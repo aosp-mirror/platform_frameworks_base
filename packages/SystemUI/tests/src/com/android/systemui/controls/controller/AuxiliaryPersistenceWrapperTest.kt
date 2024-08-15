@@ -17,7 +17,7 @@
 package com.android.systemui.controls.controller
 
 import android.content.ComponentName
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertEquals
@@ -37,7 +37,7 @@ import org.mockito.MockitoAnnotations
 import java.io.File
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AuxiliaryPersistenceWrapperTest : SysuiTestCase() {
 
     companion object {

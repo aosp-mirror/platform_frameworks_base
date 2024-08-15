@@ -42,16 +42,16 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @SysUISingleton
-open class DeviceProvisionedControllerImpl @Inject constructor(
+open class DeviceProvisionedControllerImpl
+@Inject
+constructor(
     private val secureSettings: SecureSettings,
     private val globalSettings: GlobalSettings,
     private val userTracker: UserTracker,
     private val dumpManager: DumpManager,
     @Background private val backgroundHandler: Handler,
     @Main private val mainExecutor: Executor
-) : DeviceProvisionedController,
-    DeviceProvisionedController.DeviceProvisionedListener,
-    Dumpable {
+) : DeviceProvisionedController, DeviceProvisionedController.DeviceProvisionedListener, Dumpable {
 
     companion object {
         private const val ALL_USERS = -1
@@ -63,8 +63,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     private val userSetupUri = secureSettings.getUriFor(Settings.Secure.USER_SETUP_COMPLETE)
 
     private val deviceProvisioned = AtomicBoolean(false)
-    @GuardedBy("lock")
-    private val userSetupComplete = SparseBooleanArray()
+    @GuardedBy("lock") private val userSetupComplete = SparseBooleanArray()
     @GuardedBy("lock")
     private val listeners = ArraySet<DeviceProvisionedController.DeviceProvisionedListener>()
 
@@ -81,42 +80,42 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
         return _currentUser
     }
 
-    private val observer = object : ContentObserver(backgroundHandler) {
-        override fun onChange(
-            selfChange: Boolean,
-            uris: MutableCollection<Uri>,
-            flags: Int,
-            userId: Int
-        ) {
-            val updateDeviceProvisioned = deviceProvisionedUri in uris
-            val updateUser = if (userSetupUri in uris) userId else NO_USERS
-            updateValues(updateDeviceProvisioned, updateUser)
-            if (updateDeviceProvisioned) {
-                onDeviceProvisionedChanged()
-            }
-            if (updateUser != NO_USERS) {
-                onUserSetupChanged()
+    private val observer =
+        object : ContentObserver(backgroundHandler) {
+            override fun onChange(
+                selfChange: Boolean,
+                uris: MutableCollection<Uri>,
+                flags: Int,
+                userId: Int
+            ) {
+                val updateDeviceProvisioned = deviceProvisionedUri in uris
+                val updateUser = if (userSetupUri in uris) userId else NO_USERS
+                updateValues(updateDeviceProvisioned, updateUser)
+                if (updateDeviceProvisioned) {
+                    onDeviceProvisionedChanged()
+                }
+                if (updateUser != NO_USERS) {
+                    onUserSetupChanged()
+                }
             }
         }
-    }
 
-    private val userChangedCallback = object : UserTracker.Callback {
-        @WorkerThread
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            updateValues(updateDeviceProvisioned = false, updateUser = newUser)
-            onUserSwitched()
+    private val userChangedCallback =
+        object : UserTracker.Callback {
+            @WorkerThread
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                updateValues(updateDeviceProvisioned = false, updateUser = newUser)
+                onUserSwitched()
+            }
+
+            override fun onProfilesChanged(profiles: List<UserInfo>) {}
         }
-
-        override fun onProfilesChanged(profiles: List<UserInfo>) {}
-    }
 
     init {
         userSetupComplete.put(currentUser, false)
     }
 
-    /**
-     * Call to initialize values and register observers
-     */
+    /** Call to initialize values and register observers */
     open fun init() {
         if (!initted.compareAndSet(false, true)) {
             return
@@ -124,31 +123,39 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
         dumpManager.registerDumpable(this)
         updateValues()
         userTracker.addCallback(userChangedCallback, backgroundExecutor)
-        globalSettings.registerContentObserver(deviceProvisionedUri, observer)
-        secureSettings.registerContentObserverForUser(userSetupUri, observer, UserHandle.USER_ALL)
+        globalSettings.registerContentObserverSync(deviceProvisionedUri, observer)
+        secureSettings.registerContentObserverForUserSync(
+            userSetupUri,
+            observer,
+            UserHandle.USER_ALL
+        )
     }
 
     @WorkerThread
-    private fun updateValues(
-            updateDeviceProvisioned: Boolean = true,
-            updateUser: Int = ALL_USERS
-    ) {
+    private fun updateValues(updateDeviceProvisioned: Boolean = true, updateUser: Int = ALL_USERS) {
         if (updateDeviceProvisioned) {
-            deviceProvisioned
-                    .set(globalSettings.getInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0)
+            deviceProvisioned.set(globalSettings.getInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0)
         }
         synchronized(lock) {
             if (updateUser == ALL_USERS) {
                 val n = userSetupComplete.size()
                 for (i in 0 until n) {
                     val user = userSetupComplete.keyAt(i)
-                    val value = secureSettings
-                            .getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, user) != 0
+                    val value =
+                        secureSettings.getIntForUser(
+                            Settings.Secure.USER_SETUP_COMPLETE,
+                            0,
+                            user
+                        ) != 0
                     userSetupComplete.put(user, value)
                 }
             } else if (updateUser != NO_USERS) {
-                val value = secureSettings
-                        .getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, updateUser) != 0
+                val value =
+                    secureSettings.getIntForUser(
+                        Settings.Secure.USER_SETUP_COMPLETE,
+                        0,
+                        updateUser
+                    ) != 0
                 userSetupComplete.put(updateUser, value)
             }
         }
@@ -160,15 +167,11 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
      * The listener will not be called when this happens.
      */
     override fun addCallback(listener: DeviceProvisionedController.DeviceProvisionedListener) {
-        synchronized(lock) {
-            listeners.add(listener)
-        }
+        synchronized(lock) { listeners.add(listener) }
     }
 
     override fun removeCallback(listener: DeviceProvisionedController.DeviceProvisionedListener) {
-        synchronized(lock) {
-            listeners.remove(listener)
-        }
+        synchronized(lock) { listeners.remove(listener) }
     }
 
     override fun isDeviceProvisioned(): Boolean {
@@ -176,20 +179,14 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     }
 
     override fun isUserSetup(user: Int): Boolean {
-        val index = synchronized(lock) {
-            userSetupComplete.indexOfKey(user)
-        }
+        val index = synchronized(lock) { userSetupComplete.indexOfKey(user) }
         return if (index < 0) {
-            val value = secureSettings
-                    .getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, user) != 0
-            synchronized(lock) {
-                userSetupComplete.put(user, value)
-            }
+            val value =
+                secureSettings.getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, user) != 0
+            synchronized(lock) { userSetupComplete.put(user, value) }
             value
         } else {
-            synchronized(lock) {
-                userSetupComplete.get(user, false)
-            }
+            synchronized(lock) { userSetupComplete.get(user, false) }
         }
     }
 
@@ -214,12 +211,8 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     protected fun dispatchChange(
         callback: DeviceProvisionedController.DeviceProvisionedListener.() -> Unit
     ) {
-        val listenersCopy = synchronized(lock) {
-            ArrayList(listeners)
-        }
-        mainExecutor.execute {
-            listenersCopy.forEach(callback)
-        }
+        val listenersCopy = synchronized(lock) { ArrayList(listeners) }
+        mainExecutor.execute { listenersCopy.forEach(callback) }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

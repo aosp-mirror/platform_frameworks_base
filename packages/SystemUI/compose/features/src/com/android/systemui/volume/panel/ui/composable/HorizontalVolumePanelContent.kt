@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.ui.composable
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -56,17 +57,19 @@ fun VolumePanelComposeScope.HorizontalVolumePanelContent(
                     with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
                 }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing),
-            ) {
-                for (component in layout.footerComponents) {
-                    AnimatedVisibility(
-                        visible = component.isVisible,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        with(component.component as ComposeVolumePanelUiComponent) {
-                            Content(Modifier)
+            AnimatedContent(
+                targetState = layout.footerComponents,
+                label = "FooterComponentAnimation",
+            ) { footerComponents ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing),
+                ) {
+                    for (component in footerComponents) {
+                        if (component.isVisible) {
+                            with(component.component as ComposeVolumePanelUiComponent) {
+                                Content(Modifier.weight(1f))
+                            }
                         }
                     }
                 }

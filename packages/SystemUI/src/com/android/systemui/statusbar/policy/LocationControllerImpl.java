@@ -115,7 +115,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         };
 
         // Register to listen for changes in Settings.Secure settings.
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, mContentObserver, UserHandle.USER_ALL);
 
         // Register to listen for changes in DeviceConfig settings.

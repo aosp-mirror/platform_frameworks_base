@@ -5,7 +5,6 @@ include /services/accessibility/OWNERS
 
 # Android members outside of Accessibility
 adamp@google.com #{LAST_RESORT_SUGGESTION}
-alanv@google.com #{LAST_RESORT_SUGGESTION}
 aurimas@google.com #{LAST_RESORT_SUGGESTION}
 jjaggi@google.com #{LAST_RESORT_SUGGESTION}
 ogunwale@google.com #{LAST_RESORT_SUGGESTION}

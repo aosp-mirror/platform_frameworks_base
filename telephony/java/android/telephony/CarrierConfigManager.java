@@ -51,6 +51,7 @@ import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
+import android.telephony.satellite.SatelliteManager;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.internal.telephony.flags.Flags;
@@ -9603,9 +9604,8 @@ public class CarrierConfigManager {
      * Defines the rules for data setup retry.
      *
      * The syntax of the retry rule:
-     * 1. Retry based on {@link NetworkCapabilities}. Note that only APN-type network capabilities
-     *    are supported. If the capabilities are not specified, then the retry rule only applies
-     *    to the current failed APN used in setup data call request.
+     * 1. Retry based on {@link NetworkCapabilities}. If the capabilities are not specified, then
+     * the retry rule only applies to the current failed APN used in setup data call request.
      * "capabilities=[netCaps1|netCaps2|...], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
      *
      * 2. Retry based on {@link DataFailCause}
@@ -9842,6 +9842,43 @@ public class CarrierConfigManager {
     public static final String KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL =
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
+
+    /** @hide */
+    @IntDef({
+            SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED,
+            SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
+            SATELLITE_DATA_SUPPORT_ALL,
+    })
+    public @interface SATELLITE_DATA_SUPPORT_MODE {}
+
+    /**
+     * Doesn't support unrestricted traffic on satellite network.
+     * @hide
+     */
+    public static final int SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED = 0;
+    /**
+     * Support unrestricted but bandwidth_constrained traffic on satellite network.
+     * @hide
+     */
+    public static final int SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED = 1;
+    /**
+     * Support unrestricted satellite network that serves all traffic.
+     * @hide
+     */
+    public static final int SATELLITE_DATA_SUPPORT_ALL = 2;
+    /**
+     * Indicates what kind of traffic an {@link NetworkCapabilities#NET_CAPABILITY_NOT_RESTRICTED}
+     * satellite network can possibly support. The network may subject to further
+     * restrictions such as entitlement etc.
+     * If no data is allowed on satellite network, exclude
+     * {@link ApnSetting#INFRASTRUCTURE_SATELLITE} from APN infrastructure_bitmask, and this
+     * configuration is ignored.
+     * By default it only supports restricted data.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_DATA_SUPPORT_MODE_INT =
+            "satellite_data_support_mode_int";
+
     /**
      * Determine whether to override roaming Wi-Fi Calling preference when device is connected to
      * non-terrestrial network.
@@ -9942,6 +9979,102 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CARRIER_ROAMING_SATELLITE_DEFAULT_SERVICES_INT_ARRAY =
             "carrier_roaming_satellite_default_services_int_array";
+
+    /**
+     * Indicate whether carrier roaming to satellite is using ESOS (Emergency SOS) which connects
+     * to an emergency provider instead of PSAP (Public Safety Answering Point) for emergency
+     * messaging.
+     *
+     * This will need agreement with carriers before enabling this flag.
+     *
+     * The default value is false.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_ESOS_SUPPORTED_BOOL = "satellite_esos_supported_bool";
+
+    /**
+     * Defines the NIDD (Non-IP Data Delivery) APN to be used for carrier roaming to satellite
+     * attachment. For more on NIDD, see 3GPP TS 29.542.
+     * Note this config is the only source of truth regarding the definition of the APN.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_NIDD_APN_NAME_STRING =
+            "satellite_nidd_apn_name_string";
+
+    /** @hide */
+    @IntDef({
+            CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC,
+            CARRIER_ROAMING_NTN_CONNECT_MANUAL,
+    })
+    public @interface CARRIER_ROAMING_NTN_CONNECT_TYPE {}
+
+    /**
+     * Device can connect to carrier roaming non-terrestrial network automatically.
+     * @hide
+     */
+    public static final int CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC = 0;
+    /**
+     * Device can connect to carrier roaming non-terrestrial network only if user manually triggers
+     * satellite connection.
+     * @hide
+     */
+    public static final int CARRIER_ROAMING_NTN_CONNECT_MANUAL = 1;
+    /**
+     * Indicates carrier roaming non-terrestrial network connect type that the device can use to
+     * perform satellite communication.
+     * If this key is set to CARRIER_ROAMING_NTN_CONNECT_MANUAL then connect button will be
+     * displayed to user when the device is eligible to use carrier roaming
+     * non-terrestrial network.
+     * @hide
+     */
+    public static final String KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT =
+            "carrier_roaming_ntn_connect_type_int";
+
+    /**
+     * Indicates carrier roaming non-terrestrial network emergency call handover type that the
+     * device will use to perform a handover between ESOS or T911.
+     * If this key is set to {@link SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS}
+     * then the handover will be made to ESOS. If this key is set to
+     * {@link SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911} then the handover
+     * will be made to T911.
+     *
+     * The default value is {@link SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911}.
+     *
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String
+            KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT =
+            "carrier_roaming_ntn_emergency_call_to_satellite_handover_type_int";
+
+    /**
+     * The carrier roaming non-terrestrial network hysteresis time in seconds.
+     *
+     * If the device supports P2P satellite messaging which is defined by
+     * {@link CarrierConfigManager#KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE}
+     * and the device is in {@link ServiceState#STATE_OUT_OF_SERVICE}, not connected to Wi-Fi,
+     * then hysteresis timer defined by this key will start.
+     * After the timer is expired, device is marked as eligible for satellite communication.
+     *
+     * The default value is 180 seconds.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT =
+            "carrier_supported_satellite_notification_hysteresis_sec_int";
+
+    /**
+     * An integer key holds the timeout duration in seconds used to determine whether to exit
+     * carrier-roaming NB-IOT satellite mode.
+     *
+     * The timer is started when the device screen is turned off during a satellite session.
+     * When the timer expires, the device exits Carrier Roaming NB IOT NTN.
+     *
+     * The default value is 30 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_screen_off_inactivity_timeout_duration_sec_int";
 
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
@@ -11084,6 +11217,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putBoolean(KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL, true);
+        sDefaults.putInt(KEY_SATELLITE_DATA_SUPPORT_MODE_INT,
+                CarrierConfigManager.SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED);
         sDefaults.putBoolean(KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL, true);
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 7);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
@@ -11098,6 +11233,13 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
                 (int) TimeUnit.SECONDS.toMillis(30));
+        sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
+        sDefaults.putString(KEY_SATELLITE_NIDD_APN_NAME_STRING, "");
+        sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
+        sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT,
+                SatelliteManager.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911);
+        sDefaults.putInt(KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT, 180);
+        sDefaults.putInt(KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);

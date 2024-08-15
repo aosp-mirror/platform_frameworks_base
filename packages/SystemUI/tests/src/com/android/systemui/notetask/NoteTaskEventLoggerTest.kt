@@ -16,8 +16,8 @@
 package com.android.systemui.notetask
 
 import android.os.UserHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.test.runner.AndroidJUnit4
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskEventLogger.NoteTaskUiEvent.NOTE_CLOSED_VIA_STYLUS_TAIL_BUTTON

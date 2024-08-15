@@ -26,10 +26,10 @@ import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ActivityIntentHelper;
@@ -51,7 +51,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class DreamMediaEntryComplicationTest extends SysuiTestCase {
     @Mock

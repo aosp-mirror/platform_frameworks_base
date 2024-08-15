@@ -15,11 +15,13 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.CallType
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
+@SysUISingleton
 class ActiveNotificationsInteractor
 @Inject
 constructor(
@@ -70,6 +73,24 @@ constructor(
      */
     val allNotificationsCountValue: Int
         get() = repository.activeNotifications.value.individuals.size
+
+    /**
+     * The priority ongoing call notification, or null if there is no ongoing call.
+     *
+     * The output model is guaranteed to have [ActiveNotificationModel.callType] to be equal to
+     * [CallType.Ongoing].
+     */
+    val ongoingCallNotification: Flow<ActiveNotificationModel?> =
+        allRepresentativeNotifications
+            .map { notifMap ->
+                // Once a call has started, its `whenTime` should stay the same, so we can use it as
+                // a stable sort value.
+                notifMap.values
+                    .filter { it.callType == CallType.Ongoing }
+                    .minByOrNull { it.whenTime }
+            }
+            .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
 
     /** Are any notifications being actively presented in the notification stack? */
     val areAnyNotificationsPresent: Flow<Boolean> =

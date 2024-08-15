@@ -32,3 +32,10 @@ flag {
   description: "Feature flag for adding a custom content view API to BiometricPrompt.Builder."
   bug: "302735104"
 }
+
+flag {
+  name: "mandatory_biometrics"
+  namespace: "biometrics_framework"
+  description: "This flag controls whether LSKF fallback is removed from biometric prompt when the phone is outside trusted locations"
+  bug: "322081563"
+}

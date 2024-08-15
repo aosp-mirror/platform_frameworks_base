@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene.transformation
 
+import android.platform.test.annotations.MotionTest
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -24,7 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.TransitionRecordingSpec
@@ -38,6 +39,7 @@ import platform.test.motion.compose.createComposeMotionTestRule
 import platform.test.motion.testing.createGoldenPathManager
 
 @RunWith(AndroidJUnit4::class)
+@MotionTest
 class AnchoredSizeTest {
     private val goldenPaths =
         createGoldenPathManager("frameworks/base/packages/SystemUI/compose/scene/tests/goldens")
@@ -106,8 +108,8 @@ class AnchoredSizeTest {
     }
 
     private fun assertBarSizeMatchesGolden(
-        fromSceneContent: @Composable SceneScope.() -> Unit,
-        toSceneContent: @Composable SceneScope.() -> Unit,
+        fromSceneContent: @Composable ContentScope.() -> Unit,
+        toSceneContent: @Composable ContentScope.() -> Unit,
         transition: TransitionBuilder.() -> Unit,
     ) {
         val recordingSpec =

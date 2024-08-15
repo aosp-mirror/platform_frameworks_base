@@ -22,7 +22,6 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PIP_TRANSITION;
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -60,7 +59,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -107,6 +106,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -272,6 +272,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         final boolean changed = onDisplayRotationChanged(mContext, outBounds, currentBounds,
                 mTmpInsetBounds, displayId, fromRotation, toRotation, t);
         if (changed) {
+            mMenuController.hideMenu();
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
             mTouchHandler.adjustBoundsForRotation(outBounds, mPipBoundsState.getBounds(),
@@ -368,22 +369,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     false /* fromRotation */, fromImeAdjustment, false /* fromShelfAdjustment */,
                     null /* windowContainerTransaction */);
         }
-
-        @Override
-        public void onActivityHidden(ComponentName componentName) {
-            if (componentName.equals(mPipBoundsState.getLastPipComponentName())) {
-                // The activity was removed, we don't want to restore to the reentry state
-                // saved for this component anymore.
-                mPipBoundsState.setLastPipComponentName(null);
-            }
-        }
     }
 
     /**
      * Instantiates {@link PipController}, returns {@code null} if the feature not supported.
      */
     @Nullable
-    public static Pip create(Context context,
+    public static PipImpl create(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             ShellController shellController,
@@ -488,7 +480,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
                 INPUT_CONSUMER_PIP, mMainExecutor);
-        mPipTransitionController.registerPipTransitionCallback(this);
+        mPipTransitionController.registerPipTransitionCallback(this, mMainExecutor);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             mPipDisplayLayoutState.setDisplayId(displayId);
             onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
@@ -640,6 +632,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void insetsChanged(InsetsState insetsState) {
                         DisplayLayout pendingLayout = mDisplayController
                                 .getDisplayLayout(mPipDisplayLayoutState.getDisplayId());
+                        if (pendingLayout == null) {
+                            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                    "insetsChanged: no display layout for displayId=%d",
+                                    mPipDisplayLayoutState.getDisplayId());
+                            return;
+                        }
                         if (mIsInFixedRotation
                                 || mIsKeyguardShowingOrAnimating
                                 || pendingLayout.rotation()
@@ -655,9 +653,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 });
 
         mTabletopModeController.registerOnTabletopModeChangedListener((isInTabletopMode) -> {
-            final String tag = "tabletop-mode";
             if (!isInTabletopMode) {
-                mPipBoundsState.removeNamedUnrestrictedKeepClearArea(tag);
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, null);
                 return;
             }
 
@@ -666,14 +664,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             if (mTabletopModeController.getPreferredHalfInTabletopMode()
                     == TabletopModeController.PREFERRED_TABLETOP_HALF_TOP) {
                 // Prefer top, avoid the bottom half of the display.
-                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
-                        displayBounds.left, displayBounds.centerY(),
-                        displayBounds.right, displayBounds.bottom));
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, new Rect(
+                                displayBounds.left, displayBounds.centerY(),
+                                displayBounds.right, displayBounds.bottom));
             } else {
                 // Prefer bottom, avoid the top half of the display.
-                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
-                        displayBounds.left, displayBounds.top,
-                        displayBounds.right, displayBounds.centerY()));
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_TABLETOP_MODE, new Rect(
+                                displayBounds.left, displayBounds.top,
+                                displayBounds.right, displayBounds.centerY()));
             }
 
             // Try to move the PiP window if we have entered PiP mode.
@@ -925,10 +925,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     0, mPipBoundsState.getDisplayBounds().bottom - height,
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
-            mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
             updatePipPositionForKeepClearAreas();
         } else {
-            mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
+            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
             // postpone moving in response to hide of Launcher in case there's another change
             mMainExecutor.removeCallbacks(mMovePipInResponseToKeepClearAreasChangeCallback);
             mMainExecutor.executeDelayed(
@@ -977,8 +979,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             int launcherRotation, Rect hotseatKeepClearArea) {
         // preemptively add the keep clear area for Hotseat, so that it is taken into account
         // when calculating the entry destination bounds of PiP window
-        mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
-                hotseatKeepClearArea);
+        mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, hotseatKeepClearArea);
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
         // cache current min/max size
         Point minSize = mPipBoundsState.getMinSize();
@@ -1002,9 +1004,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay, Rect appBounds) {
+            SurfaceControl overlay, Rect appBounds, Rect sourceRectHint) {
         mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay,
-                appBounds);
+                appBounds, sourceRectHint);
     }
 
     private void abortSwipePipToHome(int taskId, ComponentName componentName) {
@@ -1186,7 +1188,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /**
      * The interface for calls from outside the Shell, within the host process.
      */
-    private class PipImpl implements Pip {
+    public class PipImpl implements Pip {
         @Override
         public void expandPip() {
             mMainExecutor.execute(() -> {
@@ -1230,8 +1232,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public PipTransitionController getPipTransitionController() {
-            return mPipTransitionController;
+        public void registerPipTransitionCallback(
+                PipTransitionController.PipTransitionCallback callback,
+                Executor executor) {
+            mMainExecutor.execute(() -> mPipTransitionController.registerPipTransitionCallback(
+                    callback, executor));
         }
     }
 
@@ -1292,13 +1297,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         @Override
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
-                Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
+                Rect destinationBounds, SurfaceControl overlay, Rect appBounds,
+                Rect sourceRectHint) {
             if (overlay != null) {
                 overlay.setUnreleasedWarningCallSite("PipController.stopSwipePipToHome");
             }
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> controller.stopSwipePipToHome(
-                            taskId, componentName, destinationBounds, overlay, appBounds));
+                            taskId, componentName, destinationBounds, overlay, appBounds,
+                            sourceRectHint));
         }
 
         @Override

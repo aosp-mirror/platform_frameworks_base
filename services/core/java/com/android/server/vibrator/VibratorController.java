@@ -20,8 +20,10 @@ import android.annotation.Nullable;
 import android.hardware.vibrator.IVibrator;
 import android.os.Binder;
 import android.os.IVibratorStateListener;
+import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -56,10 +58,17 @@ final class VibratorController {
     private volatile boolean mIsUnderExternalControl;
     private volatile float mCurrentAmplitude;
 
-    /** Listener for vibration completion callbacks from native. */
+    /**
+     * Listener for vibration completion callbacks from native.
+     *
+     * <p>Only the latest active native call to {@link VibratorController#on} will ever trigger this
+     * completion callback, to avoid race conditions during a vibration playback. If a new call to
+     * {@link #on} or {@link #off} happens before a previous callback was triggered then the
+     * previous callback will be disabled, even if the new command fails.
+     */
     public interface OnVibrationCompleteListener {
 
-        /** Callback triggered when vibration is complete. */
+        /** Callback triggered when an active vibration command is complete. */
         void onComplete(int vibratorId, long vibrationId);
     }
 
@@ -235,7 +244,7 @@ final class VibratorController {
     }
 
     /**
-     * Turn on the vibrator for {@code milliseconds} time, using {@code vibrationId} or completion
+     * Turn on the vibrator for {@code milliseconds} time, using {@code vibrationId} for completion
      * callback to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
@@ -255,7 +264,36 @@ final class VibratorController {
     }
 
     /**
-     * Plays predefined vibration effect, using {@code vibrationId} or completion callback to
+     * Plays vendor vibration effect, using {@code vibrationId} for completion callback to
+     * {@link OnVibrationCompleteListener}.
+     *
+     * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
+     */
+    public long on(VibrationEffect.VendorEffect vendorEffect, long vibrationId) {
+        synchronized (mLock) {
+            Parcel vendorData = Parcel.obtain();
+            try {
+                vendorEffect.getVendorData().writeToParcel(vendorData, /* flags= */ 0);
+                vendorData.setDataPosition(0);
+                long duration = mNativeWrapper.performVendorEffect(vendorData,
+                        vendorEffect.getEffectStrength(), vendorEffect.getLinearScale(),
+                        vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    notifyListenerOnVibrating(true);
+                }
+                return duration;
+            } finally {
+                vendorData.recycle();
+            }
+        }
+    }
+
+    /**
+     * Plays predefined vibration effect, using {@code vibrationId} for completion callback to
      * {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
@@ -276,8 +314,8 @@ final class VibratorController {
     }
 
     /**
-     * Plays a composition of vibration primitives, using {@code vibrationId} or completion callback
-     * to {@link OnVibrationCompleteListener}.
+     * Plays a composition of vibration primitives, using {@code vibrationId} for completion
+     * callback to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
      *
@@ -299,7 +337,7 @@ final class VibratorController {
     }
 
     /**
-     * Plays a composition of pwle primitives, using {@code vibrationId} or completion callback
+     * Plays a composition of pwle primitives, using {@code vibrationId} for completion callback
      * to {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
@@ -321,7 +359,11 @@ final class VibratorController {
         }
     }
 
-    /** Turns off the vibrator. This will affect the state of {@link #isVibrating()}. */
+    /**
+     * Turns off the vibrator and disables completion callback to any pending vibration.
+     *
+     * <p>This will affect the state of {@link #isVibrating()}.
+     */
     public void off() {
         synchronized (mLock) {
             mNativeWrapper.off();
@@ -416,6 +458,9 @@ final class VibratorController {
         private static native long performEffect(long nativePtr, long effect, long strength,
                 long vibrationId);
 
+        private static native long performVendorEffect(long nativePtr, Parcel vendorData,
+                long strength, float scale, long vibrationId);
+
         private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
                 long vibrationId);
 
@@ -469,6 +514,12 @@ final class VibratorController {
         /** Turns vibrator on to perform one of the supported effects. */
         public long perform(long effect, long strength, long vibrationId) {
             return performEffect(mNativePtr, effect, strength, vibrationId);
+        }
+
+        /** Turns vibrator on to perform a vendor-specific effect. */
+        public long performVendorEffect(Parcel vendorData, long strength, float scale,
+                long vibrationId) {
+            return performVendorEffect(mNativePtr, vendorData, strength, scale, vibrationId);
         }
 
         /** Turns vibrator on to perform effect composed of give primitives effect. */

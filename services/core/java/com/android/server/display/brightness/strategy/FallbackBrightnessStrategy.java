@@ -39,12 +39,12 @@ public class FallbackBrightnessStrategy implements DisplayBrightnessStrategy{
         brightnessReason.setReason(BrightnessReason.REASON_MANUAL);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(strategyExecutionRequest.getCurrentScreenBrightness())
-                .setSdrBrightness(strategyExecutionRequest.getCurrentScreenBrightness())
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(getName())
                 // The fallback brightness might change due to clamping. Make sure we tell the rest
                 // of the system by updating the setting
                 .setShouldUpdateScreenBrightnessSetting(true)
+                .setIsUserInitiatedChange(strategyExecutionRequest.isUserSetBrightnessChanged())
                 .build();
     }
 

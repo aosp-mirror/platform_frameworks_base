@@ -40,12 +40,11 @@ sealed class BiometricPromptRequest(
             operationInfo = operationInfo,
             showEmergencyCallButton = info.isShowEmergencyCallButton
         ) {
-        val logoRes: Int = info.logoRes
-        val logoBitmap: Bitmap? = info.logoBitmap
+        val logoBitmap: Bitmap? = info.logo
         val logoDescription: String? = info.logoDescription
         val negativeButtonText: String = info.negativeButtonText?.toString() ?: ""
         val componentNameForConfirmDeviceCredentialActivity: ComponentName? =
-            info.componentNameForConfirmDeviceCredentialActivity
+            info.realCallerForConfirmDeviceCredentialActivity
         val allowBackgroundAuthentication = info.isAllowBackgroundAuthentication
     }
 

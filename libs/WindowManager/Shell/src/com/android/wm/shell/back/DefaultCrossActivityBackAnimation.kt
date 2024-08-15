@@ -16,18 +16,15 @@
 package com.android.wm.shell.back
 
 import android.content.Context
-import android.view.Choreographer
 import android.view.SurfaceControl
 import android.window.BackEvent
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.Interpolators
-import com.android.wm.shell.shared.annotations.ShellMainThread
 import javax.inject.Inject
 import kotlin.math.max
 
 /** Class that defines cross-activity animation. */
-@ShellMainThread
 class DefaultCrossActivityBackAnimation
 @Inject
 constructor(
@@ -39,11 +36,10 @@ constructor(
         context,
         background,
         rootTaskDisplayAreaOrganizer,
-        SurfaceControl.Transaction(),
-        Choreographer.getInstance()
+        SurfaceControl.Transaction()
     ) {
 
-    private val postCommitInterpolator = Interpolators.FAST_OUT_SLOW_IN
+    private val postCommitInterpolator = Interpolators.EMPHASIZED
     private val enteringStartOffset =
         context.resources.getDimension(R.dimen.cross_activity_back_entering_start_offset)
     override val allowEnteringYShift = true
@@ -87,17 +83,27 @@ constructor(
 
     override fun onPostCommitProgress(linearProgress: Float) {
         super.onPostCommitProgress(linearProgress)
-        val closingAlpha = max(1f - linearProgress * 2, 0f)
+        val closingAlpha = max(1f - linearProgress * 5, 0f)
         val progress = postCommitInterpolator.getInterpolation(linearProgress)
         currentClosingRect.setInterpolatedRectF(startClosingRect, targetClosingRect, progress)
-        applyTransform(closingTarget?.leash, currentClosingRect, closingAlpha)
+        applyTransform(
+            closingTarget?.leash,
+            currentClosingRect,
+            closingAlpha,
+            flingMode = FlingMode.FLING_BOUNCE
+        )
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
-        applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
+        applyTransform(
+            enteringTarget?.leash,
+            currentEnteringRect,
+            1f,
+            flingMode = FlingMode.FLING_BOUNCE
+        )
         applyTransaction()
     }
 
 
     companion object {
-        private const val POST_COMMIT_DURATION = 300L
+        private const val POST_COMMIT_DURATION = 450L
     }
 }

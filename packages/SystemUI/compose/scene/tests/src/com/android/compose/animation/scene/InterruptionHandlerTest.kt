@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Correspondence
@@ -40,7 +41,7 @@ class InterruptionHandlerTest {
         val state =
             MutableSceneTransitionLayoutState(
                 SceneA,
-                transitions { /* default interruption handler */},
+                transitions { /* default interruption handler */ },
             )
 
         state.setTargetScene(SceneB, coroutineScope = this)
@@ -131,10 +132,6 @@ class InterruptionHandlerTest {
         assertThat(state.currentTransitions)
             .comparingElementsUsing(FromToCurrentTriple)
             .containsExactly(
-                // Initial transition A to B. This transition will never be consumed by anyone given
-                // that it has the same (from, to) pair as the next transition.
-                Triple(SceneA, SceneB, SceneB),
-
                 // Initial transition reversed, B back to A.
                 Triple(SceneA, SceneB, SceneA),
 
@@ -160,7 +157,7 @@ class InterruptionHandlerTest {
                 progressVelocity = { progressVelocity },
                 onFinish = { launch {} },
             )
-        state.startTransition(aToB, transitionKey = null)
+        state.startTransition(aToB)
 
         // Animate back to A. The previous transition is reversed, i.e. it has the same (from, to)
         // pair, and its velocity is used when animating the progress back to 0.
@@ -186,7 +183,7 @@ class InterruptionHandlerTest {
                 progressVelocity = { progressVelocity },
                 onFinish = { launch {} },
             )
-        state.startTransition(aToB, transitionKey = null)
+        state.startTransition(aToB)
 
         // Animate to B. The previous transition is reversed, i.e. it has the same (from, to) pair,
         // and its velocity is used when animating the progress to 1.

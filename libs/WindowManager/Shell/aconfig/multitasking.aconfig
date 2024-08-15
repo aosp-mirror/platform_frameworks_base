@@ -1,3 +1,5 @@
+# proto-file: build/make/tools/aconfig/aconfig_protos/protos/aconfig.proto
+
 package: "com.android.wm.shell"
 container: "system"
 
@@ -98,4 +100,41 @@ flag {
     namespace: "multitasking"
     description: "Enable UI affordances to put other content into a bubble"
     bug: "342245211"
+}
+
+flag {
+    name: "only_reuse_bubbled_task_when_launched_from_bubble"
+    namespace: "multitasking"
+    description: "Allow reusing bubbled tasks for new activities only when launching from bubbles"
+    bug: "328229865"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_taskbar_on_phones"
+    namespace: "multitasking"
+    description: "Enables taskbar on phones"
+    bug: "348007377"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_bubble_bar_in_persistent_task_bar"
+    namespace: "multitasking"
+    description: "Enable bubble bar to be shown in the persistent task bar"
+    bug: "346391377"
+}
+
+flag {
+    name: "bubble_view_info_executors"
+    namespace: "multitasking"
+    description: "Use executors to inflate bubble views"
+    bug: "353894869"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

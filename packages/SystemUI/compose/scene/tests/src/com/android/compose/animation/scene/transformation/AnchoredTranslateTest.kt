@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.testTransition
+import com.android.compose.animation.scene.transition
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -74,6 +75,30 @@ class AnchoredTranslateTest {
             },
         ) {
             // Bar moves by (20dp, -40dp), like Foo.
+            before { onElement(TestElements.Bar).assertDoesNotExist() }
+            at(0) { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(0.dp, 80.dp) }
+            at(16) { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(5.dp, 70.dp) }
+            at(32) { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(10.dp, 60.dp) }
+            at(48) { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(15.dp, 50.dp) }
+            at(64) { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(20.dp, 40.dp) }
+            after { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(20.dp, 40.dp) }
+        }
+    }
+
+    @Test
+    fun anchorPlacedAfterAnchoredElement() {
+        rule.testTransition(
+            fromSceneContent = { Box(Modifier.offset(10.dp, 50.dp).element(TestElements.Foo)) },
+            toSceneContent = {
+                Box(Modifier.offset(20.dp, 40.dp).element(TestElements.Bar))
+                Box(Modifier.offset(30.dp, 10.dp).element(TestElements.Foo))
+            },
+            transition = {
+                spec = tween(16 * 4, easing = LinearEasing)
+                anchoredTranslate(TestElements.Bar, TestElements.Foo)
+            },
+        ) {
+            // No exception is thrown even if Bar is placed before the anchor in toScene.
             before { onElement(TestElements.Bar).assertDoesNotExist() }
             at(0) { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(0.dp, 80.dp) }
             at(16) { onElement(TestElements.Bar).assertPositionInRootIsEqualTo(5.dp, 70.dp) }

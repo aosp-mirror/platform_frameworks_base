@@ -15,68 +15,29 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
-import com.android.internal.widget.remotecompose.core.PaintOperation;
-import com.android.internal.widget.remotecompose.core.WireBuffer;
 
-import java.util.List;
-
-public class MatrixRotate extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
-    float mRotate, mPivotX, mPivotY;
+public class MatrixRotate extends DrawBase3 {
+    public static final Companion COMPANION =
+            new Companion(Operations.MATRIX_ROTATE) {
+                @Override
+                public Operation construct(float rotate,
+                                           float pivotX,
+                                           float pivotY
+                ) {
+                    return new MatrixRotate(rotate, pivotX, pivotY);
+                }
+            };
 
     public MatrixRotate(float rotate, float pivotX, float pivotY) {
-        mRotate = rotate;
-        mPivotX = pivotX;
-        mPivotY = pivotY;
-    }
-
-    @Override
-    public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mRotate, mPivotX, mPivotY);
-    }
-
-    @Override
-    public String toString() {
-        return "DrawArc " + mRotate + ", " + mPivotX + ", " + mPivotY + ";";
-    }
-
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            float rotate = buffer.readFloat();
-            float pivotX = buffer.readFloat();
-            float pivotY = buffer.readFloat();
-            MatrixRotate op = new MatrixRotate(rotate, pivotX, pivotY);
-            operations.add(op);
-        }
-
-        @Override
-        public String name() {
-            return "Matrix";
-        }
-
-        @Override
-        public int id() {
-            return Operations.MATRIX_ROTATE;
-        }
-
-        public void apply(WireBuffer buffer, float rotate, float pivotX, float pivotY) {
-            buffer.start(Operations.MATRIX_ROTATE);
-            buffer.writeFloat(rotate);
-            buffer.writeFloat(pivotX);
-            buffer.writeFloat(pivotY);
-        }
+        super(rotate, pivotX, pivotY);
+        mName = "MatrixRotate";
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.matrixRotate(mRotate, mPivotX, mPivotY);
+        context.matrixRotate(mV1, mV2, mV3);
     }
 }

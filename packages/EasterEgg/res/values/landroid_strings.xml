@@ -1,21 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-    Copyright (C) 2023 The Android Open Source Project
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-         http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
--->
-
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="u_egg_name" translatable="false">Android 14 Easter Egg</string>
+
+    <!-- No Android's Sky -->
+    <!-- Char Star Field -->
+    <!-- V-leet: Harmless -->
+    <!-- Contemplating My Orbital Mechanics -->
+    <string name="u_egg_name" translatable="false">Landroid</string>
+    <string name="v_egg_name" translatable="false">Landroid</string>
+    <string name="dream_description" translatable="false">---- AUTOPILOT ENGAGED ----</string>
 
     <string-array name="planet_descriptors" translatable="false">
         <item>earthy</item>
@@ -365,7 +357,64 @@
         <item>relaxed</item>
         <item>skunky</item>
         <item>breezy</item>
-        <item>soup </item>
+        <item>soup</item>
+    </string-array>
+
+    <string-array name="fauna_generic_plurals" translatable="false">
+        <item>fauna</item>
+        <item>animals</item>
+        <item>locals</item>
+        <item>creatures</item>
+        <item>critters</item>
+        <item>wildlife</item>
+        <item>specimens</item>
+        <item>life</item>
+        <item>cells</item>
+    </string-array>
+
+    <string-array name="flora_generic_plurals" translatable="false">
+        <item>flora</item>
+        <item>plants</item>
+        <item>flowers</item>
+        <item>trees</item>
+        <item>mosses</item>
+        <item>specimens</item>
+        <item>life</item>
+        <item>cells</item>
+    </string-array>
+
+    <string-array name="atmo_generic_plurals" translatable="false">
+        <item>air</item>
+        <item>atmosphere</item>
+        <item>clouds</item>
+        <item>atmo</item>
+        <item>gases</item>
+    </string-array>
+
+    <string-array name="activities" translatable="false">
+        <item>refueling</item>
+        <item>sightseeing</item>
+        <item>vacationing</item>
+        <item>luncheoning</item>
+        <item>recharging</item>
+        <item>taking up space</item>
+        <item>reticulating space splines</item>
+        <item>using facilities</item>
+        <item>spelunking</item>
+        <item>repairing</item>
+        <item>herding {fauna}</item>
+        <item>taming {fauna}</item>
+        <item>breeding {fauna}</item>
+        <item>singing lullabies to {fauna}</item>
+        <item>singing lullabies to {flora}</item>
+        <item>singing lullabies to the {planet}</item>
+        <item>gardening {flora}</item>
+        <item>collecting {flora}</item>
+        <item>surveying the {planet}</item>
+        <item>mapping the {planet}</item>
+        <item>breathing {atmo}</item>
+        <item>reprocessing {atmo}</item>
+        <item>bottling {atmo}</item>
     </string-array>
 
 </resources>

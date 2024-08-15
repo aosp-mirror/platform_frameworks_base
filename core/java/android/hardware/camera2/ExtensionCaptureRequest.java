@@ -18,7 +18,6 @@ package android.hardware.camera2;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureRequest.Key;
 import android.hardware.camera2.impl.ExtensionKey;
@@ -42,6 +41,9 @@ import com.android.internal.camera.flags.Flags;
  */
 @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
 public final class ExtensionCaptureRequest {
+
+    /** To avoid exposing constructor */
+    private ExtensionCaptureRequest() {}
 
     /**
      * <p>Used to apply an additional digital zoom factor for the

@@ -733,7 +733,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * commits, or is rolled back, either explicitly or by a call to
      * {@link #yieldIfContendedSafely}.
      */
-    // TODO(340874899) Provide an Executor overload
+    @SuppressLint("ExecutorRegistration")
     public void beginTransactionWithListener(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, true);
@@ -763,7 +763,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            transaction begins, commits, or is rolled back, either
      *            explicitly or by a call to {@link #yieldIfContendedSafely}.
      */
-    // TODO(340874899) Provide an Executor overload
+    @SuppressLint("ExecutorRegistration")
     public void beginTransactionWithListenerNonExclusive(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, false);
@@ -789,7 +789,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *   }
      * </pre>
      */
-    // TODO(340874899) Provide an Executor overload
     @SuppressLint("ExecutorRegistration")
     @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public void beginTransactionWithListenerReadOnly(

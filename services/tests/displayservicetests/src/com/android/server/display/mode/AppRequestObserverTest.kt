@@ -117,11 +117,11 @@ class AppRequestObserverTest {
             BaseModeRefreshRateVote(60f), SizeVote(1000, 1000, 1000, 1000), RenderVote(60f, 90f)),
         PREFERRED_REFRESH_RATE(false, 0, 60f, 0f, 0f,
             BaseModeRefreshRateVote(60f), SizeVote(1000, 1000, 1000, 1000), null),
-        PREFERRED_REFRESH_RATE_IGNORED(true, 0, 60f, 0f, 0f,
-            null, null, null),
+        PREFERRED_REFRESH_RATE_IGNORE_BASE_MODE_CONVERSION(true, 0, 60f, 0f, 0f,
+            RequestedRefreshRateVote(60f), null, null),
         PREFERRED_REFRESH_RATE_INVALID(false, 0, 25f, 0f, 0f,
             null, null, null),
         SYNTHETIC_MODE(false, 99, 0f, 0f, 0f,
-            RenderVote(45f, 45f), SizeVote(1000, 1000, 1000, 1000), null),
+            RequestedRefreshRateVote(45f), SizeVote(1000, 1000, 1000, 1000), null),
     }
 }

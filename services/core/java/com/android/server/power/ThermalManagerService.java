@@ -543,7 +543,7 @@ public class ThermalManagerService extends SystemService {
             if (!mHalReady.get()) {
                 FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__HAL_NOT_READY,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 return Float.NaN;
             }
 
@@ -553,7 +553,7 @@ public class ThermalManagerService extends SystemService {
                 }
                 FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED, getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__INVALID_ARGUMENT,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 return Float.NaN;
             }
 
@@ -1709,7 +1709,7 @@ public class ThermalManagerService extends SystemService {
                     ArrayList<Sample> samples = mSamples.computeIfAbsent(temperature.getName(),
                             k -> new ArrayList<>(RING_BUFFER_SIZE));
                     if (samples.size() == RING_BUFFER_SIZE) {
-                        samples.remove(0);
+                        samples.removeFirst();
                     }
                     samples.add(new Sample(now, temperature.getValue()));
                 }
@@ -1778,7 +1778,7 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                     return Float.NaN;
                 }
 
@@ -1789,7 +1789,7 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                     return Float.NaN;
                 }
 
@@ -1806,7 +1806,7 @@ public class ThermalManagerService extends SystemService {
                         continue;
                     }
 
-                    float currentTemperature = samples.get(0).temperature;
+                    float currentTemperature = samples.getLast().temperature;
 
                     if (samples.size() < MINIMUM_SAMPLE_COUNT) {
                         // Don't try to forecast, just use the latest one we have
@@ -1828,12 +1828,12 @@ public class ThermalManagerService extends SystemService {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             THERMAL_HEADROOM_CALLED__API_STATUS__NO_TEMPERATURE_THRESHOLD,
-                            Float.NaN);
+                            Float.NaN, forecastSeconds);
                 } else {
                     FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_HEADROOM_CALLED,
                             Binder.getCallingUid(),
                             FrameworkStatsLog.THERMAL_HEADROOM_CALLED__API_STATUS__SUCCESS,
-                            maxNormalized);
+                            maxNormalized, forecastSeconds);
                 }
                 return maxNormalized;
             }

@@ -17,11 +17,8 @@
 package com.android.asllib.testutils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 
 import com.android.asllib.marshallable.AslMarshallable;
-import com.android.asllib.marshallable.AslMarshallableFactory;
-import com.android.asllib.util.MalformedXmlException;
 import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Document;
@@ -36,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +56,19 @@ public class TestUtils {
     }
 
     /** Gets List of Element from a path to an existing Resource. */
-    public static List<Element> getElementsFromResource(Path filePath)
+    public static Element getElementFromResource(Path filePath)
+            throws ParserConfigurationException, IOException, SAXException {
+        String str = readStrFromResource(filePath);
+        InputStream stream = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        Document document = factory.newDocumentBuilder().parse(stream);
+        return document.getDocumentElement();
+    }
+
+    /** Gets List of Element from a path to an existing Resource. */
+    public static List<Element> getChildElementsFromResource(Path filePath)
             throws ParserConfigurationException, IOException, SAXException {
         String str = readStrFromResource(filePath);
         InputStream stream = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
@@ -69,16 +77,13 @@ public class TestUtils {
         factory.setNamespaceAware(true);
         Document document = factory.newDocumentBuilder().parse(stream);
         Element root = document.getDocumentElement();
-        if (root.getTagName().equals(HOLDER_TAG_NAME)) {
-            String tagName =
-                    XmlUtils.asElementList(root.getChildNodes()).stream()
-                            .findFirst()
-                            .get()
-                            .getTagName();
-            return XmlUtils.getChildrenByTagName(root, tagName);
-        } else {
-            return List.of(root);
-        }
+
+        String tagName =
+                XmlUtils.asElementList(root.getChildNodes()).stream()
+                        .findFirst()
+                        .get()
+                        .getTagName();
+        return XmlUtils.getChildrenByTagName(root, tagName);
     }
 
     /** Reads a Document into a String. */
@@ -130,86 +135,13 @@ public class TestUtils {
         return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     }
 
-    /** Helper for testing human-readable to on-device conversion expecting exception */
-    public static <T extends AslMarshallable> void hrToOdExpectException(
-            AslMarshallableFactory<T> factory, String hrFolderPath, String fileName) {
-        assertThrows(
-                MalformedXmlException.class,
-                () -> {
-                    factory.createFromHrElements(
-                            TestUtils.getElementsFromResource(Paths.get(hrFolderPath, fileName)));
-                });
-    }
-
-    /** Helper for testing on-device to human-readable conversion expecting exception */
-    public static <T extends AslMarshallable> void odToHrExpectException(
-            AslMarshallableFactory<T> factory, String odFolderPath, String fileName) {
-        assertThrows(
-                MalformedXmlException.class,
-                () -> {
-                    factory.createFromOdElements(
-                            TestUtils.getElementsFromResource(Paths.get(odFolderPath, fileName)));
-                });
-    }
-
-    /** Helper for testing human-readable to on-device conversion */
-    public static <T extends AslMarshallable> void testHrToOd(
-            Document doc,
-            AslMarshallableFactory<T> factory,
-            String hrFolderPath,
-            String odFolderPath,
-            String fileName)
-            throws Exception {
-        testFormatToFormat(doc, factory, hrFolderPath, odFolderPath, fileName, true);
-    }
-
-    /** Helper for testing on-device to human-readable conversion */
-    public static <T extends AslMarshallable> void testOdToHr(
-            Document doc,
-            AslMarshallableFactory<T> factory,
-            String odFolderPath,
-            String hrFolderPath,
-            String fileName)
-            throws Exception {
-        testFormatToFormat(doc, factory, odFolderPath, hrFolderPath, fileName, false);
-    }
-
     /** Helper for testing format to format conversion */
-    private static <T extends AslMarshallable> void testFormatToFormat(
-            Document doc,
-            AslMarshallableFactory<T> factory,
-            String inFolderPath,
-            String outFolderPath,
-            String fileName,
-            boolean hrToOd)
-            throws Exception {
-        AslMarshallable marshallable =
-                hrToOd
-                        ? factory.createFromHrElements(
-                                TestUtils.getElementsFromResource(
-                                        Paths.get(inFolderPath, fileName)))
-                        : factory.createFromOdElements(
-                                TestUtils.getElementsFromResource(
-                                        Paths.get(inFolderPath, fileName)));
-
-        List<Element> elements =
-                hrToOd ? marshallable.toOdDomElements(doc) : marshallable.toHrDomElements(doc);
-        if (elements.isEmpty()) {
-            throw new IllegalStateException("elements was empty.");
-        } else if (elements.size() == 1) {
-            doc.appendChild(elements.get(0));
-        } else {
-            Element root = doc.createElement(TestUtils.HOLDER_TAG_NAME);
-            for (var child : elements) {
-                root.appendChild(child);
-            }
-            doc.appendChild(root);
-        }
+    public static <T extends AslMarshallable> void testFormatToFormat(
+            Document doc, Path expectedOutPath) throws Exception {
         String converted = TestUtils.getFormattedXml(TestUtils.docToStr(doc, true), true);
         System.out.println("Converted: " + converted);
         String expectedOutContents =
-                TestUtils.getFormattedXml(
-                        TestUtils.readStrFromResource(Paths.get(outFolderPath, fileName)), true);
+                TestUtils.getFormattedXml(TestUtils.readStrFromResource(expectedOutPath), true);
         System.out.println("Expected: " + expectedOutContents);
         assertEquals(expectedOutContents, converted);
     }

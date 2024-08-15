@@ -799,12 +799,16 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         this,
                         mScaleProvider,
                         mBackgroundExecutor,
-                        () -> (isMagnificationConnectionManagerInitialized()
-                                && getMagnificationConnectionManager().isConnected())
+                        () -> isMagnificationSystemUIConnectionReady()
                 );
             }
         }
         return mFullScreenMagnificationController;
+    }
+
+    private boolean isMagnificationSystemUIConnectionReady() {
+        return isMagnificationConnectionManagerInitialized()
+                && getMagnificationConnectionManager().waitConnectionWithTimeoutIfNeeded();
     }
 
     /**

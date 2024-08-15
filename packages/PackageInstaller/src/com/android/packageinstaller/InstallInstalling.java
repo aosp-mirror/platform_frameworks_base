@@ -311,18 +311,18 @@ public class InstallInstalling extends Activity {
                         broadcastIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
-                try {
-                    // Delay committing the session by 100ms to fix a UI glitch while displaying the
-                    // Update-Owner change dialog on top of the Installing dialog
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                // Delay committing the session by 100ms to fix a UI glitch while displaying the
+                // Update-Owner change dialog on top of the Installing dialog
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    try {
                         session.commit(pendingIntent.getIntentSender());
-                    }, 100);
-                } catch (Exception e) {
-                    Log.e(LOG_TAG, "Cannot install package: ", e);
-                    launchFailure(PackageInstaller.STATUS_FAILURE,
-                        PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
-                    return;
-                }
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Cannot install package: ", e);
+                        launchFailure(PackageInstaller.STATUS_FAILURE,
+                            PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                        return;
+                    }
+                }, 100);
                 mCancelButton.setEnabled(false);
                 setFinishOnTouchOutside(false);
             } else {

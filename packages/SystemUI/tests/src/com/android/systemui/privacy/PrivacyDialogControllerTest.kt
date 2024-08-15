@@ -30,7 +30,7 @@ import android.os.Process.SYSTEM_UID
 import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -64,7 +64,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class PrivacyDialogControllerTest : SysuiTestCase() {
 
     companion object {

@@ -68,8 +68,7 @@ abstract class AppOpPermissionListModel(
     open val permissionHasAppOpFlag: Boolean = true
 
     /** These not changeable packages will also be hidden from app list. */
-    private val notChangeablePackages =
-        setOf("android", "com.android.systemui", context.packageName)
+    private val notChangeablePackages = setOf("com.android.systemui")
 
     private fun createAppOpsPermissionController(app: ApplicationInfo) =
         AppOpsPermissionController(context, app, appOps, permission)

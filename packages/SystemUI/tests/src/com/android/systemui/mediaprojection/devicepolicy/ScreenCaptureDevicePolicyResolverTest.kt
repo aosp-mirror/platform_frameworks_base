@@ -25,10 +25,11 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
+import platform.test.runner.parameterized.Parameter
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameters
 import org.mockito.ArgumentMatchers.any
 
 abstract class BaseScreenCaptureDevicePolicyResolverTest(private val precondition: Preconditions) :
@@ -81,7 +82,7 @@ abstract class BaseScreenCaptureDevicePolicyResolverTest(private val preconditio
     }
 }
 
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
 class IsAllowedScreenCaptureDevicePolicyResolverTest(
     private val test: IsScreenCaptureAllowedTestCase
@@ -468,7 +469,7 @@ class IsAllowedScreenCaptureDevicePolicyResolverTest(
     }
 }
 
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
 class IsCompletelyNotAllowedScreenCaptureDevicePolicyResolverTest(
     private val test: IsScreenCaptureCompletelyDisabledTestCase

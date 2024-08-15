@@ -103,13 +103,24 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> havaitsi tämän kuvakaappauksen."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ja jotkin muut sovellukset havaitsivat tämän kuvakaappauksen."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Lisää muistiinpanoon"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Lisää linkki"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Näytön tallentaja"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Näytön tallennusta käsitellään"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pysyvä ilmoitus näytön tallentamisesta"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Aloitetaanko tallennus?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Kun tallennat, Android saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Kun striimaat sovellusta, Android saa pääsyn kaikkeen sovelluksessa näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, audiota tai videoita."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Aloita tallennus"</string>
+    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
+    <skip />
+    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
+    <skip />
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Tallenna audiota"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Laitteen audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Musiikki, puhelut, soittoäänet ja muut äänet laitteesta"</string>
@@ -125,6 +136,27 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Katso napauttamalla"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Virhe näyttötallenteen tallentamisessa"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Virhe näytön tallennuksen aloituksessa"</string>
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Lopetetaanko tallennus?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Tallennat tällä hetkellä koko näyttöä"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Laite, jonka sisältöä tallennat: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Lopeta tallennus"</string>
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Näyttöä jaetaan"</string>
+    <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Lopetetaanko näytön jakaminen?"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Jaat tällä hetkellä koko näyttöä: <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Jaat tällä hetkellä koko näyttöä sovellukselle"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Jaat tällä hetkellä tätä: <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Jaat tällä hetkellä sovellusta"</string>
+    <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Lopeta jakaminen"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Näyttöä striimataan"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Lopetetaanko striimaus?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Striimaat tällä hetkellä koko näyttöä: <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Striimaat tällä hetkellä koko näyttöä lähellä olevalle laitteelle"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Striimaat (<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>) tällä hetkellä: <xliff:g id="DEVICE_NAME">%2$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Striimaat (<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>) tällä hetkellä lähellä olevalle laitteelle"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Striimaat tällä hetkellä: <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Striimaat tällä hetkellä lähellä olevalle laitteelle"</string>
+    <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Lopeta striimaus"</string>
+    <string name="close_dialog_button" msgid="4749497706540104133">"Sulje"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Ongelman tallentaja"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Käsittely: Ongelman tallennus"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Ongelmankeräykseen liittyvä ilmoitus taustalla jatkuvasta toiminnasta"</string>
@@ -135,7 +167,7 @@
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Virhe ongelman tallenteen tallentamisessa"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Virhe ongelman tallentamisen aloituksessa"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Koko näytön tilassa"</string>
-    <string name="immersive_cling_description" msgid="6913958856085185775">"Sulje palkki pyyhkäisemällä alas ruudun ylälaidasta."</string>
+    <string name="immersive_cling_description" msgid="2717426731830851921">"Poistu pyyhkäisemällä alas näytön yläreunasta"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Selvä"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Takaisin"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Aloitus"</string>
@@ -154,8 +186,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Lähetä"</string>
     <string name="cancel" msgid="1089011503403416730">"Peru"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"Sovelluksen logo"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Vahvista"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Yritä uudelleen"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Peru todennus napauttamalla"</string>
@@ -168,6 +198,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Avattu kasvojen avulla. Jatka painamalla."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Kasvot tunnistettu. Jatka painamalla."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Kasvot tunnistettu. Jatka lukituksen avauskuvakkeella."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_sfps" msgid="2499213248903257928">"Avattu kasvojen avulla. Jatka napauttamalla."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Todennettu"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Peruuta todennus"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Lisää vaihtoehtoja"</string>
@@ -201,7 +232,7 @@
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Sormenjälkiavauksen määritys epäonnistui. Siirry asetuksiin ja yritä uudelleen."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Ota kasvojentunnistusavaus uudelleen käyttöön"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Kasvojentunnistusavaus"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Kasvojentunnistusavauksen käyttöönotto"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Kasvojen&amp;shy;tunnistus&amp;shy;avauksen käyttöönotto"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Jos haluat ottaa kasvojentunnistusavauksen uudelleen käyttöön, nykyinen kasvomalli poistetaan.\n\nJos haluat avata puhelimen lukituksen kasvoilla, sinun on otettava ominaisuus uudelleen käyttöön."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Kasvojentunnistusavauksen käyttöönotto epäonnistui. Siirry asetuksiin ja yritä uudelleen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Kosketa sormenjälkitunnistinta"</string>
@@ -267,6 +298,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Näytönsäästäjä"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Älä häiritse"</string>
+    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Prioriteettitilat"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Laitepareja ei ole käytettävissä"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Muodosta yhteys laitteeseen tai katkaise yhteys napauttamalla"</string>
@@ -278,11 +310,11 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Tallennettu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"katkaise yhteys"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivoi"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Laita automaattisesti päälle taas huomenna"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Laita automaattisesti päälle huomenna"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share, Paikanna laite ja tietyt muut ominaisuudet käyttävät Bluetoothia"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth menee päälle huomisaamuna"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Audionjako"</string>
-    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Audiota jaetaan"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Jaa audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Audiota jaetaan"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Akun taso <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Ääni"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -361,19 +393,22 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Mitä osaa käyttökokemuksesta ongelma koski?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Valitse ongelman tyyppi"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Näytön tallentaja"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Suorituskyky"</item>
-    <item msgid="1627504621139124393">"Käyttöliittymä"</item>
-    <item msgid="8309220355268900335">"Akku"</item>
-  </string-array>
+    <string name="performance" msgid="6552785217174378320">"Suorituskyky"</string>
+    <string name="user_interface" msgid="3712869377953950887">"Käyttöliittymä"</string>
+    <string name="thermal" msgid="6758074791325414831">"Lämpökamera"</string>
+    <string name="custom" msgid="3337456985275158299">"Yksilöity"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Yksilöidyt jäljittämisasetukset"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Palauta oletus"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Yhden käden moodi"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Kuulolaitteet"</string>
+    <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktiivinen"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Yhteys katkaistu"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Kuulolaitteet"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Muodosta uusi laitepari"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Muodosta uusi laitepari klikkaamalla"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Esiasetusta ei voitu muuttaa"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Esiasetus"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Livetekstitys"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Kumotaanko laitteen mikrofonin esto?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Kumotaanko laitteen kameran esto?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Kumotaanko laitteen kameran ja mikrofonin esto?"</string>
@@ -402,6 +437,14 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Avaa Asetukset"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Muu laite"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Näytä/piilota viimeisimmät"</string>
+    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Prioriteettitilat"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Valmis"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Asetukset"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"Päällä"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Pois päältä"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Ota käyttöön"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Muuta asetuksista"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ei aktiivisia tiloja}=1{{mode} on aktiivinen}other{# tilaa on aktiivisena}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Äänet ja värinät eivät häiritse sinua, paitsi jos ne ovat hälytyksiä, muistutuksia, tapahtumia tai määrittämiäsi soittajia. Kuulet edelleen kaiken valitsemasi sisällön, kuten musiikin, videot ja pelit."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Äänet ja värinät eivät häiritse sinua, paitsi jos ne ovat hälytyksiä. Kuulet edelleen kaiken valitsemasi sisällön, kuten musiikin, videot ja pelit."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Muokkaa"</string>
@@ -440,6 +483,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Latautuu hitaasti • Täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Latautuu • Täynnä <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> päästä"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Widgetit lukitusnäytöllä"</string>
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g> ‑widget lisätty lukitusnäyttöön"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Aloita yhteisöesittely pyyhkäisemällä vasemmalle"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Muokkaa"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Hylkää"</string>
@@ -447,6 +491,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Lisää widgetejä"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Yksilöi widgetit pitkällä painalluksella"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Muokkaa widgettejä"</string>
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Avaa widgetien yksilöintiä varten"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Käytöstä poistetun widgetin sovelluskuvake"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Sovelluskuvake widgetin asentamisesta"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Muokkaa widgetiä"</string>
@@ -465,6 +510,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"valitse widget"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"poista widget"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"aseta valittu widget"</string>
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Lukitusnäytön widgetit"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Kaikki voivat nähdä widgetit lukitusnäytöllä, vaikka tabletti olisi lukittuna."</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"poista widgetin valinta"</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Lukitusnäytön widgetit"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Jos haluat avata sovelluksen käyttämällä widgetiä, sinun täytyy vahvistaa henkilöllisyytesi. Muista myös, että widgetit näkyvät kaikille, vaikka tabletti olisi lukittuna. Jotkin widgetit on ehkä tarkoitettu lukitusnäytölle, ja niiden lisääminen tänne ei välttämättä ole turvallista."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Selvä"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Vaihda käyttäjää"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"alasvetovalikko"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Kaikki sovellukset ja tämän istunnon tiedot poistetaan."</string>
@@ -484,22 +535,30 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> saa pääsyn kaikkiin näytölläsi näkyviin tietoihin ja tietoihin laitteesi toistamasta sisällöstä tallennuksen tai striimauksen aikana. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja toistettava audiosisältö."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Aloitetaanko tallentaminen tai striimaus?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Ominaisuuden tarjoavalla palvelulla on pääsy kaikkiin näytölläsi näkyviin tietoihin ja tietoihin laitteesi toistamasta sisällöstä tallennuksen tai striimauksen aikana. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja toistettava audiosisältö."</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Koko näyttö"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Yksittäinen sovellus"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Jaa sovellus tai tallenna sen sisältöä"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Haluatko, että <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aloittaa tallennuksen tai striimauksen?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kun jaat, tallennat tai striimaat, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kun jaat, tallennat tai striimaat sovellusta, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> saa pääsyn kaikkeen sovelluksessa näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Aloita"</string>
+    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
+    <skip />
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Saako <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nähdä näyttösi?"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Jaa yksi sovellus"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Jaa koko näyttö"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Kun jaat koko näytön, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> näkee kaiken sen sisälllön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Kun jaat sovelluksen, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> näkee kaiken sovelluksessa näkyvän tai toistetun sisällön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Jaa näyttö"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> on poistanut vaihtoehdon käytöstä"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Aloitetaanko striimaus?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kun striimaat, Android saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kun striimaat sovellusta, Android saa pääsyn kaikkeen sovelluksessa näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Aloita striimaus"</string>
+    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
+    <skip />
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Striimataanko näyttö?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Striimaa yksi sovellus"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Striimaa koko näyttö"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Kun striimaat koko näyttöä, kaikki näytön sisältö on näkyvillä. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Kun striimaat sovellusta, kaikki sovelluksessa näkyvä tai toistettu sisältö on näkyvillä. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Striimaa näyttö"</string>
+    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
+    <skip />
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Aloitetaanko jakaminen?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kun jaat, tallennat tai striimaat, Android saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kun jaat, tallennat tai striimaat, Android saa pääsyn kaikkeen sovelluksella näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Aloita"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"Seuraava"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Jakaminen keskeytyy, kun vaihdat sovelluksia"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Jaa tämä sovellus"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Vaihda takaisin"</string>
@@ -518,6 +577,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Aloita nyt"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ei ilmoituksia"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Ei uusia ilmoituksia"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Ilmoitusten vaimennus on päällä"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Äänenvoimakkuus ja ilmoitukset vaimennetaan enintään 2 minuutiksi, kun saat paljon ilmoituksia."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Laita pois päältä"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Avaa lukitus niin näet ilmoituksia"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Vanhempasi ylläpitää tätä laitetta"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisaatiosi omistaa laitteen ja voi valvoa verkkoliikennettä"</string>
@@ -683,7 +745,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Oletus"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automaattinen"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ei ääntä tai värinää"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ei ääntä tai värinää ja näkyy alempana keskusteluosiossa"</string>
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Ei ääntä tai värinää, mutta näkyy yhä keskusteluosiossa"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Voi soida tai väristä laitteen asetuksista riippuen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Voi soida tai väristä laitteen asetuksista riippuen. Keskusteluista (<xliff:g id="APP_NAME">%1$s</xliff:g>) luodaan oletuksena kuplia."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Järjestelmä valitsee, kuuluuko tästä ilmoituksesta ääntä tai väriseekö se"</string>
@@ -727,11 +789,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Painike <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Takaisin"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Ylänuoli"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Alanuoli"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Vasen nuoli"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Oikea nuoli"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Keskelle"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Välilyönti"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -745,6 +802,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Page Up"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Page Down"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Delete"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Home"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -795,8 +853,8 @@
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Syöttötapa"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Vaihda seuraavaan kieleen"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Vaihda aiempaan kieleen"</string>
-    <string name="input_access_emoji" msgid="8105642858900406351">"Emojien käyttö"</string>
-    <string name="input_access_voice_typing" msgid="7291201476395326141">"Puhekirjoituksen käyttö"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Käytä emojeja"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Käytä puhekirjoitusta"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Sovellukset"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistant"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Selain"</string>
@@ -1178,6 +1236,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Saat lisätietoja napauttamalla"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Ei herätyksiä"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"käytä näytön lukitustapaa"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Kosketa sormenjälkitunnistinta. Se on puhelimen sivussa oleva lyhyempi painike."</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sormenjälkitunnistin"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"todentaaksesi"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"avataksesi laitteen"</string>
@@ -1185,7 +1244,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Todennus vaaditaan. Todenna koskettamalla sormenjälkitunnistinta."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Puhelu käynnissä"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiilidata"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Yhdistetty"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Väliaikaisesti yhdistetty"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Heikko yhteys"</string>
@@ -1275,7 +1333,7 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"taitettu"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"taittamaton"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akkua jäljellä <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_percentage" msgid="2564243323894629626">"Näyttökynän akku <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Yhdistä näyttökynä laturiin"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Näyttökynän akku vähissä"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
@@ -1318,8 +1376,67 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> käytti tätä äskettäin (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Tämän käytössä: <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> käytti tätä äskettäin (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Järjestelmä"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Järjestelmän hallinta"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Järjestelmäsovellukset"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitaskaus"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Viimeisimmät sovellukset"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Jaettu näyttö"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Syöte"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Sovellusten pikakuvakkeet"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Nykyinen sovellus"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Saavutettavuus"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Pikanäppäimet"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pikahaut"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ei hakutuloksia"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tiivistyskuvake"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Laajennuskuvake"</string>
+    <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"tai"</string>
+    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Takaisin-ele"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Etusivu-ele"</string>
+    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Toimintonäppäin"</string>
+    <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Valmis"</string>
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Takaisin"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Jos haluat siirtyä takaisin, pyyhkäise kosketuslevyllä vasemmalle tai oikealle kolmella sormella.\n\nVoit myös käyttää pikanäppäinyhdistelmää toimintonäppäin + ESC."</string>
+    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
+    <skip />
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Siirry etusivulle"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Voit siirtyä aloitusnäytölle milloin tahansa pyyhkäisemällä ylös näytön alareunasta kolmella sormella."</string>
+    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Näppämistön taustavalo"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Taso %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kodin ohjaus"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Avaa kodin ohjaus nopeasti näytönsäästäjän kautta"</string>
+    <string name="volume_undo_action" msgid="5815519725211877114">"Kumoa"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Jos haluat siirtyä takaisin, pyyhkäise kosketuslevyllä vasemmalle tai oikealle kolmella sormella."</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Jos haluat siirtyä aloitussivulle, pyyhkäise kosketuslevyllä ylös kolmella sormella"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Näet äskeiset sovellukset, kun pyyhkäiset ylös ja pidät kosketuslevyä painettuna kolmella sormella."</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Jos haluat nähdä kaikki sovellukset, paina näppäimistön toimintonäppäintä"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Sensuroitu"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Avaa lukitus ja katso tiedot"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Takaisin siirtyminen kosketuslevyn avulla"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Pyyhkäise vasemmalle tai oikealle kolmella sormella. Lue lisää eleistä napauttamalla."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Aloitusnäytölle siirtyminen kosketuslevyn avulla"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Pyyhkäise ylös kolmella sormella. Lue lisää eleistä napauttamalla."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Äskettäin käytettyjen sovellusten näkeminen kosketuslevyn avulla"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Pyyhkäise ylös ja pidä kosketuslevyä painettuna kolmella sormella. Lue lisää eleistä napauttamalla."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Kaikkien sovellusten näkeminen näppäimistön avulla"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Voit painaa toimintonäppäintä milloin tahansa. Lue lisää eleistä napauttamalla."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"Erittäin himmeä on nyt osa kirkkauspalkkia"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Voit nyt tehdä näytöstä erittäin himmeän vähentämällä kirkkautta vieläkin enemmän näytön yläreunasta.\n\nTämä toimii parhaiten pimeässä ympäristössä."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Poista erittäin himmeä ‑pikakomento"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Erittäin himmeä ‑pikakomento poistettu. Voit vähentää kirkkautta tavallisesta kirkkauspalkista."</string>
 </resources>

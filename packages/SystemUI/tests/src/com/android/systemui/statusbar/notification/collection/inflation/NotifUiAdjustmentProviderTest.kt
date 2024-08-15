@@ -69,22 +69,21 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     private val groupMembershipManager: GroupMembershipManager = mock()
 
     private val section = NotifSection(mock(), 0)
-    private val entry = NotificationEntryBuilder()
-        .setSection(section)
-        .setParent(GroupEntry.ROOT_ENTRY)
-        .build()
+    private val entry =
+        NotificationEntryBuilder().setSection(section).setParent(GroupEntry.ROOT_ENTRY).build()
 
     private lateinit var contentObserver: ContentObserver
 
-    private val adjustmentProvider = NotifUiAdjustmentProvider(
-        handler,
-        secureSettings,
-        lockscreenUserManager,
-        sensitiveNotifProtectionController,
-        sectionStyleProvider,
-        userTracker,
-        groupMembershipManager,
-    )
+    private val adjustmentProvider =
+        NotifUiAdjustmentProvider(
+            handler,
+            secureSettings,
+            lockscreenUserManager,
+            sensitiveNotifProtectionController,
+            sectionStyleProvider,
+            userTracker,
+            groupMembershipManager,
+        )
 
     @Before
     fun setup() {
@@ -92,9 +91,8 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
         adjustmentProvider.addDirtyListener(dirtyListener)
         verify(secureSettings).getIntForUser(eq(SHOW_NOTIFICATION_SNOOZE), any(), any())
         contentObserver = withArgCaptor {
-            verify(secureSettings).registerContentObserverForUser(
-                eq(SHOW_NOTIFICATION_SNOOZE), capture(), any()
-            )
+            verify(secureSettings)
+                .registerContentObserverForUserSync(eq(SHOW_NOTIFICATION_SNOOZE), capture(), any())
         }
         verifyNoMoreInteractions(secureSettings, dirtyListener)
     }

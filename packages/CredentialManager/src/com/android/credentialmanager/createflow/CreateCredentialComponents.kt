@@ -123,7 +123,8 @@ fun CreateCredentialScreen(
                                 onBiometricPromptStateChange =
                                 viewModel::onBiometricPromptStateChange,
                                 getBiometricCancellationSignal =
-                                viewModel::getBiometricCancellationSignal
+                                viewModel::getBiometricCancellationSignal,
+                                onLog = { viewModel.logUiEvent(it) },
                             )
                         CreateScreenState.MORE_OPTIONS_SELECTION_ONLY -> MoreOptionsSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
@@ -642,12 +643,13 @@ internal fun BiometricSelectionPage(
     getBiometricPromptState: () -> BiometricPromptState,
     onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
     getBiometricCancellationSignal: () -> CancellationSignal,
+    onLog: @Composable (UiEventEnum) -> Unit
 ) {
     if (biometricEntry == null) {
         fallbackToOriginalFlow(BiometricFlowType.CREATE)
         return
     }
-    runBiometricFlowForCreate(
+    val biometricFlowCalled = runBiometricFlowForCreate(
         biometricEntry = biometricEntry,
         context = LocalContext.current,
         openMoreOptionsPage = onMoreOptionSelected,
@@ -659,6 +661,9 @@ internal fun BiometricSelectionPage(
         createProviderInfo = enabledProviderInfo,
         onBiometricFailureFallback = fallbackToOriginalFlow,
         onIllegalStateAndFinish = onIllegalScreenStateAndFinish,
-        getBiometricCancellationSignal = getBiometricCancellationSignal,
+        getBiometricCancellationSignal = getBiometricCancellationSignal
     )
+    if (biometricFlowCalled) {
+        onLog(CreateCredentialEvent.CREDMAN_CREATE_CRED_BIOMETRIC_FLOW_LAUNCHED)
+    }
 }

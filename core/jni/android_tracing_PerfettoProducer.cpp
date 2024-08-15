@@ -34,15 +34,17 @@
 
 namespace android {
 
-void perfettoProducerInit(JNIEnv* env, jclass clazz, int backends) {
+void perfettoProducerInit(JNIEnv* env, jclass clazz, PerfettoBackendTypes backends,
+                          uint32_t shmem_size_hint_kb) {
     struct PerfettoProducerInitArgs args = PERFETTO_PRODUCER_INIT_ARGS_INIT();
-    args.backends = (PerfettoBackendTypes)backends;
+    args.backends = backends;
+    args.shmem_size_hint_kb = shmem_size_hint_kb;
     PerfettoProducerInit(args);
 }
 
 const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
-        {"nativePerfettoProducerInit", "(I)V", (void*)perfettoProducerInit},
+        {"nativePerfettoProducerInit", "(II)V", (void*)perfettoProducerInit},
 };
 
 int register_android_tracing_PerfettoProducer(JNIEnv* env) {

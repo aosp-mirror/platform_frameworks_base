@@ -26,8 +26,8 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
@@ -90,7 +90,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.ITaskFragmentOrganizer;
@@ -140,7 +139,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private IBinder mFragmentToken;
     private WindowContainerTransaction mTransaction;
     private WindowContainerToken mFragmentWindowToken;
-    private RemoteAnimationDefinition mDefinition;
     private IBinder mErrorToken;
     private Rect mTaskFragBounds;
 
@@ -169,7 +167,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mTransaction = new WindowContainerTransaction();
         mTransaction.setTaskFragmentOrganizer(mIOrganizer);
         mFragmentWindowToken = mTaskFragment.mRemoteToken.toWindowContainerToken();
-        mDefinition = new RemoteAnimationDefinition();
         mErrorToken = new Binder();
         final Rect displayBounds = mDisplayContent.getBounds();
         mTaskFragBounds = new Rect(displayBounds.left, displayBounds.top, displayBounds.centerX(),
@@ -220,30 +217,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testOnTaskFragmentAppeared_throughTaskFragmentOrganizer() throws RemoteException {
-        mSetFlagsRule.disableFlags(Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
-
-        // No-op when the TaskFragment is not attached.
-        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
-        mController.dispatchPendingEvents();
-
-        verify(mOrganizer, never()).onTransactionReady(any());
-        verify(mAppThread, never()).scheduleTaskFragmentTransaction(any(), any());
-
-        // Send callback when the TaskFragment is attached.
-        setupMockParent(mTaskFragment, mTask);
-
-        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
-        mController.dispatchPendingEvents();
-
-        assertTaskFragmentParentInfoChangedTransaction(mTask);
-        assertTaskFragmentAppearedTransaction(false /* hasSurfaceControl */);
-        verify(mAppThread, never()).scheduleTaskFragmentTransaction(any(), any());
-    }
-
-    @Test
     public void testOnTaskFragmentAppeared_throughApplicationThread() throws RemoteException  {
-        mSetFlagsRule.enableFlags(Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
         // Re-register the organizer in case the flag was disabled during setup.
         mController.unregisterOrganizer(mIOrganizer);
         registerTaskFragmentOrganizer(mIOrganizer);
@@ -599,17 +573,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.dispatchPendingEvents();
 
         assertActivityReparentedToTaskTransaction(task.mTaskId, activity.intent, activity.token);
-    }
-
-    @Test
-    public void testRegisterRemoteAnimations() {
-        mController.registerRemoteAnimations(mIOrganizer, mDefinition);
-
-        assertEquals(mDefinition, mController.getRemoteAnimationDefinition(mIOrganizer));
-
-        mController.unregisterRemoteAnimations(mIOrganizer);
-
-        assertNull(mController.getRemoteAnimationDefinition(mIOrganizer));
     }
 
     @Test
@@ -1902,7 +1865,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         assertApplyTransactionAllowed(mTransaction);
 
-        verify(task).moveOrCreateDecorSurfaceFor(tf);
+        verify(task).moveOrCreateDecorSurfaceFor(tf, true /* visible */);
     }
 
     @Test

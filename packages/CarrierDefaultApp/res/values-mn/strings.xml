@@ -10,7 +10,7 @@
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Мобайл дата холболт алга"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Дата эсвэл роуминг төлөвлөгөөг %s-р нэмнэ үү"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Мобайл датаны төлөв"</string>
-    <string name="action_bar_label" msgid="4290345990334377177">"Мобайл сүлжээнд нэвтрэх"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Хөдөлгөөнт холбооны сүлжээнд нэвтрэх"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Таны холбогдох гэж буй сүлжээ аюулгүй байдлын асуудалтай байна."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Жишээлбэл нэвтрэх хуудас нь харагдаж буй байгууллагынх биш байж болно."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Ямар ч тохиолдолд хөтчөөр үргэлжлүүлэх"</string>

@@ -28,6 +28,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -43,18 +44,20 @@ import android.view.IWindowSession;
 import android.view.ImeBackAnimationController;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +72,10 @@ import java.util.List;
 @SmallTest
 @Presubmit
 public class WindowOnBackInvokedDispatcherTest {
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
+
     @Mock
     private IWindowSession mWindowSession;
     @Mock
@@ -105,13 +112,11 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         doReturn(true).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
         doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
 
         mDispatcher = new WindowOnBackInvokedDispatcher(mContext, Looper.getMainLooper());
-        mDispatcher.attachToWindow(mWindowSession, mWindow, mImeBackAnimationController);
+        mDispatcher.attachToWindow(mWindowSession, mWindow, null, mImeBackAnimationController);
     }
 
     private void waitForIdle() {
@@ -347,12 +352,16 @@ public class WindowOnBackInvokedDispatcherTest {
 
         waitForIdle();
         verify(mCallback1).onBackStarted(any(BackEvent.class));
+        assertTrue(mDispatcher.mProgressAnimator.isBackAnimationInProgress());
 
         mDispatcher.unregisterOnBackInvokedCallback(mCallback1);
 
         waitForIdle();
         verify(mCallback1).onBackCancelled();
         verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), isNull());
+        // Verify that ProgressAnimator is reset (and thus does not cause further callback event
+        // dispatching)
+        assertFalse(mDispatcher.mProgressAnimator.isBackAnimationInProgress());
     }
 
     @Test
@@ -368,7 +377,7 @@ public class WindowOnBackInvokedDispatcherTest {
         callbackInfo.getCallback().onBackInvoked();
 
         waitForIdle();
-        verify(mCallback1).onBackInvoked();
+        verify(mCallback1, timeout(/*millis*/ 1000)).onBackInvoked();
         verify(mCallback1, never()).onBackCancelled();
     }
 
@@ -454,25 +463,26 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test
     public void registerImeCallbacks_onBackInvokedCallbackEnabled() throws RemoteException {
-        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mDefaultImeCallback);
+        verifyImeCallackRegistrations();
+    }
+
+    @Test
+    public void registerImeCallbacks_onBackInvokedCallbackDisabled() throws RemoteException {
+        doReturn(false).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
+        verifyImeCallackRegistrations();
+    }
+
+    private void verifyImeCallackRegistrations() throws RemoteException {
+        // verify default callback is replaced with ImeBackAnimationController
+        mDispatcher.registerOnBackInvokedCallbackUnchecked(mDefaultImeCallback, PRIORITY_DEFAULT);
         assertCallbacksSize(/* default */ 1, /* overlay */ 0);
         assertSetCallbackInfo();
         assertTopCallback(mImeBackAnimationController);
 
-        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mImeCallback);
+        // verify regular ime callback is successfully registered
+        mDispatcher.registerOnBackInvokedCallbackUnchecked(mImeCallback, PRIORITY_DEFAULT);
         assertCallbacksSize(/* default */ 2, /* overlay */ 0);
         assertSetCallbackInfo();
         assertTopCallback(mImeCallback);
-    }
-
-    @Test
-    public void registerImeCallbacks_legacyBack() throws RemoteException {
-        doReturn(false).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
-
-        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mDefaultImeCallback);
-        assertNoSetCallbackInfo();
-
-        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mImeCallback);
-        assertNoSetCallbackInfo();
     }
 }

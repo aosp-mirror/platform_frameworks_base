@@ -18,6 +18,7 @@ package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
 import android.companion.virtual.VirtualDeviceManager
+import android.os.Binder
 import android.os.Handler
 import android.os.UserHandle
 import android.permission.PermissionManager
@@ -245,22 +246,32 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         }
 
     override fun setUidMode(uid: Int, deviceId: String, code: Int, mode: Int): Boolean {
-        if (
-            Flags.runtimePermissionAppopsMappingEnabled() && code in runtimeAppOpToPermissionNames
-        ) {
-            Slog.w(
-                LOG_TAG,
-                "Cannot set UID mode for runtime permission app op, uid = $uid," +
-                    " code = ${AppOpsManager.opToName(code)}," +
-                    " mode = ${AppOpsManager.modeToName(mode)}",
-                RuntimeException()
-            )
-            return false
-        }
-
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         val appOpName = AppOpsManager.opToPublicName(code)
+
+        if (
+            Flags.runtimePermissionAppopsMappingEnabled() && code in runtimeAppOpToPermissionNames
+        ) {
+            val oldMode =
+                service.getState { with(appIdPolicy) { getAppOpMode(appId, userId, appOpName) } }
+            val wouldHaveChanged = oldMode != mode
+            val logMessage =
+                (if (wouldHaveChanged) "Blocked" else "Ignored") +
+                    " setUidMode call for runtime permission app op:" +
+                    " uid = $uid," +
+                    " code = ${AppOpsManager.opToName(code)}," +
+                    " mode = ${AppOpsManager.modeToName(mode)}," +
+                    " callingUid = ${Binder.getCallingUid()}," +
+                    " oldMode = ${AppOpsManager.modeToName(oldMode)}"
+            if (wouldHaveChanged) {
+                Slog.e(LOG_TAG, logMessage, RuntimeException())
+            } else {
+                Slog.w(LOG_TAG, logMessage)
+            }
+            return false
+        }
+
         var wasChanged: Boolean
         service.mutateState {
             wasChanged = with(appIdPolicy) { setAppOpMode(appId, userId, appOpName, mode) }

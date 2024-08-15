@@ -44,13 +44,13 @@ import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -65,7 +65,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class ImageWallpaperTest extends SysuiTestCase {
     private static final int LOW_BMP_WIDTH = 128;

@@ -17,14 +17,20 @@ package com.android.wm.shell.bubbles.bar;
 
 import android.annotation.ColorInt;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.core.widget.ImageViewCompat;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
@@ -38,6 +44,7 @@ public class BubbleBarMenuView extends LinearLayout {
     private ViewGroup mBubbleSectionView;
     private ViewGroup mActionsSectionView;
     private ImageView mBubbleIconView;
+    private ImageView mBubbleDismissIconView;
     private TextView mBubbleTitleView;
 
     public BubbleBarMenuView(Context context) {
@@ -64,6 +71,29 @@ public class BubbleBarMenuView extends LinearLayout {
         mActionsSectionView = findViewById(R.id.bubble_bar_manage_menu_actions_section);
         mBubbleIconView = findViewById(R.id.bubble_bar_manage_menu_bubble_icon);
         mBubbleTitleView = findViewById(R.id.bubble_bar_manage_menu_bubble_title);
+        mBubbleDismissIconView = findViewById(R.id.bubble_bar_manage_menu_dismiss_icon);
+        updateThemeColors();
+
+        mBubbleSectionView.setAccessibilityDelegate(new AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfo.ACTION_CLICK, getResources().getString(
+                        R.string.bubble_accessibility_action_collapse_menu)));
+            }
+        });
+    }
+
+    private void updateThemeColors() {
+        try (TypedArray ta = mContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.materialColorSurfaceBright,
+                com.android.internal.R.attr.materialColorOnSurface
+        })) {
+            mActionsSectionView.getBackground().setTint(ta.getColor(0, Color.WHITE));
+            ImageViewCompat.setImageTintList(mBubbleDismissIconView,
+                    ColorStateList.valueOf(ta.getColor(1, Color.BLACK)));
+        }
     }
 
     /** Update menu details with bubble info */

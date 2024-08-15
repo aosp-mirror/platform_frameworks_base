@@ -16,7 +16,7 @@
 package com.android.systemui.notetask
 
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
@@ -26,7 +26,7 @@ import org.junit.runner.RunWith
 
 /** atest SystemUITests:NoteTaskInfoTest */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 internal class NoteTaskInfoTest : SysuiTestCase() {
 
     @Test

@@ -19,6 +19,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
@@ -37,11 +38,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: KeyguardBlueprintRepository

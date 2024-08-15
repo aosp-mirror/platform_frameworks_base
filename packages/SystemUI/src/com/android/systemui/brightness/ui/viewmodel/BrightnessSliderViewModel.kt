@@ -18,14 +18,18 @@ package com.android.systemui.brightness.ui.viewmodel
 
 import com.android.systemui.brightness.domain.interactor.BrightnessPolicyEnforcementInteractor
 import com.android.systemui.brightness.domain.interactor.ScreenBrightnessInteractor
-import com.android.systemui.brightness.shared.GammaBrightness
+import com.android.systemui.brightness.shared.model.GammaBrightness
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.utils.PolicyRestriction
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
 class BrightnessSliderViewModel
@@ -33,8 +37,14 @@ class BrightnessSliderViewModel
 constructor(
     private val screenBrightnessInteractor: ScreenBrightnessInteractor,
     private val brightnessPolicyEnforcementInteractor: BrightnessPolicyEnforcementInteractor,
+    @Application private val applicationScope: CoroutineScope,
 ) {
-    val currentBrightness = screenBrightnessInteractor.gammaBrightness
+    val currentBrightness =
+        screenBrightnessInteractor.gammaBrightness.stateIn(
+            applicationScope,
+            SharingStarted.WhileSubscribed(),
+            GammaBrightness(0)
+        )
 
     val maxBrightness = screenBrightnessInteractor.maxGammaBrightness
     val minBrightness = screenBrightnessInteractor.minGammaBrightness

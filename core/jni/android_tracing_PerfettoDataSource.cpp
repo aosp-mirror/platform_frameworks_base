@@ -245,7 +245,6 @@ static jlong nativeGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
 }
 
 void nativeWritePackets(JNIEnv* env, jclass clazz, jlong ds_ptr, jobjectArray packets) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeWritePackets(%p)", (void*)ds_ptr);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(ds_ptr);
     datasource->WritePackets(env, packets);
 }

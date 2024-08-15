@@ -15,8 +15,8 @@
  */
 package androidx.core.animation
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.doOnEnd
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
  * This test class validates that two tests' animators are isolated from each other when using the
  * same animator test rule. This is a test to prevent future instances of b/275602127.
  */
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
 class AnimatorTestRuleIsolationTest : SysuiTestCase() {

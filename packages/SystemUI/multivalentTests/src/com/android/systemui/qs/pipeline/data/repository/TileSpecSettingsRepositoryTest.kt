@@ -203,6 +203,21 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
                 .containsExactlyElementsIn(DEFAULT_TILES.toTileSpecs() + startingTiles)
         }
 
+    @Test
+    fun prependDefault_noChangesWhenInRetail() =
+        testScope.runTest {
+            val user = 0
+            retailModeRepository.setRetailMode(true)
+            val startingTiles = "a"
+            storeTilesForUser(startingTiles, user)
+
+            runCurrent()
+            underTest.prependDefault(user)
+            runCurrent()
+
+            assertThat(loadTilesForUser(user)).isEqualTo(startingTiles)
+        }
+
     private fun TestScope.storeTilesForUser(specs: String, forUser: Int) {
         secureSettings.putStringForUser(SETTING, specs, forUser)
         runCurrent()

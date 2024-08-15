@@ -99,13 +99,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -162,6 +162,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationEntry mCurrentUserNotif;
     private NotificationEntry mSecondaryUserNotif;
     private NotificationEntry mWorkProfileNotif;
+    private NotificationEntry mSensitiveContentNotif;
     private final FakeFeatureFlagsClassic mFakeFeatureFlags = new FakeFeatureFlagsClassic();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mBackgroundExecutor = new FakeExecutor(mFakeSystemClock);
@@ -223,6 +224,14 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .build();
         mWorkProfileNotif.setRanking(new RankingBuilder(mWorkProfileNotif.getRanking())
                 .setChannel(channel)
+                .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
+        mSensitiveContentNotif = new NotificationEntryBuilder()
+                .setNotification(notifWithPrivateVisibility)
+                .setUser(new UserHandle(mCurrentUser.id))
+                .build();
+        mSensitiveContentNotif.setRanking(new RankingBuilder(mCurrentUserNotif.getRanking())
+                .setChannel(channel)
+                .setSensitiveContent(true)
                 .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
         when(mNotifCollection.getEntry(mWorkProfileNotif.getKey())).thenReturn(mWorkProfileNotif);
 
@@ -456,6 +465,17 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         // THEN the secondary profile notification still needs to be redacted because the current
         // user's setting takes precedence
         assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+    }
+
+    @Test
+    public void testHasSensitiveContent_redacted() {
+        // Allow private notifications for this user
+        mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0,
+                mCurrentUser.id);
+        changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+
+        // Sensitive Content notifications are always redacted
+        assertTrue(mLockscreenUserManager.needsRedaction(mSensitiveContentNotif));
     }
 
     @Test

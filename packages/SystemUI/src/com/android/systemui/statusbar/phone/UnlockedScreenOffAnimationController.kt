@@ -23,9 +23,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -162,7 +162,7 @@ constructor(
         this.centralSurfaces = centralSurfaces
 
         updateAnimatorDurationScale()
-        globalSettings.registerContentObserver(
+        globalSettings.registerContentObserverSync(
             Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
             /* notify for descendants */ false,
             animatorDurationScaleObserver
@@ -376,8 +376,9 @@ constructor(
         // We currently draw both the light reveal scrim, and the AOD UI, in the shade. If it's
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is expanded.
-        if ((!this::centralSurfaces.isInitialized ||
-                    panelExpansionInteractorLazy.get().isPanelExpanded) &&
+        if (
+            (!this::centralSurfaces.isInitialized ||
+                panelExpansionInteractorLazy.get().isPanelExpanded) &&
                 // Status bar might be expanded because we have started
                 // playing the animation already
                 !isAnimationPlaying()

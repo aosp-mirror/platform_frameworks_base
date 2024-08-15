@@ -170,6 +170,10 @@ public class ResolverActivity extends Activity implements
     // Expected to be true if this object is ResolverActivity or is ResolverWrapperActivity.
     private final boolean mIsIntentPicker;
 
+    // Whether this activity was instantiated with a specialized constructor that predefines a list
+    // of resolutions to be displayed for the target intent (as in, e.g., the NFC use case).
+    private boolean mHasSubclassSpecifiedResolutions;
+
     // Whether or not this activity supports choosing a default handler for the intent.
     @VisibleForTesting
     protected boolean mSupportsAlwaysUseOption;
@@ -420,6 +424,8 @@ public class ResolverActivity extends Activity implements
             List<ResolveInfo> rList, boolean supportsAlwaysUseOption) {
         setTheme(appliedThemeResId());
         super.onCreate(savedInstanceState);
+
+        mHasSubclassSpecifiedResolutions = (rList != null);
 
         mQuietModeManager = createQuietModeManager();
 
@@ -917,7 +923,7 @@ public class ResolverActivity extends Activity implements
         mSystemWindowInsets = insets.getSystemWindowInsets();
 
         mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
-                mSystemWindowInsets.right, mSystemWindowInsets.bottom);
+                mSystemWindowInsets.right, 0);
 
         resetButtonBar();
 
@@ -946,7 +952,7 @@ public class ResolverActivity extends Activity implements
 
         if (mSystemWindowInsets != null) {
             mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
-                    mSystemWindowInsets.right, mSystemWindowInsets.bottom);
+                    mSystemWindowInsets.right, 0);
         }
     }
 
@@ -1203,9 +1209,19 @@ public class ResolverActivity extends Activity implements
         if (!isChangingConfigurations() && mPickOptionRequest != null) {
             mPickOptionRequest.cancel();
         }
-        if (mMultiProfilePagerAdapter != null
-                && mMultiProfilePagerAdapter.getActiveListAdapter() != null) {
-            mMultiProfilePagerAdapter.getActiveListAdapter().onDestroy();
+        if (mMultiProfilePagerAdapter != null) {
+            ResolverListAdapter activeAdapter =
+                    mMultiProfilePagerAdapter.getActiveListAdapter();
+            if (activeAdapter != null) {
+                activeAdapter.onDestroy();
+            }
+            if (android.service.chooser.Flags.fixResolverMemoryLeak()) {
+                ResolverListAdapter inactiveAdapter =
+                        mMultiProfilePagerAdapter.getInactiveListAdapter();
+                if (inactiveAdapter != null) {
+                    inactiveAdapter.onDestroy();
+                }
+            }
         }
     }
 
@@ -1698,17 +1714,25 @@ public class ResolverActivity extends Activity implements
                 isAudioCaptureDevice, initialIntentsUserSpace);
     }
 
+    private AbstractResolverComparator makeResolverComparator(UserHandle userHandle) {
+        if (mHasSubclassSpecifiedResolutions) {
+            return new NoOpResolverComparator(
+                    this, getTargetIntent(), getResolverRankerServiceUserHandleList(userHandle));
+        } else {
+            return new ResolverRankerServiceResolverComparator(
+                   this,
+                   getTargetIntent(),
+                   getReferrerPackageName(),
+                   null,
+                   null,
+                   getResolverRankerServiceUserHandleList(userHandle));
+        }
+    }
+
     @VisibleForTesting
     protected ResolverListController createListController(UserHandle userHandle) {
         UserHandle queryIntentsUser = getQueryIntentsUser(userHandle);
-        ResolverRankerServiceResolverComparator resolverComparator =
-                new ResolverRankerServiceResolverComparator(
-                        this,
-                        getTargetIntent(),
-                        getReferrerPackageName(),
-                        null,
-                        null,
-                        getResolverRankerServiceUserHandleList(userHandle));
+        AbstractResolverComparator resolverComparator = makeResolverComparator(userHandle);
         return new ResolverListController(
                 this,
                 mPm,

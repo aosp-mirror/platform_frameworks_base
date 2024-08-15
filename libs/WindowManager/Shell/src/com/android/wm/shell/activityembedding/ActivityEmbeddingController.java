@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.util.ArrayMap;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
+import android.window.TransitionInfo.AnimationOptions;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
@@ -39,6 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -117,22 +119,37 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             return false;
         }
 
-        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
-        if (options != null) {
-            // Scene-transition should be handled by app side.
-            if (options.getType() == ANIM_SCENE_TRANSITION) {
+        return shouldAnimateAnimationOptions(info);
+    }
+
+    private boolean shouldAnimateAnimationOptions(@NonNull TransitionInfo info) {
+        if (!Flags.moveAnimationOptionsToChange()) {
+            return shouldAnimateAnimationOptions(info.getAnimationOptions());
+        }
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (!shouldAnimateAnimationOptions(change.getAnimationOptions())) {
+                // If any of override animation is not supported, don't animate the transition.
                 return false;
             }
-            // The case of ActivityOptions#makeCustomAnimation, Activity#overridePendingTransition,
-            // and Activity#overrideActivityTransition are supported.
-            if (options.getType() == ANIM_CUSTOM) {
-                return true;
-            }
-            // Use default transition handler to animate other override animation.
-            return !isSupportedOverrideAnimation(options);
         }
-
         return true;
+    }
+
+    private boolean shouldAnimateAnimationOptions(@Nullable AnimationOptions options) {
+        if (options == null) {
+            return true;
+        }
+        // Scene-transition should be handled by app side.
+        if (options.getType() == ANIM_SCENE_TRANSITION) {
+            return false;
+        }
+        // The case of ActivityOptions#makeCustomAnimation, Activity#overridePendingTransition,
+        // and Activity#overrideActivityTransition are supported.
+        if (options.getType() == ANIM_CUSTOM) {
+            return true;
+        }
+        // Use default transition handler to animate other override animation.
+        return !isSupportedOverrideAnimation(options);
     }
 
     @Override

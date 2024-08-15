@@ -147,10 +147,6 @@ public:
      * Returns "false" if "entry" is bogus or if the data in the Zip file
      * appears to be bad.
      */
-    bool getEntryInfo(ZipEntryRO entry, uint16_t* pMethod, uint32_t* pUncompLen,
-        uint32_t* pCompLen, off64_t* pOffset, uint32_t* pModWhen,
-        uint32_t* pCrc32) const;
-
     bool getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
         uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
         uint32_t* pModWhen, uint32_t* pCrc32, uint16_t* pExtraFieldSize) const;

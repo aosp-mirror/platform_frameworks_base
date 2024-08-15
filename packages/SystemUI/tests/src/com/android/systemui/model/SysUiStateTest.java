@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -32,10 +33,9 @@ import com.android.systemui.settings.FakeDisplayTracker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 @SmallTest
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class SysUiStateTest extends SysuiTestCase {
     private static final int FLAG_1 = 1;
     private static final int FLAG_2 = 1 << 1;

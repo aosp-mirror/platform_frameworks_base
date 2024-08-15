@@ -54,6 +54,7 @@ import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.TestableDependency;
@@ -84,6 +85,7 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -192,16 +194,29 @@ public class NotificationTestHelper {
                 mBgCoroutineContext,
                 mMainCoroutineContext);
 
-        NotificationContentInflater contentBinder = new NotificationContentInflater(
-                mock(NotifRemoteViewCache.class),
-                mock(NotificationRemoteInputManager.class),
-                mock(ConversationNotificationProcessor.class),
-                mock(MediaFeatureFlag.class),
-                mock(Executor.class),
-                new MockSmartReplyInflater(),
-                mock(NotifLayoutInflaterFactory.Provider.class),
-                mock(HeadsUpStyleProvider.class),
-                mock(NotificationContentInflaterLogger.class));
+        NotificationRowContentBinder contentBinder =
+                NotificationRowContentBinderRefactor.isEnabled()
+                        ? new NotificationRowContentBinderImpl(
+                                mock(NotifRemoteViewCache.class),
+                                mock(NotificationRemoteInputManager.class),
+                                mock(ConversationNotificationProcessor.class),
+                                mock(RichOngoingNotificationContentExtractor.class),
+                                mock(RichOngoingNotificationViewInflater.class),
+                                mock(Executor.class),
+                                new MockSmartReplyInflater(),
+                                mock(NotifLayoutInflaterFactory.Provider.class),
+                                mock(HeadsUpStyleProvider.class),
+                                mock(NotificationRowContentBinderLogger.class))
+                        : new NotificationContentInflater(
+                                mock(NotifRemoteViewCache.class),
+                                mock(NotificationRemoteInputManager.class),
+                                mock(ConversationNotificationProcessor.class),
+                                mock(MediaFeatureFlag.class),
+                                mock(Executor.class),
+                                new MockSmartReplyInflater(),
+                                mock(NotifLayoutInflaterFactory.Provider.class),
+                                mock(HeadsUpStyleProvider.class),
+                                mock(NotificationRowContentBinderLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),
@@ -605,7 +620,11 @@ public class NotificationTestHelper {
                 .setUser(userHandle)
                 .setPostTime(System.currentTimeMillis())
                 .setChannel(channel)
+                .updateRanking(rankingBuilder -> rankingBuilder.setIsConversation(
+                        notification.isStyle(Notification.MessagingStyle.class)
+                ))
                 .build();
+
 
         return generateRow(entry, extraInflationFlags);
     }
@@ -657,7 +676,8 @@ public class NotificationTestHelper {
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
                 mFeatureFlags,
-                mock(IStatusBarService.class));
+                mock(IStatusBarService.class),
+                mock(UiEventLogger.class));
 
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);

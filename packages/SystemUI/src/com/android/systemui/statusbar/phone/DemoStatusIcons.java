@@ -223,7 +223,8 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
             }
             return;
         }
-        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.SYSTEM, iconId, 0, 0, "Demo");
+        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.SYSTEM, iconId, 0, 0, "Demo",
+                StatusBarIcon.Type.SystemIcon);
         icon.visible = true;
         StatusBarIconView v = new StatusBarIconView(getContext(), slot, null, false);
         v.setTag(slot);

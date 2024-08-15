@@ -40,6 +40,7 @@ interface KeyguardBlueprint {
         rebuildSections: List<KeyguardSection> = listOf(),
         bindData: Boolean = true
     ) {
+        rebuildSections.forEach { it.onRebuildBegin() }
         val prevSections = previousBlueprint?.sections ?: listOf()
         val skipSections = sections.intersect(prevSections).subtract(rebuildSections)
         prevSections.subtract(skipSections).forEach { it.removeViews(constraintLayout) }
@@ -49,6 +50,7 @@ interface KeyguardBlueprint {
                 it.bindData(constraintLayout)
             }
         }
+        rebuildSections.forEach { it.onRebuildEnd() }
     }
 
     /** Rebuilds views for the target sections, or all of them if unspecified. */
@@ -61,6 +63,7 @@ interface KeyguardBlueprint {
             return
         }
 
+        rebuildSections.forEach { it.onRebuildBegin() }
         rebuildSections.forEach { it.removeViews(constraintLayout) }
         rebuildSections.forEach {
             it.addViews(constraintLayout)
@@ -68,6 +71,7 @@ interface KeyguardBlueprint {
                 it.bindData(constraintLayout)
             }
         }
+        rebuildSections.forEach { it.onRebuildEnd() }
     }
 
     fun applyConstraints(constraintSet: ConstraintSet) {

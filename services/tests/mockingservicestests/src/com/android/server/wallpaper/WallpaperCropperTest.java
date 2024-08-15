@@ -211,9 +211,11 @@ public class WallpaperCropperTest {
                     new Rect(100, 200, bitmapSize.x - 100, bitmapSize.y))) {
                 for (int mode: ALL_MODES) {
                     for (boolean parallax: List.of(true, false)) {
-                        assertThat(WallpaperCropper.getAdjustedCrop(
-                                crop, bitmapSize, displaySize, parallax, mode))
-                                .isEqualTo(crop);
+                        for (boolean rtl: List.of(true, false)) {
+                            assertThat(WallpaperCropper.getAdjustedCrop(
+                                    crop, bitmapSize, displaySize, parallax, rtl, mode))
+                                    .isEqualTo(crop);
+                        }
                     }
                 }
             }
@@ -234,8 +236,11 @@ public class WallpaperCropperTest {
         Point expectedCropSize = new Point(expectedWidth, 1000);
         for (int mode: ALL_MODES) {
             assertThat(WallpaperCropper.getAdjustedCrop(
-                    crop, bitmapSize, displaySize, true, mode))
-                    .isEqualTo(centerOf(crop, expectedCropSize));
+                    crop, bitmapSize, displaySize, true, false, mode))
+                    .isEqualTo(leftOf(crop, expectedCropSize));
+            assertThat(WallpaperCropper.getAdjustedCrop(
+                    crop, bitmapSize, displaySize, true, true, mode))
+                    .isEqualTo(rightOf(crop, expectedCropSize));
         }
     }
 
@@ -254,9 +259,11 @@ public class WallpaperCropperTest {
             Point bitmapSize = new Point(acceptableWidth, 1000);
             Rect crop = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
             for (int mode : ALL_MODES) {
-                assertThat(WallpaperCropper.getAdjustedCrop(
-                        crop, bitmapSize, displaySize, true, mode))
-                        .isEqualTo(crop);
+                for (boolean rtl : List.of(false, true)) {
+                    assertThat(WallpaperCropper.getAdjustedCrop(
+                            crop, bitmapSize, displaySize, true, rtl, mode))
+                            .isEqualTo(crop);
+                }
             }
         }
     }
@@ -286,9 +293,11 @@ public class WallpaperCropperTest {
         for (int i = 0; i < crops.size(); i++) {
             Rect crop = crops.get(i);
             Rect expectedCrop = expectedAdjustedCrops.get(i);
-            assertThat(WallpaperCropper.getAdjustedCrop(
-                    crop, bitmapSize, displaySize, false, WallpaperCropper.ADD))
-                    .isEqualTo(expectedCrop);
+            for (boolean rtl: List.of(false, true)) {
+                assertThat(WallpaperCropper.getAdjustedCrop(
+                        crop, bitmapSize, displaySize, false, rtl, WallpaperCropper.ADD))
+                        .isEqualTo(expectedCrop);
+            }
         }
     }
 
@@ -309,9 +318,11 @@ public class WallpaperCropperTest {
         Point expectedCropSize = new Point(1000, 1000);
 
         for (Rect crop: crops) {
-            assertThat(WallpaperCropper.getAdjustedCrop(
-                    crop, bitmapSize, displaySize, false, WallpaperCropper.REMOVE))
-                    .isEqualTo(centerOf(crop, expectedCropSize));
+            for (boolean rtl : List.of(false, true)) {
+                assertThat(WallpaperCropper.getAdjustedCrop(
+                        crop, bitmapSize, displaySize, false, rtl, WallpaperCropper.REMOVE))
+                        .isEqualTo(centerOf(crop, expectedCropSize));
+            }
         }
     }
 
@@ -338,14 +349,14 @@ public class WallpaperCropperTest {
             Rect crop = crops.get(i);
             Rect expected = expectedAdjustedCrops.get(i);
             assertThat(WallpaperCropper.getAdjustedCrop(
-                    crop, bitmapSize, displaySize, false, WallpaperCropper.BALANCE))
+                    crop, bitmapSize, displaySize, false, false, WallpaperCropper.BALANCE))
                     .isEqualTo(expected);
 
             Rect transposedCrop = new Rect(crop.top, crop.left, crop.bottom, crop.right);
             Rect expectedTransposed = new Rect(
                     expected.top, expected.left, expected.bottom, expected.right);
             assertThat(WallpaperCropper.getAdjustedCrop(transposedCrop, bitmapSize,
-                    transposedDisplaySize, false, WallpaperCropper.BALANCE))
+                    transposedDisplaySize, false, false, WallpaperCropper.BALANCE))
                     .isEqualTo(expectedTransposed);
         }
     }
@@ -376,9 +387,11 @@ public class WallpaperCropperTest {
             Point displaySize = displaySizes.get(i);
             Point expectedCropSize = expectedCropSizes.get(i);
             for (boolean rtl : List.of(false, true)) {
+                Rect expectedCrop = rtl ? rightOf(bitmapRect, expectedCropSize)
+                        : leftOf(bitmapRect, expectedCropSize);
                 assertThat(mWallpaperCropper.getCrop(
                         displaySize, bitmapSize, suggestedCrops, rtl))
-                        .isEqualTo(centerOf(bitmapRect, expectedCropSize));
+                        .isEqualTo(expectedCrop);
             }
         }
     }

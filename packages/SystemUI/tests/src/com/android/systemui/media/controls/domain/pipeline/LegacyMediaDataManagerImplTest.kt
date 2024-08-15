@@ -40,9 +40,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.logging.InstanceId
@@ -113,7 +113,7 @@ private fun <T> anyObject(): T {
 
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class LegacyMediaDataManagerImplTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()

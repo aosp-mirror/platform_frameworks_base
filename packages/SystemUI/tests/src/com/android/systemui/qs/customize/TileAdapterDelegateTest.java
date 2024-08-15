@@ -24,11 +24,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Bundle;
-import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -41,7 +41,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class TileAdapterDelegateTest extends SysuiTestCase {
 
     private static final int MOVE_TO_POSITION_ID = R.id.accessibility_action_qs_move_to_position;

@@ -30,6 +30,7 @@ import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.IHwBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -115,7 +116,7 @@ public final class BroadcastRadioService {
                     if (entry.getValue() == moduleId) {
                         Slogf.i(TAG, "service " + entry.getKey()
                                 + " died; removed RadioModule with ID " + moduleId);
-                        return;
+                        break;
                     }
                 }
             }
@@ -221,7 +222,7 @@ public final class BroadcastRadioService {
      *
      * @param pw The file to which BroadcastRadioService state is dumped.
      */
-    public void dumpInfo(android.util.IndentingPrintWriter pw) {
+    public void dumpInfo(IndentingPrintWriter pw) {
         synchronized (mLock) {
             pw.printf("Next module id available: %d\n", mNextModuleId);
             pw.printf("ServiceName to module id map:\n");

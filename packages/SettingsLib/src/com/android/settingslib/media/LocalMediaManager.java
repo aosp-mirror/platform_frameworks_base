@@ -570,7 +570,7 @@ public class LocalMediaManager implements BluetoothCallback {
                 final CachedBluetoothDevice cachedDevice =
                         cachedDeviceManager.findDevice(device);
                 if (isBondedMediaDevice(cachedDevice) && isMutingExpectedDevice(cachedDevice)) {
-                    return new BluetoothMediaDevice(mContext, cachedDevice, null);
+                    return new BluetoothMediaDevice(mContext, cachedDevice, null, /* item */ null);
                 }
             }
             return null;
@@ -617,7 +617,7 @@ public class LocalMediaManager implements BluetoothCallback {
             mDisconnectedMediaDevices.clear();
             for (CachedBluetoothDevice cachedDevice : cachedBluetoothDeviceList) {
                 final MediaDevice mediaDevice =
-                        new BluetoothMediaDevice(mContext, cachedDevice, null);
+                        new BluetoothMediaDevice(mContext, cachedDevice, null, /* item */ null);
                 if (!mMediaDevices.contains(mediaDevice)) {
                     cachedDevice.registerCallback(mDeviceAttributeChangeCallback);
                     mDisconnectedMediaDevices.add(mediaDevice);
@@ -634,7 +634,7 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         private boolean isMediaDevice(CachedBluetoothDevice device) {
-            for (LocalBluetoothProfile profile : device.getConnectableProfiles()) {
+            for (LocalBluetoothProfile profile : device.getUiAccessibleProfiles()) {
                 if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile ||
                         profile instanceof LeAudioProfile) {
                     return true;

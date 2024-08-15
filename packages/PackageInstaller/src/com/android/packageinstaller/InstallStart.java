@@ -125,13 +125,14 @@ public class InstallStart extends Activity {
                 -1, callingUid) == PackageManager.PERMISSION_GRANTED;
         boolean isSystemDownloadsProvider = PackageUtil.getSystemDownloadsProviderInfo(
                                                 mPackageManager, callingUid) != null;
-        boolean isTrustedSource = false;
-        if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
-            isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
-                callingUid != Process.INVALID_UID && checkPermission(
-                    Manifest.permission.INSTALL_PACKAGES, -1 /* pid */, callingUid)
-                    == PackageManager.PERMISSION_GRANTED);
-        }
+
+        boolean isPrivilegedAndKnown = (sourceInfo != null && sourceInfo.isPrivilegedApp()) &&
+            intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false);
+        boolean isInstallPkgPermissionGranted =
+            checkPermission(Manifest.permission.INSTALL_PACKAGES, /* pid= */ -1, callingUid)
+                    == PackageManager.PERMISSION_GRANTED;
+
+        boolean isTrustedSource = isPrivilegedAndKnown || isInstallPkgPermissionGranted;
 
         if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager
                 && callingUid != Process.INVALID_UID) {
@@ -154,7 +155,7 @@ public class InstallStart extends Activity {
             mAbortInstall = true;
         }
 
-        checkDevicePolicyRestrictions();
+        checkDevicePolicyRestrictions(isTrustedSource);
 
         final String installerPackageNameFromIntent = getIntent().getStringExtra(
                 Intent.EXTRA_INSTALLER_PACKAGE_NAME);
@@ -304,12 +305,17 @@ public class InstallStart extends Activity {
         return callingUid == installerUid;
     }
 
-    private void checkDevicePolicyRestrictions() {
-        final String[] restrictions = new String[] {
-            UserManager.DISALLOW_INSTALL_APPS,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
-        };
+    private void checkDevicePolicyRestrictions(boolean isTrustedSource) {
+        String[] restrictions;
+        if(isTrustedSource) {
+            restrictions = new String[] { UserManager.DISALLOW_INSTALL_APPS };
+        } else {
+            restrictions =  new String[] {
+                UserManager.DISALLOW_INSTALL_APPS,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+            };
+        }
 
         final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
         for (String restriction : restrictions) {

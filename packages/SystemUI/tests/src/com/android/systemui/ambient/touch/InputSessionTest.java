@@ -24,13 +24,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Choreographer;
 import android.view.GestureDetector;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations;
  * A test suite for exercising {@link InputSession}.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper()
 public class InputSessionTest extends SysuiTestCase {
     @Mock

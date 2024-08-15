@@ -26,9 +26,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
@@ -48,7 +48,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MediaDataCombineLatestTest extends SysuiTestCase {
 
@@ -79,7 +79,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
                 USER_ID, true, APP, null, ARTIST, TITLE, null,
                 new ArrayList<>(), new ArrayList<>(), null, PACKAGE, null, null, null, true, null,
                 MediaData.PLAYBACK_LOCAL, false, KEY, false, false, false, 0L, 0L,
-                InstanceId.fakeInstanceId(-1), -1, false, null);
+                InstanceId.fakeInstanceId(-1), -1, false, null, -1, false);
         mDeviceData = new MediaDeviceData(true, null, DEVICE_NAME, null, false);
     }
 

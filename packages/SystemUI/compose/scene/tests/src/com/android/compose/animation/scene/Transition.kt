@@ -17,6 +17,8 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
+import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -27,32 +29,51 @@ import kotlinx.coroutines.test.TestScope
 fun transition(
     from: SceneKey,
     to: SceneKey,
-    current: () -> SceneKey = { from },
+    current: () -> SceneKey = { to },
     progress: () -> Float = { 0f },
     progressVelocity: () -> Float = { 0f },
-    interruptionProgress: () -> Float = { 100f },
+    previewProgress: () -> Float = { 0f },
+    previewProgressVelocity: () -> Float = { 0f },
+    isInPreviewStage: () -> Boolean = { false },
+    interruptionProgress: () -> Float = { 0f },
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Boolean = false,
     isUpOrLeft: Boolean = false,
-    bouncingScene: SceneKey? = null,
+    bouncingContent: ContentKey? = null,
     orientation: Orientation = Orientation.Horizontal,
     onFinish: ((TransitionState.Transition) -> Job)? = null,
+    replacedTransition: TransitionState.Transition? = null,
 ): TransitionState.Transition {
-    return object : TransitionState.Transition(from, to), TransitionState.HasOverscrollProperties {
+    return object :
+        TransitionState.Transition(from, to, replacedTransition),
+        ContentState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
+
         override val progress: Float
             get() = progress()
+
         override val progressVelocity: Float
             get() = progressVelocity()
+
+        override val previewProgress: Float
+            get() = previewProgress()
+
+        override val previewProgressVelocity: Float
+            get() = previewProgressVelocity()
+
+        override val isInPreviewStage: Boolean
+            get() = isInPreviewStage()
 
         override val isInitiatedByUserInput: Boolean = isInitiatedByUserInput
         override val isUserInputOngoing: Boolean = isUserInputOngoing
         override val isUpOrLeft: Boolean = isUpOrLeft
-        override val bouncingScene: SceneKey? = bouncingScene
+        override val bouncingContent: ContentKey? = bouncingContent
         override val orientation: Orientation = orientation
         override val overscrollScope: OverscrollScope =
             object : OverscrollScope {
+                override val density: Float = 1f
+                override val fontScale: Float = 1f
                 override val absoluteDistance = 0f
             }
 

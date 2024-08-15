@@ -52,10 +52,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     // Populate the DynamicRefTable with fuzzed data
     populateDynamicRefTableWithFuzzedData(*dynamic_ref_table, fuzzedDataProvider);
-
-    auto tree = android::ResXMLTree(std::move(dynamic_ref_table));
-
     std::vector<uint8_t> xmlData = fuzzedDataProvider.ConsumeRemainingBytes<uint8_t>();
+
+    // Make sure the object here outlives the vector it's set to, otherwise it will try
+    // accessing an already freed buffer and crash.
+    auto tree = android::ResXMLTree(std::move(dynamic_ref_table));
     if (tree.setTo(xmlData.data(), xmlData.size()) != android::NO_ERROR) {
         return 0; // Exit early if unable to parse XML data
     }

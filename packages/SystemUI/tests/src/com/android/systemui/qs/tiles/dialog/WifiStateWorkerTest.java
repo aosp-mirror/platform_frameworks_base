@@ -35,8 +35,8 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.net.wifi.WifiManager;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -52,7 +52,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class WifiStateWorkerTest extends SysuiTestCase {
 

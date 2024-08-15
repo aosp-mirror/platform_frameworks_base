@@ -18,6 +18,9 @@ package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.getExitTransitionType;
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isExitDesktopModeTransition;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -30,6 +33,7 @@ import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowManager.TransitionType;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
@@ -38,6 +42,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.Cuj;
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
@@ -52,8 +59,10 @@ import java.util.function.Supplier;
  */
 public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionHandler {
     private static final int FULLSCREEN_ANIMATION_DURATION = 336;
+
     private final Context mContext;
     private final Transitions mTransitions;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
@@ -61,33 +70,38 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
     public ExitDesktopTaskTransitionHandler(
             Transitions transitions,
-            Context context) {
-        this(transitions, SurfaceControl.Transaction::new, context);
+            Context context,
+            InteractionJankMonitor interactionJankMonitor
+            ) {
+        this(transitions, SurfaceControl.Transaction::new, context, interactionJankMonitor);
     }
 
     private ExitDesktopTaskTransitionHandler(
             Transitions transitions,
             Supplier<SurfaceControl.Transaction> supplier,
-            Context context) {
+            Context context,
+            InteractionJankMonitor interactionJankMonitor) {
         mTransitions = transitions;
         mTransactionSupplier = supplier;
         mContext = context;
+        mInteractionJankMonitor = interactionJankMonitor;
     }
 
     /**
      * Starts Transition of a given type
      *
-     * @param type                   Transition type
+     * @param transitionSource       DesktopModeTransitionSource for transition
      * @param wct                    WindowContainerTransaction for transition
      * @param position               Position of the task when transition is started
      * @param onAnimationEndCallback to be called after animation
      */
-    public void startTransition(@WindowManager.TransitionType int type,
+    public void startTransition(@NonNull DesktopModeTransitionSource transitionSource,
             @NonNull WindowContainerTransaction wct, Point position,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
         mPosition = position;
         mOnAnimationFinishedCallback = onAnimationEndCallback;
-        final IBinder token = mTransitions.startTransition(type, wct, this);
+        final IBinder token = mTransitions.startTransition(getExitTransitionType(transitionSource),
+                wct, this);
         mPendingTransitionTokens.add(token);
     }
 
@@ -121,7 +135,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
     @VisibleForTesting
     boolean startChangeTransition(
             @NonNull IBinder transition,
-            @WindowManager.TransitionType int type,
+            @TransitionType int type,
             @NonNull TransitionInfo.Change change,
             @NonNull SurfaceControl.Transaction startT,
             @NonNull SurfaceControl.Transaction finishT,
@@ -130,7 +144,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             return false;
         }
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-        if (type == Transitions.TRANSIT_EXIT_DESKTOP_MODE
+        if (isExitDesktopModeTransition(type)
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
             // This Transition animates a task to fullscreen after being dragged to status bar
             final Resources resources = mContext.getResources();
@@ -139,6 +153,8 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             final int screenHeight = metrics.heightPixels;
             final SurfaceControl sc = change.getLeash();
             final Rect endBounds = change.getEndAbsBounds();
+            mInteractionJankMonitor
+                .begin(sc, mContext, Cuj.CUJ_DESKTOP_MODE_EXIT_MODE);
             // Hide the first (fullscreen) frame because the animation will start from the freeform
             // size.
             startT.hide(sc)
@@ -168,6 +184,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                     if (mOnAnimationFinishedCallback != null) {
                         mOnAnimationFinishedCallback.accept(finishT);
                     }
+                    mInteractionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_EXIT_MODE);
                     mTransitions.getMainExecutor().execute(
                             () -> finishCallback.onTransitionFinished(null));
                 }

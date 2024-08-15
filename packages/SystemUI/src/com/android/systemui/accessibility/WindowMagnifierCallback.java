@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility;
 
+import static com.android.systemui.accessibility.WindowMagnificationSettings.MagnificationSize;
+
 import android.graphics.Rect;
 
 /**
@@ -68,4 +70,9 @@ interface WindowMagnifierCallback {
      * @param displayId The logical display id.
      */
     void onClickSettingsButton(int displayId);
+
+    /**
+     * Called when restoring the magnification window size.
+     */
+    void onWindowMagnifierBoundsRestored(int displayId, @MagnificationSize int index);
 }

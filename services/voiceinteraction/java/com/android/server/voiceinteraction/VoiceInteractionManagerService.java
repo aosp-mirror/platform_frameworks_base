@@ -794,8 +794,9 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (curService != null && !curService.isEmpty()) {
                     try {
                         serviceComponent = ComponentName.unflattenFromString(curService);
-                        serviceInfo = getValidVoiceInteractionServiceInfo(serviceComponent);
-                    } catch (RuntimeException e) {
+                        serviceInfo = AppGlobals.getPackageManager()
+                                .getServiceInfo(serviceComponent, 0, mCurUser);
+                    } catch (RuntimeException | RemoteException e) {
                         Slog.wtf(TAG, "Bad voice interaction service name " + curService, e);
                         serviceComponent = null;
                         serviceInfo = null;
@@ -831,27 +832,6 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 }
             }
-        }
-
-        @Nullable
-        private ServiceInfo getValidVoiceInteractionServiceInfo(
-                @Nullable ComponentName serviceComponent) {
-            if (serviceComponent == null) {
-                return null;
-            }
-            List<ResolveInfo> services = queryInteractorServices(
-                    mCurUser, serviceComponent.getPackageName());
-            for (int i = 0; i < services.size(); i++) {
-                ResolveInfo service = services.get(i);
-                VoiceInteractionServiceInfo info = new VoiceInteractionServiceInfo(
-                        mContext.getPackageManager(), service.serviceInfo);
-                ServiceInfo candidateInfo = info.getServiceInfo();
-                if (candidateInfo != null
-                        && candidateInfo.getComponentName().equals(serviceComponent)) {
-                    return candidateInfo;
-                }
-            }
-            return null;
         }
 
         private List<ResolveInfo> queryInteractorServices(
@@ -1075,15 +1055,22 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (sessionArgs != null && sessionArgs.containsKey(csKey)) {
                     if (sessionArgs.getBoolean(csEnabledKey, true)) {
                         // If Contextual Search is enabled, try to follow that path.
-                        Intent launchIntent = getContextualSearchIntent(sessionArgs);
+                        Intent launchIntent;
+                        final long getSearchIntentCaller = Binder.clearCallingIdentity();
+                        try {
+                            launchIntent = getContextualSearchIntent(sessionArgs);
+                        } finally {
+                            Binder.restoreCallingIdentity(getSearchIntentCaller);
+                        }
                         if (launchIntent != null) {
                             // Hand over to contextual search helper.
                             Slog.d(TAG, "Handed over to contextual search helper.");
-                            final long caller = Binder.clearCallingIdentity();
+                            final int userId = Binder.getCallingUserHandle().getIdentifier();
+                            final long startSearchCaller = Binder.clearCallingIdentity();
                             try {
-                                return startContextualSearch(launchIntent);
+                                return startContextualSearch(launchIntent, userId);
                             } finally {
-                                Binder.restoreCallingIdentity(caller);
+                                Binder.restoreCallingIdentity(startSearchCaller);
                             }
                         }
                     }
@@ -2781,7 +2768,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
-        private boolean startContextualSearch(Intent launchIntent) {
+        private boolean startContextualSearch(Intent launchIntent, final int userId) {
             // Contextual search starts with a frozen screen - so we launch without
             // any system animations or starting window.
             final ActivityOptions opts = ActivityOptions.makeCustomTaskAnimation(mContext,
@@ -2789,7 +2776,7 @@ public class VoiceInteractionManagerService extends SystemService {
             opts.setDisableStartingWindow(true);
             int resultCode = mAtmInternal.startActivityWithScreenshot(launchIntent,
                     mContext.getPackageName(), Binder.getCallingUid(), Binder.getCallingPid(), null,
-                    opts.toBundle(), Binder.getCallingUserHandle().getIdentifier());
+                    opts.toBundle(), userId);
             return resultCode == ActivityManager.START_SUCCESS;
         }
 

@@ -24,5 +24,5 @@ import android.content.Intent;
  */
 oneway interface IUnsafeIntentStrictModeCallback
 {
-    void onImplicitIntentMatchedInternalComponent(in Intent intent);
+    void onUnsafeIntent(int type, in Intent intent);
 }

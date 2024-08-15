@@ -418,6 +418,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_HARD_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.VIBRATE_FOR_ACTIVE_UNLOCK, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
@@ -444,7 +445,6 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.TETHERED_CONFIG_TETHERED),
                                 String.valueOf(Global.Wearable.TETHERED_CONFIG_RESTRICTED)
                         }));
-        VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_SUPPORTED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WEAR_LAUNCHER_UI_MODE, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WEAR_POWER_ANOMALY_SERVICE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.CONNECTIVITY_KEEP_DATA_ON, BOOLEAN_VALIDATOR);
@@ -456,5 +456,10 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.ADD_USERS_WHEN_LOCKED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.REMOVE_GUEST_ON_EXIT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.USER_SWITCHER_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE,
+            new InclusiveIntegerRangeValidator(
+                Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_NONE,
+                Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_COMPANION
+        ));
     }
 }

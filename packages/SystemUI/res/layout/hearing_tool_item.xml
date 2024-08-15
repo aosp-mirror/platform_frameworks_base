@@ -20,7 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
+    android:gravity="top|center_horizontal"
     android:focusable="true"
     android:clickable="true"
     android:layout_weight="1">
@@ -46,8 +46,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/hearing_devices_layout_margin"
         android:ellipsize="end"
-        android:maxLines="1"
         android:textSize="12sp"
+        android:maxLines="3"
         android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
         android:focusable="false" />
 </LinearLayout>

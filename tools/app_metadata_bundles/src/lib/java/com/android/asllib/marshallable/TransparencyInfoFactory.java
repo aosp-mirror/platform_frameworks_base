@@ -16,60 +16,83 @@
 
 package com.android.asllib.marshallable;
 
-import com.android.asllib.util.AslgenUtil;
 import com.android.asllib.util.MalformedXmlException;
 import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Element;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class TransparencyInfoFactory implements AslMarshallableFactory<TransparencyInfo> {
+    private final Map<Long, Set<String>> mRecognizedHrAttrs =
+            Map.ofEntries(Map.entry(1L, Set.of()));
+    private final Map<Long, Set<String>> mRequiredHrAttrs = Map.ofEntries(Map.entry(1L, Set.of()));
+    private final Map<Long, Set<String>> mRecognizedHrEles =
+            Map.ofEntries(
+                    Map.entry(1L, Set.of(XmlUtils.HR_TAG_DEVELOPER_INFO, XmlUtils.HR_TAG_APP_INFO)),
+                    Map.entry(2L, Set.of(XmlUtils.HR_TAG_APP_INFO)));
+    private final Map<Long, Set<String>> mRequiredHrEles =
+            Map.ofEntries(Map.entry(1L, Set.of()), Map.entry(2L, Set.of(XmlUtils.HR_TAG_APP_INFO)));
+    private final Map<Long, Set<String>> mRecognizedOdEleNames =
+            Map.ofEntries(
+                    Map.entry(
+                            1L, Set.of(XmlUtils.OD_NAME_DEVELOPER_INFO, XmlUtils.OD_NAME_APP_INFO)),
+                    Map.entry(2L, Set.of(XmlUtils.OD_NAME_APP_INFO)));
+    private final Map<Long, Set<String>> mRequiredOdEles =
+            Map.ofEntries(
+                    Map.entry(1L, Set.of()), Map.entry(2L, Set.of(XmlUtils.OD_NAME_APP_INFO)));
 
     /** Creates a {@link TransparencyInfo} from the human-readable DOM element. */
-    @Override
-    public TransparencyInfo createFromHrElements(List<Element> elements)
+    public TransparencyInfo createFromHrElement(Element transparencyInfoEle, long version)
             throws MalformedXmlException {
-        Element transparencyInfoEle = XmlUtils.getSingleElement(elements);
         if (transparencyInfoEle == null) {
-            AslgenUtil.logI("No TransparencyInfo found in hr format.");
             return null;
         }
+        XmlUtils.throwIfExtraneousAttributes(
+                transparencyInfoEle, XmlUtils.getMostRecentVersion(mRecognizedHrAttrs, version));
+        XmlUtils.throwIfExtraneousChildrenHr(
+                transparencyInfoEle, XmlUtils.getMostRecentVersion(mRecognizedHrEles, version));
 
         Element developerInfoEle =
                 XmlUtils.getSingleChildElement(
-                        transparencyInfoEle, XmlUtils.HR_TAG_DEVELOPER_INFO, false);
+                        transparencyInfoEle,
+                        XmlUtils.HR_TAG_DEVELOPER_INFO,
+                        XmlUtils.getMostRecentVersion(mRequiredHrEles, version));
         DeveloperInfo developerInfo =
-                new DeveloperInfoFactory().createFromHrElements(XmlUtils.listOf(developerInfoEle));
-
+                new DeveloperInfoFactory().createFromHrElement(developerInfoEle);
         Element appInfoEle =
                 XmlUtils.getSingleChildElement(
-                        transparencyInfoEle, XmlUtils.HR_TAG_APP_INFO, false);
-        AppInfo appInfo = new AppInfoFactory().createFromHrElements(XmlUtils.listOf(appInfoEle));
+                        transparencyInfoEle,
+                        XmlUtils.HR_TAG_APP_INFO,
+                        XmlUtils.getMostRecentVersion(mRequiredHrEles, version));
+        AppInfo appInfo = new AppInfoFactory().createFromHrElement(appInfoEle, version);
 
         return new TransparencyInfo(developerInfo, appInfo);
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    @Override
-    public TransparencyInfo createFromOdElements(List<Element> elements)
+    public TransparencyInfo createFromOdElement(Element transparencyInfoEle, long version)
             throws MalformedXmlException {
-        Element transparencyInfoEle = XmlUtils.getSingleElement(elements);
         if (transparencyInfoEle == null) {
-            AslgenUtil.logI("No TransparencyInfo found in od format.");
             return null;
         }
+        XmlUtils.throwIfExtraneousChildrenOd(
+                transparencyInfoEle, XmlUtils.getMostRecentVersion(mRecognizedOdEleNames, version));
 
         Element developerInfoEle =
                 XmlUtils.getOdPbundleWithName(
-                        transparencyInfoEle, XmlUtils.OD_NAME_DEVELOPER_INFO, false);
+                        transparencyInfoEle,
+                        XmlUtils.OD_NAME_DEVELOPER_INFO,
+                        XmlUtils.getMostRecentVersion(mRequiredOdEles, version));
         DeveloperInfo developerInfo =
-                new DeveloperInfoFactory().createFromOdElements(XmlUtils.listOf(developerInfoEle));
-
+                new DeveloperInfoFactory().createFromOdElement(developerInfoEle);
         Element appInfoEle =
                 XmlUtils.getOdPbundleWithName(
-                        transparencyInfoEle, XmlUtils.OD_NAME_APP_INFO, false);
-        AppInfo appInfo = new AppInfoFactory().createFromOdElements(XmlUtils.listOf(appInfoEle));
+                        transparencyInfoEle,
+                        XmlUtils.OD_NAME_APP_INFO,
+                        XmlUtils.getMostRecentVersion(mRequiredOdEles, version));
+        AppInfo appInfo = new AppInfoFactory().createFromOdElement(appInfoEle, version);
 
         return new TransparencyInfo(developerInfo, appInfo);
     }

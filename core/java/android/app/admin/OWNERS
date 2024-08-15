@@ -1,7 +1,6 @@
 # Bug component: 142675
 # Assign bugs to device-policy-manager-triage@google.com
 
-file:WorkDeviceExperience_OWNERS
 file:EnterprisePlatformSecurity_OWNERS
 
 yamasani@google.com #{LAST_RESORT_SUGGESTION}

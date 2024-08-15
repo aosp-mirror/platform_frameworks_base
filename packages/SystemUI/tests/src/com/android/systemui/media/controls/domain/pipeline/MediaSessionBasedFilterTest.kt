@@ -20,8 +20,8 @@ import android.media.session.MediaController
 import android.media.session.MediaController.PlaybackInfo
 import android.media.session.MediaSession
 import android.media.session.MediaSessionManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.MediaTestUtils
@@ -53,7 +53,7 @@ private val info =
     MediaTestUtils.emptyMediaData.copy(packageName = PACKAGE, notificationKey = NOTIF_KEY)
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 public class MediaSessionBasedFilterTest : SysuiTestCase() {
 

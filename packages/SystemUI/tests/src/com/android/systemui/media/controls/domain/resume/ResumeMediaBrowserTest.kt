@@ -23,8 +23,8 @@ import android.media.browse.MediaBrowser
 import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.service.media.MediaBrowserService
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
@@ -53,7 +53,7 @@ private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> any(): T = Mockito.any<T>()
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 public class ResumeMediaBrowserTest : SysuiTestCase() {
 

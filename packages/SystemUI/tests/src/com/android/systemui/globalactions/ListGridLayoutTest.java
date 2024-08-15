@@ -18,11 +18,11 @@ package com.android.systemui.globalactions;
 
 import static junit.framework.Assert.assertEquals;
 
-import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
  * Tests for {@link ListGridLayout}.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ListGridLayoutTest extends SysuiTestCase {
 
     private ListGridLayout mListGridLayout;

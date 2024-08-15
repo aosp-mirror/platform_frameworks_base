@@ -19,7 +19,6 @@ package com.android.wm.shell.onehanded;
 import static android.os.UserHandle.myUserId;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ACTIVE;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ENTERING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_EXITING;

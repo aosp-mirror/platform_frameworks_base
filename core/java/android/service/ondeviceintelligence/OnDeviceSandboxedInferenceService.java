@@ -51,6 +51,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
@@ -98,6 +99,11 @@ import java.util.function.Consumer;
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
 public abstract class OnDeviceSandboxedInferenceService extends Service {
     private static final String TAG = OnDeviceSandboxedInferenceService.class.getSimpleName();
+
+    /**
+     * @hide
+     */
+    public static final String INFERENCE_INFO_BUNDLE_KEY = "inference_info";
 
     /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
@@ -148,9 +154,12 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return new IOnDeviceSandboxedInferenceService.Stub() {
                 @Override
-                public void registerRemoteStorageService(IRemoteStorageService storageService) {
+                public void registerRemoteStorageService(IRemoteStorageService storageService,
+                        IRemoteCallback remoteCallback) throws RemoteException {
                     Objects.requireNonNull(storageService);
                     mRemoteStorageService = storageService;
+                    remoteCallback.sendResult(
+                            Bundle.EMPTY); //to notify caller uid to system-server.
                 }
 
                 @Override

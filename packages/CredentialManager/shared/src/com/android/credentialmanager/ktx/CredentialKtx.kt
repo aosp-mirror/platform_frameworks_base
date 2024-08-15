@@ -27,6 +27,7 @@ import android.credentials.selection.AuthenticationEntry
 import android.credentials.selection.Entry
 import android.credentials.selection.GetCredentialProviderData
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import androidx.activity.result.IntentSenderRequest
@@ -227,26 +228,31 @@ private fun getCredentialOptionInfoList(
  * and get flows utilize slice params; includes the final '.' before the name of the type (e.g.
  * androidx.credentials.provider.credentialEntry.SLICE_HINT_ALLOWED_AUTHENTICATORS must have
  * 'hintPrefix' up to "androidx.credentials.provider.credentialEntry.")
- * // TODO(b/326243754) : Presently, due to dependencies, the opId bit is parsed but is never
- * // expected to be used. When it is added, it should be lightly validated.
  */
 fun retrieveEntryBiometricRequest(
     entry: Entry,
-    hintPrefix: String,
+    hintPrefix: String
 ): BiometricRequestInfo? {
-    // TODO(b/326243754) : When available, use the official jetpack structured type
-    val allowedAuthenticators: Int? = entry.slice.items.firstOrNull {
-        it.hasHint(hintPrefix + "SLICE_HINT_ALLOWED_AUTHENTICATORS")
-    }?.int
+    // TODO(b/326243754) : When available, use the official jetpack structured typLo
+    val biometricPromptDataBundleKey = "SLICE_HINT_BIOMETRIC_PROMPT_DATA"
+    val biometricPromptDataBundle: Bundle = entry.slice.items.firstOrNull {
+        it.hasHint(hintPrefix + biometricPromptDataBundleKey)
+    }?.bundle ?: return null
+
+    val allowedAuthConstantKey = "androidx.credentials.provider.BUNDLE_HINT_ALLOWED_AUTHENTICATORS"
+    val cryptoOpIdKey = "androidx.credentials.provider.BUNDLE_HINT_CRYPTO_OP_ID"
+
+    if (!biometricPromptDataBundle.containsKey(allowedAuthConstantKey)) {
+        return null
+    }
+
+    val allowedAuthenticators: Int = biometricPromptDataBundle.getInt(allowedAuthConstantKey)
 
     // This is optional and does not affect validating the biometric flow in any case
-    val opId: Int? = entry.slice.items.firstOrNull {
-        it.hasHint(hintPrefix + "SLICE_HINT_CRYPTO_OP_ID")
-    }?.int
-    if (allowedAuthenticators != null) {
-        return BiometricRequestInfo(opId = opId, allowedAuthenticators = allowedAuthenticators)
-    }
-    return null
+    val opId: Long? = if (biometricPromptDataBundle.containsKey(cryptoOpIdKey))
+        biometricPromptDataBundle.getLong(cryptoOpIdKey) else null
+
+    return BiometricRequestInfo(opId = opId, allowedAuthenticators = allowedAuthenticators)
 }
 
 val Slice.credentialEntry: CredentialEntry?

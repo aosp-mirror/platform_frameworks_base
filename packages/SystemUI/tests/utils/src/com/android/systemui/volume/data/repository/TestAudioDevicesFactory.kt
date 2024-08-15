@@ -33,19 +33,22 @@ object TestAudioDevicesFactory {
         )
     }
 
-    fun wiredDevice(deviceName: String = "wired"): AudioDeviceInfo {
+    fun wiredDevice(
+        deviceName: String = "wired",
+        deviceAddress: String = "card=1;device=0",
+    ): AudioDeviceInfo {
         return AudioDeviceInfo(
             AudioDevicePort.createForTesting(
                 AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
                 deviceName,
-                "",
+                deviceAddress,
             )
         )
     }
 
     fun bluetoothDevice(
         deviceName: String = "bt",
-        deviceAddress: String = "test_address",
+        deviceAddress: String = "00:43:A8:23:10:F0",
     ): AudioDeviceInfo {
         return AudioDeviceInfo(
             AudioDevicePort.createForTesting(

@@ -20,11 +20,8 @@ import android.content.applicationContext
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.volume.domain.interactor.audioModeInteractor
-import com.android.systemui.volume.domain.interactor.audioOutputInteractor
-import com.android.systemui.volume.mediaDeviceSessionInteractor
 import com.android.systemui.volume.mediaOutputActionsInteractor
-import com.android.systemui.volume.mediaOutputInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.mediaOutputComponentInteractor
 
 var Kosmos.mediaOutputViewModel by
     Kosmos.Fixture {
@@ -32,10 +29,7 @@ var Kosmos.mediaOutputViewModel by
             applicationContext,
             testScope.backgroundScope,
             mediaOutputActionsInteractor,
-            mediaDeviceSessionInteractor,
-            audioOutputInteractor,
-            audioModeInteractor,
-            mediaOutputInteractor,
+            mediaOutputComponentInteractor,
             uiEventLogger,
         )
     }

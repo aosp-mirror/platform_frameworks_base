@@ -27,10 +27,10 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -58,7 +58,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class RotationLockTileTest extends SysuiTestCase {

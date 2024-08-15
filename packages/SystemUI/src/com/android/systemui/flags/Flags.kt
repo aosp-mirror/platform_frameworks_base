@@ -60,14 +60,6 @@ object Flags {
             "notification_drag_to_contents"
         )
 
-    /**
-     * This flag controls whether we register a listener for StatsD notification memory reports.
-     * For statsd to actually call the listener however, a server-side toggle needs to be
-     * enabled as well.
-     */
-    val NOTIFICATION_MEMORY_LOGGING_ENABLED =
-            releasedFlag("notification_memory_logging_enabled")
-
     // TODO(b/280783617): Tracking Bug
     @Keep
     @JvmField
@@ -145,12 +137,6 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField val WALLPAPER_PICKER_UI_FOR_AIWP = releasedFlag("wallpaper_picker_ui_for_aiwp")
 
-    /** Whether to allow long-press on the lock screen to directly open wallpaper picker. */
-    // TODO(b/277220285): Tracking bug.
-    @JvmField
-    val LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP =
-        unreleasedFlag("lock_screen_long_press_directly_opens_wallpaper_picker")
-
     /** Whether page transition animations in the wallpaper picker are enabled */
     // TODO(b/291710220): Tracking bug.
     @JvmField
@@ -165,9 +151,6 @@ object Flags {
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
     @JvmField val KEYGUARD_TALKBACK_FIX = unreleasedFlag("keyguard_talkback_fix")
-
-    // TODO(b/287268101): Tracking bug.
-    @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
 
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
@@ -306,15 +289,6 @@ object Flags {
     val WM_ENABLE_SHELL_TRANSITIONS =
         sysPropBooleanFlag("persist.wm.debug.shell_transit", default = true)
 
-    // TODO(b/254513207): Tracking Bug
-    @Keep
-    @JvmField
-    val WM_ENABLE_PARTIAL_SCREEN_SHARING =
-        releasedFlag(
-            name = "enable_record_task_content",
-            namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-        )
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep
@@ -385,9 +359,6 @@ object Flags {
     @JvmField
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag("warn_on_blocking_binder_transactions")
-
-    // TODO:(b/283203305): Tracking bug
-    @JvmField val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag("trim_font_caches_on_unlock")
 
     // TODO(b/298380520): Tracking Bug
     @JvmField

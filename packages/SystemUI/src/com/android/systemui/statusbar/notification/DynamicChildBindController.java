@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_CONTRACTED;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_EXPANDED;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
 
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;

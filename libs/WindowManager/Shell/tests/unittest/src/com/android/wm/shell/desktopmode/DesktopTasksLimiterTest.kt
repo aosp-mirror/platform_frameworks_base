@@ -24,19 +24,23 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.WindowContainerTransaction
+import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
-import com.android.wm.shell.shared.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.StubTransaction
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertFailsWith
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -45,6 +49,8 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.mockito.quality.Strictness
 
 
@@ -63,6 +69,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
     @Mock lateinit var transitions: Transitions
+    @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
@@ -76,8 +83,9 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
         desktopTaskRepo = DesktopModeTaskRepository()
 
-        desktopTasksLimiter = DesktopTasksLimiter(
-                transitions, desktopTaskRepo, shellTaskOrganizer)
+        desktopTasksLimiter =
+            DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT,
+                interactionJankMonitor, mContext)
     }
 
     @After
@@ -85,12 +93,20 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         mockitoSession.finishMocking()
     }
 
-    // Currently, the task limit can be overridden through an adb flag. This test ensures the limit
-    // hasn't been overridden.
     @Test
-    fun getMaxTaskLimit_isSameAsConstant() {
-        assertThat(desktopTasksLimiter.getMaxTaskLimit()).isEqualTo(
-            DesktopModeStatus.DEFAULT_MAX_TASK_LIMIT)
+    fun createDesktopTasksLimiter_withZeroLimit_shouldThrow() {
+        assertFailsWith<IllegalArgumentException> {
+            DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, 0,
+                interactionJankMonitor, mContext)
+        }
+    }
+
+    @Test
+    fun createDesktopTasksLimiter_withNegativeLimit_shouldThrow() {
+        assertFailsWith<IllegalArgumentException> {
+            DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, -5,
+                interactionJankMonitor, mContext)
+        }
     }
 
     @Test
@@ -205,9 +221,48 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     @Test
+    fun removeLeftoverMinimizedTasks_activeNonMinimizedTasksStillAround_doesNothing() {
+        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
+        desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+
+        val wct = WindowContainerTransaction()
+        desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
+            DEFAULT_DISPLAY, wct)
+
+        assertThat(wct.isEmpty).isTrue()
+    }
+
+    @Test
+    fun removeLeftoverMinimizedTasks_noMinimizedTasks_doesNothing() {
+        val wct = WindowContainerTransaction()
+        desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
+            DEFAULT_DISPLAY, wct)
+
+        assertThat(wct.isEmpty).isTrue()
+    }
+
+    @Test
+    fun removeLeftoverMinimizedTasks_onlyMinimizedTasksLeft_removesAllMinimizedTasks() {
+        val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+
+        val wct = WindowContainerTransaction()
+        desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
+            DEFAULT_DISPLAY, wct)
+
+        assertThat(wct.hierarchyOps).hasSize(2)
+        assertThat(wct.hierarchyOps[0].type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
+        assertThat(wct.hierarchyOps[0].container).isEqualTo(task1.token.asBinder())
+        assertThat(wct.hierarchyOps[1].type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
+        assertThat(wct.hierarchyOps[1].container).isEqualTo(task2.token.asBinder())
+    }
+
+    @Test
     fun addAndGetMinimizeTaskChangesIfNeeded_tasksWithinLimit_noTaskMinimized() {
-        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-        (1..<taskLimit).forEach { _ -> setUpFreeformTask() }
+        (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
 
         val wct = WindowContainerTransaction()
         val minimizedTaskId =
@@ -222,9 +277,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun addAndGetMinimizeTaskChangesIfNeeded_tasksAboveLimit_backTaskMinimized() {
-        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
         // The following list will be ordered bottom -> top, as the last task is moved to top last.
-        val tasks = (1..taskLimit).map { setUpFreeformTask() }
+        val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
         val wct = WindowContainerTransaction()
         val minimizedTaskId =
@@ -241,8 +295,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun addAndGetMinimizeTaskChangesIfNeeded_nonMinimizedTasksWithinLimit_noTaskMinimized() {
-        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-        val tasks = (1..taskLimit).map { setUpFreeformTask() }
+        val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
         desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = tasks[0].taskId)
 
         val wct = WindowContainerTransaction()
@@ -258,8 +311,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getTaskToMinimizeIfNeeded_tasksWithinLimit_returnsNull() {
-        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-        val tasks = (1..taskLimit).map { setUpFreeformTask() }
+        val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
         val minimizedTask = desktopTasksLimiter.getTaskToMinimizeIfNeeded(
                 visibleFreeformTaskIdsOrderedFrontToBack = tasks.map { it.taskId })
@@ -269,8 +321,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getTaskToMinimizeIfNeeded_tasksAboveLimit_returnsBackTask() {
-        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-        val tasks = (1..taskLimit + 1).map { setUpFreeformTask() }
+        val tasks = (1..MAX_TASK_LIMIT + 1).map { setUpFreeformTask() }
 
         val minimizedTask = desktopTasksLimiter.getTaskToMinimizeIfNeeded(
                 visibleFreeformTaskIdsOrderedFrontToBack = tasks.map { it.taskId })
@@ -280,9 +331,22 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     @Test
+    fun getTaskToMinimizeIfNeeded_tasksAboveLimit_otherLimit_returnsBackTask() {
+        desktopTasksLimiter =
+            DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT2,
+                interactionJankMonitor, mContext)
+        val tasks = (1..MAX_TASK_LIMIT2 + 1).map { setUpFreeformTask() }
+
+        val minimizedTask = desktopTasksLimiter.getTaskToMinimizeIfNeeded(
+            visibleFreeformTaskIdsOrderedFrontToBack = tasks.map { it.taskId })
+
+        // first == front, last == back
+        assertThat(minimizedTask).isEqualTo(tasks.last())
+    }
+
+    @Test
     fun getTaskToMinimizeIfNeeded_withNewTask_tasksAboveLimit_returnsBackTask() {
-        val taskLimit = desktopTasksLimiter.getMaxTaskLimit()
-        val tasks = (1..taskLimit).map { setUpFreeformTask() }
+        val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
         val minimizedTask = desktopTasksLimiter.getTaskToMinimizeIfNeeded(
                 visibleFreeformTaskIdsOrderedFrontToBack = tasks.map { it.taskId },
@@ -290,6 +354,91 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
         // first == front, last == back
         assertThat(minimizedTask).isEqualTo(tasks.last())
+    }
+
+    @Test
+    fun minimizeTransitionReadyAndFinished_logsJankInstrumentationBeginAndEnd() {
+        (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
+        val transition = Binder()
+        val task = setUpFreeformTask()
+        desktopTasksLimiter.addPendingMinimizeChange(
+            transition, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionReady(
+            transition,
+            TransitionInfoBuilder(TRANSIT_OPEN).build(),
+            StubTransaction() /* startTransaction */,
+            StubTransaction() /* finishTransaction */)
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionStarting(transition)
+
+        verify(interactionJankMonitor).begin(
+            any(),
+            eq(mContext),
+            eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionFinished(
+            transition,
+            /* aborted = */ false)
+
+        verify(interactionJankMonitor).end(eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
+    }
+
+    @Test
+    fun minimizeTransitionReadyAndAborted_logsJankInstrumentationBeginAndCancel() {
+        (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
+        val transition = Binder()
+        val task = setUpFreeformTask()
+        desktopTasksLimiter.addPendingMinimizeChange(
+            transition, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionReady(
+            transition,
+            TransitionInfoBuilder(TRANSIT_OPEN).build(),
+            StubTransaction() /* startTransaction */,
+            StubTransaction() /* finishTransaction */)
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionStarting(transition)
+
+        verify(interactionJankMonitor).begin(
+            any(),
+            eq(mContext),
+            eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionFinished(
+            transition,
+            /* aborted = */ true)
+
+        verify(interactionJankMonitor).cancel(eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
+    }
+
+    @Test
+    fun minimizeTransitionReadyAndMerged_logsJankInstrumentationBeginAndEnd() {
+        (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
+        val mergedTransition = Binder()
+        val newTransition = Binder()
+        val task = setUpFreeformTask()
+        desktopTasksLimiter.addPendingMinimizeChange(
+            mergedTransition, displayId = DEFAULT_DISPLAY, taskId = task.taskId)
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionReady(
+            mergedTransition,
+            TransitionInfoBuilder(TRANSIT_OPEN).build(),
+            StubTransaction() /* startTransaction */,
+            StubTransaction() /* finishTransaction */)
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionStarting(mergedTransition)
+
+        verify(interactionJankMonitor).begin(
+            any(),
+            eq(mContext),
+            eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
+
+        desktopTasksLimiter.getTransitionObserver().onTransitionMerged(
+            mergedTransition,
+            newTransition)
+
+        verify(interactionJankMonitor).end(eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
     }
 
     private fun setUpFreeformTask(
@@ -303,7 +452,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     private fun markTaskVisible(task: RunningTaskInfo) {
-        desktopTaskRepo.updateVisibleFreeformTasks(
+        desktopTaskRepo.updateTaskVisibility(
                 task.displayId,
                 task.taskId,
                 visible = true
@@ -311,10 +460,15 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     private fun markTaskHidden(task: RunningTaskInfo) {
-        desktopTaskRepo.updateVisibleFreeformTasks(
+        desktopTaskRepo.updateTaskVisibility(
                 task.displayId,
                 task.taskId,
                 visible = false
         )
+    }
+
+    private companion object {
+        const val MAX_TASK_LIMIT = 6
+        const val MAX_TASK_LIMIT2 = 9
     }
 }

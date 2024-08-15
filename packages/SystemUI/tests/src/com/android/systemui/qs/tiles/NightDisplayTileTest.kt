@@ -19,8 +19,8 @@ package com.android.systemui.qs.tiles
 import android.hardware.display.ColorDisplayManager
 import android.hardware.display.NightDisplayListener
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
@@ -45,7 +45,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class NightDisplayTileTest : SysuiTestCase() {

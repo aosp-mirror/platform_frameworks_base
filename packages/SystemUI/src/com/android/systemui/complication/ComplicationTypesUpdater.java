@@ -69,15 +69,15 @@ public class ComplicationTypesUpdater extends ConditionalCoreStartable {
             }
         };
 
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED,
                 settingsObserver,
                 UserHandle.myUserId());
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
                 settingsObserver,
                 UserHandle.myUserId());
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
                 settingsObserver,
                 UserHandle.myUserId());

@@ -229,6 +229,13 @@ enum DebugLevel {
 
 #define PROPERTY_8BIT_HDR_HEADROOM "debug.hwui.8bit_hdr_headroom"
 
+/**
+ * Whether to initialize GL even when HWUI is running Vulkan.
+ */
+#define PROPERTY_INITIALIZE_GL_ALWAYS "debug.hwui.initialize_gl_always"
+
+#define PROPERTY_SKIP_EGLMANAGER_TELEMETRY "debug.hwui.skip_eglmanager_telemetry"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -337,6 +344,10 @@ public:
 
     static bool clipSurfaceViews;
     static bool hdr10bitPlus;
+    static bool skipTelemetry;
+    static bool resampleGainmapRegions;
+
+    static int timeoutMultiplier;
 
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;
@@ -367,6 +378,8 @@ public:
     static DrawingEnabled drawingEnabled;
     static bool isDrawingEnabled();
     static void setDrawingEnabled(bool enable);
+
+    static bool initializeGlAlways();
 
 private:
     static StretchEffectBehavior stretchEffectBehavior;

@@ -192,5 +192,14 @@ void zygote_preload_graphics() {
         // Preload Vulkan driver if HWUI renders with Vulkan backend.
         uint32_t apiVersion;
         vkEnumerateInstanceVersion(&apiVersion);
+
+        if (Properties::initializeGlAlways()) {
+            // Even though HWUI is rendering with Vulkan, some apps still use
+            // GL. Preload GL driver just in case. Since this happens prior to
+            // forking from the zygote, apps that do not use GL are unaffected.
+            // Any memory that (E)GL uses for this call is in shared memory,
+            // and this call only happens once.
+            eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        }
     }
 }

@@ -18,10 +18,7 @@ import com.android.systemui.navigationbar.gestural.BackPanelController.DelayedOn
 private const val TAG = "BackPanel"
 private const val DEBUG = false
 
-class BackPanel(
-        context: Context,
-        private val latencyTracker: LatencyTracker
-) : View(context) {
+class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : View(context) {
 
     var arrowsPointLeft = false
         set(value) {
@@ -42,39 +39,39 @@ class BackPanel(
     // True if the panel is currently on the left of the screen
     var isLeftPanel = false
 
-    /**
-     * Used to track back arrow latency from [android.view.MotionEvent.ACTION_DOWN] to [onDraw]
-     */
+    /** Used to track back arrow latency from [android.view.MotionEvent.ACTION_DOWN] to [onDraw] */
     private var trackingBackArrowLatency = false
 
-    /**
-     * The length of the arrow measured horizontally. Used for animating [arrowPath]
-     */
-    private var arrowLength = AnimatedFloat(
+    /** The length of the arrow measured horizontally. Used for animating [arrowPath] */
+    private var arrowLength =
+        AnimatedFloat(
             name = "arrowLength",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS
-    )
+        )
 
     /**
      * The height of the arrow measured vertically from its center to its top (i.e. half the total
      * height). Used for animating [arrowPath]
      */
-    var arrowHeight = AnimatedFloat(
+    var arrowHeight =
+        AnimatedFloat(
             name = "arrowHeight",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ROTATION_DEGREES
-    )
+        )
 
-    val backgroundWidth = AnimatedFloat(
+    val backgroundWidth =
+        AnimatedFloat(
             name = "backgroundWidth",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS,
             minimumValue = 0f,
-    )
+        )
 
-    val backgroundHeight = AnimatedFloat(
+    val backgroundHeight =
+        AnimatedFloat(
             name = "backgroundHeight",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS,
             minimumValue = 0f,
-    )
+        )
 
     /**
      * Corners of the background closer to the edge of the screen (where the arrow appeared from).
@@ -88,17 +85,19 @@ class BackPanel(
      */
     val backgroundFarCornerRadius = AnimatedFloat("backgroundFarCornerRadius")
 
-    var scale = AnimatedFloat(
+    var scale =
+        AnimatedFloat(
             name = "scale",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_SCALE,
             minimumValue = 0f
-    )
+        )
 
-    val scalePivotX = AnimatedFloat(
+    val scalePivotX =
+        AnimatedFloat(
             name = "scalePivotX",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS,
             minimumValue = backgroundWidth.pos / 2,
-    )
+        )
 
     /**
      * Left/right position of the background relative to the canvas. Also corresponds with the
@@ -107,21 +106,24 @@ class BackPanel(
      */
     var horizontalTranslation = AnimatedFloat(name = "horizontalTranslation")
 
-    var arrowAlpha = AnimatedFloat(
+    var arrowAlpha =
+        AnimatedFloat(
             name = "arrowAlpha",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ALPHA,
             minimumValue = 0f,
             maximumValue = 1f
-    )
+        )
 
-    val backgroundAlpha = AnimatedFloat(
+    val backgroundAlpha =
+        AnimatedFloat(
             name = "backgroundAlpha",
             minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ALPHA,
             minimumValue = 0f,
             maximumValue = 1f
-    )
+        )
 
-    private val allAnimatedFloat = setOf(
+    private val allAnimatedFloat =
+        setOf(
             arrowLength,
             arrowHeight,
             backgroundWidth,
@@ -132,7 +134,7 @@ class BackPanel(
             horizontalTranslation,
             arrowAlpha,
             backgroundAlpha
-    )
+        )
 
     /**
      * Canvas vertical translation. How far up/down the arrow and background appear relative to the
@@ -140,43 +142,45 @@ class BackPanel(
      */
     var verticalTranslation = AnimatedFloat("verticalTranslation")
 
-    /**
-     * Use for drawing debug info. Can only be set if [DEBUG]=true
-     */
+    /** Use for drawing debug info. Can only be set if [DEBUG]=true */
     var drawDebugInfo: ((canvas: Canvas) -> Unit)? = null
         set(value) {
             if (DEBUG) field = value
         }
 
     internal fun updateArrowPaint(arrowThickness: Float) {
-
         arrowPaint.strokeWidth = arrowThickness
 
-        val isDeviceInNightTheme = resources.configuration.uiMode and
-                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        val isDeviceInNightTheme =
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+                Configuration.UI_MODE_NIGHT_YES
 
-        arrowPaint.color = Utils.getColorAttrDefaultColor(context,
+        arrowPaint.color =
+            Utils.getColorAttrDefaultColor(
+                context,
                 if (isDeviceInNightTheme) {
                     com.android.internal.R.attr.materialColorOnSecondaryContainer
                 } else {
                     com.android.internal.R.attr.materialColorOnSecondaryFixed
                 }
-        )
+            )
 
-        arrowBackgroundPaint.color = Utils.getColorAttrDefaultColor(context,
+        arrowBackgroundPaint.color =
+            Utils.getColorAttrDefaultColor(
+                context,
                 if (isDeviceInNightTheme) {
                     com.android.internal.R.attr.materialColorSecondaryContainer
                 } else {
                     com.android.internal.R.attr.materialColorSecondaryFixedDim
                 }
-        )
+            )
     }
 
     inner class AnimatedFloat(
-            name: String,
-            private val minimumVisibleChange: Float? = null,
-            private val minimumValue: Float? = null,
-            private val maximumValue: Float? = null,
+        name: String,
+        private val minimumVisibleChange: Float? = null,
+        private val minimumValue: Float? = null,
+        private val maximumValue: Float? = null,
     ) {
 
         // The resting position when not stretched by a touch drag
@@ -207,19 +211,21 @@ class BackPanel(
         }
 
         init {
-            val floatProp = object : FloatPropertyCompat<AnimatedFloat>(name) {
-                override fun setValue(animatedFloat: AnimatedFloat, value: Float) {
-                    animatedFloat.pos = value
-                }
+            val floatProp =
+                object : FloatPropertyCompat<AnimatedFloat>(name) {
+                    override fun setValue(animatedFloat: AnimatedFloat, value: Float) {
+                        animatedFloat.pos = value
+                    }
 
-                override fun getValue(animatedFloat: AnimatedFloat): Float = animatedFloat.pos
-            }
-            animation = SpringAnimation(this, floatProp).apply {
-                spring = SpringForce()
-                this@AnimatedFloat.minimumValue?.let { setMinValue(it) }
-                this@AnimatedFloat.maximumValue?.let { setMaxValue(it) }
-                this@AnimatedFloat.minimumVisibleChange?.let { minimumVisibleChange = it }
-            }
+                    override fun getValue(animatedFloat: AnimatedFloat): Float = animatedFloat.pos
+                }
+            animation =
+                SpringAnimation(this, floatProp).apply {
+                    spring = SpringForce()
+                    this@AnimatedFloat.minimumValue?.let { setMinValue(it) }
+                    this@AnimatedFloat.maximumValue?.let { setMaxValue(it) }
+                    this@AnimatedFloat.minimumVisibleChange?.let { minimumVisibleChange = it }
+                }
         }
 
         fun snapTo(newPosition: Float) {
@@ -233,11 +239,10 @@ class BackPanel(
             snapTo(restingPosition)
         }
 
-
         fun stretchTo(
-                stretchAmount: Float,
-                startingVelocity: Float? = null,
-                springForce: SpringForce? = null
+            stretchAmount: Float,
+            startingVelocity: Float? = null,
+            springForce: SpringForce? = null
         ) {
             animation.apply {
                 startingVelocity?.let {
@@ -297,8 +302,8 @@ class BackPanel(
     }
 
     fun addAnimationEndListener(
-            animatedFloat: AnimatedFloat,
-            endListener: DelayedOnAnimationEndListener
+        animatedFloat: AnimatedFloat,
+        endListener: DelayedOnAnimationEndListener
     ): Boolean {
         return if (animatedFloat.isRunning) {
             animatedFloat.addEndListener(endListener)
@@ -314,51 +319,51 @@ class BackPanel(
     }
 
     fun setStretch(
-            horizontalTranslationStretchAmount: Float,
-            arrowStretchAmount: Float,
-            arrowAlphaStretchAmount: Float,
-            backgroundAlphaStretchAmount: Float,
-            backgroundWidthStretchAmount: Float,
-            backgroundHeightStretchAmount: Float,
-            edgeCornerStretchAmount: Float,
-            farCornerStretchAmount: Float,
-            fullyStretchedDimens: EdgePanelParams.BackIndicatorDimens
+        horizontalTranslationStretchAmount: Float,
+        arrowStretchAmount: Float,
+        arrowAlphaStretchAmount: Float,
+        backgroundAlphaStretchAmount: Float,
+        backgroundWidthStretchAmount: Float,
+        backgroundHeightStretchAmount: Float,
+        edgeCornerStretchAmount: Float,
+        farCornerStretchAmount: Float,
+        fullyStretchedDimens: EdgePanelParams.BackIndicatorDimens
     ) {
         horizontalTranslation.stretchBy(
-                finalPosition = fullyStretchedDimens.horizontalTranslation,
-                amount = horizontalTranslationStretchAmount
+            finalPosition = fullyStretchedDimens.horizontalTranslation,
+            amount = horizontalTranslationStretchAmount
         )
         arrowLength.stretchBy(
-                finalPosition = fullyStretchedDimens.arrowDimens.length,
-                amount = arrowStretchAmount
+            finalPosition = fullyStretchedDimens.arrowDimens.length,
+            amount = arrowStretchAmount
         )
         arrowHeight.stretchBy(
-                finalPosition = fullyStretchedDimens.arrowDimens.height,
-                amount = arrowStretchAmount
+            finalPosition = fullyStretchedDimens.arrowDimens.height,
+            amount = arrowStretchAmount
         )
         arrowAlpha.stretchBy(
-                finalPosition = fullyStretchedDimens.arrowDimens.alpha,
-                amount = arrowAlphaStretchAmount
+            finalPosition = fullyStretchedDimens.arrowDimens.alpha,
+            amount = arrowAlphaStretchAmount
         )
         backgroundAlpha.stretchBy(
-                finalPosition = fullyStretchedDimens.backgroundDimens.alpha,
-                amount = backgroundAlphaStretchAmount
+            finalPosition = fullyStretchedDimens.backgroundDimens.alpha,
+            amount = backgroundAlphaStretchAmount
         )
         backgroundWidth.stretchBy(
-                finalPosition = fullyStretchedDimens.backgroundDimens.width,
-                amount = backgroundWidthStretchAmount
+            finalPosition = fullyStretchedDimens.backgroundDimens.width,
+            amount = backgroundWidthStretchAmount
         )
         backgroundHeight.stretchBy(
-                finalPosition = fullyStretchedDimens.backgroundDimens.height,
-                amount = backgroundHeightStretchAmount
+            finalPosition = fullyStretchedDimens.backgroundDimens.height,
+            amount = backgroundHeightStretchAmount
         )
         backgroundEdgeCornerRadius.stretchBy(
-                finalPosition = fullyStretchedDimens.backgroundDimens.edgeCornerRadius,
-                amount = edgeCornerStretchAmount
+            finalPosition = fullyStretchedDimens.backgroundDimens.edgeCornerRadius,
+            amount = edgeCornerStretchAmount
         )
         backgroundFarCornerRadius.stretchBy(
-                finalPosition = fullyStretchedDimens.backgroundDimens.farCornerRadius,
-                amount = farCornerStretchAmount
+            finalPosition = fullyStretchedDimens.backgroundDimens.farCornerRadius,
+            amount = farCornerStretchAmount
         )
     }
 
@@ -373,8 +378,11 @@ class BackPanel(
     }
 
     fun popArrowAlpha(startingVelocity: Float, springForce: SpringForce? = null) {
-        arrowAlpha.stretchTo(stretchAmount = 0f, startingVelocity = startingVelocity,
-                springForce = springForce)
+        arrowAlpha.stretchTo(
+            stretchAmount = 0f,
+            startingVelocity = startingVelocity,
+            springForce = springForce
+        )
     }
 
     fun resetStretch() {
@@ -392,12 +400,10 @@ class BackPanel(
         backgroundFarCornerRadius.snapToRestingPosition()
     }
 
-    /**
-     * Updates resting arrow and background size not accounting for stretch
-     */
+    /** Updates resting arrow and background size not accounting for stretch */
     internal fun setRestingDimens(
-            restingParams: EdgePanelParams.BackIndicatorDimens,
-            animate: Boolean = true
+        restingParams: EdgePanelParams.BackIndicatorDimens,
+        animate: Boolean = true
     ) {
         horizontalTranslation.updateRestingPosition(restingParams.horizontalTranslation)
         scale.updateRestingPosition(restingParams.scale)
@@ -410,27 +416,29 @@ class BackPanel(
         backgroundWidth.updateRestingPosition(restingParams.backgroundDimens.width, animate)
         backgroundHeight.updateRestingPosition(restingParams.backgroundDimens.height, animate)
         backgroundEdgeCornerRadius.updateRestingPosition(
-                restingParams.backgroundDimens.edgeCornerRadius, animate
+            restingParams.backgroundDimens.edgeCornerRadius,
+            animate
         )
         backgroundFarCornerRadius.updateRestingPosition(
-                restingParams.backgroundDimens.farCornerRadius, animate
+            restingParams.backgroundDimens.farCornerRadius,
+            animate
         )
     }
 
     fun animateVertically(yPos: Float) = verticalTranslation.stretchTo(yPos)
 
     fun setSpring(
-            horizontalTranslation: SpringForce? = null,
-            verticalTranslation: SpringForce? = null,
-            scale: SpringForce? = null,
-            arrowLength: SpringForce? = null,
-            arrowHeight: SpringForce? = null,
-            arrowAlpha: SpringForce? = null,
-            backgroundAlpha: SpringForce? = null,
-            backgroundFarCornerRadius: SpringForce? = null,
-            backgroundEdgeCornerRadius: SpringForce? = null,
-            backgroundWidth: SpringForce? = null,
-            backgroundHeight: SpringForce? = null,
+        horizontalTranslation: SpringForce? = null,
+        verticalTranslation: SpringForce? = null,
+        scale: SpringForce? = null,
+        arrowLength: SpringForce? = null,
+        arrowHeight: SpringForce? = null,
+        arrowAlpha: SpringForce? = null,
+        backgroundAlpha: SpringForce? = null,
+        backgroundFarCornerRadius: SpringForce? = null,
+        backgroundEdgeCornerRadius: SpringForce? = null,
+        backgroundWidth: SpringForce? = null,
+        backgroundHeight: SpringForce? = null,
     ) {
         arrowLength?.let { this.arrowLength.spring = it }
         arrowHeight?.let { this.arrowHeight.spring = it }
@@ -459,26 +467,28 @@ class BackPanel(
 
         if (!isLeftPanel) canvas.scale(-1f, 1f, canvasWidth / 2.0f, 0f)
 
-        canvas.translate(
-                horizontalTranslation.pos,
-                height * 0.5f + verticalTranslation.pos
-        )
+        canvas.translate(horizontalTranslation.pos, height * 0.5f + verticalTranslation.pos)
 
         canvas.scale(scale.pos, scale.pos, scalePivotX, 0f)
 
-        val arrowBackground = arrowBackgroundRect.apply {
-            left = 0f
-            top = -halfHeight
-            right = backgroundWidth
-            bottom = halfHeight
-        }.toPathWithRoundCorners(
-                topLeft = edgeCorner,
-                bottomLeft = edgeCorner,
-                topRight = farCorner,
-                bottomRight = farCorner
+        val arrowBackground =
+            arrowBackgroundRect
+                .apply {
+                    left = 0f
+                    top = -halfHeight
+                    right = backgroundWidth
+                    bottom = halfHeight
+                }
+                .toPathWithRoundCorners(
+                    topLeft = edgeCorner,
+                    bottomLeft = edgeCorner,
+                    topRight = farCorner,
+                    bottomRight = farCorner
+                )
+        canvas.drawPath(
+            arrowBackground,
+            arrowBackgroundPaint.apply { alpha = (255 * backgroundAlpha.pos).toInt() }
         )
-        canvas.drawPath(arrowBackground,
-                arrowBackgroundPaint.apply { alpha = (255 * backgroundAlpha.pos).toInt() })
 
         val dx = arrowLength.pos
         val dy = arrowHeight.pos
@@ -487,8 +497,8 @@ class BackPanel(
         // either the tip or the back of the arrow, whichever is closer
         val arrowOffset = (backgroundWidth - dx) / 2
         canvas.translate(
-                /* dx= */ arrowOffset,
-                /* dy= */ 0f /* pass 0 for the y position since the canvas was already translated */
+            /* dx= */ arrowOffset,
+            /* dy= */ 0f /* pass 0 for the y position since the canvas was already translated */
         )
 
         val arrowPointsAwayFromEdge = !arrowsPointLeft.xor(isLeftPanel)
@@ -500,8 +510,8 @@ class BackPanel(
         }
 
         val arrowPath = calculateArrowPath(dx = dx, dy = dy)
-        val arrowPaint = arrowPaint
-                .apply { alpha = (255 * min(arrowAlpha.pos, backgroundAlpha.pos)).toInt() }
+        val arrowPaint =
+            arrowPaint.apply { alpha = (255 * min(arrowAlpha.pos, backgroundAlpha.pos)).toInt() }
         canvas.drawPath(arrowPath, arrowPaint)
         canvas.restore()
 
@@ -519,17 +529,23 @@ class BackPanel(
     }
 
     private fun RectF.toPathWithRoundCorners(
-            topLeft: Float = 0f,
-            topRight: Float = 0f,
-            bottomRight: Float = 0f,
-            bottomLeft: Float = 0f
-    ): Path = Path().apply {
-        val corners = floatArrayOf(
-                topLeft, topLeft,
-                topRight, topRight,
-                bottomRight, bottomRight,
-                bottomLeft, bottomLeft
-        )
-        addRoundRect(this@toPathWithRoundCorners, corners, Path.Direction.CW)
-    }
+        topLeft: Float = 0f,
+        topRight: Float = 0f,
+        bottomRight: Float = 0f,
+        bottomLeft: Float = 0f
+    ): Path =
+        Path().apply {
+            val corners =
+                floatArrayOf(
+                    topLeft,
+                    topLeft,
+                    topRight,
+                    topRight,
+                    bottomRight,
+                    bottomRight,
+                    bottomLeft,
+                    bottomLeft
+                )
+            addRoundRect(this@toPathWithRoundCorners, corners, Path.Direction.CW)
+        }
 }

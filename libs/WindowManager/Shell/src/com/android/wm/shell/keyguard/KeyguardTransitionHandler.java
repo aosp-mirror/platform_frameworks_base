@@ -49,7 +49,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -143,6 +143,10 @@ public class KeyguardTransitionHandler
     }
 
     public static boolean handles(TransitionInfo info) {
+        // There is no animation for screen-wake unless we are immediately unlocking.
+        if (info.getType() == WindowManager.TRANSIT_WAKE && !info.isKeyguardGoingAway()) {
+            return false;
+        }
         return (info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0;
     }
 
@@ -166,7 +170,7 @@ public class KeyguardTransitionHandler
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
-        if (!handles(info) || mIsLaunchingActivityOverLockscreen) {
+        if (!handles(info)) {
             return false;
         }
 
@@ -181,6 +185,9 @@ public class KeyguardTransitionHandler
                     transition, info, startTransaction, finishTransaction, finishCallback);
         }
 
+        if (mIsLaunchingActivityOverLockscreen) {
+            return false;
+        }
 
         // Occlude/unocclude animations are only played if the keyguard is locked.
         if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {

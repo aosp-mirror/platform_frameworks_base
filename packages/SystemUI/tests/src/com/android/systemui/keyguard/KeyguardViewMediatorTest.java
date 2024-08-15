@@ -70,13 +70,14 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationTarget;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardSecurityView;
@@ -101,6 +102,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.settings.UserTracker;
@@ -165,7 +167,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
     private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
     private @Mock DumpManager mDumpManager;
-    private @Mock WindowManager mWindowManager;
+    private @Mock ViewCaptureAwareWindowManager mWindowManager;
     private @Mock IActivityManager mActivityManager;
     private @Mock ConfigurationController mConfigurationController;
     private @Mock PowerManager mPowerManager;
@@ -188,6 +190,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ActivityTransitionAnimator mActivityTransitionAnimator;
     private @Mock ScrimController mScrimController;
     private @Mock IActivityTaskManager mActivityTaskManagerService;
+    private @Mock IStatusBarService mStatusBarService;
     private @Mock SysuiColorExtractor mColorExtractor;
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
@@ -211,6 +214,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock SystemSettings mSystemSettings;
     private @Mock SecureSettings mSecureSettings;
     private @Mock AlarmManager mAlarmManager;
+    private @Mock ProcessWrapper mProcessWrapper;
     private FakeSystemClock mSystemClock;
     private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
 
@@ -247,6 +251,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 .thenReturn(mock(Flow.class));
         when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mDefaultUserId);
         when(mSelectedUserInteractor.getSelectedUserId(anyBoolean())).thenReturn(mDefaultUserId);
+        when(mProcessWrapper.isSystemUser()).thenReturn(true);
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,
                 new FakeWindowRootViewComponent.Factory(mock(WindowRootView.class)),
@@ -267,6 +272,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
+                mKosmos.getNotificationShadeWindowModel(),
                 mKosmos::getCommunalInteractor);
         mFeatureFlags = new FakeFeatureFlags();
         mSetFlagsRule.enableFlags(FLAG_REFACTOR_GET_CURRENT_USER);
@@ -437,7 +443,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
 
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         TestableLooper.get(this).processAllMessages();
 
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
@@ -457,7 +463,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
 
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         TestableLooper.get(this).processAllMessages();
 
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
@@ -564,7 +570,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // When showing and provisioned
         mViewMediator.onSystemReady();
         when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
-        mViewMediator.setShowingLocked(true);
+        mViewMediator.setShowingLocked(true, "");
 
         // and a SIM becomes locked and requires a PIN
         mViewMediator.mUpdateCallback.onSimStateChanged(
@@ -573,7 +579,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 TelephonyManager.SIM_STATE_PIN_REQUIRED);
 
         // and the keyguard goes away
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         when(mKeyguardStateController.isShowing()).thenReturn(false);
         mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
 
@@ -589,7 +595,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // When showing and provisioned
         mViewMediator.onSystemReady();
         when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
 
         // and a SIM becomes locked and requires a PIN
         mViewMediator.mUpdateCallback.onSimStateChanged(
@@ -598,7 +604,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 TelephonyManager.SIM_STATE_PIN_REQUIRED);
 
         // and the keyguard goes away
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         when(mKeyguardStateController.isShowing()).thenReturn(false);
         mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
 
@@ -837,7 +843,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
 
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         TestableLooper.get(this).processAllMessages();
 
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
@@ -857,7 +863,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
 
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         TestableLooper.get(this).processAllMessages();
 
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
@@ -972,7 +978,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testDoKeyguardWhileInteractive_resets() {
-        mViewMediator.setShowingLocked(true);
+        mViewMediator.setShowingLocked(true, "");
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         TestableLooper.get(this).processAllMessages();
 
@@ -986,7 +992,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testDoKeyguardWhileNotInteractive_showsInsteadOfResetting() {
-        mViewMediator.setShowingLocked(true);
+        mViewMediator.setShowingLocked(true, "");
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         TestableLooper.get(this).processAllMessages();
 
@@ -1045,7 +1051,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onSystemReady();
         processAllMessagesAndBgExecutorMessages();
 
-        mViewMediator.setShowingLocked(true);
+        mViewMediator.setShowingLocked(true, "");
 
         RemoteAnimationTarget[] apps = new RemoteAnimationTarget[]{
                 mock(RemoteAnimationTarget.class)
@@ -1117,7 +1123,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testNotStartingKeyguardWhenFlagIsDisabled() {
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         when(mKeyguardStateController.isShowing()).thenReturn(false);
 
         mViewMediator.onDreamingStarted();
@@ -1127,7 +1133,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testStartingKeyguardWhenFlagIsEnabled() {
-        mViewMediator.setShowingLocked(true);
+        mViewMediator.setShowingLocked(true, "");
         when(mKeyguardStateController.isShowing()).thenReturn(true);
 
         mViewMediator.onDreamingStarted();
@@ -1168,7 +1174,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         // WHEN keyguard visibility becomes FALSE
-        mViewMediator.setShowingLocked(false);
+        mViewMediator.setShowingLocked(false, "");
         keyguardUpdateMonitorCallback.onKeyguardVisibilityChanged(false);
         TestableLooper.get(this).processAllMessages();
 
@@ -1225,10 +1231,12 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mActivityTransitionAnimator,
                 () -> mScrimController,
                 mActivityTaskManagerService,
+                mStatusBarService,
                 mFeatureFlags,
                 mSecureSettings,
                 mSystemSettings,
                 mSystemClock,
+                mProcessWrapper,
                 mDispatcher,
                 () -> mDreamViewModel,
                 () -> mCommunalTransitionViewModel,
@@ -1240,6 +1248,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null);
+        mViewMediator.onBootCompleted();
     }
 
     private void captureKeyguardStateControllerCallback() {

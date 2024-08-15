@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.ui.composable
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -50,26 +51,27 @@ fun VolumePanelComposeScope.VerticalVolumePanelContent(
                 with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
             }
         }
-        if (layout.footerComponents.isNotEmpty()) {
+
+        AnimatedContent(
+            targetState = layout.footerComponents,
+            label = "FooterComponentAnimation",
+        ) { footerComponents ->
             Row(
                 modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                 horizontalArrangement = Arrangement.spacedBy(if (isLargeScreen) 28.dp else 20.dp),
             ) {
                 val visibleComponentsCount =
-                    layout.footerComponents.fastSumBy { if (it.isVisible) 1 else 0 }
+                    footerComponents.fastSumBy { if (it.isVisible) 1 else 0 }
 
                 // Center footer component if there is only one present
                 if (visibleComponentsCount == 1) {
                     Spacer(modifier = Modifier.weight(0.5f))
                 }
 
-                for (component in layout.footerComponents) {
-                    AnimatedVisibility(
-                        visible = component.isVisible,
-                        modifier = Modifier.weight(1f),
-                    ) {
+                for (component in footerComponents) {
+                    if (component.isVisible) {
                         with(component.component as ComposeVolumePanelUiComponent) {
-                            Content(Modifier)
+                            Content(Modifier.weight(1f))
                         }
                     }
                 }

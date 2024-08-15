@@ -332,7 +332,7 @@ public class TileServices extends IQSService.Stub {
                 if (info.applicationInfo.isSystemApp()) {
                     final StatusBarIcon statusIcon = icon != null
                             ? new StatusBarIcon(userHandle, packageName, icon, 0, 0,
-                            contentDescription)
+                            contentDescription, StatusBarIcon.Type.SystemIcon)
                             : null;
                     final String slot = getStatusBarIconSlotName(componentName);
                     mMainHandler.post(new Runnable() {

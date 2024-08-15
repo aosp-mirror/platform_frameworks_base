@@ -19,7 +19,12 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags
+import com.android.systemui.Flags.communalSceneKtfRefactor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -30,7 +35,9 @@ import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.noneOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -48,8 +55,11 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     @Background bgDispatcher: CoroutineDispatcher,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     keyguardInteractor: KeyguardInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     override val transitionRepository: KeyguardTransitionRepository,
+    override val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
@@ -65,12 +75,13 @@ constructor(
     ) {
 
     override fun start() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
-        if (!Flags.communalHub()) {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
         }
-        listenForHubToLockscreenOrDreaming()
+        if (!communalSceneKtfRefactor()) {
+            listenForHubToLockscreenOrDreaming()
+        }
         listenForHubToDozing()
         listenForHubToPrimaryBouncer()
         listenForHubToAlternateBouncer()
@@ -85,6 +96,8 @@ constructor(
                 when (toState) {
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.ALTERNATE_BOUNCER -> TO_BOUNCER_DURATION
+                    KeyguardState.PRIMARY_BOUNCER -> TO_BOUNCER_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -118,7 +131,10 @@ constructor(
         scope.launch("$TAG#listenForHubToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }
-                .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
+                .collect {
+                    // Bouncer shows on top of the hub, so do not change scenes here.
+                    startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                }
         }
     }
 
@@ -128,7 +144,10 @@ constructor(
                 .filterRelevantKeyguardStateAnd { alternateBouncerShowing ->
                     alternateBouncerShowing
                 }
-                .collect { pair -> startTransitionTo(KeyguardState.ALTERNATE_BOUNCER) }
+                .collect { pair ->
+                    // Bouncer shows on top of the hub, so do not change scenes here.
+                    startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
+                }
         }
     }
 
@@ -137,10 +156,19 @@ constructor(
             powerInteractor.isAsleep
                 .filterRelevantKeyguardStateAnd { isAsleep -> isAsleep }
                 .collect {
-                    startTransitionTo(
-                        toState = KeyguardState.DOZING,
-                        modeOnCanceled = TransitionModeOnCanceled.LAST_VALUE,
-                    )
+                    if (communalSceneKtfRefactor()) {
+                        communalSceneInteractor.changeScene(
+                            newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to dozing",
+                            transitionKey = CommunalTransitionKeys.Immediately,
+                            keyguardState = KeyguardState.DOZING,
+                        )
+                    } else {
+                        startTransitionTo(
+                            toState = KeyguardState.DOZING,
+                            modeOnCanceled = TransitionModeOnCanceled.LAST_VALUE,
+                        )
+                    }
                 }
         }
     }
@@ -150,7 +178,46 @@ constructor(
             scope.launch {
                 keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
                     .filterRelevantKeyguardStateAnd { onTop -> onTop }
-                    .collect { maybeStartTransitionToOccludedOrInsecureCamera() }
+                    .collect {
+                        maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
+                            if (communalSceneKtfRefactor()) {
+                                communalSceneInteractor.changeScene(
+                                    newScene = CommunalScenes.Blank,
+                                    loggingReason = "hub to occluded (KeyguardWmStateRefactor)",
+                                    transitionKey = CommunalTransitionKeys.SimpleFade,
+                                    keyguardState = state,
+                                )
+                                null
+                            } else {
+                                startTransitionTo(state, ownerReason = reason)
+                            }
+                        }
+                    }
+            }
+        } else if (communalSceneKtfRefactor()) {
+            scope.launch {
+                allOf(
+                        keyguardInteractor.isKeyguardOccluded,
+                        noneOf(
+                            // Dream is a special-case of occluded, so filter out the dreaming
+                            // case here.
+                            keyguardInteractor.isDreaming,
+                            // When launching activities from widgets on the hub, we have a
+                            // custom occlusion animation.
+                            communalSceneInteractor.isLaunchingWidget,
+                        ),
+                    )
+                    .filterRelevantKeyguardStateAnd { isOccludedAndNotDreamingNorLaunchingWidget ->
+                        isOccludedAndNotDreamingNorLaunchingWidget
+                    }
+                    .collect { _ ->
+                        communalSceneInteractor.changeScene(
+                            newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to occluded",
+                            transitionKey = CommunalTransitionKeys.SimpleFade,
+                            keyguardState = KeyguardState.OCCLUDED,
+                        )
+                    }
             }
         } else {
             scope.launch {
@@ -158,25 +225,66 @@ constructor(
                     .filterRelevantKeyguardStateAnd { isOccludedAndNotDreaming ->
                         isOccludedAndNotDreaming
                     }
-                    .collect { isOccludedAndNotDreaming ->
-                        startTransitionTo(KeyguardState.OCCLUDED)
-                    }
+                    .collect { _ -> startTransitionTo(KeyguardState.OCCLUDED) }
             }
         }
     }
 
     private fun listenForHubToGone() {
-        scope.launch {
-            keyguardInteractor.isKeyguardGoingAway
-                .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
-                .collect { startTransitionTo(KeyguardState.GONE) }
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
+        if (communalSceneKtfRefactor()) {
+            scope.launch {
+                allOf(
+                        keyguardInteractor.isKeyguardGoingAway,
+                        // TODO(b/327225415): Handle edit mode opening here to avoid going to GONE
+                        // state until after edit mode is ready to be shown.
+                        noneOf(
+                            // When launching activities from widgets on the hub, we wait to change
+                            // scenes until the activity launch is complete.
+                            communalSceneInteractor.isLaunchingWidget,
+                        ),
+                    )
+                    .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
+                    .sample(communalSceneInteractor.editModeState, ::Pair)
+                    .collect { (_, editModeState) ->
+                        if (
+                            editModeState == EditModeState.STARTING ||
+                                editModeState == EditModeState.SHOWING
+                        ) {
+                            // Don't change scenes here as that is handled by the edit activity.
+                            startTransitionTo(KeyguardState.GONE)
+                        } else {
+                            communalSceneInteractor.changeScene(
+                                newScene = CommunalScenes.Blank,
+                                loggingReason = "hub to gone",
+                                transitionKey = CommunalTransitionKeys.SimpleFade,
+                                keyguardState = KeyguardState.GONE
+                            )
+                        }
+                    }
+            }
+        } else {
+            scope.launch {
+                keyguardInteractor.isKeyguardGoingAway
+                    .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
+                    .collect { startTransitionTo(KeyguardState.GONE) }
+            }
         }
     }
 
     companion object {
         const val TAG = "FromGlanceableHubTransitionInteractor"
-        val DEFAULT_DURATION = 1.seconds
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
+
+        /**
+         * DEFAULT_DURATION controls the timing for all animations other than those with overrides
+         * in [getDefaultAnimatorForTransitionsToState].
+         *
+         * Set at 400ms for parity with [FromLockscreenTransitionInteractor]
+         */
+        val DEFAULT_DURATION = 400.milliseconds
+        val TO_LOCKSCREEN_DURATION = 1.seconds
+        val TO_BOUNCER_DURATION = 400.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
     }
 }

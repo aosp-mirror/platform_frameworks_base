@@ -17,6 +17,7 @@
 package com.android.systemui.model
 
 import android.view.Display
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeDisplayTracker
@@ -24,10 +25,9 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class SysUiStateExtTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()

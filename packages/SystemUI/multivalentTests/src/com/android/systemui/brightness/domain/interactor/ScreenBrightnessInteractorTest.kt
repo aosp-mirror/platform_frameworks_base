@@ -20,13 +20,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.display.BrightnessUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.brightness.data.model.LinearBrightness
 import com.android.systemui.brightness.data.repository.fakeScreenBrightnessRepository
 import com.android.systemui.brightness.data.repository.screenBrightnessRepository
-import com.android.systemui.brightness.shared.GammaBrightness
+import com.android.systemui.brightness.shared.model.GammaBrightness
+import com.android.systemui.brightness.shared.model.LinearBrightness
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -41,7 +44,14 @@ class ScreenBrightnessInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
 
-    private val underTest = ScreenBrightnessInteractor(kosmos.screenBrightnessRepository)
+    private val underTest =
+        with(kosmos) {
+            ScreenBrightnessInteractor(
+                screenBrightnessRepository,
+                applicationCoroutineScope,
+                mock<TableLogBuffer>()
+            )
+        }
 
     @Test
     fun gammaBrightness() =

@@ -36,9 +36,9 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
     private static final int LOW_BMP_WIDTH = 112;

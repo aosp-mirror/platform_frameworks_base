@@ -926,7 +926,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         }
         Slog.i(TAG, "Enabling rollback for install of " + packageName
                 + ", session:" + session.sessionId
-                + ", rollbackDataPolicy=" + rollbackDataPolicy);
+                + ", rollbackDataPolicy=" + rollbackDataPolicy
+                + ", rollbackId:" + rollback.info.getRollbackId()
+                + ", originalSessionId:" + rollback.getOriginalSessionId());
 
         final String installerPackageName = session.getInstallerPackageName();
         if (!enableRollbackAllowed(installerPackageName, packageName)) {

@@ -16,6 +16,7 @@
 package com.android.ravenwood.common;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 
 /**
  * Collection of methods to workaround limitation in the hostside JVM.
@@ -44,6 +45,11 @@ public abstract class JvmWorkaround {
     public abstract int getFdInt(FileDescriptor fd);
 
     /**
+     * Equivalent to Android's Os.close(fd).
+     */
+    public abstract void closeFd(FileDescriptor fd) throws IOException;
+
+    /**
      * Placeholder implementation for the host side.
      *
      * Even on the host side, we don't want to throw just because the class is loaded,
@@ -62,6 +68,11 @@ public abstract class JvmWorkaround {
 
         @Override
         public int getFdInt(FileDescriptor fd) {
+            throw calledOnHostside();
+        }
+
+        @Override
+        public void closeFd(FileDescriptor fd) {
             throw calledOnHostside();
         }
     }

@@ -16,7 +16,7 @@
 
 package com.android.systemui.brightness.ui.compose
 
-import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -33,14 +33,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformSlider
-import com.android.systemui.brightness.shared.GammaBrightness
+import com.android.systemui.brightness.shared.model.GammaBrightness
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.brightness.ui.viewmodel.Drag
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.utils.PolicyRestriction
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,12 +57,12 @@ private fun BrightnessSlider(
 ) {
     var value by remember(gammaValue) { mutableIntStateOf(gammaValue) }
     val animatedValue by
-        animateIntAsState(targetValue = value, label = "BrightnessSliderAnimatedValue")
+        animateFloatAsState(targetValue = value.toFloat(), label = "BrightnessSliderAnimatedValue")
     val floatValueRange = valueRange.first.toFloat()..valueRange.last.toFloat()
-    val isRestricted = restriction is PolicyRestriction.Restricted
+    val isRestricted = remember(restriction) { restriction is PolicyRestriction.Restricted }
 
     PlatformSlider(
-        value = animatedValue.toFloat(),
+        value = animatedValue,
         valueRange = floatValueRange,
         enabled = !isRestricted,
         onValueChange = {
@@ -107,8 +106,8 @@ fun BrightnessSliderContainer(
     viewModel: BrightnessSliderViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val gamma: Int by
-        viewModel.currentBrightness.map { it.value }.collectAsStateWithLifecycle(initialValue = 0)
+    val state by viewModel.currentBrightness.collectAsStateWithLifecycle()
+    val gamma = state.value
     val coroutineScope = rememberCoroutineScope()
     val restriction by
         viewModel.policyRestriction.collectAsStateWithLifecycle(

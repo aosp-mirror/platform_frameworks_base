@@ -20,8 +20,10 @@ import static android.content.pm.PackageManager.MATCH_ALL;
 
 import static androidx.window.extensions.embedding.DividerPresenter.getBoundsOffsetForDivider;
 import static androidx.window.extensions.embedding.SplitAttributesHelper.isReversedLayout;
+import static androidx.window.extensions.embedding.SplitController.TAG;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
+import android.annotation.AnimRes;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.WindowConfiguration;
@@ -31,9 +33,11 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
 import android.view.View;
@@ -56,6 +60,7 @@ import androidx.window.extensions.layout.FoldingFeature;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
 
@@ -125,6 +130,16 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     static final int RESULT_EXPAND_FAILED_NO_TF_INFO = 2;
 
     /**
+     * The key of {@link ActivityStack} alignment relative to its parent container.
+     * <p>
+     * See {@link ContainerPosition} for possible values.
+     * <p>
+     * Note that this constants must align with the definition in WM Jetpack library.
+     */
+    private static final String KEY_ACTIVITY_STACK_ALIGNMENT =
+            "androidx.window.embedding.ActivityStackAlignment";
+
+    /**
      * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
      * Activity, Activity, Intent)}
      */
@@ -151,11 +166,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         mWindowLayoutComponent = windowLayoutComponent;
         mController = controller;
         registerOrganizer();
-        if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
-            // TODO(b/207070762): cleanup with legacy app transition
-            // Animation will be handled by WM Shell when Shell transition is enabled.
-            overrideSplitAnimation();
-        }
     }
 
     /**
@@ -374,7 +384,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
         updateAnimationParams(wct, primaryContainer.getTaskFragmentToken(), splitAttributes);
         updateAnimationParams(wct, secondaryContainer.getTaskFragmentToken(), splitAttributes);
-        mController.updateDivider(wct, taskContainer);
+        mController.updateDivider(wct, taskContainer, false /* isTaskFragmentVanished */);
     }
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
@@ -395,8 +405,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         // Sets the dim area when the two TaskFragments are adjacent.
         final boolean dimOnTask = !isStacked
-                && splitAttributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
-                && Flags.fullscreenDimFlag();
+                && splitAttributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK;
         setTaskFragmentDimOnTask(wct, primaryContainer.getTaskFragmentToken(), dimOnTask);
         setTaskFragmentDimOnTask(wct, secondaryContainer.getTaskFragmentToken(), dimOnTask);
 
@@ -636,7 +645,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 container);
         final boolean isFillParent = relativeBounds.isEmpty();
         final boolean dimOnTask = !isFillParent
-                && Flags.fullscreenDimFlag()
                 && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK;
         final IBinder fragmentToken = container.getTaskFragmentToken();
 
@@ -649,36 +657,137 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // TODO(b/243518738): Update to resizeTaskFragment after we migrate WCT#setRelativeBounds
         //  and WCT#setWindowingMode to take fragmentToken.
         resizeTaskFragmentIfRegistered(wct, container, relativeBounds);
-        int windowingMode = container.getTaskContainer().getWindowingModeForTaskFragment(
-                relativeBounds);
+        final TaskContainer taskContainer = container.getTaskContainer();
+        final int windowingMode = taskContainer.getWindowingModeForTaskFragment(relativeBounds);
         updateTaskFragmentWindowingModeIfRegistered(wct, container, windowingMode);
-        // Always use default animation for standalone ActivityStack.
-        updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
+        if (container.isOverlay() && isOverlayTransitionSupported()) {
+            // Use the overlay transition for the overlay container if it's supported.
+            final TaskFragmentAnimationParams params = createOverlayAnimationParams(relativeBounds,
+                    taskContainer.getBounds(), container);
+            updateAnimationParams(wct, fragmentToken, params);
+        } else {
+            // Otherwise, fallabck to use the default animation params.
+            updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
+        }
         setTaskFragmentDimOnTask(wct, fragmentToken, dimOnTask);
     }
 
+    private static boolean isOverlayTransitionSupported() {
+        return Flags.moveAnimationOptionsToChange()
+                && Flags.activityEmbeddingOverlayPresentationFlag();
+    }
+
+    @NonNull
+    private static TaskFragmentAnimationParams createOverlayAnimationParams(
+            @NonNull Rect relativeBounds, @NonNull Rect parentContainerBounds,
+            @NonNull TaskFragmentContainer container) {
+        if (relativeBounds.isEmpty()) {
+            return TaskFragmentAnimationParams.DEFAULT;
+        }
+
+        final int positionFromOptions = container.getLaunchOptions()
+                .getInt(KEY_ACTIVITY_STACK_ALIGNMENT , -1);
+        final int position = positionFromOptions != -1 ? positionFromOptions
+                // Fallback to calculate from bounds if the info can't be retrieved from options.
+                : getOverlayPosition(relativeBounds, parentContainerBounds);
+
+        return new TaskFragmentAnimationParams.Builder()
+                .setOpenAnimationResId(getOpenAnimationResourcesId(position))
+                .setChangeAnimationResId(R.anim.overlay_task_fragment_change)
+                .setCloseAnimationResId(getCloseAnimationResourcesId(position))
+                .build();
+    }
+
+    @VisibleForTesting
+    @ContainerPosition
+    static int getOverlayPosition(
+            @NonNull Rect relativeBounds, @NonNull Rect parentContainerBounds) {
+        final Rect relativeParentBounds = new Rect(parentContainerBounds);
+        relativeParentBounds.offsetTo(0, 0);
+        final int leftMatch = (relativeParentBounds.left == relativeBounds.left) ? 1 : 0;
+        final int topMatch = (relativeParentBounds.top == relativeBounds.top) ? 1 : 0;
+        final int rightMatch = (relativeParentBounds.right == relativeBounds.right) ? 1 : 0;
+        final int bottomMatch = (relativeParentBounds.bottom == relativeBounds.bottom) ? 1 : 0;
+
+        // Flag format: {left|top|right|bottom}. Note that overlay container could be shrunk and
+        // centered, which makes only one of overlay container edge matches the parent container.
+        final int directionFlag = (leftMatch << 3) + (topMatch << 2) + (rightMatch << 1)
+                + bottomMatch;
+
+        final int position = switch (directionFlag) {
+            // Only the left edge match or only the right edge not match: should be on the left of
+            // the parent container.
+            case 0b1000, 0b1101 -> CONTAINER_POSITION_LEFT;
+            // Only the top edge match or only the bottom edge not match: should be on the top of
+            // the parent container.
+            case 0b0100, 0b1110 -> CONTAINER_POSITION_TOP;
+            // Only the right edge match or only the left edge not match: should be on the right of
+            // the parent container.
+            case 0b0010, 0b0111 -> CONTAINER_POSITION_RIGHT;
+            // Only the bottom edge match or only the top edge not match: should be on the bottom of
+            // the parent container.
+            case 0b0001, 0b1011 -> CONTAINER_POSITION_BOTTOM;
+            default -> {
+                Log.w(TAG, "Unsupported position:" + Integer.toBinaryString(directionFlag)
+                        + " fallback to treat it as right. Relative parent bounds: "
+                        + relativeParentBounds + ", relative overlay bounds:" + relativeBounds);
+                yield CONTAINER_POSITION_RIGHT;
+            }
+        };
+        return position;
+    }
+
+    @AnimRes
+    private static int getOpenAnimationResourcesId(@ContainerPosition int position) {
+        return switch (position) {
+            case CONTAINER_POSITION_LEFT -> R.anim.overlay_task_fragment_open_from_left;
+            case CONTAINER_POSITION_TOP -> R.anim.overlay_task_fragment_open_from_top;
+            case CONTAINER_POSITION_RIGHT -> R.anim.overlay_task_fragment_open_from_right;
+            case CONTAINER_POSITION_BOTTOM -> R.anim.overlay_task_fragment_open_from_bottom;
+            default -> {
+                Log.w(TAG, "Unknown position:" + position);
+                yield Resources.ID_NULL;
+            }
+        };
+    }
+
+    @AnimRes
+    private static int getCloseAnimationResourcesId(@ContainerPosition int position) {
+        return switch (position) {
+            case CONTAINER_POSITION_LEFT -> R.anim.overlay_task_fragment_close_to_left;
+            case CONTAINER_POSITION_TOP -> R.anim.overlay_task_fragment_close_to_top;
+            case CONTAINER_POSITION_RIGHT -> R.anim.overlay_task_fragment_close_to_right;
+            case CONTAINER_POSITION_BOTTOM -> R.anim.overlay_task_fragment_close_to_bottom;
+            default -> {
+                Log.w(TAG, "Unknown position:" + position);
+                yield Resources.ID_NULL;
+            }
+        };
+    }
+
     /**
-     * Returns the expanded bounds if the {@code bounds} violate minimum dimension or are not fully
-     * covered by the task bounds. Otherwise, returns {@code bounds}.
+     * Returns the expanded bounds if the {@code relBounds} violate minimum dimension or are not
+     * fully covered by the task bounds. Otherwise, returns {@code relBounds}.
      */
     @NonNull
-    static Rect sanitizeBounds(@NonNull Rect bounds, @Nullable Size minDimension,
+    static Rect sanitizeBounds(@NonNull Rect relBounds, @Nullable Size minDimension,
                         @NonNull TaskFragmentContainer container) {
-        if (bounds.isEmpty()) {
+        if (relBounds.isEmpty()) {
             // Don't need to check if the bounds follows the task bounds.
-            return bounds;
+            return relBounds;
         }
-        if (boundsSmallerThanMinDimensions(bounds, minDimension)) {
+        if (boundsSmallerThanMinDimensions(relBounds, minDimension)) {
             // Expand the bounds if the bounds are smaller than minimum dimensions.
             return new Rect();
         }
         final TaskContainer taskContainer = container.getTaskContainer();
-        final Rect taskBounds = taskContainer.getBounds();
-        if (!taskBounds.contains(bounds)) {
+        final Rect relTaskBounds = new Rect(taskContainer.getBounds());
+        relTaskBounds.offsetTo(0, 0);
+        if (!relTaskBounds.contains(relBounds)) {
             // Expand the bounds if the bounds exceed the task bounds.
             return new Rect();
         }
-        return bounds;
+        return relBounds;
     }
 
     @Override
@@ -756,7 +865,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
         super.expandTaskFragment(wct, container);
-        mController.updateDivider(wct, container.getTaskContainer());
+        mController.updateDivider(
+                wct, container.getTaskContainer(), false /* isTaskFragmentVanished */);
     }
 
     static boolean shouldShowSplit(@NonNull SplitContainer splitContainer) {
@@ -1246,5 +1356,17 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                         configuration.windowConfiguration);
         return new ParentContainerInfo(taskProperties.getTaskMetrics(), configuration,
                 windowLayoutInfo);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static String positionToString(@ContainerPosition int position) {
+        return switch (position) {
+            case CONTAINER_POSITION_LEFT -> "left";
+            case CONTAINER_POSITION_TOP -> "top";
+            case CONTAINER_POSITION_RIGHT -> "right";
+            case CONTAINER_POSITION_BOTTOM -> "bottom";
+            default -> "Unknown position:" + position;
+        };
     }
 }

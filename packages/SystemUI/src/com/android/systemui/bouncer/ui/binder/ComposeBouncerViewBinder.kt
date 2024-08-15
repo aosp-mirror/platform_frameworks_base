@@ -14,7 +14,8 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.composable.BouncerContent
-import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import kotlinx.coroutines.flow.collectLatest
@@ -25,7 +26,7 @@ object ComposeBouncerViewBinder {
     fun bind(
         view: ViewGroup,
         legacyInteractor: PrimaryBouncerInteractor,
-        viewModel: BouncerViewModel,
+        viewModelFactory: BouncerSceneContentViewModel.Factory,
         dialogFactory: BouncerDialogFactory,
         authenticationInteractor: AuthenticationInteractor,
         selectedUserInteractor: SelectedUserInteractor,
@@ -48,7 +49,14 @@ object ComposeBouncerViewBinder {
                                     this@repeatWhenAttached.lifecycle
                             }
                         )
-                        setContent { PlatformTheme { BouncerContent(viewModel, dialogFactory) } }
+                        setContent {
+                            PlatformTheme {
+                                BouncerContent(
+                                    rememberViewModel { viewModelFactory.create() },
+                                    dialogFactory,
+                                )
+                            }
+                        }
                     }
                 }
             }

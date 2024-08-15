@@ -27,7 +27,6 @@ public class PaintChangeAdapter implements PaintChanges {
 
     }
 
-
     @Override
     public void setStrokeWidth(float width) {
 
@@ -49,7 +48,7 @@ public class PaintChangeAdapter implements PaintChanges {
     }
 
     @Override
-    public void setShader(int shader, String shaderString) {
+    public void setShader(int shader) {
 
     }
 

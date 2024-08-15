@@ -36,7 +36,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
-import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -57,7 +56,7 @@ import javax.inject.Inject;
  *
  */
 @SysUISingleton
-public class KeyguardStateControllerImpl implements KeyguardStateController, Dumpable {
+public class KeyguardStateControllerImpl implements KeyguardStateController {
 
     private static final boolean DEBUG_AUTH_WITH_ADB = false;
     private static final String AUTH_BROADCAST_KEY = "debug_trigger_auth";

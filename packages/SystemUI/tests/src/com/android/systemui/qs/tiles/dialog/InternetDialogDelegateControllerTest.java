@@ -51,7 +51,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.text.TextUtils;
@@ -59,8 +58,10 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
@@ -101,7 +102,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class InternetDialogDelegateControllerTest extends SysuiTestCase {
 
@@ -160,7 +161,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
     @Mock
     InternetDialogController.InternetDialogCallback mInternetDialogCallback;
     @Mock
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     @Mock
     private ToastFactory mToastFactory;
     @Mock
@@ -232,8 +233,9 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mConnectivityManager, mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
-                mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController, mDialogTransitionAnimator, mWifiStateWorker, mFlags);
+                mWindowManager, mToastFactory, mWorkerHandler,
+                mCarrierConfigTracker, mLocationController, mDialogTransitionAnimator,
+                mWifiStateWorker, mFlags);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);

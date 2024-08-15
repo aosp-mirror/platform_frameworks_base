@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import com.android.systemui.shade.data.repository.ShadeRepository
 import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 
 /** Implementation of ShadeAnimationInteractor compatible with NPVC. */
 @SysUISingleton
@@ -30,4 +31,5 @@ constructor(
     shadeRepository: ShadeRepository,
 ) : ShadeAnimationInteractor(shadeAnimationRepository) {
     override val isAnyCloseAnimationRunning = shadeRepository.legacyIsClosing
+    override val isAnyFlingAnimationRunning = shadeRepository.currentFling.map { it != null }
 }

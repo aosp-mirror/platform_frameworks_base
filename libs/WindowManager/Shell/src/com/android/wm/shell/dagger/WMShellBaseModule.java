@@ -16,13 +16,18 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.provider.Settings.Secure.COMPAT_UI_EDUCATION_SHOWING;
+
+import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_HIDDEN;
 import static com.android.wm.shell.onehanded.OneHandedController.SUPPORT_ONE_HANDED_MODE;
 
+import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.window.SystemPerformanceHinter;
@@ -71,6 +76,14 @@ import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
+import com.android.wm.shell.compatui.CompatUIStatusManager;
+import com.android.wm.shell.compatui.api.CompatUIComponentIdGenerator;
+import com.android.wm.shell.compatui.api.CompatUIHandler;
+import com.android.wm.shell.compatui.api.CompatUIRepository;
+import com.android.wm.shell.compatui.api.CompatUIState;
+import com.android.wm.shell.compatui.impl.DefaultCompatUIHandler;
+import com.android.wm.shell.compatui.impl.DefaultCompatUIRepository;
+import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -87,12 +100,13 @@ import com.android.wm.shell.performance.PerfHintController;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.recents.TaskStackTransitionObserver;
 import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -210,7 +224,7 @@ public abstract class WMShellBaseModule {
             Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
-            Optional<CompatUIController> compatUI,
+            Optional<CompatUIHandler> compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -229,7 +243,7 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<CompatUIController> provideCompatUIController(
+    static Optional<CompatUIHandler> provideCompatUIController(
             Context context,
             ShellInit shellInit,
             ShellController shellController,
@@ -242,9 +256,17 @@ public abstract class WMShellBaseModule {
             Lazy<DockStateReader> dockStateReader,
             Lazy<CompatUIConfiguration> compatUIConfiguration,
             Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
-            Lazy<AccessibilityManager> accessibilityManager) {
+            Lazy<AccessibilityManager> accessibilityManager,
+            CompatUIRepository compatUIRepository,
+            @NonNull CompatUIState compatUIState,
+            @NonNull CompatUIComponentIdGenerator componentIdGenerator,
+            CompatUIStatusManager compatUIStatusManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
+        }
+        if (Flags.appCompatUiFramework()) {
+            return Optional.of(new DefaultCompatUIHandler(compatUIRepository, compatUIState,
+                    componentIdGenerator));
         }
         return Optional.of(
                 new CompatUIController(
@@ -260,7 +282,40 @@ public abstract class WMShellBaseModule {
                         dockStateReader.get(),
                         compatUIConfiguration.get(),
                         compatUIShellCommandHandler.get(),
-                        accessibilityManager.get()));
+                        accessibilityManager.get(),
+                        compatUIStatusManager));
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIStatusManager provideCompatUIStatusManager(@NonNull Context context) {
+        if (Flags.enableCompatUiVisibilityStatus()) {
+            return new CompatUIStatusManager(
+                    newState -> Settings.Secure.putInt(context.getContentResolver(),
+                            COMPAT_UI_EDUCATION_SHOWING, newState),
+                    () -> Settings.Secure.getInt(context.getContentResolver(),
+                            COMPAT_UI_EDUCATION_SHOWING, COMPAT_UI_EDUCATION_HIDDEN));
+        } else {
+            return new CompatUIStatusManager();
+        }
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIState provideCompatUIState() {
+        return new CompatUIState();
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIComponentIdGenerator provideCompatUIComponentIdGenerator() {
+        return new DefaultComponentIdGenerator();
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIRepository provideCompatUIRepository() {
+        return new DefaultCompatUIRepository();
     }
 
     @WMSingleton
@@ -360,7 +415,8 @@ public abstract class WMShellBaseModule {
             @ShellBackgroundThread Handler backgroundHandler,
             BackAnimationBackground backAnimationBackground,
             Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry,
-            ShellCommandHandler shellCommandHandler) {
+            ShellCommandHandler shellCommandHandler,
+            Transitions transitions) {
         if (BackAnimationController.IS_ENABLED) {
             return shellBackAnimationRegistry.map(
                     (animations) ->
@@ -372,7 +428,8 @@ public abstract class WMShellBaseModule {
                                     context,
                                     backAnimationBackground,
                                     animations,
-                                    shellCommandHandler));
+                                    shellCommandHandler,
+                                    transitions));
         }
         return Optional.empty();
     }
@@ -619,12 +676,13 @@ public abstract class WMShellBaseModule {
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
             Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            TaskStackTransitionObserver taskStackTransitionObserver,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
                 RecentTasksController.create(context, shellInit, shellController,
                         shellCommandHandler, taskStackListener, activityTaskManager,
-                        desktopModeTaskRepository, mainExecutor));
+                        desktopModeTaskRepository, taskStackTransitionObserver, mainExecutor));
     }
 
     @BindsOptionalOf
@@ -896,7 +954,7 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        return desktopTasksController.flatMap((lazy)-> {
+        return desktopTasksController.flatMap((lazy) -> {
             if (DesktopModeStatus.canEnterDesktopMode(context)) {
                 return Optional.of(lazy.get());
             }
@@ -915,12 +973,26 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        return desktopModeTaskRepository.flatMap((lazy)-> {
+        return desktopModeTaskRepository.flatMap((lazy) -> {
             if (DesktopModeStatus.canEnterDesktopMode(context)) {
                 return Optional.of(lazy.get());
             }
             return Optional.empty();
         });
+    }
+
+    //
+    // Task Stack
+    //
+
+    @WMSingleton
+    @Provides
+    static TaskStackTransitionObserver provideTaskStackTransitionObserver(
+            Context context,
+            Lazy<Transitions> transitions,
+            ShellInit shellInit
+    ) {
+        return new TaskStackTransitionObserver(context, transitions, shellInit);
     }
 
     //

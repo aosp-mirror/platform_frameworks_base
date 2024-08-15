@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
+import kotlinx.coroutines.DisposableHandle
 
 object KeyguardSmartspaceViewBinder {
     @JvmStatic
@@ -39,8 +40,8 @@ object KeyguardSmartspaceViewBinder {
         clockViewModel: KeyguardClockViewModel,
         smartspaceViewModel: KeyguardSmartspaceViewModel,
         blueprintInteractor: KeyguardBlueprintInteractor,
-    ) {
-        keyguardRootView.repeatWhenAttached {
+    ): DisposableHandle {
+        return keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch("$TAG#clockViewModel.hasCustomWeatherDataDisplay") {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
@@ -121,10 +122,7 @@ object KeyguardSmartspaceViewBinder {
             ) {
                 val dateView =
                     constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
-                val weatherView =
-                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
                 addView(dateView)
-                addView(weatherView)
             }
         }
     }
@@ -141,9 +139,6 @@ object KeyguardSmartspaceViewBinder {
             ) {
                 val dateView =
                     constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
-                val weatherView =
-                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
-                removeView(weatherView)
                 removeView(dateView)
             }
         }

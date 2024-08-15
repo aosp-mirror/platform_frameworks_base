@@ -35,8 +35,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -56,7 +56,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PeopleBackupFollowUpJobTest extends SysuiTestCase {
     private static final String SHORTCUT_ID_1 = "101";

@@ -23,7 +23,6 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_WINDOWLESS;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_STARTING_WINDOW;
 
 import android.app.ActivityManager.RunningTaskInfo;

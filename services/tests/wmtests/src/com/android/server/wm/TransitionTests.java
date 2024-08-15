@@ -35,6 +35,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_CONFIG_AT_END;
+import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
@@ -77,10 +78,13 @@ import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -93,6 +97,7 @@ import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.RemoteTransition;
 import android.window.SystemPerformanceHinter;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentOrganizer;
 import android.window.TransitionInfo;
 
@@ -100,6 +105,7 @@ import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.window.flags.Flags;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -122,6 +128,8 @@ import java.util.function.Function;
 public class TransitionTests extends WindowTestsBase {
     final SurfaceControl.Transaction mMockT = mock(SurfaceControl.Transaction.class);
     private BLASTSyncEngine mSyncEngine;
+    private Transition mTransition;
+    private TransitionInfo mInfo;
 
     private Transition createTestTransition(int transitType, TransitionController controller) {
         final Transition transition = new Transition(transitType, 0 /* flags */, controller,
@@ -1565,13 +1573,22 @@ public class TransitionTests extends WindowTestsBase {
         enteringAnimReports.clear();
         doCallRealMethod().when(mWm.mRoot).ensureActivitiesVisible(any(), anyBoolean());
         final boolean[] wasInFinishingTransition = { false };
-        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener() {
+        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener(
+                mDisplayContent.mDisplayId) {
             @Override
             public void onAppTransitionFinishedLocked(IBinder token) {
                 final ActivityRecord r = ActivityRecord.forToken(token);
                 if (r != null) {
                     wasInFinishingTransition[0] = controller.inFinishingTransition(r);
                 }
+            }
+        });
+        final boolean[] calledListenerOnOtherDisplay = { false };
+        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener(
+                mDisplayContent.mDisplayId + 1234) {
+            @Override
+            public void onAppTransitionFinishedLocked(IBinder token) {
+                calledListenerOnOtherDisplay[0] = true;
             }
         });
         assertTrue(activity1.isVisible());
@@ -1584,6 +1601,7 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.finishTransition(closeTransition);
         assertTrue(wasInFinishingTransition[0]);
+        assertFalse(calledListenerOnOtherDisplay[0]);
         assertNull(controller.mFinishingTransition);
 
         assertTrue(activity2.isVisible());
@@ -1985,6 +2003,247 @@ public class TransitionTests extends WindowTestsBase {
         assertEquals(2, info.getChanges().size());
         assertEquals(expectedBackgroundColor, info.getChanges().get(0).getBackgroundColor());
         assertEquals(expectedBackgroundColor, info.getChanges().get(1).getBackgroundColor());
+    }
+
+    @DisableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_disableAnimOptionsPerChange() {
+        initializeOverrideAnimationOptionsTest();
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeCommonAnimOptions("testPackage");
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        assertEquals(options, mInfo.getAnimationOptions());
+    }
+
+    @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_fromStyleAnimOptions() {
+        initializeOverrideAnimationOptionsTest();
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeCommonAnimOptions("testPackage");
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
+        final TransitionInfo.Change taskChange = mInfo.getChanges().get(1);
+        final TransitionInfo.Change embeddedTfChange = mInfo.getChanges().get(2);
+        final TransitionInfo.Change activityChange = mInfo.getChanges().get(3);
+
+        assertNull("Display change's AnimationOptions must not be overridden.",
+                displayChange.getAnimationOptions());
+        assertNull("Task change's AnimationOptions must not be overridden.",
+                taskChange.getAnimationOptions());
+        assertNull("Embedded TF change's AnimationOptions must not be overridden.",
+                embeddedTfChange.getAnimationOptions());
+        assertEquals("Activity change's AnimationOptions must be overridden.",
+                options, activityChange.getAnimationOptions());
+    }
+
+    @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_sceneAnimOptions() {
+        initializeOverrideAnimationOptionsTest();
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeSceneTransitionAnimOptions();
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
+        final TransitionInfo.Change taskChange = mInfo.getChanges().get(1);
+        final TransitionInfo.Change embeddedTfChange = mInfo.getChanges().get(2);
+        final TransitionInfo.Change activityChange = mInfo.getChanges().get(3);
+
+        assertNull("Display change's AnimationOptions must not be overridden.",
+                displayChange.getAnimationOptions());
+        assertEquals("Task change's AnimationOptions must be overridden.",
+                options, taskChange.getAnimationOptions());
+        assertNull("Embedded TF change's AnimationOptions must not be overridden.",
+                embeddedTfChange.getAnimationOptions());
+        assertEquals("Activity change's AnimationOptions must be overridden.",
+                options, activityChange.getAnimationOptions());
+    }
+
+    @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_crossProfileAnimOptions() {
+        initializeOverrideAnimationOptionsTest();
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeCrossProfileAnimOptions();
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
+        final TransitionInfo.Change taskChange = mInfo.getChanges().get(1);
+        final TransitionInfo.Change embeddedTfChange = mInfo.getChanges().get(2);
+        final TransitionInfo.Change activityChange = mInfo.getChanges().get(3);
+        activityChange.setMode(TRANSIT_OPEN);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        assertNull("Display change's AnimationOptions must not be overridden.",
+                displayChange.getAnimationOptions());
+        assertNull("Task change's AnimationOptions must not be overridden.",
+                taskChange.getAnimationOptions());
+        assertNull("Embedded TF change's AnimationOptions must not be overridden.",
+                embeddedTfChange.getAnimationOptions());
+        assertEquals("Activity change's AnimationOptions must be overridden.",
+                options, activityChange.getAnimationOptions());
+        assertTrue(activityChange.hasFlags(FLAG_CROSS_PROFILE_OWNER_THUMBNAIL));
+    }
+
+    @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_customAnimOptions() {
+        initializeOverrideAnimationOptionsTest();
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("testPackage", Resources.ID_NULL,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        Color.GREEN, false /* overrideTaskTransition */);
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
+        final TransitionInfo.Change taskChange = mInfo.getChanges().get(1);
+        final TransitionInfo.Change embeddedTfChange = mInfo.getChanges().get(2);
+        final TransitionInfo.Change activityChange = mInfo.getChanges().get(3);
+
+        assertNull("Display change's AnimationOptions must not be overridden.",
+                displayChange.getAnimationOptions());
+        assertNull("Task change's AnimationOptions must not be overridden.",
+                taskChange.getAnimationOptions());
+        assertEquals("Embedded TF change's AnimationOptions must be overridden.",
+                options, embeddedTfChange.getAnimationOptions());
+        assertEquals("Embedded TF change's background color must not be overridden.",
+                0, embeddedTfChange.getBackgroundColor());
+        assertEquals("Activity change's AnimationOptions must be overridden.",
+                options, activityChange.getAnimationOptions());
+        assertEquals("Activity change's background color must be overridden.",
+                options.getBackgroundColor(), activityChange.getBackgroundColor());
+    }
+
+    @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_haveTaskFragmentAnimParams() {
+        initializeOverrideAnimationOptionsTest();
+
+        final TaskFragment embeddedTf = mTransition.mTargets.get(2).mContainer.asTaskFragment();
+        embeddedTf.setAnimationParams(new TaskFragmentAnimationParams.Builder()
+                .setAnimationBackgroundColor(Color.RED)
+                .setOpenAnimationResId(0x12345678)
+                .build());
+
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("testPackage", Resources.ID_NULL,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        Color.GREEN, false /* overrideTaskTransition */);
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
+        final TransitionInfo.Change taskChange = mInfo.getChanges().get(1);
+        final TransitionInfo.Change embeddedTfChange = mInfo.getChanges().get(2);
+        final TransitionInfo.Change activityChange = mInfo.getChanges().get(3);
+
+        final int expectedColor = embeddedTf.getAnimationParams().getAnimationBackgroundColor();
+        embeddedTfChange.setBackgroundColor(expectedColor);
+        final TransitionInfo.AnimationOptions expectedOptions = TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("testPackage", 0x12345678,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        0, false /* overrideTaskTransition */);
+        embeddedTfChange.setAnimationOptions(expectedOptions);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        assertNull("Display change's AnimationOptions must not be overridden.",
+                displayChange.getAnimationOptions());
+        assertNull("Task change's AnimationOptions must not be overridden.",
+                taskChange.getAnimationOptions());
+        assertEquals("Embedded TF change's AnimationOptions must be overridden.",
+                expectedOptions, embeddedTfChange.getAnimationOptions());
+        assertEquals("Embedded TF change's background color must not be overridden.",
+                expectedColor, embeddedTfChange.getBackgroundColor());
+        assertEquals("Activity change's AnimationOptions must be overridden.",
+                options, activityChange.getAnimationOptions());
+        assertEquals("Activity change's background color must be overridden.",
+                options.getBackgroundColor(), activityChange.getBackgroundColor());
+    }
+
+    @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_customAnimOptionsWithTaskOverride() {
+        initializeOverrideAnimationOptionsTest();
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("testPackage", Resources.ID_NULL,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
+                        Color.GREEN, true /* overrideTaskTransition */);
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
+        final TransitionInfo.Change taskChange = mInfo.getChanges().get(1);
+        final TransitionInfo.Change embeddedTfChange = mInfo.getChanges().get(2);
+        final TransitionInfo.Change activityChange = mInfo.getChanges().get(3);
+
+        assertNull("Display change's AnimationOptions must not be overridden.",
+                displayChange.getAnimationOptions());
+        assertEquals("Task change's AnimationOptions must be overridden.",
+                options, taskChange.getAnimationOptions());
+        assertEquals("Task change's background color must be overridden.",
+                options.getBackgroundColor(), taskChange.getBackgroundColor());
+        assertEquals("Embedded TF change's AnimationOptions must be overridden.",
+                options, embeddedTfChange.getAnimationOptions());
+        assertEquals("Embedded TF change's background color must be overridden.",
+                0, embeddedTfChange.getBackgroundColor());
+        assertEquals("Activity change's AnimationOptions must be overridden.",
+                options, activityChange.getAnimationOptions());
+        assertEquals("Activity change's background color must be overridden.",
+                options.getBackgroundColor(), activityChange.getBackgroundColor());
+    }
+
+    private void initializeOverrideAnimationOptionsTest() {
+        mTransition = createTestTransition(TRANSIT_OPEN);
+
+        // Test set AnimationOptions for Activity and Task.
+        final Task task = createTask(mDisplayContent);
+        // Create an embedded TaskFragment.
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        registerTaskFragmentOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
+        final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord nonEmbeddedActivity = createActivityRecord(task);
+        mWm.mCurrentUserId = nonEmbeddedActivity.mUserId;
+
+        mTransition.mTargets = new ArrayList<>();
+        mTransition.mTargets.add(new Transition.ChangeInfo(mDisplayContent));
+        mTransition.mTargets.add(new Transition.ChangeInfo(task));
+        mTransition.mTargets.add(new Transition.ChangeInfo(embeddedTf));
+        mTransition.mTargets.add(new Transition.ChangeInfo(nonEmbeddedActivity));
+
+        mInfo = new TransitionInfo(TRANSIT_OPEN, 0 /* flags */);
+        mInfo.addChange(new TransitionInfo.Change(mDisplayContent.mRemoteToken
+                .toWindowContainerToken(), mDisplayContent.getAnimationLeash()));
+        mInfo.addChange(new TransitionInfo.Change(task.mRemoteToken.toWindowContainerToken(),
+                task.getAnimationLeash()));
+        mInfo.addChange(new TransitionInfo.Change(embeddedTf.mRemoteToken.toWindowContainerToken(),
+                embeddedTf.getAnimationLeash()));
+        mInfo.addChange(new TransitionInfo.Change(null /* container */,
+                nonEmbeddedActivity.getAnimationLeash()));
     }
 
     @Test

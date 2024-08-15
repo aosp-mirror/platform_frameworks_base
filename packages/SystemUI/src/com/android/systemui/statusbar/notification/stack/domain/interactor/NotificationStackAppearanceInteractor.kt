@@ -79,9 +79,6 @@ constructor(
      */
     val scrolledToTop: StateFlow<Boolean> = placeholderRepository.scrolledToTop.asStateFlow()
 
-    /** The y-coordinate in px of bottom of the contents of the HUN. */
-    val headsUpTop: StateFlow<Float> = placeholderRepository.headsUpTop.asStateFlow()
-
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
      * should only happen when a notification expansion hits the bottom of the screen, so it is
@@ -124,9 +121,5 @@ constructor(
 
     fun setConstrainedAvailableSpace(height: Int) {
         placeholderRepository.constrainedAvailableSpace.value = height
-    }
-
-    fun setHeadsUpTop(headsUpTop: Float) {
-        placeholderRepository.headsUpTop.value = headsUpTop
     }
 }

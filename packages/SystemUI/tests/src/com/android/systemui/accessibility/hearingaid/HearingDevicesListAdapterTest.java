@@ -20,9 +20,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Tests for {@link HearingDevicesListAdapter}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class HearingDevicesListAdapterTest extends SysuiTestCase {

@@ -17,19 +17,20 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/brightness_slider"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/brightness_mirror_height"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:contentDescription="@string/accessibility_brightness"
         android:importantForAccessibility="no" >
 
         <com.android.systemui.settings.brightness.ToggleSeekBar
             android:id="@+id/slider"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/brightness_mirror_height"
             android:layout_gravity="center_vertical"
             android:minHeight="48dp"
             android:thumb="@null"
-            android:background="@null"
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
             android:progressDrawable="@drawable/brightness_progress_drawable"

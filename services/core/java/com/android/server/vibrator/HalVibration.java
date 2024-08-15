@@ -108,23 +108,6 @@ final class HalVibration extends Vibration {
     }
 
     /**
-     * Resolves the default vibration amplitude of {@link #getEffectToPlay()} and each fallback.
-     *
-     * @param defaultAmplitude An integer in [1,255] representing the device default amplitude to
-     *                        replace the {@link VibrationEffect#DEFAULT_AMPLITUDE}.
-     */
-    public void resolveEffects(int defaultAmplitude) {
-        CombinedVibration newEffect =
-                mEffectToPlay.transform(VibrationEffect::resolve, defaultAmplitude);
-        if (!Objects.equals(mEffectToPlay, newEffect)) {
-            mEffectToPlay = newEffect;
-        }
-        for (int i = 0; i < mFallbacks.size(); i++) {
-            mFallbacks.setValueAt(i, mFallbacks.valueAt(i).resolve(defaultAmplitude));
-        }
-    }
-
-    /**
      * Scales the {@link #getEffectToPlay()} and each fallback effect based on the vibration usage.
      */
     public void scaleEffects(VibrationScaler scaler) {
@@ -133,6 +116,7 @@ final class HalVibration extends Vibration {
         // Save scale values for debugging purposes.
         mScaleLevel = scaler.getScaleLevel(vibrationUsage);
         mAdaptiveScale = scaler.getAdaptiveHapticsScale(vibrationUsage);
+        stats.reportAdaptiveScale(mAdaptiveScale);
 
         // Scale all VibrationEffect instances in given CombinedVibration.
         CombinedVibration newEffect = mEffectToPlay.transform(scaler::scale, vibrationUsage);
@@ -186,9 +170,11 @@ final class HalVibration extends Vibration {
 
     /** Return {@link VibrationStats.StatsInfo} with read-only metrics about this vibration. */
     public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
-        int vibrationType = isRepeating()
-                ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED
-                : FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
+        int vibrationType = mEffectToPlay.hasVendorEffects()
+                ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__VENDOR
+                : isRepeating()
+                        ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED
+                        : FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
         return new VibrationStats.StatsInfo(
                 callerInfo.uid, vibrationType, callerInfo.attrs.getUsage(), mStatus,
                 stats, completionUptimeMillis);

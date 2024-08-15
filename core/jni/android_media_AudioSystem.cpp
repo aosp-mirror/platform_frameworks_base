@@ -27,6 +27,7 @@
 #include <android_media_audiopolicy.h>
 #include <android_os_Parcel.h>
 #include <audiomanager/AudioManager.h>
+#include <android-base/properties.h>
 #include <binder/IBinder.h>
 #include <jni.h>
 #include <media/AidlConversion.h>
@@ -41,8 +42,10 @@
 #include <system/audio_policy.h>
 #include <utils/Log.h>
 
+#include <thread>
 #include <optional>
 #include <sstream>
+#include <memory>
 #include <vector>
 
 #include "android_media_AudioAttributes.h"
@@ -260,6 +263,13 @@ static struct {
     jfieldID mFormat;
     jfieldID mMixerBehavior;
 } gAudioMixerAttributesField;
+
+static struct {
+    jclass clazz;
+    jmethodID run;
+} gRunnableClassInfo;
+
+static JavaVM* gVm;
 
 static Mutex gLock;
 
@@ -711,6 +721,19 @@ android_media_AudioSystem_getForceUse(JNIEnv *env, jobject thiz, jint usage)
 {
     return static_cast<jint>(
             AudioSystem::getForceUse(static_cast<audio_policy_force_use_t>(usage)));
+}
+
+static jint android_media_AudioSystem_setDeviceAbsoluteVolumeEnabled(JNIEnv *env, jobject thiz,
+                                                                     jint device, jstring address,
+                                                                     jboolean enabled,
+                                                                     jint stream) {
+    const char *c_address = env->GetStringUTFChars(address, nullptr);
+    int state = check_AudioSystem_Command(
+            AudioSystem::setDeviceAbsoluteVolumeEnabled(static_cast<audio_devices_t>(device),
+                                                        c_address, enabled,
+                                                        static_cast<audio_stream_type_t>(stream)));
+    env->ReleaseStringUTFChars(address, c_address);
+    return state;
 }
 
 static jint
@@ -2269,7 +2292,7 @@ static jint nativeAudioMixToJavaAudioMixingRule(JNIEnv *env, const AudioMix &nAu
                                  criteria.mValue.mUsage);
                 jMixMatchCriterion = env->NewObject(gAudioMixMatchCriterionClass,
                                                     gAudioMixMatchCriterionAttrCstor,
-                                                    jMixMatchCriterion, criteria.mRule);
+                                                    jAudioAttributes, criteria.mRule);
                 break;
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
                 jAudioAttributes = env->NewObject(gAudioAttributesClass, gAudioAttributesCstor);
@@ -2277,7 +2300,7 @@ static jint nativeAudioMixToJavaAudioMixingRule(JNIEnv *env, const AudioMix &nAu
                                  criteria.mValue.mSource);
                 jMixMatchCriterion = env->NewObject(gAudioMixMatchCriterionClass,
                                                     gAudioMixMatchCriterionAttrCstor,
-                                                    jMixMatchCriterion, criteria.mRule);
+                                                    jAudioAttributes, criteria.mRule);
                 break;
         }
         env->CallBooleanMethod(jAudioMixMatchCriterionList, gArrayListMethods.add,
@@ -2705,12 +2728,11 @@ static jint android_media_AudioSystem_getMaxChannelCount(JNIEnv *env, jobject th
 }
 
 static jint android_media_AudioSystem_getMaxSampleRate(JNIEnv *env, jobject thiz) {
-    // see frameworks/av/services/audiopolicy/common/include/policy.h
-    return 192000; // SAMPLE_RATE_HZ_MAX (for API)
+    return SAMPLE_RATE_HZ_MAX;
 }
 
 static jint android_media_AudioSystem_getMinSampleRate(JNIEnv *env, jobject thiz) {
-    return 4000; // SAMPLE_RATE_HZ_MIN  (for API)
+    return SAMPLE_RATE_HZ_MIN;
 }
 
 static std::vector<uid_t> convertJIntArrayToUidVector(JNIEnv *env, jintArray jArray) {
@@ -3350,6 +3372,55 @@ static jboolean android_media_AudioSystem_isBluetoothVariableLatencyEnabled(JNIE
     return enabled;
 }
 
+class JavaSystemPropertyListener {
+  public:
+    JavaSystemPropertyListener(JNIEnv* env, jobject javaCallback, std::string sysPropName) :
+            mCallback(env->NewGlobalRef(javaCallback)),
+            mCachedProperty(android::base::CachedProperty{std::move(sysPropName)}) {
+        mListenerThread = std::thread([this]() mutable {
+            JNIEnv* threadEnv = GetOrAttachJNIEnvironment(gVm);
+            while (!mCleanupSignal.load()) {
+                using namespace std::chrono_literals;
+                // 1s timeout so this thread can read the cleanup signal to (slowly) be able to
+                // be destroyed.
+                std::string newVal = mCachedProperty.WaitForChange(1000ms) ?: "";
+                if (newVal != "" && mLastVal != newVal) {
+                    threadEnv->CallVoidMethod(mCallback, gRunnableClassInfo.run);
+                    mLastVal = std::move(newVal);
+                }
+            }
+            });
+    }
+
+    ~JavaSystemPropertyListener() {
+        mCleanupSignal.store(true);
+        mListenerThread.join();
+        JNIEnv* env = GetOrAttachJNIEnvironment(gVm);
+        env->DeleteGlobalRef(mCallback);
+    }
+
+  private:
+    jobject mCallback;
+    android::base::CachedProperty mCachedProperty;
+    std::thread mListenerThread;
+    std::atomic<bool> mCleanupSignal{false};
+    std::string mLastVal = "";
+};
+
+std::vector<std::unique_ptr<JavaSystemPropertyListener>> gSystemPropertyListeners;
+std::mutex gSysPropLock{};
+
+static void android_media_AudioSystem_listenForSystemPropertyChange(JNIEnv *env,  jobject thiz,
+        jstring sysProp,
+        jobject javaCallback) {
+    ScopedUtfChars sysPropChars{env, sysProp};
+    auto listener = std::make_unique<JavaSystemPropertyListener>(env, javaCallback,
+            std::string{sysPropChars.c_str()});
+    std::unique_lock _l{gSysPropLock};
+    gSystemPropertyListeners.push_back(std::move(listener));
+}
+
+
 // ----------------------------------------------------------------------------
 
 #define MAKE_AUDIO_SYSTEM_METHOD(x) \
@@ -3373,6 +3444,7 @@ static const JNINativeMethod gMethods[] =
          MAKE_AUDIO_SYSTEM_METHOD(setPhoneState),
          MAKE_AUDIO_SYSTEM_METHOD(setForceUse),
          MAKE_AUDIO_SYSTEM_METHOD(getForceUse),
+         MAKE_AUDIO_SYSTEM_METHOD(setDeviceAbsoluteVolumeEnabled),
          MAKE_AUDIO_SYSTEM_METHOD(initStreamVolume),
          MAKE_AUDIO_SYSTEM_METHOD(setStreamVolumeIndex),
          MAKE_AUDIO_SYSTEM_METHOD(getStreamVolumeIndex),
@@ -3521,7 +3593,12 @@ static const JNINativeMethod gMethods[] =
                                 android_media_AudioSystem_clearPreferredMixerAttributes),
          MAKE_AUDIO_SYSTEM_METHOD(supportsBluetoothVariableLatency),
          MAKE_AUDIO_SYSTEM_METHOD(setBluetoothVariableLatencyEnabled),
-         MAKE_AUDIO_SYSTEM_METHOD(isBluetoothVariableLatencyEnabled)};
+         MAKE_AUDIO_SYSTEM_METHOD(isBluetoothVariableLatencyEnabled),
+         MAKE_JNI_NATIVE_METHOD("listenForSystemPropertyChange",
+                                "(Ljava/lang/String;Ljava/lang/Runnable;)V",
+                                android_media_AudioSystem_listenForSystemPropertyChange),
+
+        };
 
 static const JNINativeMethod gEventHandlerMethods[] =
         {MAKE_JNI_NATIVE_METHOD("native_setup", "(Ljava/lang/Object;)V",
@@ -3802,6 +3879,12 @@ int register_android_media_AudioSystem(JNIEnv *env)
                                                          "Landroid/media/AudioFormat;");
     gAudioMixerAttributesField.mMixerBehavior =
             GetFieldIDOrDie(env, audioMixerAttributesClass, "mMixerBehavior", "I");
+
+    jclass runnableClazz = FindClassOrDie(env, "java/lang/Runnable");
+    gRunnableClassInfo.clazz = MakeGlobalRefOrDie(env, runnableClazz);
+    gRunnableClassInfo.run = GetMethodIDOrDie(env, runnableClazz, "run", "()V");
+
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&gVm) != 0);
 
     AudioSystem::addErrorCallback(android_media_AudioSystem_error_callback);
 

@@ -21,6 +21,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.applicationContext
 import android.graphics.drawable.Icon
+import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -40,10 +41,14 @@ import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
 import com.android.systemui.media.controls.shared.model.MediaRecModel
 import com.android.systemui.media.controls.shared.model.MediaRecommendationsModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
+import com.android.systemui.media.controls.util.SmallHash
+import com.android.systemui.media.controls.util.mediaSmartspaceLogger
+import com.android.systemui.media.controls.util.mockMediaSmartspaceLogger
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -53,6 +58,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.eq
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -62,7 +68,11 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos().apply { applicationContext = spyContext }
     private val testScope = kosmos.testScope
 
-    private val mediaDataFilter: MediaDataFilterImpl = kosmos.mediaDataFilter
+    private val mediaDataFilter: MediaDataFilterImpl =
+        with(kosmos) {
+            mediaSmartspaceLogger = mockMediaSmartspaceLogger
+            mediaDataFilter
+        }
     private val activityStarter = kosmos.activityStarter
     private val icon: Icon = Icon.createWithResource(context, R.drawable.ic_media_play)
     private val smartspaceMediaData: SmartspaceMediaData =
@@ -72,6 +82,7 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
             packageName = PACKAGE_NAME,
             recommendations = MediaTestHelper.getValidRecommendationList(icon),
         )
+    private val smartspaceLogger = kosmos.mockMediaSmartspaceLogger
 
     private val underTest: MediaRecommendationsInteractor =
         with(kosmos) {
@@ -138,8 +149,24 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        underTest.removeMediaRecommendations(KEY_MEDIA_SMARTSPACE, intent, 0)
+        mediaDataFilter.onSmartspaceMediaDataLoaded(KEY_MEDIA_SMARTSPACE, smartspaceMediaData)
+        underTest.removeMediaRecommendations(
+            KEY_MEDIA_SMARTSPACE,
+            intent,
+            0,
+            SMARTSPACE_CARD_DISMISS_EVENT,
+            1
+        )
 
+        verify(smartspaceLogger)
+            .logSmartspaceCardUIEvent(
+                SMARTSPACE_CARD_DISMISS_EVENT,
+                SmallHash.hash(smartspaceMediaData.targetId),
+                Process.INVALID_UID,
+                surface = SURFACE,
+                cardinality = 1,
+                isRecommendationCard = true,
+            )
         verify(kosmos.mockBroadcastSender).sendBroadcast(eq(intent))
     }
 
@@ -151,7 +178,13 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.component = ComponentName(PACKAGE_NAME, EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME)
 
-        underTest.removeMediaRecommendations(KEY_MEDIA_SMARTSPACE, intent, 0)
+        underTest.removeMediaRecommendations(
+            KEY_MEDIA_SMARTSPACE,
+            intent,
+            0,
+            SMARTSPACE_CARD_DISMISS_EVENT,
+            1
+        )
 
         verify(spyContext).startActivity(eq(intent))
     }
@@ -171,13 +204,26 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        underTest.startClickIntent(expandable, intent)
+        mediaDataFilter.onSmartspaceMediaDataLoaded(KEY_MEDIA_SMARTSPACE, smartspaceMediaData)
+        underTest.startClickIntent(expandable, intent, SMARTSPACE_CARD_CLICK_EVENT, 1, 2, 3)
 
+        verify(smartspaceLogger)
+            .logSmartspaceCardUIEvent(
+                SMARTSPACE_CARD_CLICK_EVENT,
+                SmallHash.hash(smartspaceMediaData.targetId),
+                Process.INVALID_UID,
+                surface = SURFACE,
+                cardinality = 1,
+                isRecommendationCard = true,
+                interactedSubcardRank = 2,
+                interactedSubcardCardinality = 3
+            )
         verify(spyContext).startActivity(eq(intent))
     }
 
     companion object {
         private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
         private const val PACKAGE_NAME = "com.example.app"
+        private const val SURFACE = 4
     }
 }

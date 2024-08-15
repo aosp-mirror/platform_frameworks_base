@@ -16,10 +16,11 @@
 
 package com.android.systemui.scene.ui.composable.transitions
 
+import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
 
 fun TransitionBuilder.lockscreenToQuickSettingsShadeTransition(
     durationScale: Double = 1.0,
 ) {
-    toQuickSettingsShadeTransition(durationScale)
+    toQuickSettingsShadeTransition(Edge.Top, durationScale)
 }

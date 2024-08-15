@@ -14,96 +14,100 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/maximize_menu"
-    style="?android:attr/buttonBarStyle"
     android:layout_width="@dimen/desktop_mode_maximize_menu_width"
     android:layout_height="@dimen/desktop_mode_maximize_menu_height"
-    android:orientation="horizontal"
-    android:gravity="center"
-    android:padding="16dp"
     android:background="@drawable/desktop_mode_maximize_menu_background"
     android:elevation="1dp">
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:id="@+id/container"
+        android:layout_width="@dimen/desktop_mode_maximize_menu_width"
+        android:layout_height="@dimen/desktop_mode_maximize_menu_height"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center">
 
-        <FrameLayout
-            android:id="@+id/maximize_menu_maximize_button_layout"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/desktop_mode_maximize_menu_layout_background"
-            android:padding="4dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="4dp"
-            android:alpha="0">
+            android:orientation="vertical">
+
             <Button
+                android:layout_width="94dp"
+                android:layout_height="60dp"
                 android:id="@+id/maximize_menu_maximize_button"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="86dp"
-                android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
-                android:background="@drawable/desktop_mode_maximize_menu_button_background"
-                android:stateListAnimator="@null"/>
-        </FrameLayout>
+                android:stateListAnimator="@null"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="4dp"
+                android:alpha="0"/>
 
-        <TextView
-            android:id="@+id/maximize_menu_maximize_window_text"
-            android:layout_width="94dp"
-            android:layout_height="18dp"
-            android:textSize="11sp"
-            android:layout_marginBottom="76dp"
-            android:gravity="center"
-            android:fontFamily="google-sans-text"
-            android:text="@string/desktop_mode_maximize_menu_maximize_text"
-            android:textColor="?androidprv:attr/materialColorOnSurface"
-            android:alpha="0"/>
-    </LinearLayout>
+            <TextView
+                android:id="@+id/maximize_menu_maximize_window_text"
+                android:layout_width="94dp"
+                android:layout_height="18dp"
+                android:textSize="11sp"
+                android:layout_marginBottom="76dp"
+                android:gravity="center"
+                android:fontFamily="google-sans-text"
+                android:text="@string/desktop_mode_maximize_menu_maximize_text"
+                android:textColor="?androidprv:attr/materialColorOnSurface"
+                android:alpha="0"/>
+        </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
         <LinearLayout
-            android:id="@+id/maximize_menu_snap_menu_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="4dp"
-            android:background="@drawable/desktop_mode_maximize_menu_layout_background"
-            android:layout_marginBottom="4dp"
-            android:alpha="0">
-            <Button
-                android:id="@+id/maximize_menu_snap_left_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="41dp"
-                android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
-                android:layout_marginRight="4dp"
-                android:background="@drawable/desktop_mode_maximize_menu_button_background"
-                android:stateListAnimator="@null"/>
+            android:orientation="vertical">
+            <LinearLayout
+                android:id="@+id/maximize_menu_snap_menu_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="4dp"
+                android:background="@drawable/desktop_mode_maximize_menu_layout_background"
+                android:layout_marginBottom="4dp"
+                android:alpha="0">
+                <Button
+                    android:id="@+id/maximize_menu_snap_left_button"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="41dp"
+                    android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
+                    android:layout_marginRight="4dp"
+                    android:background="@drawable/desktop_mode_maximize_menu_button_background"
+                    android:stateListAnimator="@null"/>
 
-            <Button
-                android:id="@+id/maximize_menu_snap_right_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="41dp"
-                android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
-                android:background="@drawable/desktop_mode_maximize_menu_button_background"
-                android:stateListAnimator="@null"/>
+                <Button
+                    android:id="@+id/maximize_menu_snap_right_button"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="41dp"
+                    android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
+                    android:background="@drawable/desktop_mode_maximize_menu_button_background"
+                    android:stateListAnimator="@null"/>
+            </LinearLayout>
+            <TextView
+                android:id="@+id/maximize_menu_snap_window_text"
+                android:layout_width="94dp"
+                android:layout_height="18dp"
+                android:textSize="11sp"
+                android:layout_marginBottom="76dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:fontFamily="google-sans-text"
+                android:text="@string/desktop_mode_maximize_menu_snap_text"
+                android:textColor="?androidprv:attr/materialColorOnSurface"
+                android:alpha="0"/>
         </LinearLayout>
-        <TextView
-            android:id="@+id/maximize_menu_snap_window_text"
-            android:layout_width="94dp"
-            android:layout_height="18dp"
-            android:textSize="11sp"
-            android:layout_marginBottom="76dp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:fontFamily="google-sans-text"
-            android:text="@string/desktop_mode_maximize_menu_snap_text"
-            android:textColor="?androidprv:attr/materialColorOnSurface"
-            android:alpha="0"/>
     </LinearLayout>
-</LinearLayout>
+
+    <!-- Empty view intentionally placed in front of everything else and matching the menu size
+     used to monitor input events over the entire menu. -->
+    <View
+        android:id="@+id/maximize_menu_overlay"
+        android:layout_width="@dimen/desktop_mode_maximize_menu_width"
+        android:layout_height="@dimen/desktop_mode_maximize_menu_height"/>
+</FrameLayout>
 

@@ -66,7 +66,7 @@ class UserDataPreparer {
      * Prepare storage areas for given user on all mounted devices.
      */
     void prepareUserData(UserInfo userInfo, int flags) {
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             /*
              * Internal storage must be prepared before adoptable storage, since the user's volume
@@ -157,7 +157,7 @@ class UserDataPreparer {
      * Destroy storage areas for given user on all mounted devices.
      */
     void destroyUserData(int userId, int flags) {
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             /*
              * Volume destruction order isn't really important, but to avoid any weird issues we
@@ -262,7 +262,7 @@ class UserDataPreparer {
             }
 
             if (destroyUser) {
-                synchronized (mInstallLock) {
+                try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
                     destroyUserDataLI(volumeUuid, userId,
                             StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
                 }

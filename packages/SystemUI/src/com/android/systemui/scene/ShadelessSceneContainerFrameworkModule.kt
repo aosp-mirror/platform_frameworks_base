@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene
 
+import com.android.systemui.scene.domain.SceneDomainModule
+import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import dagger.Module
@@ -29,6 +31,10 @@ import dagger.Provides
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,
+            SceneDomainModule::class,
+
+            // List SceneResolver modules for supported SceneFamilies
+            HomeSceneFamilyResolverModule::class,
         ],
 )
 object ShadelessSceneContainerFrameworkModule {
@@ -47,11 +53,12 @@ object ShadelessSceneContainerFrameworkModule {
                     Scenes.Bouncer,
                 ),
             initialSceneKey = Scenes.Lockscreen,
-            mapOf(
-                Scenes.Gone to 0,
-                Scenes.Lockscreen to 0,
-                Scenes.Bouncer to 1,
-            )
+            navigationDistances =
+                mapOf(
+                    Scenes.Gone to 0,
+                    Scenes.Lockscreen to 0,
+                    Scenes.Bouncer to 1,
+                )
         )
     }
 }

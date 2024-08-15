@@ -26,6 +26,8 @@ import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET_DOCKED;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
@@ -43,15 +45,11 @@ public class InfoMediaDevice extends MediaDevice {
     private static final String TAG = "InfoMediaDevice";
 
     InfoMediaDevice(
-            Context context,
-            MediaRoute2Info info,
-            RouteListingPreference.Item item) {
+            @NonNull Context context,
+            @NonNull MediaRoute2Info info,
+            @Nullable RouteListingPreference.Item item) {
         super(context, info, item);
         initDeviceRecord();
-    }
-
-    InfoMediaDevice(Context context, MediaRoute2Info info) {
-        this(context, info, null);
     }
 
     @Override

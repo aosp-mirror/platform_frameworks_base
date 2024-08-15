@@ -60,6 +60,16 @@ import java.util.Objects;
  * start times, throttling, and other useful diagnostic data can be obtained from
  * {@link ApplicationStartInfo} records.
  * </p>
+ *
+ * <p>
+*  ApplicationStartInfo objects can be retrieved via:
+*  - {@link ActivityManager#getHistoricalProcessStartReasons}, which can be called during or after
+ *      a application's startup. Using this method, an app can retrieve information about an
+ *      in-progress app start.
+*  - {@link ActivityManager#addApplicationStartInfoCompletionListener}, which returns an
+ *      ApplicationStartInfo object via a callback when the startup is complete, or immediately
+ *      if requested after the startup is complete.
+ * </p>
  */
 @FlaggedApi(Flags.FLAG_APP_START_INFO)
 public final class ApplicationStartInfo implements Parcelable {
@@ -416,11 +426,34 @@ public final class ApplicationStartInfo implements Parcelable {
 
     /**
      * @see #getStartIntent
+     *
+     * <p class="note"> Note: This method will clone the provided intent and ensure that the cloned
+     * intent doesn't contain any large objects like bitmaps in its extras by stripping it in the
+     * least aggressive acceptable way for the individual intent.</p>
+     *
      * @hide
      */
     public void setIntent(Intent startIntent) {
         if (startIntent != null) {
-            mStartIntent = startIntent.maybeStripForHistory();
+            if (startIntent.canStripForHistory()) {
+                // If maybeStripForHistory will return a lightened version, do that.
+                mStartIntent = startIntent.maybeStripForHistory();
+            } else if (startIntent.getExtras() != null) {
+                // If maybeStripForHistory would not return a lightened version and extras is
+                // non-null then extras contains un-parcelled data. Use cloneFilter to strip data
+                // more aggressively.
+                mStartIntent = startIntent.cloneFilter();
+            } else {
+                // Finally, if maybeStripForHistory would not return a lightened version and extras
+                // is null then do a regular clone so we don't leak the intent.
+                mStartIntent = new Intent(startIntent);
+            }
+
+            // If the newly cloned intent has an original intent, clear that as we don't need it and
+            // can't guarantee it doesn't need to be stripped as well.
+            if (mStartIntent.getOriginalIntent() != null) {
+                mStartIntent.setOriginalIntent(null);
+            }
         }
     }
 

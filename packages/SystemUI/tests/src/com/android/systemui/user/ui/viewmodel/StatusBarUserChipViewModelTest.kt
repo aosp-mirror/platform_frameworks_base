@@ -23,6 +23,7 @@ import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.UserManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -60,7 +61,6 @@ import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
@@ -68,7 +68,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class StatusBarUserChipViewModelTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var activityManager: ActivityManager

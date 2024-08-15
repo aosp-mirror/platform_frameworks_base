@@ -15,10 +15,14 @@
  */
 package com.android.systemui.statusbar.policy
 
+import android.os.Handler
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.internal.logging.UiEvent
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.policy.BaseHeadsUpManager.HeadsUpEntry
@@ -34,11 +38,28 @@ import javax.inject.Inject
 class AvalancheController
 @Inject
 constructor(
-    dumpManager: DumpManager,
+        dumpManager: DumpManager,
+        private val uiEventLogger: UiEventLogger,
+        private val headsUpManagerLogger: HeadsUpManagerLogger,
+        @Background private val bgHandler: Handler
 ) : Dumpable {
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
+    var enableAtRuntime = true
+        set(value) {
+            if (!value) {
+                // Waiting HUNs in AvalancheController are shown in the HUN section in open shade.
+                // Clear them so we don't show them again when the shade closes and reordering is
+                // allowed again.
+                logDroppedHunsInBackground(getWaitingKeys().size)
+                clearNext()
+                headsUpEntryShowing = null
+            }
+            if (field != value) {
+                field = value
+            }
+        }
 
     // HUN showing right now, in the floating state where full shade is hidden, on launcher or AOD
     @VisibleForTesting var headsUpEntryShowing: HeadsUpEntry? = null
@@ -65,6 +86,18 @@ constructor(
     // For debugging only
     @VisibleForTesting var debugDropSet: MutableSet<HeadsUpEntry> = HashSet()
 
+    enum class ThrottleEvent(private val id: Int) : UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "HUN was shown.") AVALANCHE_THROTTLING_HUN_SHOWN(1821),
+        @UiEvent(doc = "HUN was dropped to show higher priority HUNs.")
+        AVALANCHE_THROTTLING_HUN_DROPPED(1822),
+        @UiEvent(doc = "HUN was removed while waiting to show.")
+        AVALANCHE_THROTTLING_HUN_REMOVED(1823);
+
+        override fun getId(): Int {
+            return id
+        }
+    }
+
     init {
         dumpManager.registerNormalDumpable(tag, /* module */ this)
     }
@@ -73,29 +106,41 @@ constructor(
         return getKey(headsUpEntryShowing)
     }
 
+    fun isEnabled(): Boolean {
+        return NotificationThrottleHun.isEnabled && enableAtRuntime
+    }
+
     /** Run or delay Runnable for given HeadsUpEntry */
-    fun update(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
-        if (!NotificationThrottleHun.isEnabled) {
+    fun update(entry: HeadsUpEntry?, runnable: Runnable?, caller: String) {
+        val isEnabled = isEnabled()
+        val key = getKey(entry)
+
+        if (runnable == null) {
+            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Runnable NULL, stop")
+            return
+        }
+        if (!isEnabled) {
+            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key,
+                    "NOT ENABLED, run runnable")
             runnable.run()
             return
         }
-        log { "\n "}
-        val fn = "$label => AvalancheController.update ${getKey(entry)}"
         if (entry == null) {
-            log { "Entry is NULL, stop update." }
+            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Entry NULL, stop")
             return
         }
         if (debug) {
-            debugRunnableLabelMap[runnable] = label
+            debugRunnableLabelMap[runnable] = caller
         }
+        var outcome = ""
         if (isShowing(entry)) {
-            log { "\n$fn => update showing" }
+            outcome = "update showing"
             runnable.run()
         } else if (entry in nextMap) {
-            log { "\n$fn => update next" }
+            outcome = "update next"
             nextMap[entry]?.add(runnable)
         } else if (headsUpEntryShowing == null) {
-            log { "\n$fn => showNow" }
+            outcome = "show now"
             showNow(entry, arrayListOf(runnable))
         } else {
             // Clean up invalid state when entry is in list but not map and vice versa
@@ -111,12 +156,14 @@ constructor(
                 // HeadsUpEntry.updateEntry recursively calls AvalancheController#update
                 // and goes to the isShowing case above
                 headsUpEntryShowing!!.updateEntry(
-                        /* updatePostTime= */ false,
-                        /* updateEarliestRemovalTime= */ false,
-                        /* reason= */ "avalanche duration update")
+                    /* updatePostTime= */ false,
+                    /* updateEarliestRemovalTime= */ false,
+                    /* reason= */ "avalanche duration update"
+                )
             }
         }
-        logState("after $fn")
+        outcome += getStateStr()
+        headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, outcome)
     }
 
     @VisibleForTesting
@@ -129,27 +176,37 @@ constructor(
      * Run or ignore Runnable for given HeadsUpEntry. If entry was never shown, ignore and delete
      * all Runnables associated with that entry.
      */
-    fun delete(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
-        if (!NotificationThrottleHun.isEnabled) {
+    fun delete(entry: HeadsUpEntry?, runnable: Runnable?, caller: String) {
+        val isEnabled = isEnabled()
+        val key = getKey(entry)
+
+        if (runnable == null) {
+            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key, "Runnable NULL, stop")
+            return
+        }
+        if (!isEnabled) {
+            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
+                    "NOT ENABLED, run runnable")
             runnable.run()
             return
         }
-        log { "\n "}
-        val fn = "$label => AvalancheController.delete " + getKey(entry)
         if (entry == null) {
-            log { "$fn => entry NULL, running runnable" }
+            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
+                    "Entry NULL, run runnable")
             runnable.run()
             return
         }
+        var outcome = ""
         if (entry in nextMap) {
-            log { "$fn => remove from next" }
+            outcome = "remove from next"
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
+            uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_REMOVED)
         } else if (entry in debugDropSet) {
-            log { "$fn => remove from dropset" }
+            outcome = "remove from dropset"
             debugDropSet.remove(entry)
         } else if (isShowing(entry)) {
-            log { "$fn => remove showing ${getKey(entry)}" }
+            outcome = "remove showing"
             previousHunKey = getKey(headsUpEntryShowing)
             // Show the next HUN before removing this one, so that we don't tell listeners
             // onHeadsUpPinnedModeChanged, which causes
@@ -158,20 +215,25 @@ constructor(
             showNext()
             runnable.run()
         } else {
-            log { "$fn => removing untracked ${getKey(entry)}" }
+            outcome = "run runnable for untracked shown"
+            runnable.run()
         }
-        logState("after $fn")
+        headsUpManagerLogger.logAvalancheDelete(caller, isEnabled(), getKey(entry), outcome)
     }
 
     /**
      * Returns duration based on
-     * 1) Whether HeadsUpEntry is the last one tracked byAvalancheController
+     * 1) Whether HeadsUpEntry is the last one tracked by AvalancheController
      * 2) The priority of the top HUN in the next batch Used by
      *    BaseHeadsUpManager.HeadsUpEntry.calculateFinishTime to shorten display duration.
      */
-    fun getDurationMs(entry: HeadsUpEntry, autoDismissMs: Int): Int {
-        if (!NotificationThrottleHun.isEnabled) {
+    fun getDurationMs(entry: HeadsUpEntry?, autoDismissMs: Int): Int {
+        if (!isEnabled()) {
             // Use default duration, like we did before AvalancheController existed
+            return autoDismissMs
+        }
+        if (entry == null) {
+            // This should never happen
             return autoDismissMs
         }
         val showingList: MutableList<HeadsUpEntry> = mutableListOf()
@@ -219,7 +281,7 @@ constructor(
 
     /** Return true if entry is waiting to show. */
     fun isWaiting(key: String): Boolean {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return false
         }
         for (entry in nextMap.keys) {
@@ -232,7 +294,7 @@ constructor(
 
     /** Return list of keys for huns waiting */
     fun getWaitingKeys(): MutableList<String> {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return mutableListOf()
         }
         val keyList = mutableListOf<String>()
@@ -243,7 +305,7 @@ constructor(
     }
 
     fun getWaitingEntry(key: String): HeadsUpEntry? {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return null
         }
         for (headsUpEntry in nextMap.keys) {
@@ -255,7 +317,7 @@ constructor(
     }
 
     fun getWaitingEntryList(): List<HeadsUpEntry> {
-        if (!NotificationThrottleHun.isEnabled) {
+        if (!isEnabled()) {
             return mutableListOf()
         }
         return nextMap.keys.toList()
@@ -268,6 +330,7 @@ constructor(
     private fun showNow(entry: HeadsUpEntry, runnableList: MutableList<Runnable>) {
         log { "SHOW: " + getKey(entry) }
 
+        uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN)
         headsUpEntryShowing = entry
 
         runnableList.forEach {
@@ -295,6 +358,8 @@ constructor(
 
         // Remove runnable labels for dropped huns
         val listToDrop = nextList.subList(1, nextList.size)
+        logDroppedHunsInBackground(listToDrop.size)
+
         if (debug) {
             // Clear runnable labels
             for (e in listToDrop) {
@@ -308,6 +373,17 @@ constructor(
 
         clearNext()
         showNow(headsUpEntryShowing!!, headsUpEntryShowingRunnableList)
+    }
+
+    private fun logDroppedHunsInBackground(numDropped: Int) {
+        bgHandler.post(
+            Runnable {
+                // Do this in the background to avoid missing frames when closing the shade
+                for (n in 1..numDropped) {
+                    uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_DROPPED)
+                }
+            }
+        )
     }
 
     fun clearNext() {
@@ -324,22 +400,12 @@ constructor(
     }
 
     private fun getStateStr(): String {
-        return "SHOWING: [${getKey(headsUpEntryShowing)}]" +
-            "\nPREVIOUS: [$previousHunKey]" +
-            "\nNEXT LIST: $nextListStr" +
-            "\nNEXT MAP: $nextMapStr" +
-            "\nDROPPED: $dropSetStr"
-    }
-
-    private fun logState(reason: String) {
-        log {
-            "\n================================================================================="
-        }
-        log { "STATE $reason" }
-        log { getStateStr() }
-        log {
-            "=================================================================================\n"
-        }
+        return "\navalanche state:" +
+                "\n\tshowing: [${getKey(headsUpEntryShowing)}]" +
+                "\n\tprevious: [$previousHunKey]" +
+                "\n\tnext list: $nextListStr" +
+                "\n\tnext map: $nextMapStr" +
+                "\n\tdropped: $dropSetStr"
     }
 
     private val dropSetStr: String

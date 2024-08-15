@@ -1,9 +1,9 @@
 package com.android.systemui.qs
 
 import android.content.Context
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.widget.Scroller
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.PageIndicator.PageScrollActionListener
@@ -19,7 +19,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class PagedTileLayoutTest : SysuiTestCase() {
 

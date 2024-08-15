@@ -436,20 +436,20 @@ public class WearableSensingManager {
     /**
      * Requests the wearable to start hotword recognition.
      *
-     * <p>When this method is called, the system will attempt to provide a {@link
-     * android.service.wearable.WearableHotwordAudioConsumer} to {@link WearableSensingService}.
-     * After first-stage hotword is detected on a wearable, {@link WearableSensingService} should
-     * send the hotword audio to the {@link android.service.wearable.WearableHotwordAudioConsumer},
-     * which will forward the data to the {@link android.service.voice.HotwordDetectionService} for
+     * <p>When this method is called, the system will attempt to provide a {@code
+     * Consumer<android.service.voice.HotwordAudioStream>} to {@link WearableSensingService}. After
+     * first-stage hotword is detected on a wearable, {@link WearableSensingService} should send the
+     * hotword audio to the {@code Consumer<android.service.voice.HotwordAudioStream>}, which will
+     * forward the data to the {@link android.service.voice.HotwordDetectionService} for
      * second-stage hotword validation. If hotword is detected there, the audio data will be
      * forwarded to the {@link android.service.voice.VoiceInteractionService}.
      *
      * <p>If the {@code targetVisComponentName} provided here is not null, when {@link
-     * WearableSensingService} sends hotword audio to the {@link
-     * android.service.wearable.WearableHotwordAudioConsumer}, the system will check whether the
-     * {@link android.service.voice.VoiceInteractionService} at that time is {@code
+     * WearableSensingService} sends hotword audio to the {@code
+     * Consumer<android.service.voice.HotwordAudioStream>}, the system will check whether the {@link
+     * android.service.voice.VoiceInteractionService} at that time is {@code
      * targetVisComponentName}. If not, the system will call {@link
-     * WearableSensingService#onActiveHotwordAudioStopRequested()} and will not forward the audio
+     * WearableSensingService#onStopHotwordAudioStream()} and will not forward the audio
      * data to the current {@link android.service.voice.HotwordDetectionService} nor {@link
      * android.service.voice.VoiceInteractionService}. The system will not send a status code to
      * {@code statusConsumer} regarding the {@code targetVisComponentName} check. The caller is
@@ -457,16 +457,16 @@ public class WearableSensingManager {
      * android.service.voice.VoiceInteractionService} is the same as {@code targetVisComponentName}.
      * The check here is just a protection against race conditions.
      *
-     * <p>Calling this method again will send a new {@link
-     * android.service.wearable.WearableHotwordAudioConsumer} to {@link WearableSensingService}. For
+     * <p>Calling this method again will send a new {@code
+     * Consumer<android.service.voice.HotwordAudioStream>} to {@link WearableSensingService}. For
      * audio data sent to the new consumer, the system will perform the above check using the newly
      * provided {@code targetVisComponentName}. The {@link WearableSensingService} should not
      * continue to use the previous consumers after receiving a new one.
      *
      * <p>If the {@code statusConsumer} returns {@link STATUS_SUCCESS}, the caller should call
-     * {@link #stopListeningForHotword(Executor, Consumer)} when it wants the wearable to stop
+     * {@link #stopHotwordRecognition(Executor, Consumer)} when it wants the wearable to stop
      * listening for hotword. If the {@code statusConsumer} returns any other status code, a failure
-     * has occurred and calling {@link #stopListeningForHotword(Executor, Consumer)} is not
+     * has occurred and calling {@link #stopHotwordRecognition(Executor, Consumer)} is not
      * required. The system will not retry listening automatically. The caller should call this
      * method again if they want to retry.
      *

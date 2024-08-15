@@ -19,6 +19,7 @@ package com.android.systemui.keyboard.stickykeys.ui.viewmodel
 import android.hardware.input.InputManager
 import android.hardware.input.StickyModifierState
 import android.provider.Settings.Secure.ACCESSIBILITY_STICKY_KEYS
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -47,14 +48,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
 
     private val dispatcher = StandardTestDispatcher()

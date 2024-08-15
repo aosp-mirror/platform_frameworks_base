@@ -252,4 +252,10 @@ public class PhoneConstants {
 
     /** The key to specify the emergency service category */
     public static final String EXTRA_EMERGENCY_SERVICE_CATEGORY = "emergency_service_category";
+
+    /** The key to specify the alternate emergency URNs */
+    public static final String EXTRA_EMERGENCY_URNS = "emergency_urns";
+
+    /** The key to specify whether or not to use emergency routing */
+    public static final String EXTRA_USE_EMERGENCY_ROUTING = "use_emergency_routing";
 }

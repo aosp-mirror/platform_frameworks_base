@@ -32,9 +32,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
@@ -44,6 +44,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -54,7 +55,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class SessionTrackerTest extends SysuiTestCase {
@@ -68,6 +69,8 @@ public class SessionTrackerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private ProcessWrapper mProcessWrapper;
 
     @Captor
     ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
@@ -86,13 +89,15 @@ public class SessionTrackerTest extends SysuiTestCase {
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        when(mProcessWrapper.isSystemUser()).thenReturn(true);
 
         mSessionTracker = new SessionTracker(
                 mStatusBarService,
                 mAuthController,
                 mKeyguardUpdateMonitor,
                 mKeyguardStateController,
-                mUiEventLogger
+                mUiEventLogger,
+                mProcessWrapper
         );
     }
 

@@ -31,6 +31,11 @@ object TransitionKeys {
     val CollapseShadeInstantly = TransitionKey("CollapseShadeInstantly")
 
     /**
+     * Reference to a scene transition that brings up the shade from the bottom instead of the top.
+     */
+    val OpenBottomShade = TransitionKey("OpenBottomShade")
+
+    /**
      * Reference to a scene transition that can collapse the shade scene slightly faster than a
      * normal collapse would.
      */

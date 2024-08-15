@@ -16,9 +16,9 @@
 
 package com.android.systemui.media.controls.ui.view
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.MotionEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.util.MediaUiEventLogger
@@ -38,7 +38,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class MediaCarouselScrollHandlerTest : SysuiTestCase() {
 
     private val carouselWidth = 1038

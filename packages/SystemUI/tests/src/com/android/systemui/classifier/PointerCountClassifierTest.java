@@ -23,9 +23,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 
-import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
@@ -34,7 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class PointerCountClassifierTest extends ClassifierTest {
 
     private FalsingClassifier mClassifier;

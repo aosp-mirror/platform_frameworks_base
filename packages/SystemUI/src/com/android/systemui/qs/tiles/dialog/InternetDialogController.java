@@ -65,6 +65,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -118,8 +119,6 @@ import javax.inject.Inject;
 public class InternetDialogController implements AccessPointController.AccessPointCallback {
 
     private static final String TAG = "InternetDialogController";
-    private static final String ACTION_NETWORK_PROVIDER_SETTINGS =
-            "android.settings.NETWORK_PROVIDER_SETTINGS";
     private static final String ACTION_WIFI_SCANNING_SETTINGS =
             "android.settings.WIFI_SCANNING_SETTINGS";
     /**
@@ -186,7 +185,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private GlobalSettings mGlobalSettings;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private ConnectivityManager.NetworkCallback mConnectivityManagerNetworkCallback;
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     private ToastFactory mToastFactory;
     private SignalDrawable mSignalDrawable;
     private SignalDrawable mSecondarySignalDrawable; // For the secondary mobile data sub in DSDS
@@ -248,7 +247,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             @Main Handler handler, @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher, KeyguardUpdateMonitor keyguardUpdateMonitor,
             GlobalSettings globalSettings, KeyguardStateController keyguardStateController,
-            WindowManager windowManager, ToastFactory toastFactory,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager, ToastFactory toastFactory,
             @Background Handler workerHandler,
             CarrierConfigTracker carrierConfigTracker,
             LocationController locationController,
@@ -280,7 +279,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mAccessPointController = accessPointController;
         mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
         mConnectivityManagerNetworkCallback = new DataConnectivityListener();
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mToastFactory = toastFactory;
         mSignalDrawable = new SignalDrawable(mContext);
         mSecondarySignalDrawable = new SignalDrawable(mContext);
@@ -363,7 +362,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
     @VisibleForTesting
     protected Intent getSettingsIntent() {
-        return new Intent(ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return new Intent(Settings.ACTION_NETWORK_PROVIDER_SETTINGS).addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     @Nullable
@@ -736,7 +736,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         // Set network description for the carrier network when connecting to the carrier network
         // under the airplane mode ON.
         if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
-            summary = context.getString(R.string.preference_summary_default_combination,
+            summary = context.getString(
+                    com.android.settingslib.R.string.preference_summary_default_combination,
                     context.getString(
                             isForDds // if nonDds is active, explains Dds status as poor connection
                                     ? (isOnNonDds ? R.string.mobile_data_poor_connection

@@ -83,7 +83,7 @@ public class TelephonyFrameworkInitializer {
         // Check SDK version of the vendor partition.
         final int vendorApiLevel = SystemProperties.getInt(
                 "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
-        if (vendorApiLevel < Build.VERSION_CODES.VANILLA_ICE_CREAM) return true;
+        if (vendorApiLevel < Build.VENDOR_API_2024_Q2) return true;
 
         // Check SDK version of the client app.
         if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES)) return true;

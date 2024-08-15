@@ -42,9 +42,9 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -70,7 +70,7 @@ import org.mockito.MockitoAnnotations;
 import java.lang.ref.WeakReference;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class PowerNotificationWarningsTest extends SysuiTestCase {
 

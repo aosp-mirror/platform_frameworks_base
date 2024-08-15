@@ -21,20 +21,24 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.hardware.vibrator.IVibrator;
 import android.os.CombinedVibration;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.VibrationEffect;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
+import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.SparseArray;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 
 import com.android.server.LocalServices;
 
@@ -74,9 +78,10 @@ public class DeviceAdapterTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
 
+        Context context = ApplicationProvider.getApplicationContext();
         mTestLooper = new TestLooper();
-        mVibrationSettings = new VibrationSettings(
-                InstrumentationRegistry.getContext(), new Handler(mTestLooper.getLooper()));
+        mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),
+                new VibrationConfig(context.getResources()));
 
         SparseArray<VibratorController> vibrators = new SparseArray<>();
         vibrators.put(EMPTY_VIBRATOR_ID, createEmptyVibratorController(EMPTY_VIBRATOR_ID));
@@ -97,6 +102,17 @@ public class DeviceAdapterTest {
                         VibrationEffect.EFFECT_THUD, true, VibrationEffect.EFFECT_STRENGTH_STRONG),
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_SPIN, 0.5f, 100)),
                 /* repeatIndex= */ -1);
+
+        assertThat(mAdapter.adaptToVibrator(EMPTY_VIBRATOR_ID, effect)).isEqualTo(effect);
+        assertThat(mAdapter.adaptToVibrator(PWLE_VIBRATOR_ID, effect)).isEqualTo(effect);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testVendorEffect_returnsOriginalSegment() {
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("key", 1);
+        VibrationEffect effect = VibrationEffect.createVendorEffect(vendorData);
 
         assertThat(mAdapter.adaptToVibrator(EMPTY_VIBRATOR_ID, effect)).isEqualTo(effect);
         assertThat(mAdapter.adaptToVibrator(PWLE_VIBRATOR_ID, effect)).isEqualTo(effect);

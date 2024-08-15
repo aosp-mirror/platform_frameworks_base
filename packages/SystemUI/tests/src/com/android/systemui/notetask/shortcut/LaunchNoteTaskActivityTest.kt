@@ -16,8 +16,8 @@
 
 package com.android.systemui.notetask.shortcut
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
@@ -35,7 +35,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
 class LaunchNoteTaskActivityTest : SysuiTestCase() {

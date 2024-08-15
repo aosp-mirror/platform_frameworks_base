@@ -158,6 +158,9 @@ constructor(
     override suspend fun prependDefault(
         userId: Int,
     ) {
+        if (retailModeRepository.inRetailMode) {
+            return
+        }
         userTileRepositories.get(userId)?.prependDefault()
     }
 

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,10 +35,15 @@ import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
+
+import kotlin.Lazy;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,7 +54,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 /** Tests for {@link MenuViewLayerController}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class MenuViewLayerControllerTest extends SysuiTestCase {
@@ -69,11 +73,16 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
     @Mock
     private WindowMetrics mWindowMetrics;
 
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
+
     private MenuViewLayerController mMenuViewLayerController;
 
     @Before
     public void setUp() throws Exception {
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
+        final ViewCaptureAwareWindowManager viewCaptureAwareWm = new ViewCaptureAwareWindowManager(
+                mWindowManager, mLazyViewCapture, /* isViewCaptureEnabled= */ false);
         doAnswer(invocation -> wm.getMaximumWindowMetrics()).when(
                 mWindowManager).getMaximumWindowMetrics();
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
@@ -81,7 +90,7 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
         when(mWindowMetrics.getBounds()).thenReturn(new Rect(0, 0, 1080, 2340));
         when(mWindowMetrics.getWindowInsets()).thenReturn(stubDisplayInsets());
         mMenuViewLayerController = new MenuViewLayerController(mContext, mWindowManager,
-                mAccessibilityManager, mSecureSettings);
+                viewCaptureAwareWm, mAccessibilityManager, mSecureSettings);
     }
 
     @Test

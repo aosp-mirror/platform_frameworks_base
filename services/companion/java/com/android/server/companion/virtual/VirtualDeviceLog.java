@@ -19,6 +19,7 @@ package com.android.server.companion.virtual;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Process;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
@@ -34,6 +35,8 @@ final class VirtualDeviceLog {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(
             "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private static final int MAX_ENTRIES = 16;
+
+    private static final String VIRTUAL_DEVICE_OWNER_SYSTEM = "system";
 
     private final Context mContext;
     private final ArrayDeque<LogEntry> mLogEntries = new ArrayDeque<>();
@@ -132,6 +135,8 @@ final class VirtualDeviceLog {
             String[] packages;
             if (mUidToPackagesCache.contains(ownerUid)) {
                 return mUidToPackagesCache.get(ownerUid);
+            } else if (ownerUid == Process.SYSTEM_UID) {
+                return VIRTUAL_DEVICE_OWNER_SYSTEM;
             } else {
                 packages = mPackageManager.getPackagesForUid(ownerUid);
                 String packageName = "";

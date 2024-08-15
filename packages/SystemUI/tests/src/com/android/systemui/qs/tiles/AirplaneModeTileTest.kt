@@ -18,8 +18,8 @@ package com.android.systemui.qs.tiles
 
 import android.net.ConnectivityManager
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.telephony.flags.Flags
@@ -50,7 +50,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class AirplaneModeTileTest : SysuiTestCase() {

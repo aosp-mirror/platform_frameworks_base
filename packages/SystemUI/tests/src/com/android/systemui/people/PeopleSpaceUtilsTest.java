@@ -52,9 +52,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.ContactsContract;
-import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
@@ -81,7 +81,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PeopleSpaceUtilsTest extends SysuiTestCase {
 

@@ -55,12 +55,12 @@ public class OverrideBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(overrideBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(overrideBrightness)
                         .setDisplayBrightnessStrategyName(mOverrideBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mOverrideBrightnessStrategy.updateBrightness(
-                        new StrategyExecutionRequest(displayPowerRequest, 0.2f));
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f,
+                                /* userSetBrightnessChanged= */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 

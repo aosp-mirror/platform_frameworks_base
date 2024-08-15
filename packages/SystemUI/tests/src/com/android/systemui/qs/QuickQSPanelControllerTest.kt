@@ -17,8 +17,8 @@
 package com.android.systemui.qs
 
 import android.content.res.Configuration
-import android.testing.AndroidTestingRunner
 import android.view.ContextThemeWrapper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -50,7 +50,7 @@ import javax.inject.Provider
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class QuickQSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var quickQSPanel: QuickQSPanel

@@ -149,12 +149,12 @@ public class QuickAccessWalletController {
             if (event == WALLET_PREFERENCE_CHANGE && mWalletPreferenceObserver != null) {
                 mWalletPreferenceChangeEvents--;
                 if (mWalletPreferenceChangeEvents == 0) {
-                    mSecureSettings.unregisterContentObserver(mWalletPreferenceObserver);
+                    mSecureSettings.unregisterContentObserverSync(mWalletPreferenceObserver);
                 }
             } else if (event == DEFAULT_PAYMENT_APP_CHANGE && mDefaultPaymentAppObserver != null) {
                 mDefaultPaymentAppChangeEvents--;
                 if (mDefaultPaymentAppChangeEvents == 0) {
-                    mSecureSettings.unregisterContentObserver(mDefaultPaymentAppObserver);
+                    mSecureSettings.unregisterContentObserverSync(mDefaultPaymentAppObserver);
                 }
             } else if (event == DEFAULT_WALLET_APP_CHANGE && mDefaultWalletAppObserver != null) {
                 mDefaultWalletAppChangeEvents--;
@@ -312,7 +312,7 @@ public class QuickAccessWalletController {
                 }
             };
 
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
                     false /* notifyForDescendants */,
                     mDefaultPaymentAppObserver,
@@ -351,7 +351,7 @@ public class QuickAccessWalletController {
                 }
             };
 
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     QuickAccessWalletClientImpl.SETTING_KEY,
                     false /* notifyForDescendants */,
                     mWalletPreferenceObserver,

@@ -96,6 +96,7 @@ void DrawGainmapBitmap(SkCanvas* c, const sk_sp<const SkImage>& image, const SkR
 #ifdef __ANDROID__
 
 static constexpr char gGainmapSKSL[] = R"SKSL(
+    uniform shader linearBase;
     uniform shader base;
     uniform shader gainmap;
     uniform colorFilter workingSpaceToLinearSrgb;
@@ -117,7 +118,11 @@ static constexpr char gGainmapSKSL[] = R"SKSL(
     }
 
     half4 main(float2 coord) {
-        half4 S = base.eval(coord);
+        if (W == 0.0) {
+            return base.eval(coord);
+        }
+
+        half4 S = linearBase.eval(coord);
         half4 G = gainmap.eval(coord);
         if (gainmapIsAlpha == 1) {
             G = half4(G.a, G.a, G.a, 1.0);
@@ -186,8 +191,10 @@ private:
                 SkColorFilterPriv::MakeColorSpaceXform(baseColorSpace, gainmapMathColorSpace);
 
         // The base image shader will convert into the color space in which the gainmap is applied.
-        auto baseImageShader = baseImage->makeRawShader(tileModeX, tileModeY, samplingOptions)
-                                       ->makeWithColorFilter(colorXformSdrToGainmap);
+        auto linearBaseImageShader = baseImage->makeRawShader(tileModeX, tileModeY, samplingOptions)
+                                             ->makeWithColorFilter(colorXformSdrToGainmap);
+
+        auto baseImageShader = baseImage->makeShader(tileModeX, tileModeY, samplingOptions);
 
         // The gainmap image shader will ignore any color space that the gainmap has.
         const SkMatrix gainmapRectToDstRect =
@@ -201,6 +208,7 @@ private:
         auto colorXformGainmapToDst = SkColorFilterPriv::MakeColorSpaceXform(
                 gainmapMathColorSpace, SkColorSpace::MakeSRGBLinear());
 
+        mBuilder.child("linearBase") = std::move(linearBaseImageShader);
         mBuilder.child("base") = std::move(baseImageShader);
         mBuilder.child("gainmap") = std::move(gainmapImageShader);
         mBuilder.child("workingSpaceToLinearSrgb") = std::move(colorXformGainmapToDst);

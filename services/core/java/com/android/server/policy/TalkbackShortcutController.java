@@ -117,6 +117,7 @@ class TalkbackShortcutController {
     }
 
     private boolean isTalkback(ServiceInfo info) {
-        return TALKBACK_LABEL.equals(info.loadLabel(mPackageManager).toString());
+        return TALKBACK_LABEL.equals(info.loadLabel(mPackageManager).toString())
+            && (info.applicationInfo.isSystemApp() || info.applicationInfo.isUpdatedSystemApp());
     }
 }

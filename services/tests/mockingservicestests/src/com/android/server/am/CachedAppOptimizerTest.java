@@ -21,10 +21,21 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
 import static com.android.server.am.ActivityManagerService.Injector;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.FrozenProcessListener;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -33,12 +44,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.MessageQueue;
 import android.os.Process;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.modules.utils.testing.TestableDeviceConfig;
 import com.android.server.LocalServices;
@@ -55,9 +68,11 @@ import org.mockito.Mock;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -79,11 +94,16 @@ public final class CachedAppOptimizerTest {
     private CountDownLatch mCountDown;
     private ActivityManagerService mAms;
     private Context mContext;
+    private TestFreezer mFreezer;
+    private CountDownLatch mFreezeCounter;
     private TestInjector mInjector;
     private TestProcessDependencies mProcessDependencies;
 
     @Mock
     private PackageManagerInternal mPackageManagerInt;
+
+    // Control whether the freezer mock reports that freezing is enabled or not.
+    private boolean mUseFreezer;
 
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
@@ -103,9 +123,12 @@ public final class CachedAppOptimizerTest {
                 true /* allowIo */);
         mThread.start();
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
+
+        mUseFreezer = false;
+        mFreezer = new TestFreezer();
+
         mInjector = new TestInjector(mContext);
-        mAms = new ActivityManagerService(
-                new TestInjector(mContext), mServiceThreadRule.getThread());
+        mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
         mProcessDependencies = new TestProcessDependencies();
         mCachedAppOptimizerUnderTest = new CachedAppOptimizer(mAms,
@@ -126,6 +149,7 @@ public final class CachedAppOptimizerTest {
         mHandlerThread.quit();
         mThread.quit();
         mCountDown = null;
+        mFreezeCounter = null;
     }
 
     private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, String processName,
@@ -179,7 +203,7 @@ public final class CachedAppOptimizerTest {
         assertThat(mCachedAppOptimizerUnderTest.mProcStateThrottle)
                 .containsExactlyElementsIn(expected);
 
-        Assume.assumeTrue(mCachedAppOptimizerUnderTest.isFreezerSupported());
+        Assume.assumeTrue(mAms.isAppFreezerSupported());
         assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
                 CachedAppOptimizer.DEFAULT_USE_FREEZER);
     }
@@ -265,8 +289,8 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB + 1);
         assertThat(mCachedAppOptimizerUnderTest.mProcStateThrottle).containsExactly(1, 2, 3);
 
-        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
-        if (CachedAppOptimizer.isFreezerSupported()) {
+        Assume.assumeTrue(mAms.isAppFreezerSupported());
+        if (mAms.isAppFreezerSupported()) {
             if (CachedAppOptimizer.DEFAULT_USE_FREEZER) {
                 assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
             } else {
@@ -300,7 +324,7 @@ public final class CachedAppOptimizerTest {
 
     @Test
     public void useFreeze_doesNotListenToDeviceConfigChanges() throws InterruptedException {
-        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
+        Assume.assumeTrue(mAms.isAppFreezerSupported());
 
         assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
 
@@ -353,7 +377,7 @@ public final class CachedAppOptimizerTest {
 
     @Test
     public void useFreeze_listensToDeviceConfigChangesBadValues() throws InterruptedException {
-        Assume.assumeTrue(CachedAppOptimizer.isFreezerSupported());
+        Assume.assumeTrue(mAms.isAppFreezerSupported());
         assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
 
         // When we push an invalid flag value...
@@ -982,6 +1006,87 @@ public final class CachedAppOptimizerTest {
         }
     }
 
+    @Test
+    public void testFreezerDelegator() throws Exception {
+        mUseFreezer = true;
+        mProcessDependencies.setRss(new long[] {
+                    0 /*total_rss*/,
+                    0 /*file*/,
+                    0 /*anon*/,
+                    0 /*swap*/,
+                    0 /*shmem*/
+                });
+
+        // Force the system to use the freezer
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                CachedAppOptimizer.KEY_USE_FREEZER, "true", false);
+        mCachedAppOptimizerUnderTest.init();
+        initActivityManagerService();
+
+        assertTrue(mAms.isAppFreezerSupported());
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isTrue();
+
+        int pid = 10000;
+        int uid = 2;
+        int pkgUid = 3;
+        ProcessRecord app = makeProcessRecord(pid, uid, pkgUid, "p1", "app1");
+
+        mFreezeCounter = new CountDownLatch(1);
+        mCachedAppOptimizerUnderTest.forceFreezeForTest(app, true);
+        assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
+
+        mFreezeCounter = new CountDownLatch(1);
+        mCachedAppOptimizerUnderTest.forceFreezeForTest(app, false);
+        assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testFrozenNotifier() throws Exception {
+        mUseFreezer = true;
+        mProcessDependencies.setRss(new long[] {
+                    0 /*total_rss*/,
+                    0 /*file*/,
+                    0 /*anon*/,
+                    0 /*swap*/,
+                    0 /*shmem*/
+                });
+
+        // Force the system to use the freezer
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                CachedAppOptimizer.KEY_USE_FREEZER, "true", false);
+        mCachedAppOptimizerUnderTest.init();
+        initActivityManagerService();
+
+        assertTrue(mAms.isAppFreezerSupported());
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isTrue();
+
+        int pid = 10000;
+        int uid = 2;
+        int pkgUid = 3;
+        ProcessRecord app = makeProcessRecord(pid, uid, pkgUid, "p1", "app1");
+        assertNotNull(app.mOptRecord);
+
+        FrozenProcessListener listener = new FrozenProcessListener() {
+                @Override
+                public void onProcessFrozen(int pid) {
+                    mFreezeCounter.countDown();
+                }
+                @Override
+                public void onProcessUnfrozen(int pid) {
+                    mFreezeCounter.countDown();
+                }
+            };
+        mCachedAppOptimizerUnderTest.addFrozenProcessListener(app, directExecutor(), listener);
+
+        mFreezeCounter = new CountDownLatch(2);
+        mCachedAppOptimizerUnderTest.forceFreezeForTest(app, true);
+        assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
+
+        mFreezeCounter = new CountDownLatch(2);
+        mCachedAppOptimizerUnderTest.forceFreezeForTest(app, false);
+        assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
+    }
+
     private void setFlag(String key, String value, boolean defaultValue) throws Exception {
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, key, value, defaultValue);
@@ -1042,6 +1147,11 @@ public final class CachedAppOptimizerTest {
         public Handler getUiHandler(ActivityManagerService service) {
             return mHandler;
         }
+
+        @Override
+        public Freezer getFreezer() {
+            return mFreezer;
+        }
     }
 
     // Test implementation for ProcessDependencies.
@@ -1067,6 +1177,29 @@ public final class CachedAppOptimizerTest {
 
         public void setRssAfterCompaction(long[] newValues) {
             mRssAfterCompaction = newValues;
+        }
+    }
+
+    // Intercept Freezer calls.
+    private class TestFreezer extends Freezer {
+        @Override
+        public void setProcessFrozen(int pid, int uid, boolean frozen) {
+            mFreezeCounter.countDown();
+        }
+
+        @Override
+        public int freezeBinder(int pid, boolean freeze, int timeoutMs) {
+            return 0;
+        }
+
+        @Override
+        public int getBinderFreezeInfo(int pid) {
+            return 0;
+        }
+
+        @Override
+        public boolean isFreezerSupported() {
+            return mUseFreezer;
         }
     }
 }

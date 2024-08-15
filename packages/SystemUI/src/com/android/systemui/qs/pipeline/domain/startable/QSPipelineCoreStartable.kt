@@ -40,14 +40,12 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        if (featureFlags.pipelineEnabled) {
-            accessibilityTilesInteractor.init(currentTilesInteractor)
-            autoAddInteractor.init(currentTilesInteractor)
-            restoreReconciliationInteractor.start()
+        accessibilityTilesInteractor.init(currentTilesInteractor)
+        autoAddInteractor.init(currentTilesInteractor)
+        restoreReconciliationInteractor.start()
 
-            if (NewQsUI.isEnabled) {
-                gridConsistencyInteractor.start()
-            }
+        if (NewQsUI.isEnabled) {
+            gridConsistencyInteractor.start()
         }
     }
 }

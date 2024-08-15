@@ -29,9 +29,10 @@ import java.util.Objects;
  */
 public final class DisplayBrightnessState {
     public static final float CUSTOM_ANIMATION_RATE_NOT_SET = -1f;
+    public static final float BRIGHTNESS_NOT_SET = -1f;
 
     private final float mBrightness;
-    private final float mSdrBrightness;
+    private final float mHdrBrightness;
 
     private final float mMaxBrightness;
     private final float mMinBrightness;
@@ -47,9 +48,11 @@ public final class DisplayBrightnessState {
     private final BrightnessEvent mBrightnessEvent;
     private final int mBrightnessAdjustmentFlag;
 
+    private final boolean mIsUserInitiatedChange;
+
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
-        mSdrBrightness = builder.getSdrBrightness();
+        mHdrBrightness = builder.getHdrBrightness();
         mBrightnessReason = builder.getBrightnessReason();
         mDisplayBrightnessStrategyName = builder.getDisplayBrightnessStrategyName();
         mShouldUseAutoBrightness = builder.getShouldUseAutoBrightness();
@@ -60,6 +63,7 @@ public final class DisplayBrightnessState {
         mShouldUpdateScreenBrightnessSetting = builder.shouldUpdateScreenBrightnessSetting();
         mBrightnessEvent = builder.getBrightnessEvent();
         mBrightnessAdjustmentFlag = builder.getBrightnessAdjustmentFlag();
+        mIsUserInitiatedChange = builder.isUserInitiatedChange();
     }
 
     /**
@@ -70,10 +74,10 @@ public final class DisplayBrightnessState {
     }
 
     /**
-     * Gets the sdr brightness
+     * Gets the hdr brightness
      */
-    public float getSdrBrightness() {
-        return mSdrBrightness;
+    public float getHdrBrightness() {
+        return mHdrBrightness;
     }
 
     /**
@@ -148,13 +152,20 @@ public final class DisplayBrightnessState {
         return mBrightnessAdjustmentFlag;
     }
 
+    /**
+     * Gets if the current brightness changes are because of a user initiated change
+     */
+    public boolean isUserInitiatedChange() {
+        return mIsUserInitiatedChange;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
         stringBuilder.append("\n    brightness:");
         stringBuilder.append(getBrightness());
-        stringBuilder.append("\n    sdrBrightness:");
-        stringBuilder.append(getSdrBrightness());
+        stringBuilder.append("\n    hdrBrightness:");
+        stringBuilder.append(getHdrBrightness());
         stringBuilder.append("\n    brightnessReason:");
         stringBuilder.append(getBrightnessReason());
         stringBuilder.append("\n    shouldUseAutoBrightness:");
@@ -168,6 +179,7 @@ public final class DisplayBrightnessState {
         stringBuilder.append("\n    mBrightnessEvent:")
                 .append(Objects.toString(mBrightnessEvent, "null"));
         stringBuilder.append("\n    mBrightnessAdjustmentFlag:").append(mBrightnessAdjustmentFlag);
+        stringBuilder.append("\n    mIsUserInitiatedChange:").append(mIsUserInitiatedChange);
         return stringBuilder.toString();
     }
 
@@ -187,7 +199,7 @@ public final class DisplayBrightnessState {
         DisplayBrightnessState otherState = (DisplayBrightnessState) other;
 
         return mBrightness == otherState.getBrightness()
-                && mSdrBrightness == otherState.getSdrBrightness()
+                && mHdrBrightness == otherState.getHdrBrightness()
                 && mBrightnessReason.equals(otherState.getBrightnessReason())
                 && TextUtils.equals(mDisplayBrightnessStrategyName,
                         otherState.getDisplayBrightnessStrategyName())
@@ -199,15 +211,17 @@ public final class DisplayBrightnessState {
                 && mShouldUpdateScreenBrightnessSetting
                     == otherState.shouldUpdateScreenBrightnessSetting()
                 && Objects.equals(mBrightnessEvent, otherState.getBrightnessEvent())
-                && mBrightnessAdjustmentFlag == otherState.getBrightnessAdjustmentFlag();
+                && mBrightnessAdjustmentFlag == otherState.getBrightnessAdjustmentFlag()
+                && mIsUserInitiatedChange == otherState.isUserInitiatedChange();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
+        return Objects.hash(mBrightness, mHdrBrightness, mBrightnessReason,
                 mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mMinBrightness,
                 mCustomAnimationRate,
-                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent, mBrightnessAdjustmentFlag);
+                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent, mBrightnessAdjustmentFlag,
+                mIsUserInitiatedChange);
     }
 
     /**
@@ -222,7 +236,7 @@ public final class DisplayBrightnessState {
      */
     public static class Builder {
         private float mBrightness;
-        private float mSdrBrightness;
+        private float mHdrBrightness = BRIGHTNESS_NOT_SET;
         private BrightnessReason mBrightnessReason = new BrightnessReason();
         private String mDisplayBrightnessStrategyName;
         private boolean mShouldUseAutoBrightness;
@@ -236,6 +250,8 @@ public final class DisplayBrightnessState {
 
         public int mBrightnessAdjustmentFlag = 0;
 
+        private boolean mIsUserInitiatedChange;
+
         /**
          * Create a builder starting with the values from the specified {@link
          * DisplayBrightnessState}.
@@ -245,7 +261,7 @@ public final class DisplayBrightnessState {
         public static Builder from(DisplayBrightnessState state) {
             Builder builder = new Builder();
             builder.setBrightness(state.getBrightness());
-            builder.setSdrBrightness(state.getSdrBrightness());
+            builder.setHdrBrightness(state.getHdrBrightness());
             builder.setBrightnessReason(state.getBrightnessReason());
             builder.setDisplayBrightnessStrategyName(state.getDisplayBrightnessStrategyName());
             builder.setShouldUseAutoBrightness(state.getShouldUseAutoBrightness());
@@ -257,6 +273,7 @@ public final class DisplayBrightnessState {
                     state.shouldUpdateScreenBrightnessSetting());
             builder.setBrightnessEvent(state.getBrightnessEvent());
             builder.setBrightnessAdjustmentFlag(state.getBrightnessAdjustmentFlag());
+            builder.setIsUserInitiatedChange(state.isUserInitiatedChange());
             return builder;
         }
 
@@ -279,20 +296,20 @@ public final class DisplayBrightnessState {
         }
 
         /**
-         * Gets the sdr brightness
+         * Gets the hdr brightness
          */
-        public float getSdrBrightness() {
-            return mSdrBrightness;
+        public float getHdrBrightness() {
+            return mHdrBrightness;
         }
 
         /**
-         * Sets the sdr brightness
+         * Sets the hdr brightness
          *
-         * @param sdrBrightness The sdr brightness to be associated with DisplayBrightnessState's
+         * @param hdrBrightness The hdr brightness to be associated with DisplayBrightnessState's
          *                      builder
          */
-        public Builder setSdrBrightness(float sdrBrightness) {
-            this.mSdrBrightness = sdrBrightness;
+        public Builder setHdrBrightness(float hdrBrightness) {
+            this.mHdrBrightness = hdrBrightness;
             return this;
         }
 
@@ -312,6 +329,16 @@ public final class DisplayBrightnessState {
         public Builder setBrightnessReason(BrightnessReason brightnessReason) {
             this.mBrightnessReason = brightnessReason;
             return this;
+        }
+
+        /**
+         * Sets the {@link BrightnessReason} using the int-based reason enum. This is a convenience
+         * function so we don't have to type out the constructor syntax everywhere.
+         *
+         * @param brightnessReason The int-based brightness enum.
+         */
+        public Builder setBrightnessReason(int brightnessReason) {
+            return setBrightnessReason(new BrightnessReason(brightnessReason));
         }
 
         /**
@@ -462,6 +489,21 @@ public final class DisplayBrightnessState {
          */
         public Builder setBrightnessAdjustmentFlag(int brightnessAdjustmentFlag) {
             mBrightnessAdjustmentFlag = brightnessAdjustmentFlag;
+            return this;
+        }
+
+        /**
+         * Gets if the current change is a user initiated change
+         */
+        public boolean isUserInitiatedChange() {
+            return mIsUserInitiatedChange;
+        }
+
+        /**
+         * This is used to set if the current change is a user initiated change
+         */
+        public Builder setIsUserInitiatedChange(boolean isUserInitiatedChange) {
+            mIsUserInitiatedChange = isUserInitiatedChange;
             return this;
         }
     }

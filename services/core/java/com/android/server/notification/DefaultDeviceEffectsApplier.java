@@ -31,13 +31,14 @@ import android.os.PowerManager;
 import android.service.notification.DeviceEffectsApplier;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
+import android.service.notification.ZenModeConfig.ConfigOrigin;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
 /** Default implementation for {@link DeviceEffectsApplier}. */
 class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
-
+    private static final String TAG = "DeviceEffectsApplier";
     private static final String SUPPRESS_AMBIENT_DISPLAY_TOKEN =
             "DefaultDeviceEffectsApplier:SuppressAmbientDisplay";
     private static final int SATURATION_LEVEL_GRAYSCALE = 0;
@@ -71,47 +72,64 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
     }
 
     @Override
-    public void apply(ZenDeviceEffects effects, @ConfigChangeOrigin int origin) {
+    public void apply(ZenDeviceEffects effects, @ConfigOrigin int origin) {
         Binder.withCleanCallingIdentity(() -> {
             if (mLastAppliedEffects.shouldSuppressAmbientDisplay()
                     != effects.shouldSuppressAmbientDisplay()) {
-                mPowerManager.suppressAmbientDisplay(SUPPRESS_AMBIENT_DISPLAY_TOKEN,
-                        effects.shouldSuppressAmbientDisplay());
+                try {
+                    mPowerManager.suppressAmbientDisplay(SUPPRESS_AMBIENT_DISPLAY_TOKEN,
+                            effects.shouldSuppressAmbientDisplay());
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not change AOD override", e);
+                }
             }
 
             if (mLastAppliedEffects.shouldDisplayGrayscale() != effects.shouldDisplayGrayscale()) {
                 if (mColorDisplayManager != null) {
-                    mColorDisplayManager.setSaturationLevel(
-                            effects.shouldDisplayGrayscale() ? SATURATION_LEVEL_GRAYSCALE
-                                    : SATURATION_LEVEL_FULL_COLOR);
+                    try {
+                        mColorDisplayManager.setSaturationLevel(
+                                effects.shouldDisplayGrayscale() ? SATURATION_LEVEL_GRAYSCALE
+                                        : SATURATION_LEVEL_FULL_COLOR);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Could not change grayscale override", e);
+                    }
                 }
             }
 
             if (mLastAppliedEffects.shouldDimWallpaper() != effects.shouldDimWallpaper()) {
                 if (mWallpaperManager != null) {
-                    mWallpaperManager.setWallpaperDimAmount(
-                            effects.shouldDimWallpaper() ? WALLPAPER_DIM_AMOUNT_DIMMED
-                                    : WALLPAPER_DIM_AMOUNT_NORMAL);
+                    try {
+                        mWallpaperManager.setWallpaperDimAmount(
+                                effects.shouldDimWallpaper() ? WALLPAPER_DIM_AMOUNT_DIMMED
+                                        : WALLPAPER_DIM_AMOUNT_NORMAL);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Could not change wallpaper override", e);
+                    }
                 }
             }
 
             if (mLastAppliedEffects.shouldUseNightMode() != effects.shouldUseNightMode()) {
-                updateOrScheduleNightMode(effects.shouldUseNightMode(), origin);
+                try {
+                    updateOrScheduleNightMode(effects.shouldUseNightMode(), origin);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not change dark theme override", e);
+                }
             }
         });
 
         mLastAppliedEffects = effects;
     }
 
-    private void updateOrScheduleNightMode(boolean useNightMode, @ConfigChangeOrigin int origin) {
+    private void updateOrScheduleNightMode(boolean useNightMode, @ConfigOrigin int origin) {
         mPendingNightMode = useNightMode;
 
         // Changing the theme can be disruptive for the user (Activities are likely recreated, may
         // lose some state). Therefore we only apply the change immediately if the rule was
         // activated manually, or we are initializing, or the screen is currently off/dreaming.
-        if (origin == ZenModeConfig.UPDATE_ORIGIN_INIT
-                || origin == ZenModeConfig.UPDATE_ORIGIN_INIT_USER
-                || origin == ZenModeConfig.UPDATE_ORIGIN_USER
+        if (origin == ZenModeConfig.ORIGIN_INIT
+                || origin == ZenModeConfig.ORIGIN_INIT_USER
+                || origin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
+                || origin == ZenModeConfig.ORIGIN_USER_IN_APP
                 || !mPowerManager.isInteractive()) {
             unregisterScreenOffReceiver();
             updateNightModeImmediately(useNightMode);
@@ -131,9 +149,13 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
     private void updateNightModeImmediately(boolean useNightMode) {
         Binder.withCleanCallingIdentity(() -> {
-            mUiModeManager.setAttentionModeThemeOverlay(
-                    useNightMode ? MODE_ATTENTION_THEME_OVERLAY_NIGHT
-                            : MODE_ATTENTION_THEME_OVERLAY_OFF);
+            try {
+                mUiModeManager.setAttentionModeThemeOverlay(
+                        useNightMode ? MODE_ATTENTION_THEME_OVERLAY_NIGHT
+                                : MODE_ATTENTION_THEME_OVERLAY_OFF);
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not change wallpaper override", e);
+            }
         });
     }
 

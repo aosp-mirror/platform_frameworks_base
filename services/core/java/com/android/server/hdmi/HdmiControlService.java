@@ -144,6 +144,10 @@ public class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
     private static final Locale HONG_KONG = new Locale("zh", "HK");
     private static final Locale MACAU = new Locale("zh", "MO");
+    private static final String TAIWAN_HantLanguageTag = "zh-Hant-TW";
+    private static final String HONG_KONG_HantLanguageTag = "zh-Hant-HK";
+    private static final String HONG_KONG_YUE_HantLanguageTag = "yue-Hant-HK";
+    private static final String MACAU_HantLanguageTag = "zh-Hant-MO";
 
     private static final Map<String, String> sTerminologyToBibliographicMap =
             createsTerminologyToBibliographicMap();
@@ -174,7 +178,11 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting static String localeToMenuLanguage(Locale locale) {
-        if (locale.equals(Locale.TAIWAN) || locale.equals(HONG_KONG) || locale.equals(MACAU)) {
+        if (locale.equals(Locale.TAIWAN) || locale.equals(HONG_KONG) || locale.equals(MACAU) ||
+                locale.toLanguageTag().equals(TAIWAN_HantLanguageTag) ||
+                locale.toLanguageTag().equals(HONG_KONG_HantLanguageTag) ||
+                locale.toLanguageTag().equals(HONG_KONG_YUE_HantLanguageTag) ||
+                locale.toLanguageTag().equals(MACAU_HantLanguageTag)) {
             // Android always returns "zho" for all Chinese variants.
             // Use "bibliographic" code defined in CEC639-2 for traditional
             // Chinese used in Taiwan/Hong Kong/Macau.
@@ -1029,6 +1037,10 @@ public class HdmiControlService extends SystemService {
 
     /** Helper method for sending feature discovery command */
     private void reportFeatures(boolean isTvDeviceSetting) {
+        // <Report Features> should only be sent for HDMI 2.0
+        if (getCecVersion() < HdmiControlManager.HDMI_CEC_VERSION_2_0) {
+            return;
+        }
         // check if tv device is enabled for tv device specific RC profile setting
         if (isTvDeviceSetting) {
             if (isTvDeviceEnabled()) {

@@ -53,6 +53,9 @@ public:
     void setDisplayViewport(const DisplayViewport& viewport, bool getAdditionalMouseResources);
     void setStylusHoverMode(bool stylusHoverMode);
 
+    // Set/Unset flag to hide the mouse cursor on the mirrored display
+    void setSkipScreenshot(bool skip);
+
     void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void reloadPointerResources(bool getAdditionalMouseResources);
@@ -94,6 +97,7 @@ private:
         PointerIconStyle requestedPointerType;
         PointerIconStyle resolvedPointerType;
 
+        bool skipScreenshot{false};
         bool animating{false};
 
     } mLocked GUARDED_BY(mLock);

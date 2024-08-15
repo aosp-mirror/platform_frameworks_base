@@ -18,9 +18,10 @@ package android.text;
 
 import static com.android.graphics.hwui.flags.Flags.highContrastTextLuminance;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
-import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 
+import android.annotation.ColorInt;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -398,6 +399,20 @@ public abstract class Layout {
         mUseBoundsForWidth = useBoundsForWidth;
         mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
         mMinimumFontMetrics = minimumFontMetrics;
+
+        initSpanColors();
+    }
+
+    private void initSpanColors() {
+        if (mSpannedText && Flags.highContrastTextSmallTextRect()) {
+            if (mSpanColors == null) {
+                mSpanColors = new SpanColors();
+            } else {
+                mSpanColors.recycle();
+            }
+        } else {
+            mSpanColors = null;
+        }
     }
 
     /**
@@ -417,6 +432,7 @@ public abstract class Layout {
         mSpacingMult = spacingmult;
         mSpacingAdd = spacingadd;
         mSpannedText = text instanceof Spanned;
+        initSpanColors();
     }
 
     /**
@@ -643,20 +659,20 @@ public abstract class Layout {
             return null;
         }
 
-        return isHighContrastTextDark() ? BlendMode.MULTIPLY : BlendMode.DIFFERENCE;
+        return isHighContrastTextDark(mPaint.getColor()) ? BlendMode.MULTIPLY
+                : BlendMode.DIFFERENCE;
     }
 
-    private boolean isHighContrastTextDark() {
+    private boolean isHighContrastTextDark(@ColorInt int color) {
         // High-contrast text mode
         // Determine if the text is black-on-white or white-on-black, so we know what blendmode will
         // give the highest contrast and most realistic text color.
         // This equation should match the one in libs/hwui/hwui/DrawTextFunctor.h
         if (highContrastTextLuminance()) {
             var lab = new double[3];
-            ColorUtils.colorToLAB(mPaint.getColor(), lab);
-            return lab[0] < 0.5;
+            ColorUtils.colorToLAB(color, lab);
+            return lab[0] < 50.0;
         } else {
-            var color = mPaint.getColor();
             int channelSum = Color.red(color) + Color.green(color) + Color.blue(color);
             return channelSum < (128 * 3);
         }
@@ -1010,15 +1026,22 @@ public abstract class Layout {
         var padding = Math.max(HIGH_CONTRAST_TEXT_BORDER_WIDTH_MIN_PX,
                 mPaint.getTextSize() * HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR);
 
+        var originalTextColor = mPaint.getColor();
         var bgPaint = mWorkPlainPaint;
         bgPaint.reset();
-        bgPaint.setColor(isHighContrastTextDark() ? Color.WHITE : Color.BLACK);
+        bgPaint.setColor(isHighContrastTextDark(originalTextColor) ? Color.WHITE : Color.BLACK);
         bgPaint.setStyle(Paint.Style.FILL);
 
         int start = getLineStart(firstLine);
         int end = getLineEnd(lastLine);
         // Draw a separate background rectangle for each line of text, that only surrounds the
-        // characters on that line.
+        // characters on that line. But we also have to check the text color for each character, and
+        // make sure we are drawing the correct contrasting background. This is because Spans can
+        // change colors throughout the text and we'll need to match our backgrounds.
+        if (mSpannedText && mSpanColors != null) {
+            mSpanColors.init(mWorkPaint, ((Spanned) mText), start, end);
+        }
+
         forEachCharacterBounds(
                 start,
                 end,
@@ -1028,13 +1051,24 @@ public abstract class Layout {
                     int mLastLineNum = -1;
                     final RectF mLineBackground = new RectF();
 
+                    @ColorInt int mLastColor = originalTextColor;
+
                     @Override
                     public void onCharacterBounds(int index, int lineNum, float left, float top,
                             float right, float bottom) {
-                        if (lineNum != mLastLineNum) {
+
+                        var newBackground = determineContrastingBackgroundColor(index);
+                        var hasBgColorChanged = newBackground != bgPaint.getColor();
+
+                        if (lineNum != mLastLineNum || hasBgColorChanged) {
+                            // Draw what we have so far, then reset the rect and update its color
                             drawRect();
                             mLineBackground.set(left, top, right, bottom);
                             mLastLineNum = lineNum;
+
+                            if (hasBgColorChanged) {
+                                bgPaint.setColor(newBackground);
+                            }
                         } else {
                             mLineBackground.union(left, top, right, bottom);
                         }
@@ -1051,8 +1085,36 @@ public abstract class Layout {
                             canvas.drawRect(mLineBackground, bgPaint);
                         }
                     }
+
+                    private int determineContrastingBackgroundColor(int index) {
+                        if (!mSpannedText || mSpanColors == null) {
+                            // The text is not Spanned. it's all one color.
+                            return bgPaint.getColor();
+                        }
+
+                        // Sometimes the color will change, but not enough to warrant a background
+                        // color change. e.g. from black to dark grey still gets clamped to black,
+                        // so the background stays white and we don't need to draw a fresh
+                        // background.
+                        var textColor = mSpanColors.getColorAt(index);
+                        if (textColor == SpanColors.NO_COLOR_FOUND) {
+                            textColor = originalTextColor;
+                        }
+                        var hasColorChanged = textColor != mLastColor;
+                        if (hasColorChanged) {
+                            mLastColor = textColor;
+
+                            return isHighContrastTextDark(textColor) ? Color.WHITE : Color.BLACK;
+                        }
+
+                        return bgPaint.getColor();
+                    }
                 }
         );
+
+        if (mSpanColors != null) {
+            mSpanColors.recycle();
+        }
     }
 
     /**
@@ -3580,6 +3642,7 @@ public abstract class Layout {
     private float mSpacingAdd;
     private static final Rect sTempRect = new Rect();
     private boolean mSpannedText;
+    @Nullable private SpanColors mSpanColors;
     private TextDirectionHeuristic mTextDir;
     private SpanSet<LineBackgroundSpan> mLineBackgroundSpans;
     private boolean mIncludePad;

@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spa.debug
 
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -41,8 +40,6 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.SESSION_BROWSE
 import com.android.settingslib.spa.framework.util.SESSION_SEARCH
 import com.android.settingslib.spa.framework.util.createIntent
-import com.android.settingslib.spa.slice.fromEntry
-import com.android.settingslib.spa.slice.presenter.SliceDemo
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
@@ -52,7 +49,6 @@ private const val TAG = "DebugActivity"
 private const val ROUTE_ROOT = "root"
 private const val ROUTE_All_PAGES = "pages"
 private const val ROUTE_All_ENTRIES = "entries"
-private const val ROUTE_All_SLICES = "slices"
 private const val ROUTE_PAGE = "page"
 private const val ROUTE_ENTRY = "entry"
 private const val PARAM_NAME_PAGE_ID = "pid"
@@ -87,7 +83,6 @@ class DebugActivity : ComponentActivity() {
                 composable(route = ROUTE_ROOT) { RootPage() }
                 composable(route = ROUTE_All_PAGES) { AllPages() }
                 composable(route = ROUTE_All_ENTRIES) { AllEntries() }
-                composable(route = ROUTE_All_SLICES) { AllSlices() }
                 composable(
                     route = "$ROUTE_PAGE/{$PARAM_NAME_PAGE_ID}",
                     arguments = listOf(
@@ -109,8 +104,6 @@ class DebugActivity : ComponentActivity() {
         val entryRepository by spaEnvironment.entryRepository
         val allPageWithEntry = remember { entryRepository.getAllPageWithEntry() }
         val allEntry = remember { entryRepository.getAllEntries() }
-        val allSliceEntry =
-            remember { entryRepository.getAllEntries().filter { it.hasSliceSupport } }
         HomeScaffold(title = "Settings Debug") {
             Preference(object : PreferenceModel {
                 override val title = "List All Pages (${allPageWithEntry.size})"
@@ -119,10 +112,6 @@ class DebugActivity : ComponentActivity() {
             Preference(object : PreferenceModel {
                 override val title = "List All Entries (${allEntry.size})"
                 override val onClick = navigator(route = ROUTE_All_ENTRIES)
-            })
-            Preference(object : PreferenceModel {
-                override val title = "List All Slices (${allSliceEntry.size})"
-                override val onClick = navigator(route = ROUTE_All_SLICES)
             })
         }
     }
@@ -152,18 +141,6 @@ class DebugActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun AllSlices() {
-        val entryRepository by spaEnvironment.entryRepository
-        val authority = spaEnvironment.sliceProviderAuthorities
-        val allSliceEntry =
-            remember { entryRepository.getAllEntries().filter { it.hasSliceSupport } }
-        RegularScaffold(title = "All Slices (${allSliceEntry.size})") {
-            for (entry in allSliceEntry) {
-                SliceDemo(sliceUri = Uri.Builder().fromEntry(entry, authority).build())
-            }
-        }
-    }
 
     @Composable
     fun OnePage(arguments: Bundle?) {

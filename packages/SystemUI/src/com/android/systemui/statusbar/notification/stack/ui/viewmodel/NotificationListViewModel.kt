@@ -275,13 +275,7 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            combine(
-                notificationStackInteractor.isShowingOnLockscreen,
-                shadeInteractor.isShadeFullyCollapsed
-            ) { (isKeyguardShowing, isShadeFullyCollapsed) ->
-                !isKeyguardShowing && isShadeFullyCollapsed
-            }
-                .dumpWhileCollecting("headsUpAnimationsEnabled")
+            flowOf(true).dumpWhileCollecting("headsUpAnimationsEnabled")
         }
     }
 

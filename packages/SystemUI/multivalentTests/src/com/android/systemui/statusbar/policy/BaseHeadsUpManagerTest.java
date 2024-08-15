@@ -38,6 +38,8 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.os.Handler;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
@@ -79,8 +81,9 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
-    private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
 
+    private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
+    @Mock private Handler mBgHandler;
     @Mock private DumpManager dumpManager;
     private AvalancheController mAvalancheController;
 
@@ -147,7 +150,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Override
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
-        mAvalancheController = new AvalancheController(dumpManager);
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLoggerFake, mLogger,
+                mBgHandler);
     }
 
     @Test
@@ -237,7 +241,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         alm.showNotification(entry);
 
         final boolean removedImmediately = alm.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ false);
+                entry.getKey(), /* releaseImmediately = */ false, "removeDeferred");
         assertFalse(removedImmediately);
         assertTrue(alm.isHeadsUpEntry(entry.getKey()));
     }
@@ -250,7 +254,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         alm.showNotification(entry);
 
         final boolean removedImmediately = alm.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ true);
+                entry.getKey(), /* releaseImmediately = */ true, "forceRemove");
         assertTrue(removedImmediately);
         assertFalse(alm.isHeadsUpEntry(entry.getKey()));
     }
@@ -426,7 +430,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.showNotification(entry);
 
         final boolean removedImmediately = hum.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ false);
+                entry.getKey(), /* releaseImmediately = */ false, "beforeMinimumDisplayTime");
         assertFalse(removedImmediately);
         assertTrue(hum.isHeadsUpEntry(entry.getKey()));
 
@@ -448,7 +452,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         assertTrue(hum.isHeadsUpEntry(entry.getKey()));
 
         final boolean removedImmediately = hum.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ false);
+                entry.getKey(), /* releaseImmediately = */ false, "afterMinimumDisplayTime");
         assertTrue(removedImmediately);
         assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }
@@ -462,7 +466,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.showNotification(entry);
 
         final boolean removedImmediately = hum.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ true);
+                entry.getKey(), /* releaseImmediately = */ true, "afterMinimumDisplayTime");
         assertTrue(removedImmediately);
         assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }
@@ -610,7 +614,31 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPinEntry_logsPeek() {
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testPinEntry_logsPeek_throttleEnabled() {
+        final BaseHeadsUpManager hum = createHeadsUpManager();
+
+        // Needs full screen intent in order to be pinned
+        final BaseHeadsUpManager.HeadsUpEntry entryToPin = hum.new HeadsUpEntry(
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext));
+
+        // Note: the standard way to show a notification would be calling showNotification rather
+        // than onAlertEntryAdded. However, in practice showNotification in effect adds
+        // the notification and then updates it; in order to not log twice, the entry needs
+        // to have a functional ExpandableNotificationRow that can keep track of whether it's
+        // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
+        hum.onEntryAdded(entryToPin);
+
+        assertEquals(2, mUiEventLoggerFake.numLogs());
+        assertEquals(AvalancheController.ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN.getId(),
+                mUiEventLoggerFake.eventId(0));
+        assertEquals(BaseHeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
+                mUiEventLoggerFake.eventId(1));
+    }
+
+    @Test
+    @DisableFlags(NotificationThrottleHun.FLAG_NAME)
+    public void testPinEntry_logsPeek_throttleDisabled() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
 
         // Needs full screen intent in order to be pinned

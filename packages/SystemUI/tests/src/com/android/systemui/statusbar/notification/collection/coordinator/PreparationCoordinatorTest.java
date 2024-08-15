@@ -320,7 +320,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 .thenReturn(1);
         ArgumentCaptor<ContentObserver> contentObserverCaptor = ArgumentCaptor.forClass(
                 ContentObserver.class);
-        verify(mSecureSettings).registerContentObserverForUser(eq(SHOW_NOTIFICATION_SNOOZE),
+        verify(mSecureSettings).registerContentObserverForUserSync(eq(SHOW_NOTIFICATION_SNOOZE),
                 contentObserverCaptor.capture(), anyInt());
         ContentObserver contentObserver = contentObserverCaptor.getValue();
         contentObserver.onChange(false);

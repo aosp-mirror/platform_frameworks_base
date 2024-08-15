@@ -54,7 +54,6 @@ import android.provider.DocumentsContract.Document;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.OsConstants;
 import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.DataUnit;
@@ -580,6 +579,8 @@ public final class FileUtils {
                            ", copied:" + progress +
                            ", read:" + (count - countToRead) +
                            ", in pipe: " + countInPipe);
+                    Os.close(pipes[0]);
+                    Os.close(pipes[1]);
                     throw new ErrnoException("splice, pipe --> fdOut", EIO);
                 } else {
                     progress += t;
@@ -607,6 +608,8 @@ public final class FileUtils {
                 listener.onProgress(progressSnapshot);
             });
         }
+        Os.close(pipes[0]);
+        Os.close(pipes[1]);
         return progress;
     }
 
@@ -1531,7 +1534,6 @@ public final class FileUtils {
     }
 
     /** {@hide} */
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModeStringToPosix(String mode) {
         // Quick check for invalid chars
         for (int i = 0; i < mode.length(); i++) {
@@ -1566,7 +1568,6 @@ public final class FileUtils {
     }
 
     /** {@hide} */
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static String translateModePosixToString(int mode) {
         String res = "";
         if ((mode & O_ACCMODE) == O_RDWR) {
@@ -1588,7 +1589,6 @@ public final class FileUtils {
     }
 
     /** {@hide} */
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModePosixToPfd(int mode) {
         int res = 0;
         if ((mode & O_ACCMODE) == O_RDWR) {
@@ -1613,7 +1613,6 @@ public final class FileUtils {
     }
 
     /** {@hide} */
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModePfdToPosix(int mode) {
         int res = 0;
         if ((mode & MODE_READ_WRITE) == MODE_READ_WRITE) {
@@ -1638,7 +1637,6 @@ public final class FileUtils {
     }
 
     /** {@hide} */
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModeAccessToPosix(int mode) {
         if (mode == F_OK) {
             // There's not an exact mapping, so we attempt a read-only open to

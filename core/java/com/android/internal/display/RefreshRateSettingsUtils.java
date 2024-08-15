@@ -83,4 +83,32 @@ public class RefreshRateSettingsUtils {
         }
         return maxRefreshRate;
     }
+
+    /**
+     * Find the highest refresh rate among all the modes of all the built-in/physical displays.
+     *
+     * This method will acquire DisplayManager.mLock, so calling it while holding other locks
+     * should be done with care.
+     * @param context The context
+     * @return The highest refresh rate
+     */
+    public static float findHighestRefreshRateAmongAllBuiltInDisplays(Context context) {
+        final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        final Display[] displays = dm.getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+        if (displays.length == 0) {
+            Log.w(TAG, "No valid display devices");
+            return DEFAULT_REFRESH_RATE;
+        }
+
+        float maxRefreshRate = DEFAULT_REFRESH_RATE;
+        for (Display display : displays) {
+            if (display.getType() != Display.TYPE_INTERNAL) continue;
+            for (Display.Mode mode : display.getSupportedModes()) {
+                if (mode.getRefreshRate() > maxRefreshRate) {
+                    maxRefreshRate = mode.getRefreshRate();
+                }
+            }
+        }
+        return maxRefreshRate;
+    }
 }

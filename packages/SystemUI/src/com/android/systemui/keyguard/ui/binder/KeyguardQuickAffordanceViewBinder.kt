@@ -31,17 +31,22 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launch
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.binder.IconViewBinder
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.util.doOnEnd
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -49,11 +54,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /** This is only for a SINGLE Quick affordance */
-object KeyguardQuickAffordanceViewBinder {
+@SysUISingleton
+class KeyguardQuickAffordanceViewBinder
+@Inject
+constructor(
+    private val falsingManager: FalsingManager?,
+    private val vibratorHelper: VibratorHelper?,
+    private val logger: KeyguardQuickAffordancesLogger,
+    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
+) {
 
-    private const val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
-    private const val SCALE_SELECTED_BUTTON = 1.23f
-    private const val DIM_ALPHA = 0.3f
+    private val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
+    private val SCALE_SELECTED_BUTTON = 1.23f
+    private val DIM_ALPHA = 0.3f
+    private val TAG = "KeyguardQuickAffordanceViewBinder"
 
     /**
      * Defines interface for an object that acts as the binding between the view and its view-model.
@@ -73,8 +87,6 @@ object KeyguardQuickAffordanceViewBinder {
         view: LaunchableImageView,
         viewModel: Flow<KeyguardQuickAffordanceViewModel>,
         alpha: Flow<Float>,
-        falsingManager: FalsingManager?,
-        vibratorHelper: VibratorHelper?,
         messageDisplayer: (Int) -> Unit,
     ): Binding {
         val button = view as ImageView
@@ -82,14 +94,12 @@ object KeyguardQuickAffordanceViewBinder {
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    launch("$TAG#viewModel.collect") {
+                    launch("$TAG#viewModel") {
                         viewModel.collect { buttonModel ->
                             updateButton(
                                 view = button,
                                 viewModel = buttonModel,
-                                falsingManager = falsingManager,
                                 messageDisplayer = messageDisplayer,
-                                vibratorHelper = vibratorHelper,
                             )
                         }
                     }
@@ -129,9 +139,7 @@ object KeyguardQuickAffordanceViewBinder {
     private fun updateButton(
         view: ImageView,
         viewModel: KeyguardQuickAffordanceViewModel,
-        falsingManager: FalsingManager?,
         messageDisplayer: (Int) -> Unit,
-        vibratorHelper: VibratorHelper?,
     ) {
         if (!viewModel.isVisible) {
             view.isInvisible = true
@@ -229,6 +237,7 @@ object KeyguardQuickAffordanceViewBinder {
                     shakeAnimator.start()
 
                     vibratorHelper?.vibrate(KeyguardBottomAreaVibrations.Shake)
+                    logger.logQuickAffordanceTapped(viewModel.configKey)
                 }
                 view.onLongClickListener =
                     OnLongClickListener(falsingManager, viewModel, vibratorHelper, onTouchListener)
@@ -324,6 +333,4 @@ object KeyguardQuickAffordanceViewBinder {
     private data class ConfigurationBasedDimensions(
         val buttonSizePx: Size,
     )
-
-    private const val TAG = "KeyguardQuickAffordanceViewBinder"
 }

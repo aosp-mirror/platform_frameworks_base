@@ -171,11 +171,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         };
 
         if (ENABLE_HEADS_UP) {
-            mGlobalSettings.registerContentObserver(
+            mGlobalSettings.registerContentObserverSync(
                     mGlobalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
                     true,
                     headsUpObserver);
-            mGlobalSettings.registerContentObserver(
+            mGlobalSettings.registerContentObserverSync(
                     mGlobalSettings.getUriFor(SETTING_HEADS_UP_TICKER), true,
                     headsUpObserver);
         }
@@ -295,8 +295,17 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             // b/231322873: Detect and report an event when a notification has both an FSI and a
             // suppressive groupAlertBehavior, and now correctly block the FSI from firing.
             return getDecisionGivenSuppression(
-                    FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
+                FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
+                suppressedByDND);
+        }
+
+        // If the notification is explicitly silent, block FSI and warn.
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (sbn.getNotification().isSilent()) {
+                return getDecisionGivenSuppression(
+                    FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION,
                     suppressedByDND);
+            }
         }
 
         // If the notification has suppressive BubbleMetadata, block FSI and warn.
@@ -587,8 +596,18 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         StatusBarNotification sbn = entry.getSbn();
 
         // Don't alert notifications that are suppressed due to group alert behavior
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (sbn.getNotification().isSilent()) {
+                if (log) {
+                    mLogger.logNoAlertingSilentNotification(entry);
+                }
+                return false;
+            }
+        }
+
         if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            if (log) mLogger.logNoAlertingGroupAlertBehavior(entry);
+            if (log)
+                mLogger.logNoAlertingGroupAlertBehavior(entry);
             return false;
         }
 

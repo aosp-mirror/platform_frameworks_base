@@ -23,9 +23,9 @@ import static org.mockito.Mockito.when;
 
 import android.os.Handler;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -54,7 +54,7 @@ import org.mockito.MockitoSession;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class HotspotTileTest extends SysuiTestCase {

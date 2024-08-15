@@ -38,9 +38,6 @@ class NotificationPlaceholderRepository @Inject constructor() {
      */
     val shadeScrimBounds = MutableStateFlow<ShadeScrimBounds?>(null)
 
-    /** the y position of the top of the HUN area */
-    val headsUpTop = MutableStateFlow(0f)
-
     /** height made available to the notifications in the size-constrained mode of lock screen. */
     val constrainedAvailableSpace = MutableStateFlow(0)
 

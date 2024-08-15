@@ -115,7 +115,8 @@ sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char
     size_t* total = (size_t*) arg;
     uint32_t uncompLen;
 
-    if (!zipFile->getEntryInfo(zipEntry, nullptr, &uncompLen, nullptr, nullptr, nullptr, nullptr)) {
+    if (!zipFile->getEntryInfo(zipEntry, nullptr, &uncompLen, nullptr, nullptr, nullptr, nullptr,
+                               nullptr)) {
         return INSTALL_FAILED_INVALID_APK;
     }
 

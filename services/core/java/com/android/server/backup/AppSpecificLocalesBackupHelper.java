@@ -18,6 +18,8 @@ package com.android.server.backup;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.backup.BackupRestoreEventLogger.BackupRestoreError;
+import android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType;
 import android.app.backup.BlobBackupHelper;
 import android.util.Slog;
 
@@ -32,6 +34,16 @@ import com.android.server.locales.LocaleManagerInternal;
 public class AppSpecificLocalesBackupHelper extends BlobBackupHelper {
     private static final String TAG = "AppLocalesBackupHelper";   // must be < 23 chars
     private static final boolean DEBUG = false;
+
+    @BackupRestoreDataType
+    private static final String DATA_TYPE_APP_LOCALES = "app_locales:locales";
+
+    @BackupRestoreError
+    private static final String ERROR_UNEXPECTED_KEY = "unexpected_key";
+    @BackupRestoreError
+    private static final String ERROR_BACKUP_FAILED = "backup_failed";
+    @BackupRestoreError
+    private static final String ERROR_RESTORE_FAILED = "restore_failed";
 
     // Current version of the blob schema
     private static final int BLOB_VERSION = 1;
@@ -59,13 +71,24 @@ public class AppSpecificLocalesBackupHelper extends BlobBackupHelper {
         if (KEY_APP_LOCALES.equals(key)) {
             try {
                 newPayload = mLocaleManagerInternal.getBackupPayload(mUserId);
+                getLogger().logItemsBackedUp(
+                        DATA_TYPE_APP_LOCALES,
+                        /* count= */ 1);
             } catch (Exception e) {
                 // Treat as no data
                 Slog.e(TAG, "Couldn't communicate with locale manager", e);
+                getLogger().logItemsBackupFailed(
+                        DATA_TYPE_APP_LOCALES,
+                        /* count= */ 1,
+                        ERROR_BACKUP_FAILED);
                 newPayload = null;
             }
         } else {
             Slog.w(TAG, "Unexpected backup key " + key);
+            getLogger().logItemsBackupFailed(
+                    DATA_TYPE_APP_LOCALES,
+                    /* count= */ 1,
+                    ERROR_UNEXPECTED_KEY);
         }
         return newPayload;
     }
@@ -79,11 +102,22 @@ public class AppSpecificLocalesBackupHelper extends BlobBackupHelper {
         if (KEY_APP_LOCALES.equals(key)) {
             try {
                 mLocaleManagerInternal.stageAndApplyRestoredPayload(payload, mUserId);
+                getLogger().logItemsRestored(
+                        DATA_TYPE_APP_LOCALES,
+                        /* count= */ 1);
             } catch (Exception e) {
                 Slog.e(TAG, "Couldn't communicate with locale manager", e);
+                getLogger().logItemsRestoreFailed(
+                        DATA_TYPE_APP_LOCALES,
+                        /* count= */ 1,
+                        ERROR_RESTORE_FAILED);
             }
         } else {
             Slog.w(TAG, "Unexpected restore key " + key);
+            getLogger().logItemsBackupFailed(
+                    DATA_TYPE_APP_LOCALES,
+                    /* count= */ 1,
+                    ERROR_UNEXPECTED_KEY);
         }
     }
 

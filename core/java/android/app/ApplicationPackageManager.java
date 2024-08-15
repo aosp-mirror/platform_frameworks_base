@@ -1128,7 +1128,7 @@ public class ApplicationPackageManager extends PackageManager {
     private static final PropertyInvalidatedCache<Integer, GetPackagesForUidResult>
             mGetPackagesForUidCache =
             new PropertyInvalidatedCache<Integer, GetPackagesForUidResult>(
-                32, CACHE_KEY_PACKAGES_FOR_UID_PROPERTY) {
+                1024, CACHE_KEY_PACKAGES_FOR_UID_PROPERTY) {
                 @Override
                 public GetPackagesForUidResult recompute(Integer uid) {
                     try {
@@ -2617,6 +2617,9 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             Objects.requireNonNull(packageName);
             return mPM.isAppArchivable(packageName, new UserHandle(getUserId()));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(NameNotFoundException.class);
+            throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

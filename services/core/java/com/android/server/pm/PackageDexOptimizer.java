@@ -123,7 +123,7 @@ public class PackageDexOptimizer {
     // One minute over PM WATCHDOG_TIMEOUT
     private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
 
-    private final Object mInstallLock;
+    private final PackageManagerTracedLock mInstallLock;
 
     /**
      * This should be accessed only through {@link #getInstallerLI()} with
@@ -142,7 +142,7 @@ public class PackageDexOptimizer {
     private final Context mContext;
     private static final Random sRandom = new Random();
 
-    PackageDexOptimizer(Installer installer, Object installLock, Context context,
+    PackageDexOptimizer(Installer installer, PackageManagerTracedLock installLock, Context context,
             String wakeLockTag) {
         this(new Injector() {
             @Override
@@ -167,8 +167,8 @@ public class PackageDexOptimizer {
     }
 
     @VisibleForTesting
-    PackageDexOptimizer(@NonNull Injector injector, Installer installer, Object installLock,
-            Context context, String wakeLockTag) {
+    PackageDexOptimizer(@NonNull Injector injector, Installer installer,
+            PackageManagerTracedLock installLock, Context context, String wakeLockTag) {
         this.mContext = context;
         this.mInstaller = installer;
         this.mInstallLock = installLock;
@@ -231,7 +231,7 @@ public class PackageDexOptimizer {
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             final long acquireTime = acquireWakeLockLI(pkg.getUid());
             try {
                 return performDexOptLI(pkg, pkgSetting, instructionSets,
@@ -868,8 +868,8 @@ public class PackageDexOptimizer {
      */
     public static class ForcedUpdatePackageDexOptimizer extends PackageDexOptimizer {
 
-        public ForcedUpdatePackageDexOptimizer(Installer installer, Object installLock,
-                Context context, String wakeLockTag) {
+        public ForcedUpdatePackageDexOptimizer(Installer installer,
+                PackageManagerTracedLock installLock, Context context, String wakeLockTag) {
             super(installer, installLock, context, wakeLockTag);
         }
 

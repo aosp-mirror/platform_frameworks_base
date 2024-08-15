@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaRecommendationsInteractor
 import com.android.systemui.media.controls.shared.model.MediaRecModel
 import com.android.systemui.media.controls.shared.model.MediaRecommendationsModel
+import com.android.systemui.media.controls.shared.model.NUM_REQUIRED_RECOMMENDATIONS
 import com.android.systemui.media.controls.ui.animation.accentPrimaryFromScheme
 import com.android.systemui.media.controls.ui.animation.surfaceFromScheme
 import com.android.systemui.media.controls.ui.animation.textPrimaryFromScheme
@@ -44,6 +45,8 @@ import com.android.systemui.media.controls.ui.animation.textSecondaryFromScheme
 import com.android.systemui.media.controls.ui.controller.MediaViewController.Companion.GUTS_ANIMATION_DURATION
 import com.android.systemui.media.controls.ui.util.MediaArtworkHelper
 import com.android.systemui.media.controls.util.MediaDataUtils
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
@@ -78,6 +81,8 @@ constructor(
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
+    private var location = -1
+
     /**
      * Called whenever the recommendation has been expired or removed by the user. This method
      * removes the recommendation card entirely from the carousel.
@@ -89,9 +94,14 @@ constructor(
         dismissIntent: Intent?,
         instanceId: InstanceId?
     ) {
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_DISMISS_EVENT).
         logger.logLongPressDismiss(uid, packageName, instanceId)
-        interactor.removeMediaRecommendations(key, dismissIntent, GUTS_DISMISS_DELAY_MS_DURATION)
+        interactor.removeMediaRecommendations(
+            key,
+            dismissIntent,
+            GUTS_DISMISS_DELAY_MS_DURATION,
+            SMARTSPACE_CARD_DISMISS_EVENT,
+            location
+        )
     }
 
     private fun onClicked(
@@ -111,12 +121,18 @@ constructor(
         } else {
             logger.logRecommendationItemTap(packageName, instanceId, index)
         }
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT).
 
         // set the package name of the player added by recommendation once the media is loaded.
         interactor.switchToMediaControl(packageName)
 
-        interactor.startClickIntent(expandable, intent)
+        interactor.startClickIntent(
+            expandable,
+            intent,
+            SMARTSPACE_CARD_CLICK_EVENT,
+            location,
+            index,
+            NUM_REQUIRED_RECOMMENDATIONS
+        )
     }
 
     private suspend fun toRecsViewModel(model: MediaRecommendationsModel): MediaRecsCardViewModel? {
@@ -212,6 +228,7 @@ constructor(
             areTitlesVisible = areTitlesVisible,
             areSubtitlesVisible = areSubtitlesVisible,
             gutsMenu = toGutsViewModel(model, scheme),
+            onLocationChanged = { location = it }
         )
     }
 
@@ -259,8 +276,7 @@ constructor(
                         width,
                         height
                     )
-                }
-                ?: ColorDrawable(Color.TRANSPARENT)
+                } ?: ColorDrawable(Color.TRANSPARENT)
         }
 
     private fun addGradientToRecommendationAlbum(

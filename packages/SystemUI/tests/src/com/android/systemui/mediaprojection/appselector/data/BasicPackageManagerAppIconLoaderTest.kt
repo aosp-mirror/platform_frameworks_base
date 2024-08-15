@@ -20,6 +20,7 @@ import android.content.ComponentName
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.launcher3.icons.FastBitmapDrawable
 import com.android.systemui.SysuiTestCase
@@ -31,10 +32,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class BasicPackageManagerAppIconLoaderTest : SysuiTestCase() {
 
     private val packageManagerWrapper: PackageManagerWrapper = mock()

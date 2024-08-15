@@ -559,7 +559,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add(TEST_ID);
@@ -580,7 +580,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add("fake_id");
@@ -602,7 +602,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add(TEST_ID);
@@ -623,7 +623,7 @@ public class InfoMediaManagerTest {
         routingSessionInfos.add(info);
 
         final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, route2Info);
+        final MediaDevice device = new InfoMediaDevice(mContext, route2Info, /* item */ null);
 
         final List<String> list = new ArrayList<>();
         list.add("fake_id");
@@ -856,6 +856,23 @@ public class InfoMediaManagerTest {
 
         mInfoMediaManager.mMediaDevices.clear();
         mInfoMediaManager.addMediaDevice(route2Info, TEST_SYSTEM_ROUTING_SESSION);
+
+        assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void addMediaDevice_withAddresslessBluetoothDevice_shouldIgnoreDeviceAndNotCrash() {
+        MediaRoute2Info bluetoothRoute =
+                new MediaRoute2Info.Builder(TEST_BLUETOOTH_ROUTE).setAddress(null).build();
+
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
+                mock(CachedBluetoothDeviceManager.class);
+        when(mLocalBluetoothManager.getCachedDeviceManager())
+                .thenReturn(cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class))).thenReturn(null);
+
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(bluetoothRoute, TEST_SYSTEM_ROUTING_SESSION);
 
         assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
     }

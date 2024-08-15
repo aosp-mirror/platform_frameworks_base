@@ -464,7 +464,8 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    void setAutofillFailureLocked(int sessionId, int uid, @NonNull List<AutofillId> ids) {
+    void setAutofillFailureLocked(
+            int sessionId, int uid, @NonNull List<AutofillId> ids, boolean isRefill) {
         if (!isEnabledLocked()) {
             Slog.wtf(TAG, "Service not enabled");
             return;
@@ -474,11 +475,11 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setAutofillFailure(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
-        session.setAutofillFailureLocked(ids);
+        session.setAutofillFailureLocked(ids, isRefill);
     }
 
     @GuardedBy("mLock")
-    void setViewAutofilled(int sessionId, int uid, @NonNull AutofillId id) {
+    void setViewAutofilledLocked(int sessionId, int uid, @NonNull AutofillId id) {
         if (!isEnabledLocked()) {
             Slog.wtf(TAG, "Service not enabled");
             return;
@@ -488,7 +489,53 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setViewAutofilled(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
-        session.setViewAutofilled(id);
+        session.setViewAutofilledLocked(id);
+    }
+
+    @GuardedBy("mLock")
+    void notifyNotExpiringResponseDuringAuth(int sessionId, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyNotExpiringResponseDuringAuth(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setNotifyNotExpiringResponseDuringAuth();
+    }
+
+    @GuardedBy("mLock")
+    void notifyViewEnteredIgnoredDuringAuthCount(int sessionId, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyViewEnteredIgnoredDuringAuthCount(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setLogViewEnteredIgnoredDuringAuth();
+    }
+
+    @GuardedBy("mLock")
+    public void setAutofillIdsAttemptedForRefill(
+            int sessionId, @NonNull List<AutofillId> ids, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "setAutofillIdsAttemptedForRefill(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setAutofillIdsAttemptedForRefillLocked(ids);
     }
 
     @GuardedBy("mLock")
@@ -515,7 +562,10 @@ final class AutofillManagerServiceImpl
         }
 
         final boolean finished = saveResult.isRemoveSession();
-        if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
+        if (sVerbose) {
+            Slog.v(TAG, "finishSessionLocked(): session finished? " + finished
+                    + ", showing save UI? " + saveResult.isLogSaveShown());
+        }
 
         if (finished) {
             session.removeFromServiceLocked();
@@ -792,10 +842,9 @@ final class AutofillManagerServiceImpl
      * Initializes the last fill selection after an autofill service returned a new
      * {@link FillResponse}.
      */
-    void setLastResponse(int sessionId, @NonNull FillResponse response) {
-        synchronized (mLock) {
+    @GuardedBy("mLock")
+    void setLastResponseLocked(int sessionId, @NonNull FillResponse response) {
             mEventHistory = new FillEventHistory(sessionId, response.getClientState());
-        }
     }
 
     void setLastAugmentedAutofillResponse(int sessionId) {

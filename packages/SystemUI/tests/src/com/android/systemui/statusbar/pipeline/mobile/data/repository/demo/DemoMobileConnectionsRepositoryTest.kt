@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
 import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
@@ -49,9 +50,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     private val dumpManager: DumpManager = mock()
 

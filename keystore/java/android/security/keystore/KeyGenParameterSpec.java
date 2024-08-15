@@ -1149,6 +1149,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
 
         /**
          * Sets the serial number used for the certificate of the generated key pair.
+         * To ensure compatibility with devices and certificate parsers, the value
+         * should be 20 bytes or shorter (see RFC 5280 section 4.1.2.2).
          *
          * <p>By default, the serial number is {@code 1}.
          */

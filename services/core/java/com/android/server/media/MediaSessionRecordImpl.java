@@ -34,8 +34,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class MediaSessionRecordImpl {
 
-    static final AtomicInteger sNextMediaSessionRecordId = new AtomicInteger(1);
-    int mUniqueId;
+    private static final AtomicInteger sNextMediaSessionRecordId = new AtomicInteger(1);
+    private final int mUniqueId;
+
+    protected MediaSessionRecordImpl() {
+        mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
+    }
 
     /**
      * Get the info for this session.

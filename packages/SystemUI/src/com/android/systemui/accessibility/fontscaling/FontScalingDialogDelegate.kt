@@ -29,12 +29,12 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
-import com.android.systemui.res.R
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener.ControlUnitType
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -46,7 +46,9 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 /** The Dialog that contains a seekbar for changing the font size. */
-class FontScalingDialogDelegate @Inject constructor(
+class FontScalingDialogDelegate
+@Inject
+constructor(
     private val context: Context,
     private val systemUIDialogFactory: SystemUIDialog.Factory,
     private val layoutInflater: LayoutInflater,
@@ -84,9 +86,9 @@ class FontScalingDialogDelegate @Inject constructor(
         dialog.setTitle(R.string.font_scaling_dialog_title)
         dialog.setView(layoutInflater.inflate(R.layout.font_scaling_dialog, null))
         dialog.setPositiveButton(
-                R.string.quick_settings_done,
-                /* onClick = */ null,
-                /* dismissOnClick = */ true
+            R.string.quick_settings_done,
+            /* onClick = */ null,
+            /* dismissOnClick = */ true
         )
     }
 
@@ -142,7 +144,7 @@ class FontScalingDialogDelegate @Inject constructor(
             }
         )
         doneButton.setOnClickListener { dialog.dismiss() }
-        systemSettings.registerContentObserver(Settings.System.FONT_SCALE, fontSizeObserver)
+        systemSettings.registerContentObserverSync(Settings.System.FONT_SCALE, fontSizeObserver)
     }
 
     /**
@@ -165,7 +167,7 @@ class FontScalingDialogDelegate @Inject constructor(
     override fun onStop(dialog: SystemUIDialog) {
         cancelUpdateFontScaleRunnable?.run()
         cancelUpdateFontScaleRunnable = null
-        systemSettings.unregisterContentObserver(fontSizeObserver)
+        systemSettings.unregisterContentObserverSync(fontSizeObserver)
     }
 
     @MainThread

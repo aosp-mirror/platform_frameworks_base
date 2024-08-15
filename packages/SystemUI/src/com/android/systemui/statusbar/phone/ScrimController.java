@@ -72,9 +72,11 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.shared.flag.DualShade;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -86,6 +88,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -100,6 +103,7 @@ import javax.inject.Inject;
  * security method gets shown).
  */
 @SysUISingleton
+@ExperimentalCoroutinesApi
 public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dumpable,
         CoreStartable {
 
@@ -319,7 +323,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mScrimBehind.setViewAlpha(mBehindAlpha);
     };
 
+    @VisibleForTesting
     Consumer<TransitionStep> mBouncerToGoneTransition;
+
+    private boolean mViewsAttached;
 
     @Inject
     public ScrimController(
@@ -432,6 +439,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             state.prepare(state);
         }
 
+        hydrateStateInternally(behindScrim);
+
+        mViewsAttached = true;
+    }
+
+    private void hydrateStateInternally(ScrimView behindScrim) {
+        if (SceneContainerFlag.isEnabled()) {
+            return;
+        }
+
         // Directly control transition to UNLOCKED scrim state from PRIMARY_BOUNCER, and make sure
         // to report back that keyguard has faded away. This fixes cases where the scrim state was
         // rapidly switching on unlock, due to shifts in state in CentralSurfacesImpl
@@ -443,7 +460,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
                     if (state == TransitionState.STARTED) {
                         setExpansionAffectsAlpha(false);
-                        transitionTo(ScrimState.UNLOCKED);
+                        legacyTransitionTo(ScrimState.UNLOCKED);
                     }
 
                     if (state == TransitionState.FINISHED || state == TransitionState.CANCELED) {
@@ -457,6 +474,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         // PRIMARY_BOUNCER->GONE
         collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.getINVALID(),
                 Edge.Companion.create(PRIMARY_BOUNCER, GONE)),
                 mBouncerToGoneTransition, mMainDispatcher);
         collectFlow(behindScrim, mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha(),
@@ -508,10 +526,36 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     public void transitionTo(ScrimState state) {
-        transitionTo(state, null);
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode() || !mViewsAttached) {
+            return;
+        }
+
+        internalTransitionTo(state, null);
     }
 
-    public void transitionTo(ScrimState state, Callback callback) {
+    /**
+     * Transitions to the given {@link ScrimState}.
+     *
+     * @deprecated Legacy codepath only. Do not call directly.
+     */
+    @Deprecated
+    public void legacyTransitionTo(ScrimState state) {
+        SceneContainerFlag.assertInLegacyMode();
+        internalTransitionTo(state, null);
+    }
+
+    /**
+     * Transitions to the given {@link ScrimState}.
+     *
+     * @deprecated Legacy codepath only. Do not call directly.
+     */
+    @Deprecated
+    public void legacyTransitionTo(ScrimState state, Callback callback) {
+        SceneContainerFlag.assertInLegacyMode();
+        internalTransitionTo(state, callback);
+    }
+
+    private void internalTransitionTo(ScrimState state, Callback callback) {
         if (mIsBouncerToGoneTransitionRunning) {
             Log.i(TAG, "Skipping transition to: " + state
                     + " while mIsBouncerToGoneTransitionRunning");
@@ -959,7 +1003,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             if (!mScreenOffAnimationController.shouldExpandNotifications()
                     && !mAnimatingPanelExpansionOnUnlock
                     && !occluding) {
-                if (mTransparentScrimBackground) {
+                if (mTransparentScrimBackground || DualShade.isEnabled()) {
                     mBehindAlpha = 0;
                     mNotificationsAlpha = 0;
                 } else if (mClipsQsScrim) {
@@ -1011,7 +1055,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 behindAlpha = 0f;
             }
             mInFrontAlpha = mState.getFrontAlpha();
-            if (mClipsQsScrim) {
+            if (DualShade.isEnabled() && mState == ScrimState.SHADE_LOCKED) {
+                mBehindAlpha = 0;
+                mNotificationsTint = Color.TRANSPARENT;
+                mNotificationsAlpha = 0;
+                mBehindTint = Color.TRANSPARENT;
+            } else if (mClipsQsScrim) {
                 mNotificationsAlpha = behindAlpha;
                 mNotificationsTint = behindTint;
                 mBehindAlpha = 1;
@@ -1065,8 +1114,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private Pair<Integer, Float> calculateBackStateForState(ScrimState state) {
-        // Either darken of make the scrim transparent when you
-        // pull down the shade
+        // Either darken or make the scrim transparent when pulling down the shade.
         float interpolatedFract = getInterpolatedFraction();
 
         float stateBehind = mClipsQsScrim ? state.getNotifAlpha() : state.getBehindAlpha();
@@ -1161,11 +1209,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return true;
         }
 
-        if (mState == ScrimState.PULSING) {
-            return true;
-        }
-
-        return false;
+        return mState == ScrimState.PULSING;
     }
 
     /**

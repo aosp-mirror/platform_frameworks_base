@@ -75,7 +75,7 @@ private fun SecureSettings.watch(
 ) {
     fun fetch(): Boolean = getIntForUser(key, if (defaultValue) 1 else 0, userId) > 0
 
-    registerContentObserverForUser(
+    registerContentObserverForUserSync(
         key,
         false /* notifyForDescendants */,
         object : ContentObserver(handler) {

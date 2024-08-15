@@ -16,8 +16,11 @@ flag {
 }
 
 flag {
-  name: "mandatory_biometrics"
+  name: "notify_fingerprints_loe"
   namespace: "biometrics_framework"
-  description: "This flag controls whether LSKF fallback is removed from biometric prompt when the phone is outside trusted locations"
-  bug: "322081563"
+  description: "This flag controls whether a notification should be sent to notify user when loss of enrollment happens"
+  bug: "351036558"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
 }

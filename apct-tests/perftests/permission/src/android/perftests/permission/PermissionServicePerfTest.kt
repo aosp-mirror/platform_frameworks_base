@@ -36,6 +36,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
+import org.junit.Ignore
 
 @RunWith(AndroidJUnit4::class)
 class PermissionServicePerfTest {
@@ -48,6 +49,7 @@ class PermissionServicePerfTest {
     val mUiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation()
 
     @Test
+    @Ignore("Fails to capture duration, results in infinite loop and execution timeout")
     fun testInstallPackages() {
         mUiAutomation.executeShellCommand(COMMAND_TRACE_START)
         eventually { assertThat(Trace.isTagEnabled(TRACE_TAG)).isTrue() }

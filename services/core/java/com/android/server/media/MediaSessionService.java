@@ -197,6 +197,16 @@ public class MediaSessionService extends SystemService implements Monitor {
     @GuardedBy("mLock")
     private final Map<Integer, Set<Notification>> mMediaNotifications = new HashMap<>();
 
+    /**
+     * Holds all {@link MediaSessionRecordImpl} which we've reported as being {@link
+     * ActivityManagerInternal#startForegroundServiceDelegate user engaged}.
+     *
+     * <p>This map simply prevents invoking {@link
+     * ActivityManagerInternal#startForegroundServiceDelegate} more than once per session.
+     */
+    @GuardedBy("mLock")
+    private final Set<MediaSessionRecordImpl> mFgsAllowedMediaSessionRecords = new HashSet<>();
+
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
     private FullUserRecord mCurrentFullUserRecord;
@@ -704,17 +714,31 @@ public class MediaSessionService extends SystemService implements Monitor {
             int uid = mediaSessionRecord.getUid();
             for (Notification mediaNotification : mMediaNotifications.getOrDefault(uid, Set.of())) {
                 if (mediaSessionRecord.isLinkedToNotification(mediaNotification)) {
-                    startFgsDelegate(mediaSessionRecord.getForegroundServiceDelegationOptions());
+                    startFgsDelegateLocked(mediaSessionRecord);
                     return;
                 }
             }
         }
     }
 
-    private void startFgsDelegate(
-            ForegroundServiceDelegationOptions foregroundServiceDelegationOptions) {
+    @GuardedBy("mLock")
+    private void startFgsDelegateLocked(MediaSessionRecordImpl mediaSessionRecord) {
+        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                mediaSessionRecord.getForegroundServiceDelegationOptions();
+        if (foregroundServiceDelegationOptions == null) {
+            return; // This record doesn't support FGS. Typically a MediaSession2 record.
+        }
+        if (!mFgsAllowedMediaSessionRecords.add(mediaSessionRecord)) {
+            return; // This record is already FGS-started.
+        }
         final long token = Binder.clearCallingIdentity();
         try {
+            Log.i(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "startFgsDelegate: pkg=%s uid=%d",
+                            foregroundServiceDelegationOptions.mClientPackageName,
+                            foregroundServiceDelegationOptions.mClientUid));
             mActivityManagerInternal.startForegroundServiceDelegate(
                     foregroundServiceDelegationOptions, /* connection= */ null);
         } finally {
@@ -748,14 +772,29 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             }
 
-            stopFgsDelegate(foregroundServiceDelegationOptions);
+            stopFgsDelegateLocked(mediaSessionRecord);
         }
     }
 
-    private void stopFgsDelegate(
-            ForegroundServiceDelegationOptions foregroundServiceDelegationOptions) {
+    @GuardedBy("mLock")
+    private void stopFgsDelegateLocked(MediaSessionRecordImpl mediaSessionRecord) {
+        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                mediaSessionRecord.getForegroundServiceDelegationOptions();
+        if (foregroundServiceDelegationOptions == null) {
+            return; // This record doesn't support FGS. Typically a MediaSession2 record.
+        }
+        if (!mFgsAllowedMediaSessionRecords.remove(mediaSessionRecord)) {
+            return; // This record is not FGS-started. No need to stop it.
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
+            Log.i(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "stopFgsDelegate: pkg=%s uid=%d",
+                            foregroundServiceDelegationOptions.mClientPackageName,
+                            foregroundServiceDelegationOptions.mClientUid));
             mActivityManagerInternal.stopForegroundServiceDelegate(
                     foregroundServiceDelegationOptions);
         } finally {
@@ -2679,6 +2718,9 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         @Override
         public void expireTempEngagedSessions() {
+            if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+                return;
+            }
             synchronized (mLock) {
                 for (Set<MediaSessionRecordImpl> uidSessions :
                         mUserEngagedSessionsForFgs.values()) {
@@ -3194,11 +3236,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 mMediaNotifications.get(uid).add(postedNotification);
                 for (MediaSessionRecordImpl mediaSessionRecord :
                         mUserEngagedSessionsForFgs.getOrDefault(uid, Set.of())) {
-                    ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
-                            mediaSessionRecord.getForegroundServiceDelegationOptions();
-                    if (foregroundServiceDelegationOptions != null
-                            && mediaSessionRecord.isLinkedToNotification(postedNotification)) {
-                        startFgsDelegate(foregroundServiceDelegationOptions);
+                    if (mediaSessionRecord.isLinkedToNotification(postedNotification)) {
+                        startFgsDelegateLocked(mediaSessionRecord);
                         return;
                     }
                 }

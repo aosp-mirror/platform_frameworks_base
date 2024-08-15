@@ -45,3 +45,10 @@ flag {
     description: "Do not allow intents without an action to match any intent filters"
     bug: "293560872"
 }
+
+flag {
+    name: "asm_opt_system_into_enforcement"
+    namespace: "responsible_apis"
+    description: "Opt the system into enforcement of BAL"
+    bug: "339403750"
+}

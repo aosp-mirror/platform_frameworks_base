@@ -48,14 +48,30 @@ constructor(
     private val uiEventLogger: UiEventLogger,
 ) {
 
+    private val spatialSpeakerIcon =
+        Icon.Resource(R.drawable.ic_spatial_speaker, contentDescription = null)
+
     val spatialAudioButton: StateFlow<ButtonViewModel?> =
-        interactor.isEnabled
-            .map {
-                val isChecked = it is SpatialAudioEnabledModel.SpatialAudioEnabled
-                it.toViewModel(isChecked)
+        combine(interactor.isEnabled, interactor.isAvailable) { isEnabled, isAvailable ->
+                isEnabled
+                    .toViewModel(
+                        isChecked = isEnabled is SpatialAudioEnabledModel.SpatialAudioEnabled,
+                        isHeadTrackingAvailable =
+                            isAvailable is SpatialAudioAvailabilityModel.HeadTracking,
+                    )
                     .copy(label = context.getString(R.string.volume_panel_spatial_audio_title))
             }
             .stateIn(scope, SharingStarted.Eagerly, null)
+
+    val shouldUsePopup: StateFlow<Boolean> =
+        interactor.isAvailable
+            .map {
+                // head tracking availability means there are three possible states for the spatial
+                // audio: disabled, enabled regular, enabled with head tracking.
+                // Show popup in this case instead of a togglealbe button.
+                it is SpatialAudioAvailabilityModel.HeadTracking
+            }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     val isAvailable: StateFlow<Boolean> =
         availabilityCriteria.isAvailable().stateIn(scope, SharingStarted.Eagerly, true)
@@ -73,8 +89,12 @@ constructor(
                         }
                     }
                     .map { isEnabled ->
-                        val isChecked = isEnabled == currentIsEnabled
-                        val buttonViewModel: ButtonViewModel = isEnabled.toViewModel(isChecked)
+                        val buttonViewModel: ButtonViewModel =
+                            isEnabled.toViewModel(
+                                isChecked = isEnabled == currentIsEnabled,
+                                isHeadTrackingAvailable =
+                                    isAvailable is SpatialAudioAvailabilityModel.HeadTracking,
+                            )
                         SpatialAudioButtonViewModel(button = buttonViewModel, model = isEnabled)
                     }
             }
@@ -97,11 +117,21 @@ constructor(
         scope.launch { interactor.setEnabled(model) }
     }
 
-    private fun SpatialAudioEnabledModel.toViewModel(isChecked: Boolean): ButtonViewModel {
+    private fun SpatialAudioEnabledModel.toViewModel(
+        isChecked: Boolean,
+        isHeadTrackingAvailable: Boolean,
+    ): ButtonViewModel {
+        // This method deliberately uses the same icon for the case when head tracking is disabled
+        // to show a toggle button with a non-changing icon
         if (this is SpatialAudioEnabledModel.HeadTrackingEnabled) {
             return ButtonViewModel(
                 isActive = isChecked,
-                icon = Icon.Resource(R.drawable.ic_head_tracking, contentDescription = null),
+                icon =
+                    if (isHeadTrackingAvailable) {
+                        Icon.Resource(R.drawable.ic_head_tracking, contentDescription = null)
+                    } else {
+                        spatialSpeakerIcon
+                    },
                 label = context.getString(R.string.volume_panel_spatial_audio_tracking)
             )
         }
@@ -109,7 +139,12 @@ constructor(
         if (this is SpatialAudioEnabledModel.SpatialAudioEnabled) {
             return ButtonViewModel(
                 isActive = isChecked,
-                icon = Icon.Resource(R.drawable.ic_spatial_audio, contentDescription = null),
+                icon =
+                    if (isHeadTrackingAvailable) {
+                        Icon.Resource(R.drawable.ic_spatial_audio, contentDescription = null)
+                    } else {
+                        spatialSpeakerIcon
+                    },
                 label = context.getString(R.string.volume_panel_spatial_audio_fixed)
             )
         }
@@ -117,7 +152,12 @@ constructor(
         if (this is SpatialAudioEnabledModel.Disabled) {
             return ButtonViewModel(
                 isActive = isChecked,
-                icon = Icon.Resource(R.drawable.ic_spatial_audio_off, contentDescription = null),
+                icon =
+                    if (isHeadTrackingAvailable) {
+                        Icon.Resource(R.drawable.ic_spatial_audio_off, contentDescription = null)
+                    } else {
+                        spatialSpeakerIcon
+                    },
                 label = context.getString(R.string.volume_panel_spatial_audio_off)
             )
         }

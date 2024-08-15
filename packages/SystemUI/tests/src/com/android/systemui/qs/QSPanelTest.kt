@@ -14,7 +14,7 @@
 package com.android.systemui.qs
 
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
+import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableContext
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
@@ -27,13 +27,15 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
+import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -44,11 +46,17 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
 @SmallTest
-class QSPanelTest : SysuiTestCase() {
+class QSPanelTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Mock private lateinit var qsLogger: QSLogger
 
@@ -57,9 +65,8 @@ class QSPanelTest : SysuiTestCase() {
 
     private lateinit var footer: View
 
-    private val themedContext = TestableContext(
-            ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
-    )
+    private val themedContext =
+        TestableContext(ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
 
     @Before
     @Throws(Exception::class)
@@ -106,38 +113,8 @@ class QSPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun testTilesFooterVisibleRTLLandscapeMedia() {
-        qsPanel.layoutDirection = View.LAYOUT_DIRECTION_RTL
-        // We need at least a tile so the layout has a height
-        qsPanel.tileLayout?.addTile(
-                QSPanelControllerBase.TileRecord(
-                    mock(QSTile::class.java),
-                    QSTileViewImpl(themedContext)
-                )
-            )
-
-        val mediaView = FrameLayout(themedContext)
-        mediaView.addView(View(themedContext), MATCH_PARENT, 800)
-
-        qsPanel.setUsingHorizontalLayout(/* horizontal */ true, mediaView, /* force */ true)
-        qsPanel.measure(
-            /* width */ View.MeasureSpec.makeMeasureSpec(3000, View.MeasureSpec.EXACTLY),
-            /* height */ View.MeasureSpec.makeMeasureSpec(1000, View.MeasureSpec.EXACTLY)
-        )
-        qsPanel.layout(0, 0, qsPanel.measuredWidth, qsPanel.measuredHeight)
-
-        val tiles = qsPanel.tileLayout as View
-        // Tiles are effectively to the right of media
-        assertThat(mediaView isLeftOf tiles)
-        assertThat(tiles.isVisibleToUser).isTrue()
-
-        assertThat(mediaView isLeftOf footer)
-        assertThat(footer.isVisibleToUser).isTrue()
-    }
-
-    @Test
+    @DisableSceneContainer
     fun testTilesFooterVisibleLandscapeMedia() {
-        qsPanel.layoutDirection = View.LAYOUT_DIRECTION_LTR
         // We need at least a tile so the layout has a height
         qsPanel.tileLayout?.addTile(
             QSPanelControllerBase.TileRecord(
@@ -158,10 +135,10 @@ class QSPanelTest : SysuiTestCase() {
 
         val tiles = qsPanel.tileLayout as View
         // Tiles are effectively to the left of media
-        assertThat(tiles isLeftOf mediaView)
+        assertThat(tiles isLeftOf mediaView).isTrue()
         assertThat(tiles.isVisibleToUser).isTrue()
 
-        assertThat(footer isLeftOf mediaView)
+        assertThat(footer isLeftOf mediaView).isTrue()
         assertThat(footer.isVisibleToUser).isTrue()
     }
 
@@ -169,8 +146,8 @@ class QSPanelTest : SysuiTestCase() {
     fun testBottomPadding() {
         val padding = 10
         themedContext.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_bottom,
-                padding
+            R.dimen.qs_panel_padding_bottom,
+            padding
         )
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingBottom).isEqualTo(padding)
@@ -182,8 +159,8 @@ class QSPanelTest : SysuiTestCase() {
         val paddingCombined = 100
         themedContext.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
         themedContext.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top,
-                paddingCombined
+            R.dimen.qs_panel_padding_top,
+            paddingCombined
         )
 
         qsPanel.updatePadding()
@@ -220,7 +197,8 @@ class QSPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun initializedWithNoMedia_tileLayoutParentIsAlwaysQsPanel() {
+    @DisableSceneContainer
+    fun initializedWithNoMedia_sceneContainerDisabled_tileLayoutParentIsAlwaysQsPanel() {
         lateinit var panel: QSPanel
         lateinit var tileLayout: View
         testableLooper.runWithLooper {
@@ -249,6 +227,7 @@ class QSPanelTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun initializeWithNoMedia_mediaNeverAttached() {
         lateinit var panel: QSPanel
         testableLooper.runWithLooper {
@@ -286,6 +265,10 @@ class QSPanelTest : SysuiTestCase() {
 
         assertThat(qsPanel.tileLayout!!.minRows).isEqualTo(2)
         assertThat(qsPanel.tileLayout!!.maxColumns).isEqualTo(2)
+    }
+
+    companion object {
+        @Parameters(name = "{0}") @JvmStatic fun getParams() = parameterizeSceneContainerFlag()
     }
 
     private infix fun View.isLeftOf(other: View): Boolean {

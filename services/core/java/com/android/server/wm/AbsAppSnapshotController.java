@@ -43,7 +43,6 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.window.ScreenCapture;
 import android.window.SnapshotDrawerUtils;
@@ -137,7 +136,6 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     }
 
     abstract ActivityRecord getTopActivity(TYPE source);
-    abstract ActivityRecord getTopFullscreenActivity(TYPE source);
     abstract ActivityManager.TaskDescription getTaskDescription(TYPE source);
     /**
      * Find the window for a given task to take a snapshot. Top child of the task is usually the one
@@ -331,7 +329,8 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         builder.setPixelFormat(pixelFormat);
         builder.setIsTranslucent(isTranslucent);
         builder.setWindowingMode(source.getWindowingMode());
-        builder.setAppearance(getAppearance(source));
+        builder.setAppearance(mainWindow.mAttrs.insetsFlags.appearance);
+        builder.setUiMode(activity.getConfiguration().uiMode);
 
         final Configuration taskConfig = activity.getTask().getConfiguration();
         final int displayRotation = taskConfig.windowConfiguration.getDisplayRotation();
@@ -379,12 +378,6 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         if (activity == null) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + source);
-            }
-            return null;
-        }
-        if (activity.hasCommittedReparentToAnimationLeash()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
             }
             return null;
         }
@@ -456,29 +449,14 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
                 contentInsets, letterboxInsets, false /* isLowResolution */,
                 false /* isRealSnapshot */, source.getWindowingMode(),
-                getAppearance(source), false /* isTranslucent */, false /* hasImeSurface */);
+                attrs.insetsFlags.appearance, false /* isTranslucent */, false /* hasImeSurface */,
+                topActivity.getConfiguration().uiMode /* uiMode */);
         return validateSnapshot(taskSnapshot);
     }
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
         return state.calculateInsets(
                 frame, WindowInsets.Type.systemBars(), false /* ignoreVisibility */).toRect();
-    }
-
-    /**
-     * @return The {@link WindowInsetsController.Appearance} flags for the top main app window in
-     * the given {@param TYPE}.
-     */
-    @WindowInsetsController.Appearance
-    private int getAppearance(TYPE source) {
-        final ActivityRecord topFullscreenActivity = getTopFullscreenActivity(source);
-        final WindowState topFullscreenWindow = topFullscreenActivity != null
-                ? topFullscreenActivity.findMainWindow()
-                : null;
-        if (topFullscreenWindow != null) {
-            return topFullscreenWindow.mAttrs.insetsFlags.appearance;
-        }
-        return 0;
     }
 
     /**

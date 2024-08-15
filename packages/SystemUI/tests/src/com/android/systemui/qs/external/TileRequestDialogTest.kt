@@ -22,11 +22,11 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations
 import java.util.Arrays
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class TileRequestDialogTest : SysuiTestCase() {
 

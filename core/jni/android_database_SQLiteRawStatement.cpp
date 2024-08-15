@@ -72,17 +72,30 @@ static void throwInvalidParameter(JNIEnv *env, jlong stmtPtr, jint index) {
 
 
 // This throws a SQLiteBindOrColumnIndexOutOfRangeException if the column index is out
-// of bounds.
-static void throwIfInvalidColumn(JNIEnv *env, jlong stmtPtr, jint col) {
+// of bounds.  It returns true if an exception was thrown.
+static bool throwIfInvalidColumn(JNIEnv *env, jlong stmtPtr, jint col) {
     if (col < 0 || col >= sqlite3_data_count(stmt(stmtPtr))) {
         int count = sqlite3_data_count(stmt(stmtPtr));
         std::string message = android::base::StringPrintf(
             "column index %d out of bounds [0,%d]", col, count - 1);
         char const * errmsg = sqlite3_errstr(SQLITE_RANGE);
         throw_sqlite3_exception(env, SQLITE_RANGE, errmsg, message.c_str());
+        return true;
+    } else {
+        return false;
     }
 }
 
+// If the last operation failed, throw an exception and return true.  Otherwise return false.
+static bool throwIfError(JNIEnv *env, jlong stmtPtr) {
+    switch (sqlite3_errcode(db(stmtPtr))) {
+        case SQLITE_OK:
+        case SQLITE_DONE:
+        case SQLITE_ROW: return false;
+    }
+    throw_sqlite3_exception(env, db(stmtPtr), nullptr);
+    return true;
+}
 
 static jint bindParameterCount(JNIEnv* env, jclass, jlong stmtPtr) {
     return sqlite3_bind_parameter_count(stmt(stmtPtr));
@@ -206,12 +219,16 @@ static void bindText(JNIEnv* env, jclass, jlong stmtPtr, jint index, jstring val
 
 
 static jint columnType(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return 0;
+    }
     return sqlite3_column_type(stmt(stmtPtr), col);
 }
 
 static jstring columnName(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return nullptr;
+    }
     const jchar* name = static_cast<const jchar*>(sqlite3_column_name16(stmt(stmtPtr), col));
     if (name == nullptr) {
         throw_sqlite3_exception(env, db(stmtPtr), "error fetching columnName()");
@@ -222,18 +239,29 @@ static jstring columnName(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
 }
 
 static jint columnBytes(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
-    return sqlite3_column_bytes16(stmt(stmtPtr), col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return 0;
+    }
+    int r = sqlite3_column_bytes16(stmt(stmtPtr), col);
+    throwIfError(env, stmtPtr);
+    return r;
 }
 
-
 static jbyteArray columnBlob(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return nullptr;
+    }
     const void* blob = sqlite3_column_blob(stmt(stmtPtr), col);
     if (blob == nullptr) {
+        if (throwIfError(env, stmtPtr)) {
+            return NULL;
+        }
         return (sqlite3_column_type(stmt(stmtPtr), col) == SQLITE_NULL) ? NULL : emptyArray;
     }
     size_t size = sqlite3_column_bytes(stmt(stmtPtr), col);
+    if (throwIfError(env, stmtPtr)) {
+        return NULL;
+    }
     jbyteArray result = env->NewByteArray(size);
     if (result == nullptr) {
         // An OutOfMemory exception will have been thrown.
@@ -245,12 +273,18 @@ static jbyteArray columnBlob(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
 
 static int columnBuffer(JNIEnv* env, jclass, jlong stmtPtr, jint col,
         jbyteArray buffer, jint offset, jint length, jint srcOffset) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return 0;
+    }
     const void* blob = sqlite3_column_blob(stmt(stmtPtr), col);
     if (blob == nullptr) {
+        throwIfError(env, stmtPtr);
         return 0;
     }
     jsize bsize = sqlite3_column_bytes(stmt(stmtPtr), col);
+    if (throwIfError(env, stmtPtr)) {
+        return 0;
+    }
     if (bsize == 0 || bsize <= srcOffset) {
         return 0;
     }
@@ -260,27 +294,39 @@ static int columnBuffer(JNIEnv* env, jclass, jlong stmtPtr, jint col,
 }
 
 static jdouble columnDouble(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return 0;
+    }
     return sqlite3_column_double(stmt(stmtPtr), col);
 }
 
 static jint columnInt(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return 0;
+    }
     return sqlite3_column_int(stmt(stmtPtr), col);
 }
 
 static jlong columnLong(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return 0;
+    }
     return sqlite3_column_int64(stmt(stmtPtr), col);
 }
 
 static jstring columnText(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    throwIfInvalidColumn(env, stmtPtr, col);
+    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+        return nullptr;
+    }
     const jchar* text = static_cast<const jchar*>(sqlite3_column_text16(stmt(stmtPtr), col));
     if (text == nullptr) {
+        throwIfError(env, stmtPtr);
         return NULL;
     }
     size_t length = sqlite3_column_bytes16(stmt(stmtPtr), col) / sizeof(jchar);
+    if (throwIfError(env, stmtPtr)) {
+        return NULL;
+    }
     return env->NewString(text, length);
 }
 

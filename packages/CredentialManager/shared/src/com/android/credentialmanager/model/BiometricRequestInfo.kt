@@ -23,6 +23,6 @@ package com.android.credentialmanager.model
  * null.
  */
 data class BiometricRequestInfo(
-    val opId: Int? = null,
+    val opId: Long? = null,
     val allowedAuthenticators: Int
 )

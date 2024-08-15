@@ -38,8 +38,10 @@ import com.android.wm.shell.common.bubbles.BubbleBarLocation.RIGHT
  */
 abstract class BaseBubblePinController(private val screenSizeProvider: () -> Point) {
 
+    private var initialLocationOnLeft = false
     private var onLeft = false
     private var dismissZone: RectF? = null
+    private var stuckToDismissTarget = false
     private var screenCenterX = 0
     private var listener: LocationChangeListener? = null
     private var dropTargetAnimator: ObjectAnimator? = null
@@ -50,6 +52,7 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
      * @param initialLocationOnLeft side of the screen where bubble bar is pinned to
      */
     fun onDragStart(initialLocationOnLeft: Boolean) {
+        this.initialLocationOnLeft = initialLocationOnLeft
         onLeft = initialLocationOnLeft
         screenCenterX = screenSizeProvider.invoke().x / 2
         dismissZone = getExclusionRect()
@@ -59,22 +62,33 @@ abstract class BaseBubblePinController(private val screenSizeProvider: () -> Poi
     fun onDragUpdate(x: Float, y: Float) {
         if (dismissZone?.contains(x, y) == true) return
 
-        if (onLeft && x > screenCenterX) {
-            onLeft = false
-            onLocationChange(RIGHT)
-        } else if (!onLeft && x < screenCenterX) {
-            onLeft = true
-            onLocationChange(LEFT)
+        val wasOnLeft = onLeft
+        onLeft = x < screenCenterX
+        if (wasOnLeft != onLeft) {
+            onLocationChange(if (onLeft) LEFT else RIGHT)
+        } else if (stuckToDismissTarget) {
+            // Moved out of the dismiss view back to initial side, if we have a drop target, show it
+            getDropTargetView()?.apply { animateIn() }
         }
+        // Make sure this gets cleared
+        stuckToDismissTarget = false
     }
 
-    /** Temporarily hide the drop target view */
-    fun setDropTargetHidden(hidden: Boolean) {
-        val targetView = getDropTargetView() ?: return
-        if (hidden) {
-            targetView.animateOut()
-        } else {
-            targetView.animateIn()
+    /** Signal the controller that view has been dragged to dismiss view. */
+    fun onStuckToDismissTarget() {
+        stuckToDismissTarget = true
+        // Notify that location may be reset
+        val shouldResetLocation = onLeft != initialLocationOnLeft
+        if (shouldResetLocation) {
+            onLeft = initialLocationOnLeft
+            listener?.onChange(if (onLeft) LEFT else RIGHT)
+        }
+        getDropTargetView()?.apply {
+            animateOut {
+                if (shouldResetLocation) {
+                    updateLocation(if (onLeft) LEFT else RIGHT)
+                }
+            }
         }
     }
 

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.UserHandle;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -27,19 +28,18 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
-import com.android.systemui.settings.DisplayTracker;
 
 import javax.inject.Inject;
 
 /** An intermediary singleton object to help communicating with the cross process service. */
 @SysUISingleton
 class AppClipsCrossProcessHelper {
+    private static final String TAG = AppClipsCrossProcessHelper.class.getSimpleName();
 
     private final ServiceConnector<IAppClipsScreenshotHelperService> mProxyConnector;
-    private final DisplayTracker mDisplayTracker;
 
     @Inject
-    AppClipsCrossProcessHelper(@Application Context context, DisplayTracker displayTracker) {
+    AppClipsCrossProcessHelper(@Application Context context) {
         // Start a service as main user so that even if the app clips activity is running as work
         // profile user the service is able to use correct instance of Bubbles to grab a screenshot
         // excluding the bubble layer.
@@ -48,7 +48,6 @@ class AppClipsCrossProcessHelper {
                 Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
                         | Context.BIND_NOT_VISIBLE, UserHandle.USER_SYSTEM,
                 IAppClipsScreenshotHelperService.Stub::asInterface);
-        mDisplayTracker = displayTracker;
     }
 
     /**
@@ -58,15 +57,16 @@ class AppClipsCrossProcessHelper {
      * pass around but not a {@link Bitmap}.
      */
     @Nullable
-    Bitmap takeScreenshot() {
+    Bitmap takeScreenshot(int displayId) {
         try {
             AndroidFuture<ScreenshotHardwareBufferInternal> future =
                     mProxyConnector.postForResult(
-                            service ->
-                                    // Take a screenshot of the default display of the user.
-                                    service.takeScreenshot(mDisplayTracker.getDefaultDisplayId()));
+                            service -> service.takeScreenshot(displayId));
             return future.get().createBitmapThenCloseBuffer();
         } catch (Exception e) {
+            Log.e(TAG,
+                    String.format("Error while capturing a screenshot of displayId %d", displayId),
+                    e);
             return null;
         }
     }

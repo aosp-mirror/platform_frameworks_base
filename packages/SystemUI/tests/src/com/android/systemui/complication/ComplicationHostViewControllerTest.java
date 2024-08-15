@@ -24,13 +24,13 @@ import static org.mockito.Mockito.when;
 
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.view.View;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -51,7 +51,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ComplicationHostViewControllerTest extends SysuiTestCase {
     @Mock
     ConstraintLayout mComplicationHostView;

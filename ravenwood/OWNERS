@@ -2,6 +2,7 @@ set noparent
 
 jsharkey@google.com
 omakoto@google.com
+dplotnikov@google.com
 
 per-file ravenwood-annotation-allowed-classes.txt = dplotnikov@google.com
 per-file texts/ravenwood-annotation-allowed-classes.txt = dplotnikov@google.com

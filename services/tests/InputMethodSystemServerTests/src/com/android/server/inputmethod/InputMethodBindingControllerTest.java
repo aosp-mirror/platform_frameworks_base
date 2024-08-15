@@ -79,10 +79,8 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         // from system.
         synchronized (ImfLock.class) {
             mBindingController =
-                    new InputMethodBindingController(
-                            mInputMethodManagerService.getCurrentImeUserIdLocked(),
-                            mInputMethodManagerService, mImeConnectionBindFlags,
-                            mCountDownLatch);
+                    new InputMethodBindingController(mUserId, mInputMethodManagerService,
+                            mImeConnectionBindFlags, mCountDownLatch);
         }
     }
 
@@ -140,7 +138,7 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         final InputMethodInfo info;
         synchronized (ImfLock.class) {
             mBindingController.setSelectedMethodId(TEST_IME_ID);
-            info = mInputMethodManagerService.queryInputMethodForCurrentUserLocked(TEST_IME_ID);
+            info = InputMethodSettingsRepository.get(mUserId).getMethodMap().get(TEST_IME_ID);
         }
         assertThat(info).isNotNull();
         assertThat(info.getId()).isEqualTo(TEST_IME_ID);

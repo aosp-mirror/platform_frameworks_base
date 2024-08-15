@@ -20,7 +20,6 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.app.admin.devicePolicyManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
@@ -29,11 +28,12 @@ import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.flags.Flags.FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.DisabledReason
+import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_BACKGROUND_SETTING
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -43,6 +43,7 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -63,6 +64,38 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         setKeyguardFeaturesDisabled(SECONDARY_USER, KEYGUARD_DISABLE_FEATURES_NONE)
         setKeyguardFeaturesDisabled(WORK_PROFILE, KEYGUARD_DISABLE_FEATURES_NONE)
         underTest = kosmos.communalSettingsRepository
+    }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_bothEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
+        assertThat(underTest.getFlagEnabled()).isTrue()
+    }
+
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_bothDisabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyClassicFlagEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyTrunkFlagEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
     }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
@@ -180,40 +213,30 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
                 )
         }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB)
     @Test
-    fun hubShowsWidgetCategoriesSetByUser() =
+    fun backgroundType_defaultValue() =
         testScope.runTest {
-            kosmos.fakeSettings.putIntForUser(
-                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                PRIMARY_USER.id
-            )
-            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
-            assertThat(setting?.categories)
-                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
+            val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))
+            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.ANIMATED)
         }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB)
-    @DisableFlags(FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT)
     @Test
-    fun hubShowsKeyguardWidgetsByDefault() =
+    fun backgroundType_verifyAllValues() =
         testScope.runTest {
-            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
-            assertThat(setting?.categories)
-                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
-        }
-
-    @EnableFlags(FLAG_COMMUNAL_HUB, FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT)
-    @Test
-    fun hubShowsAllWidgetsByDefaultWhenFlagEnabled() =
-        testScope.runTest {
-            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
-            assertThat(setting?.categories)
-                .isEqualTo(
-                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD +
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
+            val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))
+            for (type in CommunalBackgroundType.entries) {
+                kosmos.fakeSettings.putIntForUser(
+                    GLANCEABLE_HUB_BACKGROUND_SETTING,
+                    type.value,
+                    PRIMARY_USER.id
                 )
+                assertWithMessage(
+                        "Expected $type when $GLANCEABLE_HUB_BACKGROUND_SETTING is set to" +
+                            " ${type.value} but was $backgroundType"
+                    )
+                    .that(backgroundType)
+                    .isEqualTo(type)
+            }
         }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {

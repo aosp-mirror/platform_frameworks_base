@@ -35,9 +35,9 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -63,7 +63,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class DreamTileTest extends SysuiTestCase {

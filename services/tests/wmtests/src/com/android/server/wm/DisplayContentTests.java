@@ -83,6 +83,8 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFO
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -115,6 +117,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Display;
@@ -1343,6 +1347,27 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
     }
 
+    @SetupWindows(addWindows = W_ACTIVITY)
+    @Test
+    public void testShouldImeAttachedToApp_targetBoundsDifferentFromImeContainer_returnsFalse()
+            throws Exception {
+        Rect imeContainerBounds = new Rect(0, 0, 100, 100);
+        Rect imeTargetBounds = new Rect(0, 0, 100, 200);
+        spyOn(mAppWindow);
+        spyOn(mAppWindow.mActivityRecord);
+        doReturn(imeTargetBounds).when(mAppWindow).getBounds();
+        doReturn(true).when(mAppWindow.mActivityRecord).matchParentBounds();
+        mDisplayContent.setImeInputTarget(mAppWindow);
+        mDisplayContent.setImeLayeringTarget(
+                mDisplayContent.getImeInputTarget().getWindowState());
+        mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
+        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+        spyOn(imeContainer);
+        doReturn(imeContainerBounds).when(imeContainer).getBounds();
+
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
+    }
+
     @Test
     public void testUpdateSystemGestureExclusion() throws Exception {
         final DisplayContent dc = createNewDisplay();
@@ -1844,6 +1869,46 @@ public class DisplayContentTests extends WindowTestsBase {
                 eq(recentsActivity));
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
         assertFalse(recentsActivity.hasFixedRotationTransform());
+    }
+
+    @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
+    @Test
+    public void testRespectNonTopVisibleFixedOrientation() {
+        spyOn(mWm.mAppCompatConfiguration);
+        doReturn(false).when(mWm.mAppCompatConfiguration).isTranslucentLetterboxingEnabled();
+        makeDisplayPortrait(mDisplayContent);
+        final ActivityRecord nonTopVisible = new ActivityBuilder(mAtm)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .setCreateTask(true).build();
+        final ActivityRecord translucentTop = new ActivityBuilder(mAtm)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .setTask(nonTopVisible.getTask()).setVisible(false)
+                .setActivityTheme(android.R.style.Theme_Translucent).build();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+        mDisplayContent.requestTransitionAndLegacyPrepare(WindowManager.TRANSIT_OPEN, 0);
+        translucentTop.setVisibility(true);
+        mDisplayContent.updateOrientation();
+        assertEquals("Non-top visible activity must be portrait",
+                Configuration.ORIENTATION_PORTRAIT, nonTopVisible.getConfiguration().orientation);
+        assertEquals("Top translucent activity must be landscape",
+                Configuration.ORIENTATION_LANDSCAPE, translucentTop.getConfiguration().orientation);
+
+        player.start();
+        player.finish();
+        assertEquals("Display must be landscape after the transition is finished",
+                Configuration.ORIENTATION_LANDSCAPE,
+                mDisplayContent.getConfiguration().orientation);
+        assertEquals("Non-top visible activity must still be portrait",
+                Configuration.ORIENTATION_PORTRAIT,
+                nonTopVisible.getConfiguration().orientation);
+
+        translucentTop.finishIfPossible("test", false /* oomAdj */);
+        mDisplayContent.updateOrientation();
+        player.start();
+        player.finish();
+        assertEquals("Display must be portrait after closing the translucent activity",
+                Configuration.ORIENTATION_PORTRAIT,
+                mDisplayContent.getConfiguration().orientation);
     }
 
     @Test
@@ -2539,7 +2604,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // test misc display overrides
         assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
-                mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+                mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
     }
 
@@ -2582,7 +2647,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // test misc display overrides
         assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
-                mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+                mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
     }
 
@@ -2591,6 +2656,7 @@ public class DisplayContentTests extends WindowTestsBase {
      * display.
      */
     @Test
+    @SuppressWarnings("GuardedBy")
     public void testNotResumeHomeRootTaskOnRemovingDisplay() {
         // Create a display which supports system decoration and allows reparenting root tasks to
         // another display when the display is removed.
@@ -2613,7 +2679,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // The removed display should have no focused root task and its home root task should never
         // resume.
         assertNull(display.getFocusedRootTask());
-        verify(homeRootTask, never()).resumeTopActivityUncheckedLocked(any(), any());
+        verify(homeRootTask, never()).resumeTopActivityUncheckedLocked(
+                any(), any(), anyBoolean());
     }
 
     /**
@@ -2799,6 +2866,31 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(dc.hasAccess(uid2));
 
         verify(mWm.mUmInternal, never()).isUserVisible(userId2, displayId);
+    }
+
+    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @Test
+    public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
+        doReturn(true).when(() ->
+                DesktopModeHelper.canEnterDesktopMode(any()));
+
+        assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
+    }
+
+    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @Test
+    public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
+        doReturn(true).when(() ->
+                DesktopModeHelper.canEnterDesktopMode(any()));
+
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
+    }
+
+    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @Test
+    public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
+        assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
     private void removeRootTaskTests(Runnable runnable) {

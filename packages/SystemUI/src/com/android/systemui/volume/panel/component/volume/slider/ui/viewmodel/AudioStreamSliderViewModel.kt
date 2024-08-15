@@ -26,15 +26,20 @@ import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
+import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -47,8 +52,10 @@ constructor(
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
     private val uiEventLogger: UiEventLogger,
+    private val volumePanelLogger: VolumePanelLogger,
 ) : SliderViewModel {
 
+    private val volumeChanges = MutableStateFlow<Int?>(null)
     private val streamsAffectedByRing =
         setOf(
             AudioManager.STREAM_RING,
@@ -100,16 +107,25 @@ constructor(
                 audioVolumeInteractor.canChangeVolume(audioStream),
                 audioVolumeInteractor.ringerMode,
             ) { model, isEnabled, ringerMode ->
+                volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
                 model.toState(isEnabled, ringerMode)
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
 
+    init {
+        volumeChanges
+            .filterNotNull()
+            .onEach {
+                volumePanelLogger.onSetVolumeRequested(audioStream, it)
+                audioVolumeInteractor.setVolume(audioStream, it)
+            }
+            .launchIn(coroutineScope)
+    }
+
     override fun onValueChanged(state: SliderState, newValue: Float) {
         val audioViewModel = state as? State
         audioViewModel ?: return
-        coroutineScope.launch {
-            audioVolumeInteractor.setVolume(audioStream, newValue.roundToInt())
-        }
+        volumeChanges.tryEmit(newValue.roundToInt())
     }
 
     override fun onValueChangeFinished() {

@@ -19,7 +19,7 @@ package com.android.systemui.controls.management
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.service.controls.Control
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlStatus
@@ -37,7 +37,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AllModelTest : SysuiTestCase() {
 
     companion object {

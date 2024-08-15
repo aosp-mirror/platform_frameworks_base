@@ -24,6 +24,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -33,6 +34,7 @@ public class QrDecorateView extends View {
     private static final float CORNER_STROKE_WIDTH = 4f;    // 4dp
     private static final float CORNER_LINE_LENGTH = 264f;   // 264dp
     private static final float CORNER_RADIUS = 16f;         // 16dp
+    private static final String TAG = "QrDecorateView";
 
     private final int mCornerColor;
     private final int mFocusedCornerColor;
@@ -94,6 +96,10 @@ public class QrDecorateView extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+        if (getWidth() <= 0 || getHeight() <= 0) {
+            Log.e(TAG, "width and height must be > 0");
+            return;
+        }
 
         if (mMaskBitmap == null) {
             mMaskBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);

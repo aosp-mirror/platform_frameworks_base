@@ -405,11 +405,12 @@ public class RootTaskTests extends WindowTestsBase {
 
         final RootWindowContainer.FindTaskResult result =
                 new RootWindowContainer.FindTaskResult();
-        result.init(r.getActivityType(), r.taskAffinity, r.intent, r.info);
+        result.init(r.getActivityType(), r.taskAffinity, r.intent, r.info, true);
         result.process(task);
 
-        assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */));
-        assertEquals(taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */));
+        assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */, true));
+        assertEquals(
+                taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */, true));
         assertNotNull(result.mIdealRecord);
     }
 
@@ -432,7 +433,7 @@ public class RootTaskTests extends WindowTestsBase {
         final ActivityRecord r1 = new ActivityBuilder(mAtm).setComponent(
                 target).setTargetActivity(targetActivity).build();
         RootWindowContainer.FindTaskResult result = new RootWindowContainer.FindTaskResult();
-        result.init(r1.getActivityType(), r1.taskAffinity, r1.intent, r1.info);
+        result.init(r1.getActivityType(), r1.taskAffinity, r1.intent, r1.info, true);
         result.process(parentTask);
         assertThat(result.mIdealRecord).isNotNull();
 
@@ -440,7 +441,7 @@ public class RootTaskTests extends WindowTestsBase {
         final ActivityRecord r2 = new ActivityBuilder(mAtm).setComponent(
                 alias).setTargetActivity(targetActivity).build();
         result = new RootWindowContainer.FindTaskResult();
-        result.init(r2.getActivityType(), r2.taskAffinity, r2.intent, r2.info);
+        result.init(r2.getActivityType(), r2.taskAffinity, r2.intent, r2.info, true);
         result.process(parentTask);
         assertThat(result.mIdealRecord).isNotNull();
     }
@@ -1234,12 +1235,18 @@ public class RootTaskTests extends WindowTestsBase {
         assertEquals(STOPPING, activity2.getState());
         assertThat(mSupervisor.mStoppingActivities).contains(activity2);
 
+        registerTestTransitionPlayer();
+        final Transition transition = display.mTransitionController
+                .requestCloseTransitionIfNeeded(rootTask1);
+        transition.collectClose(rootTask1);
         // The display becomes empty. Since there is no next activity to be idle, the activity
         // should be destroyed immediately with updating configuration to restore original state.
         final ActivityRecord activity1 = finishTopActivity(rootTask1);
         assertEquals(DESTROYING, activity1.getState());
         verify(mRootWindowContainer).ensureVisibilityAndConfig(eq(null) /* starting */,
                 eq(display), anyBoolean());
+        assertTrue("Transition must be ready if there is no next running activity",
+                transition.allReady());
     }
 
     private ActivityRecord finishTopActivity(Task task) {

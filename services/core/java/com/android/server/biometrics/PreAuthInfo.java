@@ -29,11 +29,13 @@ import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.PromptInfo;
 import android.os.RemoteException;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.lang.annotation.Retention;
@@ -59,6 +61,7 @@ class PreAuthInfo {
     static final int BIOMETRIC_LOCKOUT_TIMED = 10;
     static final int BIOMETRIC_LOCKOUT_PERMANENT = 11;
     static final int BIOMETRIC_SENSOR_PRIVACY_ENABLED = 12;
+    static final int MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR = 13;
     private static final String TAG = "BiometricService/PreAuthInfo";
     final boolean credentialRequested;
     // Sensors that can be used for this request (e.g. strong enough, enrolled, enabled).
@@ -73,12 +76,16 @@ class PreAuthInfo {
     private final boolean mBiometricRequested;
     private final int mBiometricStrengthRequested;
     private final BiometricCameraManager mBiometricCameraManager;
+    private final boolean mOnlyMandatoryBiometricsRequested;
+    private final boolean mIsMandatoryBiometricsAuthentication;
 
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
             List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
-            boolean confirmationRequested, boolean ignoreEnrollmentState, int userId,
-            Context context, BiometricCameraManager biometricCameraManager) {
+            PromptInfo promptInfo, int userId, Context context,
+            BiometricCameraManager biometricCameraManager,
+            boolean isOnlyMandatoryBiometricsRequested,
+            boolean isMandatoryBiometricsAuthentication) {
         mBiometricRequested = biometricRequested;
         mBiometricStrengthRequested = biometricStrengthRequested;
         mBiometricCameraManager = biometricCameraManager;
@@ -87,10 +94,12 @@ class PreAuthInfo {
         this.eligibleSensors = eligibleSensors;
         this.ineligibleSensors = ineligibleSensors;
         this.credentialAvailable = credentialAvailable;
-        this.confirmationRequested = confirmationRequested;
-        this.ignoreEnrollmentState = ignoreEnrollmentState;
+        this.confirmationRequested = promptInfo.isConfirmationRequested();
+        this.ignoreEnrollmentState = promptInfo.isIgnoreEnrollmentState();
         this.userId = userId;
         this.context = context;
+        this.mOnlyMandatoryBiometricsRequested = isOnlyMandatoryBiometricsRequested;
+        this.mIsMandatoryBiometricsAuthentication = isMandatoryBiometricsAuthentication;
     }
 
     static PreAuthInfo create(ITrustManager trustManager,
@@ -102,7 +111,18 @@ class PreAuthInfo {
             BiometricCameraManager biometricCameraManager)
             throws RemoteException {
 
-        final boolean confirmationRequested = promptInfo.isConfirmationRequested();
+        final boolean isOnlyMandatoryBiometricsRequested = promptInfo.getAuthenticators()
+                == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
+        boolean isMandatoryBiometricsAuthentication = false;
+
+        if (dropCredentialFallback(promptInfo.getAuthenticators(),
+                settingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
+                        userId), trustManager)) {
+            isMandatoryBiometricsAuthentication = true;
+            promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+            promptInfo.setNegativeButtonText(context.getString(R.string.cancel));
+        }
+
         final boolean biometricRequested = Utils.isBiometricRequested(promptInfo);
         final int requestedStrength = Utils.getPublicBiometricStrength(promptInfo);
         final boolean credentialRequested = Utils.isCredentialRequested(promptInfo);
@@ -150,8 +170,28 @@ class PreAuthInfo {
         }
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
-                eligibleSensors, ineligibleSensors, credentialAvailable, confirmationRequested,
-                promptInfo.isIgnoreEnrollmentState(), userId, context, biometricCameraManager);
+                eligibleSensors, ineligibleSensors, credentialAvailable, promptInfo, userId,
+                context, biometricCameraManager, isOnlyMandatoryBiometricsRequested,
+                isMandatoryBiometricsAuthentication);
+    }
+
+    private static boolean dropCredentialFallback(int authenticators,
+            boolean isMandatoryBiometricsEnabled, ITrustManager trustManager) {
+        final boolean isMandatoryBiometricsRequested =
+                (authenticators & BiometricManager.Authenticators.MANDATORY_BIOMETRICS)
+                        == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
+        if (Flags.mandatoryBiometrics() && isMandatoryBiometricsEnabled
+                && isMandatoryBiometricsRequested) {
+            try {
+                final boolean isInSignificantPlace = trustManager.isInSignificantPlace();
+                return !isInSignificantPlace;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception while trying to check "
+                        + "if user is in a trusted location.");
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -381,6 +421,9 @@ class PreAuthInfo {
         } else if (credentialRequested) {
             modality |= TYPE_CREDENTIAL;
             status = credentialAvailable ? AUTHENTICATOR_OK : CREDENTIAL_NOT_ENROLLED;
+        } else if (Flags.mandatoryBiometrics() && mOnlyMandatoryBiometricsRequested
+                && !mIsMandatoryBiometricsAuthentication) {
+            status = MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR;
         } else {
             // This should not be possible via the public API surface and is here mainly for
             // "correctness". An exception should have been thrown before getting here.
@@ -509,7 +552,8 @@ class PreAuthInfo {
             CREDENTIAL_NOT_ENROLLED,
             BIOMETRIC_LOCKOUT_TIMED,
             BIOMETRIC_LOCKOUT_PERMANENT,
-            BIOMETRIC_SENSOR_PRIVACY_ENABLED})
+            BIOMETRIC_SENSOR_PRIVACY_ENABLED,
+            MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR})
     @Retention(RetentionPolicy.SOURCE)
     @interface AuthenticatorStatus {
     }

@@ -2,8 +2,8 @@ package com.android.systemui.qs
 
 import android.content.ComponentName
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
 import android.widget.Switch
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
@@ -12,7 +12,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TileStateToProtoTest : SysuiTestCase() {
 

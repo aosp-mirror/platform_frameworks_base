@@ -54,13 +54,14 @@ public class FallbackBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(currentBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(currentBrightness)
                         .setDisplayBrightnessStrategyName(mFallbackBrightnessStrategy.getName())
                         .setShouldUpdateScreenBrightnessSetting(true)
+                        .setIsUserInitiatedChange(true)
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mFallbackBrightnessStrategy.updateBrightness(
-                        new StrategyExecutionRequest(displayPowerRequest, currentBrightness));
+                        new StrategyExecutionRequest(displayPowerRequest, currentBrightness,
+                                /* userSetBrightnessChanged= */ true));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 }

@@ -48,6 +48,7 @@ import android.hardware.vibrator.IVibratorManager;
 import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
@@ -101,6 +102,8 @@ public class VibrationThreadTest {
     private static final String PACKAGE_NAME = "package";
     private static final VibrationAttributes ATTRS = new VibrationAttributes.Builder().build();
     private static final int TEST_RAMP_STEP_DURATION = 5;
+    private static final int TEST_DEFAULT_AMPLITUDE = 255;
+    private static final float TEST_DEFAULT_SCALE_LEVEL_GAIN = 1.4f;
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule
@@ -132,6 +135,10 @@ public class VibrationThreadTest {
         when(mVibrationConfigMock.getDefaultVibrationIntensity(anyInt()))
                 .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
         when(mVibrationConfigMock.getRampStepDurationMs()).thenReturn(TEST_RAMP_STEP_DURATION);
+        when(mVibrationConfigMock.getDefaultVibrationAmplitude())
+                .thenReturn(TEST_DEFAULT_AMPLITUDE);
+        when(mVibrationConfigMock.getDefaultVibrationScaleLevelGain())
+                .thenReturn(TEST_DEFAULT_SCALE_LEVEL_GAIN);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
         doAnswer(answer -> {
@@ -145,7 +152,7 @@ public class VibrationThreadTest {
         Context context = InstrumentationRegistry.getContext();
         mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),
                 mVibrationConfigMock);
-        mVibrationScaler = new VibrationScaler(context, mVibrationSettings);
+        mVibrationScaler = new VibrationScaler(mVibrationConfigMock, mVibrationSettings);
 
         mockVibrators(VIBRATOR_ID);
 
@@ -560,8 +567,37 @@ public class VibrationThreadTest {
         // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
         Thread cancellingThread =
                 new Thread(() -> mVibrationConductor.notifyCancelled(
-                        new Vibration.EndInfo(
-                                Vibration.Status.CANCELLED_BY_SETTINGS_UPDATE),
+                        new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_SETTINGS_UPDATE),
+                        /* immediate= */ false));
+        cancellingThread.start();
+
+        waitForCompletion(/* timeout= */ 50);
+        cancellingThread.join();
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED_BY_SETTINGS_UPDATE);
+        assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void vibrate_singleVibratorVendorEffectCancel_cancelsVibrationImmediately()
+            throws Exception {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+        // Set long vendor effect duration to check it gets cancelled quickly.
+        mVibratorProviders.get(VIBRATOR_ID).setVendorEffectDuration(10 * TEST_TIMEOUT_MILLIS);
+
+        VibrationEffect effect = VibrationEffect.createVendorEffect(createTestVendorData());
+        long vibrationId = startThreadAndDispatcher(effect);
+
+        assertTrue(waitUntil(() -> mControllers.get(VIBRATOR_ID).isVibrating(),
+                TEST_TIMEOUT_MILLIS));
+        assertTrue(mThread.isRunningVibrationId(vibrationId));
+
+        // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
+        // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
+        Thread cancellingThread =
+                new Thread(() -> mVibrationConductor.notifyCancelled(
+                        new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_SETTINGS_UPDATE),
                         /* immediate= */ false));
         cancellingThread.start();
 
@@ -588,8 +624,7 @@ public class VibrationThreadTest {
         // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
         Thread cancellingThread =
                 new Thread(() -> mVibrationConductor.notifyCancelled(
-                        new Vibration.EndInfo(
-                                Vibration.Status.CANCELLED_BY_SCREEN_OFF),
+                        new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_SCREEN_OFF),
                         /* immediate= */ false));
         cancellingThread.start();
 
@@ -651,6 +686,27 @@ public class VibrationThreadTest {
         verify(mControllerCallbacks, never()).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
         verifyCallbacksTriggered(vibrationId, Vibration.Status.IGNORED_UNSUPPORTED);
         assertTrue(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId).isEmpty());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void vibrate_singleVibratorVendorEffect_runsVibration() {
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+
+        VibrationEffect effect = VibrationEffect.createVendorEffect(createTestVendorData());
+        long vibrationId = startThreadAndDispatcher(effect);
+        waitForCompletion();
+
+        verify(mManagerHooks).noteVibratorOn(eq(UID),
+                eq(PerformVendorEffectVibratorStep.VENDOR_EFFECT_MAX_DURATION_MS));
+        verify(mManagerHooks).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+        assertThat(mControllers.get(VIBRATOR_ID).isVibrating()).isFalse();
+
+        assertThat(mVibratorProviders.get(VIBRATOR_ID).getVendorEffects(vibrationId))
+                .containsExactly(effect)
+                .inOrder();
     }
 
     @Test
@@ -1437,16 +1493,48 @@ public class VibrationThreadTest {
                 .combine();
         long vibrationId = startThreadAndDispatcher(effect);
 
-        assertTrue(waitUntil(() -> mControllers.get(2).isVibrating(),
-                TEST_TIMEOUT_MILLIS));
+        assertTrue(waitUntil(() -> mControllers.get(2).isVibrating(), TEST_TIMEOUT_MILLIS));
         assertTrue(mThread.isRunningVibrationId(vibrationId));
 
         // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
         // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
         Thread cancellingThread = new Thread(
                 () -> mVibrationConductor.notifyCancelled(
-                        new Vibration.EndInfo(
-                                Vibration.Status.CANCELLED_BY_SCREEN_OFF),
+                        new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_SCREEN_OFF),
+                        /* immediate= */ false));
+        cancellingThread.start();
+
+        waitForCompletion(/* timeout= */ 50);
+        cancellingThread.join();
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED_BY_SCREEN_OFF);
+        assertFalse(mControllers.get(1).isVibrating());
+        assertFalse(mControllers.get(2).isVibrating());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void vibrate_multipleVendorEffectCancel_cancelsVibrationImmediately() throws Exception {
+        mockVibrators(1, 2);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+        mVibratorProviders.get(1).setVendorEffectDuration(10 * TEST_TIMEOUT_MILLIS);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+        mVibratorProviders.get(2).setVendorEffectDuration(10 * TEST_TIMEOUT_MILLIS);
+
+        CombinedVibration effect = CombinedVibration.startParallel()
+                .addVibrator(1, VibrationEffect.createVendorEffect(createTestVendorData()))
+                .addVibrator(2, VibrationEffect.createVendorEffect(createTestVendorData()))
+                .combine();
+        long vibrationId = startThreadAndDispatcher(effect);
+
+        assertTrue(waitUntil(() -> mControllers.get(2).isVibrating(), TEST_TIMEOUT_MILLIS));
+        assertTrue(mThread.isRunningVibrationId(vibrationId));
+
+        // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
+        // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
+        Thread cancellingThread = new Thread(
+                () -> mVibrationConductor.notifyCancelled(
+                        new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_SCREEN_OFF),
                         /* immediate= */ false));
         cancellingThread.start();
 
@@ -1614,6 +1702,25 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void vibrate_vendorEffectWithRampDown_doesNotAddRampDown() {
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+
+        VibrationEffect effect = VibrationEffect.createVendorEffect(createTestVendorData());
+        long vibrationId = startThreadAndDispatcher(effect);
+        waitForCompletion();
+
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId));
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+
+        assertThat(mVibratorProviders.get(VIBRATOR_ID).getVendorEffects(vibrationId))
+                .containsExactly(effect)
+                .inOrder();
+        assertThat(mVibratorProviders.get(VIBRATOR_ID).getAmplitudes()).isEmpty();
+    }
+
+    @Test
     public void vibrate_composedWithRampDown_doesNotAddRampDown() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL,
@@ -1681,7 +1788,7 @@ public class VibrationThreadTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .compose();
         VibrationEffect effect4 = VibrationEffect.createOneShot(8000, 100);
-        VibrationEffect effect5 = VibrationEffect.createOneShot(20, 222);
+        VibrationEffect effect5 = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
 
         long vibrationId1 = startThreadAndDispatcher(effect1);
         waitForCompletion();
@@ -1745,13 +1852,8 @@ public class VibrationThreadTest {
         verifyCallbacksTriggered(vibrationId4, Vibration.Status.CANCELLED_BY_SCREEN_OFF);
         assertTrue("Tested duration=" + duration4, duration4 < 2000);
 
-        // Effect5: normal oneshot. Don't worry about amplitude, as effect4 may or may not have
-        // started.
-
-        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibrationId5));
-        verifyCallbacksTriggered(vibrationId5, Vibration.Status.FINISHED);
-
-        assertEquals(Arrays.asList(expectedOneShot(20)),
+        // Effect5: played normally after effect4, which may or may not have played.
+        assertEquals(Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK)),
                 fakeVibrator.getEffectSegments(vibrationId5));
     }
 
@@ -1834,6 +1936,16 @@ public class VibrationThreadTest {
             mCustomTestLooperDispatcher.start();
         }
         return array;
+    }
+
+    private static PersistableBundle createTestVendorData() {
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("id", 1);
+        vendorData.putDouble("scale", 0.5);
+        vendorData.putBoolean("loop", false);
+        vendorData.putLongArray("amplitudes", new long[] { 0, 255, 128 });
+        vendorData.putString("label", "vibration");
+        return vendorData;
     }
 
     private VibrationEffectSegment expectedOneShot(long millis) {

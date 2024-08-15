@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.scrim.ScrimController;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
@@ -70,7 +74,9 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
+    private KosmosJavaAdapter mKosmos;
     @Mock
     CentralSurfaces mCentralSurfaces;
 
@@ -113,7 +119,13 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     LockPatternUtils mLockPatternUtils;
 
     @Mock
+    ActivityStarter mActivityStarter;
+
+    @Mock
     Region mRegion;
+
+    @Mock
+    CommunalViewModel mCommunalViewModel;
 
     @Captor
     ArgumentCaptor<Rect> mRectCaptor;
@@ -134,9 +146,11 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mKosmos = new KosmosJavaAdapter(this);
         MockitoAnnotations.initMocks(this);
         mUserTracker = new FakeUserTracker();
         mTouchHandler = new BouncerSwipeTouchHandler(
+                mKosmos.getTestScope(),
                 mScrimManager,
                 Optional.of(mCentralSurfaces),
                 mNotificationShadeWindowController,
@@ -144,11 +158,13 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mVelocityTrackerFactory,
                 mLockPatternUtils,
                 mUserTracker,
+                mCommunalViewModel,
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION,
                 MIN_BOUNCER_HEIGHT,
-                mUiEventLogger);
+                mUiEventLogger,
+                mActivityStarter);
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
@@ -194,7 +210,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                         1,
                         2)).isTrue();
     }
-
 
     /**
      * Ensures expansion only happens when touch down happens in valid part of the screen.
@@ -397,7 +412,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 .isTrue();
         // We should not expand since the keyguard is not secure
         verify(mScrimController, never()).expand(any());
-        // Since we are swiping up, we should wake from dreams.
+
+        // Since we are swiping up, we should dismiss the keyguard and wake from dreams.
+        ArgumentCaptor<Runnable> dismissKeyguardRunnable = ArgumentCaptor.forClass(Runnable.class);
+        verify(mActivityStarter).executeRunnableDismissingKeyguard(
+                dismissKeyguardRunnable.capture(), isNull(), eq(true), eq(true), eq(false));
+        dismissKeyguardRunnable.getValue().run();
         verify(mCentralSurfaces).awakenDreams();
     }
 

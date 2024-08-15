@@ -40,12 +40,12 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
 import androidx.annotation.Nullable;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
@@ -75,7 +75,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class TileQueryHelperTest extends SysuiTestCase {
     private static final String CURRENT_TILES = "internet,dnd,nfc";

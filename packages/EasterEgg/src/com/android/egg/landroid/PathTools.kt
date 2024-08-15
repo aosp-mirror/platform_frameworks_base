@@ -32,6 +32,13 @@ fun createPolygon(radius: Float, sides: Int): Path {
     }
 }
 
+fun createPolygonPoints(radius: Float, sides: Int): List<Vec2> {
+    val angleStep = PI2f / sides
+    return (0 until sides).map { i ->
+        Vec2(radius * cos(angleStep * i), radius * sin(angleStep * i))
+    }
+}
+
 fun createStar(radius1: Float, radius2: Float, points: Int): Path {
     return Path().apply {
         val angleStep = PI2f / points
@@ -46,15 +53,16 @@ fun createStar(radius1: Float, radius2: Float, points: Int): Path {
 }
 
 fun Path.parseSvgPathData(d: String) {
-    Regex("([A-Z])([-.,0-9e ]+)").findAll(d.trim()).forEach {
+    Regex("([A-Za-z])\\s*([-.,0-9e ]+)").findAll(d.trim()).forEach {
         val cmd = it.groups[1]!!.value
         val args =
             it.groups[2]?.value?.split(Regex("\\s+"))?.map { v -> v.toFloat() } ?: emptyList()
-        Log.d("Landroid", "cmd = $cmd, args = " + args.joinToString(","))
+        // Log.d("Landroid", "cmd = $cmd, args = " + args.joinToString(","))
         when (cmd) {
             "M" -> moveTo(args[0], args[1])
             "C" -> cubicTo(args[0], args[1], args[2], args[3], args[4], args[5])
             "L" -> lineTo(args[0], args[1])
+            "l" -> relativeLineTo(args[0], args[1])
             "Z" -> close()
             else -> Log.v("Landroid", "unsupported SVG command: $cmd")
         }

@@ -19,7 +19,6 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.MathUtils
-import android.view.Choreographer
 import android.view.SurfaceControl
 import android.view.animation.Animation
 import android.view.animation.Transformation
@@ -28,36 +27,31 @@ import android.window.BackMotionEvent
 import android.window.BackNavigationInfo
 import com.android.internal.R
 import com.android.internal.policy.TransitionAnimation
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
-import com.android.wm.shell.shared.annotations.ShellMainThread
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 
 /** Class that handles customized predictive cross activity back animations. */
-@ShellMainThread
 class CustomCrossActivityBackAnimation(
     context: Context,
     background: BackAnimationBackground,
     rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
     transaction: SurfaceControl.Transaction,
-    choreographer: Choreographer,
     private val customAnimationLoader: CustomAnimationLoader
 ) :
     CrossActivityBackAnimation(
         context,
         background,
         rootTaskDisplayAreaOrganizer,
-        transaction,
-        choreographer
+        transaction
     ) {
 
     private var enterAnimation: Animation? = null
     private var closeAnimation: Animation? = null
     private val transformation = Transformation()
-    private var gestureProgress = 0f
 
     override val allowEnteringYShift = false
 
@@ -71,7 +65,6 @@ class CustomCrossActivityBackAnimation(
         background,
         rootTaskDisplayAreaOrganizer,
         SurfaceControl.Transaction(),
-        Choreographer.getInstance(),
         CustomAnimationLoader(
             TransitionAnimation(context, false /* debug */, "CustomCrossActivityBackAnimation")
         )
@@ -105,7 +98,6 @@ class CustomCrossActivityBackAnimation(
     }
 
     override fun getPreCommitEnteringBaseTransformation(progress: Float): Transformation {
-        gestureProgress = progress
         transformation.clear()
         enterAnimation!!.getTransformationAt(progress * PRE_COMMIT_MAX_PROGRESS, transformation)
         return transformation
@@ -134,7 +126,13 @@ class CustomCrossActivityBackAnimation(
         if (closingTarget == null || enteringTarget == null) return
 
         val closingProgress = closeAnimation!!.getPostCommitProgress(linearProgress)
-        applyTransform(closingTarget!!.leash, currentClosingRect, closingProgress, closeAnimation!!)
+        applyTransform(
+            closingTarget!!.leash,
+            currentClosingRect,
+            closingProgress,
+            closeAnimation!!,
+            FlingMode.FLING_SHRINK
+        )
         val enteringProgress = MathUtils.lerp(
             gestureProgress * PRE_COMMIT_MAX_PROGRESS,
             1f,
@@ -144,7 +142,8 @@ class CustomCrossActivityBackAnimation(
             enteringTarget!!.leash,
             currentEnteringRect,
             enteringProgress,
-            enterAnimation!!
+            enterAnimation!!,
+            FlingMode.NO_FLING
         )
         applyTransaction()
     }
@@ -153,11 +152,12 @@ class CustomCrossActivityBackAnimation(
         leash: SurfaceControl,
         rect: RectF,
         progress: Float,
-        animation: Animation
+        animation: Animation,
+        flingMode: FlingMode
     ) {
         transformation.clear()
         animation.getTransformationAt(progress, transformation)
-        applyTransform(leash, rect, transformation.alpha, transformation)
+        applyTransform(leash, rect, transformation.alpha, transformation, flingMode)
     }
 
     override fun finishAnimation() {
@@ -166,7 +166,6 @@ class CustomCrossActivityBackAnimation(
         enterAnimation?.reset()
         enterAnimation = null
         transformation.clear()
-        gestureProgress = 0f
         super.finishAnimation()
     }
 

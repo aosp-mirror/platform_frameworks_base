@@ -46,9 +46,12 @@ public abstract class WindowStateTransactionItem extends ClientTransactionItem {
     }
 
     /** Target window. */
-    private IWindow mWindow;
+    @NonNull
+    private final IWindow mWindow;
 
-    WindowStateTransactionItem() {}
+    public WindowStateTransactionItem(@NonNull IWindow window) {
+        mWindow = requireNonNull(window);
+    }
 
     @Override
     public final void execute(@NonNull ClientTransactionHandler client,
@@ -67,26 +70,18 @@ public abstract class WindowStateTransactionItem extends ClientTransactionItem {
     public abstract void execute(@NonNull ClientTransactionHandler client,
             @NonNull IWindow window, @NonNull PendingTransactionActions pendingActions);
 
-    void setWindow(@NonNull IWindow window) {
-        mWindow = requireNonNull(window);
-    }
+    // Parcelable implementation
 
-    // To be overridden
-
-    WindowStateTransactionItem(@NonNull Parcel in) {
-        mWindow = IWindow.Stub.asInterface(in.readStrongBinder());
-    }
-
+    /** Writes to Parcel. */
     @CallSuper
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mWindow.asBinder());
     }
 
-    @CallSuper
-    @Override
-    public void recycle() {
-        mWindow = null;
+    /** Reads from Parcel. */
+    WindowStateTransactionItem(@NonNull Parcel in) {
+        mWindow = requireNonNull(IWindow.Stub.asInterface(in.readStrongBinder()));
     }
 
     // Subclass must override and call super.equals to compare the mActivityToken.

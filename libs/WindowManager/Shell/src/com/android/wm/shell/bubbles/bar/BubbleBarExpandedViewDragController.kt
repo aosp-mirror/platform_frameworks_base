@@ -38,6 +38,9 @@ class BubbleBarExpandedViewDragController(
     var isStuckToDismiss: Boolean = false
         private set
 
+    var isDragged: Boolean = false
+        private set
+
     private var expandedViewInitialTranslationX = 0f
     private var expandedViewInitialTranslationY = 0f
     private val magnetizedExpandedView: MagnetizedObject<BubbleBarExpandedView> =
@@ -94,6 +97,7 @@ class BubbleBarExpandedViewDragController(
             // While animating, don't allow new touch events
             if (expandedView.isAnimating) return false
             pinController.onDragStart(bubblePositioner.isBubbleBarOnLeft)
+            isDragged = true
             return true
         }
 
@@ -141,6 +145,7 @@ class BubbleBarExpandedViewDragController(
                 dismissView.hide()
             }
             isMoving = false
+            isDragged = false
         }
     }
 
@@ -150,7 +155,7 @@ class BubbleBarExpandedViewDragController(
             draggedObject: MagnetizedObject<*>
         ) {
             isStuckToDismiss = true
-            pinController.setDropTargetHidden(true)
+            pinController.onStuckToDismissTarget()
         }
 
         override fun onUnstuckFromTarget(
@@ -162,7 +167,6 @@ class BubbleBarExpandedViewDragController(
         ) {
             isStuckToDismiss = false
             animationHelper.animateUnstuckFromDismissView(target)
-            pinController.setDropTargetHidden(false)
         }
 
         override fun onReleasedInTarget(

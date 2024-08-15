@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
-import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsSourceConsumerProto.ANIMATION_STATE;
@@ -29,18 +28,22 @@ import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
 import static android.view.InsetsSourceConsumerProto.TYPE_NUMBER;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.window.flags.Flags.insetsControlSeq;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.ImeTracing;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -181,11 +184,10 @@ public class InsetsSourceConsumer {
                     mController.notifyVisibilityChanged();
                 }
 
-                // If there is no animation controlling the leash, make sure the visibility and the
-                // position is up-to-date.
-                final int animType = mController.getAnimationType(mType);
-                if (animType == ANIMATION_TYPE_NONE || animType == ANIMATION_TYPE_RESIZE) {
-                    applyRequestedVisibilityAndPositionToControl();
+                // If we have a new leash, make sure visibility is up-to-date, even though we
+                // didn't want to run an animation above.
+                if (mController.getAnimationType(mType) == ANIMATION_TYPE_NONE) {
+                    applyRequestedVisibilityToControl();
                 }
 
                 // Remove the surface that owned by last control when it lost.
@@ -244,9 +246,15 @@ public class InsetsSourceConsumer {
         }
 
         final boolean showRequested = isShowRequested();
-        final boolean cancelledForNewAnimation = !running && showRequested
-                ? mAnimationState == ANIMATION_STATE_HIDE
-                : mAnimationState == ANIMATION_STATE_SHOW;
+        final boolean cancelledForNewAnimation;
+        if (Flags.refactorInsetsController()) {
+            cancelledForNewAnimation =
+                    (mController.getCancelledForNewAnimationTypes() & mType) != 0;
+        } else {
+            cancelledForNewAnimation = (!running && showRequested)
+                    ? mAnimationState == ANIMATION_STATE_HIDE
+                    : mAnimationState == ANIMATION_STATE_SHOW;
+        }
 
         mAnimationState = running
                 ? (showRequested ? ANIMATION_STATE_SHOW : ANIMATION_STATE_HIDE)
@@ -289,18 +297,57 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting(visibility = PACKAGE)
     public boolean applyLocalVisibilityOverride() {
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                ImeTracing.getInstance().triggerClientDump(
+                        "ImeInsetsSourceConsumer#applyLocalVisibilityOverride",
+                        mController.getHost().getInputMethodManager(), null /* icProto */);
+            }
+        }
         final InsetsSource source = mState.peekSource(mId);
         if (source == null) {
             return false;
         }
         final boolean requestedVisible = (mController.getRequestedVisibleTypes() & mType) != 0;
 
-        // If we don't have control, we are not able to change the visibility.
-        if (mSourceControl == null) {
-            if (DEBUG) Log.d(TAG, "applyLocalVisibilityOverride: No control in "
-                    + mController.getHost().getRootViewTitle()
-                    + " requestedVisible=" + requestedVisible);
-            return false;
+        if (Flags.refactorInsetsController()) {
+            // If we don't have control or the leash (in case of the IME), we enforce the
+            // visibility to be hidden, as otherwise we would let the app know too early.
+            if (mSourceControl == null) {
+                if (DEBUG) {
+                    Log.d(TAG, TextUtils.formatSimple(
+                            "applyLocalVisibilityOverride: No control in %s for type %s, "
+                                    + "requestedVisible=%s",
+                            mController.getHost().getRootViewTitle(),
+                            WindowInsets.Type.toString(mType), requestedVisible));
+                }
+                return false;
+                // TODO(b/323136120) add a flag to the control, to define whether a leash is needed
+            } else if (mId != InsetsSource.ID_IME_CAPTION_BAR
+                    && mSourceControl.getLeash() == null) {
+                if (DEBUG) {
+                    Log.d(TAG, TextUtils.formatSimple(
+                            "applyLocalVisibilityOverride: Set the source visibility to false, as"
+                                    + " there is no leash yet for type %s in %s",
+                            WindowInsets.Type.toString(mType),
+                            mController.getHost().getRootViewTitle()));
+                }
+                boolean wasVisible = source.isVisible();
+                source.setVisible(false);
+                // only if it was visible before and is now hidden, we want to notify about the
+                // changed state
+                return wasVisible;
+            }
+        } else {
+            // If we don't have control, we are not able to change the visibility.
+            if (mSourceControl == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "applyLocalVisibilityOverride: No control in "
+                            + mController.getHost().getRootViewTitle()
+                            + " requestedVisible=" + requestedVisible);
+                }
+                return false;
+            }
         }
         if (source.isVisible() == requestedVisible) {
             return false;
@@ -341,6 +388,15 @@ public class InsetsSourceConsumer {
      * @see InsetsAnimationControlCallbacks#reportPerceptible
      */
     public void onPerceptible(boolean perceptible) {
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                final IBinder window = mController.getHost().getWindowToken();
+                if (window != null) {
+                    mController.getHost().getInputMethodManager().reportPerceptible(window,
+                            perceptible);
+                }
+            }
+        }
     }
 
     /**
@@ -348,6 +404,14 @@ public class InsetsSourceConsumer {
      */
     public void removeSurface() {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                final IBinder window = mController.getHost().getWindowToken();
+                if (window != null) {
+                    mController.getHost().getInputMethodManager().removeImeSurface(window);
+                }
+            }
+        }
     }
 
     @VisibleForTesting(visibility = PACKAGE)
@@ -363,7 +427,9 @@ public class InsetsSourceConsumer {
 
         // Frame is changing while animating. Keep note of the new frame but keep existing frame
         // until animation is finished.
-        newSource = new InsetsSource(newSource);
+        if (!insetsControlSeq()) {
+            newSource = new InsetsSource(newSource);
+        }
         mPendingFrame = new Rect(newSource.getFrame());
         mPendingVisibleFrame = newSource.getVisibleFrame() != null
                 ? new Rect(newSource.getVisibleFrame())
@@ -374,27 +440,21 @@ public class InsetsSourceConsumer {
         if (DEBUG) Log.d(TAG, "updateSource: " + newSource);
     }
 
-    private void applyRequestedVisibilityAndPositionToControl() {
-        if (mSourceControl == null) {
-            return;
-        }
-        final SurfaceControl leash = mSourceControl.getLeash();
-        if (leash == null) {
+    private void applyRequestedVisibilityToControl() {
+        if (mSourceControl == null || mSourceControl.getLeash() == null) {
             return;
         }
 
         final boolean requestedVisible = (mController.getRequestedVisibleTypes() & mType) != 0;
-        final Point surfacePosition = mSourceControl.getSurfacePosition();
         try (Transaction t = mTransactionSupplier.get()) {
             if (DEBUG) Log.d(TAG, "applyRequestedVisibilityToControl: " + requestedVisible);
             if (requestedVisible) {
-                t.show(leash);
+                t.show(mSourceControl.getLeash());
             } else {
-                t.hide(leash);
+                t.hide(mSourceControl.getLeash());
             }
             // Ensure the alpha value is aligned with the actual requested visibility.
-            t.setAlpha(leash, requestedVisible ? 1 : 0);
-            t.setPosition(leash, surfacePosition.x, surfacePosition.y);
+            t.setAlpha(mSourceControl.getLeash(), requestedVisible ? 1 : 0);
             t.apply();
         }
         onPerceptible(requestedVisible);

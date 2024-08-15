@@ -230,18 +230,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
         val isSoftRestricted =
             if (permission.isSoftRestricted && !isExempt) {
-                val targetSdkVersion =
-                    reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT) {
-                        targetSdkVersion,
-                        packageState ->
-                        if (permissionName in packageState.androidPackage!!.requestedPermissions) {
-                            targetSdkVersion.coerceAtMost(
-                                packageState.androidPackage!!.targetSdkVersion
-                            )
-                        } else {
-                            targetSdkVersion
-                        }
-                    }
+                val targetSdkVersion = getAppIdTargetSdkVersion(appId, permissionName)
                 !anyPackageInAppId(appId) {
                     permissionName in it.androidPackage!!.requestedPermissions &&
                         isSoftRestrictedPermissionExemptForPackage(
@@ -718,18 +707,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
         // If the app is updated, and has scoped storage permissions, then it is possible that the
         // app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
-        val oldTargetSdkVersion =
-            reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT, oldState) {
-                targetSdkVersion,
-                packageState ->
-                targetSdkVersion.coerceAtMost(packageState.androidPackage!!.targetSdkVersion)
-            }
-        val newTargetSdkVersion =
-            reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT, newState) {
-                targetSdkVersion,
-                packageState ->
-                targetSdkVersion.coerceAtMost(packageState.androidPackage!!.targetSdkVersion)
-            }
+        val oldTargetSdkVersion = getAppIdTargetSdkVersion(appId, null, oldState)
+        val newTargetSdkVersion = getAppIdTargetSdkVersion(appId, null, newState)
         @Suppress("ConvertTwoComparisonsToRangeCheck")
         val isTargetSdkVersionDowngraded =
             oldTargetSdkVersion >= Build.VERSION_CODES.Q &&
@@ -1115,6 +1094,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     private fun MutateStateScope.inheritImplicitPermissionStates(appId: Int, userId: Int) {
+        val targetSdkVersion = getAppIdTargetSdkVersion(appId, null)
         val implicitPermissions = MutableIndexedSet<String>()
         forEachPackageInAppId(appId) {
             implicitPermissions += it.androidPackage!!.implicitPermissions
@@ -1153,7 +1133,10 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     newFlags = newFlags or (sourceFlags and PermissionFlags.MASK_RUNTIME)
                 }
             }
-            if (implicitPermissionName in RETAIN_IMPLICIT_FLAGS_PERMISSIONS) {
+            if (
+                targetSdkVersion >= Build.VERSION_CODES.M &&
+                    implicitPermissionName in NO_IMPLICIT_FLAG_PERMISSIONS
+            ) {
                 newFlags = newFlags andInv PermissionFlags.IMPLICIT
             } else {
                 newFlags = newFlags or PermissionFlags.IMPLICIT
@@ -1277,10 +1260,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     permissionName
                 )
             else ->
-                permissionAllowlist.getProductSignatureAppAllowlistState(
-                    packageName,
-                    permissionName
-                )
+                permissionAllowlist.getApexSignatureAppAllowlistState(packageName, permissionName)
+                    ?: permissionAllowlist.getProductSignatureAppAllowlistState(
+                        packageName,
+                        permissionName
+                    )
                     ?: permissionAllowlist.getVendorSignatureAppAllowlistState(
                         packageName,
                         permissionName
@@ -1410,6 +1394,22 @@ class AppIdPermissionPolicy : SchemePolicy() {
             Manifest.permission.WRITE_EXTERNAL_STORAGE ->
                 appIdTargetSdkVersion >= Build.VERSION_CODES.Q
             else -> false
+        }
+
+    private fun MutateStateScope.getAppIdTargetSdkVersion(
+        appId: Int,
+        permissionName: String?,
+        state: AccessState = newState
+    ): Int =
+        reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT, state) {
+            targetSdkVersion,
+            packageState ->
+            val androidPackage = packageState.androidPackage!!
+            if (permissionName == null || permissionName in androidPackage.requestedPermissions) {
+                targetSdkVersion.coerceAtMost(androidPackage.targetSdkVersion)
+            } else {
+                targetSdkVersion
+            }
         }
 
     private inline fun MutateStateScope.anyPackageInAppId(
@@ -1781,7 +1781,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         private const val PLATFORM_PACKAGE_NAME = "android"
 
         // A set of permissions that we don't want to revoke when they are no longer implicit.
-        private val RETAIN_IMPLICIT_FLAGS_PERMISSIONS =
+        private val NO_IMPLICIT_FLAG_PERMISSIONS =
             indexedSetOf(
                 Manifest.permission.ACCESS_MEDIA_LOCATION,
                 Manifest.permission.ACTIVITY_RECOGNITION,

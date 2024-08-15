@@ -95,7 +95,7 @@ public class VirtualCameraControllerTest {
         mVirtualCameraController = new VirtualCameraController(mVirtualCameraServiceMock,
                 DEVICE_POLICY_CUSTOM, DEVICE_ID);
         when(mVirtualCameraServiceMock.registerCamera(any(), any(), anyInt())).thenReturn(true);
-        when(mVirtualCameraServiceMock.getCameraId(any())).thenReturn(0);
+        when(mVirtualCameraServiceMock.getCameraId(any())).thenReturn("0");
     }
 
     @After

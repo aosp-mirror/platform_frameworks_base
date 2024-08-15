@@ -17,12 +17,13 @@
 package androidx.window.extensions.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
-import static androidx.window.util.ExtensionHelper.isZero;
-import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
-import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
+import static androidx.window.common.ExtensionHelper.isZero;
+import static androidx.window.common.ExtensionHelper.rotateRectToDisplayRotation;
+import static androidx.window.common.ExtensionHelper.transformToWindowSpaceRect;
+import static androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_FLAT;
+import static androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
 
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -30,10 +31,12 @@ import android.app.Application;
 import android.app.WindowConfiguration;
 import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -41,9 +44,11 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiContext;
-import androidx.window.common.CommonFoldingFeature;
+import androidx.annotation.VisibleForTesting;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
+import androidx.window.common.collections.ListUtil;
+import androidx.window.common.layout.CommonFoldingFeature;
 import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.extensions.util.DeduplicateConsumer;
 
@@ -91,8 +96,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mFoldingFeatureProducer = foldingFeatureProducer;
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-        final List<DisplayFoldFeature> displayFoldFeatures =
-                DisplayFoldFeatureUtil.extractDisplayFoldFeatures(mFoldingFeatureProducer);
+        final List<DisplayFoldFeature> displayFoldFeatures = ListUtil.map(
+                mFoldingFeatureProducer.getDisplayFeatures(), DisplayFoldFeatureUtil::translate);
         mSupportedWindowFeatures = new SupportedWindowFeatures.Builder(displayFoldFeatures).build();
     }
 
@@ -134,10 +139,23 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                     || containsConsumer(consumer)) {
                 return;
             }
+            final IllegalArgumentException exception = new IllegalArgumentException(
+                    "Context must be a UI Context with display association, which should be"
+                    + " an Activity, WindowContext or InputMethodService");
             if (!context.isUiContext()) {
-                throw new IllegalArgumentException("Context must be a UI Context, which should be"
-                        + " an Activity, WindowContext or InputMethodService");
+                throw exception;
             }
+            if (context.getAssociatedDisplayId() == INVALID_DISPLAY) {
+                // This is to identify if #isUiContext of a non-UI Context is overridden.
+                // #isUiContext is more likely to be overridden than #getAssociatedDisplayId
+                // since #isUiContext is a public API.
+                StrictMode.onIncorrectContextUsed("The registered Context is a UI Context "
+                        + "but not associated with any display. "
+                        + "This Context may not receive any WindowLayoutInfo update. "
+                        + dumpAllBaseContextToString(context), exception);
+            }
+            Log.d(TAG, "Register WindowLayoutInfoListener on "
+                    + dumpAllBaseContextToString(context));
             mFoldingFeatureProducer.getData((features) -> {
                 WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
                 consumer.accept(newWindowLayout);
@@ -154,6 +172,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 mConfigurationChangeListeners.put(windowContextToken, listener);
             }
         }
+    }
+
+    @NonNull
+    private String dumpAllBaseContextToString(@NonNull Context context) {
+        final StringBuilder builder = new StringBuilder("Context=" + context);
+        while ((context instanceof ContextWrapper wrapper) && wrapper.getBaseContext() != null) {
+            context = wrapper.getBaseContext();
+            builder.append(", of which baseContext=").append(context);
+        }
+        return builder.toString();
     }
 
     @Override
@@ -257,7 +285,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
     }
 
-    private void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
+    @VisibleForTesting
+    void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
         synchronized (mLock) {
             mLastReportedFoldingFeatures.clear();
             mLastReportedFoldingFeatures.addAll(storedFeatures);
@@ -409,7 +438,18 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * @return true if the display features should be reported for the UI Context, false otherwise.
      */
     private boolean shouldReportDisplayFeatures(@NonNull @UiContext Context context) {
-        int displayId = context.getDisplay().getDisplayId();
+        int displayId = context.getAssociatedDisplayId();
+        if (!context.isUiContext() || displayId == INVALID_DISPLAY) {
+            // This could happen if a caller sets MutableContextWrapper's base Context to a non-UI
+            // Context.
+            StrictMode.onIncorrectContextUsed("Context is not a UI Context anymore."
+                    + " Was the base context changed? It's suggested to unregister"
+                    + " the windowLayoutInfo callback before changing the base Context."
+                    + " UI Contexts are Activity, InputMethodService or context created"
+                    + " with createWindowContext. " + dumpAllBaseContextToString(context),
+                    new UnsupportedOperationException("Context is not a UI Context anymore."
+                            + " Was the base context changed?"));
+        }
         if (displayId != DEFAULT_DISPLAY) {
             // Display features are not supported on secondary displays.
             return false;

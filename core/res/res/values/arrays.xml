@@ -37,8 +37,7 @@
         <item>@drawable/fastscroll_label_right_material</item>
         <item>@drawable/fastscroll_thumb_material</item>
         <item>@drawable/fastscroll_track_material</item>
-        <item>@drawable/floating_popup_background_dark</item>
-        <item>@drawable/floating_popup_background_light</item>
+        <item>@drawable/floating_popup_background</item>
         <item>@drawable/ic_ab_back_material</item>
         <item>@drawable/ic_ab_back_material_dark</item>
         <item>@drawable/ic_ab_back_material_light</item>

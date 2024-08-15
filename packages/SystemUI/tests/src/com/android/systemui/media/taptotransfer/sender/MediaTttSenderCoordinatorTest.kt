@@ -24,7 +24,6 @@ import android.media.MediaRoute2Info
 import android.os.PowerManager
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +31,10 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.SysuiTestCase
@@ -74,7 +76,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
@@ -100,6 +102,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var vibratorHelper: VibratorHelper
     @Mock private lateinit var swipeHandler: SwipeChipbarAwayGestureHandler
+    @Mock private lateinit var lazyViewCapture: Lazy<ViewCapture>
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
     private lateinit var chipbarCoordinator: ChipbarCoordinator
@@ -145,7 +148,8 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             ChipbarCoordinator(
                 context,
                 chipbarLogger,
-                windowManager,
+                ViewCaptureAwareWindowManager(windowManager, lazyViewCapture,
+                        isViewCaptureEnabled = false),
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,

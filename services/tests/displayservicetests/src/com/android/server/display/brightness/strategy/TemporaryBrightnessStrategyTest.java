@@ -55,12 +55,12 @@ public class TemporaryBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(temporaryBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(temporaryBrightness)
                         .setDisplayBrightnessStrategyName(mTemporaryBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mTemporaryBrightnessStrategy.updateBrightness(
-                        new StrategyExecutionRequest(displayPowerRequest, 0.2f));
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f,
+                                /* userSetBrightnessChanged= */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 

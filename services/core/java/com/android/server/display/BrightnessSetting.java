@@ -131,6 +131,25 @@ public class BrightnessSetting {
     }
 
     /**
+     * Sets the brightness. Does not send update event to listeners.
+     * @param brightness The value to which the brightness is to be set.
+     */
+    public void setBrightnessNoNotify(float brightness) {
+        if (Float.isNaN(brightness)) {
+            Slog.w(TAG, "Attempting to init invalid brightness");
+            return;
+        }
+        synchronized (mSyncRoot) {
+            if (brightness != mBrightness) {
+                mPersistentDataStore.setBrightness(mLogicalDisplay.getPrimaryDisplayDeviceLocked(),
+                        brightness, mUserSerial
+                );
+            }
+            mBrightness = brightness;
+        }
+    }
+
+    /**
      * @return The brightness for the default display in nits. Used when the underlying display
      * device has changed but we want to persist the nit value.
      */

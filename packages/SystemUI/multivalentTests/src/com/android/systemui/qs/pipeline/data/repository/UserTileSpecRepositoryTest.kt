@@ -327,6 +327,32 @@ class UserTileSpecRepositoryTest : SysuiTestCase() {
             assertThat(loadTiles()).isEqualTo(expected)
         }
 
+    @Test
+    fun setTilesWithRepeats_onlyDistinctTiles() =
+        testScope.runTest {
+            val tilesToSet = "a,b,c,a,d,b".toTileSpecs()
+            val expected = "a,b,c,d"
+
+            val tiles by collectLastValue(underTest.tiles())
+            underTest.setTiles(tilesToSet)
+
+            assertThat(tiles).isEqualTo(expected.toTileSpecs())
+            assertThat(loadTiles()).isEqualTo(expected)
+        }
+
+    @Test
+    fun prependDefaultTwice_doesntAddMoreTiles() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles())
+            underTest.setTiles(listOf(TileSpec.create("a")))
+
+            underTest.prependDefault()
+            val currentTiles = tiles!!
+            underTest.prependDefault()
+
+            assertThat(tiles).isEqualTo(currentTiles)
+        }
+
     private fun getDefaultTileSpecs(): List<TileSpec> {
         return defaultTilesRepository.defaultTiles
     }

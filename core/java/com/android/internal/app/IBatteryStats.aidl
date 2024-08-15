@@ -21,6 +21,7 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.BluetoothBatteryStats;
 import android.os.ParcelFileDescriptor;
+import android.os.ResultReceiver;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
@@ -33,6 +34,9 @@ import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
 
 interface IBatteryStats {
+    /** @hide */
+    const String KEY_UID_SNAPSHOTS = "uid_snapshots";
+
     // These first methods are also called by native code, so must
     // be kept in sync with frameworks/native/libs/binder/include_batterystats/batterystats/IBatteryStats.h
     @EnforcePermission("UPDATE_DEVICE_STATS")
@@ -255,6 +259,9 @@ interface IBatteryStats {
     HealthStatsParceler takeUidSnapshot(int uid);
     @PermissionManuallyEnforced
     HealthStatsParceler[] takeUidSnapshots(in int[] uid);
+
+    @PermissionManuallyEnforced
+    oneway void takeUidSnapshotsAsync(in int[] uid, in ResultReceiver result);
 
     @EnforcePermission("UPDATE_DEVICE_STATS")
     oneway void noteBluetoothControllerActivity(in BluetoothActivityEnergyInfo info);

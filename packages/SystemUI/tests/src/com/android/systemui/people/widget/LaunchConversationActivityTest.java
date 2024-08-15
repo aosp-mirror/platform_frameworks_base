@@ -36,9 +36,9 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.NotificationListenerService;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -64,7 +64,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class LaunchConversationActivityTest extends SysuiTestCase {
     private static final String EMPTY_STRING = "";

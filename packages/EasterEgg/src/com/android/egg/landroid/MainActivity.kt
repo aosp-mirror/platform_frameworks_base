@@ -17,16 +17,15 @@
 package com.android.egg.landroid
 
 import android.content.res.Resources
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -34,12 +33,14 @@ import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment.Left
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -59,8 +61,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -94,12 +98,12 @@ const val TEST_UNIVERSE = false
 val RANDOM_SEED_TYPE = RandomSeedType.Daily
 
 const val FIXED_RANDOM_SEED = 5038L
-const val DEFAULT_CAMERA_ZOOM = 0.25f
+const val DEFAULT_CAMERA_ZOOM = 1f
 const val MIN_CAMERA_ZOOM = 250f / UNIVERSE_RANGE // 0.0025f
 const val MAX_CAMERA_ZOOM = 5f
-const val TOUCH_CAMERA_PAN = false
-const val TOUCH_CAMERA_ZOOM = true
-const val DYNAMIC_ZOOM = false // @@@ FIXME
+var TOUCH_CAMERA_PAN = false
+var TOUCH_CAMERA_ZOOM = false
+var DYNAMIC_ZOOM = false
 
 fun dailySeed(): Long {
     val today = GregorianCalendar()
@@ -115,6 +119,26 @@ fun randomSeed(): Long {
         else -> Random.Default.nextLong().mod(10_000_000).toLong()
     }.absoluteValue
 }
+
+fun getDessertCode(): String =
+    when (Build.VERSION.SDK_INT) {
+        Build.VERSION_CODES.LOLLIPOP -> "LMP"
+        Build.VERSION_CODES.LOLLIPOP_MR1 -> "LM1"
+        Build.VERSION_CODES.M -> "MNC"
+        Build.VERSION_CODES.N -> "NYC"
+        Build.VERSION_CODES.N_MR1 -> "NM1"
+        Build.VERSION_CODES.O -> "OC"
+        Build.VERSION_CODES.P -> "PIE"
+        Build.VERSION_CODES.Q -> "QT"
+        Build.VERSION_CODES.R -> "RVC"
+        Build.VERSION_CODES.S -> "SC"
+        Build.VERSION_CODES.S_V2 -> "SC2"
+        Build.VERSION_CODES.TIRAMISU -> "TM"
+        Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> "UDC"
+        Build.VERSION_CODES.VANILLA_ICE_CREAM -> "VIC"
+        else -> Build.VERSION.RELEASE_OR_CODENAME.replace(Regex("[a-z]*"), "")
+    }
+
 
 val DEBUG_TEXT = mutableStateOf("Hello Universe")
 const val SHOW_DEBUG_TEXT = false
@@ -134,38 +158,20 @@ fun DebugText(text: MutableState<String>) {
 }
 
 @Composable
-fun ColumnScope.ConsoleText(
-    modifier: Modifier = Modifier,
-    visible: Boolean = true,
-    random: Random = Random.Default,
-    text: String
-) {
-    AnimatedVisibility(
-        modifier = modifier,
-        visible = visible,
-        enter =
-            fadeIn(
-                animationSpec =
-                    tween(
-                        durationMillis = 1000,
-                        easing = flickerFadeEasing(random) * CubicBezierEasing(0f, 1f, 1f, 0f)
-                    )
-            )
-    ) {
-        Text(
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Medium,
-            fontSize = 12.sp,
-            color = Color(0xFFFF8000),
-            text = text
-        )
-    }
-}
-
-@Composable
 fun Telemetry(universe: VisibleUniverse) {
     var topVisible by remember { mutableStateOf(false) }
     var bottomVisible by remember { mutableStateOf(false) }
+
+    var catalogFontSize by remember { mutableStateOf(9.sp) }
+
+    val textStyle =
+        TextStyle(
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp,
+            letterSpacing = 1.sp,
+            lineHeight = 12.sp,
+        )
 
     LaunchedEffect("blah") {
         delay(1000)
@@ -174,65 +180,110 @@ fun Telemetry(universe: VisibleUniverse) {
         topVisible = true
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(6.dp)) {
-        universe.triggerDraw.value // recompose on every frame
-        val explored = universe.planets.filter { it.explored }
+    universe.triggerDraw.value // recompose on every frame
 
-        AnimatedVisibility(modifier = Modifier, visible = topVisible, enter = flickerFadeIn) {
-            Text(
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Medium,
-                fontSize = 12.sp,
-                color = Colors.Console,
-                modifier = Modifier.align(Left),
-                text =
-                    with(universe.star) {
-                        "  STAR: $name (UDC-${universe.randomSeed % 100_000})\n" +
-                            " CLASS: ${cls.name}\n" +
-                            "RADIUS: ${radius.toInt()}\n" +
-                            "  MASS: %.3g\n".format(mass) +
-                            "BODIES: ${explored.size} / ${universe.planets.size}\n" +
-                            "\n"
-                    } +
-                        explored
-                            .map {
-                                "  BODY: ${it.name}\n" +
-                                    "  TYPE: ${it.description.capitalize()}\n" +
-                                    "  ATMO: ${it.atmosphere.capitalize()}\n" +
-                                    " FAUNA: ${it.fauna.capitalize()}\n" +
-                                    " FLORA: ${it.flora.capitalize()}\n"
-                            }
-                            .joinToString("\n")
+    val explored = universe.planets.filter { it.explored }
 
-                // TODO: different colors, highlight latest discovery
+    BoxWithConstraints(
+        modifier =
+            Modifier.fillMaxSize().padding(6.dp).windowInsetsPadding(WindowInsets.safeContent),
+    ) {
+        val wide = maxWidth > maxHeight
+        Column(
+            modifier =
+                Modifier.align(if (wide) Alignment.BottomEnd else Alignment.BottomStart)
+                    .fillMaxWidth(if (wide) 0.45f else 1.0f)
+        ) {
+            universe.ship.autopilot?.let { autopilot ->
+                if (autopilot.enabled) {
+                    AnimatedVisibility(
+                        modifier = Modifier,
+                        visible = bottomVisible,
+                        enter = flickerFadeIn
+                    ) {
+                        Text(
+                            style = textStyle,
+                            color = Colors.Autopilot,
+                            modifier = Modifier.align(Left),
+                            text = autopilot.telemetry
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                modifier = Modifier,
+                visible = bottomVisible,
+                enter = flickerFadeIn
+            ) {
+                Text(
+                    style = textStyle,
+                    color = Colors.Console,
+                    modifier = Modifier.align(Left),
+                    text =
+                        with(universe.ship) {
+                            val closest = universe.closestPlanet()
+                            val distToClosest = ((closest.pos - pos).mag() - closest.radius).toInt()
+                            listOfNotNull(
+                                    landing?.let {
+                                        "LND: ${it.planet.name.toUpperCase()}\nJOB: ${it.text}"
+                                    }
+                                        ?: if (distToClosest < 10_000) {
+                                            "ALT: $distToClosest"
+                                        } else null,
+                                    "THR: %.0f%%".format(thrust.mag() * 100f),
+                                    "POS: %s".format(pos.str("%+7.0f")),
+                                    "VEL: %.0f".format(velocity.mag())
+                                )
+                                .joinToString("\n")
+                        }
                 )
+            }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        AnimatedVisibility(modifier = Modifier, visible = bottomVisible, enter = flickerFadeIn) {
+        AnimatedVisibility(
+            modifier = Modifier.align(Alignment.TopStart),
+            visible = topVisible,
+            enter = flickerFadeIn
+        ) {
             Text(
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Medium,
-                fontSize = 12.sp,
+                style = textStyle,
+                fontSize = catalogFontSize,
+                lineHeight = catalogFontSize,
+                letterSpacing = 1.sp,
                 color = Colors.Console,
-                modifier = Modifier.align(Left),
-                text =
-                    with(universe.ship) {
-                        val closest = universe.closestPlanet()
-                        val distToClosest = (closest.pos - pos).mag().toInt()
-                        listOfNotNull(
-                                landing?.let { "LND: ${it.planet.name}" }
-                                    ?: if (distToClosest < 10_000) {
-                                        "ALT: $distToClosest"
-                                    } else null,
-                                if (thrust != Vec2.Zero) "THR: %.0f%%".format(thrust.mag() * 100f)
-                                else null,
-                                "POS: %s".format(pos.str("%+7.0f")),
-                                "VEL: %.0f".format(velocity.mag())
-                            )
-                            .joinToString("\n")
+                onTextLayout = { textLayoutResult ->
+                    if (textLayoutResult.didOverflowHeight) {
+                        catalogFontSize = 8.sp
                     }
+                },
+                text =
+                    (with(universe.star) {
+                            listOf(
+                                "  STAR: $name (${getDessertCode()}-" +
+                                    "${universe.randomSeed % 100_000})",
+                                " CLASS: ${cls.name}",
+                                "RADIUS: ${radius.toInt()}",
+                                "  MASS: %.3g".format(mass),
+                                "BODIES: ${explored.size} / ${universe.planets.size}",
+                                ""
+                            )
+                        } +
+                            explored
+                                .map {
+                                    listOf(
+                                        "  BODY: ${it.name}",
+                                        "  TYPE: ${it.description.capitalize()}",
+                                        "  ATMO: ${it.atmosphere.capitalize()}",
+                                        " FAUNA: ${it.fauna.capitalize()}",
+                                        " FLORA: ${it.flora.capitalize()}",
+                                        ""
+                                    )
+                                }
+                                .flatten())
+                        .joinToString("\n")
+
+                // TODO: different colors, highlight latest discovery
             )
         }
     }
@@ -246,6 +297,8 @@ class MainActivity : ComponentActivity() {
 
         onWindowLayoutInfoChange()
 
+        enableEdgeToEdge()
+
         val universe = VisibleUniverse(namer = Namer(resources), randomSeed = randomSeed())
 
         if (TEST_UNIVERSE) {
@@ -253,6 +306,15 @@ class MainActivity : ComponentActivity() {
         } else {
             universe.initRandom()
         }
+
+        com.android.egg.ComponentActivationActivity.lockUnlockComponents(applicationContext)
+
+        // for autopilot testing in the activity
+        //        val autopilot = Autopilot(universe.ship, universe)
+        //        universe.ship.autopilot = autopilot
+        //        universe.add(autopilot)
+        //        autopilot.enabled = true
+        //        DYNAMIC_ZOOM = autopilot.enabled
 
         setContent {
             Spaaaace(modifier = Modifier.fillMaxSize(), u = universe, foldState = foldState)
@@ -437,8 +499,13 @@ fun Spaaaace(
         val distToNearestSurf = max(0f, (u.ship.pos - closest.pos).mag() - closest.radius * 1.2f)
         //        val normalizedDist = clamp(distToNearestSurf, 50f, 50_000f) / 50_000f
         if (DYNAMIC_ZOOM) {
-            //            cameraZoom = lerp(0.1f, 5f, smooth(1f-normalizedDist))
-            cameraZoom = clamp(500f / distToNearestSurf, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM)
+            cameraZoom =
+                expSmooth(
+                    cameraZoom,
+                    clamp(500f / distToNearestSurf, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM),
+                    dt = u.dt,
+                    speed = 1.5f
+                )
         } else if (!TOUCH_CAMERA_ZOOM) cameraZoom = DEFAULT_CAMERA_ZOOM
         if (!TOUCH_CAMERA_PAN) cameraOffset = (u.follow?.pos ?: Vec2.Zero) * -1f
 
@@ -478,26 +545,26 @@ fun Spaaaace(
                 "star: '${u.star.name}' designation=UDC-${u.randomSeed % 100_000} " +
                 "class=${u.star.cls.name} r=${u.star.radius.toInt()} m=${u.star.mass}\n" +
                 "planets: ${u.planets.size}\n" +
-                    u.planets.joinToString("\n") {
-                        val range = (u.ship.pos - it.pos).mag()
-                        val vorbit = sqrt(GRAVITATION * it.mass / range)
-                        val vescape = sqrt(2 * GRAVITATION * it.mass / it.radius)
-                        " * ${it.name}:\n" +
-                                if (it.explored) {
-                                    "   TYPE:  ${it.description.capitalize()}\n" +
-                                            "   ATMO:  ${it.atmosphere.capitalize()}\n" +
-                                            "   FAUNA: ${it.fauna.capitalize()}\n" +
-                                            "   FLORA: ${it.flora.capitalize()}\n"
-                                } else {
-                                    "   (Unexplored)\n"
-                                } +
-                                "   orbit=${(it.pos - it.orbitCenter).mag().toInt()}" +
-                                " radius=${it.radius.toInt()}" +
-                                " mass=${"%g".format(it.mass)}" +
-                                " vel=${(it.speed).toInt()}" +
-                                " // range=${"%.0f".format(range)}" +
-                                " vorbit=${vorbit.toInt()} vescape=${vescape.toInt()}"
-                    })
+                u.planets.joinToString("\n") {
+                    val range = (u.ship.pos - it.pos).mag()
+                    val vorbit = sqrt(GRAVITATION * it.mass / range)
+                    val vescape = sqrt(2 * GRAVITATION * it.mass / it.radius)
+                    " * ${it.name}:\n" +
+                        if (it.explored) {
+                            "   TYPE:  ${it.description.capitalize()}\n" +
+                                "   ATMO:  ${it.atmosphere.capitalize()}\n" +
+                                "   FAUNA: ${it.fauna.capitalize()}\n" +
+                                "   FLORA: ${it.flora.capitalize()}\n"
+                        } else {
+                            "   (Unexplored)\n"
+                        } +
+                        "   orbit=${(it.pos - it.orbitCenter).mag().toInt()}" +
+                        " radius=${it.radius.toInt()}" +
+                        " mass=${"%g".format(it.mass)}" +
+                        " vel=${(it.speed).toInt()}" +
+                        " // range=${"%.0f".format(range)}" +
+                        " vorbit=${vorbit.toInt()} vescape=${vescape.toInt()}"
+                })
 
         zoom(cameraZoom) {
             // All coordinates are space coordinates now.

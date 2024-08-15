@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 /**
  * Represent a logical device of type TV residing in Android system.
  */
-public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
+public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDeviceTv";
 
     // Whether ARC is available or not. "true" means that ARC is established between TV and
@@ -112,6 +112,18 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // discovered yet. The buffered commands are taken out and when they are ready to
     // handle.
     private final DelayedMessageBuffer mDelayedMessageBuffer = new DelayedMessageBuffer(this);
+
+    private boolean mWasActiveSourceSetToConnectedDevice = false;
+
+    @VisibleForTesting
+    protected boolean getWasActiveSourceSetToConnectedDevice() {
+        return mWasActiveSourceSetToConnectedDevice;
+    }
+
+    protected void setWasActiveSourceSetToConnectedDevice(
+            boolean wasActiveSourceSetToConnectedDevice) {
+        mWasActiveSourceSetToConnectedDevice = wasActiveSourceSetToConnectedDevice;
+    }
 
     // Defines the callback invoked when TV input framework is updated with input status.
     // We are interested in the notification for HDMI input addition event, in order to
@@ -205,7 +217,9 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         resetSelectRequestBuffer();
         launchDeviceDiscovery();
         startQueuedActions();
-        if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
+        List<HdmiCecMessage> bufferedActiveSource = mDelayedMessageBuffer
+                .getBufferedMessagesWithOpcode(Constants.MESSAGE_ACTIVE_SOURCE);
+        if (bufferedActiveSource.isEmpty()) {
             if (hasAction(RequestActiveSourceAction.class)) {
                 Slog.i(TAG, "RequestActiveSourceAction is in progress. Restarting.");
                 removeAction(RequestActiveSourceAction.class);
@@ -224,7 +238,31 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     }
                 }
             }));
+        } else {
+            addCecDeviceForBufferedActiveSource(bufferedActiveSource.get(0));
         }
+    }
+
+    // Add a new CEC device with known information from the buffered <Active Source> message. This
+    // helps TvInputCallback#onInputAdded to be called such that the message can be processed and
+    // the TV to switch to the new active input.
+    @ServiceThreadOnly
+    private void addCecDeviceForBufferedActiveSource(HdmiCecMessage bufferedActiveSource) {
+        assertRunOnServiceThread();
+        if (bufferedActiveSource == null) {
+            return;
+        }
+        int source = bufferedActiveSource.getSource();
+        int physicalAddress = HdmiUtils.twoBytesToInt(bufferedActiveSource.getParams());
+        List<Integer> deviceTypes = HdmiUtils.getTypeFromAddress(source);
+        HdmiDeviceInfo newDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(source)
+                .setPhysicalAddress(physicalAddress)
+                .setDisplayName(HdmiUtils.getDefaultDeviceName(source))
+                .setDeviceType(deviceTypes.get(0))
+                .setVendorId(Constants.VENDOR_ID_UNKNOWN)
+                .build();
+        mService.getHdmiCecNetwork().addCecDevice(newDevice);
     }
 
     @ServiceThreadOnly
@@ -474,6 +512,7 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 || info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             mService.getHdmiCecNetwork().updateDevicePowerStatus(logicalAddress,
                     HdmiControlManager.POWER_STATUS_ON);
+            setWasActiveSourceSetToConnectedDevice(true);
             ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
             ActiveSourceHandler.create(this, null).process(activeSource, info.getDeviceType());
         } else {
@@ -489,13 +528,16 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleStandby(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        // Ignore <Standby> from non-active source device.
-        if (getActiveSource().logicalAddress != message.getSource()) {
+        // If a device has previously asserted the active source status, ignore <Standby> from
+        // non-active source.
+        if (getWasActiveSourceSetToConnectedDevice()
+                && getActiveSource().logicalAddress != message.getSource()) {
             Slog.d(TAG, "<Standby> was not sent by the current active source, ignoring."
                     + " Current active source has logical address "
                     + getActiveSource().logicalAddress);
             return Constants.HANDLED;
         }
+        setWasActiveSourceSetToConnectedDevice(false);
         return super.handleStandby(message);
     }
 
@@ -581,6 +623,12 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Constants.HandleMessageResult
     protected int handleReportPhysicalAddress(HdmiCecMessage message) {
         super.handleReportPhysicalAddress(message);
+        // Ignore <Report Physical Address> while DeviceDiscoveryAction is in progress to avoid
+        // starting a NewDeviceAction which might interfere in creating the list of known devices.
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            return Constants.HANDLED;
+        }
+
         int path = HdmiUtils.twoBytesToInt(message.getParams());
         int address = message.getSource();
         int type = message.getParams()[2];
@@ -1457,6 +1505,7 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             invokeStandbyCompletedCallback(callback);
             return;
         }
+        setWasActiveSourceSetToConnectedDevice(false);
         boolean sendStandbyOnSleep =
                 mService.getHdmiCecConfig().getIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP)

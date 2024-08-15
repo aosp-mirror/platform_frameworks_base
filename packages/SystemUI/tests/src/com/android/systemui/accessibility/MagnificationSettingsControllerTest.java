@@ -22,11 +22,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.content.pm.ActivityInfo;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.WindowMagnificationSettings.MagnificationSize;
@@ -40,7 +41,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 /** Tests the MagnificationSettingsController. */
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MagnificationSettingsControllerTest extends SysuiTestCase {
@@ -56,6 +57,8 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
     private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
     @Before
     public void setUp() {
@@ -63,7 +66,7 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
         mMagnificationSettingsController = new MagnificationSettingsController(
                 mContext, mSfVsyncFrameProvider,
                 mMagnificationSettingControllerCallback, mSecureSettings,
-                mWindowMagnificationSettings);
+                mWindowMagnificationSettings, mViewCaptureAwareWindowManager);
     }
 
     @After

@@ -42,9 +42,9 @@ import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletService;
 import android.service.quickaccesswallet.WalletCard;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -68,7 +68,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Collections;
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class WalletScreenControllerTest extends SysuiTestCase {

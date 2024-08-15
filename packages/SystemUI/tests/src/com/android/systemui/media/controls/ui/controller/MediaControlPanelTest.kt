@@ -40,12 +40,12 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.TypedValue
 import android.view.View
@@ -60,6 +60,7 @@ import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.media.utils.MediaConstants
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
@@ -68,6 +69,7 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -137,7 +139,7 @@ private const val REC_APP_NAME = "REC APP NAME"
 private const val APP_NAME = "APP_NAME"
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaControlPanelTest : SysuiTestCase() {
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
@@ -210,6 +212,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
 
+    @Mock private lateinit var communalSceneInteractor: CommunalSceneInteractor
+
     @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock private lateinit var smartspaceAction: SmartspaceAction
     private lateinit var smartspaceData: SmartspaceMediaData
@@ -270,6 +274,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     logger,
                     keyguardStateController,
                     activityIntentHelper,
+                    communalSceneInteractor,
                     lockscreenUserManager,
                     broadcastDialogController,
                     globalSettings,
@@ -1771,8 +1776,41 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
     }
 
+    @EnableFlags(Flags.FLAG_MEDIA_LOCKSCREEN_LAUNCH_ANIMATION)
     @Test
-    fun tapContentView_showOverLockscreen_openActivity() {
+    fun tapContentView_showOverLockscreen_openActivity_withOriginAnimation() {
+        // WHEN we are on lockscreen and this activity can show over lockscreen
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val clickIntent = mock(Intent::class.java)
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.intent).thenReturn(clickIntent)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        // THEN it sends the PendingIntent without dismissing keyguard first,
+        // and does not use the Intent directly (see b/271845008)
+        captor.value.onClick(viewHolder.player)
+        verify(activityStarter)
+            .startPendingIntentMaybeDismissingKeyguard(
+                eq(pendingIntent),
+                eq(true),
+                eq(null),
+                any(),
+                eq(null),
+                eq(null),
+                eq(null),
+            )
+        verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
+    }
+
+    @DisableFlags(Flags.FLAG_MEDIA_LOCKSCREEN_LAUNCH_ANIMATION)
+    @Test
+    fun tapContentView_showOverLockscreen_openActivity_withoutOriginAnimation() {
         // WHEN we are on lockscreen and this activity can show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
         whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)

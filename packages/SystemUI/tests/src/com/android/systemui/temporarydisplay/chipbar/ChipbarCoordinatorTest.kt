@@ -19,7 +19,6 @@ package com.android.systemui.temporarydisplay.chipbar
 import android.os.PowerManager
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.MotionEvent
 import android.view.View
@@ -29,7 +28,10 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.animation.doOnCancel
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
@@ -68,7 +70,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ChipbarCoordinatorTest : SysuiTestCase() {
     private lateinit var underTest: ChipbarCoordinator
@@ -84,6 +86,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var vibratorHelper: VibratorHelper
     @Mock private lateinit var swipeGestureHandler: SwipeChipbarAwayGestureHandler
+    @Mock private lateinit var lazyViewCapture: Lazy<ViewCapture>
     private lateinit var chipbarAnimator: TestChipbarAnimator
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
@@ -112,7 +115,8 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
             ChipbarCoordinator(
                 context,
                 logger,
-                windowManager,
+                ViewCaptureAwareWindowManager(windowManager, lazyViewCapture,
+                        isViewCaptureEnabled = false),
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,

@@ -18,6 +18,7 @@ package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION_CALLBACK;
+import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
@@ -127,7 +128,7 @@ public class MagnificationConnectionManager implements
     @ConnectionState
     private int mConnectionState = DISCONNECTED;
 
-    private static final int WAIT_CONNECTION_TIMEOUT_MILLIS = 100;
+    private static final int WAIT_CONNECTION_TIMEOUT_MILLIS = 200 * HW_TIMEOUT_MULTIPLIER;
 
     private final Object mLock;
     private final Context mContext;
@@ -679,8 +680,7 @@ public class MagnificationConnectionManager implements
      */
     public boolean onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
         synchronized (mLock) {
-            waitForConnectionIfNeeded();
-            if (mConnectionWrapper == null) {
+            if (!waitConnectionWithTimeoutIfNeeded()) {
                 Slog.w(TAG,
                         "onFullscreenMagnificationActivationChanged mConnectionWrapper is null. "
                                 + "mConnectionState=" + connectionStateToString(mConnectionState));
@@ -1290,8 +1290,7 @@ public class MagnificationConnectionManager implements
             float centerY, float magnificationFrameOffsetRatioX,
             float magnificationFrameOffsetRatioY,
             MagnificationAnimationCallback animationCallback) {
-        waitForConnectionIfNeeded();
-        if (mConnectionWrapper == null) {
+        if (!waitConnectionWithTimeoutIfNeeded()) {
             Slog.w(TAG,
                     "enableWindowMagnificationInternal mConnectionWrapper is null. "
                             + "mConnectionState=" + connectionStateToString(mConnectionState));
@@ -1333,7 +1332,7 @@ public class MagnificationConnectionManager implements
                 displayId, positionX, positionY, animationCallback);
     }
 
-    private void waitForConnectionIfNeeded() {
+    boolean waitConnectionWithTimeoutIfNeeded() {
         // Wait for the connection with a timeout.
         final long endMillis = SystemClock.uptimeMillis() + WAIT_CONNECTION_TIMEOUT_MILLIS;
         while (mConnectionState == CONNECTING && (SystemClock.uptimeMillis() < endMillis)) {
@@ -1343,5 +1342,6 @@ public class MagnificationConnectionManager implements
                 /* ignore */
             }
         }
+        return isConnected();
     }
 }

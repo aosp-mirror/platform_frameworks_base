@@ -202,8 +202,8 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             }
             boolean currentUser = userId == mUserTracker.getUserId();
             boolean isAsleep = themeOverlayControllerWakefulnessDeprecation()
-                    ? mKeyguardTransitionInteractor.isFinishedInStateWhereValue(
-                    KeyguardState.Companion::deviceIsAsleepInState)
+                    ? KeyguardState.Companion.deviceIsAsleepInState(
+                            mKeyguardTransitionInteractor.getFinishedState())
                     : mWakefulnessLifecycle.getWakefulness() != WAKEFULNESS_ASLEEP;
 
             if (currentUser && !mAcceptColorEvents && isAsleep) {
@@ -444,7 +444,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
                 UserHandle.ALL);
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 false,
                 new ContentObserver(mBgHandler) {
@@ -525,7 +525,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
         if (themeOverlayControllerWakefulnessDeprecation()) {
             mJavaAdapter.alwaysCollectFlow(
-                    mKeyguardTransitionInteractor.isFinishedInState(KeyguardState.DOZING),
+                    mKeyguardTransitionInteractor.isFinishedIn(KeyguardState.DOZING),
                     isFinishedInDozing -> {
                         if (isFinishedInDozing) whenAsleepHandler.run();
                     });

@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.controls.domain.pipeline.interactor.factory
 
-import android.content.applicationContext
 import com.android.internal.logging.InstanceId
 import com.android.systemui.activityIntentHelper
 import com.android.systemui.bluetooth.mockBroadcastDialogController
@@ -34,7 +33,6 @@ val Kosmos.mediaControlInteractorFactory by
         object : MediaControlInteractorFactory {
             override fun create(instanceId: InstanceId): MediaControlInteractor {
                 return MediaControlInteractor(
-                    applicationContext = applicationContext,
                     instanceId = instanceId,
                     repository = mediaFilterRepository,
                     mediaDataProcessor = mediaDataProcessor,

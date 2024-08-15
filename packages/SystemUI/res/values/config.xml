@@ -25,9 +25,6 @@
      (package/class)  -->
     <string name="config_recentsComponent" translatable="false">com.android.systemui.recents.OverviewProxyRecentsImpl</string>
 
-    <!-- Whether or not we show the number in the bar. -->
-    <bool name="config_statusBarShowNumber">false</bool>
-
     <!-- For how long the lock screen can be on before the display turns off. -->
     <integer name="config_lockScreenDisplayTimeout">10000</integer>
 
@@ -36,6 +33,9 @@
         <item>0</item>
         <item>400</item>
     </integer-array>
+
+    <!-- Whether to use deadzone with nav bar -->
+    <bool name="config_useDeadZone">true</bool>
 
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
@@ -287,7 +287,8 @@
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
 
     <!-- Doze: Table that translates sensor values from the doze_brightness_sensor_type sensor
-               to brightness values; -1 means keeping the current brightness. -->
+               to brightness values in the integer scale [1, 255]; -1 means keeping the current
+               brightness. -->
     <integer-array name="config_doze_brightness_sensor_to_brightness">
         <item>-1</item> <!-- 0: OFF -->
         <item>2</item> <!-- 1: NIGHT -->
@@ -1046,4 +1047,10 @@
 
     <!-- The width of the shortcut helper container, as a fraction of the screen's width. -->
     <item name="shortcut_helper_screen_width_fraction" format="float" type="dimen">1.0</item>
+
+    <!-- Only applicable for dual shade - Allow Notifications/QS shade to anchor to the bottom. -->
+    <bool name="config_dualShadeAlignedToBottom">false</bool>
+
+    <!-- List of packages for which we want to use activity info (instead of application info) for biometric prompt logo. Empty for AOSP. [DO NOT TRANSLATE] -->
+    <string-array name="config_useActivityLogoForBiometricPrompt" translatable="false"/>
 </resources>

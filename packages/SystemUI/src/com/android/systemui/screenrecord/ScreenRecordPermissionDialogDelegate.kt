@@ -29,7 +29,6 @@ import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -114,10 +113,8 @@ class ScreenRecordPermissionDialogDelegate(
     }
 
     private lateinit var tapsSwitch: Switch
-    private lateinit var tapsSwitchContainer: ViewGroup
     private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
-    private lateinit var audioSwitchContainer: ViewGroup
     private lateinit var options: Spinner
 
     override fun createDialog(): SystemUIDialog {
@@ -128,7 +125,6 @@ class ScreenRecordPermissionDialogDelegate(
         super<BaseMediaProjectionPermissionDialogDelegate>.onCreate(dialog, savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
         dialog.setTitle(R.string.screenrecord_title)
-        setStartButtonText(R.string.screenrecord_permission_dialog_continue)
         setStartButtonOnClickListener { v: View? ->
             onStartRecordingClicked?.run()
             if (selectedScreenShareOption.mode == ENTIRE_SCREEN) {
@@ -150,6 +146,10 @@ class ScreenRecordPermissionDialogDelegate(
                     hostUserHandle
                 )
                 intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID, hostUid)
+                intent.putExtra(
+                    MediaProjectionAppSelectorActivity.EXTRA_SCREEN_SHARE_TYPE,
+                    MediaProjectionAppSelectorActivity.ScreenShareType.ScreenRecord.name,
+                )
                 activityStarter.startActivity(intent, /* dismissShade= */ true)
             }
             dialog.dismiss()
@@ -164,16 +164,11 @@ class ScreenRecordPermissionDialogDelegate(
     private fun initRecordOptionsView() {
         audioSwitch = dialog.requireViewById(R.id.screenrecord_audio_switch)
         tapsSwitch = dialog.requireViewById(R.id.screenrecord_taps_switch)
-        audioSwitchContainer = dialog.requireViewById(R.id.screenrecord_audio_switch_container)
-        tapsSwitchContainer = dialog.requireViewById(R.id.screenrecord_taps_switch_container)
 
         // Add these listeners so that the switch only responds to movement
         // within its target region, to meet accessibility requirements
         audioSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
         tapsSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
-
-        audioSwitchContainer.setOnClickListener { audioSwitch.toggle() }
-        tapsSwitchContainer.setOnClickListener { tapsSwitch.toggle() }
 
         tapsView = dialog.requireViewById(R.id.show_taps)
         updateTapsViewVisibility()
@@ -279,13 +274,18 @@ class ScreenRecordPermissionDialogDelegate(
             return listOf(
                 ScreenShareOption(
                     SINGLE_APP,
-                    R.string.screen_share_permission_dialog_option_single_app,
-                    R.string.screenrecord_permission_dialog_warning_single_app
+                    R.string.screenrecord_permission_dialog_option_text_single_app,
+                    R.string.screenrecord_permission_dialog_warning_single_app,
+                    startButtonText =
+                        R.string
+                            .media_projection_entry_generic_permission_dialog_continue_single_app,
                 ),
                 ScreenShareOption(
                     ENTIRE_SCREEN,
-                    R.string.screen_share_permission_dialog_option_entire_screen,
-                    R.string.screenrecord_permission_dialog_warning_entire_screen
+                    R.string.screenrecord_permission_dialog_option_text_entire_screen,
+                    R.string.screenrecord_permission_dialog_warning_entire_screen,
+                    startButtonText =
+                        R.string.screenrecord_permission_dialog_continue_entire_screen,
                 )
             )
         }

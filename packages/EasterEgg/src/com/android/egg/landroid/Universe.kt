@@ -43,11 +43,9 @@ const val CRAFT_SPEED_LIMIT = 5_000f
 const val MAIN_ENGINE_ACCEL = 1000f // thrust effect, pixels per second squared
 const val LAUNCH_MECO = 2f // how long to suspend gravity when launching
 
-const val SCALED_THRUST = true
+const val LANDING_REMOVAL_TIME = 60 * 15f // 15 min of simulation time
 
-interface Removable {
-    fun canBeRemoved(): Boolean
-}
+const val SCALED_THRUST = true
 
 open class Planet(
     val orbitCenter: Vec2,
@@ -155,10 +153,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                     speed = speed,
                     color = Colors.Eigengrau4
                 )
-            android.util.Log.v(
-                "Landroid",
-                "created planet $p with period $period and vel $speed"
-            )
+            android.util.Log.v("Landroid", "created planet $p with period $period and vel $speed")
             val num = it + 1
             p.description = "TEST PLANET #$num"
             p.atmosphere = "radius=$radius"
@@ -215,10 +210,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                     speed = speed,
                     color = Colors.Eigengrau4
                 )
-            android.util.Log.v(
-                "Landroid",
-                "created planet $p with period $period and vel $speed"
-            )
+            android.util.Log.v("Landroid", "created planet $p with period $period and vel $speed")
             p.description = namer.describePlanet(rng)
             p.atmosphere = namer.describeAtmo(rng)
             p.flora = namer.describeLife(rng)
@@ -302,7 +294,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                     //                        &&
                     //                        vDiff < 100f
                     ) {
-                        val landing = Landing(ship, planet, a)
+                        val landing = Landing(ship, planet, a, namer.describeActivity(rng, planet))
                         ship.landing = landing
                         ship.velocity = planet.velocity
                         add(landing)
@@ -327,7 +319,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                         //
                         (1..10).forEach {
                             Spark(
-                                    lifetime = rng.nextFloatInRange(0.5f, 2f),
+                                    ttl = rng.nextFloatInRange(0.5f, 2f),
                                     style = Spark.Style.DOT,
                                     color = Color.White,
                                     size = 1f
@@ -365,28 +357,43 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
         entities
             .filterIsInstance<Removable>()
             .filter(predicate = Removable::canBeRemoved)
-            .filterIsInstance<Entity>()
-            .forEach { remove(it) }
+            .forEach { remove(it as Entity) }
+
+        constraints
+            .filterIsInstance<Removable>()
+            .filter(predicate = Removable::canBeRemoved)
+            .forEach { remove(it as Constraint) }
     }
 }
 
-class Landing(val ship: Spacecraft, val planet: Planet, val angle: Float) : Constraint {
-    private val landingVector = Vec2.makeWithAngleMag(angle, ship.radius + planet.radius)
+class Landing(
+    var ship: Spacecraft?,
+    val planet: Planet,
+    val angle: Float,
+    val text: String = "",
+    private val fuse: Fuse = Fuse(LANDING_REMOVAL_TIME)
+) : Constraint, Removable by fuse {
     override fun solve(sim: Simulator, dt: Float) {
-        val desiredPos = planet.pos + landingVector
-        ship.pos = (ship.pos * 0.5f) + (desiredPos * 0.5f) // @@@ FIXME
-        ship.angle = angle
+        ship?.let { ship ->
+            val landingVector = Vec2.makeWithAngleMag(angle, ship.radius + planet.radius)
+            val desiredPos = planet.pos + landingVector
+            ship.pos = (ship.pos * 0.5f) + (desiredPos * 0.5f) // @@@ FIXME
+            ship.angle = angle
+        }
+
+        fuse.update(dt)
     }
 }
 
 class Spark(
-    var lifetime: Float,
+    var ttl: Float,
     collides: Boolean = false,
     mass: Float = 0f,
     val style: Style = Style.LINE,
     val color: Color = Color.Gray,
-    val size: Float = 2f
-) : Removable, Body() {
+    val size: Float = 2f,
+    val fuse: Fuse = Fuse(ttl)
+) : Removable by fuse, Body(name = "Spark") {
     enum class Style {
         LINE,
         LINE_ABSOLUTE,
@@ -401,10 +408,7 @@ class Spark(
     }
     override fun update(sim: Simulator, dt: Float) {
         super.update(sim, dt)
-        lifetime -= dt
-    }
-    override fun canBeRemoved(): Boolean {
-        return lifetime < 0
+        fuse.update(dt)
     }
 }
 
@@ -435,6 +439,7 @@ class Spacecraft : Body() {
     val track = Track()
 
     var landing: Landing? = null
+    var autopilot: Autopilot? = null
 
     init {
         mass = SPACECRAFT_MASS
@@ -448,23 +453,19 @@ class Spacecraft : Body() {
             var deltaV = MAIN_ENGINE_ACCEL * dt
             if (SCALED_THRUST) deltaV *= thrustMag.coerceIn(0f, 1f)
 
-            if (landing == null) {
-                // we are free in space, so we attempt to pivot toward the desired direction
-                // NOTE: no longer required thanks to FlightStick
-                // angle = thrust.angle()
-            } else
-                landing?.let { landing ->
-                    if (launchClock == 0f) launchClock = sim.now + 1f /* @@@ TODO extract */
+            // check if we are currently attached to a landing
+            landing?.let { landing ->
+                // launch clock is 1 second long
+                if (launchClock == 0f) launchClock = sim.now + 1f /* @@@ TODO extract */
 
-                    if (sim.now > launchClock) {
-                        // first-stage to orbit has 1000x power
-                        //                    deltaV *= 1000f
-                        sim.remove(landing)
-                        this.landing = null
-                    } else {
-                        deltaV = 0f
-                    }
+                if (sim.now > launchClock) {
+                    // detach from landing site
+                    landing.ship = null
+                    this.landing = null
+                } else {
+                    deltaV = 0f
                 }
+            }
 
             // this is it. impart thrust to the ship.
             // note that we always thrust in the forward direction
@@ -492,11 +493,11 @@ class Spacecraft : Body() {
             // exhaust
             sim.add(
                 Spark(
-                        lifetime = sim.rng.nextFloatInRange(0.5f, 1f),
+                        ttl = sim.rng.nextFloatInRange(0.5f, 1f),
                         collides = true,
                         mass = 1f,
                         style = Spark.Style.RING,
-                        size = 3f,
+                        size = 1f,
                         color = Color(0x40FFFFFF)
                     )
                     .also { spark ->

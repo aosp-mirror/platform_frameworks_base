@@ -18,11 +18,11 @@ package com.android.systemui.surfaceeffects.loadingeffect
 
 import android.graphics.Paint
 import android.graphics.RenderEffect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
-import com.android.systemui.model.SysUiStateTest
 import com.android.systemui.surfaceeffects.PaintDrawCallback
 import com.android.systemui.surfaceeffects.RenderEffectDrawCallback
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig
@@ -33,9 +33,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class LoadingEffectTest : SysUiStateTest() {
+class LoadingEffectTest : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
 

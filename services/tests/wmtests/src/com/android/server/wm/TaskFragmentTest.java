@@ -56,6 +56,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 
+import android.app.ActivityOptions;
 import android.content.pm.SigningDetails;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -291,6 +292,30 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
+    public void testFindTopNonFinishingActivity_ignoresLaunchedFromBubbleActivities() {
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setUid(DEFAULT_TASK_FRAGMENT_ORGANIZER_UID).setActivityOptions(opts).build();
+        mTaskFragment.addChild(activity);
+
+        assertNull(mTaskFragment.getTopNonFinishingActivity(true, false));
+    }
+
+    @Test
+    public void testFindTopNonFinishingActivity_includesLaunchedFromBubbleActivities() {
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setUid(DEFAULT_TASK_FRAGMENT_ORGANIZER_UID).setActivityOptions(opts).build();
+        mTaskFragment.addChild(activity);
+
+        assertEquals(mTaskFragment.getTopNonFinishingActivity(true, true), activity);
+    }
+
+    @Test
     public void testMoveTaskToFront_supportsEnterPipOnTaskSwitchForAdjacentTaskFragment() {
         final Task bottomTask = createTask(mDisplayContent);
         final ActivityRecord bottomActivity = createActivityRecord(bottomTask);
@@ -474,8 +499,8 @@ public class TaskFragmentTest extends WindowTestsBase {
                 .build();
         final ActivityRecord activity0 = organizedTf.getBottomMostActivity();
         final ActivityRecord activity1 = organizedTf.getTopMostActivity();
-        // Bottom activity is untrusted embedding. Top activity is trusted embedded.
-        // Activity0 has overlay over untrusted mode embedded.
+        // Bottom activity is untrusted embedding. Top activity is trusted embedded and occludes
+        // the bottom activity. Activity0 has overlay over untrusted mode embedded.
         activity0.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 1;
         activity1.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID;
         doReturn(true).when(organizedTf).isAllowedToEmbedActivityInUntrustedMode(activity0);
@@ -508,6 +533,48 @@ public class TaskFragmentTest extends WindowTestsBase {
         activity2.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 2;
 
         assertFalse(activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
+    }
+
+    @Test
+    public void testActivityHasOverlayOverUntrustedModeEmbeddedWithAdjacentTaskFragments() {
+        final Task rootTask = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        final Rect taskBounds = rootTask.getBounds();
+        final TaskFragment organizedTf0 = new TaskFragmentBuilder(mAtm)
+                .createActivityCount(1)
+                .setParentTask(rootTask)
+                .setFragmentToken(new Binder())
+                .setOrganizer(mOrganizer)
+                .setBounds(new Rect(taskBounds.left, taskBounds.top,
+                        taskBounds.left + taskBounds.width() / 2, taskBounds.bottom))
+                .build();
+        final TaskFragment organizedTf1 = new TaskFragmentBuilder(mAtm)
+                .createActivityCount(1)
+                .setParentTask(rootTask)
+                .setFragmentToken(new Binder())
+                .setOrganizer(mOrganizer)
+                .setBounds(new Rect(taskBounds.left + taskBounds.width() / 2, taskBounds.top,
+                        taskBounds.right, taskBounds.bottom))
+                .build();
+        final ActivityRecord activity0 = organizedTf0.getTopMostActivity();
+        final ActivityRecord activity1 = organizedTf1.getTopMostActivity();
+
+        activity0.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID + 1;
+        activity1.info.applicationInfo.uid = DEFAULT_TASK_FRAGMENT_ORGANIZER_UID;
+        doReturn(true).when(organizedTf0).isAllowedToEmbedActivityInUntrustedMode(activity0);
+
+        assertFalse("Activity0 doesn't have overlay because it's not occluded by activity1",
+                activity0.hasOverlayOverUntrustedModeEmbedded());
+        assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
+
+        // Expand organizedTf1 bounds slightly.
+        final Rect tfBounds1 = organizedTf1.getBounds();
+        organizedTf1.setBounds(tfBounds1.left - 5, tfBounds1.top, taskBounds.right + 5,
+                tfBounds1.bottom);
+
+        assertTrue("Activity0 has overlay because it's occluded partially by activity1",
+                activity0.hasOverlayOverUntrustedModeEmbedded());
         assertFalse(activity1.hasOverlayOverUntrustedModeEmbedded());
     }
 
@@ -692,20 +759,24 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Assert fixed orientation request is ignored for activity in ActivityEmbedding split.
         activity0.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity0.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         activity1.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity1.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         // Also verify the behavior on device that ignore orientation request.
         mDisplayContent.setIgnoreOrientationRequest(true);
         task.onConfigurationChanged(task.getParent().getConfiguration());
 
-        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
-        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity0.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity1.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
 
         tf0.setResumedActivity(activity0, "test");
@@ -924,16 +995,14 @@ public class TaskFragmentTest extends WindowTestsBase {
         // The focus should change.
         assertEquals(winLeftTop, mDisplayContent.mCurrentFocus);
 
-        if (Flags.embeddedActivityBackNavFlag()) {
-            // Move focus if the adjacent activity is more recently active.
-            doReturn(1L).when(appLeftTop).getLastWindowCreateTime();
-            doReturn(2L).when(appRightTop).getLastWindowCreateTime();
-            assertTrue(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
+        // Move focus if the adjacent activity is more recently active.
+        doReturn(1L).when(appLeftTop).getLastWindowCreateTime();
+        doReturn(2L).when(appRightTop).getLastWindowCreateTime();
+        assertTrue(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
 
-            // Do not move the focus if the adjacent activity is less recently active.
-            doReturn(3L).when(appLeftTop).getLastWindowCreateTime();
-            assertFalse(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
-        }
+        // Do not move the focus if the adjacent activity is less recently active.
+        doReturn(3L).when(appLeftTop).getLastWindowCreateTime();
+        assertFalse(mWm.moveFocusToAdjacentEmbeddedWindow(winLeftTop));
     }
 
     @Test
@@ -976,6 +1045,28 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Should be invisible even if it is ACTIVITY_TYPE_HOME.
         when(taskFragment.getActivityType()).thenReturn(ACTIVITY_TYPE_HOME);
         assertFalse(taskFragment.shouldBeVisible(null));
+    }
+
+    @Test
+    public void testTaskFragmentSmallestScreenWidthDp() {
+        // Create an embedded TaskFragment in a Task.
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .build();
+        final Rect taskBounds = task.getBounds();
+
+        // Making the bounds of the embedded TaskFragment smaller than the parent Task.
+        taskFragment.setBounds(taskBounds.left, taskBounds.top, taskBounds.right / 2,
+                taskBounds.bottom);
+
+        // The swdp should be calculated via the TF bounds when it is a multi-window TF.
+        final Configuration outConfig = new Configuration();
+        outConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        taskFragment.computeConfigResourceOverrides(outConfig, task.getConfiguration());
+        assertEquals(outConfig.smallestScreenWidthDp,
+                Math.min(outConfig.screenWidthDp, outConfig.screenHeightDp));
     }
 
     private WindowState createAppWindow(ActivityRecord app, String name) {

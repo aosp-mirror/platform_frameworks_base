@@ -286,13 +286,16 @@ void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
     mCursorController.setCustomPointerIcon(icon);
 }
 
-void PointerController::setSkipScreenshot(ui::LogicalDisplayId displayId, bool skip) {
+void PointerController::setSkipScreenshotFlagForDisplay(ui::LogicalDisplayId displayId) {
     std::scoped_lock lock(getLock());
-    if (skip) {
-        mLocked.displaysToSkipScreenshot.insert(displayId);
-    } else {
-        mLocked.displaysToSkipScreenshot.erase(displayId);
-    }
+    mLocked.displaysToSkipScreenshot.insert(displayId);
+    mCursorController.setSkipScreenshot(true);
+}
+
+void PointerController::clearSkipScreenshotFlags() {
+    std::scoped_lock lock(getLock());
+    mLocked.displaysToSkipScreenshot.clear();
+    mCursorController.setSkipScreenshot(false);
 }
 
 void PointerController::doInactivityTimeout() {

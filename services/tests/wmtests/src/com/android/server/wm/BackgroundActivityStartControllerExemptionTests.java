@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
+
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_COMPONENT;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_FOREGROUND;
@@ -23,12 +26,12 @@ import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_SAW_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityOptions;
@@ -57,7 +60,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 
 import java.lang.reflect.Field;
@@ -133,9 +135,8 @@ public class BackgroundActivityStartControllerExemptionTests {
 
     ActivityOptions mCheckedOptions = ActivityOptions.makeBasic()
             .setPendingIntentCreatorBackgroundActivityStartMode(
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
-            .setPendingIntentBackgroundActivityStartMode(
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            .setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
 
     class TestableBackgroundActivityStartController extends BackgroundActivityStartController {
         private Set<Pair<Integer, Integer>> mBalPermissionUidPidPairs = new HashSet<>();
@@ -174,7 +175,6 @@ public class BackgroundActivityStartControllerExemptionTests {
         when(mService.getAppOpsManager()).thenReturn(mAppOpsManager);
         setViaReflection(mService, "mProcessMap", mProcessMap);
 
-        //Mockito.when(mSupervisor.getBackgroundActivityLaunchController()).thenReturn(mController);
         setViaReflection(mSupervisor, "mRecentTasks", mRecentTasks);
 
         mController = new TestableBackgroundActivityStartController(mService, mSupervisor);
@@ -396,7 +396,7 @@ public class BackgroundActivityStartControllerExemptionTests {
 
         // setup state
         WindowProcessControllerMap mProcessMap = new WindowProcessControllerMap();
-        WindowProcessController otherProcess = Mockito.mock(WindowProcessController.class);
+        WindowProcessController otherProcess = mock(WindowProcessController.class);
         mProcessMap.put(callingPid, mCallerApp);
         mProcessMap.put(REGULAR_PID_1_1, otherProcess);
         setViaReflection(mService, "mProcessMap", mProcessMap);
@@ -515,13 +515,12 @@ public class BackgroundActivityStartControllerExemptionTests {
         BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
         Intent intent = TEST_INTENT;
         ActivityOptions checkedOptions = mCheckedOptions;
-        checkedOptions.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+        checkedOptions.setPendingIntentBackgroundActivityStartMode(
+                MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
         BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
                 callingPid, callingPackage, realCallingUid, realCallingPid, null,
                 originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
                 checkedOptions);
-
-        assertThat(balState.isPendingIntentBalAllowedByPermission()).isTrue();
 
         // call
         BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedBySender(
@@ -563,5 +562,137 @@ public class BackgroundActivityStartControllerExemptionTests {
         // assertions
         assertWithMessage(balState.toString()).that(callerVerdict.getCode()).isEqualTo(
                 BAL_ALLOW_SAW_PERMISSION);
+    }
+
+    @Test
+    public void testCaller_isRecents() {
+        int callingUid = REGULAR_UID_1;
+        int callingPid = REGULAR_PID_1;
+        final String callingPackage = REGULAR_PACKAGE_1;
+        int realCallingUid = REGULAR_UID_2;
+        int realCallingPid = REGULAR_PID_2;
+
+        // setup state
+        //if (mSupervisor.mRecentTasks.isCallerRecents(state.mCallingUid))
+        RecentTasks recentTasks = mock(RecentTasks.class);
+        when(recentTasks.isCallerRecents(eq(callingUid))).thenReturn(true);
+        mSupervisor.mRecentTasks = recentTasks;
+
+        // prepare call
+        PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
+        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        Intent intent = TEST_INTENT;
+        ActivityOptions checkedOptions = mCheckedOptions;
+        BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
+                callingPid, callingPackage, realCallingUid, realCallingPid, null,
+                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                checkedOptions);
+
+        // call
+        BalVerdict callerVerdict = mController.checkBackgroundActivityStartAllowedByCaller(
+                balState);
+        balState.setResultForCaller(callerVerdict);
+
+        // assertions
+        assertWithMessage(balState.toString()).that(callerVerdict.getCode()).isEqualTo(
+                BAL_ALLOW_ALLOWLISTED_COMPONENT);
+    }
+
+    @Test
+    public void testCaller_isDeviceOwner() {
+        int callingUid = REGULAR_UID_1;
+        int callingPid = REGULAR_PID_1;
+        final String callingPackage = REGULAR_PACKAGE_1;
+        int realCallingUid = REGULAR_UID_2;
+        int realCallingPid = REGULAR_PID_2;
+
+        // setup state
+        when(mService.isDeviceOwner(eq(callingUid))).thenReturn(true);
+
+        // prepare call
+        PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
+        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        Intent intent = TEST_INTENT;
+        ActivityOptions checkedOptions = mCheckedOptions;
+        BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
+                callingPid, callingPackage, realCallingUid, realCallingPid, null,
+                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                checkedOptions);
+
+        // call
+        BalVerdict callerVerdict = mController.checkBackgroundActivityStartAllowedByCaller(
+                balState);
+        balState.setResultForCaller(callerVerdict);
+
+        // assertions
+        assertWithMessage(balState.toString()).that(callerVerdict.getCode()).isEqualTo(
+                BAL_ALLOW_ALLOWLISTED_COMPONENT);
+    }
+
+    @Test
+    public void testCaller_isAffiliatedProfileOwner() {
+        int callingUid = REGULAR_UID_1;
+        int callingPid = REGULAR_PID_1;
+        final String callingPackage = REGULAR_PACKAGE_1;
+        int realCallingUid = REGULAR_UID_2;
+        int realCallingPid = REGULAR_PID_2;
+
+        // setup state
+        when(mService.isAffiliatedProfileOwner(eq(callingUid))).thenReturn(true);
+
+        // prepare call
+        PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
+        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        Intent intent = TEST_INTENT;
+        ActivityOptions checkedOptions = mCheckedOptions;
+        BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
+                callingPid, callingPackage, realCallingUid, realCallingPid, null,
+                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                checkedOptions);
+
+        // call
+        BalVerdict callerVerdict = mController.checkBackgroundActivityStartAllowedByCaller(
+                balState);
+        balState.setResultForCaller(callerVerdict);
+
+        // assertions
+        assertWithMessage(balState.toString()).that(callerVerdict.getCode()).isEqualTo(
+                BAL_ALLOW_ALLOWLISTED_COMPONENT);
+    }
+
+    @Test
+    public void testCaller_isExemptFromBgStartRestriction() {
+        int callingUid = REGULAR_UID_1;
+        int callingPid = REGULAR_PID_1;
+        final String callingPackage = REGULAR_PACKAGE_1;
+        int realCallingUid = REGULAR_UID_2;
+        int realCallingPid = REGULAR_PID_2;
+
+        mDeviceConfig.set("system_exempt_from_activity_bg_start_restriction_enabled", "true");
+        AppOpsManager appOpsManager = mock(AppOpsManager.class);
+        when(mService.getAppOpsManager()).thenReturn(appOpsManager);
+        when(appOpsManager.checkOpNoThrow(eq(
+                        AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
+                eq(callingUid), eq(callingPackage))).thenReturn(AppOpsManager.MODE_ALLOWED);
+
+
+        // prepare call
+        PendingIntentRecord originatingPendingIntent = mPendingIntentRecord;
+        BackgroundStartPrivileges forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+        Intent intent = TEST_INTENT;
+        ActivityOptions checkedOptions = mCheckedOptions;
+        BackgroundActivityStartController.BalState balState = mController.new BalState(callingUid,
+                callingPid, callingPackage, realCallingUid, realCallingPid, null,
+                originatingPendingIntent, forcedBalByPiSender, mResultRecord, intent,
+                checkedOptions);
+
+        // call
+        BalVerdict callerVerdict = mController.checkBackgroundActivityStartAllowedByCaller(
+                balState);
+        balState.setResultForCaller(callerVerdict);
+
+        // assertions
+        assertWithMessage(balState.toString()).that(callerVerdict.getCode()).isEqualTo(
+                BAL_ALLOW_PERMISSION);
     }
 }

@@ -16,18 +16,18 @@
 
 package com.android.systemui.biometrics.shared.model
 
-/** Provides current sensor location information in the current screen resolution [scale]. */
+/**
+ * Provides current sensor location information in the current screen resolution [scale].
+ *
+ * @property scale Scale to apply to the sensor location's natural parameters to support different
+ *   screen resolutions.
+ */
 data class SensorLocation(
     private val naturalCenterX: Int,
     private val naturalCenterY: Int,
-    private val naturalRadius: Int
+    private val naturalRadius: Int,
+    private val scale: Float = 1f
 ) {
-    /**
-     * Scale to apply to the sensor location's natural parameters to support different screen
-     * resolutions.
-     */
-    var scale: Float = 1f
-
     val centerX: Float
         get() {
             return naturalCenterX * scale

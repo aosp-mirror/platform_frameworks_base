@@ -38,12 +38,12 @@ import android.os.UserHandle;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -54,14 +54,18 @@ import com.android.settingslib.flags.Flags;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.kosmos.Kosmos;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractor;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractorKosmosKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -75,7 +79,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @MediumTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MediaOutputDialogTest extends SysuiTestCase {
 
@@ -83,6 +87,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    private final Kosmos mKosmos = SysuiTestCaseExtKt.testKosmos(this);
 
     // Mock
     private final MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
@@ -136,6 +142,9 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mMediaSessionManager.getActiveSessionsForUser(any(),
                 Mockito.eq(userHandle))).thenReturn(
                 mMediaControllers);
+        VolumePanelGlobalStateInteractor volumePanelGlobalStateInteractor =
+                VolumePanelGlobalStateInteractorKosmosKt.getVolumePanelGlobalStateInteractor(
+                        mKosmos);
 
         mMediaOutputController =
                 new MediaOutputController(
@@ -153,6 +162,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        volumePanelGlobalStateInteractor,
                         mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = makeTestDialog(mMediaOutputController);

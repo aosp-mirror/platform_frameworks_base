@@ -33,9 +33,9 @@ import android.app.role.RoleManager;
 import android.content.Intent;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -57,7 +57,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class QuickAccessWalletControllerTest extends SysuiTestCase {

@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.os.Looper
 import android.service.quickaccesswallet.WalletCard
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
@@ -22,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.anySet
 import org.mockito.Mockito.doNothing
@@ -31,7 +31,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WalletContextualLocationsServiceTest : SysuiTestCase() {

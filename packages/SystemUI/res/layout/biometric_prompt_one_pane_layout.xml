@@ -10,7 +10,7 @@
         android:id="@+id/background"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:contentDescription="@string/biometric_dialog_empty_space_description"
+        android:contentDescription="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,7 +26,6 @@
         app:layout_constraintStart_toStartOf="@id/leftGuideline"
         app:layout_constraintTop_toTopOf="@id/topBarrier"
         app:layout_constraintWidth_max="@dimen/biometric_prompt_panel_max_width" />
-
 
     <include
         android:id="@+id/button_bar"
@@ -148,9 +147,10 @@
     <TextView
         android:id="@+id/indicator"
         style="@style/TextAppearance.AuthCredential.Indicator"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="24dp"
         android:accessibilityLiveRegion="assertive"
         android:fadingEdge="horizontal"
         android:gravity="center_horizontal"

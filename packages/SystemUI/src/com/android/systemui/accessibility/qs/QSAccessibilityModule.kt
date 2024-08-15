@@ -28,6 +28,7 @@ import com.android.systemui.qs.tiles.HearingDevicesTile
 import com.android.systemui.qs.tiles.NightDisplayTile
 import com.android.systemui.qs.tiles.OneHandedModeTile
 import com.android.systemui.qs.tiles.ReduceBrightColorsTile
+import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.colorcorrection.domain.ColorCorrectionTileMapper
 import com.android.systemui.qs.tiles.impl.colorcorrection.domain.interactor.ColorCorrectionTileDataInteractor
@@ -114,6 +115,48 @@ interface QSAccessibilityModule {
     @IntoMap
     @StringKey(HearingDevicesTile.TILE_SPEC)
     fun bindHearingDevicesTile(hearingDevicesTile: HearingDevicesTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(COLOR_CORRECTION_TILE_SPEC)
+    fun provideColorCorrectionAvailabilityInteractor(
+            impl: ColorCorrectionTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(COLOR_INVERSION_TILE_SPEC)
+    fun provideColorInversionAvailabilityInteractor(
+            impl: ColorCorrectionTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(FONT_SCALING_TILE_SPEC)
+    fun provideFontScalingAvailabilityInteractor(
+            impl: FontScalingTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(REDUCE_BRIGHTNESS_TILE_SPEC)
+    fun provideReduceBrightnessAvailabilityInteractor(
+            impl: ReduceBrightColorsTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(ONE_HANDED_TILE_SPEC)
+    fun provideOneHandedAvailabilityInteractor(
+            impl: OneHandedModeTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
+    @Binds
+    @IntoMap
+    @StringKey(NIGHT_DISPLAY_TILE_SPEC)
+    fun provideNightDisplayAvailabilityInteractor(
+            impl: NightDisplayTileDataInteractor
+    ): QSTileAvailabilityInteractor
 
     companion object {
         const val COLOR_CORRECTION_TILE_SPEC = "color_correction"

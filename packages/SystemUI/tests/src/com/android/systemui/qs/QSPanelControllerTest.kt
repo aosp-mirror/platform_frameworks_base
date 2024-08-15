@@ -1,8 +1,8 @@
 package com.android.systemui.qs
 
 import android.content.res.Configuration
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import android.testing.AndroidTestingRunner
 import android.testing.TestableResources
 import android.view.ContextThemeWrapper
 import com.android.internal.logging.MetricsLogger
@@ -41,7 +41,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class QSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var qsPanel: QSPanel

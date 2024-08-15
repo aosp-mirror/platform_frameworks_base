@@ -17,6 +17,8 @@
 package com.android.systemui.shade
 
 import android.content.Context
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper
@@ -31,6 +33,7 @@ import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LegacyLockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.Flags
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
@@ -70,6 +73,7 @@ import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
@@ -85,6 +89,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.anyFloat
@@ -132,6 +137,8 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var mGlanceableHubContainerController: GlanceableHubContainerController
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private lateinit var sysUiUnfoldComponent: SysUIUnfoldComponent
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
@@ -209,6 +216,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
                 dozeScrimController,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
+                Optional.of(sysUiUnfoldComponent),
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,
@@ -393,8 +401,8 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
 
     @Test
     @DisableSceneContainer
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun handleDispatchTouchEvent_nsslMigrationOff_userActivity_not_called() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         underTest.setStatusBarViewController(phoneStatusBarViewController)
 
         interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
@@ -403,8 +411,8 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
+    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun handleDispatchTouchEvent_nsslMigrationOn_userActivity() {
-        enableMigrateClocksFlag()
         underTest.setStatusBarViewController(phoneStatusBarViewController)
 
         interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
@@ -435,6 +443,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
+    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun shouldInterceptTouchEvent_dozing_touchInLockIconArea_touchNotIntercepted() {
         // GIVEN dozing
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
@@ -447,13 +456,12 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
         // AND the lock icon wants the touch
         whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT)).thenReturn(true)
 
-        enableMigrateClocksFlag()
-
         // THEN touch should NOT be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isFalse()
     }
 
     @Test
+    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun shouldInterceptTouchEvent_dozing_touchNotInLockIconArea_touchIntercepted() {
         // GIVEN dozing
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
@@ -466,13 +474,12 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
         whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
                 .thenReturn(false)
 
-        enableMigrateClocksFlag()
-
         // THEN touch should be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
     }
 
     @Test
+    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun shouldInterceptTouchEvent_dozing_touchInStatusBar_touchIntercepted() {
         // GIVEN dozing
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
@@ -485,13 +492,12 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
         whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
                 .thenReturn(true)
 
-        enableMigrateClocksFlag()
-
         // THEN touch should be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
     }
 
     @Test
+    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun shouldInterceptTouchEvent_dozingAndPulsing_touchIntercepted() {
         // GIVEN dozing
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
@@ -512,10 +518,48 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
         whenever(shadeViewController.handleExternalInterceptTouch(DOWN_EVENT))
                 .thenReturn(true)
 
-        enableMigrateClocksFlag()
-
         // THEN touch should be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
+    }
+
+    @Test
+    fun handleExternalTouch_intercepted_sendsOnTouch() {
+        // Accept dispatch and also intercept.
+        whenever(view.dispatchTouchEvent(any())).thenReturn(true)
+        whenever(view.onInterceptTouchEvent(any())).thenReturn(true)
+
+        underTest.handleExternalTouch(DOWN_EVENT)
+        underTest.handleExternalTouch(MOVE_EVENT)
+
+        // Once intercepted, both events are sent to the view.
+        verify(view).onTouchEvent(DOWN_EVENT)
+        verify(view).onTouchEvent(MOVE_EVENT)
+    }
+
+    @Test
+    fun handleExternalTouch_notDispatched_interceptNotCalled() {
+        // Don't accept dispatch
+        whenever(view.dispatchTouchEvent(any())).thenReturn(false)
+
+        underTest.handleExternalTouch(DOWN_EVENT)
+
+        // Interception is not offered.
+        verify(view, never()).onInterceptTouchEvent(any())
+    }
+
+    @Test
+    fun handleExternalTouch_notIntercepted_onTouchNotSent() {
+        // Accept dispatch, but don't dispatch
+        whenever(view.dispatchTouchEvent(any())).thenReturn(true)
+        whenever(view.onInterceptTouchEvent(any())).thenReturn(false)
+
+        underTest.handleExternalTouch(DOWN_EVENT)
+        underTest.handleExternalTouch(MOVE_EVENT)
+
+        // Interception offered for both events, but onTouchEvent is never called.
+        verify(view).onInterceptTouchEvent(DOWN_EVENT)
+        verify(view).onInterceptTouchEvent(MOVE_EVENT)
+        verify(view, never()).onTouchEvent(any())
     }
 
     @Test
@@ -607,17 +651,11 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
+    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun cancelCurrentTouch_callsDragDownHelper() {
-        enableMigrateClocksFlag()
         underTest.cancelCurrentTouch()
 
         verify(dragDownHelper).stopDragging()
-    }
-
-    private fun enableMigrateClocksFlag() {
-        if (!Flags.migrateClocksToBlueprint()) {
-            mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-        }
     }
 
     companion object {

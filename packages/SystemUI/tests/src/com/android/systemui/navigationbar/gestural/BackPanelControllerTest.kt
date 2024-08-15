@@ -17,7 +17,6 @@
 package com.android.systemui.navigationbar.gestural
 
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -26,7 +25,9 @@ import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_UP
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.jank.Cuj
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
@@ -49,12 +50,13 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class BackPanelControllerTest : SysuiTestCase() {
     companion object {
         private const val START_X: Float = 0f
     }
+
     private val kosmos = testKosmos()
     private lateinit var mBackPanelController: BackPanelController
     private lateinit var systemClock: FakeSystemClock
@@ -62,7 +64,7 @@ class BackPanelControllerTest : SysuiTestCase() {
     private var triggerThreshold: Float = 0.0f
     private val touchSlop = ViewConfiguration.get(context).scaledEdgeSlop
     @Mock private lateinit var vibratorHelper: VibratorHelper
-    @Mock private lateinit var windowManager: WindowManager
+    @Mock private lateinit var viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var latencyTracker: LatencyTracker
     private val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
@@ -77,7 +79,7 @@ class BackPanelControllerTest : SysuiTestCase() {
         mBackPanelController =
             BackPanelController(
                 context,
-                windowManager,
+                viewCaptureAwareWindowManager,
                 ViewConfiguration.get(context),
                 Handler.createAsync(testableLooper.looper),
                 systemClock,

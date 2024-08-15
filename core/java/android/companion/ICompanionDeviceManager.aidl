@@ -141,4 +141,7 @@ interface ICompanionDeviceManager {
     byte[] getBackupPayload(int userId);
 
     void applyRestoredPayload(in byte[] payload, int userId);
+
+    @EnforcePermission("BLUETOOTH_CONNECT")
+    boolean removeBond(int associationId, in String packageName, int userId);
 }

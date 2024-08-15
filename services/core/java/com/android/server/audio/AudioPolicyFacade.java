@@ -16,12 +16,14 @@
 
 package com.android.server.audio;
 
+import com.android.media.permission.INativePermissionController;
 
 /**
  * Facade to IAudioPolicyService which fulfills AudioService dependencies.
  * See @link{IAudioPolicyService.aidl}
  */
 public interface AudioPolicyFacade {
-
     public boolean isHotwordStreamSupported(boolean lookbackAudio);
+    public INativePermissionController getPermissionController();
+    public void registerOnStartTask(Runnable r);
 }

@@ -110,7 +110,7 @@ internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionApp
     app: ApplicationInfo,
 ) {
     val record = remember { transformItem(app) }
-    if (!remember { isChangeable(record) }) return
+    if (!remember { isChangeableWithSystemUidCheck(record) }) return
     val context = LocalContext.current
     val internalListModel = remember {
         TogglePermissionInternalAppListModel(
@@ -178,6 +178,6 @@ private fun <T : AppRecord> TogglePermissionAppListModel<T>.rememberRecord(app: 
 private fun <T : AppRecord> TogglePermissionAppListModel<T>.rememberIsChangeable(record: T) =
     remember(record) {
         flow {
-            emit(isChangeable(record))
+            emit(isChangeableWithSystemUidCheck(record))
         }.flowOn(Dispatchers.Default)
     }.collectAsStateWithLifecycle(initialValue = false)

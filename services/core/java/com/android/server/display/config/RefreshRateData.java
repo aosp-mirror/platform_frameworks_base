@@ -64,17 +64,21 @@ public class RefreshRateData {
 
     public final List<SupportedModeData> lowPowerSupportedModes;
 
+    public final List<SupportedModeData> lowLightBlockingZoneSupportedModes;
+
     @VisibleForTesting
     public RefreshRateData(int defaultRefreshRate, int defaultPeakRefreshRate,
             int defaultRefreshRateInHbmHdr, int defaultRefreshRateInHbmSunlight,
-            List<SupportedModeData> lowPowerSupportedModes) {
+            List<SupportedModeData> lowPowerSupportedModes,
+            List<SupportedModeData> lowLightBlockingZoneSupportedModes) {
         this.defaultRefreshRate = defaultRefreshRate;
         this.defaultPeakRefreshRate = defaultPeakRefreshRate;
         this.defaultRefreshRateInHbmHdr = defaultRefreshRateInHbmHdr;
         this.defaultRefreshRateInHbmSunlight = defaultRefreshRateInHbmSunlight;
         this.lowPowerSupportedModes = Collections.unmodifiableList(lowPowerSupportedModes);
+        this.lowLightBlockingZoneSupportedModes =
+                Collections.unmodifiableList(lowLightBlockingZoneSupportedModes);
     }
-
 
     @Override
     public String toString() {
@@ -84,6 +88,7 @@ public class RefreshRateData {
                 + ", defaultRefreshRateInHbmHdr: " + defaultRefreshRateInHbmHdr
                 + ", defaultRefreshRateInHbmSunlight: " + defaultRefreshRateInHbmSunlight
                 + ", lowPowerSupportedModes=" + lowPowerSupportedModes
+                + ", lowLightBlockingZoneSupportedModes=" + lowLightBlockingZoneSupportedModes
                 + "} ";
     }
 
@@ -100,13 +105,19 @@ public class RefreshRateData {
         int defaultRefreshRateInHbmSunlight = loadDefaultRefreshRateInHbmSunlight(
                 refreshRateConfigs, resources);
 
-        NonNegativeFloatToFloatMap modes =
+        NonNegativeFloatToFloatMap lowPowerModes =
                 refreshRateConfigs == null ? null : refreshRateConfigs.getLowPowerSupportedModes();
-        List<SupportedModeData> lowPowerSupportedModes = SupportedModeData.load(modes);
+        List<SupportedModeData> lowPowerSupportedModes = SupportedModeData.load(lowPowerModes);
+
+        BlockingZoneConfig lowerZoneConfig = refreshRateConfigs == null ? null
+                : refreshRateConfigs.getLowerBlockingZoneConfigs();
+        NonNegativeFloatToFloatMap lowerZoneModes =
+                lowerZoneConfig == null ? null : lowerZoneConfig.getSupportedModes();
+        List<SupportedModeData> lowLightSupportedModes = SupportedModeData.load(lowerZoneModes);
 
         return new RefreshRateData(defaultRefreshRate, defaultPeakRefreshRate,
                 defaultRefreshRateInHbmHdr, defaultRefreshRateInHbmSunlight,
-                lowPowerSupportedModes);
+                lowPowerSupportedModes, lowLightSupportedModes);
     }
 
     private static int loadDefaultRefreshRate(

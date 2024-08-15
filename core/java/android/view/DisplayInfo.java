@@ -24,6 +24,7 @@ import static android.view.DisplayInfoProto.FLAGS;
 import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
 import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
+import static android.view.DisplayInfoProto.TYPE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -213,7 +214,7 @@ public final class DisplayInfo implements Parcelable {
 
     /**
      * The supported modes that will be exposed externally.
-     * Might have different set of modes that supportedModes for VRR displays
+     * Might have different set of modes than supportedModes for VRR displays
      */
     public Display.Mode[] appsSupportedModes = Display.Mode.EMPTY_ARRAY;
 
@@ -707,7 +708,7 @@ public final class DisplayInfo implements Parcelable {
      */
     @Nullable
     public Display.Mode findDefaultModeByRefreshRate(float refreshRate) {
-        Display.Mode[] modes = supportedModes;
+        Display.Mode[] modes = appsSupportedModes;
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
             if (modes[i].matches(
@@ -722,7 +723,7 @@ public final class DisplayInfo implements Parcelable {
      * Returns the list of supported refresh rates in the default mode.
      */
     public float[] getDefaultRefreshRates() {
-        Display.Mode[] modes = supportedModes;
+        Display.Mode[] modes = appsSupportedModes;
         ArraySet<Float> rates = new ArraySet<>();
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
@@ -961,6 +962,7 @@ public final class DisplayInfo implements Parcelable {
         protoOutputStream.write(APP_HEIGHT, appHeight);
         protoOutputStream.write(NAME, name);
         protoOutputStream.write(FLAGS, flags);
+        protoOutputStream.write(TYPE, type);
         if (displayCutout != null) {
             displayCutout.dumpDebug(protoOutputStream, CUTOUT);
         }

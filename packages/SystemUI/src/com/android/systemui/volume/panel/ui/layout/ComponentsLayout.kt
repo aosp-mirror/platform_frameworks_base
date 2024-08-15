@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.ui.layout
 
 import com.android.systemui.volume.panel.ui.viewmodel.ComponentState
+import com.android.systemui.volume.panel.ui.viewmodel.toLogString
 
 /** Represents components grouping into the layout. */
 data class ComponentsLayout(
@@ -29,3 +30,12 @@ data class ComponentsLayout(
     /** This is a separated entity that is always visible on the bottom of the Volume Panel. */
     val bottomBarComponent: ComponentState,
 )
+
+fun ComponentsLayout.toLogString(): String {
+    return "(" +
+        " headerComponents=${headerComponents.joinToString { it.toLogString() }}" +
+        " contentComponents=${contentComponents.joinToString { it.toLogString() }}" +
+        " footerComponents=${footerComponents.joinToString { it.toLogString() }}" +
+        " bottomBarComponent=${bottomBarComponent.toLogString()}" +
+        " )"
+}

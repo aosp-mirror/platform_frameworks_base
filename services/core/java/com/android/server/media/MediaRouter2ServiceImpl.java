@@ -70,6 +70,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -118,6 +119,7 @@ class MediaRouter2ServiceImpl {
     private final UserManagerInternal mUserManagerInternal;
     private final Object mLock = new Object();
     private final AppOpsManager mAppOpsManager;
+    private final StatusBarManagerInternal mStatusBarManagerInternal;
     final AtomicInteger mNextRouterOrManagerId = new AtomicInteger(1);
     final ActivityManager mActivityManager;
     final PowerManager mPowerManager;
@@ -188,6 +190,7 @@ class MediaRouter2ServiceImpl {
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+        mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
 
         IntentFilter screenOnOffIntentFilter = new IntentFilter();
         screenOnOffIntentFilter.addAction(ACTION_SCREEN_ON);
@@ -248,6 +251,10 @@ class MediaRouter2ServiceImpl {
                         systemRoutes = providerInfo.getRoutes();
                     } else {
                         systemRoutes = Collections.emptyList();
+                        Slog.e(
+                                TAG,
+                                "Returning empty system routes list because "
+                                    + "system provider has null providerInfo.");
                     }
                 } else {
                     systemRoutes = new ArrayList<>();
@@ -255,6 +262,17 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return new ArrayList<>(systemRoutes);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public boolean showMediaOutputSwitcherWithRouter2(@NonNull String packageName) {
+        UserHandle userHandle = Binder.getCallingUserHandle();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return showOutputSwitcher(packageName, userHandle);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -274,7 +292,7 @@ class MediaRouter2ServiceImpl {
                         == PackageManager.PERMISSION_GRANTED;
         final boolean hasModifyAudioRoutingPermission =
                 checkCallerHasModifyAudioRoutingPermission(pid, uid);
-
+        boolean hasMediaContentControlPermission = checkMediaContentControlPermission(uid, pid);
         boolean hasMediaRoutingControlPermission =
                 checkMediaRoutingControlPermission(uid, pid, packageName);
 
@@ -289,6 +307,7 @@ class MediaRouter2ServiceImpl {
                         userId,
                         hasConfigureWifiDisplayPermission,
                         hasModifyAudioRoutingPermission,
+                        hasMediaContentControlPermission,
                         hasMediaRoutingControlPermission);
             }
         } finally {
@@ -309,6 +328,12 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_ROUTING_CONTROL,
+                Manifest.permission.MEDIA_CONTENT_CONTROL
+            },
+            conditional = true)
     public void updateScanningState(
             @NonNull IMediaRouter2 router, @ScanningState int scanningState) {
         Objects.requireNonNull(router, "router must not be null");
@@ -778,6 +803,31 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public boolean showMediaOutputSwitcherWithProxyRouter(
+            @NonNull IMediaRouter2Manager proxyRouter) {
+        Objects.requireNonNull(proxyRouter, "Proxy router must not be null");
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                final IBinder binder = proxyRouter.asBinder();
+                ManagerRecord proxyRouterRecord = mAllManagerRecords.get(binder);
+
+                if (proxyRouterRecord.mTargetPackageName == null) {
+                    throw new UnsupportedOperationException(
+                            "Only proxy routers can show the Output Switcher.");
+                }
+
+                return showOutputSwitcher(
+                        proxyRouterRecord.mTargetPackageName,
+                        UserHandle.of(proxyRouterRecord.mUserRecord.mUserId));
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     // End of methods that implement MediaRouter2Manager operations.
 
     // Start of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
@@ -934,6 +984,19 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    private boolean showOutputSwitcher(
+            @NonNull String packageName, @NonNull UserHandle userHandle) {
+        if (mActivityManager.getPackageImportance(packageName) > IMPORTANCE_FOREGROUND) {
+            Slog.w(TAG, "showMediaOutputSwitcher only works when called from foreground");
+            return false;
+        }
+        synchronized (mLock) {
+            mStatusBarManagerInternal.showMediaOutputSwitcher(packageName, userHandle);
+        }
+        return true;
+    }
+
     // End of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
 
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
@@ -1077,6 +1140,7 @@ class MediaRouter2ServiceImpl {
             int userId,
             boolean hasConfigureWifiDisplayPermission,
             boolean hasModifyAudioRoutingPermission,
+            boolean hasMediaContentControlPermission,
             boolean hasMediaRoutingControlPermission) {
         final IBinder binder = router.asBinder();
         if (mAllRouterRecords.get(binder) != null) {
@@ -1095,6 +1159,7 @@ class MediaRouter2ServiceImpl {
                         packageName,
                         hasConfigureWifiDisplayPermission,
                         hasModifyAudioRoutingPermission,
+                        hasMediaContentControlPermission,
                         hasMediaRoutingControlPermission);
         try {
             binder.linkToDeath(routerRecord, 0);
@@ -1157,6 +1222,12 @@ class MediaRouter2ServiceImpl {
         disposeUserIfNeededLocked(userRecord); // since router removed from user
     }
 
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_ROUTING_CONTROL,
+                Manifest.permission.MEDIA_CONTENT_CONTROL
+            },
+            conditional = true)
     @GuardedBy("mLock")
     private void updateScanningStateLocked(
             @NonNull IMediaRouter2 router, @ScanningState int scanningState) {
@@ -1167,7 +1238,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        boolean enableScanViaMediaContentControl =
+                Flags.enableFullScanWithMediaContentControl()
+                        && routerRecord.mHasMediaContentControlPermission;
         if (scanningState == SCANNING_STATE_SCANNING_FULL
+                && !enableScanViaMediaContentControl
                 && !routerRecord.mHasMediaRoutingControl) {
             throw new SecurityException("Screen off scan requires MEDIA_ROUTING_CONTROL");
         }
@@ -1620,7 +1695,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        boolean enableScanViaMediaContentControl =
+                Flags.enableFullScanWithMediaContentControl()
+                        && managerRecord.mHasMediaContentControl;
         if (!managerRecord.mHasMediaRoutingControl
+                && !enableScanViaMediaContentControl
                 && scanningState == SCANNING_STATE_SCANNING_FULL) {
             throw new SecurityException("Screen off scan requires MEDIA_ROUTING_CONTROL");
         }
@@ -2011,9 +2090,10 @@ class MediaRouter2ServiceImpl {
         public final int mPid;
         public final boolean mHasConfigureWifiDisplayPermission;
         public final boolean mHasModifyAudioRoutingPermission;
+        public final boolean mHasMediaContentControlPermission;
+        public final boolean mHasMediaRoutingControl;
         public final AtomicBoolean mHasBluetoothRoutingPermission;
         public final int mRouterId;
-        public final boolean mHasMediaRoutingControl;
         public @ScanningState int mScanningState = SCANNING_STATE_NOT_SCANNING;
 
         public RouteDiscoveryPreference mDiscoveryPreference;
@@ -2027,6 +2107,7 @@ class MediaRouter2ServiceImpl {
                 String packageName,
                 boolean hasConfigureWifiDisplayPermission,
                 boolean hasModifyAudioRoutingPermission,
+                boolean hasMediaContentControlPermission,
                 boolean hasMediaRoutingControl) {
             mUserRecord = userRecord;
             mPackageName = packageName;
@@ -2037,9 +2118,10 @@ class MediaRouter2ServiceImpl {
             mPid = pid;
             mHasConfigureWifiDisplayPermission = hasConfigureWifiDisplayPermission;
             mHasModifyAudioRoutingPermission = hasModifyAudioRoutingPermission;
+            mHasMediaContentControlPermission = hasMediaContentControlPermission;
+            mHasMediaRoutingControl = hasMediaRoutingControl;
             mHasBluetoothRoutingPermission =
                     new AtomicBoolean(checkCallerHasBluetoothPermissions(mPid, mUid));
-            mHasMediaRoutingControl = hasMediaRoutingControl;
             mRouterId = mNextRouterOrManagerId.getAndIncrement();
         }
 

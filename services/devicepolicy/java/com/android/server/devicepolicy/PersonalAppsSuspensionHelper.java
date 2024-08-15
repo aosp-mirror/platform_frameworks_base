@@ -202,9 +202,9 @@ public final class PersonalAppsSuspensionHelper {
     private String getDefaultSmsPackage() {
         //TODO(b/319449037): Unflag the following change.
         if (Flags.defaultSmsPersonalAppSuspensionFixEnabled()) {
-            return SmsApplication.getDefaultSmsApplicationAsUser(
-                            mContext, /*updateIfNeeded=*/ false, mContext.getUser())
-                    .getPackageName();
+            ComponentName defaultSmsApp = SmsApplication.getDefaultSmsApplicationAsUser(
+                    mContext, /*updateIfNeeded=*/ false, mContext.getUser());
+            return defaultSmsApp != null ? defaultSmsApp.getPackageName() : null;
         } else {
             return Telephony.Sms.getDefaultSmsPackage(mContext);
         }

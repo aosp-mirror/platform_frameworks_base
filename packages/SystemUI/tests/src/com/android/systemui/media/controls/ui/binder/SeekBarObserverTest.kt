@@ -18,11 +18,11 @@ package com.android.systemui.media.controls.ui.binder
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.ui.drawable.SquigglyProgress
@@ -40,7 +40,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class SeekBarObserverTest : SysuiTestCase() {
 

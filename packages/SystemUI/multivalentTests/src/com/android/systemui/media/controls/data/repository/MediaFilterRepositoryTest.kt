@@ -30,11 +30,21 @@ import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
+import com.android.systemui.media.controls.util.SmallHash
+import com.android.systemui.media.controls.util.mediaSmartspaceLogger
+import com.android.systemui.media.controls.util.mockMediaSmartspaceLogger
 import com.android.systemui.testKosmos
+import com.android.systemui.util.time.systemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.kotlin.never
+import org.mockito.kotlin.reset
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -42,8 +52,20 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val smartspaceLogger = kosmos.mockMediaSmartspaceLogger
+    private val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
+    private val mediaRecommendation =
+        SmartspaceMediaData(
+            targetId = KEY_MEDIA_SMARTSPACE,
+            isActive = true,
+            recommendations = MediaTestHelper.getValidRecommendationList(icon),
+        )
 
-    private val underTest: MediaFilterRepository = kosmos.mediaFilterRepository
+    private val underTest: MediaFilterRepository =
+        with(kosmos) {
+            mediaSmartspaceLogger = mockMediaSmartspaceLogger
+            mediaFilterRepository
+        }
 
     @Test
     fun addSelectedUserMediaEntry_activeThenInactivate() =
@@ -56,11 +78,15 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.addSelectedUserMediaEntry(userMedia)
 
             assertThat(selectedUserEntries?.get(instanceId)).isEqualTo(userMedia)
+            assertThat(underTest.hasActiveMedia()).isTrue()
+            assertThat(underTest.hasAnyMedia()).isTrue()
 
             underTest.addSelectedUserMediaEntry(userMedia.copy(active = false))
 
             assertThat(selectedUserEntries?.get(instanceId)).isNotEqualTo(userMedia)
             assertThat(selectedUserEntries?.get(instanceId)?.active).isFalse()
+            assertThat(underTest.hasActiveMedia()).isFalse()
+            assertThat(underTest.hasAnyMedia()).isTrue()
         }
 
     @Test
@@ -74,8 +100,12 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.addSelectedUserMediaEntry(userMedia)
 
             assertThat(selectedUserEntries?.get(instanceId)).isEqualTo(userMedia)
+            assertThat(underTest.hasActiveMedia()).isTrue()
+            assertThat(underTest.hasAnyMedia()).isTrue()
 
             assertThat(underTest.removeSelectedUserMediaEntry(instanceId, userMedia)).isTrue()
+            assertThat(underTest.hasActiveMedia()).isFalse()
+            assertThat(underTest.hasAnyMedia()).isFalse()
         }
 
     @Test
@@ -129,14 +159,6 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val smartspaceMediaData by collectLastValue(underTest.smartspaceMediaData)
 
-            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
-            val mediaRecommendation =
-                SmartspaceMediaData(
-                    targetId = KEY_MEDIA_SMARTSPACE,
-                    isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
-                )
-
             underTest.setRecommendation(mediaRecommendation)
 
             assertThat(smartspaceMediaData).isEqualTo(mediaRecommendation)
@@ -144,7 +166,7 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.setRecommendation(mediaRecommendation.copy(isActive = false))
 
             assertThat(smartspaceMediaData).isNotEqualTo(mediaRecommendation)
-            assertThat(smartspaceMediaData?.isActive).isFalse()
+            assertThat(underTest.isRecommendationActive()).isFalse()
         }
 
     @Test
@@ -156,16 +178,44 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             val playingData = createMediaData("app1", true, LOCAL, false, playingInstanceId)
             val remoteData = createMediaData("app2", true, REMOTE, false, remoteInstanceId)
 
+            underTest.setRecommendation(mediaRecommendation)
+            underTest.setRecommendationsLoadingState(
+                SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
+            )
             underTest.addSelectedUserMediaEntry(playingData)
-            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(playingInstanceId))
-            underTest.addSelectedUserMediaEntry(remoteData)
-            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(remoteInstanceId))
+            underTest.addMediaDataLoadingState(
+                MediaDataLoadingModel.Loaded(playingInstanceId),
+                false
+            )
 
-            assertThat(currentMedia?.size).isEqualTo(2)
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(
+                    playingData.smartspaceId,
+                    playingData.appUid,
+                    cardinality = 2
+                )
+
+            underTest.addSelectedUserMediaEntry(remoteData)
+            underTest.addMediaDataLoadingState(
+                MediaDataLoadingModel.Loaded(remoteInstanceId),
+                false
+            )
+
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(
+                    remoteData.smartspaceId,
+                    playingData.appUid,
+                    cardinality = 3,
+                    rank = 1
+                )
+            assertThat(currentMedia?.size).isEqualTo(3)
             assertThat(currentMedia)
                 .containsExactly(
                     MediaCommonModel.MediaControl(MediaDataLoadingModel.Loaded(playingInstanceId)),
-                    MediaCommonModel.MediaControl(MediaDataLoadingModel.Loaded(remoteInstanceId))
+                    MediaCommonModel.MediaControl(MediaDataLoadingModel.Loaded(remoteInstanceId)),
+                    MediaCommonModel.MediaRecommendations(
+                        SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
+                    )
                 )
                 .inOrder()
         }
@@ -214,6 +264,16 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
 
             underTest.setOrderedMedia()
 
+            verify(smartspaceLogger, never())
+                .logSmartspaceCardReceived(
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyBoolean(),
+                    anyBoolean(),
+                    anyInt(),
+                    anyInt()
+                )
             assertThat(currentMedia?.size).isEqualTo(2)
             assertThat(currentMedia)
                 .containsExactly(
@@ -240,14 +300,6 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             val stoppedAndRemoteData = createMediaData("app4", false, REMOTE, false, instanceId4)
             val canResumeData = createMediaData("app5", false, LOCAL, true, instanceId5)
 
-            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
-            val mediaRecommendations =
-                SmartspaceMediaData(
-                    targetId = KEY_MEDIA_SMARTSPACE,
-                    isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
-                )
-
             underTest.addSelectedUserMediaEntry(stoppedAndLocalData)
             underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId3))
 
@@ -263,11 +315,33 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
             underTest.addSelectedUserMediaEntry(playingAndRemoteData)
             underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId2))
 
-            underTest.setRecommendation(mediaRecommendations)
+            underTest.setRecommendation(mediaRecommendation)
             underTest.setRecommendationsLoadingState(
                 SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
             )
+            underTest.setOrderedMedia()
 
+            val smartspaceId = SmallHash.hash(mediaRecommendation.targetId)
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(
+                    eq(smartspaceId),
+                    anyInt(),
+                    eq(6),
+                    anyBoolean(),
+                    anyBoolean(),
+                    eq(2),
+                    anyInt()
+                )
+            verify(smartspaceLogger, never())
+                .logSmartspaceCardReceived(
+                    eq(playingAndLocalData.smartspaceId),
+                    anyInt(),
+                    anyInt(),
+                    anyBoolean(),
+                    anyBoolean(),
+                    anyInt(),
+                    anyInt()
+                )
             assertThat(currentMedia?.size).isEqualTo(6)
             assertThat(currentMedia)
                 .containsExactly(
@@ -304,18 +378,10 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
                     isPlaying = true,
                     notificationKey = KEY_2
                 )
-            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
-            val mediaRecommendations =
-                SmartspaceMediaData(
-                    targetId = KEY_MEDIA_SMARTSPACE,
-                    isActive = true,
-                    packageName = PACKAGE_NAME,
-                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
-                )
 
             underTest.setMediaFromRecPackageName(PACKAGE_NAME)
             underTest.addSelectedUserMediaEntry(data)
-            underTest.setRecommendation(mediaRecommendations)
+            underTest.setRecommendation(mediaRecommendation)
             underTest.setRecommendationsLoadingState(
                 SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE)
             )
@@ -347,6 +413,97 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
                     )
                 )
                 .inOrder()
+        }
+
+    @Test
+    fun hasAnyMedia_noMediaSet_returnsFalse() =
+        testScope.runTest { assertThat(underTest.hasAnyMedia()).isFalse() }
+
+    @Test
+    fun hasActiveMedia_noMediaSet_returnsFalse() =
+        testScope.runTest { assertThat(underTest.hasActiveMedia()).isFalse() }
+
+    @Test
+    fun updateMediaWithLatency_smartspaceIsLogged() =
+        testScope.runTest {
+            val instanceId = InstanceId.fakeInstanceId(123)
+            val data = createMediaData("app", true, LOCAL, false, instanceId)
+
+            underTest.setRecommendation(mediaRecommendation)
+            underTest.setRecommendationsLoadingState(
+                SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
+            )
+
+            val smartspaceId = SmallHash.hash(mediaRecommendation.targetId)
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(
+                    eq(smartspaceId),
+                    anyInt(),
+                    eq(1),
+                    eq(true),
+                    anyBoolean(),
+                    eq(0),
+                    anyInt()
+                )
+            reset(smartspaceLogger)
+
+            underTest.addSelectedUserMediaEntry(data)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId), false)
+
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(data.smartspaceId, data.appUid, cardinality = 2)
+
+            reset(smartspaceLogger)
+
+            underTest.addSelectedUserMediaEntry(data)
+            underTest.addMediaDataLoadingState(
+                MediaDataLoadingModel.Loaded(instanceId, receivedSmartspaceCardLatency = 123),
+                true
+            )
+
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(
+                    SmallHash.hash(data.appUid + kosmos.systemClock.currentTimeMillis().toInt()),
+                    data.appUid,
+                    cardinality = 2,
+                    rank = 0,
+                    receivedLatencyMillis = 123
+                )
+        }
+
+    @Test
+    fun resumeMedia_loadSmartspace_allSmartspaceIsLogged() =
+        testScope.runTest {
+            val resumeInstanceId = InstanceId.fakeInstanceId(123)
+            val data = createMediaData("app", false, LOCAL, true, resumeInstanceId)
+
+            underTest.addSelectedUserMediaEntry(data.copy(active = false))
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(resumeInstanceId))
+            underTest.setRecommendation(mediaRecommendation)
+            underTest.setRecommendationsLoadingState(
+                SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
+            )
+
+            assertThat(underTest.hasActiveMedia()).isFalse()
+            assertThat(underTest.hasAnyMedia()).isTrue()
+            val smartspaceId = SmallHash.hash(mediaRecommendation.targetId)
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(
+                    eq(smartspaceId),
+                    anyInt(),
+                    eq(2),
+                    eq(true),
+                    anyBoolean(),
+                    eq(0),
+                    anyInt()
+                )
+            verify(smartspaceLogger)
+                .logSmartspaceCardReceived(
+                    SmallHash.hash(data.appUid + kosmos.systemClock.currentTimeMillis().toInt()),
+                    data.appUid,
+                    cardinality = 2,
+                    rank = 1
+                )
         }
 
     private fun createMediaData(

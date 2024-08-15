@@ -21,7 +21,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.graphics.Color;
-
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import com.android.internal.graphics.cam.Cam;
 
 /**
@@ -29,6 +29,7 @@ import com.android.internal.graphics.cam.Cam;
  *
  * A set of color-related utility methods, building upon those available in {@code Color}.
  */
+@RavenwoodKeepWholeClass
 public final class ColorUtils {
 
     private static final double XYZ_WHITE_REFERENCE_X = 95.047;
@@ -392,7 +393,7 @@ public final class ColorUtils {
      * Convert RGB components to its CIE Lab representative components.
      *
      * <ul>
-     * <li>outLab[0] is L [0 ...1)</li>
+     * <li>outLab[0] is L [0 ...100)</li>
      * <li>outLab[1] is a [-128...127)</li>
      * <li>outLab[2] is b [-128...127)</li>
      * </ul>
@@ -474,7 +475,7 @@ public final class ColorUtils {
      * 2° Standard Observer (1931).</p>
      *
      * <ul>
-     * <li>outLab[0] is L [0 ...1)</li>
+     * <li>outLab[0] is L [0 ...100)</li>
      * <li>outLab[1] is a [-128...127)</li>
      * <li>outLab[2] is b [-128...127)</li>
      * </ul>

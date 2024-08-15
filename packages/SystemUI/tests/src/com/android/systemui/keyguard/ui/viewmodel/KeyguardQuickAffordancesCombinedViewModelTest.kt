@@ -20,8 +20,10 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -49,7 +51,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
@@ -76,7 +77,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -84,7 +84,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarter: ActivityStarter
@@ -94,7 +94,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var launchAnimator: DialogTransitionAnimator
-    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
+    @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock
     private lateinit var aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel
@@ -194,10 +195,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
         val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
-                set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
-            }
+            FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         keyguardInteractor = withDeps.keyguardInteractor
@@ -222,7 +220,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -290,7 +287,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
         underTest =
             KeyguardQuickAffordancesCombinedViewModel(
-                applicationScope = kosmos.applicationCoroutineScope,
+                applicationScope = testScope.backgroundScope,
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,
@@ -303,6 +300,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
                         logger = logger,
+                        metricsLogger = metricsLogger,
                         devicePolicyManager = devicePolicyManager,
                         dockManager = dockManager,
                         biometricSettingsRepository = biometricSettingsRepository,

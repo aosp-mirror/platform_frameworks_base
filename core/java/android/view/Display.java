@@ -2263,6 +2263,7 @@ public final class Display {
             this(modeId, width, height, refreshRate, vsyncRate, false, alternativeRefreshRates,
                     supportedHdrTypes);
         }
+
         /**
          * @hide
          */

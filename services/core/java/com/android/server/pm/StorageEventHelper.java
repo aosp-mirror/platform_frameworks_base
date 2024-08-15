@@ -156,7 +156,7 @@ public final class StorageEventHelper extends StorageEventListener {
             freezers.add(mPm.freezePackage(ps.getPackageName(), UserHandle.USER_ALL,
                     "loadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER,
                     null /* request */));
-            synchronized (mPm.mInstallLock) {
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                 final AndroidPackage pkg;
                 try {
                     pkg = mPm.initPackageTracedLI(
@@ -194,7 +194,7 @@ public final class StorageEventHelper extends StorageEventListener {
 
             try {
                 sm.prepareUserStorage(volumeUuid, user.id, flags);
-                synchronized (mPm.mInstallLock) {
+                try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                     appDataHelper.reconcileAppsDataLI(volumeUuid, user.id, flags,
                             true /* migrateAppData */);
                 }
@@ -247,7 +247,7 @@ public final class StorageEventHelper extends StorageEventListener {
 
         final int[] userIds = mPm.mUserManager.getUserIds();
         final ArrayList<AndroidPackage> unloaded = new ArrayList<>();
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             synchronized (mPm.mLock) {
                 final List<? extends PackageStateInternal> packages =
                         mPm.mSettings.getVolumePackagesLPr(volumeUuid);

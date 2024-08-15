@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.InputBindResult;
@@ -244,6 +245,24 @@ final class IInputMethodClientInvoker {
     private void setInteractiveInternal(boolean interactive, boolean fullscreen) {
         try {
             mTarget.setInteractive(interactive, fullscreen);
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
+
+    @AnyThread
+    void setImeVisibility(boolean visible, @Nullable ImeTracker.Token statsToken) {
+        if (mIsProxy) {
+            setImeVisibilityInternal(visible, statsToken);
+        } else {
+            mHandler.post(() -> setImeVisibilityInternal(visible, statsToken));
+        }
+    }
+
+    @AnyThread
+    private void setImeVisibilityInternal(boolean visible, @Nullable ImeTracker.Token statsToken) {
+        try {
+            mTarget.setImeVisibility(visible, statsToken);
         } catch (RemoteException e) {
             logRemoteException(e);
         }

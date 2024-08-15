@@ -449,9 +449,16 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
-        if (previous.getSbn().getOverrideGroupKey() != null && !getSbn().isAppGroup()) {
-            getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
+        if (android.service.notification.Flags.notificationForceGrouping()) {
+            if (previous.getSbn().getOverrideGroupKey() != null) {
+                getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
+            }
+        } else {
+            if (previous.getSbn().getOverrideGroupKey() != null && !getSbn().isAppGroup()) {
+                getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
+            }
         }
+
         // Don't copy importance information or mGlobalSortKey, recompute them.
     }
 
@@ -710,7 +717,8 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
-                                    Adjustment.KEY_SNOOZE_CRITERIA, android.service.notification.SnoozeCriterion.class);
+                                    Adjustment.KEY_SNOOZE_CRITERIA,
+                                    android.service.notification.SnoozeCriterion.class);
                     setSnoozeCriteria(snoozeCriterionList);
                     EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_SNOOZE_CRITERIA,
                             snoozeCriterionList.toString());
@@ -736,7 +744,8 @@ public final class NotificationRecord {
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
-                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, android.app.Notification.Action.class));
+                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS,
+                                    android.app.Notification.Action.class));
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_CONTEXTUAL_ACTIONS,
                             getSystemGeneratedSmartActions().toString());
@@ -777,6 +786,14 @@ public final class NotificationRecord {
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_SENSITIVE_CONTENT,
                             Boolean.toString(mSensitiveContent));
+                }
+                if (android.service.notification.Flags.notificationClassification()
+                        && signals.containsKey(Adjustment.KEY_TYPE)) {
+                    updateNotificationChannel(signals.getParcelable(Adjustment.KEY_TYPE,
+                            NotificationChannel.class));
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_TYPE,
+                            mChannel.getId());
                 }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
@@ -1144,6 +1161,21 @@ public final class NotificationRecord {
 
     public void setOverrideGroupKey(String overrideGroupKey) {
         getSbn().setOverrideGroupKey(overrideGroupKey);
+    }
+
+    /**
+     * Get the original group key that was set via {@link Notification.Builder#setGroup}
+     *
+     * This value is different than the value returned by {@link #getGroupKey()} as it does
+     * not contain any userId or package name.
+     *
+     * This value is different than the value returned
+     * by {@link StatusBarNotification#getGroup()} if the notification group
+     * was overridden: by NotificationAssistantService or by autogrouping.
+     */
+    @Nullable
+    public String getOriginalGroupKey() {
+        return getSbn().getNotification().getGroup();
     }
 
     public NotificationChannel getChannel() {

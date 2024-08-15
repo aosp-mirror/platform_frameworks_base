@@ -19,8 +19,8 @@ package com.android.systemui.qs.user
 import android.content.DialogInterface
 import android.content.Intent
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.widget.Button
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -53,7 +53,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class UserSwitchDialogControllerTest : SysuiTestCase() {
 
     @Mock

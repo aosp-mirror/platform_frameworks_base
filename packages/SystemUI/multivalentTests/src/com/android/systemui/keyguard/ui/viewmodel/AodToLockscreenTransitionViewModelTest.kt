@@ -156,6 +156,43 @@ class AodToLockscreenTransitionViewModelTest(flags: FlagsParameterization) : Sys
             assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
         }
 
+    @Test
+    fun deviceEntryBackgroundView_onCancel() =
+        testScope.runTest {
+            fingerprintPropertyRepository.supportsUdfps()
+            val deviceEntryBackgroundViewAlpha by
+                collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
+            runCurrent()
+
+            // GIVEN transition START
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(0f)
+
+            // WHEN transition is cancelled
+            repository.sendTransitionStep(step(.1f, TransitionState.CANCELED))
+
+            // THEN alpha is immediately set to 1f (expected lockscreen alpha state)
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
+        }
+
+    @Test
+    fun deviceEntryParentViewAlpha_onCancel() =
+        testScope.runTest {
+            fingerprintPropertyRepository.supportsUdfps()
+            val deviceEntryBackgroundViewAlpha by
+                collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
+
+            // GIVEN transition START
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+
+            // WHEN transition is cancelled
+            repository.sendTransitionStep(step(.1f, TransitionState.CANCELED))
+
+            // THEN alpha is immediately set to 1f (expected lockscreen alpha state)
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
+        }
+
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING

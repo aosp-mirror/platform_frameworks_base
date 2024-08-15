@@ -36,9 +36,9 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.logging.KeyguardLogger;
@@ -56,7 +56,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCase {

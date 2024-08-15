@@ -226,11 +226,10 @@ public abstract class PipContentOverlay {
                     appBoundsCenterX - mOverlayHalfSize,
                     appBoundsCenterY - mOverlayHalfSize);
             // Scale back the bitmap with the pivot point at center.
-            mTmpTransform.postScale(
+            final float scale = Math.min(
                     (float) mAppBounds.width() / currentBounds.width(),
-                    (float) mAppBounds.height() / currentBounds.height(),
-                    appBoundsCenterX,
-                    appBoundsCenterY);
+                    (float) mAppBounds.height() / currentBounds.height());
+            mTmpTransform.postScale(scale, scale, appBoundsCenterX, appBoundsCenterY);
             atomicTx.setMatrix(mLeash, mTmpTransform, mTmpFloat9)
                     .setAlpha(mLeash, fraction < 0.5f ? 0 : (fraction - 0.5f) * 2);
         }

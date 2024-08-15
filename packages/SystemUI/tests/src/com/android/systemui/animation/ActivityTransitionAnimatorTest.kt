@@ -9,7 +9,6 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.os.Looper
 import android.platform.test.flag.junit.SetFlagsRule
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
@@ -20,6 +19,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.window.RemoteTransition
 import android.window.TransitionFilter
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.Flags
@@ -49,7 +49,7 @@ import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class ActivityTransitionAnimatorTest : SysuiTestCase() {
     private val transitionContainer = LinearLayout(mContext)

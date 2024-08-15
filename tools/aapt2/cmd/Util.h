@@ -37,7 +37,17 @@
 
 namespace aapt {
 
-using FeatureFlagValues = std::map<std::string, std::optional<bool>, std::less<>>;
+struct FeatureFlagProperties {
+  bool read_only;
+  std::optional<bool> enabled;
+
+  FeatureFlagProperties(bool ro, std::optional<bool> e) : read_only(ro), enabled(e) {
+  }
+
+  bool operator==(const FeatureFlagProperties&) const = default;
+};
+
+using FeatureFlagValues = std::map<std::string, FeatureFlagProperties, std::less<>>;
 
 // Parses a configuration density (ex. hdpi, xxhdpi, 234dpi, anydpi, etc).
 // Returns Nothing and logs a human friendly error message if the string was not legal.

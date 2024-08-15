@@ -24,10 +24,10 @@ import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
-import android.testing.AndroidTestingRunner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -35,7 +35,7 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class KeyguardIndicationTest extends SysuiTestCase {
 

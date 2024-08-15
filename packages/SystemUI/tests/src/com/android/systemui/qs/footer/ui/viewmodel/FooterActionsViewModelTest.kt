@@ -18,10 +18,10 @@ package com.android.systemui.qs.footer.ui.viewmodel
 
 import android.graphics.drawable.Drawable
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.view.ContextThemeWrapper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
@@ -47,6 +47,7 @@ import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -57,10 +58,11 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class FooterActionsViewModelTest : SysuiTestCase() {
-    private val testScope = TestScope()
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
     private lateinit var utils: FooterActionsTestUtils
 
     private val themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
@@ -127,7 +129,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
     fun userSwitcher() = runTest {
         val picture: Drawable = mock()
         val userInfoController = FakeUserInfoController(FakeInfo(picture = picture))
-        val settings = FakeGlobalSettings()
+        val settings = FakeGlobalSettings(testDispatcher)
         val userId = 42
         val userSwitcherControllerWrapper =
             MockUserSwitcherControllerWrapper(currentUserName = "foo")

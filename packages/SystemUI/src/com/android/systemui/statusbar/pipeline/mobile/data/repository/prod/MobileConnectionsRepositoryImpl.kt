@@ -40,6 +40,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
@@ -99,6 +100,7 @@ constructor(
     private val context: Context,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     airplaneModeRepository: AirplaneModeRepository,
     // Some "wifi networks" should be rendered as a mobile connection, which is why the wifi
     // repository is an input to the mobile repository.
@@ -315,6 +317,7 @@ constructor(
                 trySend(false)
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
+            .flowOn(mainDispatcher)
             .logDiffsForTable(
                 tableLogger,
                 LOGGING_PREFIX,

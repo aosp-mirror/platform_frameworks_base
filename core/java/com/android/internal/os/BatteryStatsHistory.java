@@ -1514,6 +1514,36 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Records an event when some state2 flag changes to true.
+     */
+    public void recordState2StartEvent(long elapsedRealtimeMs, long uptimeMs, int stateFlags,
+            int uid, String name) {
+        synchronized (this) {
+            mHistoryCur.states2 |= stateFlags;
+            mHistoryCur.eventCode = EVENT_STATE_CHANGE | EVENT_FLAG_START;
+            mHistoryCur.eventTag = mHistoryCur.localEventTag;
+            mHistoryCur.eventTag.uid = uid;
+            mHistoryCur.eventTag.string = name;
+            writeHistoryItem(elapsedRealtimeMs, uptimeMs);
+        }
+    }
+
+    /**
+     * Records an event when some state2 flag changes to false.
+     */
+    public void recordState2StopEvent(long elapsedRealtimeMs, long uptimeMs, int stateFlags,
+            int uid, String name) {
+        synchronized (this) {
+            mHistoryCur.states2 &= ~stateFlags;
+            mHistoryCur.eventCode = EVENT_STATE_CHANGE | EVENT_FLAG_FINISH;
+            mHistoryCur.eventTag = mHistoryCur.localEventTag;
+            mHistoryCur.eventTag.uid = uid;
+            mHistoryCur.eventTag.string = name;
+            writeHistoryItem(elapsedRealtimeMs, uptimeMs);
+        }
+    }
+
+    /**
      * Records an event when some state2 flag changes to false.
      */
     public void recordState2StopEvent(long elapsedRealtimeMs, long uptimeMs, int stateFlags) {

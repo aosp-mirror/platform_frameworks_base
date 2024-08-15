@@ -25,6 +25,7 @@ import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -72,6 +73,13 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
     /** Given [resourceId], emit the dimension pixel size on config change */
     fun dimensionPixelSize(resourceId: Int): Flow<Int> {
         return onAnyConfigurationChange.mapLatest { repository.getDimensionPixelSize(resourceId) }
+    }
+
+    /** Emits the dimensional pixel size of the given resource, inverting it for RTL if necessary */
+    fun directionalDimensionPixelSize(originLayoutDirection: Int, resourceId: Int): Flow<Int> {
+        return dimensionPixelSize(resourceId).combine(layoutDirection) { size, direction ->
+            if (originLayoutDirection == direction) size else -size
+        }
     }
 
     /** Given a set of [resourceId]s, emit Map<ResourceId, DimensionPixelSize> on config change */

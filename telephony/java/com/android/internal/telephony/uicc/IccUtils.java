@@ -967,7 +967,7 @@ public class IccUtils {
         byte[] serializedFplmns = new byte[dataLength];
         int offset = 0;
         for (String fplmn : fplmns) {
-            if (offset >= dataLength) break;
+            if (offset + FPLMN_BYTE_SIZE > dataLength) break;
             stringToBcdPlmn(fplmn, serializedFplmns, offset);
             offset += FPLMN_BYTE_SIZE;
         }

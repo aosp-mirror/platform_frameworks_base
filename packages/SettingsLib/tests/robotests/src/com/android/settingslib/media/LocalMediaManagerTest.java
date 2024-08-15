@@ -135,8 +135,8 @@ public class LocalMediaManagerTest {
                 .when(mInfoMediaManager)
                 .getRoutingSessionsForPackage();
 
-        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1));
-        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2);
+        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1, /* item */ null));
+        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2, /* item */ null);
         mLocalMediaManager =
                 new LocalMediaManager(
                         mContext, mLocalBluetoothManager, mInfoMediaManager, TEST_PACKAGE_NAME);
@@ -470,7 +470,7 @@ public class LocalMediaManagerTest {
         when(cachedManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(cachedDevice.isConnected()).thenReturn(false);
-        when(cachedDevice.getConnectableProfiles()).thenReturn(profiles);
+        when(cachedDevice.getUiAccessibleProfiles()).thenReturn(profiles);
         when(cachedDevice.getDevice()).thenReturn(bluetoothDevice);
         when(cachedDevice.getAddress()).thenReturn(TEST_ADDRESS);
         when(mA2dpProfile.getActiveDevice()).thenReturn(bluetoothDevice);

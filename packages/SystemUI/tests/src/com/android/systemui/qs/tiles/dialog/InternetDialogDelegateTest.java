@@ -18,7 +18,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -26,6 +25,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -56,7 +56,7 @@ import java.util.List;
 
 @Ignore("b/257089187")
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class InternetDialogDelegateTest extends SysuiTestCase {
 

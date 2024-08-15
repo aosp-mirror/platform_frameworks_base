@@ -19,12 +19,18 @@ package com.android.systemui.brightness.data.repository
 import android.annotation.SuppressLint
 import android.hardware.display.BrightnessInfo
 import android.hardware.display.DisplayManager
-import com.android.systemui.brightness.data.model.LinearBrightness
+import com.android.systemui.brightness.shared.model.BrightnessLog
+import com.android.systemui.brightness.shared.model.LinearBrightness
+import com.android.systemui.brightness.shared.model.formatBrightness
+import com.android.systemui.brightness.shared.model.logDiffForTable
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.DisplayId
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.table.TableLogBuffer
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -32,13 +38,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -78,6 +84,8 @@ class ScreenBrightnessDisplayManagerRepository
 constructor(
     @DisplayId private val displayId: Int,
     private val displayManager: DisplayManager,
+    @BrightnessLog private val logBuffer: LogBuffer,
+    @BrightnessLog private val tableBuffer: TableLogBuffer,
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundContext: CoroutineContext,
 ) : ScreenBrightnessRepository {
@@ -100,6 +108,7 @@ constructor(
                         displayManager.setBrightness(displayId, value)
                     }
                 }
+                logBrightnessChange(call is SetBrightnessMethod.Permanent, value)
             }
         }
     }
@@ -147,13 +156,15 @@ constructor(
         brightnessInfo
             .filterNotNull()
             .map { LinearBrightness(it.brightnessMinimum) }
-            .shareIn(applicationScope, SharingStarted.WhileSubscribed())
+            .logDiffForTable(tableBuffer, TABLE_PREFIX_LINEAR, TABLE_COLUMN_MIN, null)
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), LinearBrightness(0f))
 
-    override val maxLinearBrightness =
+    override val maxLinearBrightness: SharedFlow<LinearBrightness> =
         brightnessInfo
             .filterNotNull()
             .map { LinearBrightness(it.brightnessMaximum) }
-            .shareIn(applicationScope, SharingStarted.WhileSubscribed())
+            .logDiffForTable(tableBuffer, TABLE_PREFIX_LINEAR, TABLE_COLUMN_MAX, null)
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), LinearBrightness(1f))
 
     override suspend fun getMinMaxLinearBrightness(): Pair<LinearBrightness, LinearBrightness> {
         val brightnessInfo = brightnessInfo.value ?: brightnessInfoValue()
@@ -166,7 +177,8 @@ constructor(
         brightnessInfo
             .filterNotNull()
             .map { LinearBrightness(it.brightness) }
-            .shareIn(applicationScope, SharingStarted.WhileSubscribed())
+            .logDiffForTable(tableBuffer, TABLE_PREFIX_LINEAR, TABLE_COLUMN_BRIGHTNESS, null)
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), LinearBrightness(0f))
 
     override fun setTemporaryBrightness(value: LinearBrightness) {
         apiQueue.trySend(SetBrightnessMethod.Temporary(value))
@@ -182,5 +194,22 @@ constructor(
         value class Temporary(override val value: LinearBrightness) : SetBrightnessMethod
         @JvmInline
         value class Permanent(override val value: LinearBrightness) : SetBrightnessMethod
+    }
+
+    private fun logBrightnessChange(permanent: Boolean, value: Float) {
+        logBuffer.log(
+            LOG_BUFFER_BRIGHTNESS_CHANGE_TAG,
+            if (permanent) LogLevel.DEBUG else LogLevel.VERBOSE,
+            { str1 = value.formatBrightness() },
+            { "Change requested: $str1" }
+        )
+    }
+
+    private companion object {
+        const val TABLE_COLUMN_BRIGHTNESS = "brightness"
+        const val TABLE_COLUMN_MIN = "min"
+        const val TABLE_COLUMN_MAX = "max"
+        const val TABLE_PREFIX_LINEAR = "linear"
+        const val LOG_BUFFER_BRIGHTNESS_CHANGE_TAG = "BrightnessChange"
     }
 }

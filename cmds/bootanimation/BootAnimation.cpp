@@ -236,7 +236,7 @@ void BootAnimation::onFirstRef() {
         ALOGD("%sAnimationPreloadTiming start time: %" PRId64 "ms",
                 mShuttingDown ? "Shutdown" : "Boot", elapsedRealtime());
         preloadAnimation();
-        ALOGD("%sAnimationPreloadStopTiming start time: %" PRId64 "ms",
+        ALOGD("%sAnimationPreloadTiming stop time: %" PRId64 "ms",
                 mShuttingDown ? "Shutdown" : "Boot", elapsedRealtime());
     }
 }
@@ -1335,7 +1335,8 @@ bool BootAnimation::preloadZip(Animation& animation) {
                 if (path.string() == animation.parts[j].path.c_str()) {
                     uint16_t method;
                     // supports only stored png files
-                    if (zip->getEntryInfo(entry, &method, nullptr, nullptr, nullptr, nullptr, nullptr)) {
+                    if (zip->getEntryInfo(entry, &method, nullptr, nullptr, nullptr, nullptr,
+                            nullptr, nullptr)) {
                         if (method == ZipFileRO::kCompressStored) {
                             FileMap* map = zip->createEntryFileMap(entry);
                             if (map) {

@@ -22,7 +22,7 @@ import android.content.ComponentName
 import android.content.DialogInterface
 import android.graphics.drawable.Icon
 import android.os.RemoteException
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.statusbar.IAddTileResultCallback
@@ -51,7 +51,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class TileServiceRequestControllerTest : SysuiTestCase() {
 
     companion object {

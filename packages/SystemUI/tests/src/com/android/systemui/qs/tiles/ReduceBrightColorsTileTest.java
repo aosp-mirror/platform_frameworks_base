@@ -24,14 +24,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
+import com.android.server.display.feature.flags.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -52,7 +54,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ReduceBrightColorsTileTest extends SysuiTestCase {
@@ -131,6 +133,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_EVEN_DIMMER)
     public void testActive_clicked_featureIsActivated() {
         when(mReduceBrightColorsController.isReduceBrightColorsActivated()).thenReturn(false);
         mTile.refreshState();

@@ -43,7 +43,7 @@ import java.util.List;
  * 2. For each UID, compute the proportion of the combined estimates in each state
  * and attribute the corresponding portion of the total power estimate in that state to the UID.
  */
-abstract class PowerStatsProcessor {
+public abstract class PowerStatsProcessor {
     private static final String TAG = "PowerStatsProcessor";
 
     private static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
@@ -220,8 +220,7 @@ abstract class PowerStatsProcessor {
         }
 
         @Nullable
-        public DeviceStateEstimation getDeviceStateEstimate(
-                @AggregatedPowerStatsConfig.TrackedState int[] stateValues) {
+        public DeviceStateEstimation getDeviceStateEstimate(int[] stateValues) {
             String label = concatLabels(mConfig.getDeviceStateConfig(), stateValues);
             for (int i = 0; i < deviceStateEstimations.size(); i++) {
                 DeviceStateEstimation deviceStateEstimation = this.deviceStateEstimations.get(i);
@@ -233,8 +232,7 @@ abstract class PowerStatsProcessor {
         }
 
         public CombinedDeviceStateEstimate getCombinedDeviceStateEstimate(
-                MultiStateStats.States[] deviceStates,
-                @AggregatedPowerStatsConfig.TrackedState int[] stateValues) {
+                MultiStateStats.States[] deviceStates, int[] stateValues) {
             String label = concatLabels(deviceStates, stateValues);
             for (int i = 0; i < combinedDeviceStateEstimations.size(); i++) {
                 CombinedDeviceStateEstimate cdse = combinedDeviceStateEstimations.get(i);
@@ -259,8 +257,8 @@ abstract class PowerStatsProcessor {
             for (int i = deviceStateEstimations.size() - 1; i >= 0; i--) {
                 deviceStateEstimations.get(i).intermediates = null;
             }
-            for (int i = deviceStateEstimations.size() - 1; i >= 0; i--) {
-                deviceStateEstimations.get(i).intermediates = null;
+            for (int i = combinedDeviceStateEstimations.size() - 1; i >= 0; i--) {
+                combinedDeviceStateEstimations.get(i).intermediates = null;
             }
             for (int i = uidStateEstimates.size() - 1; i >= 0; i--) {
                 UidStateEstimate uidStateEstimate = uidStateEstimates.get(i);
@@ -275,12 +273,10 @@ abstract class PowerStatsProcessor {
 
     protected static class DeviceStateEstimation {
         public final String id;
-        @AggregatedPowerStatsConfig.TrackedState
         public final int[] stateValues;
         public Object intermediates;
 
-        public DeviceStateEstimation(MultiStateStats.States[] config,
-                @AggregatedPowerStatsConfig.TrackedState int[] stateValues) {
+        public DeviceStateEstimation(MultiStateStats.States[] config, int[] stateValues) {
             id = concatLabels(config, stateValues);
             this.stateValues = stateValues;
         }
@@ -288,11 +284,12 @@ abstract class PowerStatsProcessor {
 
     protected static class CombinedDeviceStateEstimate {
         public final String id;
+        public final int[] stateValues;
         public List<DeviceStateEstimation> deviceStateEstimations = new ArrayList<>();
         public Object intermediates;
 
-        public CombinedDeviceStateEstimate(MultiStateStats.States[] config,
-                @AggregatedPowerStatsConfig.TrackedState int[] stateValues) {
+        public CombinedDeviceStateEstimate(MultiStateStats.States[] config, int[] stateValues) {
+            this.stateValues = Arrays.copyOf(stateValues, stateValues.length);
             id = concatLabels(config, stateValues);
         }
     }
@@ -310,19 +307,16 @@ abstract class PowerStatsProcessor {
     }
 
     protected static class UidStateProportionalEstimate {
-        @AggregatedPowerStatsConfig.TrackedState
         public final int[] stateValues;
         public Object intermediates;
 
-        protected UidStateProportionalEstimate(
-                @AggregatedPowerStatsConfig.TrackedState int[] stateValues) {
+        protected UidStateProportionalEstimate(int[] stateValues) {
             this.stateValues = stateValues;
         }
     }
 
     @NonNull
-    private static String concatLabels(MultiStateStats.States[] config,
-            @AggregatedPowerStatsConfig.TrackedState int[] stateValues) {
+    private static String concatLabels(MultiStateStats.States[] config, int[] stateValues) {
         List<String> labels = new ArrayList<>();
         for (int state = 0; state < config.length; state++) {
             if (config[state] != null && config[state].isTracked()) {
@@ -334,7 +328,6 @@ abstract class PowerStatsProcessor {
         return labels.toString();
     }
 
-    @AggregatedPowerStatsConfig.TrackedState
     private static int[][] getAllTrackedStateCombinations(MultiStateStats.States[] states) {
         List<int[]> combinations = new ArrayList<>();
         MultiStateStats.States.forEachTrackedStateCombination(states, stateValues -> {

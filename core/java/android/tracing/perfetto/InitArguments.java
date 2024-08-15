@@ -26,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class InitArguments {
     public final @PerfettoBackend int backends;
+    public final int shmemSizeHintKb;
 
     /**
      * @hide
@@ -44,11 +45,21 @@ public class InitArguments {
     // on Linux/Android/Mac uses a named UNIX socket).
     public static final int PERFETTO_BACKEND_SYSTEM = (1 << 1);
 
-    public static InitArguments DEFAULTS = new InitArguments(PERFETTO_BACKEND_SYSTEM);
+    public static InitArguments DEFAULTS = new InitArguments(PERFETTO_BACKEND_SYSTEM, 0);
 
-    public static InitArguments TESTING = new InitArguments(PERFETTO_BACKEND_IN_PROCESS);
+    public static InitArguments TESTING = new InitArguments(PERFETTO_BACKEND_IN_PROCESS, 0);
 
-    public InitArguments(@PerfettoBackend int backends) {
+    /**
+     * Perfetto initialization arguments.
+     *
+     * @param backends Bitwise-or of backends that should be enabled.
+     * @param shmemSizeHintKb [Optional] Tune the size of the shared memory buffer between the
+     *  current process and the service backend(s). This is a trade-off between memory footprint and
+     *  the ability to sustain bursts of trace writes. If set, the value must be a multiple of 4KB.
+     *  The value can be ignored if larger than kMaxShmSize (32MB) or not a multiple of 4KB.
+     */
+    public InitArguments(@PerfettoBackend int backends, int shmemSizeHintKb) {
         this.backends = backends;
+        this.shmemSizeHintKb = shmemSizeHintKb;
     }
 }

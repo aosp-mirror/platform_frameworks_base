@@ -76,8 +76,6 @@ public class TracingServiceProxy extends SystemService {
     // Keep this in sync with the definitions in TraceService
     private static final String INTENT_ACTION_NOTIFY_SESSION_STOPPED =
             "com.android.traceur.NOTIFY_SESSION_STOPPED";
-    private static final String INTENT_ACTION_NOTIFY_SESSION_STOLEN =
-            "com.android.traceur.NOTIFY_SESSION_STOLEN";
 
     private static final int REPORT_BEGIN =
             TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_BEGIN;
@@ -93,16 +91,16 @@ public class TracingServiceProxy extends SystemService {
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final LruCache<ComponentName, ServiceConnector<IMessenger>> mCachedReporterServices;
+    private boolean mServicePublished = false;
 
     private final ITracingServiceProxy.Stub mTracingServiceProxy = new ITracingServiceProxy.Stub() {
         /**
-         * Notifies system tracing app that a tracing session has ended. If a session is repurposed
-         * for use in a bugreport, sessionStolen can be set to indicate that tracing has ended but
-         * there is no buffer available to dump.
+         * Notifies system tracing app that a tracing session has ended. sessionStolen is ignored,
+         * as trace sessions are no longer stolen and are always cloned instead.
          */
         @Override
-        public void notifyTraceSessionEnded(boolean sessionStolen) {
-            TracingServiceProxy.this.notifyTraceur(sessionStolen);
+        public void notifyTraceSessionEnded(boolean sessionStolen /* unused */) {
+            TracingServiceProxy.this.notifyTraceur();
         }
 
         @Override
@@ -122,13 +120,16 @@ public class TracingServiceProxy extends SystemService {
     public void onStart() {}
 
     @Override
-    public void onBootPhase(int phase) {
-        if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        // We need the device storage to be unlocked before we can accept and forward
+        // requests.
+        if (!mServicePublished) {
             publishBinderService(TRACING_SERVICE_PROXY_BINDER_NAME, mTracingServiceProxy);
+            mServicePublished = true;
         }
     }
 
-    private void notifyTraceur(boolean sessionStolen) {
+    private void notifyTraceur() {
         final Intent intent = new Intent();
 
         try {
@@ -137,11 +138,7 @@ public class TracingServiceProxy extends SystemService {
                     PackageManager.MATCH_SYSTEM_ONLY);
 
             intent.setClassName(info.packageName, TRACING_APP_ACTIVITY);
-            if (sessionStolen) {
-                intent.setAction(INTENT_ACTION_NOTIFY_SESSION_STOLEN);
-            } else {
-                intent.setAction(INTENT_ACTION_NOTIFY_SESSION_STOPPED);
-            }
+            intent.setAction(INTENT_ACTION_NOTIFY_SESSION_STOPPED);
 
             final long identity = Binder.clearCallingIdentity();
             try {

@@ -16,10 +16,15 @@
 
 package com.android.server.audio;
 
+import android.annotation.Nullable;
 import android.media.IAudioPolicyService;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.android.media.permission.INativePermissionController;
+
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
@@ -43,6 +48,7 @@ public class DefaultAudioPolicyFacade implements AudioPolicyFacade {
                         (Function<IBinder, IAudioPolicyService>)
                                 IAudioPolicyService.Stub::asInterface,
                         e);
+        mServiceHolder.registerOnStartTask(i -> Binder.allowBlocking(i.asBinder()));
     }
 
     @Override
@@ -54,5 +60,24 @@ public class DefaultAudioPolicyFacade implements AudioPolicyFacade {
             mServiceHolder.attemptClear(ap.asBinder());
             throw new IllegalStateException();
         }
+    }
+
+    @Override
+    public @Nullable INativePermissionController getPermissionController() {
+        IAudioPolicyService ap = mServiceHolder.checkService();
+        if (ap == null) return null;
+        try {
+            var res = Objects.requireNonNull(ap.getPermissionController());
+            Binder.allowBlocking(res.asBinder());
+            return res;
+        } catch (RemoteException e) {
+            mServiceHolder.attemptClear(ap.asBinder());
+            return null;
+        }
+    }
+
+    @Override
+    public void registerOnStartTask(Runnable task) {
+        mServiceHolder.registerOnStartTask(unused -> task.run());
     }
 }

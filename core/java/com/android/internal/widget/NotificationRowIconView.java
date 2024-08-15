@@ -22,7 +22,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -30,12 +35,21 @@ import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.widget.RemoteViews;
 
+import com.android.internal.R;
+
 /**
- * An image view that holds the icon displayed on the left side of a notification row.
+ * An image view that holds the icon displayed at the start of a notification row.
  */
 @RemoteViews.RemoteView
 public class NotificationRowIconView extends CachingIconView {
     private boolean mApplyCircularCrop = false;
+    private boolean mShouldShowAppIcon = false;
+
+    // Padding and background set on the view prior to being changed by setShouldShowAppIcon(true),
+    // to be restored if shouldShowAppIcon becomes false again.
+    private Rect mOriginalPadding = null;
+    private Drawable mOriginalBackground = null;
+
 
     public NotificationRowIconView(Context context) {
         super(context);
@@ -59,12 +73,51 @@ public class NotificationRowIconView extends CachingIconView {
     @Override
     protected void onFinishInflate() {
         // If showing the app icon, we don't need background or padding.
-        if (Flags.notificationsUseAppIcon() || Flags.notificationsUseAppIconInRow()) {
+        if (Flags.notificationsUseAppIcon()) {
             setPadding(0, 0, 0, 0);
             setBackground(null);
         }
 
         super.onFinishInflate();
+    }
+
+    /** Whether the icon represents the app icon (instead of the small icon). */
+    @RemotableViewMethod
+    public void setShouldShowAppIcon(boolean shouldShowAppIcon) {
+        if (Flags.notificationsUseAppIconInRow()) {
+            if (mShouldShowAppIcon == shouldShowAppIcon) {
+                return; // no change
+            }
+
+            mShouldShowAppIcon = shouldShowAppIcon;
+            if (mShouldShowAppIcon) {
+                if (mOriginalPadding == null && mOriginalBackground == null) {
+                    mOriginalPadding = new Rect(getPaddingLeft(), getPaddingTop(),
+                            getPaddingRight(), getPaddingBottom());
+                    mOriginalBackground = getBackground();
+                }
+
+                setPadding(0, 0, 0, 0);
+
+                // Make the background white in case the icon itself doesn't have one.
+                ColorFilter colorFilter = new PorterDuffColorFilter(Color.WHITE,
+                        PorterDuff.Mode.SRC_ATOP);
+
+                if (mOriginalBackground == null) {
+                    setBackground(getContext().getDrawable(R.drawable.notification_icon_circle));
+                }
+                getBackground().mutate().setColorFilter(colorFilter);
+            } else {
+                // Restore original padding and background if needed
+                if (mOriginalPadding != null) {
+                    setPadding(mOriginalPadding.left, mOriginalPadding.top, mOriginalPadding.right,
+                            mOriginalPadding.bottom);
+                    mOriginalPadding = null;
+                }
+                setBackground(mOriginalBackground);
+                mOriginalBackground = null;
+            }
+        }
     }
 
     @Nullable

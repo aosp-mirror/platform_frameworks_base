@@ -37,6 +37,12 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.clocks.AodClockBurnInModel
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.util.kotlin.DisposableHandles
+import com.android.systemui.util.ui.value
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
@@ -52,80 +58,94 @@ object KeyguardClockViewBinder {
         keyguardClockInteractor: KeyguardClockInteractor,
         blueprintInteractor: KeyguardBlueprintInteractor,
         rootViewModel: KeyguardRootViewModel,
-    ) {
-        keyguardRootView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                keyguardClockInteractor.clockEventController.registerListeners(keyguardRootView)
+    ): DisposableHandle {
+        val disposables = DisposableHandles()
+        disposables +=
+            keyguardRootView.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    keyguardClockInteractor.clockEventController.registerListeners(keyguardRootView)
+                }
             }
-        }
 
-        keyguardRootView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
-                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.currentClock.collect { currentClock ->
-                        cleanupClockViews(currentClock, keyguardRootView, viewModel.burnInLayer)
-                        addClockViews(currentClock, keyguardRootView)
-                        updateBurnInLayer(keyguardRootView, viewModel, viewModel.clockSize.value)
-                        applyConstraints(clockSection, keyguardRootView, true)
-                    }
-                }
-
-                launch {
-                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.clockSize.collect { clockSize ->
-                        updateBurnInLayer(keyguardRootView, viewModel, clockSize)
-                        blueprintInteractor.refreshBlueprint(Type.ClockSize)
-                    }
-                }
-
-                launch {
-                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.clockShouldBeCentered.collect {
-                        viewModel.currentClock.value?.let {
-                            // TODO(b/301502635): remove "!it.config.useCustomClockScene" when
-                            // migrate clocks to blueprint is fully rolled out
-                            if (
-                                it.largeClock.config.hasCustomPositionUpdatedAnimation &&
-                                    !it.config.useCustomClockScene
-                            ) {
-                                blueprintInteractor.refreshBlueprint(Type.DefaultClockStepping)
-                            } else {
-                                blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
-                            }
-                        }
-                    }
-                }
-
-                launch {
-                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.isAodIconsVisible.collect {
-                        viewModel.currentClock.value?.let {
-                            if (
-                                viewModel.isLargeClockVisible.value && it.config.useCustomClockScene
-                            ) {
-                                blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
-                            }
-                        }
-                    }
-                }
-
-                launch {
-                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    rootViewModel.burnInModel.collect { burnInModel ->
-                        viewModel.currentClock.value?.let {
-                            it.largeClock.layout.applyAodBurnIn(
-                                AodClockBurnInModel(
-                                    translationX = burnInModel.translationX.toFloat(),
-                                    translationY = burnInModel.translationY.toFloat(),
-                                    scale = burnInModel.scale
-                                )
+        disposables +=
+            keyguardRootView.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    launch {
+                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                        viewModel.currentClock.collect { currentClock ->
+                            cleanupClockViews(currentClock, keyguardRootView, viewModel.burnInLayer)
+                            addClockViews(currentClock, keyguardRootView)
+                            updateBurnInLayer(
+                                keyguardRootView,
+                                viewModel,
+                                viewModel.clockSize.value
                             )
+                            applyConstraints(clockSection, keyguardRootView, true)
+                        }
+                    }
+
+                    launch {
+                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                        viewModel.clockSize.collect { clockSize ->
+                            updateBurnInLayer(keyguardRootView, viewModel, clockSize)
+                            blueprintInteractor.refreshBlueprint(Type.ClockSize)
+                        }
+                    }
+
+                    launch {
+                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                        viewModel.clockShouldBeCentered.collect {
+                            viewModel.currentClock.value?.let {
+                                // TODO(b/301502635): remove "!it.config.useCustomClockScene" when
+                                // migrate clocks to blueprint is fully rolled out
+                                if (
+                                    it.largeClock.config.hasCustomPositionUpdatedAnimation &&
+                                        !it.config.useCustomClockScene
+                                ) {
+                                    blueprintInteractor.refreshBlueprint(Type.DefaultClockStepping)
+                                } else {
+                                    blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
+                                }
+                            }
+                        }
+                    }
+
+                    launch {
+                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                        combine(
+                                viewModel.hasAodIcons,
+                                rootViewModel.isNotifIconContainerVisible.map { it.value }
+                            ) { hasIcon, isVisible ->
+                                hasIcon && isVisible
+                            }
+                            .distinctUntilChanged()
+                            .collect { _ ->
+                                viewModel.currentClock.value?.let {
+                                    if (it.config.useCustomClockScene) {
+                                        blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
+                                    }
+                                }
+                            }
+                    }
+
+                    launch {
+                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                        rootViewModel.burnInModel.collect { burnInModel ->
+                            viewModel.currentClock.value?.let {
+                                it.largeClock.layout.applyAodBurnIn(
+                                    AodClockBurnInModel(
+                                        translationX = burnInModel.translationX.toFloat(),
+                                        translationY = burnInModel.translationY.toFloat(),
+                                        scale = burnInModel.scale
+                                    )
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
+
+        return disposables
     }
 
     @VisibleForTesting

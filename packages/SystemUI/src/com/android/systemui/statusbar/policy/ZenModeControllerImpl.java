@@ -140,13 +140,13 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (registerZenModeContentObserverBackground()) {
             bgHandler.post(() -> {
-                globalSettings.registerContentObserver(Global.ZEN_MODE, modeContentObserver);
-                globalSettings.registerContentObserver(Global.ZEN_MODE_CONFIG_ETAG,
+                globalSettings.registerContentObserverSync(Global.ZEN_MODE, modeContentObserver);
+                globalSettings.registerContentObserverSync(Global.ZEN_MODE_CONFIG_ETAG,
                         configContentObserver);
             });
         } else {
-            globalSettings.registerContentObserver(Global.ZEN_MODE, modeContentObserver);
-            globalSettings.registerContentObserver(Global.ZEN_MODE_CONFIG_ETAG,
+            globalSettings.registerContentObserverSync(Global.ZEN_MODE, modeContentObserver);
+            globalSettings.registerContentObserverSync(Global.ZEN_MODE_CONFIG_ETAG,
                     configContentObserver);
         }
         updateZenMode(getModeSettingValueFromProvider());

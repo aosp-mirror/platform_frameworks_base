@@ -17,12 +17,12 @@
 package com.android.systemui.privacy
 
 import android.content.Intent
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -38,7 +38,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class PrivacyDialogV2Test : SysuiTestCase() {
 

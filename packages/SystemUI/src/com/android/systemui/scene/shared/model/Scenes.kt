@@ -64,7 +64,7 @@ object Scenes {
      *
      * For the "split" shade configuration (on large screens or unfolded foldables, where
      * notifications and quick settings are shown side-by-side in their own columns), the [Shade]
-     * scene is used].
+     * scene is used.
      *
      * For the dual shade configuration, where there are two separate shades: one for notifications
      * and one for quick settings, [NotificationsShade] and [QuickSettingsShade] scenes are used
@@ -96,4 +96,30 @@ object Scenes {
      * separate shades: one for notifications and one for quick settings, other scenes are used.
      */
     @JvmField val Shade = SceneKey("shade")
+}
+
+/**
+ * Keys of all known scene families. A scene family is an alias that is resolved to a specific scene
+ * from [Scenes] dynamically.
+ *
+ * PLEASE KEEP THE KEYS SORTED ALPHABETICALLY.
+ */
+object SceneFamilies {
+    /**
+     * The "base" scene, from the user's perspective. This is generally Gone or Lockscreen,
+     * depending on whether the device is unlocked and has been entered.
+     */
+    @JvmField val Home = SceneKey(debugName = "scene_family_home")
+
+    /**
+     * The scene that contains the full, interactive notification shade. The specific scene it
+     * resolves to can depend on dual / split / single shade settings.
+     */
+    @JvmField val NotifShade = SceneKey(debugName = "scene_family_notif_shade")
+
+    /**
+     * The scene that contains the full QuickSettings (not to be confused with Quick-QuickSettings).
+     * The specific scene it resolves to can depend on dual / split / single shade settings.
+     */
+    @JvmField val QuickSettings = SceneKey(debugName = "scene_family_quick_settings")
 }

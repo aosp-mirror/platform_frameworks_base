@@ -132,7 +132,7 @@ public class BubbleBarLayerView extends FrameLayout
                     }
                 });
 
-        setOnClickListener(view -> hideMenuOrCollapse());
+        setOnClickListener(view -> hideModalOrCollapse());
     }
 
     @Override
@@ -173,6 +173,11 @@ public class BubbleBarLayerView extends FrameLayout
     /** Whether the stack of bubbles is expanded or not. */
     public boolean isExpanded() {
         return mIsExpanded;
+    }
+
+    /** Return whether the expanded view is being dragged */
+    public boolean isExpandedViewDragged() {
+        return mDragController != null && mDragController.isDragged();
     }
 
     /** Shows the expanded view of the provided bubble. */
@@ -217,7 +222,7 @@ public class BubbleBarLayerView extends FrameLayout
 
                 @Override
                 public void onBackPressed() {
-                    hideMenuOrCollapse();
+                    hideModalOrCollapse();
                 }
             });
 
@@ -344,15 +349,23 @@ public class BubbleBarLayerView extends FrameLayout
         addView(mDismissView);
     }
 
-    /** Hides the current modal education/menu view, expanded view or collapses the bubble stack */
-    private void hideMenuOrCollapse() {
+    /** Hides the current modal education/menu view, IME or collapses the expanded view */
+    private void hideModalOrCollapse() {
         if (mEducationViewController.isEducationVisible()) {
             mEducationViewController.hideEducation(/* animated = */ true);
-        } else if (isExpanded() && mExpandedView != null) {
-            mExpandedView.hideMenuOrCollapse();
-        } else {
-            mBubbleController.collapseStack();
+            return;
         }
+        if (isExpanded() && mExpandedView != null) {
+            boolean menuHidden = mExpandedView.hideMenuIfVisible();
+            if (menuHidden) {
+                return;
+            }
+            boolean imeHidden = mExpandedView.hideImeIfVisible();
+            if (imeHidden) {
+                return;
+            }
+        }
+        mBubbleController.collapseStack();
     }
 
     /** Updates the expanded view size and position. */

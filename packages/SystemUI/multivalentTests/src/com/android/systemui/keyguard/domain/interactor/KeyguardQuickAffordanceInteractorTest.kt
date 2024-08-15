@@ -22,6 +22,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
@@ -86,7 +87,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var shadeInteractor: ShadeInteractor
-    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
+    @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
 
     private val kosmos = testKosmos()
 
@@ -148,7 +150,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -195,6 +196,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
                 logger = logger,
+                metricsLogger = metricsLogger,
                 devicePolicyManager = devicePolicyManager,
                 dockManager = dockManager,
                 biometricSettingsRepository = biometricSettingsRepository,
@@ -350,7 +352,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun quickAffordance_doNotSendUpdatesWhileShadeExpandingAndStillHidden() =
+    fun quickAffordance_updateOncePerShadeExpansion() =
         testScope.runTest {
             val shadeExpansion = MutableStateFlow(0f)
             whenever(shadeInteractor.anyExpansion).thenReturn(shadeExpansion)
@@ -365,9 +367,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 shadeExpansion.value = i / 10f
             }
 
-            assertThat(collectedValue[0])
-                .isInstanceOf(KeyguardQuickAffordanceModel.Hidden::class.java)
-            assertThat(collectedValue.size).isEqualTo(initialSize)
+            assertThat(collectedValue.size).isEqualTo(initialSize + 1)
         }
 
     @Test

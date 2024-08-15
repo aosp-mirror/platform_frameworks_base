@@ -37,11 +37,13 @@ import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 
 /**
- * A class which provides an adjustment object to the preparation coordinator which is uses
- * to ensure that notifications are reinflated when ranking-derived information changes.
+ * A class which provides an adjustment object to the preparation coordinator which is uses to
+ * ensure that notifications are reinflated when ranking-derived information changes.
  */
 @SysUISingleton
-class NotifUiAdjustmentProvider @Inject constructor(
+class NotifUiAdjustmentProvider
+@Inject
+constructor(
     @Main private val handler: Handler,
     private val secureSettings: SecureSettings,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
@@ -53,14 +55,13 @@ class NotifUiAdjustmentProvider @Inject constructor(
     private val dirtyListeners = ListenerSet<Runnable>()
     private var isSnoozeSettingsEnabled = false
 
-    /**
-     *  Update the snooze enabled value on user switch
-     */
-    private val userTrackerCallback = object : UserTracker.Callback {
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            updateSnoozeEnabled()
+    /** Update the snooze enabled value on user switch */
+    private val userTrackerCallback =
+        object : UserTracker.Callback {
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                updateSnoozeEnabled()
+            }
         }
-    }
 
     init {
         userTracker.addCallback(userTrackerCallback, HandlerExecutor(handler))
@@ -75,7 +76,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
                 )
             }
             updateSnoozeEnabled()
-            secureSettings.registerContentObserverForUser(
+            secureSettings.registerContentObserverForUserSync(
                 SHOW_NOTIFICATION_SNOOZE,
                 settingsObserver,
                 UserHandle.USER_ALL
@@ -93,7 +94,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
                     onSensitiveStateChangedListener
                 )
             }
-            secureSettings.unregisterContentObserver(settingsObserver)
+            secureSettings.unregisterContentObserverSync(settingsObserver)
         }
     }
 
@@ -104,12 +105,13 @@ class NotifUiAdjustmentProvider @Inject constructor(
 
     private val onSensitiveStateChangedListener = Runnable { dirtyListeners.forEach(Runnable::run) }
 
-    private val settingsObserver = object : ContentObserver(handler) {
-        override fun onChange(selfChange: Boolean) {
-            updateSnoozeEnabled()
-            dirtyListeners.forEach(Runnable::run)
+    private val settingsObserver =
+        object : ContentObserver(handler) {
+            override fun onChange(selfChange: Boolean) {
+                updateSnoozeEnabled()
+                dirtyListeners.forEach(Runnable::run)
+            }
         }
-    }
 
     private fun updateSnoozeEnabled() {
         isSnoozeSettingsEnabled =
@@ -126,22 +128,23 @@ class NotifUiAdjustmentProvider @Inject constructor(
     }
 
     /**
-     * Returns a adjustment object for the given entry.  This can be compared to a previous instance
+     * Returns a adjustment object for the given entry. This can be compared to a previous instance
      * from the same notification using [NotifUiAdjustment.needReinflate] to determine if it should
      * be reinflated.
      */
-    fun calculateAdjustment(entry: NotificationEntry) = NotifUiAdjustment(
-        key = entry.key,
-        smartActions = entry.ranking.smartActions,
-        smartReplies = entry.ranking.smartReplies,
-        isConversation = entry.ranking.isConversation,
-        isSnoozeEnabled = isSnoozeSettingsEnabled && !entry.isCanceled,
-        isMinimized = isEntryMinimized(entry),
-        needsRedaction =
-            lockscreenUserManager.needsRedaction(entry) ||
-                (screenshareNotificationHiding() &&
-                    sensitiveNotifProtectionController.shouldProtectNotification(entry)),
-        isChildInGroup = entry.hasEverBeenGroupChild(),
-        isGroupSummary = entry.hasEverBeenGroupSummary(),
-    )
+    fun calculateAdjustment(entry: NotificationEntry) =
+        NotifUiAdjustment(
+            key = entry.key,
+            smartActions = entry.ranking.smartActions,
+            smartReplies = entry.ranking.smartReplies,
+            isConversation = entry.ranking.isConversation,
+            isSnoozeEnabled = isSnoozeSettingsEnabled && !entry.isCanceled,
+            isMinimized = isEntryMinimized(entry),
+            needsRedaction =
+                lockscreenUserManager.needsRedaction(entry) ||
+                    (screenshareNotificationHiding() &&
+                        sensitiveNotifProtectionController.shouldProtectNotification(entry)),
+            isChildInGroup = entry.hasEverBeenGroupChild(),
+            isGroupSummary = entry.hasEverBeenGroupSummary(),
+        )
 }

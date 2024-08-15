@@ -65,6 +65,15 @@ constructor(@ShadeCarrierGroupControllerLog val buffer: LogBuffer) {
         )
     }
 
+    fun logUsingSatelliteText(text: CharSequence) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { str1 = "$text" },
+            { "┗ updating No SIM view with satellite text=$str1" },
+        )
+    }
+
     fun logUsingSimViews() {
         buffer.log(TAG, LogLevel.VERBOSE, {}, { "┗ updating SIM views" })
     }

@@ -32,7 +32,9 @@ import java.util.Map;
  */
 public class SyntheticModeManager {
     private static final float FLOAT_TOLERANCE = 0.01f;
-    private static final float SYNTHETIC_MODE_HIGH_BOUNDARY = 60f + FLOAT_TOLERANCE;
+    private static final float SYNTHETIC_MODE_REFRESH_RATE = 60f;
+    private static final float SYNTHETIC_MODE_HIGH_BOUNDARY =
+            SYNTHETIC_MODE_REFRESH_RATE + FLOAT_TOLERANCE;
 
     private final boolean mSynthetic60HzModesEnabled;
 
@@ -62,7 +64,7 @@ public class SyntheticModeManager {
                 nextModeId = mode.getModeId();
             }
 
-            float divisor = mode.getVsyncRate() / 60f;
+            float divisor = mode.getVsyncRate() / SYNTHETIC_MODE_REFRESH_RATE;
             boolean is60HzAchievable = Math.abs(divisor - Math.round(divisor)) < FLOAT_TOLERANCE;
             if (is60HzAchievable) {
                 sizes.put(new Size(mode.getPhysicalWidth(), mode.getPhysicalHeight()),

@@ -43,9 +43,9 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -73,7 +73,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class FgsManagerControllerTest extends SysuiTestCase {

@@ -16,13 +16,18 @@
 
 package com.android.server;
 
+import static android.content.Intent.ACTION_REBOOT;
+import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -150,6 +155,15 @@ public class PackageWatchdog {
     private static final int DEFAULT_MAJOR_USER_IMPACT_LEVEL_THRESHOLD =
             PackageHealthObserverImpact.USER_IMPACT_LEVEL_71;
 
+    // Comma separated list of all packages exempt from user impact level threshold. If a package
+    // in the list is crash looping, all the mitigations including factory reset will be performed.
+    private static final String PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD =
+            "persist.device_config.configuration.packages_exempt_from_impact_level_threshold";
+
+    // Comma separated list of default packages exempt from user impact level threshold.
+    private static final String DEFAULT_PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD =
+            "com.android.systemui";
+
     private long mNumberOfNativeCrashPollsRemaining;
 
     private static final int DB_VERSION = 1;
@@ -195,6 +209,8 @@ public class PackageWatchdog {
     private final BootThreshold mBootThreshold;
     private final DeviceConfig.OnPropertiesChangedListener
             mOnPropertyChangedListener = this::onPropertyChanged;
+
+    private final Set<String> mPackagesExemptFromImpactLevelThreshold = new ArraySet<>();
 
     // The set of packages that have been synced with the ExplicitHealthCheckController
     @GuardedBy("mLock")
@@ -518,12 +534,19 @@ public class PackageWatchdog {
                               @FailureReasons int failureReason,
                               int currentObserverImpact,
                               int mitigationCount) {
-        if (currentObserverImpact < getUserImpactLevelLimit()) {
+        if (allowMitigations(currentObserverImpact, versionedPackage)) {
             synchronized (mLock) {
                 mLastMitigation = mSystemClock.uptimeMillis();
             }
             currentObserverToNotify.execute(versionedPackage, failureReason, mitigationCount);
         }
+    }
+
+    private boolean allowMitigations(int currentObserverImpact,
+            VersionedPackage versionedPackage) {
+        return currentObserverImpact < getUserImpactLevelLimit()
+                || getPackagesExemptFromImpactLevelThreshold().contains(
+                versionedPackage.getPackageName());
     }
 
     private long getMitigationWindowMs() {
@@ -657,12 +680,22 @@ public class PackageWatchdog {
                 DEFAULT_MAJOR_USER_IMPACT_LEVEL_THRESHOLD);
     }
 
+    private Set<String> getPackagesExemptFromImpactLevelThreshold() {
+        if (mPackagesExemptFromImpactLevelThreshold.isEmpty()) {
+            String packageNames = SystemProperties.get(PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD,
+                    DEFAULT_PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD);
+            return Set.of(packageNames.split("\\s*,\\s*"));
+        }
+        return mPackagesExemptFromImpactLevelThreshold;
+    }
+
     /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */
     @Retention(SOURCE)
     @IntDef(value = {PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_10,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_20,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_40,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_50,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_70,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_71,
@@ -678,6 +711,7 @@ public class PackageWatchdog {
         /* Actions having medium user impact, user of a device will likely notice. */
         int USER_IMPACT_LEVEL_20 = 20;
         int USER_IMPACT_LEVEL_30 = 30;
+        int USER_IMPACT_LEVEL_40 = 40;
         int USER_IMPACT_LEVEL_50 = 50;
         int USER_IMPACT_LEVEL_70 = 70;
         /* Action has high user impact, a last resort, user of a device will be very frustrated. */
@@ -1999,6 +2033,31 @@ public class PackageWatchdog {
                 }
             }
         }
+    }
 
+    /**
+     * Register broadcast receiver for shutdown.
+     * We would save the observer state to persist across boots.
+     *
+     * @hide
+     */
+    public void registerShutdownBroadcastReceiver() {
+        BroadcastReceiver shutdownEventReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Only write if intent is relevant to device reboot or shutdown.
+                String intentAction = intent.getAction();
+                if (ACTION_REBOOT.equals(intentAction)
+                        || ACTION_SHUTDOWN.equals(intentAction)) {
+                    writeNow();
+                }
+            }
+        };
+
+        // Setup receiver for device reboots or shutdowns.
+        IntentFilter filter = new IntentFilter(ACTION_REBOOT);
+        filter.addAction(ACTION_SHUTDOWN);
+        mContext.registerReceiverForAllUsers(shutdownEventReceiver, filter, null,
+                /* run on main thread */ null);
     }
 }

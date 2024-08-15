@@ -18,9 +18,11 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.graphics.Point
+import android.platform.test.annotations.DisableFlags
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.LegacyLockIconViewController
 import com.android.systemui.Flags as AConfigFlags
@@ -44,14 +46,13 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     @Mock private lateinit var authController: AuthController
@@ -106,8 +107,8 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun addViewsConditionally_migrateFlagOff() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)

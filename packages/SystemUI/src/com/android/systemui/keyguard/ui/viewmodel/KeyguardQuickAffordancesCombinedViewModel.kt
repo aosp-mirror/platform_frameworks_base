@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.FlowTracing.traceEmissionCount
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
@@ -45,7 +46,7 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardQuickAffordancesCombinedViewModel
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
+    @Application private val applicationScope: CoroutineScope,
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     shadeInteractor: ShadeInteractor,
@@ -89,20 +90,15 @@ constructor(
     /** The only time the expansion is important is while lockscreen is actively displayed */
     private val shadeExpansionAlpha =
         combine(
-                showingLockscreen,
-                shadeInteractor.anyExpansion,
-            ) { showingLockscreen, expansion ->
-                if (showingLockscreen) {
-                    1 - expansion
-                } else {
-                    0f
-                }
+            showingLockscreen,
+            shadeInteractor.anyExpansion,
+        ) { showingLockscreen, expansion ->
+            if (showingLockscreen) {
+                1 - expansion
+            } else {
+                0f
             }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Lazily,
-                initialValue = 0f,
-            )
+        }
 
     /**
      * ID of the slot that's currently selected in the preview that renders exclusively in the
@@ -142,9 +138,14 @@ constructor(
     /** The source of truth of alpha for all of the quick affordances on lockscreen */
     val transitionAlpha: Flow<Float> =
         merge(
-            fadeInAlpha,
-            fadeOutAlpha,
-        )
+                fadeInAlpha,
+                fadeOutAlpha,
+            )
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = 0f,
+            )
 
     /**
      * Whether quick affordances are "opaque enough" to be considered visible to and interactive by
@@ -208,38 +209,42 @@ constructor(
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
-        return previewMode.flatMapLatest { previewMode ->
-            combine(
-                    if (previewMode.isInPreviewMode) {
-                        quickAffordanceInteractor.quickAffordanceAlwaysVisible(position = position)
-                    } else {
-                        quickAffordanceInteractor.quickAffordance(position = position)
-                    },
-                    keyguardInteractor.animateDozingTransitions.distinctUntilChanged(),
-                    areQuickAffordancesFullyOpaque,
-                    selectedPreviewSlotId,
-                    quickAffordanceInteractor.useLongPress(),
-                ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId, useLongPress ->
-                    val slotId = position.toSlotId()
-                    val isSelected = selectedPreviewSlotId == slotId
-                    model.toViewModel(
-                        animateReveal = !previewMode.isInPreviewMode && animateReveal,
-                        isClickable = isFullyOpaque && !previewMode.isInPreviewMode,
-                        isSelected =
-                            previewMode.isInPreviewMode &&
-                                previewMode.shouldHighlightSelectedAffordance &&
-                                isSelected,
-                        isDimmed =
-                            previewMode.isInPreviewMode &&
-                                previewMode.shouldHighlightSelectedAffordance &&
-                                !isSelected,
-                        forceInactive = previewMode.isInPreviewMode,
-                        slotId = slotId,
-                        useLongPress = useLongPress,
-                    )
-                }
-                .distinctUntilChanged()
-        }
+        return previewMode
+            .flatMapLatest { previewMode ->
+                combine(
+                        if (previewMode.isInPreviewMode) {
+                            quickAffordanceInteractor.quickAffordanceAlwaysVisible(
+                                position = position
+                            )
+                        } else {
+                            quickAffordanceInteractor.quickAffordance(position = position)
+                        },
+                        keyguardInteractor.animateDozingTransitions.distinctUntilChanged(),
+                        areQuickAffordancesFullyOpaque,
+                        selectedPreviewSlotId,
+                        quickAffordanceInteractor.useLongPress(),
+                    ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId, useLongPress ->
+                        val slotId = position.toSlotId()
+                        val isSelected = selectedPreviewSlotId == slotId
+                        model.toViewModel(
+                            animateReveal = !previewMode.isInPreviewMode && animateReveal,
+                            isClickable = isFullyOpaque && !previewMode.isInPreviewMode,
+                            isSelected =
+                                previewMode.isInPreviewMode &&
+                                    previewMode.shouldHighlightSelectedAffordance &&
+                                    isSelected,
+                            isDimmed =
+                                previewMode.isInPreviewMode &&
+                                    previewMode.shouldHighlightSelectedAffordance &&
+                                    !isSelected,
+                            forceInactive = previewMode.isInPreviewMode,
+                            slotId = slotId,
+                            useLongPress = useLongPress,
+                        )
+                    }
+                    .distinctUntilChanged()
+            }
+            .traceEmissionCount({ "QuickAfforcances#button${position.toSlotId()}" })
     }
 
     private fun KeyguardQuickAffordanceModel.toViewModel(

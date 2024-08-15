@@ -67,7 +67,6 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
         // The lock is required to prevent `Controller2Callback` from using partially initialized
         // `MediaSession2Record.this`.
         synchronized (mLock) {
-            mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
             mSessionToken = sessionToken;
             mService = service;
             mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));

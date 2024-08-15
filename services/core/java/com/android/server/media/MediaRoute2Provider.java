@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRouter2;
+import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
@@ -59,7 +60,7 @@ abstract class MediaRoute2Provider {
     public abstract void requestCreateSession(
             long requestId,
             String packageName,
-            String routeId,
+            String routeOriginalId,
             @Nullable Bundle sessionHints,
             @RoutingSessionInfo.TransferReason int transferReason,
             @NonNull UserHandle transferInitiatorUserHandle,
@@ -77,13 +78,15 @@ abstract class MediaRoute2Provider {
             long requestId,
             @NonNull UserHandle transferInitiatorUserHandle,
             @NonNull String transferInitiatorPackageName,
-            String sessionId,
-            String routeId,
+            String sessionOriginalId,
+            String routeOriginalId,
             @RoutingSessionInfo.TransferReason int transferReason);
 
-    public abstract void setRouteVolume(long requestId, String routeId, int volume);
-    public abstract void setSessionVolume(long requestId, String sessionId, int volume);
-    public abstract void prepareReleaseSession(@NonNull String sessionId);
+    public abstract void setRouteVolume(long requestId, String routeOriginalId, int volume);
+
+    public abstract void setSessionVolume(long requestId, String sessionOriginalId, int volume);
+
+    public abstract void prepareReleaseSession(@NonNull String sessionUniqueId);
 
     @NonNull
     public String getUniqueId() {
@@ -197,8 +200,8 @@ abstract class MediaRoute2Provider {
          */
         public final long mRequestId;
 
-        /** The {@link MediaRoute2Info#getId() id} of the target route. */
-        @NonNull public final String mTargetRouteId;
+        /** The {@link MediaRoute2Info#getOriginalId()} original id} of the target route. */
+        @NonNull public final String mTargetOriginalRouteId;
 
         @RoutingSessionInfo.TransferReason public final int mTransferReason;
 
@@ -209,23 +212,38 @@ abstract class MediaRoute2Provider {
 
         SessionCreationOrTransferRequest(
                 long requestId,
-                @NonNull String routeId,
+                @NonNull String targetOriginalRouteId,
                 @RoutingSessionInfo.TransferReason int transferReason,
                 @NonNull UserHandle transferInitiatorUserHandle,
                 @NonNull String transferInitiatorPackageName) {
             mRequestId = requestId;
-            mTargetRouteId = routeId;
+            mTargetOriginalRouteId = targetOriginalRouteId;
             mTransferReason = transferReason;
             mTransferInitiatorUserHandle = transferInitiatorUserHandle;
             mTransferInitiatorPackageName = transferInitiatorPackageName;
         }
 
         public boolean isTargetRoute(@Nullable MediaRoute2Info route2Info) {
-            return route2Info != null && mTargetRouteId.equals(route2Info.getId());
+            return route2Info != null && mTargetOriginalRouteId.equals(route2Info.getOriginalId());
         }
 
-        public boolean isTargetRouteIdInList(@NonNull List<String> routesList) {
-            return routesList.stream().anyMatch(mTargetRouteId::equals);
+        /**
+         * Returns whether the given list of {@link MediaRoute2Info#getOriginalId() original ids}
+         * contains the {@link #mTargetOriginalRouteId target route id}.
+         */
+        public boolean isTargetRouteIdInRouteOriginalIdList(
+                @NonNull List<String> originalRouteIdList) {
+            return originalRouteIdList.stream().anyMatch(mTargetOriginalRouteId::equals);
+        }
+
+        /**
+         * Returns whether the given list of {@link MediaRoute2Info#getId() unique ids} contains the
+         * {@link #mTargetOriginalRouteId target route id}.
+         */
+        public boolean isTargetRouteIdInRouteUniqueIdList(@NonNull List<String> uniqueRouteIdList) {
+            return uniqueRouteIdList.stream()
+                    .map(MediaRouter2Utils::getOriginalId)
+                    .anyMatch(mTargetOriginalRouteId::equals);
         }
     }
 }

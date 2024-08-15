@@ -128,8 +128,13 @@ public class TouchMonitor {
                     completer.set(predecessor);
                 }
 
-                if (mActiveTouchSessions.isEmpty() && mStopMonitoringPending) {
-                    stopMonitoring(false);
+                if (mActiveTouchSessions.isEmpty()) {
+                    if (mStopMonitoringPending) {
+                        stopMonitoring(false);
+                    } else {
+                        // restart monitoring to reset any destructive state on the input session
+                        startMonitoring();
+                    }
                 }
             });
 
@@ -323,12 +328,15 @@ public class TouchMonitor {
 
         // When we stop monitoring touches, we must ensure that all active touch sessions and
         // descendants informed of the removal so any cleanup for active tracking can proceed.
-        mMainExecutor.execute(() -> mActiveTouchSessions.forEach(touchSession -> {
-            while (touchSession != null) {
-                touchSession.onRemoved();
-                touchSession = touchSession.getPredecessor();
-            }
-        }));
+        mMainExecutor.execute(() -> {
+            mActiveTouchSessions.forEach(touchSession -> {
+                while (touchSession != null) {
+                    touchSession.onRemoved();
+                    touchSession = touchSession.getPredecessor();
+                }
+            });
+            mActiveTouchSessions.clear();
+        });
 
         mCurrentInputSession.dispose();
         mCurrentInputSession = null;
@@ -571,6 +579,10 @@ public class TouchMonitor {
         mLifecycle.removeObserver(mLifecycleObserver);
         if (Flags.ambientTouchMonitorListenToDisplayChanges()) {
             mBoundsFlow.cancel(new CancellationException());
+        }
+
+        for (TouchHandler handler : mHandlers) {
+            handler.onDestroy();
         }
 
         mInitialized = false;

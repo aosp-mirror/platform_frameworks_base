@@ -395,6 +395,7 @@ android.app.BackgroundInstallControlManager
 android.app.BackgroundServiceStartNotAllowedException$1
 android.app.BackgroundServiceStartNotAllowedException
 android.app.BroadcastOptions
+android.app.CameraCompatTaskInfo
 android.app.ClientTransactionHandler
 android.app.ComponentCaller
 android.app.ComponentOptions
@@ -737,7 +738,6 @@ android.app.SharedPreferencesImpl$1
 android.app.SharedPreferencesImpl$EditorImpl$$ExternalSyntheticLambda0
 android.app.SharedPreferencesImpl$EditorImpl$1
 android.app.SharedPreferencesImpl$EditorImpl$2
-android.app.SharedPreferencesImpl$EditorImpl
 android.app.SharedPreferencesImpl$MemoryCommitResult-IA
 android.app.SharedPreferencesImpl$MemoryCommitResult
 android.app.SharedPreferencesImpl$SharedPreferencesThreadFactory
@@ -1216,7 +1216,6 @@ android.app.servertransaction.TopResumedActivityChangeItem-IA
 android.app.servertransaction.TopResumedActivityChangeItem
 android.app.servertransaction.TransactionExecutor
 android.app.servertransaction.TransactionExecutorHelper
-android.app.servertransaction.WindowStateResizeItem$ResizeListener
 android.app.slice.ISliceManager$Stub$Proxy
 android.app.slice.ISliceManager$Stub
 android.app.slice.ISliceManager
@@ -1988,7 +1987,6 @@ android.content.res.ResourceTimer$Config
 android.content.res.ResourceTimer$Timer
 android.content.res.ResourceTimer
 android.content.res.Resources$$ExternalSyntheticLambda0
-android.content.res.Resources$$ExternalSyntheticLambda1
 android.content.res.Resources$AssetManagerUpdateHandler
 android.content.res.Resources$NotFoundException
 android.content.res.Resources$Theme-IA
@@ -2196,10 +2194,7 @@ android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda0
 android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda1
 android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda2
 android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda3
-android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda4
 android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda5
-android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda6
-android.graphics.ColorSpace$Rgb$$ExternalSyntheticLambda9
 android.graphics.ColorSpace$Rgb$NoImagePreloadHolder
 android.graphics.ColorSpace$Rgb$TransferParameters
 android.graphics.ColorSpace$Rgb-IA
@@ -2959,6 +2954,7 @@ android.hardware.hdmi.HdmiRecordSources$OwnSource
 android.hardware.hdmi.HdmiRecordSources$RecordSource
 android.hardware.input.HostUsiVersion$1
 android.hardware.input.HostUsiVersion
+android.hardware.input.IInputDevicesChangedListener$Stub$Proxy
 android.hardware.input.IInputDevicesChangedListener$Stub
 android.hardware.input.IInputDevicesChangedListener
 android.hardware.input.IInputManager$Stub$Proxy
@@ -2975,6 +2971,7 @@ android.hardware.input.InputManager$InputDeviceListener
 android.hardware.input.InputManager
 android.hardware.input.InputManagerGlobal$InputDeviceListenerDelegate
 android.hardware.input.InputManagerGlobal$InputDevicesChangedListener-IA
+android.hardware.input.InputManagerGlobal$InputDevicesChangedListener
 android.hardware.input.InputManagerGlobal$OnTabletModeChangedListenerDelegate
 android.hardware.input.InputManagerGlobal
 android.hardware.input.InputSettings
@@ -3733,6 +3730,7 @@ android.icu.impl.UCharacterProperty$25
 android.icu.impl.UCharacterProperty$26
 android.icu.impl.UCharacterProperty$27
 android.icu.impl.UCharacterProperty$28
+android.icu.impl.UCharacterProperty$29
 android.icu.impl.UCharacterProperty$2
 android.icu.impl.UCharacterProperty$3
 android.icu.impl.UCharacterProperty$4
@@ -3941,6 +3939,9 @@ android.icu.impl.locale.LSR$CachedDecoder$$ExternalSyntheticLambda2
 android.icu.impl.locale.LSR$CachedDecoder
 android.icu.impl.locale.LSR
 android.icu.impl.locale.LanguageTag
+android.icu.impl.locale.LikelySubtags$1
+android.icu.impl.locale.LikelySubtags$Data
+android.icu.impl.locale.LikelySubtags
 android.icu.impl.locale.LocaleDistance$Data
 android.icu.impl.locale.LocaleDistance
 android.icu.impl.locale.LocaleExtensions
@@ -4101,6 +4102,7 @@ android.icu.lang.UCharacter$DummyValueIterator
 android.icu.lang.UCharacter$EastAsianWidth
 android.icu.lang.UCharacter$GraphemeClusterBreak
 android.icu.lang.UCharacter$HangulSyllableType
+android.icu.lang.UCharacter$IdentifierType
 android.icu.lang.UCharacter$IndicPositionalCategory
 android.icu.lang.UCharacter$IndicSyllabicCategory
 android.icu.lang.UCharacter$JoiningGroup
@@ -4693,6 +4695,7 @@ android.icu.text.UnicodeSet$EntryRangeIterable
 android.icu.text.UnicodeSet$EntryRangeIterator
 android.icu.text.UnicodeSet$Filter
 android.icu.text.UnicodeSet$GeneralCategoryMaskFilter
+android.icu.text.UnicodeSet$IdentifierTypeFilter
 android.icu.text.UnicodeSet$IntPropertyFilter
 android.icu.text.UnicodeSet$NumericValueFilter
 android.icu.text.UnicodeSet$ScriptExtensionsFilter
@@ -4799,7 +4802,12 @@ android.icu.util.ICUUncheckedIOException
 android.icu.util.IllformedLocaleException
 android.icu.util.IndianCalendar
 android.icu.util.InitialTimeZoneRule
+android.icu.util.IslamicCalendar$Algorithm
 android.icu.util.IslamicCalendar$CalculationType
+android.icu.util.IslamicCalendar$CivilAlgorithm
+android.icu.util.IslamicCalendar$IslamicAlgorithm
+android.icu.util.IslamicCalendar$TBLAAlgorithm
+android.icu.util.IslamicCalendar$UmalquraAlgorithm
 android.icu.util.IslamicCalendar
 android.icu.util.JapaneseCalendar
 android.icu.util.LocaleData$MeasurementSystem
@@ -5146,6 +5154,8 @@ android.media.ImageWriter$WriterSurfaceImage$SurfacePlane
 android.media.ImageWriter$WriterSurfaceImage
 android.media.ImageWriter
 android.media.JetPlayer
+android.media.MediaCodec$$ExternalSyntheticLambda6
+android.media.MediaCodec$$ExternalSyntheticLambda7
 android.media.MediaCodec$BufferInfo
 android.media.MediaCodec$BufferMap$CodecBuffer-IA
 android.media.MediaCodec$BufferMap$CodecBuffer
@@ -6007,6 +6017,7 @@ android.os.Handler$Callback
 android.os.Handler$MessengerImpl-IA
 android.os.Handler$MessengerImpl
 android.os.Handler
+android.os.HandlerExecutor
 android.os.HandlerThread
 android.os.HardwarePropertiesManager
 android.os.HidlMemory
@@ -6511,9 +6522,6 @@ android.permission.PermissionManager$PermissionQuery
 android.permission.PermissionManager$SplitPermissionInfo-IA
 android.permission.PermissionManager$SplitPermissionInfo
 android.permission.PermissionManagerInternal
-android.permission.flags.FeatureFlags
-android.permission.flags.FeatureFlagsImpl
-android.permission.flags.Flags
 android.preference.DialogPreference
 android.preference.GenericInflater$Parent
 android.preference.GenericInflater
@@ -7641,6 +7649,7 @@ android.telephony.TelephonyCallback$CallDisconnectCauseListener
 android.telephony.TelephonyCallback$CallForwardingIndicatorListener
 android.telephony.TelephonyCallback$CallStateListener
 android.telephony.TelephonyCallback$CarrierNetworkListener
+android.telephony.TelephonyCallback$CarrierRoamingNtnModeListener
 android.telephony.TelephonyCallback$CellInfoListener
 android.telephony.TelephonyCallback$CellLocationListener
 android.telephony.TelephonyCallback$DataActivationStateListener
@@ -7718,7 +7727,6 @@ android.telephony.TelephonyRegistryManager$$ExternalSyntheticLambda0
 android.telephony.TelephonyRegistryManager$$ExternalSyntheticLambda1
 android.telephony.TelephonyRegistryManager$$ExternalSyntheticLambda2
 android.telephony.TelephonyRegistryManager$1$$ExternalSyntheticLambda0
-android.telephony.TelephonyRegistryManager$1
 android.telephony.TelephonyRegistryManager$2
 android.telephony.TelephonyRegistryManager$3
 android.telephony.TelephonyRegistryManager$CarrierPrivilegesCallbackWrapper$$ExternalSyntheticLambda0
@@ -8388,7 +8396,6 @@ android.util.FeatureFlagUtils
 android.util.FloatProperty
 android.util.Half
 android.util.IconDrawableFactory
-android.util.IndentingPrintWriter
 android.util.IntArray
 android.util.IntProperty
 android.util.JsonReader$1
@@ -8646,7 +8653,6 @@ android.view.IDisplayChangeWindowController
 android.view.IDisplayFoldListener$Stub$Proxy
 android.view.IDisplayFoldListener$Stub
 android.view.IDisplayFoldListener
-android.view.IDisplayWindowInsetsController$Stub$Proxy
 android.view.IDisplayWindowInsetsController$Stub
 android.view.IDisplayWindowInsetsController
 android.view.IDisplayWindowListener$Stub$Proxy
@@ -9197,7 +9203,6 @@ android.view.WindowManagerGlobal$2
 android.view.WindowManagerGlobal$TrustedPresentationListener-IA
 android.view.WindowManagerGlobal$TrustedPresentationListener
 android.view.WindowManagerGlobal
-android.view.WindowManagerImpl
 android.view.WindowManagerPolicyConstants$PointerEventListener
 android.view.WindowManagerPolicyConstants
 android.view.WindowMetrics
@@ -9213,6 +9218,7 @@ android.view.accessibility.AccessibilityManager$$ExternalSyntheticLambda0
 android.view.accessibility.AccessibilityManager$$ExternalSyntheticLambda1
 android.view.accessibility.AccessibilityManager$$ExternalSyntheticLambda3
 android.view.accessibility.AccessibilityManager$1$$ExternalSyntheticLambda0
+android.view.accessibility.AccessibilityManager$1
 android.view.accessibility.AccessibilityManager$AccessibilityPolicy
 android.view.accessibility.AccessibilityManager$AccessibilityServicesStateChangeListener
 android.view.accessibility.AccessibilityManager$AccessibilityStateChangeListener
@@ -9256,6 +9262,7 @@ android.view.accessibility.IAccessibilityInteractionConnectionCallback
 android.view.accessibility.IAccessibilityManager$Stub$Proxy
 android.view.accessibility.IAccessibilityManager$Stub
 android.view.accessibility.IAccessibilityManager
+android.view.accessibility.IAccessibilityManagerClient$Stub$Proxy
 android.view.accessibility.IAccessibilityManagerClient$Stub
 android.view.accessibility.IAccessibilityManagerClient
 android.view.accessibility.WeakSparseArray$WeakReferenceWithId
@@ -9439,7 +9446,6 @@ android.view.inputmethod.IInputMethodSessionInvoker$$ExternalSyntheticLambda6
 android.view.inputmethod.IInputMethodSessionInvoker$$ExternalSyntheticLambda8
 android.view.inputmethod.IInputMethodSessionInvoker
 android.view.inputmethod.ImeTracker$1$$ExternalSyntheticLambda0
-android.view.inputmethod.ImeTracker$1
 android.view.inputmethod.ImeTracker$Debug$$ExternalSyntheticLambda0
 android.view.inputmethod.ImeTracker$Debug$$ExternalSyntheticLambda1
 android.view.inputmethod.ImeTracker$Debug$$ExternalSyntheticLambda2
@@ -10200,6 +10206,7 @@ android.window.BackProgressAnimator$$ExternalSyntheticLambda0
 android.window.BackProgressAnimator$1
 android.window.BackProgressAnimator$ProgressCallback
 android.window.BackProgressAnimator
+android.window.BackTouchTracker
 android.window.ClientWindowFrames$1
 android.window.ClientWindowFrames-IA
 android.window.ClientWindowFrames
@@ -10640,7 +10647,6 @@ com.android.ims.ImsMultiEndpoint$ImsExternalCallStateListenerProxy
 com.android.ims.ImsMultiEndpoint
 com.android.ims.ImsServiceClass
 com.android.ims.ImsUt$IImsUtListenerProxy
-com.android.ims.ImsUt
 com.android.ims.ImsUtInterface
 com.android.ims.MmTelFeatureConnection$BinderAccessState
 com.android.ims.MmTelFeatureConnection$CapabilityCallbackManager
@@ -11074,6 +11080,7 @@ com.android.internal.colorextraction.types.Tonal$ConfigParser
 com.android.internal.colorextraction.types.Tonal$TonalPalette
 com.android.internal.colorextraction.types.Tonal
 com.android.internal.compat.AndroidBuildClassifier
+com.android.internal.compat.ChangeReporter$$ExternalSyntheticLambda0
 com.android.internal.compat.ChangeReporter$ChangeReport
 com.android.internal.compat.ChangeReporter
 com.android.internal.compat.CompatibilityChangeConfig$1
@@ -11339,6 +11346,9 @@ com.android.internal.os.CachedDeviceState$TimeInStateStopwatch
 com.android.internal.os.CachedDeviceState
 com.android.internal.os.ClassLoaderFactory
 com.android.internal.os.Clock
+com.android.internal.os.FeatureFlags
+com.android.internal.os.FeatureFlagsImpl
+com.android.internal.os.Flags
 com.android.internal.os.FuseAppLoop$1
 com.android.internal.os.FuseAppLoop
 com.android.internal.os.FuseUnavailableMountException
@@ -11450,7 +11460,6 @@ com.android.internal.pm.pkg.component.flags.FeatureFlagsImpl
 com.android.internal.pm.pkg.component.flags.Flags
 com.android.internal.pm.pkg.parsing.ParsingPackageUtils$Callback
 com.android.internal.policy.AttributeCache
-com.android.internal.policy.BackdropFrameRenderer
 com.android.internal.policy.DecorContext
 com.android.internal.policy.DecorView$$ExternalSyntheticLambda0
 com.android.internal.policy.DecorView$$ExternalSyntheticLambda1
@@ -11919,7 +11928,6 @@ com.android.internal.telephony.PhoneSubInfoController$$ExternalSyntheticLambda8
 com.android.internal.telephony.PhoneSubInfoController$$ExternalSyntheticLambda9
 com.android.internal.telephony.PhoneSubInfoController$CallPhoneMethodHelper
 com.android.internal.telephony.PhoneSubInfoController$PermissionCheckHelper
-com.android.internal.telephony.PhoneSubInfoController
 com.android.internal.telephony.ProxyController$1
 com.android.internal.telephony.ProxyController
 com.android.internal.telephony.RIL$RadioProxyDeathRecipient
@@ -12312,7 +12320,6 @@ com.android.internal.telephony.euicc.EuiccController$9
 com.android.internal.telephony.euicc.EuiccController$DownloadSubscriptionGetMetadataCommandCallback
 com.android.internal.telephony.euicc.EuiccController$GetDefaultListCommandCallback
 com.android.internal.telephony.euicc.EuiccController$GetMetadataCommandCallback
-com.android.internal.telephony.euicc.EuiccController
 com.android.internal.telephony.euicc.EuiccOperation$1
 com.android.internal.telephony.euicc.EuiccOperation$Action
 com.android.internal.telephony.euicc.EuiccOperation
@@ -12474,7 +12481,6 @@ com.android.internal.telephony.imsphone.ImsPhoneCallTracker$$ExternalSyntheticLa
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$$ExternalSyntheticLambda2
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$$ExternalSyntheticLambda3
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$10
-com.android.internal.telephony.imsphone.ImsPhoneCallTracker$11
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$12
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$1
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$2
@@ -14202,6 +14208,7 @@ org.ccil.cowan.tagsoup.jaxp.SAXParserImpl
 [Landroid.icu.impl.units.MeasureUnitImpl$InitialCompoundPart;
 [Landroid.icu.impl.units.MeasureUnitImpl$PowerPart;
 [Landroid.icu.impl.units.MeasureUnitImpl$UnitsParser$Token$Type;
+[Landroid.icu.lang.UCharacter$IdentifierType;
 [Landroid.icu.lang.UCharacter$UnicodeBlock;
 [Landroid.icu.lang.UScript$ScriptUsage;
 [Landroid.icu.lang.UScriptRun$ParenStackEntry;

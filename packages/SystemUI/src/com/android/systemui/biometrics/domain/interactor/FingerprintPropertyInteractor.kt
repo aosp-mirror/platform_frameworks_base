@@ -98,11 +98,11 @@ constructor(
         ) { unscaledSensorLocation, scale ->
             val sensorLocation =
                 SensorLocation(
-                    unscaledSensorLocation.sensorLocationX,
-                    unscaledSensorLocation.sensorLocationY,
-                    unscaledSensorLocation.sensorRadius,
+                    naturalCenterX = unscaledSensorLocation.sensorLocationX,
+                    naturalCenterY = unscaledSensorLocation.sensorLocationY,
+                    naturalRadius = unscaledSensorLocation.sensorRadius,
+                    scale = scale
                 )
-            sensorLocation.scale = scale
             sensorLocation
         }
 

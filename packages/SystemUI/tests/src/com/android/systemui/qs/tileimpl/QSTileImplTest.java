@@ -48,11 +48,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.annotation.Nullable;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
@@ -75,6 +75,7 @@ import com.android.systemui.qs.QsEventLoggerFake;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.StatusBarState;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,7 +86,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class QSTileImplTest extends SysuiTestCase {
@@ -144,6 +145,12 @@ public class QSTileImplTest extends SysuiTestCase {
         mInstanceId = InstanceId.fakeInstanceId(mQsEventLoggerFake.getLastInstanceId());
 
         mTile.setTileSpec(SPEC);
+    }
+
+    @After
+    public void destroyTile() {
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
     }
 
     @Test

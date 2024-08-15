@@ -20,7 +20,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PixelFormat
@@ -33,13 +32,19 @@ import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
 import android.view.SurfaceSession
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL
 import android.view.WindowlessWindowManager
 import android.widget.ImageView
 import android.window.TaskConstants
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.ui.graphics.toArgb
 import com.android.wm.shell.R
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayController.OnDisplaysChangedListener
 import com.android.wm.shell.windowdecor.WindowDecoration.SurfaceControlViewHostFactory
+import com.android.wm.shell.windowdecor.common.DecorThemeUtil
+import com.android.wm.shell.windowdecor.common.Theme
 import java.util.function.Supplier
 
 /**
@@ -49,14 +54,18 @@ class ResizeVeil @JvmOverloads constructor(
         private val context: Context,
         private val displayController: DisplayController,
         private val appIcon: Bitmap,
-        private val taskInfo: RunningTaskInfo,
         private var parentSurface: SurfaceControl,
         private val surfaceControlTransactionSupplier: Supplier<SurfaceControl.Transaction>,
         private val surfaceControlBuilderFactory: SurfaceControlBuilderFactory =
                 object : SurfaceControlBuilderFactory {},
         private val surfaceControlViewHostFactory: SurfaceControlViewHostFactory =
-                object : SurfaceControlViewHostFactory {}
+                object : SurfaceControlViewHostFactory {},
+        taskInfo: RunningTaskInfo,
 ) {
+    private val decorThemeUtil = DecorThemeUtil(context)
+    private val lightColors = dynamicLightColorScheme(context)
+    private val darkColors = dynamicDarkColorScheme(context)
+
     private val surfaceSession = SurfaceSession()
     private lateinit var iconView: ImageView
     private var iconSize = 0
@@ -86,20 +95,9 @@ class ResizeVeil @JvmOverloads constructor(
                         return
                     }
                     displayController.removeDisplayWindowListener(this)
-                    setupResizeVeil()
+                    setupResizeVeil(taskInfo)
                 }
             }
-
-    private val backgroundColorId: Int
-        get() {
-            val configuration = context.resources.configuration
-            return if (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-                    == Configuration.UI_MODE_NIGHT_YES) {
-                R.color.desktop_mode_resize_veil_dark
-            } else {
-                R.color.desktop_mode_resize_veil_light
-            }
-        }
 
     /**
      * Whether the resize veil is ready to be shown.
@@ -108,14 +106,14 @@ class ResizeVeil @JvmOverloads constructor(
         get() = viewHost != null
 
     init {
-        setupResizeVeil()
+        setupResizeVeil(taskInfo)
     }
 
     /**
      * Create the veil in its default invisible state.
      */
-    private fun setupResizeVeil() {
-        if (!obtainDisplayOrRegisterListener()) {
+    private fun setupResizeVeil(taskInfo: RunningTaskInfo) {
+        if (!obtainDisplayOrRegisterListener(taskInfo.displayId)) {
             // Display may not be available yet, skip this until then.
             return
         }
@@ -154,6 +152,7 @@ class ResizeVeil @JvmOverloads constructor(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT)
         lp.title = "Resize veil icon window of Task=" + taskInfo.taskId
+        lp.inputFeatures = INPUT_FEATURE_NO_INPUT_CHANNEL
         lp.setTrustedOverlay()
         val wwm = WindowlessWindowManager(taskInfo.configuration,
                 iconSurface, null /* hostInputToken */)
@@ -162,8 +161,8 @@ class ResizeVeil @JvmOverloads constructor(
         Trace.endSection()
     }
 
-    private fun obtainDisplayOrRegisterListener(): Boolean {
-        display = displayController.getDisplay(taskInfo.displayId)
+    private fun obtainDisplayOrRegisterListener(displayId: Int): Boolean {
+        display = displayController.getDisplay(displayId)
         if (display == null) {
             displayController.addDisplayWindowListener(onDisplaysChangedListener)
             return false
@@ -184,7 +183,8 @@ class ResizeVeil @JvmOverloads constructor(
             t: SurfaceControl.Transaction,
             parent: SurfaceControl,
             taskBounds: Rect,
-            fadeIn: Boolean
+            taskInfo: RunningTaskInfo,
+            fadeIn: Boolean,
     ) {
         if (!isReady || isVisible) {
             t.apply()
@@ -202,13 +202,15 @@ class ResizeVeil @JvmOverloads constructor(
             parentSurface = parent
         }
 
-
+        val backgroundColor = when (decorThemeUtil.getAppTheme(taskInfo)) {
+            Theme.LIGHT -> lightColors.surfaceContainer
+            Theme.DARK -> darkColors.surfaceContainer
+        }
         t.show(veil)
                 .setLayer(veil, VEIL_CONTAINER_LAYER)
                 .setLayer(icon, VEIL_ICON_LAYER)
                 .setLayer(background, VEIL_BACKGROUND_LAYER)
-                .setColor(background,
-                        Color.valueOf(context.getColor(backgroundColorId)).components)
+                .setColor(background, Color.valueOf(backgroundColor.toArgb()).components)
         relayout(taskBounds, t)
         if (fadeIn) {
             cancelAnimation()
@@ -270,12 +272,12 @@ class ResizeVeil @JvmOverloads constructor(
     /**
      * Animate veil's alpha to 1, fading it in.
      */
-    fun showVeil(parentSurface: SurfaceControl, taskBounds: Rect) {
+    fun showVeil(parentSurface: SurfaceControl, taskBounds: Rect, taskInfo: RunningTaskInfo) {
         if (!isReady || isVisible) {
             return
         }
         val t = surfaceControlTransactionSupplier.get()
-        showVeil(t, parentSurface, taskBounds, true /* fadeIn */)
+        showVeil(t, parentSurface, taskBounds, taskInfo, true /* fadeIn */)
     }
 
     /**

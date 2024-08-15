@@ -50,5 +50,8 @@ class WindowManagerFlags {
 
     final boolean mInsetsDecoupledConfiguration = Flags.insetsDecoupledConfiguration();
 
+    final boolean mRespectNonTopVisibleFixedOrientation =
+            Flags.respectNonTopVisibleFixedOrientation();
+
     /* End Available Flags */
 }

@@ -19,6 +19,7 @@ package com.android.mediaframeworktest.integration;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 
+import android.content.AttributionSourceState;
 import android.hardware.CameraInfo;
 import android.hardware.ICamera;
 import android.hardware.ICameraClient;
@@ -37,6 +38,8 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.mediaframeworktest.helpers.CameraTestUtils;
 
 /**
  * <p>
@@ -78,8 +81,10 @@ public class CameraBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testNumberOfCameras() throws Exception {
+        AttributionSourceState clientAttribution = CameraTestUtils.getClientAttribution(mContext);
+        clientAttribution.deviceId = DEVICE_ID_DEFAULT;
         int numCameras = mUtils.getCameraService().getNumberOfCameras(CAMERA_TYPE_ALL,
-                DEVICE_ID_DEFAULT, DEVICE_POLICY_DEFAULT);
+                clientAttribution, DEVICE_POLICY_DEFAULT);
         assertTrue("At least this many cameras: " + mUtils.getGuessedNumCameras(),
                 numCameras >= mUtils.getGuessedNumCameras());
         Log.v(TAG, "Number of cameras " + numCameras);
@@ -87,9 +92,11 @@ public class CameraBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testCameraInfo() throws Exception {
+        AttributionSourceState clientAttribution = CameraTestUtils.getClientAttribution(mContext);
+        clientAttribution.deviceId = DEVICE_ID_DEFAULT;
         for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
             CameraInfo info = mUtils.getCameraService().getCameraInfo(cameraId,
-                    ICameraService.ROTATION_OVERRIDE_NONE, DEVICE_ID_DEFAULT,
+                    ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution,
                     DEVICE_POLICY_DEFAULT);
             assertTrue("Facing was not set for camera " + cameraId, info.info.facing != -1);
             assertTrue("Orientation was not set for camera " + cameraId,
@@ -154,20 +161,20 @@ public class CameraBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testConnect() throws Exception {
+        AttributionSourceState clientAttribution = CameraTestUtils.getClientAttribution(mContext);
+        clientAttribution.deviceId = DEVICE_ID_DEFAULT;
+        clientAttribution.uid = ICameraService.USE_CALLING_UID;
+        clientAttribution.pid = ICameraService.USE_CALLING_PID;
         for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
 
             ICameraClient dummyCallbacks = new DummyCameraClient();
 
-            String clientPackageName = getContext().getPackageName();
-
             ICamera cameraUser = mUtils.getCameraService()
-                    .connect(dummyCallbacks, cameraId, clientPackageName,
-                            ICameraService.USE_CALLING_UID,
-                            ICameraService.USE_CALLING_PID,
+                    .connect(dummyCallbacks, cameraId,
                             getContext().getApplicationInfo().targetSdkVersion,
                             ICameraService.ROTATION_OVERRIDE_NONE,
                             /*forceSlowJpegMode*/false,
-                            DEVICE_ID_DEFAULT, DEVICE_POLICY_DEFAULT);
+                            clientAttribution, DEVICE_POLICY_DEFAULT);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
@@ -258,16 +265,17 @@ public class CameraBinderTest extends AndroidTestCase {
 
             ICameraDeviceCallbacks dummyCallbacks = new DummyCameraDeviceCallbacks();
 
-            String clientPackageName = getContext().getPackageName();
-            String clientAttributionTag = getContext().getAttributionTag();
+            AttributionSourceState clientAttribution =
+                    CameraTestUtils.getClientAttribution(mContext);
+            clientAttribution.deviceId = DEVICE_ID_DEFAULT;
+            clientAttribution.uid = ICameraService.USE_CALLING_UID;
 
             ICameraDeviceUser cameraUser =
                     mUtils.getCameraService().connectDevice(
                         dummyCallbacks, String.valueOf(cameraId),
-                        clientPackageName, clientAttributionTag,
-                        ICameraService.USE_CALLING_UID, 0 /*oomScoreOffset*/,
+                        0 /*oomScoreOffset*/,
                         getContext().getApplicationInfo().targetSdkVersion,
-                        ICameraService.ROTATION_OVERRIDE_NONE, DEVICE_ID_DEFAULT,
+                        ICameraService.ROTATION_OVERRIDE_NONE, clientAttribution,
                         DEVICE_POLICY_DEFAULT);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 

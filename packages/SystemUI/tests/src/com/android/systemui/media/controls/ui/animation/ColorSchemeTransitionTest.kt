@@ -18,8 +18,8 @@ package com.android.systemui.media.controls.ui.animation
 
 import android.animation.ValueAnimator
 import android.graphics.Color
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.ui.view.GutsViewHolder
@@ -44,7 +44,7 @@ private const val DEFAULT_COLOR = Color.RED
 private const val TARGET_COLOR = Color.BLUE
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class ColorSchemeTransitionTest : SysuiTestCase() {
 

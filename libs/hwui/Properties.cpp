@@ -39,6 +39,17 @@ constexpr bool clip_surfaceviews() {
 constexpr bool hdr_10bit_plus() {
     return false;
 }
+constexpr bool initialize_gl_always() {
+    return false;
+}
+
+constexpr bool skip_eglmanager_telemetry() {
+    return false;
+}
+
+constexpr bool resample_gainmap_regions() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
@@ -97,6 +108,10 @@ float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
 
 bool Properties::clipSurfaceViews = false;
 bool Properties::hdr10bitPlus = false;
+bool Properties::skipTelemetry = false;
+bool Properties::resampleGainmapRegions = false;
+
+int Properties::timeoutMultiplier = 1;
 
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
@@ -170,6 +185,12 @@ bool Properties::load() {
     clipSurfaceViews =
             base::GetBoolProperty("debug.hwui.clip_surfaceviews", hwui_flags::clip_surfaceviews());
     hdr10bitPlus = hwui_flags::hdr_10bit_plus();
+    resampleGainmapRegions = base::GetBoolProperty("debug.hwui.resample_gainmap_regions",
+                                                   hwui_flags::resample_gainmap_regions());
+
+    timeoutMultiplier = android::base::GetIntProperty("ro.hw_timeout_multiplier", 1);
+    skipTelemetry = base::GetBoolProperty(PROPERTY_SKIP_EGLMANAGER_TELEMETRY,
+                                          hwui_flags::skip_eglmanager_telemetry());
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }
@@ -255,6 +276,10 @@ bool Properties::isDrawingEnabled() {
         enableRTAnimations = drawingEnabledProp;
     }
     return drawingEnabled == DrawingEnabled::On;
+}
+
+bool Properties::initializeGlAlways() {
+    return base::GetBoolProperty(PROPERTY_INITIALIZE_GL_ALWAYS, hwui_flags::initialize_gl_always());
 }
 
 }  // namespace uirenderer

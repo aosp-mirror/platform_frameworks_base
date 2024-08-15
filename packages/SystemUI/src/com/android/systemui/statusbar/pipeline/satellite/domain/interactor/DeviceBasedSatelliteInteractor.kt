@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelli
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
-import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,7 +44,6 @@ class DeviceBasedSatelliteInteractor
 constructor(
     val repo: DeviceBasedSatelliteRepository,
     iconsInteractor: MobileIconsInteractor,
-    deviceProvisioningInteractor: DeviceProvisioningInteractor,
     wifiInteractor: WifiInteractor,
     @Application scope: CoroutineScope,
     @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
@@ -78,7 +76,7 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
-    val isDeviceProvisioned: Flow<Boolean> = deviceProvisioningInteractor.isDeviceProvisioned
+    val isSatelliteProvisioned = repo.isSatelliteProvisioned
 
     val isWifiActive: Flow<Boolean> =
         wifiInteractor.wifiNetwork.map { it is WifiNetworkModel.Active }

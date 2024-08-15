@@ -16,135 +16,136 @@
 
 package com.android.settingslib.media;
 
+import static android.media.AudioDeviceInfo.AudioDeviceType;
+import static android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
+import static android.media.AudioDeviceInfo.TYPE_DOCK;
+import static android.media.AudioDeviceInfo.TYPE_HDMI;
+import static android.media.AudioDeviceInfo.TYPE_HDMI_ARC;
+import static android.media.AudioDeviceInfo.TYPE_HDMI_EARC;
+import static android.media.AudioDeviceInfo.TYPE_USB_ACCESSORY;
+import static android.media.AudioDeviceInfo.TYPE_USB_DEVICE;
+import static android.media.AudioDeviceInfo.TYPE_USB_HEADSET;
+import static android.media.AudioDeviceInfo.TYPE_WIRED_HEADPHONES;
+import static android.media.AudioDeviceInfo.TYPE_WIRED_HEADSET;
+
 import android.annotation.DrawableRes;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.media.AudioDeviceInfo;
 import android.media.MediaRoute2Info;
+import android.os.SystemProperties;
+import android.util.SparseIntArray;
 
+import androidx.annotation.NonNull;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
 import com.android.settingslib.media.flags.Flags;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /** A util class to get the appropriate icon for different device types. */
 public class DeviceIconUtil {
 
-    // A default icon to use if the type is not present in the map.
-    @DrawableRes private static final int DEFAULT_ICON = R.drawable.ic_smartphone;
-    @DrawableRes private static final int DEFAULT_ICON_TV = R.drawable.ic_media_speaker_device;
-
-    // A map from a @AudioDeviceInfo.AudioDeviceType to full device information.
-    private final Map<Integer, Device> mAudioDeviceTypeToIconMap = new HashMap<>();
-    // A map from a @MediaRoute2Info.Type to full device information.
-    private final Map<Integer, Device> mMediaRouteTypeToIconMap = new HashMap<>();
+    private static final SparseIntArray AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE = new SparseIntArray();
 
     private final boolean mIsTv;
-
-    public DeviceIconUtil(Context context) {
-        this(context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK));
+    private final boolean mIsTablet;
+    private final Context mContext;
+    public DeviceIconUtil(@NonNull Context context) {
+        mContext = Objects.requireNonNull(context);
+        mIsTv =
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                        && Flags.enableTvMediaOutputDialog();
+        mIsTablet =
+                Arrays.asList(SystemProperties.get("ro.build.characteristics").split(","))
+                        .contains("tablet");
     }
 
-    public DeviceIconUtil(boolean isTv) {
-        mIsTv = isTv && Flags.enableTvMediaOutputDialog();
-        List<Device> deviceList = Arrays.asList(
-                        new Device(
-                                AudioDeviceInfo.TYPE_USB_DEVICE,
-                                MediaRoute2Info.TYPE_USB_DEVICE,
-                                R.drawable.ic_headphone),
-                        new Device(
-                                AudioDeviceInfo.TYPE_USB_HEADSET,
-                                MediaRoute2Info.TYPE_USB_HEADSET,
-                                R.drawable.ic_headphone),
-                        new Device(
-                                AudioDeviceInfo.TYPE_USB_ACCESSORY,
-                                MediaRoute2Info.TYPE_USB_ACCESSORY,
-                                mIsTv ? R.drawable.ic_usb : R.drawable.ic_headphone),
-                        new Device(
-                                AudioDeviceInfo.TYPE_DOCK,
-                                MediaRoute2Info.TYPE_DOCK,
-                                R.drawable.ic_dock_device),
-                        new Device(
-                                AudioDeviceInfo.TYPE_HDMI,
-                                MediaRoute2Info.TYPE_HDMI,
-                                mIsTv ? R.drawable.ic_tv : R.drawable.ic_external_display),
-                        new Device(
-                                AudioDeviceInfo.TYPE_HDMI_ARC,
-                                MediaRoute2Info.TYPE_HDMI_ARC,
-                                mIsTv ? R.drawable.ic_hdmi : R.drawable.ic_external_display),
-                        new Device(
-                                AudioDeviceInfo.TYPE_HDMI_EARC,
-                                MediaRoute2Info.TYPE_HDMI_EARC,
-                                mIsTv ? R.drawable.ic_hdmi : R.drawable.ic_external_display),
-                        new Device(
-                                AudioDeviceInfo.TYPE_WIRED_HEADSET,
-                                MediaRoute2Info.TYPE_WIRED_HEADSET,
-                                mIsTv ? R.drawable.ic_wired_device : R.drawable.ic_headphone),
-                        new Device(
-                                AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
-                                MediaRoute2Info.TYPE_WIRED_HEADPHONES,
-                                mIsTv ? R.drawable.ic_wired_device : R.drawable.ic_headphone),
-                        new Device(
-                                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
-                                MediaRoute2Info.TYPE_BUILTIN_SPEAKER,
-                                mIsTv ? R.drawable.ic_tv : R.drawable.ic_smartphone));
-        for (int i = 0; i < deviceList.size(); i++) {
-            Device device = deviceList.get(i);
-            mAudioDeviceTypeToIconMap.put(device.mAudioDeviceType, device);
-            mMediaRouteTypeToIconMap.put(device.mMediaRouteType, device);
-        }
-    }
-
-    private int getDefaultIcon() {
-        return mIsTv ? DEFAULT_ICON_TV : DEFAULT_ICON;
+    @VisibleForTesting
+    /* package */ DeviceIconUtil(boolean isTv) {
+        mContext = null;
+        mIsTv = isTv;
+        mIsTablet = false;
     }
 
     /** Returns a drawable for an icon representing the given audioDeviceType. */
-    public Drawable getIconFromAudioDeviceType(
-            @AudioDeviceInfo.AudioDeviceType int audioDeviceType, Context context) {
-        return context.getDrawable(getIconResIdFromAudioDeviceType(audioDeviceType));
+    public Drawable getIconFromAudioDeviceType(@AudioDeviceType int audioDeviceType) {
+        return mContext.getDrawable(getIconResIdFromAudioDeviceType(audioDeviceType));
     }
 
     /** Returns a drawable res ID for an icon representing the given audioDeviceType. */
     @DrawableRes
-    public int getIconResIdFromAudioDeviceType(
-            @AudioDeviceInfo.AudioDeviceType int audioDeviceType) {
-        if (mAudioDeviceTypeToIconMap.containsKey(audioDeviceType)) {
-            return mAudioDeviceTypeToIconMap.get(audioDeviceType).mIconDrawableRes;
-        }
-        return getDefaultIcon();
+    public int getIconResIdFromAudioDeviceType(@AudioDeviceType int audioDeviceType) {
+        int mediaRouteType =
+                AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.get(audioDeviceType, /* defaultValue */ -1);
+        return getIconResIdFromMediaRouteType(mediaRouteType);
     }
 
     /** Returns a drawable res ID for an icon representing the given mediaRouteType. */
     @DrawableRes
-    public int getIconResIdFromMediaRouteType(
-            @MediaRoute2Info.Type int mediaRouteType) {
-        if (mMediaRouteTypeToIconMap.containsKey(mediaRouteType)) {
-            return mMediaRouteTypeToIconMap.get(mediaRouteType).mIconDrawableRes;
-        }
-        return getDefaultIcon();
+    public int getIconResIdFromMediaRouteType(@MediaRoute2Info.Type int type) {
+        return mIsTv
+                ? getIconResourceIdForTv(type)
+                : getIconResourceIdForPhoneOrTablet(type, mIsTablet);
     }
 
-    private static class Device {
-        @AudioDeviceInfo.AudioDeviceType
-        private final int mAudioDeviceType;
+    @SuppressLint("SwitchIntDef")
+    @DrawableRes
+    private static int getIconResourceIdForPhoneOrTablet(
+            @MediaRoute2Info.Type int type, boolean isTablet) {
+        int defaultResId = isTablet ? R.drawable.ic_media_tablet : R.drawable.ic_smartphone;
 
-        @MediaRoute2Info.Type
-        private final int mMediaRouteType;
+        return switch (type) {
+            case MediaRoute2Info.TYPE_USB_DEVICE,
+                            MediaRoute2Info.TYPE_USB_HEADSET,
+                            MediaRoute2Info.TYPE_USB_ACCESSORY,
+                            MediaRoute2Info.TYPE_WIRED_HEADSET,
+                            MediaRoute2Info.TYPE_WIRED_HEADPHONES ->
+                    R.drawable.ic_headphone;
+            case MediaRoute2Info.TYPE_DOCK -> R.drawable.ic_dock_device;
+            case MediaRoute2Info.TYPE_HDMI,
+                            MediaRoute2Info.TYPE_HDMI_ARC,
+                            MediaRoute2Info.TYPE_HDMI_EARC ->
+                    R.drawable.ic_external_display;
+            default -> defaultResId; // Includes TYPE_BUILTIN_SPEAKER.
+        };
+    }
 
-        @DrawableRes
-        private final int mIconDrawableRes;
+    @SuppressLint("SwitchIntDef")
+    @DrawableRes
+    private static int getIconResourceIdForTv(@MediaRoute2Info.Type int type) {
+        return switch (type) {
+            case MediaRoute2Info.TYPE_USB_DEVICE, MediaRoute2Info.TYPE_USB_HEADSET ->
+                    R.drawable.ic_headphone;
+            case MediaRoute2Info.TYPE_USB_ACCESSORY -> R.drawable.ic_usb;
+            case MediaRoute2Info.TYPE_DOCK -> R.drawable.ic_dock_device;
+            case MediaRoute2Info.TYPE_HDMI, MediaRoute2Info.TYPE_BUILTIN_SPEAKER ->
+                    R.drawable.ic_tv;
+            case MediaRoute2Info.TYPE_HDMI_ARC, MediaRoute2Info.TYPE_HDMI_EARC ->
+                    R.drawable.ic_hdmi;
+            case MediaRoute2Info.TYPE_WIRED_HEADSET, MediaRoute2Info.TYPE_WIRED_HEADPHONES ->
+                    R.drawable.ic_wired_device;
+            default -> R.drawable.ic_media_speaker_device;
+        };
+    }
 
-        Device(@AudioDeviceInfo.AudioDeviceType int audioDeviceType,
-                @MediaRoute2Info.Type int mediaRouteType,
-                @DrawableRes int iconDrawableRes) {
-            mAudioDeviceType = audioDeviceType;
-            mMediaRouteType = mediaRouteType;
-            mIconDrawableRes = iconDrawableRes;
-        }
+    static {
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(TYPE_USB_DEVICE, MediaRoute2Info.TYPE_USB_DEVICE);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(TYPE_USB_HEADSET, MediaRoute2Info.TYPE_USB_HEADSET);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(
+                TYPE_USB_ACCESSORY, MediaRoute2Info.TYPE_USB_ACCESSORY);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(TYPE_DOCK, MediaRoute2Info.TYPE_DOCK);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(TYPE_HDMI, MediaRoute2Info.TYPE_HDMI);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(TYPE_HDMI_ARC, MediaRoute2Info.TYPE_HDMI_ARC);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(TYPE_HDMI_EARC, MediaRoute2Info.TYPE_HDMI_EARC);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(
+                TYPE_WIRED_HEADSET, MediaRoute2Info.TYPE_WIRED_HEADSET);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(
+                TYPE_WIRED_HEADPHONES, MediaRoute2Info.TYPE_WIRED_HEADPHONES);
+        AUDIO_DEVICE_TO_MEDIA_ROUTE_TYPE.put(
+                TYPE_BUILTIN_SPEAKER, MediaRoute2Info.TYPE_BUILTIN_SPEAKER);
     }
 }

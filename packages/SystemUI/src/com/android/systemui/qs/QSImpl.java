@@ -54,6 +54,7 @@ import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSComponent;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
@@ -162,6 +163,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private boolean mQsVisible;
 
     private boolean mIsSmallScreen;
+
+    /** Should the squishiness fraction be updated on the media host. */
+    private boolean mShouldUpdateMediaSquishiness;
 
     private CommandQueue mCommandQueue;
 
@@ -352,7 +356,33 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @Override
     public View getHeader() {
+        QSComposeFragment.assertInLegacyMode();
         return mHeader;
+    }
+
+    @Override
+    public int getHeaderTop() {
+        return mHeader.getTop();
+    }
+
+    @Override
+    public int getHeaderBottom() {
+        return mHeader.getBottom();
+    }
+
+    @Override
+    public int getHeaderLeft() {
+        return mHeader.getLeft();
+    }
+
+    @Override
+    public void getHeaderBoundsOnScreen(Rect outBounds) {
+        mHeader.getBoundsOnScreen(outBounds);
+    }
+
+    @Override
+    public boolean isHeaderShown() {
+        return mHeader.isShown();
     }
 
     @Override
@@ -619,6 +649,12 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     @Override
+    public void setShouldUpdateSquishinessOnMedia(boolean shouldUpdate) {
+        if (DEBUG) Log.d(TAG, "setShouldUpdateSquishinessOnMedia " + shouldUpdate);
+        mShouldUpdateMediaSquishiness = shouldUpdate;
+    }
+
+    @Override
     public void setQsExpansion(float expansion, float panelExpansionFraction,
             float proposedTranslation, float squishinessFraction) {
         float headerTranslation = mTransitioningToFullShade ? 0 : proposedTranslation;
@@ -697,9 +733,11 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
         }
-        if (!mInSplitShade
+        if (!mShouldUpdateMediaSquishiness
+                && (!mInSplitShade
                 || mStatusBarStateController.getState() == KEYGUARD
-                || mStatusBarStateController.getState() == SHADE_LOCKED) {
+                || mStatusBarStateController.getState() == SHADE_LOCKED)
+        ) {
             // At beginning, state is 0 and will apply wrong squishiness to MediaHost in lockscreen
             // and media player expect no change by squishiness in lock screen shade. Don't bother
             // squishing mQsMediaHost when not in split shade to prevent problems with stale state.
@@ -954,8 +992,22 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         return mContainer.getQqsHeight();
     }
 
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedQqsHeight() {
+        return mContainer.getSquishedQqsHeight();
+    }
+
     public int getQSHeight() {
         return mContainer.getQsHeight();
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedQsHeight() {
+        return mContainer.getSquishedQsHeight();
     }
 
     /**
@@ -995,6 +1047,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         indentingPw.println("mTransitioningToFullShade: " + mTransitioningToFullShade);
         indentingPw.println("mLockscreenToShadeProgress: " + mLockscreenToShadeProgress);
         indentingPw.println("mOverScrolling: " + mOverScrolling);
+        indentingPw.println("mShouldUpdateMediaSquishiness: " + mShouldUpdateMediaSquishiness);
         indentingPw.println("isCustomizing: " + mQSCustomizerController.isCustomizing());
         View view = getView();
         if (view != null) {

@@ -56,7 +56,8 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
-import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineConversationViewBinder;
+import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
+import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.SingleLineViewBinder;
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
@@ -92,7 +93,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
     private final HeadsUpStyleProvider mHeadsUpStyleProvider;
 
-    private final NotificationContentInflaterLogger mLogger;
+    private final NotificationRowContentBinderLogger mLogger;
 
     @Inject
     NotificationContentInflater(
@@ -104,7 +105,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             SmartReplyStateInflater smartRepliesInflater,
             NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             HeadsUpStyleProvider headsUpStyleProvider,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
+        NotificationRowContentBinderRefactor.assertInLegacyMode();
         mRemoteViewCache = remoteViewCache;
         mRemoteInputManager = remoteInputManager;
         mConversationProcessor = conversationProcessor;
@@ -194,8 +196,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
         result = inflateSmartReplyViews(result, reInflateFlags, entry, row.getContext(),
                 packageContext, row.getExistingSmartReplyState(), smartRepliesInflater, mLogger);
+        boolean isConversation = entry.getRanking().isConversation();
         if (AsyncHybridViewInflation.isEnabled()) {
-            boolean isConversation = entry.getRanking().isConversation();
             Notification.MessagingStyle messagingStyle = null;
             if (isConversation) {
                 messagingStyle = mConversationProcessor
@@ -208,8 +210,22 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                             builder,
                             row.getContext()
                     );
-            result.mInflatedSingleLineViewHolder =
-                    SingleLineViewInflater.inflateSingleLineViewHolder(
+            result.mInflatedSingleLineView =
+                    SingleLineViewInflater.inflatePrivateSingleLineView(
+                            isConversation,
+                            reInflateFlags,
+                            entry,
+                            row.getContext(),
+                            mLogger
+                    );
+        }
+
+        if (LockscreenOtpRedaction.isEnabled()) {
+            result.mPublicInflatedSingleLineViewModel =
+                    SingleLineViewInflater.inflateRedactedSingleLineViewModel(row.getContext(),
+                            isConversation);
+            result.mPublicInflatedSingleLineView =
+                    SingleLineViewInflater.inflatePublicSingleLineView(
                             isConversation,
                             reInflateFlags,
                             entry,
@@ -289,6 +305,16 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     row.getPrivateLayout().setHeadsUpInflatedSmartReplies(null);
                 });
                 break;
+            case FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE:
+                if (LockscreenOtpRedaction.isEnabled()) {
+                    row.getPublicLayout()
+                            .performWhenContentInactive(VISIBLE_TYPE_SINGLELINE, () -> {
+                                row.getPublicLayout().setSingleLineView(null);
+                                mRemoteViewCache.removeCachedView(entry,
+                                        FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
+                            });
+                }
+                break;
             case FLAG_CONTENT_VIEW_PUBLIC:
                 row.getPublicLayout().performWhenContentInactive(VISIBLE_TYPE_CONTRACTED, () -> {
                     row.getPublicLayout().setContractedChild(null);
@@ -332,6 +358,10 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED);
         }
         if (AsyncHybridViewInflation.isEnabled()
+                && (contentViews & FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE) != 0) {
+            row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
+        }
+        if (LockscreenOtpRedaction.isEnabled()
                 && (contentViews & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
             row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }
@@ -345,7 +375,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             Context packageContext,
             InflatedSmartReplyState previousSmartReplyState,
             SmartReplyStateInflater inflater,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         boolean inflateContracted = (reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0
                 && result.newContentView != null;
         boolean inflateExpanded = (reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0
@@ -377,7 +407,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             ExpandableNotificationRow row,
             NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             HeadsUpStyleProvider headsUpStyleProvider,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         return TraceUtils.trace("NotificationContentInflater.createRemoteViews", () -> {
             InflationProgress result = new InflationProgress();
             final NotificationEntry entryForLogging = row.getEntry();
@@ -465,7 +495,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             ExpandableNotificationRow row,
             RemoteViews.InteractionHandler remoteViewClickHandler,
             @Nullable InflationCallback callback,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         Trace.beginAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row));
 
         NotificationContentView privateLayout = row.getPrivateLayout();
@@ -676,7 +706,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             NotificationViewWrapper existingWrapper,
             final HashMap<Integer, CancellationSignal> runningInflations,
             ApplyCallback applyCallback,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         RemoteViews newContentView = applyCallback.getRemoteView();
         if (inflateSynchronously) {
             try {
@@ -845,7 +875,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private static void handleInflationError(
             HashMap<Integer, CancellationSignal> runningInflations, Exception e,
             NotificationEntry notification, @Nullable InflationCallback callback,
-            NotificationContentInflaterLogger logger, String logContext) {
+            NotificationRowContentBinderLogger logger, String logContext) {
         Assert.isMainThread();
         logger.logAsyncTaskException(notification, logContext, e);
         runningInflations.values().forEach(CancellationSignal::cancel);
@@ -864,7 +894,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             @InflationFlag int reInflateFlags, NotifRemoteViewCache remoteViewCache,
             HashMap<Integer, CancellationSignal> runningInflations,
             @Nullable InflationCallback endListener, NotificationEntry entry,
-            ExpandableNotificationRow row, NotificationContentInflaterLogger logger) {
+            ExpandableNotificationRow row, NotificationRowContentBinderLogger logger) {
         Assert.isMainThread();
         if (!runningInflations.isEmpty()) {
             return false;
@@ -933,19 +963,21 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
         if (AsyncHybridViewInflation.isEnabled()
                 && (reInflateFlags & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
-            HybridNotificationView viewHolder = result.mInflatedSingleLineViewHolder;
+            HybridNotificationView view = result.mInflatedSingleLineView;
             SingleLineViewModel viewModel = result.mInflatedSingleLineViewModel;
-            if (viewHolder != null && viewModel != null) {
-                if (viewModel.isConversation()) {
-                    SingleLineConversationViewBinder.bind(
-                            result.mInflatedSingleLineViewModel,
-                            result.mInflatedSingleLineViewHolder
-                    );
-                } else {
-                    SingleLineViewBinder.bind(result.mInflatedSingleLineViewModel,
-                            result.mInflatedSingleLineViewHolder);
-                }
-                privateLayout.setSingleLineView(result.mInflatedSingleLineViewHolder);
+            if (view != null && viewModel != null) {
+                SingleLineViewBinder.bind(viewModel, view);
+                privateLayout.setSingleLineView(result.mInflatedSingleLineView);
+            }
+        }
+
+        if (LockscreenOtpRedaction.isEnabled()
+                && (reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE) != 0) {
+            HybridNotificationView view = result.mPublicInflatedSingleLineView;
+            SingleLineViewModel viewModel = result.mPublicInflatedSingleLineViewModel;
+            if (view != null && viewModel != null) {
+                SingleLineViewBinder.bind(viewModel, view);
+                publicLayout.setSingleLineView(result.mPublicInflatedSingleLineView);
             }
         }
 
@@ -1080,7 +1112,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final SmartReplyStateInflater mSmartRepliesInflater;
         private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
         private final HeadsUpStyleProvider mHeadsUpStyleProvider;
-        private final NotificationContentInflaterLogger mLogger;
+        private final NotificationRowContentBinderLogger mLogger;
 
         private AsyncInflationTask(
                 Executor inflationExecutor,
@@ -1099,7 +1131,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 SmartReplyStateInflater smartRepliesInflater,
                 NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
                 HeadsUpStyleProvider headsUpStyleProvider,
-                NotificationContentInflaterLogger logger) {
+                NotificationRowContentBinderLogger logger) {
             mEntry = entry;
             mRow = row;
             mInflationExecutor = inflationExecutor;
@@ -1209,8 +1241,22 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                                 recoveredBuilder,
                                 mContext
                         );
-                result.mInflatedSingleLineViewHolder =
-                        SingleLineViewInflater.inflateSingleLineViewHolder(
+                result.mInflatedSingleLineView =
+                        SingleLineViewInflater.inflatePrivateSingleLineView(
+                                isConversation,
+                                mReInflateFlags,
+                                mEntry,
+                                mContext,
+                                mLogger
+                        );
+            }
+
+            if (LockscreenOtpRedaction.isEnabled()) {
+                result.mPublicInflatedSingleLineViewModel =
+                        SingleLineViewInflater.inflateRedactedSingleLineViewModel(mContext,
+                                isConversation);
+                result.mPublicInflatedSingleLineView =
+                        SingleLineViewInflater.inflatePublicSingleLineView(
                                 isConversation,
                                 mReInflateFlags,
                                 mEntry,
@@ -1345,8 +1391,13 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
         // ViewModel for SingleLineView, holds the UI State
         SingleLineViewModel mInflatedSingleLineViewModel;
+        // ViewModel for public SingleLineView, holds the UI State
+        SingleLineViewModel mPublicInflatedSingleLineViewModel;
         // Inflated SingleLineViewHolder, SingleLineView that lacks the UI State
-        HybridNotificationView mInflatedSingleLineViewHolder;
+        HybridNotificationView mInflatedSingleLineView;
+        // Inflated SingleLineViewHolder, SingleLineView that lacks the UI State for the public
+        // single line view
+        HybridNotificationView mPublicInflatedSingleLineView;
     }
 
     @VisibleForTesting

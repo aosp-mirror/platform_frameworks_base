@@ -1411,10 +1411,8 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         return JNI_TRUE;
     }
 
-    if (err == FAILED_TRANSACTION) {
-        env->CallStaticVoidMethod(gBinderOffsets.mClass, gBinderOffsets.mTransactionCallback,
-                                  getpid(), code, flags, err);
-    }
+    env->CallStaticVoidMethod(gBinderOffsets.mClass, gBinderOffsets.mTransactionCallback, getpid(),
+                              code, flags, err);
 
     if (err == UNKNOWN_TRANSACTION) {
         return JNI_FALSE;

@@ -20,16 +20,22 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 
 import java.util.List;
 
-public class DrawBitmap extends PaintOperation {
+public class DrawBitmap extends PaintOperation implements VariableSupport {
     public static final Companion COMPANION = new Companion();
     float mLeft;
     float mTop;
     float mRight;
     float mBottom;
+    float mOutputLeft;
+    float mOutputTop;
+    float mOutputRight;
+    float mOutputBottom;
     int mId;
     int mDescriptionId = 0;
 
@@ -46,6 +52,34 @@ public class DrawBitmap extends PaintOperation {
         mBottom = bottom;
         mId = imageId;
         mDescriptionId = descriptionId;
+    }
+
+    @Override
+    public void updateVariables(RemoteContext context) {
+        mOutputLeft = (Float.isNaN(mLeft))
+                ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
+        mOutputTop = (Float.isNaN(mTop))
+                ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
+        mOutputRight = (Float.isNaN(mRight))
+                ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
+        mOutputBottom = (Float.isNaN(mBottom))
+                ? context.getFloat(Utils.idFromNan(mBottom)) : mBottom;
+    }
+
+    @Override
+    public void registerListening(RemoteContext context) {
+        if (Float.isNaN(mLeft)) {
+            context.listensTo(Utils.idFromNan(mLeft), this);
+        }
+        if (Float.isNaN(mTop)) {
+            context.listensTo(Utils.idFromNan(mTop), this);
+        }
+        if (Float.isNaN(mRight)) {
+            context.listensTo(Utils.idFromNan(mRight), this);
+        }
+        if (Float.isNaN(mBottom)) {
+            context.listensTo(Utils.idFromNan(mBottom), this);
+        }
     }
 
     @Override
@@ -105,9 +139,9 @@ public class DrawBitmap extends PaintOperation {
 
     @Override
     public void paint(PaintContext context) {
-        context.drawBitmap(mId, mLeft,
-                mTop,
-                mRight,
-                mBottom);
+        context.drawBitmap(mId, mOutputLeft,
+                mOutputTop,
+                mOutputRight,
+                mOutputBottom);
     }
 }

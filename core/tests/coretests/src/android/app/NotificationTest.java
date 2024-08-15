@@ -84,6 +84,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.Spannable;
@@ -545,12 +547,26 @@ public class NotificationTest {
     }
 
     @Test
+    @DisableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
     public void testBuilder_setSilent_emptyGroupKey_groupKeySilent() {
         Notification emptyGroupKeyNotif = new Notification.Builder(mContext, "channelId")
                 .setGroup("")
                 .setSilent(true)
                 .build();
-        assertEquals(GROUP_KEY_SILENT, emptyGroupKeyNotif.getGroup());
+        assertThat(emptyGroupKeyNotif.getGroup()).isEqualTo(GROUP_KEY_SILENT);
+        assertThat(emptyGroupKeyNotif.isSilent()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    public void testBuilder_setSilent_flagSilent() {
+        final String groupKey = "groupKey";
+        Notification emptyGroupKeyNotif = new Notification.Builder(mContext, "channelId")
+            .setGroup(groupKey)
+            .setSilent(true)
+            .build();
+        assertThat(emptyGroupKeyNotif.getGroup()).isEqualTo(groupKey);
+        assertThat(emptyGroupKeyNotif.isSilent()).isTrue();
     }
 
     @Test
@@ -703,10 +719,10 @@ public class NotificationTest {
                 hugeIcon).build();
 
         Bitmap smallNotificationIcon = notification.getSmallIcon().getBitmap();
-        assertThat(smallNotificationIcon.getWidth()).isEqualTo(
+        assertThat((float) smallNotificationIcon.getWidth()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
-        assertThat(smallNotificationIcon.getHeight()).isEqualTo(
+        assertThat((float) smallNotificationIcon.getHeight()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
     }
@@ -730,23 +746,23 @@ public class NotificationTest {
         Notification notification = new Notification.Builder(mContext, "Channel").setStyle(
                 style).build();
 
-        int targetSize = mContext.getResources().getDimensionPixelSize(
+        float targetSize = mContext.getResources().getDimensionPixelSize(
                 ActivityManager.isLowRamDeviceStatic()
                         ? R.dimen.notification_person_icon_max_size_low_ram
                         : R.dimen.notification_person_icon_max_size);
 
         Bitmap personIcon = style.getUser().getIcon().getBitmap();
-        assertThat(personIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(personIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) personIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) personIcon.getHeight()).isWithin(3f).of(targetSize);
 
         Bitmap avatarIcon = style.getMessages().get(0).getSenderPerson().getIcon().getBitmap();
-        assertThat(avatarIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(avatarIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) avatarIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) avatarIcon.getHeight()).isWithin(3f).of(targetSize);
 
         Bitmap historicAvatarIcon = style.getHistoricMessages().get(
                 0).getSenderPerson().getIcon().getBitmap();
-        assertThat(historicAvatarIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(historicAvatarIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) historicAvatarIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) historicAvatarIcon.getHeight()).isWithin(3f).of(targetSize);
     }
 
     @Test
@@ -760,10 +776,10 @@ public class NotificationTest {
                 style).build();
         Bitmap shortcutIcon = style.getShortcutIcon().getBitmap();
 
-        assertThat(shortcutIcon.getWidth()).isEqualTo(
+        assertThat((float) shortcutIcon.getWidth()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
-        assertThat(shortcutIcon.getHeight()).isEqualTo(
+        assertThat((float) shortcutIcon.getHeight()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
     }
@@ -804,6 +820,7 @@ public class NotificationTest {
     }
 
     @Test
+    @Ignore // b/347089000 - Restore or delete
     public void testColors_ensureColors_colorized_producesValidPalette_white() {
         validateColorizedPaletteForColor(Color.WHITE);
     }

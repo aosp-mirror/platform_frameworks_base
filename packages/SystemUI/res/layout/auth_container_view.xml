@@ -28,9 +28,9 @@
 
     <View
         android:id="@+id/panel"
+        style="@style/AuthNonCredentialPanelStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?androidprv:attr/materialColorSurfaceContainer"
         android:elevation="@dimen/biometric_dialog_elevation"/>
 
     <ScrollView

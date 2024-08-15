@@ -17,5 +17,10 @@
 package com.android.server.ondeviceintelligence;
 
 public interface OnDeviceIntelligenceManagerInternal {
-    String getRemoteServicePackageName();
+    /**
+     * Gets the uid for the process that is currently hosting the
+     * {@link android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService} registered on
+     * the device.
+     */
+    int getInferenceServiceUid();
 }

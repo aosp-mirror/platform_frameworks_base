@@ -327,11 +327,11 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final List<ResolveInfo> queryIntentReceivers(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid, int userId, boolean forSend) {
+    public final List<ResolveInfo> queryIntentReceivers(
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
+            int filterCallingUid, int callingPid, int userId, boolean forSend) {
         return getResolveIntentHelper().queryIntentReceiversInternal(snapshot(), intent,
-                resolvedType, flags, userId, filterCallingUid, forSend);
+                resolvedType, flags, userId, filterCallingUid, callingPid, forSend);
     }
 
     @Override
@@ -341,7 +341,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
             int userId) {
         final String resolvedType = intent.resolveTypeIfNeeded(getContext().getContentResolver());
         return snapshot().queryIntentServicesInternal(intent, resolvedType, flags, userId,
-                callingUid, false);
+                callingUid, Process.INVALID_PID, false, /*resolveForStart*/ false);
     }
 
     @Override
@@ -472,24 +472,10 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     public final ResolveInfo resolveIntent(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
-            boolean resolveForStart, int filterCallingUid) {
-        return getResolveIntentHelper().resolveIntentInternal(snapshot(),
-                intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
-                filterCallingUid);
-    }
-
-    /**
-     * @deprecated similar to {@link resolveIntent} but limits the matches to exported components.
-     */
-    @Override
-    @Deprecated
-    public final ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
-            @PackageManager.ResolveInfoFlagsBits long flags,
-            @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
             boolean resolveForStart, int filterCallingUid, int callingPid) {
         return getResolveIntentHelper().resolveIntentInternal(snapshot(),
                 intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
-                filterCallingUid, true, callingPid);
+                filterCallingUid, callingPid);
     }
 
     @Override
@@ -497,7 +483,18 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     public final ResolveInfo resolveService(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags, int userId, int callingUid) {
         return getResolveIntentHelper().resolveServiceInternal(snapshot(), intent,
-                resolvedType, flags, userId, callingUid);
+                resolvedType, flags, userId, callingUid, Process.INVALID_PID,
+                /*resolveForStart*/ false);
+    }
+
+    @Override
+    @Deprecated
+    public final ResolveInfo resolveService(
+            Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId,
+            int callingUid, int callingPid) {
+        return getResolveIntentHelper().resolveServiceInternal(snapshot(), intent,
+                resolvedType, flags, userId, callingUid, callingPid, /*resolveForStart*/ true);
     }
 
     @Override

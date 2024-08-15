@@ -26,13 +26,17 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
+
+import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
@@ -42,6 +46,7 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleTaskView;
 import com.android.wm.shell.bubbles.BubbleTaskViewHelper;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.taskview.TaskView;
 
 import java.util.function.Supplier;
@@ -81,7 +86,9 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private static final String TAG = BubbleBarExpandedView.class.getSimpleName();
     private static final int INVALID_TASK_ID = -1;
 
+    private Bubble mBubble;
     private BubbleExpandedViewManager mManager;
+    private BubblePositioner mPositioner;
     private boolean mIsOverflow;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
@@ -160,6 +167,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             boolean isOverflow,
             @Nullable BubbleTaskView bubbleTaskView) {
         mManager = expandedViewManager;
+        mPositioner = positioner;
         mIsOverflow = isOverflow;
 
         if (mIsOverflow) {
@@ -167,6 +175,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
                     R.layout.bubble_overflow_container, null /* root */);
             mOverflowView.initialize(expandedViewManager, positioner);
             addView(mOverflowView);
+            // Don't show handle for overflow
+            mHandleView.setVisibility(View.GONE);
         } else {
             mTaskView = bubbleTaskView.getTaskView();
             mBubbleTaskViewHelper = new BubbleTaskViewHelper(mContext, expandedViewManager,
@@ -184,12 +194,21 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
             // Handle view needs to draw on top of task view.
             bringChildToFront(mHandleView);
+
+            mHandleView.setAccessibilityDelegate(new HandleViewAccessibilityDelegate());
         }
         mMenuViewController = new BubbleBarMenuViewController(mContext, this);
         mMenuViewController.setListener(new BubbleBarMenuViewController.Listener() {
             @Override
             public void onMenuVisibilityChanged(boolean visible) {
                 setObscured(visible);
+                if (visible) {
+                    mHandleView.setFocusable(false);
+                    mHandleView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+                } else {
+                    mHandleView.setFocusable(true);
+                    mHandleView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+                }
             }
 
             @Override
@@ -207,7 +226,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
             @Override
             public void onDismissBubble(Bubble bubble) {
-                mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_REMOVED);
+                mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_GESTURE);
             }
         });
         mHandleView.setOnClickListener(view -> {
@@ -290,19 +309,32 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     }
 
     /**
-     * Hides the current modal menu view or collapses the bubble stack.
-     * Called from {@link BubbleBarLayerView}
+     * Hides the current modal menu if it is visible
+     * @return {@code true} if menu was visible and is hidden
      */
-    public void hideMenuOrCollapse() {
+    public boolean hideMenuIfVisible() {
         if (mMenuViewController.isMenuVisible()) {
-            mMenuViewController.hideMenu(/* animated = */ true);
-        } else {
-            mManager.collapseStack();
+            mMenuViewController.hideMenu(true /* animated */);
+            return true;
         }
+        return false;
+    }
+
+    /**
+     * Hides the IME if it is visible
+     * @return {@code true} if IME was visible
+     */
+    public boolean hideImeIfVisible() {
+        if (mPositioner.isImeVisible()) {
+            mManager.hideCurrentInputMethod();
+            return true;
+        }
+        return false;
     }
 
     /** Updates the bubble shown in the expanded view. */
     public void update(Bubble bubble) {
+        mBubble = bubble;
         mBubbleTaskViewHelper.update(bubble);
         mMenuViewController.updateMenu(bubble);
     }
@@ -439,6 +471,53 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
                 mTaskView.setCornerRadius(cornerRadius);
             }
             invalidateOutline();
+        }
+    }
+
+    private class HandleViewAccessibilityDelegate extends AccessibilityDelegate {
+        @Override
+        public void onInitializeAccessibilityNodeInfo(@NonNull View host,
+                @NonNull AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+            info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                    AccessibilityNodeInfo.ACTION_CLICK, getResources().getString(
+                    R.string.bubble_accessibility_action_expand_menu)));
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
+            if (mPositioner.isBubbleBarOnLeft()) {
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.action_move_bubble_bar_right, getResources().getString(
+                        R.string.bubble_accessibility_action_move_bar_right)));
+            } else {
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+                        R.id.action_move_bubble_bar_left, getResources().getString(
+                        R.string.bubble_accessibility_action_move_bar_left)));
+            }
+        }
+
+        @Override
+        public boolean performAccessibilityAction(@NonNull View host, int action,
+                @Nullable Bundle args) {
+            if (super.performAccessibilityAction(host, action, args)) {
+                return true;
+            }
+            if (action == AccessibilityNodeInfo.ACTION_COLLAPSE) {
+                mManager.collapseStack();
+                return true;
+            }
+            if (action == AccessibilityNodeInfo.ACTION_DISMISS) {
+                mManager.dismissBubble(mBubble, Bubbles.DISMISS_USER_GESTURE);
+                return true;
+            }
+            if (action == R.id.action_move_bubble_bar_left) {
+                mManager.updateBubbleBarLocation(BubbleBarLocation.LEFT);
+                return true;
+            }
+            if (action == R.id.action_move_bubble_bar_right) {
+                mManager.updateBubbleBarLocation(BubbleBarLocation.RIGHT);
+                return true;
+            }
+            return false;
         }
     }
 }

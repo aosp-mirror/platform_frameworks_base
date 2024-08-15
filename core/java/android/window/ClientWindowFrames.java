@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static android.util.SequenceUtils.getInitSeq;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -53,10 +55,22 @@ public class ClientWindowFrames implements Parcelable {
 
     public float compatScale = 1f;
 
+    /** To make sure the info update between client and system server is in order. */
+    public int seq = getInitSeq();
+
     public ClientWindowFrames() {
     }
 
-    public ClientWindowFrames(ClientWindowFrames other) {
+    public ClientWindowFrames(@NonNull ClientWindowFrames other) {
+        setTo(other);
+    }
+
+    private ClientWindowFrames(@NonNull Parcel in) {
+        readFromParcel(in);
+    }
+
+    /** Updates the current frames to the given frames. */
+    public void setTo(@NonNull ClientWindowFrames other) {
         frame.set(other.frame);
         displayFrame.set(other.displayFrame);
         parentFrame.set(other.parentFrame);
@@ -65,10 +79,7 @@ public class ClientWindowFrames implements Parcelable {
         }
         isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
         compatScale = other.compatScale;
-    }
-
-    private ClientWindowFrames(Parcel in) {
-        readFromParcel(in);
+        seq = other.seq;
     }
 
     /** Needed for AIDL out parameters. */
@@ -79,6 +90,7 @@ public class ClientWindowFrames implements Parcelable {
         attachedFrame = in.readTypedObject(Rect.CREATOR);
         isParentFrameClippedByDisplayCutout = in.readBoolean();
         compatScale = in.readFloat();
+        seq = in.readInt();
     }
 
     @Override
@@ -89,6 +101,7 @@ public class ClientWindowFrames implements Parcelable {
         dest.writeTypedObject(attachedFrame, flags);
         dest.writeBoolean(isParentFrameClippedByDisplayCutout);
         dest.writeFloat(compatScale);
+        dest.writeInt(seq);
     }
 
     @Override
@@ -111,6 +124,7 @@ public class ClientWindowFrames implements Parcelable {
             return false;
         }
         final ClientWindowFrames other = (ClientWindowFrames) o;
+        // seq is for internal bookkeeping only.
         return frame.equals(other.frame)
                 && displayFrame.equals(other.displayFrame)
                 && parentFrame.equals(other.parentFrame)

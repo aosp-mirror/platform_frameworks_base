@@ -17,6 +17,7 @@
 package com.android.server.wallpaper;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
@@ -650,9 +651,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             synchronized (mLock) {
                 if (mLastWallpaper != null) {
                     WallpaperData targetWallpaper = null;
-                    if (mLastWallpaper.connection.containsDisplay(displayId)) {
+                    if (mLastWallpaper.connection != null &&
+                            mLastWallpaper.connection.containsDisplay(displayId)) {
                         targetWallpaper = mLastWallpaper;
-                    } else if (mFallbackWallpaper.connection.containsDisplay(displayId)) {
+                    } else if (mFallbackWallpaper != null &&
+                            mFallbackWallpaper.connection != null &&
+                            mFallbackWallpaper.connection.containsDisplay(displayId)) {
                         targetWallpaper = mFallbackWallpaper;
                     }
                     if (targetWallpaper == null) return;
@@ -2206,7 +2210,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
             IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId,
             boolean getCropped) {
-        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL);
+        final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL)
+                || hasPermission(MANAGE_EXTERNAL_STORAGE);
         if (!hasPrivilege) {
             mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
                     Binder.getCallingPid(), Binder.getCallingUid(), callingPkg, callingFeatureId);
@@ -2729,8 +2734,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         try {
             List<WallpaperData> pendingColorExtraction = new ArrayList<>();
             synchronized (mLock) {
-                WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
-                WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
+                // If called in boot before mCurrentUserId is set, sets the dim for USER_SYSTEM.
+                int userId = mCurrentUserId != UserHandle.USER_NULL
+                        ? mCurrentUserId : UserHandle.USER_SYSTEM;
+                WallpaperData wallpaper = mWallpaperMap.get(userId);
+                WallpaperData lockWallpaper = mLockWallpaperMap.get(userId);
 
                 if (dimAmount == 0.0f) {
                     wallpaper.mUidToDimAmount.remove(uid);
@@ -3836,6 +3844,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             pw.print("  mPadding="); pw.println(wpSize.mPadding);
         });
         pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
+        if (multiCrop()) pw.print("  mCropHints="); pw.println(wallpaper.mCropHints);
         pw.print("  mName=");  pw.println(wallpaper.name);
         pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
         pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);

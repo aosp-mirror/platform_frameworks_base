@@ -54,6 +54,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.server.display.config.HdrBrightnessData;
+import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.config.RefreshRateData;
@@ -436,7 +437,7 @@ public final class DisplayDeviceConfigTest {
     public void testHighBrightnessModeDataFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile();
 
-        DisplayDeviceConfig.HighBrightnessModeData hbmData =
+        HighBrightnessModeData hbmData =
                 mDisplayDeviceConfig.getHighBrightnessModeData();
         assertNotNull(hbmData);
         assertEquals(BRIGHTNESS[1], hbmData.transitionPoint, ZERO_DELTA);
@@ -671,14 +672,14 @@ public final class DisplayDeviceConfigTest {
         HdrBrightnessData data = mDisplayDeviceConfig.getHdrBrightnessData();
 
         assertNotNull(data);
-        assertEquals(2, data.mMaxBrightnessLimits.size());
-        assertEquals(13000, data.mBrightnessDecreaseDebounceMillis);
-        assertEquals(0.1f, data.mScreenBrightnessRampDecrease, SMALL_DELTA);
-        assertEquals(1000, data.mBrightnessIncreaseDebounceMillis);
-        assertEquals(0.11f, data.mScreenBrightnessRampIncrease, SMALL_DELTA);
+        assertEquals(2, data.maxBrightnessLimits.size());
+        assertEquals(13000, data.brightnessDecreaseDebounceMillis);
+        assertEquals(0.1f, data.screenBrightnessRampDecrease, SMALL_DELTA);
+        assertEquals(1000, data.brightnessIncreaseDebounceMillis);
+        assertEquals(0.11f, data.screenBrightnessRampIncrease, SMALL_DELTA);
 
-        assertEquals(0.3f, data.mMaxBrightnessLimits.get(500f), SMALL_DELTA);
-        assertEquals(0.6f, data.mMaxBrightnessLimits.get(1200f), SMALL_DELTA);
+        assertEquals(0.3f, data.maxBrightnessLimits.get(500f), SMALL_DELTA);
+        assertEquals(0.6f, data.maxBrightnessLimits.get(1200f), SMALL_DELTA);
     }
 
     private void verifyConfigValuesFromConfigResource() {
@@ -948,6 +949,67 @@ public final class DisplayDeviceConfigTest {
         assertThat(supportedModeData.vsyncRate).isEqualTo(120);
     }
 
+    @Test
+    public void testLowLightBlockingZoneSupportedModesFromConfigFile() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        RefreshRateData refreshRateData = mDisplayDeviceConfig.getRefreshRateData();
+        assertNotNull(refreshRateData);
+        assertThat(refreshRateData.lowLightBlockingZoneSupportedModes).hasSize(2);
+        SupportedModeData supportedModeData =
+                refreshRateData.lowLightBlockingZoneSupportedModes.get(0);
+        assertThat(supportedModeData.refreshRate).isEqualTo(60);
+        assertThat(supportedModeData.vsyncRate).isEqualTo(60);
+        supportedModeData = refreshRateData.lowLightBlockingZoneSupportedModes.get(1);
+        assertThat(supportedModeData.refreshRate).isEqualTo(240);
+        assertThat(supportedModeData.vsyncRate).isEqualTo(240);
+    }
+
+    @Test
+    public void testDozeBrightness_Ddc() throws IOException {
+        when(mFlags.isDozeBrightnessFloatEnabled()).thenReturn(true);
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertArrayEquals(new float[]{ -1, 0.1f, 0.2f, 0.3f, 0.4f },
+                mDisplayDeviceConfig.getDozeBrightnessSensorValueToBrightness(), SMALL_DELTA);
+        assertEquals(0.25f, mDisplayDeviceConfig.getDefaultDozeBrightness(), SMALL_DELTA);
+    }
+
+    @Test
+    public void testDefaultDozeBrightness_FallBackToConfigXmlFloat() throws IOException {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+        when(mFlags.isDozeBrightnessFloatEnabled()).thenReturn(true);
+        when(mResources.getFloat(com.android.internal.R.dimen.config_screenBrightnessDozeFloat))
+                .thenReturn(0.31f);
+        when(mResources.getInteger(com.android.internal.R.integer.config_screenBrightnessDoze))
+                .thenReturn(90);
+
+        // Empty display config file
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                        + "<displayConfiguration />\n");
+
+        assertEquals(0.31f, mDisplayDeviceConfig.getDefaultDozeBrightness(), ZERO_DELTA);
+    }
+
+    @Test
+    public void testDefaultDozeBrightness_FallBackToConfigXmlInt() throws IOException {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+        when(mFlags.isDozeBrightnessFloatEnabled()).thenReturn(true);
+        when(mResources.getFloat(com.android.internal.R.dimen.config_screenBrightnessDozeFloat))
+                .thenReturn(DisplayDeviceConfig.INVALID_BRIGHTNESS_IN_CONFIG);
+        when(mResources.getInteger(com.android.internal.R.integer.config_screenBrightnessDoze))
+                .thenReturn(90);
+
+        // Empty display config file
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                        + "<displayConfiguration />\n");
+
+        assertEquals(brightnessIntToFloat(90),
+                mDisplayDeviceConfig.getDefaultDozeBrightness(), ZERO_DELTA);
+    }
+
     private String getValidLuxThrottling() {
         return "<luxThrottling>\n"
                 + "    <brightnessLimitMap>\n"
@@ -1115,6 +1177,19 @@ public final class DisplayDeviceConfigTest {
                 + "        <second>120</second>\n"
                 + "    </point>\n"
                 + "</lowPowerSupportedModes>\n";
+    }
+
+    private String getLowLightVrrSupportedModesConfig() {
+        return "<supportedModes>\n"
+                + "    <point>\n"
+                + "        <first>60</first>\n"
+                + "        <second>60</second>\n"
+                + "    </point>\n"
+                + "    <point>\n"
+                + "        <first>240</first>\n"
+                + "        <second>240</second>\n"
+                + "    </point>\n"
+                + "</supportedModes>\n";
     }
 
     private String getHdrBrightnessConfig() {
@@ -1624,6 +1699,7 @@ public final class DisplayDeviceConfigTest {
                 +                   "<nits>-1</nits>\n"
                 +               "</displayBrightnessPoint>\n"
                 +           "</blockingZoneThreshold>\n"
+                + getLowLightVrrSupportedModesConfig()
                 +       "</lowerBlockingZoneConfigs>\n"
                 +       "<higherBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>90</defaultRefreshRate>\n"
@@ -1677,6 +1753,16 @@ public final class DisplayDeviceConfigTest {
                 +           "</point>"
                 +       "</luxThresholds>"
                 +   "</idleScreenRefreshRateTimeout>"
+                +   "<dozeBrightnessSensorValueToBrightness>\n"
+                +       "<item>-1</item>\n"
+                +       "<item>0.1</item>\n"
+                +       "<item>0.2</item>\n"
+                +       "<item>0.3</item>\n"
+                +       "<item>0.4</item>\n"
+                +   "</dozeBrightnessSensorValueToBrightness>\n"
+                +   "<defaultDozeBrightness>"
+                +       "0.25"
+                +   "</defaultDozeBrightness>\n"
                 + "</displayConfiguration>\n";
     }
 

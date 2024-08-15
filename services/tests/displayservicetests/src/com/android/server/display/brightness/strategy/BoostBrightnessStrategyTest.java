@@ -55,12 +55,12 @@ public class BoostBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(PowerManager.BRIGHTNESS_MAX)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(PowerManager.BRIGHTNESS_MAX)
                         .setDisplayBrightnessStrategyName(mBoostBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mBoostBrightnessStrategy.updateBrightness(
-                        new StrategyExecutionRequest(displayPowerRequest, 0.2f));
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f,
+                                /* userSetBrightnessChanged= */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 

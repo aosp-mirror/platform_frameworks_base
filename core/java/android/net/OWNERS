@@ -3,6 +3,6 @@ set noparent
 include platform/frameworks/base:/services/core/java/com/android/server/net/OWNERS
 
 per-file **IpSec* = file:/services/core/java/com/android/server/vcn/OWNERS
-per-file SSL*,Uri*,Url* = prb@google.com,oth@google.com,narayan@google.com,ngeoffray@google.com
+per-file SSL*,Uri*,Url* = prb@google.com,sorinbasca@google.com,narayan@google.com,ngeoffray@google.com
 per-file SntpClient* = file:/services/core/java/com/android/server/timedetector/OWNERS
 per-file Uri.java,Uri.aidl = varunshah@google.com

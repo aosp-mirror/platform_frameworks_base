@@ -135,16 +135,18 @@ class CredentialSelectorViewModel(
                     Log.w(Constants.LOG_TAG, "Unexpected biometric result exists when " +
                             "autoSelect is preferred.")
                 }
-                // TODO(b/333445754) : Decide whether to propagate info on prompt launch
+                // TODO(b/333445754) : Change the fm option to false in qpr after discussion
                 if (biometricState.biometricResult != null) {
                     entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_RESULT,
                         biometricState.biometricResult.biometricAuthenticationResult
                             .authenticationType)
+                    entryIntent?.putExtra(Constants.BIOMETRIC_FRAMEWORK_OPTION, true)
                 } else if (biometricState.biometricError != null){
                     entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_ERROR_CODE,
                         biometricState.biometricError.errorCode)
                     entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_ERROR_MESSAGE,
                         biometricState.biometricError.errorMessage)
+                    entryIntent?.putExtra(Constants.BIOMETRIC_FRAMEWORK_OPTION, true)
                 }
             }
             val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent)

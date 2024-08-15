@@ -22,8 +22,8 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX
 import com.android.systemui.Flags.FLAG_PSS_APP_SELECTOR_RECENTS_SPLIT_SCREEN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
@@ -36,6 +36,7 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.any
@@ -43,6 +44,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MediaProjectionRecentsViewControllerTest : SysuiTestCase() {
 
     @get:Rule val expect: Expect = Expect.create()
@@ -138,27 +140,13 @@ class MediaProjectionRecentsViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onRecentAppClicked_fullScreenTaskInForeground_flagOff_usesScaleUpAnimation() {
-        mSetFlagsRule.disableFlags(FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX)
-
-        controller.onRecentAppClicked(fullScreenTask, taskView)
-
-        assertThat(getStartedTaskActivityOptions(fullScreenTask.taskId).animationType)
-            .isEqualTo(ActivityOptions.ANIM_SCALE_UP)
-    }
-
-    @Test
-    fun onRecentAppClicked_fullScreenTaskInForeground_flagOn_usesDefaultAnimation() {
-        mSetFlagsRule.enableFlags(FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX)
+    fun onRecentAppClicked_fullScreenTaskInForeground_usesDefaultAnimation() {
         assertForegroundTaskUsesDefaultCloseAnimation(fullScreenTask)
     }
 
     @Test
     fun onRecentAppClicked_splitScreenTaskInForeground_flagOn_usesDefaultAnimation() {
-        mSetFlagsRule.enableFlags(
-            FLAG_PSS_APP_SELECTOR_ABRUPT_EXIT_FIX,
-            FLAG_PSS_APP_SELECTOR_RECENTS_SPLIT_SCREEN
-        )
+        mSetFlagsRule.enableFlags(FLAG_PSS_APP_SELECTOR_RECENTS_SPLIT_SCREEN)
         assertForegroundTaskUsesDefaultCloseAnimation(splitScreenTask)
     }
 

@@ -19,5 +19,4 @@
     <cache-path name="leak" path="leak/"/>
     <external-path name="screenrecord" path="."/>
     <cache-path name="multi_user" path="multi_user/" />
-    <root-path name="traces" path="/data/local/traces"/>
 </paths>

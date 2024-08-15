@@ -29,13 +29,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.MovableElementScenePicker
+import com.android.compose.animation.scene.MovableElementContentPicker
+import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.ValueKey
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -54,7 +56,10 @@ object QuickSettings {
 
     object Elements {
         val Content =
-            ElementKey("QuickSettingsContent", scenePicker = MovableElementScenePicker(SCENES))
+            MovableElementKey(
+                "QuickSettingsContent",
+                contentPicker = MovableElementContentPicker(SCENES)
+            )
         val QuickQuickSettings = ElementKey("QuickQuickSettings")
         val SplitShadeQuickSettings = ElementKey("SplitShadeQuickSettings")
         val FooterActions = ElementKey("QuickSettingsFooterActions")
@@ -62,10 +67,20 @@ object QuickSettings {
 
     object SharedValues {
         val TilesSquishiness = ValueKey("QuickSettingsTileSquishiness")
+
         object SquishinessValues {
             val Default = 1f
             val LockscreenSceneStarting = 0f
             val GoneSceneStarting = 0.3f
+        }
+
+        val MediaLandscapeTopOffset = ValueKey("MediaLandscapeTopOffset")
+
+        object MediaOffset {
+            val InQQS = 0.dp
+            // Brightness + padding
+            val InQS = 92.dp
+            val Default = 0.dp
         }
     }
 }
@@ -77,8 +92,8 @@ private fun SceneScope.stateForQuickSettingsContent(
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
             when (transitionState.currentScene) {
-                Scenes.Shade -> QSSceneAdapter.State.QQS.takeUnless { isSplitShade }
-                        ?: QSSceneAdapter.State.QS
+                Scenes.Shade ->
+                    QSSceneAdapter.State.QQS.takeUnless { isSplitShade } ?: QSSceneAdapter.State.QS
                 Scenes.QuickSettings -> QSSceneAdapter.State.QS
                 else -> QSSceneAdapter.State.CLOSED
             }
