@@ -364,10 +364,7 @@ public final class HapticFeedbackVibrationProvider {
         if ((privFlags & HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS) == 0) {
             return TOUCH_VIBRATION_ATTRIBUTES;
         }
-        return new VibrationAttributes.Builder(IME_FEEDBACK_VIBRATION_ATTRIBUTES)
-                // TODO(b/332661766): Remove CATEGORY_KEYBOARD logic
-                .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
-                .build();
+        return IME_FEEDBACK_VIBRATION_ATTRIBUTES;
     }
 
     @Nullable
