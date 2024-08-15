@@ -21,6 +21,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.modesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.modesDialogEventLogger
 import javax.inject.Provider
 
 val Kosmos.modesDialogViewModel: ModesDialogViewModel by
@@ -30,5 +31,6 @@ val Kosmos.modesDialogViewModel: ModesDialogViewModel by
             zenModeInteractor,
             testDispatcher,
             Provider { modesDialogDelegate }.get(),
+            modesDialogEventLogger,
         )
     }
