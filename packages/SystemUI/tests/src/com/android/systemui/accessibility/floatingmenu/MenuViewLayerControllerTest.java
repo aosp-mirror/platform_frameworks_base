@@ -21,6 +21,7 @@ import static android.view.WindowInsets.Type.systemBars;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,7 @@ import androidx.test.filters.SmallTest;
 import com.android.app.viewcapture.ViewCapture;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import kotlin.Lazy;
@@ -90,7 +92,8 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
         when(mWindowMetrics.getBounds()).thenReturn(new Rect(0, 0, 1080, 2340));
         when(mWindowMetrics.getWindowInsets()).thenReturn(stubDisplayInsets());
         mMenuViewLayerController = new MenuViewLayerController(mContext, mWindowManager,
-                viewCaptureAwareWm, mAccessibilityManager, mSecureSettings);
+                viewCaptureAwareWm, mAccessibilityManager, mSecureSettings,
+                mock(NavigationModeController.class));
     }
 
     @Test
