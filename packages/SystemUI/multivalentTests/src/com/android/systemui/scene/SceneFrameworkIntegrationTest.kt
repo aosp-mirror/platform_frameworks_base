@@ -328,6 +328,16 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         }
 
     @Test
+    fun lockDeviceLocksDevice() =
+        testScope.runTest {
+            unlockDevice()
+            assertCurrentScene(Scenes.Gone)
+
+            lockDevice()
+            assertCurrentScene(Scenes.Lockscreen)
+        }
+
+    @Test
     fun deviceGoesToSleep_switchesToLockscreen() =
         testScope.runTest {
             unlockDevice()
@@ -616,7 +626,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         assertWithMessage("The authentication method of $authMethod is not secure, cannot lock!")
             .that(authMethod.isSecure)
             .isTrue()
-
+        kosmos.sceneInteractor.changeScene(Scenes.Lockscreen, "")
         runCurrent()
     }
 
