@@ -1313,15 +1313,18 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         info.getChanges().remove(j);
                     }
                 }
-                tmpSize = info.getChanges().size();
-                for (int i = 0; i < tmpSize; ++i) {
-                    final TransitionInfo.Change change = init.getChanges().get(i);
-                    if (moveToTop) {
-                        if (isSameChangeTarget(openComponent, openTaskId, change)) {
-                            change.setFlags(change.getFlags() | FLAG_MOVED_TO_TOP);
+                // Ignore merge if there is no close target
+                if (!info.getChanges().isEmpty()) {
+                    tmpSize = init.getChanges().size();
+                    for (int i = 0; i < tmpSize; ++i) {
+                        final TransitionInfo.Change change = init.getChanges().get(i);
+                        if (moveToTop) {
+                            if (isSameChangeTarget(openComponent, openTaskId, change)) {
+                                change.setFlags(change.getFlags() | FLAG_MOVED_TO_TOP);
+                            }
                         }
+                        info.getChanges().add(i, change);
                     }
-                    info.getChanges().add(i, change);
                 }
             } else {
                 // Open transition, the transition info should be:
