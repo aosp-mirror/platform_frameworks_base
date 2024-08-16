@@ -12255,7 +12255,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return selectionMin >= 0 && selectionMax > 0 && selectionMin != selectionMax;
     }
 
-    String getSelectedText() {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public String getSelectedText() {
         if (!hasSelection()) {
             return null;
         }
@@ -14080,7 +14084,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         structure.setInputType(getInputType());
     }
 
-    boolean canRequestAutofill() {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean canRequestAutofill() {
         if (!isAutofillable()) {
             return false;
         }
