@@ -11479,10 +11479,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.println();
                 mStatLogger.dump(pw);
                 pw.println();
-                if (Flags.dumpsysPolicyEngineMigrationEnabled()) {
-                    mDevicePolicyEngine.dump(pw);
-                    pw.println();
-                }
+                mDevicePolicyEngine.dump(pw);
+                pw.println();
                 pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
                 pw.println("Logout user: " + getLogoutUserIdUnchecked());
                 pw.println();
