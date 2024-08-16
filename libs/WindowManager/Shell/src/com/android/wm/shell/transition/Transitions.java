@@ -724,7 +724,11 @@ public class Transitions implements RemoteCallable<Transitions>,
                 Log.e(TAG, "Got duplicate transitionReady for " + transitionToken);
                 // The transition is already somewhere else in the pipeline, so just return here.
                 t.apply();
-                existing.mFinishT.merge(finishT);
+                if (existing.mFinishT != null) {
+                    existing.mFinishT.merge(finishT);
+                } else {
+                    existing.mFinishT = finishT;
+                }
                 return;
             }
             // This usually means the system is in a bad state and may not recover; however,
