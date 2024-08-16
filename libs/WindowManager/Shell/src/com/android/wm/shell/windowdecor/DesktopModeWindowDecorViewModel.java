@@ -74,6 +74,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.widget.Toast;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -469,7 +470,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         if (!decoration.mTaskInfo.isResizeable
                 && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(mContext)) {
-            //TODO(b/354658237) - show toast with relevant string
+            Toast.makeText(mContext,
+                    R.string.desktop_mode_non_resizable_snap_text, Toast.LENGTH_SHORT).show();
         } else {
             mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
                     decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
