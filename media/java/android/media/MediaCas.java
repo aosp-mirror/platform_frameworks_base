@@ -131,7 +131,7 @@ public final class MediaCas implements AutoCloseable {
     private int mCasSystemId;
     private int mUserId;
     private TunerResourceManager mTunerResourceManager = null;
-    private final Map<Session, Integer> mSessionMap = new HashMap<>();
+    private final Map<Session, Long> mSessionMap = new HashMap<>();
 
     /**
      * Scrambling modes used to open cas sessions.
@@ -1126,10 +1126,10 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
-    private int getSessionResourceHandle() throws MediaCasException {
+    private long getSessionResourceHandle() throws MediaCasException {
         validateInternalStates();
 
-        int[] sessionResourceHandle = new int[1];
+        long[] sessionResourceHandle = new long[1];
         sessionResourceHandle[0] = -1;
         if (mTunerResourceManager != null) {
             CasSessionRequest casSessionRequest = new CasSessionRequest();
@@ -1144,8 +1144,7 @@ public final class MediaCas implements AutoCloseable {
         return sessionResourceHandle[0];
     }
 
-    private void addSessionToResourceMap(Session session, int sessionResourceHandle) {
-
+    private void addSessionToResourceMap(Session session, long sessionResourceHandle) {
         if (sessionResourceHandle != TunerResourceManager.INVALID_RESOURCE_HANDLE) {
             synchronized (mSessionMap) {
                 mSessionMap.put(session, sessionResourceHandle);
@@ -1178,13 +1177,14 @@ public final class MediaCas implements AutoCloseable {
      * @throws MediaCasStateException for CAS-specific state exceptions.
      */
     public Session openSession() throws MediaCasException {
-        int sessionResourceHandle = getSessionResourceHandle();
+        long sessionResourceHandle = getSessionResourceHandle();
 
         try {
             if (mICas != null) {
                 try {
                     byte[] sessionId = mICas.openSessionDefault();
                     Session session = createFromSessionId(sessionId);
+                    addSessionToResourceMap(session, sessionResourceHandle);
                     Log.d(TAG, "Write Stats Log for succeed to Open Session.");
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS,
@@ -1238,7 +1238,7 @@ public final class MediaCas implements AutoCloseable {
     @Nullable
     public Session openSession(@SessionUsage int sessionUsage, @ScramblingMode int scramblingMode)
             throws MediaCasException {
-        int sessionResourceHandle = getSessionResourceHandle();
+        long sessionResourceHandle = getSessionResourceHandle();
 
         if (mICas != null) {
             try {
