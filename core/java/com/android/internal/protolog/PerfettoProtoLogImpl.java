@@ -497,7 +497,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                     os.write(GROUP_ID, pis.readInt(GROUP_ID));
                     break;
                 case (int) LOCATION:
-                    os.write(LOCATION, pis.readInt(LOCATION));
+                    os.write(LOCATION, pis.readString(LOCATION));
+                    break;
                 default:
                     throw new RuntimeException(
                             "Unexpected field id " + pis.getFieldNumber());
