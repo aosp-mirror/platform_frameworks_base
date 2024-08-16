@@ -206,7 +206,7 @@ struct JTuner : public RefBase {
     int disconnectCiCam();
     int unlinkCiCam(jint id);
     jobject getFrontendIds();
-    jobject openFrontendByHandle(jlong feHandle);
+    jobject openFrontendByHandle(int feHandle);
     int shareFrontend(int feId);
     int unshareFrontend();
     void registerFeCbListener(JTuner* jtuner);
@@ -221,16 +221,16 @@ struct JTuner : public RefBase {
     int setLnb(sp<LnbClient> lnbClient);
     bool isLnaSupported();
     int setLna(bool enable);
-    jobject openLnbByHandle(jlong handle);
+    jobject openLnbByHandle(int handle);
     jobject openLnbByName(jstring name);
     jobject openFilter(DemuxFilterType type, int bufferSize);
     jobject openTimeFilter();
     jobject openDescrambler();
     jobject openDvr(DvrType type, jlong bufferSize);
     jobject getDemuxCaps();
-    jobject getDemuxInfo(jlong handle);
+    jobject getDemuxInfo(int handle);
     jobject getFrontendStatus(jintArray types);
-    Result openDemux(jlong handle);
+    Result openDemux(int handle);
     jint close();
     jint closeFrontend();
     jint closeDemux();
