@@ -613,8 +613,9 @@ constructor(
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
                     if (Flags.communalHub()) {
                         communalSceneInteractor.snapToScene(
-                            CommunalScenes.Blank,
-                            ActivityTransitionAnimator.TIMINGS.totalDuration
+                            newScene = CommunalScenes.Blank,
+                            loggingReason = "ActivityStarterInternalImpl",
+                            delayMillis = ActivityTransitionAnimator.TIMINGS.totalDuration
                         )
                     }
                 }

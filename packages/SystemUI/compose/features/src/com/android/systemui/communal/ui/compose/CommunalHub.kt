@@ -1410,7 +1410,10 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
                                     R.string.accessibility_action_label_close_communal_hub
                                 )
                             ) {
-                                viewModel.changeScene(CommunalScenes.Blank)
+                                viewModel.changeScene(
+                                    CommunalScenes.Blank,
+                                    "closed by accessibility"
+                                )
                                 true
                             },
                             CustomAccessibilityAction(

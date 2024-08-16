@@ -26,16 +26,25 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.PromptInfo;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 @Presubmit
 @SmallTest
 public class UtilsTest {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Test
     public void testCombineAuthenticatorBundles_withKeyDeviceCredential_andKeyAuthenticators() {
@@ -215,7 +224,8 @@ public class UtilsTest {
     }
 
     @Test
-    public void testBiometricConstantsConversion() {
+    @RequiresFlagsDisabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testBiometricConstantsConversionLegacy() {
         final int[][] testCases = {
                 {BiometricConstants.BIOMETRIC_SUCCESS,
                         BiometricManager.BIOMETRIC_SUCCESS},
@@ -231,6 +241,34 @@ public class UtilsTest {
                         BiometricManager.BIOMETRIC_SUCCESS},
                 {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
                         BiometricManager.BIOMETRIC_SUCCESS}
+        };
+
+        for (int i = 0; i < testCases.length; i++) {
+            assertEquals(testCases[i][1],
+                    Utils.biometricConstantsToBiometricManager(testCases[i][0]));
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testBiometricConstantsConversion() {
+        final int[][] testCases = {
+                {BiometricConstants.BIOMETRIC_SUCCESS,
+                        BiometricManager.BIOMETRIC_SUCCESS},
+                {BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS,
+                        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED},
+                {BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
+                        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED},
+                {BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE},
+                {BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT,
+                        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE},
+                {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
+                        BiometricManager.BIOMETRIC_ERROR_LOCKOUT},
+                {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+                        BiometricManager.BIOMETRIC_ERROR_LOCKOUT},
+                {BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE,
+                        BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE}
         };
 
         for (int i = 0; i < testCases.length; i++) {

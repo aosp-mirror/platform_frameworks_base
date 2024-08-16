@@ -16,8 +16,6 @@
 
 package com.android.server.vibrator;
 
-import static android.os.VibrationAttributes.CATEGORY_KEYBOARD;
-import static android.os.VibrationAttributes.CATEGORY_UNKNOWN;
 import static android.os.VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
 import static android.os.VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
 import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
@@ -255,7 +253,7 @@ public class HapticFeedbackVibrationProviderTest {
     }
 
     @Test
-    public void testKeyboardHaptic_fixAmplitude_keyboardCategoryOn_keyboardVibrationReturned() {
+    public void testKeyboardHaptic_fixAmplitude_keyboardVibrationReturned() {
         mockVibratorPrimitiveSupport(PRIMITIVE_CLICK, PRIMITIVE_TICK);
         mockKeyboardVibrationFixedAmplitude(KEYBOARD_VIBRATION_FIXED_AMPLITUDE);
 
@@ -330,7 +328,7 @@ public class HapticFeedbackVibrationProviderTest {
     }
 
     @Test
-    public void testVibrationAttribute_keyboardCategoryOn_notIme_useTouchUsage() {
+    public void testVibrationAttribute_notIme_useTouchUsage() {
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
@@ -338,13 +336,11 @@ public class HapticFeedbackVibrationProviderTest {
                     effectId, /* flags */ 0, /* privFlags */ 0);
             assertWithMessage("Expected USAGE_TOUCH for effect " + effectId)
                     .that(attrs.getUsage()).isEqualTo(USAGE_TOUCH);
-            assertWithMessage("Expected CATEGORY_KEYBOARD for effect " + effectId)
-                    .that(attrs.getCategory()).isEqualTo(CATEGORY_UNKNOWN);
         }
     }
 
     @Test
-    public void testVibrationAttribute_keyboardCategoryOn_isIme_useImeFeedbackUsage() {
+    public void testVibrationAttribute_isIme_useImeFeedbackUsage() {
         HapticFeedbackVibrationProvider hapticProvider = createProviderWithDefaultCustomizations();
 
         for (int effectId : KEYBOARD_FEEDBACK_CONSTANTS) {
@@ -353,8 +349,6 @@ public class HapticFeedbackVibrationProviderTest {
                     HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS);
             assertWithMessage("Expected USAGE_IME_FEEDBACK for effect " + effectId)
                     .that(attrs.getUsage()).isEqualTo(USAGE_IME_FEEDBACK);
-            assertWithMessage("Expected CATEGORY_KEYBOARD for effect " + effectId)
-                    .that(attrs.getCategory()).isEqualTo(CATEGORY_KEYBOARD);
         }
     }
 

@@ -179,8 +179,8 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         mContext
             .getOrCreateTestableResources()
             .addOverride(R.integer.ambient_notification_extension_time, 500)
-        mAvalancheController = AvalancheController(dumpManager, mUiEventLogger,
-                mHeadsUpManagerLogger, mBgHandler)
+        mAvalancheController =
+            AvalancheController(dumpManager, mUiEventLogger, mHeadsUpManagerLogger, mBgHandler)
     }
 
     @Test
@@ -200,7 +200,12 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         hmp.addSwipedOutNotification(entry.key)
 
         // Remove should succeed because the notification is swiped out
-        val removedImmediately = hmp.removeNotification(entry.key, /* releaseImmediately= */ false)
+        val removedImmediately =
+            hmp.removeNotification(
+                entry.key,
+                /* releaseImmediately= */ false,
+                /* reason= */ "swipe out"
+            )
         Assert.assertTrue(removedImmediately)
         Assert.assertFalse(hmp.isHeadsUpEntry(entry.key))
     }

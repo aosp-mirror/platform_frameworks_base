@@ -241,7 +241,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         alm.showNotification(entry);
 
         final boolean removedImmediately = alm.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ false);
+                entry.getKey(), /* releaseImmediately = */ false, "removeDeferred");
         assertFalse(removedImmediately);
         assertTrue(alm.isHeadsUpEntry(entry.getKey()));
     }
@@ -254,7 +254,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         alm.showNotification(entry);
 
         final boolean removedImmediately = alm.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ true);
+                entry.getKey(), /* releaseImmediately = */ true, "forceRemove");
         assertTrue(removedImmediately);
         assertFalse(alm.isHeadsUpEntry(entry.getKey()));
     }
@@ -430,7 +430,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.showNotification(entry);
 
         final boolean removedImmediately = hum.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ false);
+                entry.getKey(), /* releaseImmediately = */ false, "beforeMinimumDisplayTime");
         assertFalse(removedImmediately);
         assertTrue(hum.isHeadsUpEntry(entry.getKey()));
 
@@ -452,7 +452,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         assertTrue(hum.isHeadsUpEntry(entry.getKey()));
 
         final boolean removedImmediately = hum.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ false);
+                entry.getKey(), /* releaseImmediately = */ false, "afterMinimumDisplayTime");
         assertTrue(removedImmediately);
         assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }
@@ -466,7 +466,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.showNotification(entry);
 
         final boolean removedImmediately = hum.removeNotification(
-                entry.getKey(), /* releaseImmediately = */ true);
+                entry.getKey(), /* releaseImmediately = */ true, "afterMinimumDisplayTime");
         assertTrue(removedImmediately);
         assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }

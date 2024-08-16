@@ -40,12 +40,13 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -191,12 +192,14 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      * enough and needs to be kept around.
      * @param key the key of the notification to remove
      * @param releaseImmediately force a remove regardless of earliest removal time
+     * @param reason reason for removing the notification
      * @return true if notification is removed, false otherwise
      */
     @Override
-    public boolean removeNotification(@NonNull String key, boolean releaseImmediately) {
+    public boolean removeNotification(@NotNull String key, boolean releaseImmediately,
+            @NonNull String reason) {
         final boolean isWaiting = mAvalancheController.isWaiting(key);
-        mLogger.logRemoveNotification(key, releaseImmediately, isWaiting);
+        mLogger.logRemoveNotification(key, releaseImmediately, isWaiting, reason);
 
         if (mAvalancheController.isWaiting(key)) {
             removeEntry(key, "removeNotification (isWaiting)");
@@ -204,6 +207,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
         HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
         if (headsUpEntry == null) {
+            mLogger.logNullEntry(key, reason);
             return true;
         }
         if (releaseImmediately) {

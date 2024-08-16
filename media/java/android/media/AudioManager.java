@@ -84,6 +84,7 @@ import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
@@ -4283,7 +4284,7 @@ public class AudioManager {
                                     final OnAudioFocusChangeListener listener =
                                             fri.mRequest.getOnAudioFocusChangeListener();
                                     if (listener != null) {
-                                        Log.d(TAG, "dispatching onAudioFocusChange("
+                                        Slog.i(TAG, "dispatching onAudioFocusChange("
                                                 + msg.arg1 + ") to " + msg.obj);
                                         listener.onAudioFocusChange(msg.arg1);
                                     }

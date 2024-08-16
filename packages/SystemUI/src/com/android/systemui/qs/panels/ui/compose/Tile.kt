@@ -22,7 +22,6 @@ import android.graphics.drawable.Animatable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.text.TextUtils
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -593,15 +592,15 @@ enum class ClickAction {
 }
 
 @Composable
-private fun getTileIcon(icon: Supplier<QSTile.Icon>): Icon {
+private fun getTileIcon(icon: Supplier<QSTile.Icon?>): Icon {
     val context = LocalContext.current
-    return icon.get().let {
+    return icon.get()?.let {
         if (it is QSTileImpl.ResourceIcon) {
             Icon.Resource(it.resId, null)
         } else {
             Icon.Loaded(it.getDrawable(context), null)
         }
-    }
+    } ?: Icon.Resource(R.drawable.ic_error_outline, null)
 }
 
 @OptIn(ExperimentalAnimationGraphicsApi::class)
@@ -618,7 +617,7 @@ private fun TileIcon(
         remember(icon, context) {
             when (icon) {
                 is Icon.Loaded -> icon.drawable
-                is Icon.Resource -> AppCompatResources.getDrawable(context, icon.res)
+                is Icon.Resource -> context.getDrawable(icon.res)
             }
         }
     if (loadedDrawable !is Animatable) {

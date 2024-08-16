@@ -19,6 +19,7 @@ package com.android.settingslib.notification.modes;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -67,6 +68,7 @@ public class ZenModeTest {
         assertThat(manualMode.canEditNameAndIcon()).isFalse();
         assertThat(manualMode.canBeDeleted()).isFalse();
         assertThat(manualMode.isActive()).isFalse();
+        assertThat(manualMode.getRule().getPackageName()).isEqualTo(PACKAGE_ANDROID);
     }
 
     @Test
