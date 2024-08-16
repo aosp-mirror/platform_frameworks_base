@@ -100,21 +100,21 @@ public class WindowTracingPerfettoTest {
     @Test
     public void trace_writesInitialStateSnapshot_whenTracingStarts() throws Exception {
         startTracing(false);
-        verify(mWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTraceLogLevel.ALL));
+        verify(mWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
     }
 
     @Test
     public void trace_writesStateSnapshot_onLogStateCall() throws Exception {
         startTracing(false);
         mWindowTracing.logState("where");
-        verify(mWmMock, times(2)).dumpDebugLocked(any(), eq(WindowTraceLogLevel.ALL));
+        verify(mWmMock, times(2)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
     }
 
     @Test
     public void dump_writesOneSingleStateSnapshot() throws Exception {
         startTracing(true);
         mWindowTracing.logState("where");
-        verify(mWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTraceLogLevel.ALL));
+        verify(mWmMock, times(1)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.ALL));
     }
 
     private void startTracing(boolean isDump) {

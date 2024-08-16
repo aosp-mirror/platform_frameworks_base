@@ -50,12 +50,12 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
     }
 
     public static class Config {
-        public final @WindowTraceLogLevel int mLogLevel;
-        public final @WindowTraceLogFrequency int mLogFrequency;
+        public final @WindowTracingLogLevel int mLogLevel;
+        public final @WindowTracingLogFrequency int mLogFrequency;
 
         private Config(
-                @WindowTraceLogLevel int logLevel,
-                @WindowTraceLogFrequency int logFrequency) {
+                @WindowTracingLogLevel int logLevel,
+                @WindowTracingLogFrequency int logFrequency) {
             mLogLevel = logLevel;
             mLogFrequency = logFrequency;
         }
@@ -71,7 +71,7 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
     }
 
     private static final Config CONFIG_DEFAULT =
-            new Config(WindowTraceLogLevel.TRIM, WindowTraceLogFrequency.FRAME);
+            new Config(WindowTracingLogLevel.TRIM, WindowTracingLogFrequency.FRAME);
     private static final int CONFIG_VALUE_UNSPECIFIED = 0;
     private static final String TAG = "WindowTracingDataSource";
 
@@ -163,45 +163,45 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
             throw new RuntimeException("Failed to parse WindowManagerConfig", e);
         }
 
-        @WindowTraceLogLevel int logLevel;
+        @WindowTracingLogLevel int logLevel;
         switch(parsedLogLevel) {
             case CONFIG_VALUE_UNSPECIFIED:
                 Log.w(TAG, "Unspecified log level. Defaulting to TRIM");
-                logLevel = WindowTraceLogLevel.TRIM;
+                logLevel = WindowTracingLogLevel.TRIM;
                 break;
             case WindowManagerConfig.LOG_LEVEL_VERBOSE:
-                logLevel = WindowTraceLogLevel.ALL;
+                logLevel = WindowTracingLogLevel.ALL;
                 break;
             case WindowManagerConfig.LOG_LEVEL_DEBUG:
-                logLevel = WindowTraceLogLevel.TRIM;
+                logLevel = WindowTracingLogLevel.TRIM;
                 break;
             case WindowManagerConfig.LOG_LEVEL_CRITICAL:
-                logLevel = WindowTraceLogLevel.CRITICAL;
+                logLevel = WindowTracingLogLevel.CRITICAL;
                 break;
             default:
                 Log.w(TAG, "Unrecognized log level. Defaulting to TRIM");
-                logLevel = WindowTraceLogLevel.TRIM;
+                logLevel = WindowTracingLogLevel.TRIM;
                 break;
         }
 
-        @WindowTraceLogFrequency int logFrequency;
+        @WindowTracingLogFrequency int logFrequency;
         switch(parsedLogFrequency) {
             case CONFIG_VALUE_UNSPECIFIED:
                 Log.w(TAG, "Unspecified log frequency. Defaulting to 'frame'");
-                logFrequency = WindowTraceLogFrequency.FRAME;
+                logFrequency = WindowTracingLogFrequency.FRAME;
                 break;
             case WindowManagerConfig.LOG_FREQUENCY_FRAME:
-                logFrequency = WindowTraceLogFrequency.FRAME;
+                logFrequency = WindowTracingLogFrequency.FRAME;
                 break;
             case WindowManagerConfig.LOG_FREQUENCY_TRANSACTION:
-                logFrequency = WindowTraceLogFrequency.TRANSACTION;
+                logFrequency = WindowTracingLogFrequency.TRANSACTION;
                 break;
             case WindowManagerConfig.LOG_FREQUENCY_SINGLE_DUMP:
-                logFrequency = WindowTraceLogFrequency.SINGLE_DUMP;
+                logFrequency = WindowTracingLogFrequency.SINGLE_DUMP;
                 break;
             default:
                 Log.w(TAG, "Unrecognized log frequency. Defaulting to 'frame'");
-                logFrequency = WindowTraceLogFrequency.FRAME;
+                logFrequency = WindowTracingLogFrequency.FRAME;
                 break;
         }
 

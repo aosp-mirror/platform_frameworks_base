@@ -2450,7 +2450,7 @@ final class AccessibilityController {
 
                             long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
                             synchronized (mService.mGlobalLock) {
-                                mService.dumpDebugLocked(os, WindowTraceLogLevel.ALL);
+                                mService.dumpDebugLocked(os, WindowTracingLogLevel.ALL);
                             }
                             os.end(tokenInner);
                             os.write(CPU_STATS, printCpuStats(reportedTimeStampNanos));

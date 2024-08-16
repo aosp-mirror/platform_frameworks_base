@@ -22,12 +22,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @IntDef({
-        WindowTraceLogLevel.ALL,
-        WindowTraceLogLevel.TRIM,
-        WindowTraceLogLevel.CRITICAL,
+        WindowTracingLogLevel.ALL,
+        WindowTracingLogLevel.TRIM,
+        WindowTracingLogLevel.CRITICAL,
 })
 @Retention(RetentionPolicy.SOURCE)
-@interface WindowTraceLogLevel{
+@interface WindowTracingLogLevel {
     /**
      * Logs all elements with maximum amount of information.
      *

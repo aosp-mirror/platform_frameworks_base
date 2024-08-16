@@ -4072,9 +4072,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @CallSuper
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         boolean isVisible = isVisible();
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible) {
             return;
         }
 
@@ -6140,7 +6140,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void dumpProto(ProtoOutputStream proto, long fieldId,
-                          @WindowTraceLogLevel int logLevel) {
+                          @WindowTracingLogLevel int logLevel) {
         dumpDebug(proto, fieldId, logLevel);
     }
 
