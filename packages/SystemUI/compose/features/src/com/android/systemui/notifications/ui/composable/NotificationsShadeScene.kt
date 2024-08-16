@@ -72,7 +72,7 @@ constructor(
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions
 
-    override suspend fun activate() {
+    override suspend fun activate(): Nothing {
         actionsViewModel.activate()
     }
 

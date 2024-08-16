@@ -22,6 +22,7 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationResul
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.lifecycle.SysUiViewModel
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +61,7 @@ sealed class AuthMethodBouncerViewModel(
 
     private val authenticationRequests = Channel<AuthenticationRequest>(Channel.BUFFERED)
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         authenticationRequests.receiveAsFlow().collectLatest { request ->
             if (!isInputEnabled.value) {
                 return@collectLatest
@@ -79,6 +80,7 @@ sealed class AuthMethodBouncerViewModel(
             _animateFailure.value = authenticationResult != AuthenticationResult.SUCCEEDED
             clearInput()
         }
+        awaitCancellation()
     }
 
     /**
