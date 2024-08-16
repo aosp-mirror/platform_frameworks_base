@@ -45,6 +45,7 @@ import com.android.wm.shell.pip2.phone.PipScheduler;
 import com.android.wm.shell.pip2.phone.PipTouchHandler;
 import com.android.wm.shell.pip2.phone.PipTransition;
 import com.android.wm.shell.pip2.phone.PipTransitionState;
+import com.android.wm.shell.pip2.phone.PipUiStateChangeController;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -73,10 +74,11 @@ public abstract class Pip2Module {
             Optional<PipController> pipController,
             PipTouchHandler pipTouchHandler,
             @NonNull PipScheduler pipScheduler,
-            @NonNull PipTransitionState pipStackListenerController) {
+            @NonNull PipTransitionState pipStackListenerController,
+            @NonNull PipUiStateChangeController pipUiStateChangeController) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, null, pipBoundsAlgorithm, pipScheduler,
-                pipStackListenerController);
+                pipStackListenerController, pipUiStateChangeController);
     }
 
     @WMSingleton
@@ -180,5 +182,12 @@ public abstract class Pip2Module {
     @Provides
     static PipTransitionState providePipTransitionState(@ShellMainThread Handler handler) {
         return new PipTransitionState(handler);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipUiStateChangeController providePipUiStateChangeController(
+            PipTransitionState pipTransitionState) {
+        return new PipUiStateChangeController(pipTransitionState);
     }
 }
