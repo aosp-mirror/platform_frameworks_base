@@ -315,6 +315,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -332,6 +333,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -351,6 +353,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -373,6 +376,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -391,6 +395,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -406,6 +411,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -421,6 +427,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             LOW_LIGHT_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -437,6 +444,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             HOME_CONTROL_PANEL_DREAM_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -453,6 +461,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             LOW_LIGHT_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -487,6 +496,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         // Immediately end the dream.
@@ -518,6 +528,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -537,6 +548,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             LOW_LIGHT_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -588,6 +600,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -611,6 +624,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -631,6 +645,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -660,6 +675,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -683,6 +699,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -708,6 +725,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mWindowParams,
                 mDreamOverlayCallback,
                 DREAM_COMPONENT,
+                false /*isPreview*/,
                 false /*shouldShowComplication*/
             )
             mMainExecutor.runAllReady()
@@ -733,6 +751,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mWindowParams,
                 mDreamOverlayCallback,
                 DREAM_COMPONENT,
+                false /*isPreview*/,
                 false /*shouldShowComplication*/
             )
             // Set communal available, verify that overlay callback is informed.
@@ -761,6 +780,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -781,6 +801,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -800,6 +821,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -823,6 +845,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -853,6 +876,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         testScope.runCurrent()
@@ -869,6 +893,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -892,6 +917,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -923,6 +949,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -954,6 +981,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -989,6 +1017,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -1023,6 +1052,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -1042,6 +1072,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -1077,6 +1108,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
