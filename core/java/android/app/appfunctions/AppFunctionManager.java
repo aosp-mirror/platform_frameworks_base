@@ -16,6 +16,9 @@
 
 package android.app.appfunctions;
 
+import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
+
+import android.annotation.FlaggedApi;
 import android.annotation.SystemService;
 import android.content.Context;
 
@@ -25,8 +28,8 @@ import android.content.Context;
  * <p>App function is a specific piece of functionality that an app offers to the system. These
  * functionalities can be integrated into various system features.
  *
- * @hide
  */
+@FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 @SystemService(Context.APP_FUNCTION_SERVICE)
 public final class AppFunctionManager {
     private final IAppFunctionManager mService;

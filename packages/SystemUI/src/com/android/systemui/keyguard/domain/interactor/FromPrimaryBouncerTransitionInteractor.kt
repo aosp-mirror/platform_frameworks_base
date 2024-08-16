@@ -175,7 +175,10 @@ constructor(
                 !communalSceneInteractor.isLaunchingWidget.value &&
                 communalSceneInteractor.editModeState.value == null
         ) {
-            communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+            communalSceneInteractor.snapToScene(
+                newScene = CommunalScenes.Blank,
+                loggingReason = "FromPrimaryBouncerTransitionInteractor",
+            )
         }
     }
 

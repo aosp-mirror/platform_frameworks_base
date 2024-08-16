@@ -96,9 +96,10 @@ interface HeadsUpManager : Dumpable {
      *
      * @param key the key of the notification to remove
      * @param releaseImmediately force a remove regardless of earliest removal time
+     * @param reason reason for removing the notification
      * @return true if notification is removed, false otherwise
      */
-    fun removeNotification(key: String, releaseImmediately: Boolean): Boolean
+    fun removeNotification(key: String, releaseImmediately: Boolean, reason: String): Boolean
 
     /**
      * Try to remove the notification. May not succeed if the notification has not been shown long
@@ -107,9 +108,15 @@ interface HeadsUpManager : Dumpable {
      * @param key the key of the notification to remove
      * @param releaseImmediately force a remove regardless of earliest removal time
      * @param animate if true, animate the removal
+     * @param reason reason for removing the notification
      * @return true if notification is removed, false otherwise
      */
-    fun removeNotification(key: String, releaseImmediately: Boolean, animate: Boolean): Boolean
+    fun removeNotification(
+        key: String,
+        releaseImmediately: Boolean,
+        animate: Boolean,
+        reason: String
+    ): Boolean
 
     /** Clears all managed notifications. */
     fun releaseAllImmediately()
@@ -246,10 +253,15 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
 
     override fun removeListener(listener: OnHeadsUpChangedListener) {}
 
-    override fun removeNotification(key: String, releaseImmediately: Boolean) = false
-
-    override fun removeNotification(key: String, releaseImmediately: Boolean, animate: Boolean) =
+    override fun removeNotification(key: String, releaseImmediately: Boolean, reason: String) =
         false
+
+    override fun removeNotification(
+        key: String,
+        releaseImmediately: Boolean,
+        animate: Boolean,
+        reason: String
+    ) = false
 
     override fun setAnimationStateHandler(handler: AnimationStateHandler) {}
 

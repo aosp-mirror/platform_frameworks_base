@@ -1780,11 +1780,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (resuming != null) {
             // We do not want to trigger auto-PiP upon launch of a translucent activity.
             final boolean resumingOccludesParent = resuming.occludesParent();
-            // Resuming the new resume activity only if the previous activity can't go into Pip
-            // since we want to give Pip activities a chance to enter Pip before resuming the
-            // next activity.
-            final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
-                    "shouldAutoPipWhilePausing", userLeaving);
 
             if (ActivityTaskManagerService.isPip2ExperimentEnabled()) {
                 // If a new task is being launched, then mark the existing top activity as
@@ -1794,6 +1789,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 Task.enableEnterPipOnTaskSwitch(prev, resuming.getTask(),
                         resuming, resuming.getOptions());
             }
+
+            // Resuming the new resume activity only if the previous activity can't go into Pip
+            // since we want to give Pip activities a chance to enter Pip before resuming the
+            // next activity.
+            final boolean lastResumedCanPip = prev.checkEnterPictureInPictureState(
+                    "shouldAutoPipWhilePausing", userLeaving);
             if (prev.supportsEnterPipOnTaskSwitch && userLeaving
                     && resumingOccludesParent && lastResumedCanPip
                     && prev.pictureInPictureArgs.isAutoEnterEnabled()) {

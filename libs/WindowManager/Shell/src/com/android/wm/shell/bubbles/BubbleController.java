@@ -1495,7 +1495,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 b.setAppBubbleIntent(intent);
             } else {
                 // App bubble does not exist, lets add and expand it
-                b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
+                b = Bubble.createAppBubble(intent, user, icon, mMainExecutor, mBackgroundExecutor);
             }
             ProtoLog.d(WM_SHELL_BUBBLES, "inflateAndAdd %s", appBubbleKey);
             b.setShouldAutoExpand(true);

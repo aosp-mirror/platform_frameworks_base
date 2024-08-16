@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static java.io.File.createTempFile;
-import static java.nio.file.Files.createTempDirectory;
 
 import android.content.Context;
 import android.os.SystemClock;
@@ -45,6 +44,7 @@ import android.tracing.perfetto.DataSource;
 import android.util.proto.ProtoInputStream;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
@@ -67,7 +67,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -78,7 +77,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Presubmit
 @RunWith(JUnit4.class)
 public class PerfettoProtoLogImplTest {
-    private final File mTracingDirectory = createTempDirectory("temp").toFile();
+    private final File mTracingDirectory = InstrumentationRegistry.getInstrumentation()
+            .getTargetContext().getFilesDir();
 
     private final ResultWriter mWriter = new ResultWriter()
             .forScenario(new ScenarioBuilder()
@@ -384,7 +384,7 @@ public class PerfettoProtoLogImplTest {
                 new Object[]{5});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
-                LogLevel.INFO), eq("UNKNOWN MESSAGE#1234 (5)"));
+                LogLevel.INFO), eq("UNKNOWN MESSAGE args = (5)"));
         verify(mReader).getViewerString(eq(1234L));
     }
 
@@ -451,8 +451,8 @@ public class PerfettoProtoLogImplTest {
             before = SystemClock.elapsedRealtimeNanos();
             mProtoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP,
-                    "My test message :: %s, %d, %o, %x, %f, %b",
-                    "test", 1, 2, 3, 0.4, true);
+                    "My test message :: %s, %d, %x, %f, %b",
+                    "test", 1, 3, 0.4, true);
             after = SystemClock.elapsedRealtimeNanos();
         } finally {
             traceMonitor.stop(mWriter);
@@ -467,7 +467,7 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages.getFirst().getTimestamp().getElapsedNanos())
                 .isAtMost(after);
         Truth.assertThat(protolog.messages.getFirst().getMessage())
-                .isEqualTo("My test message :: test, 2, 4, 6, 0.400000, true");
+                .isEqualTo("My test message :: test, 2, 6, 0.400000, true");
     }
 
     @Test

@@ -20,6 +20,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.volume.domain.interactor.audioModeInteractor
 import com.android.systemui.volume.domain.interactor.audioOutputInteractor
+import com.android.systemui.volume.domain.interactor.audioSharingInteractor
 import com.android.systemui.volume.mediaDeviceSessionInteractor
 import com.android.systemui.volume.mediaOutputInteractor
 
@@ -31,5 +32,6 @@ val Kosmos.mediaOutputComponentInteractor by
             audioOutputInteractor,
             audioModeInteractor,
             mediaOutputInteractor,
+            audioSharingInteractor,
         )
     }
