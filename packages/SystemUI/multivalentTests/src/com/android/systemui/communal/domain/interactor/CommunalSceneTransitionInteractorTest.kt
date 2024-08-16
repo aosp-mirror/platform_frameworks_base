@@ -53,6 +53,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,6 +79,7 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
 
     private val underTest by lazy { kosmos.communalSceneTransitionInteractor }
     private val keyguardTransitionRepository by lazy { kosmos.realKeyguardTransitionRepository }
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
 
     private val ownerName = CommunalSceneTransitionInteractor::class.java.simpleName
     private val progress = MutableSharedFlow<Float>()
@@ -783,6 +785,49 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                     TransitionStep(
                         from = OCCLUDED,
                         to = GLANCEABLE_HUB,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    )
+                )
+        }
+
+    /** Verifies that we correctly transition to GONE after keyguard goes away */
+    @Test
+    fun transition_to_blank_after_unlock_should_go_to_gone() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            sceneTransitions.value = Idle(CommunalScenes.Communal)
+
+            val currentStep by collectLastValue(keyguardTransitionRepository.transitions)
+
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = LOCKSCREEN,
+                        to = GLANCEABLE_HUB,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    )
+                )
+
+            // Keyguard starts exiting after a while, then fully exits after some time.
+            advanceTimeBy(1.seconds)
+            keyguardRepository.setKeyguardGoingAway(true)
+            advanceTimeBy(2.seconds)
+            keyguardRepository.setKeyguardGoingAway(false)
+            keyguardRepository.setKeyguardShowing(false)
+            runCurrent()
+
+            // We snap to the blank scene as a result of keyguard going away.
+            sceneTransitions.value = Idle(CommunalScenes.Blank)
+
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = GONE,
                         transitionState = FINISHED,
                         value = 1f,
                         ownerName = ownerName,
