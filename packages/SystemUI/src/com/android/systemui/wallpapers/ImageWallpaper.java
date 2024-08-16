@@ -21,6 +21,7 @@ import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.SetWallpaperFlags;
 
 import static com.android.systemui.Flags.fixImageWallpaperCrashSurfaceAlreadyReleased;
+import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.offloadColorExtraction;
 
 import android.annotation.Nullable;
@@ -190,7 +191,10 @@ public class ImageWallpaper extends WallpaperService {
             }
             mWallpaperManager = getDisplayContext().getSystemService(WallpaperManager.class);
             mSurfaceHolder = surfaceHolder;
-            Rect dimensions = mWallpaperManager.peekBitmapDimensions(getSourceFlag(), true);
+            Rect dimensions = !multiCrop()
+                    ? mWallpaperManager.peekBitmapDimensions(getSourceFlag(), true)
+                    : mWallpaperManager.peekBitmapDimensionsAsUser(getSourceFlag(), true,
+                    mUserTracker.getUserId());
             int width = Math.max(MIN_SURFACE_WIDTH, dimensions.width());
             int height = Math.max(MIN_SURFACE_HEIGHT, dimensions.height());
             mSurfaceHolder.setFixedSize(width, height);
