@@ -13012,7 +13012,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRateCategory() {
         // use toolkitSetFrameRate flag to gate the change
-        return shouldEnableDvrr() && mSurface.isValid() && shouldEnableDvrr();
+        return shouldEnableDvrr() && mSurface.isValid();
     }
 
     private boolean shouldSetFrameRate() {

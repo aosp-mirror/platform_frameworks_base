@@ -994,6 +994,35 @@ public class ViewFrameRateTest {
                 mViewRoot.getLastPreferredFrameRateCategory());
     }
 
+    /**
+     * If a View is an instance of ViewGroupOverlay,
+     * we obtain the velocity from its hostView.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    public void overlayViewGroupVelocity() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+
+        FrameLayout host = new FrameLayout(mActivity);
+        View childView = new View(mActivity);
+        float velocity = 1000;
+
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams fullSize = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            mActivity.setContentView(host, fullSize);
+            host.setFrameContentVelocity(velocity);
+            ViewGroupOverlay overlay = host.getOverlay();
+            overlay.add(childView);
+            assertEquals(velocity, host.getFrameContentVelocity());
+            assertEquals(host.getFrameContentVelocity(),
+                    ((View) childView.getParent()).getFrameContentVelocity());
+        });
+    }
+
     private void runAfterDraw(@NonNull Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         mAfterDrawLatch = new CountDownLatch(1);
