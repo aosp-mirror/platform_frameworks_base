@@ -393,7 +393,7 @@ public class NotificationManager {
      * changes.
      *
      * <p>This broadcast is only sent to registered receivers and receivers in packages that have
-     * been granted Do Not Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
+     * been granted Notification Policy access (see {@link #isNotificationPolicyAccessGranted()}).
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -1627,7 +1627,7 @@ public class NotificationManager {
     }
 
     /**
-     * Checks the ability to modify notification do not disturb policy for the calling package.
+     * Checks the ability to modify Notification Policy for the calling package.
      *
      * <p>
      * Returns true if the calling package can modify notification policy.

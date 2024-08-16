@@ -1972,10 +1972,10 @@ public final class Settings {
             "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
 
     /**
-     * Activity Action: Show Do Not Disturb access settings.
+     * Activity Action: Show Notification Policy access settings.
      * <p>
-     * Users can grant and deny access to Do Not Disturb configuration from here. Managed
-     * profiles cannot grant Do Not Disturb access.
+     * Users can grant and deny access to Notification Policy (DND / Priority Modes) configuration
+     * from here. Managed profiles cannot grant Notification Policy access.
      * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
      * details.
      * <p>
