@@ -234,18 +234,11 @@ public final class SatelliteManager {
 
     /**
      * Bundle key to get the response from
-     * {@link #requestProvisionSubscriberIds(Executor, OutcomeReceiver)}.
+     * {@link #requestSatelliteSubscriberProvisionStatus(Executor, OutcomeReceiver)}.
      * @hide
      */
     public static final String KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN =
             "request_provision_subscriber_id";
-
-    /**
-     * Bundle key to get the response from
-     * {@link #requestIsProvisioned(String, Executor, OutcomeReceiver)}.
-     * @hide
-     */
-    public static final String KEY_IS_SATELLITE_PROVISIONED = "request_is_satellite_provisioned";
 
     /**
      * Bundle key to get the response from
@@ -2651,8 +2644,10 @@ public final class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public void requestProvisionSubscriberIds(@NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<List<SatelliteSubscriberInfo>, SatelliteException> callback) {
+    public void requestSatelliteSubscriberProvisionStatus(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<List<SatelliteSubscriberProvisionStatus>,
+                    SatelliteException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -2664,10 +2659,10 @@ public final class SatelliteManager {
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
                         if (resultCode == SATELLITE_RESULT_SUCCESS) {
                             if (resultData.containsKey(KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN)) {
-                                List<SatelliteSubscriberInfo> list =
+                                List<SatelliteSubscriberProvisionStatus> list =
                                         resultData.getParcelableArrayList(
                                                 KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN,
-                                                SatelliteSubscriberInfo.class);
+                                                SatelliteSubscriberProvisionStatus.class);
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                         callback.onResult(list)));
                             } else {
@@ -2682,70 +2677,14 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestProvisionSubscriberIds(receiver);
+                telephony.requestSatelliteSubscriberProvisionStatus(receiver);
             } else {
-                loge("requestProvisionSubscriberIds() invalid telephony");
+                loge("requestSatelliteSubscriberProvisionStatus() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
-            loge("requestProvisionSubscriberIds() RemoteException: " + ex);
-            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
-        }
-    }
-
-    /**
-     * Request to get provisioned status for given a satellite subscriber id.
-     *
-     * @param satelliteSubscriberId Satellite subscriber id requiring provisioned status check.
-     * @param executor The executor on which the callback will be called.
-     * @param callback callback.
-     *
-     * @throws SecurityException if the caller doesn't have required permission.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public void requestIsProvisioned(@NonNull String satelliteSubscriberId,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
-        Objects.requireNonNull(satelliteSubscriberId);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                ResultReceiver receiver = new ResultReceiver(null) {
-                    @Override
-                    protected void onReceiveResult(int resultCode, Bundle resultData) {
-                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
-                            if (resultData.containsKey(KEY_IS_SATELLITE_PROVISIONED)) {
-                                boolean isIsProvisioned =
-                                        resultData.getBoolean(KEY_IS_SATELLITE_PROVISIONED);
-                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onResult(isIsProvisioned)));
-                            } else {
-                                loge("KEY_IS_SATELLITE_PROVISIONED does not exist.");
-                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onError(new SatelliteException(
-                                                SATELLITE_RESULT_REQUEST_FAILED))));
-                            }
-                        } else {
-                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                    callback.onError(new SatelliteException(resultCode))));
-                        }
-                    }
-                };
-                telephony.requestIsProvisioned(satelliteSubscriberId, receiver);
-            } else {
-                loge("requestIsSatelliteProvisioned() invalid telephony");
-                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
-                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
-            }
-        } catch (RemoteException ex) {
-            loge("requestIsSatelliteProvisioned() RemoteException: " + ex);
+            loge("requestSatelliteSubscriberProvisionStatus() RemoteException: " + ex);
             executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                     new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
