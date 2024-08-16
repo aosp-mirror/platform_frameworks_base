@@ -18,13 +18,21 @@ package com.android.wm.shell.compatui.impl
 
 import android.app.ActivityManager
 import android.testing.AndroidTestingRunner
+import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.api.CompatUIComponentState
 import com.android.wm.shell.compatui.api.CompatUIInfo
 import com.android.wm.shell.compatui.api.CompatUIState
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 /**
  * Tests for {@link DefaultCompatUIHandler}.
@@ -34,20 +42,37 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-class DefaultCompatUIHandlerTest {
+class DefaultCompatUIHandlerTest : ShellTestCase() {
+
+    @JvmField
+    @Rule
+    val compatUIHandlerRule: CompatUIHandlerRule = CompatUIHandlerRule()
 
     lateinit var compatUIRepository: FakeCompatUIRepository
     lateinit var compatUIHandler: DefaultCompatUIHandler
     lateinit var compatUIState: CompatUIState
     lateinit var fakeIdGenerator: FakeCompatUIComponentIdGenerator
+    lateinit var syncQueue: SyncTransactionQueue
+    lateinit var displayController: DisplayController
+    lateinit var shellExecutor: TestShellExecutor
+    lateinit var componentFactory: FakeCompatUIComponentFactory
 
     @Before
     fun setUp() {
+        shellExecutor = TestShellExecutor()
         compatUIRepository = FakeCompatUIRepository()
         compatUIState = CompatUIState()
         fakeIdGenerator = FakeCompatUIComponentIdGenerator("compId")
-        compatUIHandler = DefaultCompatUIHandler(compatUIRepository, compatUIState,
-            fakeIdGenerator)
+        syncQueue = mock<SyncTransactionQueue>()
+        displayController = mock<DisplayController>()
+        componentFactory = FakeCompatUIComponentFactory(mContext, syncQueue, displayController)
+        compatUIHandler =
+            DefaultCompatUIHandler(
+                compatUIRepository,
+                compatUIState,
+                fakeIdGenerator,
+                componentFactory,
+                shellExecutor)
     }
 
     @Test
@@ -57,12 +82,18 @@ class DefaultCompatUIHandlerTest {
             creationReturn = false,
             removalReturn = false
         )
-        val fakeCompatUISpec = FakeCompatUISpec("one", fakeLifecycle).getSpec()
+        val fakeCompatUILayout = FakeCompatUILayout(viewBuilderReturn = View(mContext))
+        val fakeCompatUISpec =
+            FakeCompatUISpec(name = "one",
+                lifecycle = fakeLifecycle,
+                layout = fakeCompatUILayout).getSpec()
         compatUIRepository.addSpec(fakeCompatUISpec)
 
         val generatedId = fakeIdGenerator.generatedComponentId
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
 
         fakeIdGenerator.assertGenerateInvocations(1)
         fakeLifecycle.assertCreationInvocation(1)
@@ -71,7 +102,9 @@ class DefaultCompatUIHandlerTest {
         compatUIState.assertHasNoStateFor(generatedId)
         compatUIState.assertHasNoComponentFor(generatedId)
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
         fakeLifecycle.assertCreationInvocation(2)
         fakeLifecycle.assertRemovalInvocation(0)
         fakeLifecycle.assertInitialStateInvocation(0)
@@ -86,12 +119,18 @@ class DefaultCompatUIHandlerTest {
             creationReturn = true,
             removalReturn = false
         )
-        val fakeCompatUISpec = FakeCompatUISpec("one", fakeLifecycle).getSpec()
+        val fakeCompatUILayout = FakeCompatUILayout(viewBuilderReturn = View(mContext))
+        val fakeCompatUISpec =
+            FakeCompatUISpec(name = "one",
+                lifecycle = fakeLifecycle,
+                layout = fakeCompatUILayout).getSpec()
         compatUIRepository.addSpec(fakeCompatUISpec)
 
         val generatedId = fakeIdGenerator.generatedComponentId
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
 
         fakeLifecycle.assertCreationInvocation(1)
         fakeLifecycle.assertRemovalInvocation(0)
@@ -99,7 +138,9 @@ class DefaultCompatUIHandlerTest {
         compatUIState.assertHasNoStateFor(generatedId)
         compatUIState.assertHasComponentFor(generatedId)
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
 
         fakeLifecycle.assertCreationInvocation(1)
         fakeLifecycle.assertRemovalInvocation(1)
@@ -117,12 +158,18 @@ class DefaultCompatUIHandlerTest {
             removalReturn = false,
             initialState = { _, _ -> fakeComponentState }
         )
-        val fakeCompatUISpec = FakeCompatUISpec("one", fakeLifecycle).getSpec()
+        val fakeCompatUILayout = FakeCompatUILayout(viewBuilderReturn = View(mContext))
+        val fakeCompatUISpec =
+            FakeCompatUISpec(name = "one",
+                lifecycle = fakeLifecycle,
+                layout = fakeCompatUILayout).getSpec()
         compatUIRepository.addSpec(fakeCompatUISpec)
 
         val generatedId = fakeIdGenerator.generatedComponentId
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
 
         fakeLifecycle.assertCreationInvocation(1)
         fakeLifecycle.assertRemovalInvocation(0)
@@ -130,7 +177,9 @@ class DefaultCompatUIHandlerTest {
         compatUIState.assertHasStateEqualsTo(generatedId, fakeComponentState)
         compatUIState.assertHasComponentFor(generatedId)
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
 
         fakeLifecycle.assertCreationInvocation(1)
         fakeLifecycle.assertRemovalInvocation(1)
@@ -148,12 +197,18 @@ class DefaultCompatUIHandlerTest {
             removalReturn = true,
             initialState = { _, _ -> fakeComponentState }
         )
-        val fakeCompatUISpec = FakeCompatUISpec("one", fakeLifecycle).getSpec()
+        val fakeCompatUILayout = FakeCompatUILayout(viewBuilderReturn = View(mContext))
+        val fakeCompatUISpec =
+            FakeCompatUISpec(name = "one",
+                lifecycle = fakeLifecycle,
+                layout = fakeCompatUILayout).getSpec()
         compatUIRepository.addSpec(fakeCompatUISpec)
 
         val generatedId = fakeIdGenerator.generatedComponentId
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
 
         fakeLifecycle.assertCreationInvocation(1)
         fakeLifecycle.assertRemovalInvocation(0)
@@ -161,7 +216,9 @@ class DefaultCompatUIHandlerTest {
         compatUIState.assertHasStateEqualsTo(generatedId, fakeComponentState)
         compatUIState.assertHasComponentFor(generatedId)
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
 
         fakeLifecycle.assertCreationInvocation(1)
         fakeLifecycle.assertRemovalInvocation(1)
@@ -177,16 +234,55 @@ class DefaultCompatUIHandlerTest {
             creationReturn = true,
             removalReturn = true,
         )
-        val fakeCompatUISpec = FakeCompatUISpec("one", fakeLifecycle).getSpec()
+        val fakeCompatUILayout = FakeCompatUILayout(viewBuilderReturn = View(mContext))
+        val fakeCompatUISpec = FakeCompatUISpec("one", fakeLifecycle,
+            fakeCompatUILayout).getSpec()
         compatUIRepository.addSpec(fakeCompatUISpec)
         // Component creation
         fakeIdGenerator.assertGenerateInvocations(0)
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
         fakeIdGenerator.assertGenerateInvocations(1)
 
-        compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
         fakeIdGenerator.assertGenerateInvocations(2)
     }
+
+    @Test
+    fun `viewBuilder and viewBinder invoked if component is created and released when destroyed`() {
+        // We add a spec to the repository
+        val fakeLifecycle = FakeCompatUILifecyclePredicates(
+            creationReturn = true,
+            removalReturn = true,
+        )
+        val fakeCompatUILayout = FakeCompatUILayout(viewBuilderReturn = View(mContext))
+        val fakeCompatUISpec = FakeCompatUISpec("one", fakeLifecycle,
+            fakeCompatUILayout).getSpec()
+        compatUIRepository.addSpec(fakeCompatUISpec)
+
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
+        shellExecutor.flushAll()
+        componentFactory.assertInvocations(1)
+        fakeCompatUILayout.assertViewBuilderInvocation(1)
+        fakeCompatUILayout.assertViewBinderInvocation(1)
+        fakeCompatUILayout.assertViewReleaserInvocation(0)
+
+        compatUIHandlerRule.postBlocking {
+            compatUIHandler.onCompatInfoChanged(testCompatUIInfo())
+        }
+        shellExecutor.flushAll()
+
+        componentFactory.assertInvocations(1)
+        fakeCompatUILayout.assertViewBuilderInvocation(1)
+        fakeCompatUILayout.assertViewBinderInvocation(1)
+        fakeCompatUILayout.assertViewReleaserInvocation(1)
+    }
+
 
     private fun testCompatUIInfo(): CompatUIInfo {
         val taskInfo = ActivityManager.RunningTaskInfo()

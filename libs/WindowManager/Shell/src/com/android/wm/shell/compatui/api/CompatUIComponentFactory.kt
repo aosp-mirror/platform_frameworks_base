@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.compatui.impl
-
-import com.android.wm.shell.compatui.api.CompatUISpec
+package com.android.wm.shell.compatui.api
 
 /**
- * Fake implementation for {@link ompatUISpec}
+ * Abstracts the component responsible for the creation of a component
  */
-class FakeCompatUISpec(
-    val name: String,
-    val lifecycle: FakeCompatUILifecyclePredicates = FakeCompatUILifecyclePredicates(),
-    val layout: FakeCompatUILayout
-) {
-    fun getSpec(): CompatUISpec = CompatUISpec(
-        name = name,
-        log = {str -> android.util.Log.d("COMPAT_UI_TEST", str)},
-        lifecycle = lifecycle.getLifecycle(),
-        layout = layout.getLayout()
-    )
+interface CompatUIComponentFactory {
+
+    fun create(
+        spec: CompatUISpec,
+        compId: String,
+        state: CompatUIState,
+        compatUIInfo: CompatUIInfo,
+    ): CompatUIComponent
 }
