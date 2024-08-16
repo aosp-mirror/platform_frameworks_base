@@ -8010,6 +8010,41 @@
     <permission android:name="android.permission.EXECUTE_APP_ACTION"
                 android:protectionLevel="internal|role" />
 
+    <!-- Must be required by an {@link android.app.appfunctions.AppFunctionService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+    <permission android:name="android.permission.BIND_APP_FUNCTION_SERVICE"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows a trusted application to perform actions on behalf of users inside of
+         applications with privacy guarantees from the system.
+         <p>This permission is currently only granted to system packages in the
+         {@link android.app.role.SYSTEM_UI_INTELLIGENCE} role which complies with privacy
+         requirements outlined in the Android CDD section "9.8.6 Content Capture".
+         <p>Apps are not able to opt-out from caller having this permission.
+         <p>Protection level: internal|role
+         @hide
+         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+    <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="internal|role" />
+
+    <!-- @SystemApi Allows an application to perform actions on behalf of users inside of
+         applications.
+         <p>This permission is currently only granted to preinstalled / system apps having the
+         {@link android.app.role.ASSISTANT} role.
+         <p>Apps contributing app functions can opt to disallow callers with this permission,
+         limiting to only callers with {@link android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}
+         instead.
+         <p>Protection level: internal|role
+         @hide
+         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+    <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="internal|role" />
+
     <!-- Allows an application to display its suggestions using the autofill framework.
          <p>For now, this permission is only granted to the Browser application.
          <p>Protection level: internal|role
