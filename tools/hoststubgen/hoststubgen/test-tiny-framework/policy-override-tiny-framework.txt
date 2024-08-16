@@ -12,6 +12,16 @@ class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
   # method addThree_host	(I)I	# used as a substitute
   method unsupportedMethod	()Ljava/lang/String;	throw
   method visibleButUsesUnsupportedMethod	()Ljava/lang/String;	stub
+  method toBeIgnoredObj	()Ljava/lang/String;	ignore
+  method toBeIgnoredV	()V	ignore
+  method toBeIgnoredZ	()Z	ignore
+  method toBeIgnoredB	()B	ignore
+  method toBeIgnoredC	()C	ignore
+  method toBeIgnoredS	()S	ignore
+  method toBeIgnoredI	()I	ignore
+  method toBeIgnoredL	()L	ignore
+  method toBeIgnoredF	()F	ignore
+  method toBeIgnoredD	()D	ignore
 
 # Class load hook
 class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded

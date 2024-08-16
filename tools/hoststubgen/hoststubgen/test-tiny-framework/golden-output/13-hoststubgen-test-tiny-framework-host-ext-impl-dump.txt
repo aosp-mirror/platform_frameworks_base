@@ -2141,7 +2141,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 2, methods: 8, attributes: 2
+  interfaces: 0, fields: 2, methods: 17, attributes: 2
   public int stub;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -2254,13 +2254,192 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
+  public java.lang.String toBeIgnoredObj();
+    descriptor: ()Ljava/lang/String;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredObj
+         x: ldc           #x                 // String ()Ljava/lang/String;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: aconst_null
+        x: areturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public void toBeIgnoredV();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredV
+         x: ldc           #x                 // String ()V
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: return
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public boolean toBeIgnoredZ();
+    descriptor: ()Z
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredZ
+         x: ldc           #x                 // String ()Z
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_0
+        x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public byte toBeIgnoredB();
+    descriptor: ()B
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredB
+         x: ldc           #x                 // String ()B
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_0
+        x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public char toBeIgnoredC();
+    descriptor: ()C
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredC
+         x: ldc           #x                 // String ()C
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_0
+        x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public short toBeIgnoredS();
+    descriptor: ()S
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredS
+         x: ldc           #x                 // String ()S
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_0
+        x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public int toBeIgnoredI();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredI
+         x: ldc           #x                 // String ()I
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_0
+        x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public float toBeIgnoredF();
+    descriptor: ()F
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredF
+         x: ldc           #x                 // String ()F
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: fconst_0
+        x: freturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public double toBeIgnoredD();
+    descriptor: ()D
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
+         x: ldc           #x                 // String toBeIgnoredD
+         x: ldc           #x                 // String ()D
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: dconst_0
+        x: dreturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
   public int addTwo(int);
     descriptor: (I)I
     flags: (0x0001) ACC_PUBLIC
     Code:
       stack=4, locals=2, args_size=2
          x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
-         x: ldc           #x                 // String addTwo
+         x: ldc           #x                // String addTwo
          x: ldc           #x                 // String (I)I
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
          x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
@@ -2287,7 +2466,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
     Code:
       stack=4, locals=1, args_size=1
          x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
-         x: ldc           #x                 // String nativeAddThree
+         x: ldc           #x                // String nativeAddThree
          x: ldc           #x                 // String (I)I
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
          x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
@@ -2313,21 +2492,21 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
     Code:
       stack=4, locals=1, args_size=1
          x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
-         x: ldc           #x                 // String unsupportedMethod
+         x: ldc           #x                // String unsupportedMethod
          x: ldc           #x                 // String ()Ljava/lang/String;
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
          x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
         x: ldc           #x                 // String com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
-        x: ldc           #x                 // String unsupportedMethod
+        x: ldc           #x                // String unsupportedMethod
         x: ldc           #x                 // String ()Ljava/lang/String;
         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.getStackWalker:()Ljava/lang/StackWalker;
         x: invokevirtual #x                 // Method java/lang/StackWalker.getCallerClass:()Ljava/lang/Class;
         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onNonStubMethodCalled:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)V
-        x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onThrowMethodCalled:()V
-        x: new           #x                 // class java/lang/RuntimeException
+        x: invokestatic  #x                // Method com/android/hoststubgen/hosthelper/HostTestUtils.onThrowMethodCalled:()V
+        x: new           #x                // class java/lang/RuntimeException
         x: dup
-        x: ldc           #x                 // String Unreachable
-        x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+        x: ldc           #x                // String Unreachable
+        x: invokespecial #x                // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
         x: athrow
     RuntimeVisibleAnnotations:
       x: #x()
@@ -2341,12 +2520,12 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
     Code:
       stack=4, locals=1, args_size=1
          x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
-         x: ldc           #x                 // String visibleButUsesUnsupportedMethod
+         x: ldc           #x                // String visibleButUsesUnsupportedMethod
          x: ldc           #x                 // String ()Ljava/lang/String;
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
          x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
         x: aload_0
-        x: invokevirtual #x                 // Method unsupportedMethod:()Ljava/lang/String;
+        x: invokevirtual #x                // Method unsupportedMethod:()Ljava/lang/String;
         x: areturn
       LineNumberTable:
       LocalVariableTable:
