@@ -264,6 +264,9 @@ constructor(
             // Keeps the lockout message up-to-date.
             launch { bouncerInteractor.onLockoutStarted.collect { startLockoutCountdown() } }
 
+            // Start already active lockdown if it exists
+            launch { startLockoutCountdown() }
+
             // Listens to relevant bouncer events
             launch {
                 bouncerInteractor.onIncorrectBouncerInput
