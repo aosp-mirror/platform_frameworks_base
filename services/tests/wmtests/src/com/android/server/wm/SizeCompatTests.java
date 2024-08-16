@@ -2394,7 +2394,13 @@ public class SizeCompatTests extends WindowTestsBase {
     private void testUserOverrideAspectRatio(boolean isUnresizable, int screenOrientation,
             float expectedAspectRatio, @PackageManager.UserMinAspectRatio int aspectRatio,
             boolean enabled) {
-        final ActivityRecord activity = getActivityBuilderOnSameTask().build();
+        final ActivityRecord activity = getActivityBuilderWithoutTask().build();
+        final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
+                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+        spyOn(desktopAppCompatAspectRatioPolicy);
+        doReturn(enabled).when(desktopAppCompatAspectRatioPolicy)
+                .hasMinAspectRatioOverride(any());
+        mTask.addChild(activity);
         activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         spyOn(activity.mWmService.mAppCompatConfiguration);
         doReturn(enabled).when(activity.mWmService.mAppCompatConfiguration)
@@ -4944,8 +4950,11 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     private ActivityBuilder getActivityBuilderOnSameTask() {
+        return getActivityBuilderWithoutTask().setTask(mTask);
+    }
+
+    private ActivityBuilder getActivityBuilderWithoutTask() {
         return new ActivityBuilder(mAtm)
-                .setTask(mTask)
                 .setComponent(ComponentName.createRelative(mContext,
                         SizeCompatTests.class.getName()))
                 .setUid(android.os.Process.myUid());

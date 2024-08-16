@@ -867,6 +867,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_landscapeDevice_portraitResizableApp_aspectRatioOverridden() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_PORTRAIT,
+      shouldLetterbox = true, aspectRatioOverrideApplied = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_PORTRAIT_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun addMoveToDesktopChanges_portraitDevice_userFullscreenOverride_defaultPortraitBounds() {
     setUpPortraitDisplay()
     val task = setUpFullscreenTask(enableUserFullscreenOverride = true)
@@ -885,6 +897,19 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.addMoveToDesktopChanges(wct, task)
 
     assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_portraitDevice_landscapeResizableApp_aspectRatioOverridden() {
+    setUpPortraitDisplay()
+    val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_LANDSCAPE,
+      deviceOrientation = ORIENTATION_PORTRAIT,
+      shouldLetterbox = true, aspectRatioOverrideApplied = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_LANDSCAPE_BOUNDS)
   }
 
   @Test
@@ -2896,7 +2921,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     shouldLetterbox: Boolean = false,
     gravity: Int = Gravity.NO_GRAVITY,
     enableUserFullscreenOverride: Boolean = false,
-    enableSystemFullscreenOverride: Boolean = false
+    enableSystemFullscreenOverride: Boolean = false,
+    aspectRatioOverrideApplied: Boolean = false
   ): RunningTaskInfo {
     val task = createFullscreenTask(displayId)
     val activityInfo = ActivityInfo()
@@ -2911,6 +2937,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       appCompatTaskInfo.isSystemFullscreenOverrideEnabled = enableSystemFullscreenOverride
 
       if (shouldLetterbox) {
+        appCompatTaskInfo.setHasMinAspectRatioOverride(aspectRatioOverrideApplied)
         if (deviceOrientation == ORIENTATION_LANDSCAPE &&
             screenOrientation == SCREEN_ORIENTATION_PORTRAIT) {
           // Letterbox to portrait size
