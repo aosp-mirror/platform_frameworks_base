@@ -3836,7 +3836,6 @@
     <!-- Allows an application to use audit logging API.
         @hide
         @SystemApi
-        @FlaggedApi("android.app.admin.flags.security_log_v2_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING"
         android:protectionLevel="internal|role" />
