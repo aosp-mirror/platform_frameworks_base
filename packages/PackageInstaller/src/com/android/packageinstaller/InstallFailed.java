@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+
 import androidx.annotation.Nullable;
 
 /**
@@ -84,22 +85,28 @@ public class InstallFailed extends Activity {
         int statusCode = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
             PackageInstaller.STATUS_FAILURE);
         boolean returnResult = intent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
-
-        if (returnResult) {
-            int legacyStatus = intent.getIntExtra(PackageInstaller.EXTRA_LEGACY_STATUS,
+        int legacyStatus = intent.getIntExtra(PackageInstaller.EXTRA_LEGACY_STATUS,
                 PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
 
+        // TODO (b/346655018): Use INSTALL_FAILED_ABORTED legacyCode in the condition
+        // statusCode can be STATUS_FAILURE_ABORTED if:
+        // 1. GPP blocks an install.
+        // 2. User denies ownership update explicitly.
+        // InstallFailed dialog must not be shown only when the user denies ownership update. We
+        // must show this dialog for all other install failures.
+        boolean userDenied = statusCode == PackageInstaller.STATUS_FAILURE_ABORTED
+                && legacyStatus != PackageManager.INSTALL_FAILED_VERIFICATION_TIMEOUT
+                && legacyStatus != PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
+
+        if (returnResult) {
             // Return result if requested
             Intent result = new Intent();
             result.putExtra(Intent.EXTRA_INSTALL_RESULT, legacyStatus);
             setResult(Activity.RESULT_FIRST_USER, result);
             finish();
-        } else if (statusCode != PackageInstaller.STATUS_FAILURE_ABORTED) {
-            // statusCode will be STATUS_FAILURE_ABORTED if the update-owner confirmation dialog was
-            // dismissed by the user. We don't want to show a InstallFailed dialog in this case.
-            // If the user denies install permission for normal installs, this dialog will never be
-            // triggered as the status code is returned from PackageInstallerActivity.java
-
+        } else if (userDenied) {
+            finish();
+        } else {
             // Set header icon and title
             PackageUtil.AppSnippet as = intent.getParcelableExtra(
                 PackageInstallerActivity.EXTRA_APP_SNIPPET, PackageUtil.AppSnippet.class);
@@ -127,8 +134,6 @@ public class InstallFailed extends Activity {
 
             // Get status messages
             setExplanationFromErrorCode(statusCode);
-        } else {
-            finish();
         }
     }
 

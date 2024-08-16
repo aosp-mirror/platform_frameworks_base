@@ -1722,7 +1722,9 @@ public abstract class Window {
      * @see View#findViewById(int)
      * @see Window#requireViewById(int)
      */
-    @Nullable
+    // Strictly speaking this should be marked as @Nullable but the nullability of the return value
+    // is deliberately left unspecified as idiomatically correct code can make assumptions either
+    // way based on local context, e.g. layout specification.
     public <T extends View> T findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
     }
@@ -2954,6 +2956,15 @@ public abstract class Window {
      * There is a second caption drawn underneath it that will be fast enough. By default the
      * caption is constructed from the theme. You can provide a drawable, that will be drawn instead
      * to better match your application.
+     *
+     * Starting in Android 15, this API is a no-op. New window decorations introduced in Android 14
+     * are drawn in SystemUI process, and OEMs are responsible to make them responsive to resizing.
+     * There is no need to set a background drawable to improve UX anymore since then. Additionally,
+     * the foremost activity can draw in caption areas starting in Android 15. Check
+     * {@link WindowInsetsController#APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND},
+     * {@link WindowInsetsController#APPEARANCE_LIGHT_CAPTION_BARS},
+     * {@link WindowInsetsController#setSystemBarsAppearance(int, int)} and
+     * {@link WindowInsets#getBoundingRects(int)}.
      */
     public abstract void setResizingCaptionDrawable(Drawable drawable);
 

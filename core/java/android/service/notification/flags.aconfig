@@ -36,3 +36,25 @@ flag {
   bug: "305095040"
   is_fixed_read_only: true
 }
+
+flag {
+    name: "notification_classification"
+    is_exported: true
+    namespace: "systemui"
+    description: "Allows the NAS to classify notifications"
+    bug: "343988084"
+}
+
+flag {
+  name: "notification_force_grouping"
+  namespace: "systemui"
+  description: "This flag controls the forced auto-grouping feature"
+  bug: "336488844"
+}
+
+flag {
+  name: "notification_silent_flag"
+  namespace: "systemui"
+  description: "Guards the new FLAG_SILENT Notification flag"
+  bug: "336488844"
+}

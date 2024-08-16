@@ -760,7 +760,7 @@ public class CacheOomRankerTest {
         ProcessStatsService processStatsService = new ProcessStatsService(
                 mock(ActivityManagerService.class), new File(Environment.getDataSystemCeDirectory(),
                 "procstats"));
-        app.makeActive(mock(IApplicationThread.class), processStatsService);
+        app.makeActive(mock(ApplicationThreadDeferred.class), processStatsService);
         return app;
     }
 

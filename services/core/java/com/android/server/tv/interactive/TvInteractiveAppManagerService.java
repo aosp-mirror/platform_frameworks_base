@@ -2124,7 +2124,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         @Override
         public void setTeletextAppEnabled(IBinder sessionToken, boolean enable, int userId) {
             if (DEBUG) {
-                Slogf.d(TAG, "setTeletextAppEnabled(enable=%d)", enable);
+                Slogf.d(TAG, "setTeletextAppEnabled(enable=%b)", enable);
             }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,

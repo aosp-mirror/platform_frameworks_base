@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.windowdecor;
 
-import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
@@ -29,6 +29,8 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.isEdgeResizePermitted;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.isEventFromTouchscreen;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -54,7 +56,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 import android.window.InputTransferToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -80,6 +82,7 @@ class DragResizeInputListener implements AutoCloseable {
     private final InputChannel mInputChannel;
     private final TaskResizeInputEventReceiver mInputEventReceiver;
 
+    private final Context mContext;
     private final SurfaceControl mInputSinkSurface;
     private final IBinder mSinkClientToken;
     private final InputChannel mSinkInputChannel;
@@ -96,6 +99,7 @@ class DragResizeInputListener implements AutoCloseable {
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             DisplayController displayController) {
+        mContext = context;
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mDisplayId = displayId;
         mDecorationSurface = decorationSurface;
@@ -109,7 +113,7 @@ class DragResizeInputListener implements AutoCloseable {
                     mDecorationSurface,
                     mClientToken,
                     null /* hostInputToken */,
-                    FLAG_NOT_FOCUSABLE,
+                    FLAG_NOT_FOCUSABLE | FLAG_SPLIT_TOUCH,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
                     INPUT_FEATURE_SPY,
                     TYPE_APPLICATION,
@@ -179,7 +183,7 @@ class DragResizeInputListener implements AutoCloseable {
 
         mTouchRegion.setEmpty();
         // Apply the geometry to the touch region.
-        geometry.union(mTouchRegion);
+        geometry.union(mContext, mTouchRegion);
         mInputEventReceiver.setGeometry(geometry);
         mInputEventReceiver.setTouchRegion(mTouchRegion);
 
@@ -353,7 +357,7 @@ class DragResizeInputListener implements AutoCloseable {
          */
         @NonNull Region getCornersRegion() {
             Region region = new Region();
-            mDragResizeWindowGeometry.union(region);
+            mDragResizeWindowGeometry.union(mContext, region);
             return region;
         }
 
@@ -392,10 +396,9 @@ class DragResizeInputListener implements AutoCloseable {
             boolean result = false;
             // Check if this is a touch event vs mouse event.
             // Touch events are tracked in four corners. Other events are tracked in resize edges.
-            boolean isTouch = isTouchEvent(e);
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
-                    mShouldHandleEvents = mDragResizeWindowGeometry.shouldHandleEvent(e, isTouch,
+                    mShouldHandleEvents = mDragResizeWindowGeometry.shouldHandleEvent(mContext, e,
                             new Point() /* offset */);
                     if (mShouldHandleEvents) {
                         // Save the id of the pointer for this drag interaction; we will use the
@@ -405,7 +408,9 @@ class DragResizeInputListener implements AutoCloseable {
                         float y = e.getY(0);
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
-                        int ctrlType = mDragResizeWindowGeometry.calculateCtrlType(isTouch, x, y);
+                        final int ctrlType = mDragResizeWindowGeometry.calculateCtrlType(mContext,
+                                isEventFromTouchscreen(e), isEdgeResizePermitted(mContext, e), x,
+                                y);
                         ProtoLog.d(WM_SHELL_DESKTOP_MODE,
                                 "%s: Handling action down, update ctrlType to %d", TAG, ctrlType);
                         mDragStartTaskBounds = mCallback.onDragPositioningStart(ctrlType,
@@ -467,8 +472,7 @@ class DragResizeInputListener implements AutoCloseable {
                 case MotionEvent.ACTION_HOVER_ENTER:
                 case MotionEvent.ACTION_HOVER_MOVE: {
                     updateCursorType(e.getDisplayId(), e.getDeviceId(),
-                            e.getPointerId(/*pointerIndex=*/0), e.getXCursorPosition(),
-                            e.getYCursorPosition());
+                            e.getPointerId(/*pointerIndex=*/0), e.getX(), e.getY());
                     result = true;
                     break;
                 }
@@ -493,8 +497,11 @@ class DragResizeInputListener implements AutoCloseable {
 
         private void updateCursorType(int displayId, int deviceId, int pointerId, float x,
                 float y) {
+            // Since we are handling cursor, we know that this is not a touchscreen event, and
+            // that edge resizing should always be allowed.
             @DragPositioningCallback.CtrlType int ctrlType =
-                    mDragResizeWindowGeometry.calculateCtrlType(/* isTouch= */ false, x, y);
+                    mDragResizeWindowGeometry.calculateCtrlType(mContext, /* isTouchscreen= */
+                            false, /* isEdgeResizePermitted= */ true, x, y);
 
             int cursorType = PointerIcon.TYPE_DEFAULT;
             switch (ctrlType) {
@@ -534,11 +541,7 @@ class DragResizeInputListener implements AutoCloseable {
         }
 
         private boolean shouldHandleEvent(MotionEvent e, Point offset) {
-            return mDragResizeWindowGeometry.shouldHandleEvent(e, offset);
-        }
-
-        private boolean isTouchEvent(MotionEvent e) {
-            return (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+            return mDragResizeWindowGeometry.shouldHandleEvent(mContext, e, offset);
         }
     }
 }

@@ -20,6 +20,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.ext.truth.content.IntentSubject.assertThat as assertThatIntent
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
@@ -29,9 +30,11 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ActionIntentCreatorTest : SysuiTestCase() {
 
     @Test

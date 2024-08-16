@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+
 import static com.android.server.display.BrightnessMappingStrategy.INVALID_LUX;
 import static com.android.server.display.config.DisplayBrightnessMappingConfig.autoBrightnessModeToString;
 
@@ -54,7 +56,6 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 import com.android.server.display.brightness.BrightnessEvent;
-import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -242,6 +243,9 @@ public class AutomaticBrightnessController {
 
     private int mDisplayState = Display.STATE_UNKNOWN;
 
+    // True if the normal brightness should be forced while device is dozing.
+    private boolean mUseNormalBrightnessForDoze;
+
     // True if we are collecting a brightness adjustment sample, along with some data
     // for the initial state of the sample.
     private boolean mBrightnessAdjustmentSamplePending;
@@ -256,7 +260,6 @@ public class AutomaticBrightnessController {
 
     // Controls Brightness range (including High Brightness Mode).
     private final BrightnessRangeController mBrightnessRangeController;
-    private final BrightnessClamperController mBrightnessClamperController;
 
     // Throttles (caps) maximum allowed brightness
     private final BrightnessThrottler mBrightnessThrottler;
@@ -295,7 +298,6 @@ public class AutomaticBrightnessController {
             BrightnessRangeController brightnessModeController,
             BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
             int ambientLightHorizonLong, float userLux, float userNits,
-            BrightnessClamperController brightnessClamperController,
             DisplayManagerFlags displayManagerFlags) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor,
                 brightnessMappingStrategyMap, lightSensorWarmUpTime, brightnessMin, brightnessMax,
@@ -306,7 +308,7 @@ public class AutomaticBrightnessController {
                 screenBrightnessThresholds, ambientBrightnessThresholdsIdle,
                 screenBrightnessThresholdsIdle, context, brightnessModeController,
                 brightnessThrottler, ambientLightHorizonShort, ambientLightHorizonLong, userLux,
-                userNits, brightnessClamperController, displayManagerFlags
+                userNits, displayManagerFlags
         );
     }
 
@@ -325,7 +327,6 @@ public class AutomaticBrightnessController {
             BrightnessRangeController brightnessRangeController,
             BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
             int ambientLightHorizonLong, float userLux, float userNits,
-            BrightnessClamperController brightnessClamperController,
             DisplayManagerFlags displayManagerFlags) {
         mInjector = injector;
         mClock = injector.createClock(displayManagerFlags.offloadControlsDozeAutoBrightness());
@@ -370,7 +371,6 @@ public class AutomaticBrightnessController {
         mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mBrightnessRangeController = brightnessRangeController;
-        mBrightnessClamperController = brightnessClamperController;
         mBrightnessThrottler = brightnessThrottler;
         mBrightnessMappingStrategyMap = brightnessMappingStrategyMap;
         mDisplayManagerFlags = displayManagerFlags;
@@ -447,11 +447,12 @@ public class AutomaticBrightnessController {
     public void configure(int state, @Nullable BrightnessConfiguration configuration,
             float brightness, boolean userChangedBrightness, float adjustment,
             boolean userChangedAutoBrightnessAdjustment, int displayPolicy, int displayState,
-            boolean shouldResetShortTermModel) {
+            boolean useNormalBrightnessForDoze, boolean shouldResetShortTermModel) {
         mState = state;
         boolean changed = setBrightnessConfiguration(configuration, shouldResetShortTermModel);
         changed |= setDisplayPolicy(displayPolicy);
         mDisplayState = displayState;
+        mUseNormalBrightnessForDoze = useNormalBrightnessForDoze;
         if (userChangedAutoBrightnessAdjustment) {
             changed |= setAutoBrightnessAdjustment(adjustment);
         }
@@ -582,6 +583,14 @@ public class AutomaticBrightnessController {
     @AutomaticBrightnessController.AutomaticBrightnessMode
     public int getMode() {
         return mCurrentBrightnessMapper.getMode();
+    }
+
+    /**
+     * @return The preset for this mapping strategy. Presets are used on devices that allow users
+     * to choose from a set of predefined options in display auto-brightness settings.
+     */
+    public int getPreset() {
+        return mCurrentBrightnessMapper.getPreset();
     }
 
     public boolean isInIdleMode() {
@@ -771,7 +780,6 @@ public class AutomaticBrightnessController {
                     mAmbientBrightnessThresholds.getDarkeningThreshold(lux);
         }
         mBrightnessRangeController.onAmbientLuxChange(mAmbientLux);
-        mBrightnessClamperController.onAmbientLuxChange(mAmbientLux);
 
         // If the short term model was invalidated and the change is drastic enough, reset it.
         mShortTermModel.maybeReset(mAmbientLux);
@@ -1262,11 +1270,10 @@ public class AutomaticBrightnessController {
     }
 
     private boolean shouldApplyDozeScaleFactor() {
-        // Apply the doze scale factor if the display is in doze. We shouldn't rely on the display
-        // policy here - the screen might turn on while the policy is POLICY_DOZE and in this
-        // situation, we shouldn't apply the doze scale factor. We also don't apply the doze scale
-        // factor if we have a designated brightness curve for doze.
-        return Display.isDozeState(mDisplayState) && getMode() != AUTO_BRIGHTNESS_MODE_DOZE;
+        // We don't apply the doze scale factor if we have a designated brightness curve for doze.
+        return (mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()
+                ? !mUseNormalBrightnessForDoze && mDisplayPolicy == POLICY_DOZE
+                : Display.isDozeState(mDisplayState)) && getMode() != AUTO_BRIGHTNESS_MODE_DOZE;
     }
 
     private class ShortTermModel {

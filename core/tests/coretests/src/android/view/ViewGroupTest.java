@@ -19,6 +19,7 @@ package android.view;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -29,10 +30,15 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.graphics.Region;
 import android.platform.test.annotations.Presubmit;
+import android.view.autofill.AutofillId;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -182,6 +188,31 @@ public class ViewGroupTest {
         assertRegionContainPoint(3 /* x */, r, false /* contain */); // Outside of bounds
     }
 
+    @Test
+    public void testfindAutofillableViewsByTraversal() {
+        final Context context = getInstrumentation().getContext();
+        final TestView viewGroup = new TestView(context, 200 /* right */);
+
+        // viewA and viewC are autofillable. ViewB isn't.
+        final TestView viewA = spy(new AutofillableTestView(context, 100 /* right */));
+        final TestView viewB = spy(new NonAutofillableTestView(context, 200 /* right */));
+        final TestView viewC = spy(new AutofillableTestView(context, 300 /* right */));
+
+        viewGroup.addView(viewA);
+        viewGroup.addView(viewB);
+        viewGroup.addView(viewC);
+
+        List<View> autofillableViews = new ArrayList<>();
+        viewGroup.findAutofillableViewsByTraversal(autofillableViews);
+
+        verify(viewA).findAutofillableViewsByTraversal(autofillableViews);
+        verify(viewB).findAutofillableViewsByTraversal(autofillableViews);
+        verify(viewC).findAutofillableViewsByTraversal(autofillableViews);
+
+        assertEquals("Size of autofillable views", 2, autofillableViews.size());
+        assertTrue(autofillableViews.containsAll(Arrays.asList(viewA, viewC)));
+    }
+
     private static void getUnobscuredTouchableRegion(Region outRegion, View view) {
         outRegion.set(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
         final ViewParent parent = view.getParent();
@@ -208,6 +239,31 @@ public class ViewGroupTest {
         @Override
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             // We don't layout this view.
+        }
+    }
+
+    public static class AutofillableTestView extends TestView {
+        AutofillableTestView(Context context, int right) {
+            super(context, right);
+            setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
+            // Need to set autofill id in such a way that the view is considered part of activity.
+            setAutofillId(new AutofillId(LAST_APP_AUTOFILL_ID + 5));
+        }
+
+        @Override
+        public @AutofillType int getAutofillType() {
+            return AUTOFILL_TYPE_TEXT;
+        }
+    }
+
+    public static class NonAutofillableTestView extends TestView {
+        NonAutofillableTestView(Context context, int right) {
+            super(context, right);
+        }
+
+        @Override
+        public @AutofillType int getAutofillType() {
+            return AUTOFILL_TYPE_NONE;
         }
     }
 }

@@ -35,7 +35,6 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,26 +46,30 @@ import java.util.stream.Stream;
 public class CujTest {
     private static final String ENUM_NAME_PREFIX =
             "UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__";
-    private static final Set<String> DEPRECATED_VALUES = new HashSet<>() {
-        {
-            add(ENUM_NAME_PREFIX + "IME_INSETS_ANIMATION");
-        }
-    };
-    private static final Map<Integer, String> ENUM_NAME_EXCEPTION_MAP = new HashMap<>() {
-        {
-            put(Cuj.CUJ_NOTIFICATION_ADD, getEnumName("SHADE_NOTIFICATION_ADD"));
-            put(Cuj.CUJ_NOTIFICATION_HEADS_UP_APPEAR, getEnumName("SHADE_HEADS_UP_APPEAR"));
-            put(Cuj.CUJ_NOTIFICATION_APP_START, getEnumName("SHADE_APP_LAUNCH"));
-            put(Cuj.CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR, getEnumName("SHADE_HEADS_UP_DISAPPEAR"));
-            put(Cuj.CUJ_NOTIFICATION_REMOVE, getEnumName("SHADE_NOTIFICATION_REMOVE"));
-            put(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE, getEnumName("NOTIFICATION_SHADE_SWIPE"));
-            put(Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE, getEnumName("SHADE_QS_EXPAND_COLLAPSE"));
-            put(Cuj.CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE, getEnumName("SHADE_QS_SCROLL_SWIPE"));
-            put(Cuj.CUJ_NOTIFICATION_SHADE_ROW_EXPAND, getEnumName("SHADE_ROW_EXPAND"));
-            put(Cuj.CUJ_NOTIFICATION_SHADE_ROW_SWIPE, getEnumName("SHADE_ROW_SWIPE"));
-            put(Cuj.CUJ_NOTIFICATION_SHADE_SCROLL_FLING, getEnumName("SHADE_SCROLL_FLING"));
-        }
-    };
+    private static final Set<String> DEPRECATED_VALUES = Set.of(
+            ENUM_NAME_PREFIX + "IME_INSETS_ANIMATION"
+    );
+    private static final Map<Integer, String> ENUM_NAME_EXCEPTION_MAP = Map.ofEntries(
+            Map.entry(Cuj.CUJ_NOTIFICATION_ADD, getEnumName("SHADE_NOTIFICATION_ADD")),
+            Map.entry(Cuj.CUJ_NOTIFICATION_HEADS_UP_APPEAR, getEnumName("SHADE_HEADS_UP_APPEAR")),
+            Map.entry(Cuj.CUJ_NOTIFICATION_APP_START, getEnumName("SHADE_APP_LAUNCH")),
+            Map.entry(
+                    Cuj.CUJ_NOTIFICATION_HEADS_UP_DISAPPEAR,
+                    getEnumName("SHADE_HEADS_UP_DISAPPEAR")),
+            Map.entry(Cuj.CUJ_NOTIFICATION_REMOVE, getEnumName("SHADE_NOTIFICATION_REMOVE")),
+            Map.entry(
+                    Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE,
+                    getEnumName("NOTIFICATION_SHADE_SWIPE")),
+            Map.entry(
+                        Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE,
+                        getEnumName("SHADE_QS_EXPAND_COLLAPSE")),
+            Map.entry(
+                    Cuj.CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE,
+                    getEnumName("SHADE_QS_SCROLL_SWIPE")),
+            Map.entry(Cuj.CUJ_NOTIFICATION_SHADE_ROW_EXPAND, getEnumName("SHADE_ROW_EXPAND")),
+            Map.entry(Cuj.CUJ_NOTIFICATION_SHADE_ROW_SWIPE, getEnumName("SHADE_ROW_SWIPE")),
+            Map.entry(Cuj.CUJ_NOTIFICATION_SHADE_SCROLL_FLING, getEnumName("SHADE_SCROLL_FLING"))
+    );
 
     @Rule
     public final Expect mExpect = Expect.create();

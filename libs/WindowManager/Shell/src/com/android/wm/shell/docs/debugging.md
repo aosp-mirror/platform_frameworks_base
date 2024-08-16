@@ -68,12 +68,12 @@ adb shell dumpsys SurfaceFlinger
 ## Tracing global SurfaceControl transaction updates
 
 While Winscope traces are very useful, it sometimes doesn't give you enough information about which
-part of the code is initiating the transaction updates.  In such cases, it can be helpful to get
+part of the code is initiating the transaction updates. In such cases, it can be helpful to get
 stack traces when specific surface transaction calls are made, which is possible by enabling the
 following system properties for example:
 ```shell
 # Enabling
-adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha  # matches the name of the SurfaceControlTransaction method
+adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,setPosition  # matches the name of the SurfaceControlTransaction methods
 adb shell setprop persist.wm.debug.sc.tx.log_match_name com.android.systemui # matches the name of the surface
 adb reboot
 adb logcat -s "SurfaceControlRegistry"
@@ -81,13 +81,25 @@ adb logcat -s "SurfaceControlRegistry"
 # Disabling logging
 adb shell setprop persist.wm.debug.sc.tx.log_match_call \"\"
 adb shell setprop persist.wm.debug.sc.tx.log_match_name \"\"
-adb reboot
 ```
+
+A reboot is required to enable the logging. Once enabled, reboot is not needed to update the
+properties.
 
 It is not necessary to set both `log_match_call` and `log_match_name`, but note logs can be quite
 noisy if unfiltered.
 
-## Tracing activity starts in the app process
+It can sometimes be useful to trace specific logs and when they are applied (sometimes we build
+transactions that can be applied later).  You can do this by adding the "merge" and "apply" calls to
+the set of requested calls:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.sc.tx.log_match_call setAlpha,merge,apply  # apply will dump logs of each setAlpha or merge call on that tx
+adb reboot
+adb logcat -s "SurfaceControlRegistry"
+```
+
+## Tracing activity starts & finishes in the app process
 
 It's sometimes useful to know when to see a stack trace of when an activity starts in the app code
 (ie. if you are repro'ing a bug related to activity starts). You can enable this system property to
@@ -100,6 +112,19 @@ adb logcat -s "Instrumentation"
 
 # Disabling
 adb shell setprop persist.wm.debug.start_activity \"\"
+adb reboot
+```
+
+Likewise, to trace where a finish() call may be made in the app process, you can enable this system
+property:
+```shell
+# Enabling
+adb shell setprop persist.wm.debug.finish_activity true
+adb reboot
+adb logcat -s "Instrumentation"
+
+# Disabling
+adb shell setprop persist.wm.debug.finish_activity \"\"
 adb reboot
 ```
 

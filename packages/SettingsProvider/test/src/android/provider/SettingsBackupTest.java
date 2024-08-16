@@ -177,6 +177,7 @@ public class SettingsBackupTest {
                     Settings.Global.DESK_UNDOCK_SOUND,
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
                     Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
+                    Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
                     Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
@@ -628,11 +629,11 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.CUSTOM_COLOR_BACKGROUND,
                     Settings.Global.Wearable.PHONE_SWITCHING_STATUS,
                     Settings.Global.Wearable.TETHER_CONFIG_STATE,
-                    Settings.Global.Wearable.PHONE_SWITCHING_SUPPORTED,
                     Settings.Global.Wearable.WEAR_MEDIA_CONTROLS_PACKAGE,
                     Settings.Global.Wearable.WEAR_MEDIA_SESSIONS_PACKAGE,
                     Settings.Global.Wearable.WEAR_POWER_ANOMALY_SERVICE_ENABLED,
-                    Settings.Global.Wearable.CONNECTIVITY_KEEP_DATA_ON);
+                    Settings.Global.Wearable.CONNECTIVITY_KEEP_DATA_ON,
+                    Settings.Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
@@ -676,9 +677,11 @@ public class SettingsBackupTest {
                  Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED, // Candidate for backup?
                  Settings.Secure.CARRIER_APPS_HANDLED,
                  Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
+                 Settings.Secure.COMPAT_UI_EDUCATION_SHOWING,
                  Settings.Secure.COMPLETED_CATEGORY_PREFIX,
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.CONTENT_CAPTURE_ENABLED,
+                 Settings.Secure.CONTEXTUAL_SEARCH_PACKAGE,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
                  Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD,
                  Settings.Secure.DEVICE_PAIRED,
@@ -916,6 +919,7 @@ public class SettingsBackupTest {
                         Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
                         Settings.System.SHOW_TOUCHES,
                         Settings.System.SHOW_KEY_PRESSES,
+                        Settings.System.TOUCHPAD_VISUALIZER,
                         Settings.System.SHOW_ROTARY_INPUT,
                         Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
                         Settings.System.SIP_ALWAYS, // value, not a setting

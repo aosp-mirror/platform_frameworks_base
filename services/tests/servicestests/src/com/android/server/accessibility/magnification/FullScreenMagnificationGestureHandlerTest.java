@@ -17,6 +17,7 @@
 package com.android.server.accessibility.magnification;
 
 import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT;
@@ -27,9 +28,14 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.server.testutils.TestUtils.strictMock;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.gt;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -198,6 +204,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private final Scroller mMockScroller = spy(new Scroller(mContext));
 
     private boolean mMockMagnificationConnectionState;
+    private boolean mMockOneFingerPanningEnabled;
 
     private OffsettableClock mClock;
     private FullScreenMagnificationGestureHandler mMgh;
@@ -208,8 +215,6 @@ public class FullScreenMagnificationGestureHandlerTest {
     private float mOriginalMagnificationPersistedScale;
 
     static final Rect INITIAL_MAGNIFICATION_BOUNDS = new Rect(0, 0, 800, 800);
-
-    static final Region INITIAL_MAGNIFICATION_REGION = new Region(INITIAL_MAGNIFICATION_BOUNDS);
 
     @Before
     public void setUp() {
@@ -282,6 +287,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     @NonNull
     private FullScreenMagnificationGestureHandler newInstance(boolean detectSingleFingerTripleTap,
             boolean detectTwoFingerTripleTap, boolean detectShortcutTrigger) {
+        enableOneFingerPanning(
+                    isWatch() || Flags.enableMagnificationOneFingerPanningGesture());
         FullScreenMagnificationGestureHandler h =
                 new FullScreenMagnificationGestureHandler(
                         mContext,
@@ -296,9 +303,14 @@ public class FullScreenMagnificationGestureHandlerTest {
                         mMockFullScreenMagnificationVibrationHelper,
                         mMockMagnificationLogger,
                         ViewConfiguration.get(mContext),
-                        mMockOneFingerPanningSettingsProvider);
+                        mMockOneFingerPanningSettingsProvider,
+                        new MouseEventHandler(mFullScreenMagnificationController));
+        // OverscrollHandler is only supported on watches.
+        // @See config_enable_a11y_fullscreen_magnification_overscroll_handler
         if (isWatch()) {
-            enableOneFingerPanning(true);
+            assertNotNull(h.mOverscrollHandler);
+        } else {
+            assertNull(h.mOverscrollHandler);
         }
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
@@ -612,7 +624,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTap_StateIsActivated_shouldInDelegating() {
+    public void testTwoFingerTap_StateIsActivated_shouldInDetecting() {
         assumeTrue(isWatch());
         enableOneFingerPanning(false);
         goFromStateIdleTo(STATE_ACTIVATED);
@@ -621,14 +633,15 @@ public class FullScreenMagnificationGestureHandlerTest {
         send(downEvent());
         send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
         send(upEvent());
-        fastForward(ViewConfiguration.getDoubleTapTimeout());
+        fastForward(mMgh.mDetectingState.mMultiTapMaxDelay);
 
-        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        verify(mMgh.getNext(), times(3)).onMotionEvent(any(), any(), anyInt());
+        assertTrue(mMgh.mCurrentState == mMgh.mDetectingState);
     }
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTap_StateIsIdle_shouldInDelegating() {
+    public void testTwoFingerTap_StateIsIdle_shouldInDetecting() {
         assumeTrue(isWatch());
         enableOneFingerPanning(false);
         goFromStateIdleTo(STATE_IDLE);
@@ -637,9 +650,10 @@ public class FullScreenMagnificationGestureHandlerTest {
         send(downEvent());
         send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
         send(upEvent());
-        fastForward(ViewConfiguration.getDoubleTapTimeout());
+        fastForward(mMgh.mDetectingState.mMultiTapMaxDelay);
 
-        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        verify(mMgh.getNext(), times(3)).onMotionEvent(any(), any(), anyInt());
+        assertTrue(mMgh.mCurrentState == mMgh.mDetectingState);
     }
 
     @Test
@@ -836,7 +850,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     public void testActionUpNotAtEdge_singlePanningState_detectingState() {
-        assumeTrue(isWatch());
+        assumeTrue(isOneFingerPanningEnabled());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
 
         send(upEvent());
@@ -846,8 +860,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
-    public void testScroll_SinglePanningDisabled_delegatingState() {
-        assumeTrue(isWatch());
+    public void testScroll_singlePanningDisabled_delegatingState() {
         enableOneFingerPanning(false);
 
         goFromStateIdleTo(STATE_ACTIVATED);
@@ -858,8 +871,54 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testSingleFingerOverscrollAtLeftEdge_isNotWatch_transitionToDelegatingState() {
+        assumeTrue(isOneFingerPanningEnabled());
+        assumeFalse(isWatch());
+        goFromStateIdleTo(STATE_ACTIVATED);
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, INITIAL_MAGNIFICATION_BOUNDS.left, centerY, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(INITIAL_MAGNIFICATION_BOUNDS.centerX(),
+                        INITIAL_MAGNIFICATION_BOUNDS.centerY());
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(swipeMinDistance, 0);
+
+        allowEventDelegation();
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testSingleFingerOverscrollAtBottomEdge_isNotWatch_transitionToDelegatingState() {
+        assumeTrue(isOneFingerPanningEnabled());
+        assumeFalse(isWatch());
+        goFromStateIdleTo(STATE_ACTIVATED);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.bottom, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(INITIAL_MAGNIFICATION_BOUNDS.centerX(),
+                        INITIAL_MAGNIFICATION_BOUNDS.centerY());
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(0, -swipeMinDistance);
+
+        allowEventDelegation();
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+        assertTrue(isZoomed());
+    }
+
+    @Test
     @FlakyTest
-    public void testScroll_singleHorizontalPanningAndAtEdge_leftEdgeOverscroll() {
+    public void testSingleFingerOverscrollAtLeftEdge_isWatch_expectedOverscrollState() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerY =
@@ -883,7 +942,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @FlakyTest
-    public void testScroll_singleHorizontalPanningAndAtEdge_rightEdgeOverscroll() {
+    public void testSingleFingerOverscrollAtRightEdge_isWatch_expectedOverscrollState() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerY =
@@ -907,7 +966,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @FlakyTest
-    public void testScroll_singleVerticalPanningAndAtEdge_verticalOverscroll() {
+    public void testSingleFingerOverscrollAtTopEdge_isWatch_expectedOverscrollState() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerX =
@@ -929,7 +988,54 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
-    public void testScroll_singlePanningAndAtEdge_noOverscroll() {
+    public void testSingleFingerOverscrollAtTopEdge_isWatch_scrollDiagonally_noOverscroll() {
+        assumeTrue(isWatch());
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        // Scroll diagonally towards top-right with a bigger right delta
+        edgeCoords.offset(swipeMinDistance * 2, swipeMinDistance);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_NONE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void
+            testSingleFingerOverscrollAtTopEdge_isWatch_scrollDiagonally_expectedOverscrollState() {
+        assumeTrue(isWatch());
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        // Scroll diagonally towards top-right with a bigger top delta
+        edgeCoords.offset(swipeMinDistance, swipeMinDistance * 2);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_VERTICAL_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testSingleFingerScrollAtEdge_isWatch_noOverscroll() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerY =
@@ -951,7 +1057,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
-    public void testScroll_singleHorizontalPanningAndAtEdge_vibrate() {
+    public void testSingleFingerHorizontalScrollAtEdge_isWatch_vibrate() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         mFullScreenMagnificationController.setCenter(
@@ -975,7 +1081,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
-    public void testScroll_singleVerticalPanningAndAtEdge_doNotVibrate() {
+    public void testSingleFingerVerticalScrollAtEdge_isWatch_doNotVibrate() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         mFullScreenMagnificationController.setCenter(
@@ -1000,13 +1106,28 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_FULLSCREEN_FLING_GESTURE)
-    public void singleFinger_testScrollAfterMagnified_startsFling() {
+    public void testSingleFingerScrollAfterMagnified_startsFling() {
         assumeTrue(isWatch());
         goFromStateIdleTo(STATE_ACTIVATED);
 
-        swipeAndHold();
+        PointF pointer = DEFAULT_POINT;
+        send(downEvent(pointer.x, pointer.y));
+
+        // first move triggers the panning state
+        pointer.offset(100, 100);
         fastForward(20);
-        swipe(DEFAULT_POINT, new PointF(DEFAULT_X * 2, DEFAULT_Y * 2), /* durationMs= */ 20);
+        send(moveEvent(pointer.x, pointer.y));
+
+        // second move actually pans
+        pointer.offset(100, 100);
+        fastForward(20);
+        send(moveEvent(pointer.x, pointer.y));
+        pointer.offset(100, 100);
+        fastForward(20);
+        send(moveEvent(pointer.x, pointer.y));
+
+        fastForward(20);
+        send(upEvent(pointer.x, pointer.y));
 
         verify(mMockScroller).fling(
                 /* startX= */ anyInt(),
@@ -1281,8 +1402,309 @@ public class FullScreenMagnificationGestureHandlerTest {
         mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
     }
 
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testMouseMoveEventsDoNotMoveMagnifierViewport() {
+        runMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_MOUSE);
+    }
+
+    @Test
+    public void testStylusMoveEventsDoNotMoveMagnifierViewport() {
+        runMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_STYLUS);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testMouseHoverMoveEventsDoNotMoveMagnifierViewport() {
+        runHoverMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_MOUSE);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testStylusHoverMoveEventsDoNotMoveMagnifierViewport() {
+        runHoverMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_STYLUS);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testMouseHoverMoveEventsMoveMagnifierViewport() {
+        runHoverMovesViewportTest(InputDevice.SOURCE_MOUSE);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testStylusHoverMoveEventsMoveMagnifierViewport() {
+        runHoverMovesViewportTest(InputDevice.SOURCE_STYLUS);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testMouseDownEventsDoNotMoveMagnifierViewport() {
+        runDownDoesNotMoveViewportTest(InputDevice.SOURCE_MOUSE);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testStylusDownEventsDoNotMoveMagnifierViewport() {
+        runDownDoesNotMoveViewportTest(InputDevice.SOURCE_STYLUS);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testMouseUpEventsDoNotMoveMagnifierViewport() {
+        runUpDoesNotMoveViewportTest(InputDevice.SOURCE_MOUSE);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testStylusUpEventsDoNotMoveMagnifierViewport() {
+        runUpDoesNotMoveViewportTest(InputDevice.SOURCE_STYLUS);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
+    public void testMouseMoveEventsMoveMagnifierViewport() {
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.left + INITIAL_MAGNIFICATION_BOUNDS.width()) / 2.0f;
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
+        float scale = 6.2f; // value is unimportant but unique among tests to increase coverage.
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+        MotionEvent event = mouseEvent(centerX, centerY, ACTION_HOVER_MOVE);
+        send(event, InputDevice.SOURCE_MOUSE);
+        fastForward(20);
+        event = mouseEvent(centerX, centerY, ACTION_DOWN);
+        send(event, InputDevice.SOURCE_MOUSE);
+        fastForward(20);
+
+        // Mouse drag event does impact magnifier viewport.
+        event = mouseEvent(centerX + 30, centerY + 60, ACTION_MOVE);
+        send(event, InputDevice.SOURCE_MOUSE);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0))
+                .isEqualTo(centerX + 30);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0))
+                .isEqualTo(centerY + 60);
+
+        // The mouse events were not consumed by magnifier.
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(3);
+        assertThat(eventCaptor.mEvents.get(0).getSource()).isEqualTo(InputDevice.SOURCE_MOUSE);
+        assertThat(eventCaptor.mEvents.get(1).getSource()).isEqualTo(InputDevice.SOURCE_MOUSE);
+        assertThat(eventCaptor.mEvents.get(2).getSource()).isEqualTo(InputDevice.SOURCE_MOUSE);
+
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
+        expectedActions.add(Integer.valueOf(ACTION_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_MOVE));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
+    private void runHoverMovesViewportTest(int source) {
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.left + INITIAL_MAGNIFICATION_BOUNDS.width()) / 2.0f;
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
+        float scale = 4.0f; // value is unimportant but unique among tests to increase coverage.
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+
+        // HOVER_MOVE should change magnifier viewport.
+        MotionEvent event = motionEvent(centerX + 20, centerY, ACTION_HOVER_MOVE);
+        send(event, source);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0))
+                .isEqualTo(centerX + 20);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0)).isEqualTo(centerY);
+
+        // Make sure mouse events are sent onward and not blocked after moving the viewport.
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(1);
+        assertThat(eventCaptor.mEvents.get(0).getSource()).isEqualTo(source);
+
+        // Send another hover.
+        event = motionEvent(centerX + 20, centerY + 40, ACTION_HOVER_MOVE);
+        send(event, source);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0))
+                .isEqualTo(centerX + 20);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0))
+                .isEqualTo(centerY + 40);
+
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(2);
+        assertThat(eventCaptor.mEvents.get(1).getSource()).isEqualTo(source);
+
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
+        expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
+    private void runDownDoesNotMoveViewportTest(int source) {
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.left + INITIAL_MAGNIFICATION_BOUNDS.width()) / 2.0f;
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
+        float scale = 5.3f; // value is unimportant but unique among tests to increase coverage.
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+        MotionEvent event = motionEvent(centerX, centerY, ACTION_HOVER_MOVE);
+        send(event, source);
+        fastForward(20);
+
+        // Down event doesn't impact magnifier viewport.
+        event = motionEvent(centerX + 20, centerY + 40, ACTION_DOWN);
+        send(event, source);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0)).isEqualTo(centerX);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0)).isEqualTo(centerY);
+
+        // The events were not consumed by magnifier.
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(2);
+        assertThat(eventCaptor.mEvents.get(0).getSource()).isEqualTo(source);
+        assertThat(eventCaptor.mEvents.get(1).getSource()).isEqualTo(source);
+
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
+        expectedActions.add(Integer.valueOf(ACTION_DOWN));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
+    private void runUpDoesNotMoveViewportTest(int source) {
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.left + INITIAL_MAGNIFICATION_BOUNDS.width()) / 2.0f;
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
+        float scale = 2.7f; // value is unimportant but unique among tests to increase coverage.
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+        MotionEvent event = motionEvent(centerX, centerY, ACTION_HOVER_MOVE);
+        send(event, source);
+        fastForward(20);
+        event = motionEvent(centerX, centerY, ACTION_DOWN);
+        send(event, source);
+        fastForward(20);
+
+        // Up event should not move the viewport.
+        event = motionEvent(centerX + 30, centerY + 60, ACTION_UP);
+        send(event, source);
+        fastForward(20);
+
+        // The events were not consumed by magnifier.
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(3);
+        assertThat(eventCaptor.mEvents.get(0).getSource()).isEqualTo(source);
+        assertThat(eventCaptor.mEvents.get(1).getSource()).isEqualTo(source);
+        assertThat(eventCaptor.mEvents.get(2).getSource()).isEqualTo(source);
+
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
+        expectedActions.add(Integer.valueOf(ACTION_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_UP));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
+    private void runMoveEventsDoNotMoveMagnifierViewport(int source) {
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.left + INITIAL_MAGNIFICATION_BOUNDS.width()) / 2.0f;
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
+        float scale = 3.8f; // value is unimportant but unique among tests to increase coverage.
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+        centerX = mFullScreenMagnificationController.getCenterX(DISPLAY_0);
+        centerY = mFullScreenMagnificationController.getCenterY(DISPLAY_0);
+
+        MotionEvent event = motionEvent(centerX, centerY, ACTION_DOWN);
+        send(event, source);
+        fastForward(20);
+
+        // Drag event doesn't impact magnifier viewport.
+        event = stylusEvent(centerX + 18, centerY + 42, ACTION_MOVE);
+        send(event, source);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0)).isEqualTo(centerX);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0)).isEqualTo(centerY);
+
+        // The events were not consumed by magnifier.
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(2);
+        assertThat(eventCaptor.mEvents.get(0).getSource()).isEqualTo(source);
+        assertThat(eventCaptor.mEvents.get(1).getSource()).isEqualTo(source);
+
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_MOVE));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
+    private void runHoverMoveEventsDoNotMoveMagnifierViewport(int source) {
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.left + INITIAL_MAGNIFICATION_BOUNDS.width()) / 2.0f;
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
+        float scale = 4.0f; // value is unimportant but unique among tests to increase coverage.
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+        centerX = mFullScreenMagnificationController.getCenterX(DISPLAY_0);
+        centerY = mFullScreenMagnificationController.getCenterY(DISPLAY_0);
+
+        // HOVER_MOVE should not change magnifier viewport.
+        MotionEvent event = motionEvent(centerX + 20, centerY, ACTION_HOVER_MOVE);
+        send(event, source);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0)).isEqualTo(centerX);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0)).isEqualTo(centerY);
+
+        // Make sure events are sent onward and not blocked after moving the viewport.
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(1);
+        assertThat(eventCaptor.mEvents.get(0).getSource()).isEqualTo(source);
+
+        // Send another hover.
+        event = motionEvent(centerX + 20, centerY + 40, ACTION_HOVER_MOVE);
+        send(event, source);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0)).isEqualTo(centerX);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0)).isEqualTo(centerY);
+
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(2);
+        assertThat(eventCaptor.mEvents.get(1).getSource()).isEqualTo(source);
+
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
+        expectedActions.add(Integer.valueOf(ACTION_HOVER_MOVE));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
     private void enableOneFingerPanning(boolean enable) {
+        mMockOneFingerPanningEnabled = enable;
         when(mMockOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()).thenReturn(enable);
+    }
+
+    private boolean isOneFingerPanningEnabled() {
+        return mMockOneFingerPanningEnabled;
     }
 
     private void assertActionsInOrder(List<MotionEvent> actualEvents,
@@ -1673,8 +2095,14 @@ public class FullScreenMagnificationGestureHandlerTest {
         mMgh.notifyShortcutTriggered();
     }
 
+    /** Sends the MotionEvent from a Touchscreen source */
     private void send(MotionEvent event) {
-        event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        send(event, InputDevice.SOURCE_TOUCHSCREEN);
+    }
+
+    /** Sends the MotionEvent from the given source type. */
+    private void send(MotionEvent event, int source) {
+        event.setSource(source);
         try {
             mMgh.onMotionEvent(event, event, /* policyFlags */ 0);
         } catch (Throwable t) {
@@ -1688,9 +2116,30 @@ public class FullScreenMagnificationGestureHandlerTest {
         return ev;
     }
 
+    private static MotionEvent fromMouse(MotionEvent ev) {
+        ev.setSource(InputDevice.SOURCE_MOUSE);
+        return ev;
+    }
+
+    private static MotionEvent fromStylus(MotionEvent ev) {
+        ev.setSource(InputDevice.SOURCE_STYLUS);
+        return ev;
+    }
+
+    private MotionEvent motionEvent(float x, float y, int action) {
+        return MotionEvent.obtain(mLastDownTime, mClock.now(), action, x, y, 0);
+    }
+
+    private MotionEvent mouseEvent(float x, float y, int action) {
+        return fromMouse(motionEvent(x, y, action));
+    }
+
+    private MotionEvent stylusEvent(float x, float y, int action) {
+        return fromStylus(motionEvent(x, y, action));
+    }
+
     private MotionEvent moveEvent(float x, float y) {
-        return fromTouchscreen(
-                MotionEvent.obtain(mLastDownTime, mClock.now(), ACTION_MOVE, x, y, 0));
+        return fromTouchscreen(motionEvent(x, y, ACTION_MOVE));
     }
 
     private MotionEvent downEvent() {

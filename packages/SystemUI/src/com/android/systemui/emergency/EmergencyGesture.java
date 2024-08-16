@@ -36,5 +36,17 @@ public final class EmergencyGesture {
     public static final String ACTION_LAUNCH_EMERGENCY =
             "com.android.systemui.action.LAUNCH_EMERGENCY";
 
+    /**
+     * An alternate intent to launch the emergency flow if the device is in retail mode
+     */
+    public static final String ACTION_LAUNCH_EMERGENCY_RETAIL =
+            "com.android.systemui.action.LAUNCH_EMERGENCY_RETAIL";
+
+    /**
+     * Launches the emergency information screen
+     */
+    public static final String ACTION_LAUNCH_EMERGENCY_INFO =
+            "com.android.systemui.action.LAUNCH_EMERGENCY_INFO";
+
     private EmergencyGesture() {}
 }

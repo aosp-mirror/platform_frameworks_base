@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.os.UserHandle
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.screenshot.data.model.DisplayContentModel
@@ -40,7 +41,9 @@ import com.android.systemui.screenshot.policy.TestUserIds.PRIVATE
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class PrivateProfilePolicyTest {
     private val kosmos = Kosmos()
     private val policy = PrivateProfilePolicy(kosmos.profileTypeRepository)

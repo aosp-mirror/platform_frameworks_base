@@ -58,6 +58,19 @@ public interface ActivityStarter {
             @Nullable ActivityTransitionAnimator.Controller animationController);
 
     /**
+     * Similar to {@link #startPendingIntentMaybeDismissingKeyguard(PendingIntent, Runnable,
+     * ActivityTransitionAnimator.Controller)} but will always not dismiss the keyguard when
+     * launching activities. This should be avoided and other alternatives should be used.
+     */
+    void startPendingIntentWithoutDismissing(
+            PendingIntent intent,
+            boolean dismissShade,
+            Runnable intentSentUiThreadCallback,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
+            @Nullable Intent fillInIntent,
+            @Nullable Bundle extraOptions);
+
+    /**
      * Similar to {@link #startPendingIntentDismissingKeyguard}, except that it supports launching
      * activities on top of the keyguard. If the activity supports {@code showOverLockscreen}, it
      * will show over keyguard without first dimissing it. If it doesn't support it, calling this
@@ -71,14 +84,17 @@ public interface ActivityStarter {
      * Similar to {@link #startPendingIntentMaybeDismissingKeyguard(PendingIntent, Runnable,
      * ActivityTransitionAnimator.Controller)}, but also specifies a fill-in intent and extra
      * option that could be used to populate the pending intent and launch the activity. This also
-     * allows the caller to avoid dismissing the shade.
+     * allows the caller to avoid dismissing the shade. An optional custom message can be set as
+     * the unlock reason in the alternate bouncer.
      */
     void startPendingIntentMaybeDismissingKeyguard(PendingIntent intent,
             boolean dismissShade,
             @Nullable Runnable intentSentUiThreadCallback,
             @Nullable ActivityTransitionAnimator.Controller animationController,
             @Nullable Intent fillInIntent,
-            @Nullable Bundle extraOptions);
+            @Nullable Bundle extraOptions,
+            @Nullable String customMessage
+        );
 
     /**
      * The intent flag can be specified in startActivity().
@@ -121,14 +137,20 @@ public interface ActivityStarter {
     void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
             boolean afterKeyguardGone);
 
-    /** Authenticates if needed and dismisses keyguard to execute an action. */
+    /**
+     * Authenticates if needed and dismisses keyguard to execute an action.
+     *
+     * TODO(b/348431835) Display the custom message in the new alternate bouncer, when the
+     * device_entry_udfps_refactor flag is enabled.
+     */
     void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
             boolean afterKeyguardGone, @Nullable String customMessage);
 
     /** Starts an activity and dismisses keyguard. */
     void startActivityDismissingKeyguard(Intent intent,
             boolean onlyProvisioned,
-            boolean dismissShade);
+            boolean dismissShade,
+            @Nullable String customMessage);
 
     /** Starts an activity and dismisses keyguard. */
     void startActivityDismissingKeyguard(Intent intent,

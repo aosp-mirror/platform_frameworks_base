@@ -33,6 +33,7 @@ import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -417,6 +418,22 @@ public class SyncEngineTests extends WindowTestsBase {
     }
 
     @Test
+    public void testSkipPrepareSync() {
+        final TestWindowContainer wc = new TestWindowContainer(mWm, true /* waiter */);
+        wc.mSkipPrepareSync = true;
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
+        final BLASTSyncEngine.SyncGroup syncGroup = bse.prepareSyncSet(
+                mock(BLASTSyncEngine.TransactionReadyListener.class), "test");
+        bse.startSyncSet(syncGroup);
+        bse.addToSyncSet(syncGroup.mSyncId, wc);
+        assertEquals(SYNC_STATE_NONE, wc.mSyncState);
+        // If the implementation of prepareSync doesn't set sync state, the sync group should also
+        // be empty.
+        assertNull(wc.mSyncGroup);
+        assertTrue(wc.isSyncFinished(syncGroup));
+    }
+
+    @Test
     public void testNonBlastMethod() {
         mAppWindow = createWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
 
@@ -694,6 +711,7 @@ public class SyncEngineTests extends WindowTestsBase {
         final boolean mWaiter;
         boolean mVisibleRequested = true;
         boolean mFillsParent = false;
+        boolean mSkipPrepareSync = false;
 
         TestWindowContainer(WindowManagerService wms, boolean waiter) {
             super(wms);
@@ -703,6 +721,9 @@ public class SyncEngineTests extends WindowTestsBase {
 
         @Override
         boolean prepareSync() {
+            if (mSkipPrepareSync) {
+                return false;
+            }
             if (!super.prepareSync()) {
                 return false;
             }

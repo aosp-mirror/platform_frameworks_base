@@ -16,47 +16,154 @@
 
 package com.android.asllib.marshallable;
 
-import com.android.asllib.util.AslgenUtil;
 import com.android.asllib.util.MalformedXmlException;
 import com.android.asllib.util.XmlUtils;
 
 import org.w3c.dom.Element;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class AppInfoFactory implements AslMarshallableFactory<AppInfo> {
+    // We don't need to support V1 for HR.
+    private final Map<Long, Set<String>> mRecognizedHrAttrs =
+            Map.ofEntries(
+                    Map.entry(
+                            2L,
+                            Set.of(
+                                    XmlUtils.HR_ATTR_APS_COMPLIANT,
+                                    XmlUtils.HR_ATTR_PRIVACY_POLICY,
+                                    XmlUtils.HR_ATTR_DEVELOPER_ID,
+                                    XmlUtils.HR_ATTR_APPLICATION_ID)));
+    private final Map<Long, Set<String>> mRequiredHrAttrs =
+            Map.ofEntries(
+                    Map.entry(
+                            2L,
+                            Set.of(
+                                    XmlUtils.HR_ATTR_APS_COMPLIANT,
+                                    XmlUtils.HR_ATTR_PRIVACY_POLICY,
+                                    XmlUtils.HR_ATTR_DEVELOPER_ID,
+                                    XmlUtils.HR_ATTR_APPLICATION_ID)));
+    private final Map<Long, Set<String>> mRecognizedHrEles =
+            Map.ofEntries(
+                    Map.entry(
+                            2L,
+                            Set.of(
+                                    XmlUtils.HR_TAG_FIRST_PARTY_ENDPOINTS,
+                                    XmlUtils.HR_TAG_SERVICE_PROVIDER_ENDPOINTS)));
+    private final Map<Long, Set<String>> mRequiredHrEles =
+            Map.ofEntries(
+                    Map.entry(
+                            2L,
+                            Set.of(
+                                    XmlUtils.HR_TAG_FIRST_PARTY_ENDPOINTS,
+                                    XmlUtils.HR_TAG_SERVICE_PROVIDER_ENDPOINTS)));
+    private final Map<Long, Set<String>> mRecognizedOdEleNames =
+            Map.ofEntries(
+                    Map.entry(
+                            1L,
+                            Set.of(
+                                    XmlUtils.OD_NAME_TITLE,
+                                    XmlUtils.OD_NAME_DESCRIPTION,
+                                    XmlUtils.OD_NAME_CONTAINS_ADS,
+                                    XmlUtils.OD_NAME_OBEY_APS,
+                                    XmlUtils.OD_NAME_ADS_FINGERPRINTING,
+                                    XmlUtils.OD_NAME_SECURITY_FINGERPRINTING,
+                                    XmlUtils.OD_NAME_PRIVACY_POLICY,
+                                    XmlUtils.OD_NAME_SECURITY_ENDPOINTS,
+                                    XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINTS,
+                                    XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINTS,
+                                    XmlUtils.OD_NAME_CATEGORY,
+                                    XmlUtils.OD_NAME_EMAIL,
+                                    XmlUtils.OD_NAME_WEBSITE)),
+                    Map.entry(
+                            2L,
+                            Set.of(
+                                    XmlUtils.OD_NAME_APS_COMPLIANT,
+                                    XmlUtils.OD_NAME_PRIVACY_POLICY,
+                                    XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINTS,
+                                    XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINTS,
+                                    XmlUtils.OD_NAME_DEVELOPER_ID,
+                                    XmlUtils.OD_NAME_APPLICATION_ID)));
+    private final Map<Long, Set<String>> mRequiredOdEles =
+            Map.ofEntries(
+                    Map.entry(
+                            1L,
+                            Set.of(
+                                    XmlUtils.OD_NAME_TITLE,
+                                    XmlUtils.OD_NAME_DESCRIPTION,
+                                    XmlUtils.OD_NAME_CONTAINS_ADS,
+                                    XmlUtils.OD_NAME_OBEY_APS,
+                                    XmlUtils.OD_NAME_ADS_FINGERPRINTING,
+                                    XmlUtils.OD_NAME_SECURITY_FINGERPRINTING,
+                                    XmlUtils.OD_NAME_PRIVACY_POLICY,
+                                    XmlUtils.OD_NAME_SECURITY_ENDPOINTS,
+                                    XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINTS,
+                                    XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINTS,
+                                    XmlUtils.OD_NAME_CATEGORY)),
+                    Map.entry(
+                            2L,
+                            Set.of(
+                                    XmlUtils.OD_NAME_APS_COMPLIANT,
+                                    XmlUtils.OD_NAME_PRIVACY_POLICY,
+                                    XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINTS,
+                                    XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINTS,
+                                    XmlUtils.OD_NAME_DEVELOPER_ID,
+                                    XmlUtils.OD_NAME_APPLICATION_ID)));
 
     /** Creates a {@link AppInfo} from the human-readable DOM element. */
-    @Override
-    public AppInfo createFromHrElements(List<Element> elements) throws MalformedXmlException {
-        Element appInfoEle = XmlUtils.getSingleElement(elements);
+    public AppInfo createFromHrElement(Element appInfoEle, long version)
+            throws MalformedXmlException {
         if (appInfoEle == null) {
-            AslgenUtil.logI("No AppInfo found in hr format.");
             return null;
         }
+        XmlUtils.throwIfExtraneousAttributes(
+                appInfoEle, XmlUtils.getMostRecentVersion(mRecognizedHrAttrs, version));
+        XmlUtils.throwIfExtraneousChildrenHr(
+                appInfoEle, XmlUtils.getMostRecentVersion(mRecognizedHrEles, version));
 
-        String title = XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_TITLE, true);
-        String description = XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_DESCRIPTION, true);
-        Boolean containsAds = XmlUtils.getBoolAttr(appInfoEle, XmlUtils.HR_ATTR_CONTAINS_ADS, true);
-        Boolean obeyAps = XmlUtils.getBoolAttr(appInfoEle, XmlUtils.HR_ATTR_OBEY_APS, true);
+        var requiredHrAttrs = XmlUtils.getMostRecentVersion(mRequiredHrAttrs, version);
+        var requiredHrEles = XmlUtils.getMostRecentVersion(mRequiredHrEles, version);
+
+        String title = XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_TITLE, requiredHrAttrs);
+        String description =
+                XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_DESCRIPTION, requiredHrAttrs);
+        Boolean containsAds =
+                XmlUtils.getBoolAttr(appInfoEle, XmlUtils.HR_ATTR_CONTAINS_ADS, requiredHrAttrs);
+        Boolean obeyAps =
+                XmlUtils.getBoolAttr(appInfoEle, XmlUtils.HR_ATTR_OBEY_APS, requiredHrAttrs);
         Boolean adsFingerprinting =
-                XmlUtils.getBoolAttr(appInfoEle, XmlUtils.HR_ATTR_ADS_FINGERPRINTING, true);
+                XmlUtils.getBoolAttr(
+                        appInfoEle, XmlUtils.HR_ATTR_ADS_FINGERPRINTING, requiredHrAttrs);
         Boolean securityFingerprinting =
-                XmlUtils.getBoolAttr(appInfoEle, XmlUtils.HR_ATTR_SECURITY_FINGERPRINTING, true);
+                XmlUtils.getBoolAttr(
+                        appInfoEle, XmlUtils.HR_ATTR_SECURITY_FINGERPRINTING, requiredHrAttrs);
         String privacyPolicy =
-                XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_PRIVACY_POLICY, true);
+                XmlUtils.getStringAttr(
+                        appInfoEle, XmlUtils.HR_ATTR_PRIVACY_POLICY, requiredHrAttrs);
         List<String> securityEndpoints =
                 XmlUtils.getPipelineSplitAttr(
-                        appInfoEle, XmlUtils.HR_ATTR_SECURITY_ENDPOINTS, true);
+                        appInfoEle, XmlUtils.HR_ATTR_SECURITY_ENDPOINTS, requiredHrAttrs);
+        String category =
+                XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_CATEGORY, requiredHrAttrs);
+        String email = XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_EMAIL, requiredHrAttrs);
+        String website =
+                XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_WEBSITE, requiredHrAttrs);
+        String developerId =
+                XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_DEVELOPER_ID, requiredHrAttrs);
+        String applicationId =
+                XmlUtils.getStringAttr(
+                        appInfoEle, XmlUtils.HR_ATTR_APPLICATION_ID, requiredHrAttrs);
+
+        Boolean apsCompliant =
+                XmlUtils.getBoolAttr(appInfoEle, XmlUtils.HR_ATTR_APS_COMPLIANT, requiredHrAttrs);
         List<String> firstPartyEndpoints =
-                XmlUtils.getPipelineSplitAttr(
-                        appInfoEle, XmlUtils.HR_ATTR_FIRST_PARTY_ENDPOINTS, true);
+                XmlUtils.getHrItemsAsStrings(
+                        appInfoEle, XmlUtils.HR_TAG_FIRST_PARTY_ENDPOINTS, requiredHrEles);
         List<String> serviceProviderEndpoints =
-                XmlUtils.getPipelineSplitAttr(
-                        appInfoEle, XmlUtils.HR_ATTR_SERVICE_PROVIDER_ENDPOINTS, true);
-        String category = XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_CATEGORY, true);
-        String email = XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_EMAIL, true);
-        String website = XmlUtils.getStringAttr(appInfoEle, XmlUtils.HR_ATTR_WEBSITE, false);
+                XmlUtils.getHrItemsAsStrings(
+                        appInfoEle, XmlUtils.HR_TAG_SERVICE_PROVIDER_ENDPOINTS, requiredHrEles);
 
         return new AppInfo(
                 title,
@@ -71,40 +178,60 @@ public class AppInfoFactory implements AslMarshallableFactory<AppInfo> {
                 serviceProviderEndpoints,
                 category,
                 email,
-                website);
+                website,
+                apsCompliant,
+                developerId,
+                applicationId);
     }
 
     /** Creates an {@link AslMarshallableFactory} from on-device DOM elements */
-    @Override
-    public AppInfo createFromOdElements(List<Element> elements) throws MalformedXmlException {
-        Element appInfoEle = XmlUtils.getSingleElement(elements);
+    public AppInfo createFromOdElement(Element appInfoEle, long version)
+            throws MalformedXmlException {
         if (appInfoEle == null) {
-            AslgenUtil.logI("No AppInfo found in od format.");
             return null;
         }
+        XmlUtils.throwIfExtraneousChildrenOd(
+                appInfoEle, XmlUtils.getMostRecentVersion(mRecognizedOdEleNames, version));
+        var requiredOdEles = XmlUtils.getMostRecentVersion(mRequiredOdEles, version);
 
-        String title = XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_TITLE, true);
+        String title = XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_TITLE, requiredOdEles);
         String description =
-                XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_DESCRIPTION, true);
+                XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_DESCRIPTION, requiredOdEles);
         Boolean containsAds =
-                XmlUtils.getOdBoolEle(appInfoEle, XmlUtils.OD_NAME_CONTAINS_ADS, true);
-        Boolean obeyAps = XmlUtils.getOdBoolEle(appInfoEle, XmlUtils.OD_NAME_OBEY_APS, true);
+                XmlUtils.getOdBoolEle(appInfoEle, XmlUtils.OD_NAME_CONTAINS_ADS, requiredOdEles);
+        Boolean obeyAps =
+                XmlUtils.getOdBoolEle(appInfoEle, XmlUtils.OD_NAME_OBEY_APS, requiredOdEles);
         Boolean adsFingerprinting =
-                XmlUtils.getOdBoolEle(appInfoEle, XmlUtils.OD_NAME_ADS_FINGERPRINTING, true);
+                XmlUtils.getOdBoolEle(
+                        appInfoEle, XmlUtils.OD_NAME_ADS_FINGERPRINTING, requiredOdEles);
         Boolean securityFingerprinting =
-                XmlUtils.getOdBoolEle(appInfoEle, XmlUtils.OD_NAME_SECURITY_FINGERPRINTING, true);
+                XmlUtils.getOdBoolEle(
+                        appInfoEle, XmlUtils.OD_NAME_SECURITY_FINGERPRINTING, requiredOdEles);
         String privacyPolicy =
-                XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_PRIVACY_POLICY, true);
+                XmlUtils.getOdStringEle(
+                        appInfoEle, XmlUtils.OD_NAME_PRIVACY_POLICY, requiredOdEles);
         List<String> securityEndpoints =
-                XmlUtils.getOdStringArray(appInfoEle, XmlUtils.OD_NAME_SECURITY_ENDPOINT, true);
+                XmlUtils.getOdStringArray(
+                        appInfoEle, XmlUtils.OD_NAME_SECURITY_ENDPOINTS, requiredOdEles);
+        String category =
+                XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_CATEGORY, requiredOdEles);
+        String email = XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_EMAIL, requiredOdEles);
+        String website =
+                XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_WEBSITE, requiredOdEles);
+        String developerId =
+                XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_DEVELOPER_ID, requiredOdEles);
+        String applicationId =
+                XmlUtils.getOdStringEle(
+                        appInfoEle, XmlUtils.OD_NAME_APPLICATION_ID, requiredOdEles);
+
+        Boolean apsCompliant =
+                XmlUtils.getOdBoolEle(appInfoEle, XmlUtils.OD_NAME_APS_COMPLIANT, requiredOdEles);
         List<String> firstPartyEndpoints =
-                XmlUtils.getOdStringArray(appInfoEle, XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINT, true);
+                XmlUtils.getOdStringArray(
+                        appInfoEle, XmlUtils.OD_NAME_FIRST_PARTY_ENDPOINTS, requiredOdEles);
         List<String> serviceProviderEndpoints =
                 XmlUtils.getOdStringArray(
-                        appInfoEle, XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINT, true);
-        String category = XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_CATEGORY, true);
-        String email = XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_EMAIL, true);
-        String website = XmlUtils.getOdStringEle(appInfoEle, XmlUtils.OD_NAME_WEBSITE, false);
+                        appInfoEle, XmlUtils.OD_NAME_SERVICE_PROVIDER_ENDPOINTS, requiredOdEles);
 
         return new AppInfo(
                 title,
@@ -119,6 +246,9 @@ public class AppInfoFactory implements AslMarshallableFactory<AppInfo> {
                 serviceProviderEndpoints,
                 category,
                 email,
-                website);
+                website,
+                apsCompliant,
+                developerId,
+                applicationId);
     }
 }

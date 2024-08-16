@@ -78,6 +78,7 @@ import android.telephony.satellite.ISatelliteModemStateCallback;
 import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
+import android.telephony.satellite.SatelliteSubscriberInfo;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
@@ -3006,16 +3007,18 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void setDeviceAlignedWithSatellite(int subId, in boolean isAligned);
+    void setDeviceAlignedWithSatellite(int subId, boolean isAligned);
 
     /**
      * This API can be used by only CTS to update satellite vendor service package name.
      *
      * @param servicePackageName The package name of the satellite vendor service.
+     * @param provisioned Whether satellite should be provisioned or not.
+     *
      * @return {@code true} if the satellite vendor service is set successfully,
      * {@code false} otherwise.
      */
-    boolean setSatelliteServicePackageName(in String servicePackageName);
+    boolean setSatelliteServicePackageName(in String servicePackageName, in String provisioned);
 
     /**
      * This API can be used by only CTS to update satellite gateway service package name.
@@ -3400,4 +3403,26 @@ interface ITelephony {
      * @hide
      */
     void requestSatelliteSessionStats(int subId, in ResultReceiver receiver);
+
+    /**
+     * Request to get list of prioritized satellite subscriber ids to be used for provision.
+     *
+     * @param result The result receiver, which returns the list of prioritized satellite tokens
+     * to be used for provision if the request is successful or an error code if the request failed.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSatelliteSubscriberProvisionStatus(in ResultReceiver result);
+
+    /**
+     * Deliver the list of provisioned satellite subscriber infos.
+     *
+     * @param list The list of provisioned satellite subscriber infos.
+     * @param result The result receiver that returns whether deliver success or fail.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void provisionSatellite(in List<SatelliteSubscriberInfo> list, in ResultReceiver result);
 }

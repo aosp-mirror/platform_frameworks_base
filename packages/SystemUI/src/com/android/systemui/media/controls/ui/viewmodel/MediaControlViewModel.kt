@@ -37,6 +37,8 @@ import com.android.systemui.media.controls.ui.animation.accentPrimaryFromScheme
 import com.android.systemui.media.controls.ui.animation.surfaceFromScheme
 import com.android.systemui.media.controls.ui.animation.textPrimaryFromScheme
 import com.android.systemui.media.controls.ui.util.MediaArtworkHelper
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
@@ -72,6 +74,7 @@ class MediaControlViewModel(
 
     private var isPlaying = false
     private var isAnyButtonClicked = false
+    private var location = -1
 
     private fun onDismissMediaData(
         token: Token?,
@@ -80,7 +83,13 @@ class MediaControlViewModel(
         instanceId: InstanceId
     ) {
         logger.logLongPressDismiss(uid, packageName, instanceId)
-        interactor.removeMediaControl(token, instanceId, MEDIA_PLAYER_ANIMATION_DELAY)
+        interactor.removeMediaControl(
+            token,
+            instanceId,
+            MEDIA_PLAYER_ANIMATION_DELAY,
+            SMARTSPACE_CARD_DISMISS_EVENT,
+            location
+        )
     }
 
     private suspend fun toViewModel(model: MediaControlModel): MediaPlayerViewModel? {
@@ -100,7 +109,7 @@ class MediaControlViewModel(
                     TAG,
                     Style.CONTENT
                 )
-                    ?: return null
+                ?: return null
 
         val gutsViewModel = toGutsViewModel(model, scheme)
 
@@ -144,8 +153,12 @@ class MediaControlViewModel(
             onClicked = { expandable ->
                 model.clickIntent?.let { clickIntent ->
                     logger.logTapContentView(model.uid, model.packageName, model.instanceId)
-                    // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
-                    interactor.startClickIntent(expandable, clickIntent)
+                    interactor.startClickIntent(
+                        expandable,
+                        clickIntent,
+                        SMARTSPACE_CARD_CLICK_EVENT,
+                        location
+                    )
                 }
             },
             onLongClicked = {
@@ -153,7 +166,7 @@ class MediaControlViewModel(
             },
             onSeek = {
                 logger.logSeek(model.uid, model.packageName, model.instanceId)
-                // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
+                interactor.logSmartspaceUserEvent(SMARTSPACE_CARD_CLICK_EVENT, location)
             },
             onBindSeekbar = { seekBarViewModel ->
                 if (model.isResume && model.resumeProgress != null) {
@@ -163,7 +176,8 @@ class MediaControlViewModel(
                         seekBarViewModel.updateController(mediaController)
                     }
                 }
-            }
+            },
+            onLocationChanged = { location = it }
         )
     }
 
@@ -179,8 +193,7 @@ class MediaControlViewModel(
                     it,
                     applicationContext.getString(R.string.broadcasting_description_is_broadcasting)
                 )
-            }
-                ?: false
+            } ?: false
         val useDisabledAlpha =
             if (showBroadcastButton) {
                 !isCurrentBroadcastApp
@@ -197,7 +210,8 @@ class MediaControlViewModel(
         return MediaOutputSwitcherViewModel(
             isTapEnabled = showBroadcastButton || !useDisabledAlpha,
             deviceString = deviceString,
-            deviceIcon = device?.icon?.let { Icon.Loaded(it, null) }
+            deviceIcon =
+                device?.icon?.let { Icon.Loaded(it, null) }
                     ?: if (showBroadcastButton) {
                         Icon.Resource(R.drawable.settings_input_antenna, null)
                     } else {
@@ -364,7 +378,7 @@ class MediaControlViewModel(
         action: Runnable
     ) {
         logger.logTapAction(id, uid, packageName, instanceId)
-        // TODO (b/330897926) log smartspace card reported (SMARTSPACE_CARD_CLICK_EVENT)
+        interactor.logSmartspaceUserEvent(SMARTSPACE_CARD_CLICK_EVENT, location)
         isAnyButtonClicked = true
         action.run()
     }
@@ -385,8 +399,7 @@ class MediaControlViewModel(
             SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.stream().allMatch { id: Int ->
                 semanticActions.getActionById(id) != null
             }
-        }
-            ?: false
+        } ?: false
     }
 
     companion object {

@@ -35,7 +35,7 @@ import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.window.InputTransferToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.input.InputManagerService;
 
 /**
@@ -77,12 +77,14 @@ class EmbeddedWindowController {
             mWindows.put(inputToken, window);
             final InputTransferToken inputTransferToken = window.getInputTransferToken();
             mWindowsByInputTransferToken.put(inputTransferToken, window);
-            mWindowsByWindowToken.put(window.getWindowToken(), window);
+            final IBinder windowToken = window.getWindowToken();
+            mWindowsByWindowToken.put(windowToken, window);
             updateProcessController(window);
             window.mClient.linkToDeath(()-> {
                 synchronized (mGlobalLock) {
                     mWindows.remove(inputToken);
                     mWindowsByInputTransferToken.remove(inputTransferToken);
+                    mWindowsByWindowToken.remove(windowToken);
                 }
             }, 0);
         } catch (RemoteException e) {
@@ -401,7 +403,7 @@ class EmbeddedWindowController {
 
         @Override
         public void dumpProto(ProtoOutputStream proto, long fieldId,
-                              @WindowTraceLogLevel int logLevel) {
+                              @WindowTracingLogLevel int logLevel) {
             final long token = proto.start(fieldId);
 
             final long token2 = proto.start(IDENTIFIER);

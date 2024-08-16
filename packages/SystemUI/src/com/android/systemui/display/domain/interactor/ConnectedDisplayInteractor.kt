@@ -85,7 +85,7 @@ interface ConnectedDisplayInteractor {
 class ConnectedDisplayInteractorImpl
 @Inject
 constructor(
-    private val virtualDeviceManager: VirtualDeviceManager,
+    private val virtualDeviceManager: VirtualDeviceManager?,
     keyguardRepository: KeyguardRepository,
     displayRepository: DisplayRepository,
     deviceStateRepository: DeviceStateRepository,
@@ -156,6 +156,7 @@ constructor(
 
     private fun isVirtualDeviceOwnedMirrorDisplay(display: Display): Boolean {
         return Flags.interactiveScreenMirror() &&
+            virtualDeviceManager != null &&
             virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(display.displayId)
     }
 }

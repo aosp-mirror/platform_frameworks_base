@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
 import android.view.View
@@ -25,20 +26,28 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.WidgetConfigurator
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /** The base view model for the communal hub. */
 abstract class BaseCommunalViewModel(
-    private val communalSceneInteractor: CommunalSceneInteractor,
+    val communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
 ) {
     val currentScene: Flow<SceneKey> = communalSceneInteractor.currentScene
+
+    /** Used to animate showing or hiding the communal content. */
+    open val isCommunalContentVisible: Flow<Boolean> = MutableStateFlow(false)
 
     /** Whether communal hub should be focused by accessibility tools. */
     open val isFocusable: Flow<Boolean> = MutableStateFlow(false)
@@ -52,16 +61,59 @@ abstract class BaseCommunalViewModel(
     val selectedKey: StateFlow<String?>
         get() = _selectedKey
 
+    private val _isTouchConsumed: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /** Whether an element inside the lazy grid is actively consuming touches */
+    val isTouchConsumed: Flow<Boolean> = _isTouchConsumed.asStateFlow()
+
+    private val _isNestedScrolling: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /** Whether the lazy grid is reporting scrolling within itself */
+    val isNestedScrolling: Flow<Boolean> = _isNestedScrolling.asStateFlow()
+
+    /**
+     * Whether touch is available to be consumed by a touch handler. Touch is available during
+     * nested scrolling as lazy grid reports this for all scroll directions that it detects. In the
+     * case that there is consumed scrolling on a nested element, such as an AndroidView, no nested
+     * scrolling will be reported. It is up to the flow consumer to determine whether the nested
+     * scroll can be applied. In the communal case, this would be identifying the scroll as
+     * vertical, which the lazy horizontal grid does not handle.
+     */
+    val glanceableTouchAvailable: Flow<Boolean> = anyOf(not(isTouchConsumed), isNestedScrolling)
+
     /** Accessibility delegate to be set on CommunalAppWidgetHostView. */
     open val widgetAccessibilityDelegate: View.AccessibilityDelegate? = null
+
+    /**
+     * The up-to-date value of the grid scroll offset. persisted to interactor on
+     * {@link #persistScrollPosition}
+     */
+    private var currentScrollOffset = 0
+
+    /**
+     * The up-to-date value of the grid scroll index. persisted to interactor on
+     * {@link #persistScrollPosition}
+     */
+    private var currentScrollIndex = 0
 
     fun signalUserInteraction() {
         communalInteractor.signalUserInteraction()
     }
 
-    fun changeScene(scene: SceneKey, transitionKey: TransitionKey? = null) {
-        communalSceneInteractor.changeScene(scene, transitionKey)
+    /**
+     * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
+     * installed transition or the one specified by [transitionKey], if provided.
+     */
+    fun changeScene(
+        scene: SceneKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+        keyguardState: KeyguardState? = null
+    ) {
+        communalSceneInteractor.changeScene(scene, loggingReason, transitionKey, keyguardState)
     }
+
+    fun setEditModeState(state: EditModeState?) = communalSceneInteractor.setEditModeState(state)
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
@@ -70,18 +122,6 @@ abstract class BaseCommunalViewModel(
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         communalSceneInteractor.setTransitionState(transitionState)
-    }
-
-    /**
-     * Called when a widget is added via drag and drop from the widget picker into the communal hub.
-     */
-    open fun onAddWidget(
-        componentName: ComponentName,
-        user: UserHandle,
-        priority: Int,
-        configurator: WidgetConfigurator? = null
-    ) {
-        communalInteractor.addWidget(componentName, user, priority, configurator)
     }
 
     open fun onOpenEnableWidgetDialog() {}
@@ -109,8 +149,26 @@ abstract class BaseCommunalViewModel(
     /** Called as the UI request to dismiss the any displaying popup */
     open fun onHidePopup() {}
 
+    /** Called as the UI requests adding a widget. */
+    open fun onAddWidget(
+        componentName: ComponentName,
+        user: UserHandle,
+        priority: Int,
+        configurator: WidgetConfigurator? = null,
+    ) {}
+
     /** Called as the UI requests deleting a widget. */
-    open fun onDeleteWidget(id: Int) {}
+    open fun onDeleteWidget(
+        id: Int,
+        componentName: ComponentName,
+        priority: Int,
+    ) {}
+
+    /** Called as the UI detects a tap event on the widget. */
+    open fun onTapWidget(
+        componentName: ComponentName,
+        priority: Int,
+    ) {}
 
     /**
      * Called as the UI requests reordering widgets.
@@ -123,7 +181,6 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
     open fun onOpenWidgetEditor(
-        preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {}
 
@@ -140,10 +197,59 @@ abstract class BaseCommunalViewModel(
     open fun onReorderWidgetCancel() {}
 
     /** Called as the user request to show the customize widget button. */
-    open fun onShowCustomizeWidgetButton() {}
+    open fun onLongClick() {}
+
+    /** Called as the UI determines that a new widget has been added to the grid. */
+    open fun onNewWidgetAdded(provider: AppWidgetProviderInfo) {}
+
+    /** Called when the grid scroll position has been updated. */
+    open fun onScrollPositionUpdated(firstVisibleItemIndex: Int, firstVisibleItemScroll: Int) {
+        currentScrollIndex = firstVisibleItemIndex
+        currentScrollOffset = firstVisibleItemScroll
+    }
+
+    /** Stores scroll values to interactor. */
+    protected fun persistScrollPosition() {
+        communalInteractor.setScrollPosition(currentScrollIndex, currentScrollOffset)
+    }
+
+    /** Invoked after scroll values are used to initialize grid position. */
+    open fun clearPersistedScrollPosition() {
+        communalInteractor.setScrollPosition(0, 0)
+    }
+
+    val savedFirstScrollIndex: Int
+        get() = communalInteractor.firstVisibleItemIndex
+
+    val savedFirstScrollOffset: Int
+        get() = communalInteractor.firstVisibleItemOffset
 
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {
         _selectedKey.value = key
+    }
+
+    /** Invoked once touches inside the lazy grid are consumed */
+    fun onHubTouchConsumed() {
+        if (_isTouchConsumed.value) {
+            return
+        }
+
+        _isTouchConsumed.value = true
+    }
+
+    /** Invoked when nested scrolling begins on the lazy grid */
+    fun onNestedScrolling() {
+        if (_isNestedScrolling.value) {
+            return
+        }
+
+        _isNestedScrolling.value = true
+    }
+
+    /** Resets nested scroll and touch consumption state */
+    fun onResetTouchState() {
+        _isTouchConsumed.value = false
+        _isNestedScrolling.value = false
     }
 }

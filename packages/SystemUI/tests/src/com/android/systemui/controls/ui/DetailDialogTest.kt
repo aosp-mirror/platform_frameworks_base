@@ -19,9 +19,9 @@ package com.android.systemui.controls.ui
 import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.content.Context
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.EmptyTestActivity
@@ -44,7 +44,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class DetailDialogTest : SysuiTestCase() {
 
@@ -89,9 +89,7 @@ class DetailDialogTest : SysuiTestCase() {
         verify(taskView).startActivity(any(), any(), capture(optionsCaptor), any())
 
         assertThat(optionsCaptor.value.pendingIntentBackgroundActivityStartMode)
-            .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
-        assertThat(optionsCaptor.value.isPendingIntentBackgroundActivityLaunchAllowedByPermission)
-            .isTrue()
+            .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS)
         assertThat(optionsCaptor.value.taskAlwaysOnTop).isTrue()
     }
 

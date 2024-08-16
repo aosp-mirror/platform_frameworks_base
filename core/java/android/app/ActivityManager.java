@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.Instrumentation.DEBUG_FINISH_ACTIVITY;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -80,6 +81,7 @@ import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Singleton;
 import android.util.Size;
 import android.view.WindowInsetsController.Appearance;
@@ -4222,6 +4224,10 @@ public class ActivityManager {
      * Return a list of {@link ApplicationStartInfo} records containing the information about the
      * most recent app startups.
      *
+     * Records accessed using this path might include "incomplete" records such as in-progress app
+     * starts. Accessing in-progress starts using this method lets you access start information
+     * early to better optimize your startup path.
+     *
      * <p class="note"> Note: System stores this historical information in a ring buffer and only
      * the most recent records will be returned. </p>
      *
@@ -4248,6 +4254,9 @@ public class ActivityManager {
     /**
      * Return a list of {@link ApplicationStartInfo} records containing the information about the
      * most recent app startups.
+     *
+     * Records accessed using this path might include "incomplete" records such as in-progress app
+     * starts.
      *
      * <p class="note"> Note: System stores this historical information in a ring buffer and only
      * the most recent records will be returned. </p>
@@ -4294,17 +4303,19 @@ public class ActivityManager {
     }
 
     /**
-     * Adds a callback to be notified when the {@link ApplicationStartInfo} records of this startup
-     * are complete.
+     * Adds a callback that is notified when the {@link ApplicationStartInfo} record of this startup
+     * is complete. The startup is considered complete when the first frame is drawn.
      *
-     * <p class="note"> Note: callback will be removed automatically after being triggered.</p>
+     * The callback doesn't wait for {@link Activity#reportFullyDrawn} to occur. Retrieve a copy
+     * of {@link ApplicationStartInfo} after {@link Activity#reportFullyDrawn} is called (using this
+     * callback or {@link getHistoricalProcessStartReasons}) if you need the
+     * {@link ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN} timestamp.
      *
-     * <p class="note"> Note: callback will not wait for {@link Activity#reportFullyDrawn} to occur.
-     * Timestamp for fully drawn may be added after callback occurs. Set callback after invoking
-     * {@link Activity#reportFullyDrawn} if timestamp for fully drawn is required.</p>
+     * If the current start record has already been completed (that is, the process is not currently
+     * starting), the callback will be invoked immediately on the specified executor with the
+     * previously completed {@link ApplicationStartInfo} record.
      *
-     * <p class="note"> Note: if start records have already been retrieved, the callback will be
-     * invoked immediately on the specified executor with the previously resolved AppStartInfo.</p>
+     * Callback will be called at most once and removed automatically after being triggered.
      *
      * <p class="note"> Note: callback is asynchronous and should be made from a background thread.
      * </p>
@@ -4394,8 +4405,8 @@ public class ActivityManager {
      * Adds an optional developer supplied timestamp to the calling apps most recent
      * {@link ApplicationStartInfo}. This is in addition to system recorded timestamps.
      *
-     * <p class="note"> Note: timestamps added after {@link Activity#reportFullyDrawn} is called
-     * will be discarded.</p>
+     * <p class="note"> Note: any timestamps added after {@link Activity#reportFullyDrawn} is called
+     * are discarded.</p>
      *
      * <p class="note"> Note: will overwrite existing timestamp if called with same key.</p>
      *
@@ -6002,6 +6013,10 @@ public class ActivityManager {
          * Finishes all activities in this task and removes it from the recent tasks list.
          */
         public void finishAndRemoveTask() {
+            if (DEBUG_FINISH_ACTIVITY) {
+                Log.d(Instrumentation.TAG, "AppTask#finishAndRemoveTask: task="
+                        + getTaskInfo(), new Throwable());
+            }
             try {
                 mAppTaskImpl.finishAndRemoveTask();
             } catch (RemoteException e) {

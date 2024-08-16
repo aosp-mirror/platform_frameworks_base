@@ -19,17 +19,15 @@ package com.android.systemui.scene.ui.composable.transitions
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.UserActionDistance
-import com.android.compose.animation.scene.UserActionDistanceScope
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toQuickSettingsShadeTransition(
+    edge: Edge = Edge.Top,
     durationScale: Double = 1.0,
 ) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
@@ -38,17 +36,9 @@ fun TransitionBuilder.toQuickSettingsShadeTransition(
             stiffness = Spring.StiffnessMediumLow,
             visibilityThreshold = Shade.Dimensions.ScrimVisibilityThreshold,
         )
-    distance =
-        object : UserActionDistance {
-            override fun UserActionDistanceScope.absoluteDistance(
-                fromSceneSize: IntSize,
-                orientation: Orientation,
-            ): Float {
-                return fromSceneSize.height.toFloat() * 2 / 3f
-            }
-        }
+    distance = UserActionDistance { fromSceneSize, _ -> fromSceneSize.height.toFloat() * 2 / 3f }
 
-    translate(OverlayShade.Elements.Panel, Edge.Top)
+    translate(OverlayShade.Elements.Panel, edge)
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
 }

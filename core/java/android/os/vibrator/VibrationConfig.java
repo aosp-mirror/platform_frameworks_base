@@ -20,6 +20,7 @@ import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
 import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
+import static android.os.VibrationAttributes.USAGE_IME_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_MEDIA;
 import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
 import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
@@ -48,8 +49,22 @@ import java.util.Arrays;
  */
 public class VibrationConfig {
 
+    /**
+     * Hardcoded default scale level gain to be applied between each scale level to define their
+     * scale factor value.
+     *
+     * <p>Default gain defined as 3 dBs.
+     */
+    private static final float DEFAULT_SCALE_LEVEL_GAIN = 1.4f;
+
+    /**
+     * Hardcoded default amplitude to be used when device config is invalid, i.e. not in [1,255].
+     */
+    private static final int DEFAULT_AMPLITUDE = 255;
+
     // TODO(b/191150049): move these to vibrator static config file
     private final float mHapticChannelMaxVibrationAmplitude;
+    private final int mDefaultVibrationAmplitude;
     private final int mRampStepDurationMs;
     private final int mRampDownDurationMs;
     private final int mRequestVibrationParamsTimeoutMs;
@@ -67,15 +82,17 @@ public class VibrationConfig {
     private final int mDefaultNotificationVibrationIntensity;
     @VibrationIntensity
     private final int mDefaultRingVibrationIntensity;
+    @VibrationIntensity
+    private final int mDefaultKeyboardVibrationIntensity;
 
-    private final boolean mDefaultKeyboardVibrationEnabled;
-
-    private final boolean mHasFixedKeyboardAmplitude;
+    private final boolean mKeyboardVibrationSettingsSupported;
 
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
+        mDefaultVibrationAmplitude = resources.getInteger(
+                com.android.internal.R.integer.config_defaultVibrationAmplitude);
         mHapticChannelMaxVibrationAmplitude = loadFloat(resources,
-                com.android.internal.R.dimen.config_hapticChannelMaxVibrationAmplitude, 0);
+                com.android.internal.R.dimen.config_hapticChannelMaxVibrationAmplitude);
         mRampDownDurationMs = loadInteger(resources,
                 com.android.internal.R.integer.config_vibrationWaveformRampDownDuration, 0);
         mRampStepDurationMs = loadInteger(resources,
@@ -86,11 +103,9 @@ public class VibrationConfig {
                 com.android.internal.R.array.config_requestVibrationParamsForUsages);
 
         mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
-                com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
-        mDefaultKeyboardVibrationEnabled = loadBoolean(resources,
-                com.android.internal.R.bool.config_defaultKeyboardVibrationEnabled, true);
-        mHasFixedKeyboardAmplitude = loadFloat(resources,
-                com.android.internal.R.dimen.config_keyboardHapticFeedbackFixedAmplitude, -1) > 0;
+                com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger);
+        mKeyboardVibrationSettingsSupported = loadBoolean(resources,
+                com.android.internal.R.bool.config_keyboardVibrationSettingsSupported);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -102,6 +117,8 @@ public class VibrationConfig {
                 com.android.internal.R.integer.config_defaultNotificationVibrationIntensity);
         mDefaultRingVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultRingVibrationIntensity);
+        mDefaultKeyboardVibrationIntensity = loadDefaultIntensity(resources,
+                com.android.internal.R.integer.config_defaultKeyboardVibrationIntensity);
     }
 
     @VibrationIntensity
@@ -114,16 +131,16 @@ public class VibrationConfig {
         return value;
     }
 
-    private static float loadFloat(@Nullable Resources res, int resId, float defaultValue) {
-        return res != null ? res.getFloat(resId) : defaultValue;
+    private static float loadFloat(@Nullable Resources res, int resId) {
+        return res != null ? res.getFloat(resId) : 0f;
     }
 
     private static int loadInteger(@Nullable Resources res, int resId, int defaultValue) {
         return res != null ? res.getInteger(resId) : defaultValue;
     }
 
-    private static boolean loadBoolean(@Nullable Resources res, int resId, boolean defaultValue) {
-        return res != null ? res.getBoolean(resId) : defaultValue;
+    private static boolean loadBoolean(@Nullable Resources res, int resId) {
+        return res != null && res.getBoolean(resId);
     }
 
     private static int[] loadIntArray(@Nullable Resources res, int resId) {
@@ -141,6 +158,26 @@ public class VibrationConfig {
             return Float.NaN;
         }
         return mHapticChannelMaxVibrationAmplitude;
+    }
+
+    /**
+     * Return the device default vibration amplitude value to replace the
+     * {@link android.os.VibrationEffect#DEFAULT_AMPLITUDE} constant.
+     */
+    public int getDefaultVibrationAmplitude() {
+        if (mDefaultVibrationAmplitude < 1 || mDefaultVibrationAmplitude > 255) {
+            return DEFAULT_AMPLITUDE;
+        }
+        return mDefaultVibrationAmplitude;
+    }
+
+    /**
+     * Return the device default gain to be applied between scale levels to define the scale factor
+     * for each level.
+     */
+    public float getDefaultVibrationScaleLevelGain() {
+        // TODO(b/356407380): add device config for this
+        return DEFAULT_SCALE_LEVEL_GAIN;
     }
 
     /**
@@ -194,19 +231,11 @@ public class VibrationConfig {
     }
 
     /**
-     * Whether keyboard vibration settings is enabled by default.
+     * Whether the device support keyboard vibration settings.
      * @hide
      */
-    public boolean isDefaultKeyboardVibrationEnabled() {
-        return mDefaultKeyboardVibrationEnabled;
-    }
-
-    /**
-     * Whether the device has a fixed amplitude for keyboard.
-     * @hide
-     */
-    public boolean hasFixedKeyboardAmplitude() {
-        return mHasFixedKeyboardAmplitude;
+    public boolean isKeyboardVibrationSettingsSupported() {
+        return mKeyboardVibrationSettingsSupported;
     }
 
     /** Get the default vibration intensity for given usage. */
@@ -225,6 +254,9 @@ public class VibrationConfig {
             case USAGE_PHYSICAL_EMULATION:
             case USAGE_ACCESSIBILITY:
                 return mDefaultHapticFeedbackIntensity;
+            case USAGE_IME_FEEDBACK:
+                return isKeyboardVibrationSettingsSupported()
+                        ? mDefaultKeyboardVibrationIntensity : mDefaultHapticFeedbackIntensity;
             case USAGE_MEDIA:
             case USAGE_UNKNOWN:
                 // fall through
@@ -237,6 +269,7 @@ public class VibrationConfig {
     public String toString() {
         return "VibrationConfig{"
                 + "mIgnoreVibrationsOnWirelessCharger=" + mIgnoreVibrationsOnWirelessCharger
+                + ", mDefaultVibrationAmplitude=" + mDefaultVibrationAmplitude
                 + ", mHapticChannelMaxVibrationAmplitude=" + mHapticChannelMaxVibrationAmplitude
                 + ", mRampStepDurationMs=" + mRampStepDurationMs
                 + ", mRampDownDurationMs=" + mRampDownDurationMs
@@ -248,7 +281,8 @@ public class VibrationConfig {
                 + ", mDefaultMediaIntensity=" + mDefaultMediaVibrationIntensity
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
-                + ", mDefaultKeyboardVibrationEnabled=" + mDefaultKeyboardVibrationEnabled
+                + ", mDefaultKeyboardIntensity=" + mDefaultKeyboardVibrationIntensity
+                + ", mKeyboardVibrationSettingsSupported=" + mKeyboardVibrationSettingsSupported
                 + "}";
     }
 
@@ -261,6 +295,7 @@ public class VibrationConfig {
         pw.println("VibrationConfig:");
         pw.increaseIndent();
         pw.println("ignoreVibrationsOnWirelessCharger = " + mIgnoreVibrationsOnWirelessCharger);
+        pw.println("defaultVibrationAmplitude = " + mDefaultVibrationAmplitude);
         pw.println("hapticChannelMaxAmplitude = " + mHapticChannelMaxVibrationAmplitude);
         pw.println("rampStepDurationMs = " + mRampStepDurationMs);
         pw.println("rampDownDurationMs = " + mRampDownDurationMs);

@@ -17,10 +17,11 @@
 package com.android.server.inputmethod;
 
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
-import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,6 +29,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Printer;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,8 +60,9 @@ final class InputMethodMenuController {
     private AlertDialog.Builder mDialogBuilder;
     private AlertDialog mSwitchingDialog;
     private View mSwitchingDialogTitleView;
+    private List<ImeSubtypeListItem> mImList;
     private InputMethodInfo[] mIms;
-    private int[] mSubtypeIds;
+    private int[] mSubtypeIndices;
 
     private boolean mShowImeWithHardKeyboard;
 
@@ -74,30 +77,31 @@ final class InputMethodMenuController {
 
     @GuardedBy("ImfLock.class")
     void showInputMethodMenuLocked(boolean showAuxSubtypes, int displayId,
-            String preferredInputMethodId, int preferredInputMethodSubtypeId,
-            @NonNull List<ImeSubtypeListItem> imList) {
+            String preferredInputMethodId, int preferredInputMethodSubtypeIndex,
+            @NonNull List<ImeSubtypeListItem> imList, @UserIdInt int userId) {
         if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
 
-        final int userId = mService.getCurrentImeUserIdLocked();
+        final var bindingController = mService.getInputMethodBindingController(userId);
 
-        hideInputMethodMenuLocked();
+        hideInputMethodMenuLocked(userId);
 
-        if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
+        if (preferredInputMethodSubtypeIndex == NOT_A_SUBTYPE_INDEX) {
             final InputMethodSubtype currentSubtype =
-                    mService.getCurrentInputMethodSubtypeLocked();
+                    bindingController.getCurrentInputMethodSubtype();
             if (currentSubtype != null) {
-                final String curMethodId = mService.getSelectedMethodIdLocked();
+                final String curMethodId = bindingController.getSelectedMethodId();
                 final InputMethodInfo currentImi =
-                        mService.queryInputMethodForCurrentUserLocked(curMethodId);
-                preferredInputMethodSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
+                        InputMethodSettingsRepository.get(userId).getMethodMap().get(curMethodId);
+                preferredInputMethodSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(
                         currentImi, currentSubtype.hashCode());
             }
         }
 
         // Find out which item should be checked by default.
         final int size = imList.size();
+        mImList = imList;
         mIms = new InputMethodInfo[size];
-        mSubtypeIds = new int[size];
+        mSubtypeIndices = new int[size];
         // No items are checked by default. When we have a list of explicitly enabled subtypes,
         // the implicit subtype is no longer listed, but if it is still the selected one,
         // no items will be shown as checked.
@@ -105,12 +109,13 @@ final class InputMethodMenuController {
         for (int i = 0; i < size; ++i) {
             final ImeSubtypeListItem item = imList.get(i);
             mIms[i] = item.mImi;
-            mSubtypeIds[i] = item.mSubtypeId;
+            mSubtypeIndices[i] = item.mSubtypeIndex;
             if (mIms[i].getId().equals(preferredInputMethodId)) {
-                int subtypeId = mSubtypeIds[i];
-                if ((subtypeId == NOT_A_SUBTYPE_ID)
-                        || (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID && subtypeId == 0)
-                        || (subtypeId == preferredInputMethodSubtypeId)) {
+                int subtypeIndex = mSubtypeIndices[i];
+                if ((subtypeIndex == NOT_A_SUBTYPE_INDEX)
+                        || (preferredInputMethodSubtypeIndex == NOT_A_SUBTYPE_INDEX
+                        && subtypeIndex == 0)
+                        || (subtypeIndex == preferredInputMethodSubtypeIndex)) {
                     checkedItem = i;
                 }
             }
@@ -119,7 +124,7 @@ final class InputMethodMenuController {
         if (checkedItem == -1) {
             Slog.w(TAG, "Switching menu shown with no item selected"
                     + ", IME id: " + preferredInputMethodId
-                    + ", subtype index: " + preferredInputMethodSubtypeId);
+                    + ", subtype index: " + preferredInputMethodSubtypeIndex);
         }
 
         if (mDialogWindowContext == null) {
@@ -127,7 +132,7 @@ final class InputMethodMenuController {
         }
         final Context dialogWindowContext = mDialogWindowContext.get(displayId);
         mDialogBuilder = new AlertDialog.Builder(dialogWindowContext);
-        mDialogBuilder.setOnCancelListener(dialog -> hideInputMethodMenu());
+        mDialogBuilder.setOnCancelListener(dialog -> hideInputMethodMenu(userId));
 
         final Context dialogContext = mDialogBuilder.getContext();
         final TypedArray a = dialogContext.obtainStyledAttributes(null,
@@ -158,7 +163,7 @@ final class InputMethodMenuController {
                     isChecked, userId);
             // Ensure that the input method dialog is dismissed when changing
             // the hardware keyboard state.
-            hideInputMethodMenu();
+            hideInputMethodMenu(userId);
         });
 
         // Fill the list items with onClick listener, which takes care of IME (and subtype)
@@ -167,21 +172,21 @@ final class InputMethodMenuController {
                 com.android.internal.R.layout.input_method_switch_item, imList, checkedItem);
         final DialogInterface.OnClickListener choiceListener = (dialog, which) -> {
             synchronized (ImfLock.class) {
-                if (mIms == null || mIms.length <= which || mSubtypeIds == null
-                        || mSubtypeIds.length <= which) {
+                if (mIms == null || mIms.length <= which || mSubtypeIndices == null
+                        || mSubtypeIndices.length <= which) {
                     return;
                 }
                 final InputMethodInfo im = mIms[which];
-                int subtypeId = mSubtypeIds[which];
+                int subtypeIndex = mSubtypeIndices[which];
                 adapter.mCheckedItem = which;
                 adapter.notifyDataSetChanged();
                 if (im != null) {
-                    if (subtypeId < 0 || subtypeId >= im.getSubtypeCount()) {
-                        subtypeId = NOT_A_SUBTYPE_ID;
+                    if (subtypeIndex < 0 || subtypeIndex >= im.getSubtypeCount()) {
+                        subtypeIndex = NOT_A_SUBTYPE_INDEX;
                     }
-                    mService.setInputMethodLocked(im.getId(), subtypeId);
+                    mService.setInputMethodLocked(im.getId(), subtypeIndex, userId);
                 }
-                hideInputMethodMenuLocked();
+                hideInputMethodMenuLocked(userId);
             }
         };
         mDialogBuilder.setSingleChoiceItems(adapter, checkedItem, choiceListener);
@@ -200,15 +205,15 @@ final class InputMethodMenuController {
         attrs.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         attrs.setTitle("Select input method");
         w.setAttributes(attrs);
-        mService.updateSystemUiLocked();
-        mService.sendOnNavButtonFlagsChangedLocked();
+        mService.updateSystemUiLocked(userId);
+        mService.sendOnNavButtonFlagsChangedLocked(mService.getUserData(userId));
         mSwitchingDialog.show();
     }
 
-    void updateKeyboardFromSettingsLocked() {
+    void updateKeyboardFromSettingsLocked(@UserIdInt int userId) {
         mShowImeWithHardKeyboard =
                 SecureSettingsWrapper.getBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
-                        false, mService.getCurrentImeUserIdLocked());
+                        false, userId);
         if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
                 && mSwitchingDialog.isShowing()) {
             final Switch hardKeySwitch = mSwitchingDialogTitleView.findViewById(
@@ -219,18 +224,22 @@ final class InputMethodMenuController {
 
     /**
      * Hides the input method switcher menu.
+     *
+     * @param userId user ID for this operation
      */
-    void hideInputMethodMenu() {
+    void hideInputMethodMenu(@UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            hideInputMethodMenuLocked();
+            hideInputMethodMenuLocked(userId);
         }
     }
 
     /**
      * Hides the input method switcher menu, synchronised version of {@link #hideInputMethodMenu}.
+     *
+     * @param userId user ID for this operation
      */
     @GuardedBy("ImfLock.class")
-    void hideInputMethodMenuLocked() {
+    void hideInputMethodMenuLocked(@UserIdInt int userId) {
         if (DEBUG) Slog.v(TAG, "Hide switching menu");
 
         if (mSwitchingDialog != null) {
@@ -238,10 +247,12 @@ final class InputMethodMenuController {
             mSwitchingDialog = null;
             mSwitchingDialogTitleView = null;
 
-            mService.updateSystemUiLocked();
-            mService.sendOnNavButtonFlagsChangedLocked();
+            mService.updateSystemUiLocked(userId);
+            mService.sendOnNavButtonFlagsChangedToAllImesLocked();
             mDialogBuilder = null;
+            mImList = null;
             mIms = null;
+            mSubtypeIndices = null;
         }
     }
 
@@ -271,6 +282,15 @@ final class InputMethodMenuController {
                         com.android.internal.R.id.hard_keyboard_section).setVisibility(
                         available ? View.VISIBLE : View.GONE);
             }
+        }
+    }
+
+    void dump(@NonNull Printer pw, @NonNull String prefix) {
+        final boolean showing = isisInputMethodPickerShownForTestLocked();
+        pw.println(prefix + "  isShowing: " + showing);
+
+        if (showing) {
+            pw.println(prefix + "  imList: " + mImList);
         }
     }
 

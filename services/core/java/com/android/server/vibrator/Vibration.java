@@ -44,9 +44,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 abstract class Vibration {
     private static final DateTimeFormatter DEBUG_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+            "HH:mm:ss.SSS");
     private static final DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "MM-dd HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
+            "MM-dd HH:mm:ss.SSS");
 
     // Used to generate globally unique vibration ids.
     private static final AtomicInteger sNextVibrationId = new AtomicInteger(1); // 0 = no callback
@@ -67,8 +67,10 @@ abstract class Vibration {
         CANCELLED_BY_SCREEN_OFF(VibrationProto.CANCELLED_BY_SCREEN_OFF),
         CANCELLED_BY_SETTINGS_UPDATE(VibrationProto.CANCELLED_BY_SETTINGS_UPDATE),
         CANCELLED_BY_USER(VibrationProto.CANCELLED_BY_USER),
+        CANCELLED_BY_FOREGROUND_USER(VibrationProto.CANCELLED_BY_FOREGROUND_USER),
         CANCELLED_BY_UNKNOWN_REASON(VibrationProto.CANCELLED_BY_UNKNOWN_REASON),
         CANCELLED_SUPERSEDED(VibrationProto.CANCELLED_SUPERSEDED),
+        CANCELLED_BY_APP_OPS(VibrationProto.CANCELLED_BY_APP_OPS),
         IGNORED_ERROR_APP_OPS(VibrationProto.IGNORED_ERROR_APP_OPS),
         IGNORED_ERROR_CANCELLING(VibrationProto.IGNORED_ERROR_CANCELLING),
         IGNORED_ERROR_SCHEDULING(VibrationProto.IGNORED_ERROR_SCHEDULING),
@@ -242,12 +244,10 @@ abstract class Vibration {
 
         @Override
         public String toString() {
-            return "createTime: " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mCreateTime))
-                    + ", startTime: " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mStartTime))
-                    + ", endTime: " + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mEndTime)))
+            return "createTime: " + formatTime(mCreateTime, /*includeDate=*/ true)
+                    + ", startTime: " + formatTime(mStartTime, /*includeDate=*/ true)
+                    + ", endTime: " + (mEndTime == 0 ? null : formatTime(mEndTime,
+                    /*includeDate=*/ true))
                     + ", durationMs: " + mDurationMs
                     + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
                     + ", playedEffect: " + mPlayedEffect
@@ -271,25 +271,17 @@ abstract class Vibration {
             boolean isExternalVibration = mPlayedEffect == null;
             String timingsStr = String.format(Locale.ROOT,
                     "%s | %8s | %20s | duration: %5dms | start: %12s | end: %12s",
-                    DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mCreateTime)),
+                    formatTime(mCreateTime, /*includeDate=*/ true),
                     isExternalVibration ? "external" : "effect",
                     mStatus.name().toLowerCase(Locale.ROOT),
                     mDurationMs,
-                    mStartTime == 0 ? ""
-                            : DEBUG_TIME_FORMATTER.format(Instant.ofEpochMilli(mStartTime)),
-                    mEndTime == 0 ? ""
-                            : DEBUG_TIME_FORMATTER.format(Instant.ofEpochMilli(mEndTime)));
+                    mStartTime == 0 ? "" : formatTime(mStartTime, /*includeDate=*/ false),
+                    mEndTime == 0 ? "" : formatTime(mEndTime, /*includeDate=*/ false));
             String paramStr = String.format(Locale.ROOT,
                     " | scale: %8s (adaptive=%.2f) | flags: %4s | usage: %s",
                     VibrationScaler.scaleLevelToString(mScaleLevel), mAdaptiveScale,
                     Long.toBinaryString(mCallerInfo.attrs.getFlags()),
                     mCallerInfo.attrs.usageToString());
-            // Optional, most vibrations have category unknown so skip them to simplify the logs
-            String categoryStr =
-                    mCallerInfo.attrs.getCategory() != VibrationAttributes.CATEGORY_UNKNOWN
-                            ? " | category=" + VibrationAttributes.categoryToString(
-                            mCallerInfo.attrs.getCategory())
-                            : "";
             // Optional, most vibrations should not be defined via AudioAttributes
             // so skip them to simplify the logs
             String audioUsageStr =
@@ -304,7 +296,7 @@ abstract class Vibration {
                     " | played: %s | original: %s",
                     mPlayedEffect == null ? null : mPlayedEffect.toDebugString(),
                     mOriginalEffect == null ? null : mOriginalEffect.toDebugString());
-            pw.println(timingsStr + paramStr + categoryStr + audioUsageStr + callerStr + effectStr);
+            pw.println(timingsStr + paramStr + audioUsageStr + callerStr + effectStr);
         }
 
         /** Write this info into given {@link PrintWriter}. */
@@ -313,12 +305,10 @@ abstract class Vibration {
             pw.increaseIndent();
             pw.println("status = " + mStatus.name().toLowerCase(Locale.ROOT));
             pw.println("durationMs = " + mDurationMs);
-            pw.println("createTime = " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mCreateTime)));
-            pw.println("startTime = " + DEBUG_DATE_TIME_FORMATTER.format(
-                    Instant.ofEpochMilli(mStartTime)));
+            pw.println("createTime = " + formatTime(mCreateTime, /*includeDate=*/ true));
+            pw.println("startTime = " + formatTime(mStartTime, /*includeDate=*/ true));
             pw.println("endTime = " + (mEndTime == 0 ? null
-                    : DEBUG_DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(mEndTime))));
+                    : formatTime(mEndTime, /*includeDate=*/ true)));
             pw.println("playedEffect = " + mPlayedEffect);
             pw.println("originalEffect = " + mOriginalEffect);
             pw.println("scale = " + VibrationScaler.scaleLevelToString(mScaleLevel));
@@ -339,7 +329,6 @@ abstract class Vibration {
             final VibrationAttributes attrs = mCallerInfo.attrs;
             proto.write(VibrationAttributesProto.USAGE, attrs.getUsage());
             proto.write(VibrationAttributesProto.AUDIO_USAGE, attrs.getAudioUsage());
-            proto.write(VibrationAttributesProto.CATEGORY, attrs.getCategory());
             proto.write(VibrationAttributesProto.FLAGS, attrs.getFlags());
             proto.end(attrsToken);
 
@@ -397,13 +386,14 @@ abstract class Vibration {
 
         private void dumpEffect(
                 ProtoOutputStream proto, long fieldId, VibrationEffect effect) {
-            final long token = proto.start(fieldId);
-            VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
-            for (VibrationEffectSegment segment : composed.getSegments()) {
-                dumpEffect(proto, VibrationEffectProto.SEGMENTS, segment);
+            if (effect instanceof VibrationEffect.Composed composed) {
+                final long token = proto.start(fieldId);
+                for (VibrationEffectSegment segment : composed.getSegments()) {
+                    dumpEffect(proto, VibrationEffectProto.SEGMENTS, segment);
+                }
+                proto.write(VibrationEffectProto.REPEAT, composed.getRepeatIndex());
+                proto.end(token);
             }
-            proto.write(VibrationEffectProto.REPEAT, composed.getRepeatIndex());
-            proto.end(token);
         }
 
         private void dumpEffect(ProtoOutputStream proto, long fieldId,
@@ -455,6 +445,13 @@ abstract class Vibration {
             proto.write(PrimitiveSegmentProto.SCALE, segment.getScale());
             proto.write(PrimitiveSegmentProto.DELAY, segment.getDelay());
             proto.end(token);
+        }
+
+        private String formatTime(long timeInMillis, boolean includeDate) {
+            return (includeDate ? DEBUG_DATE_TIME_FORMATTER : DEBUG_TIME_FORMATTER)
+                    // Ensure timezone is retrieved at formatting time
+                    .withZone(ZoneId.systemDefault())
+                    .format(Instant.ofEpochMilli(timeInMillis));
         }
     }
 }

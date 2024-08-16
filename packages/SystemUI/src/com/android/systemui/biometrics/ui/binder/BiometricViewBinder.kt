@@ -24,7 +24,6 @@ import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
-import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -35,6 +34,10 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -42,13 +45,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
-import com.android.systemui.Flags.constraintBp
-import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.biometrics.shared.model.asBiometricModality
-import com.android.systemui.biometrics.ui.BiometricPromptLayout
 import com.android.systemui.biometrics.ui.viewmodel.FingerprintStartMode
 import com.android.systemui.biometrics.ui.viewmodel.PromptMessage
 import com.android.systemui.biometrics.ui.viewmodel.PromptSize
@@ -64,38 +64,35 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 private const val TAG = "BiometricViewBinder"
+private const val MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30
 
 /** Top-most view binder for BiometricPrompt views. */
 object BiometricViewBinder {
 
-    /** Binds a [BiometricPromptLayout] to a [PromptViewModel]. */
+    /** Binds a Biometric Prompt View to a [PromptViewModel]. */
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
         view: View,
         viewModel: PromptViewModel,
-        panelViewController: AuthPanelController?,
         jankListener: BiometricJankListener,
         backgroundView: View,
         legacyCallback: Spaghetti.Callback,
         applicationScope: CoroutineScope,
         vibratorHelper: VibratorHelper,
     ): Spaghetti {
-        /**
-         * View is only set visible in BiometricViewSizeBinder once PromptSize is determined that
-         * accounts for iconView size, to prevent prompt resizing being visible to the user.
-         *
-         * TODO(b/288175072): May be able to remove this once constraint layout is implemented
-         */
-        if (!constraintBp()) {
-            view.visibility = View.INVISIBLE
-        }
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
         val textColorError =
             view.resources.getColor(R.color.biometric_dialog_error, view.context.theme)
-        val textColorHint =
-            view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
+
+        val attributes =
+            view.context.obtainStyledAttributes(
+                R.style.TextAppearance_AuthCredential_Indicator,
+                intArrayOf(android.R.attr.textColor)
+            )
+        val textColorHint = attributes.getColor(0, 0)
+        attributes.recycle()
 
         val logoView = view.requireViewById<ImageView>(R.id.logo)
         val logoDescriptionView = view.requireViewById<TextView>(R.id.logo_description)
@@ -104,30 +101,15 @@ object BiometricViewBinder {
         val descriptionView = view.requireViewById<TextView>(R.id.description)
         val customizedViewContainer =
             view.requireViewById<LinearLayout>(R.id.customized_view_container)
-        val udfpsGuidanceView =
-            if (constraintBp()) {
-                view.requireViewById<View>(R.id.panel)
-            } else {
-                backgroundView
-            }
+        val udfpsGuidanceView = view.requireViewById<View>(R.id.panel)
 
         // set selected to enable marquee unless a screen reader is enabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
-        descriptionView.movementMethod = ScrollingMovementMethod()
 
-        val iconOverlayView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
-
-        val iconSizeOverride =
-            if (constraintBp()) {
-                null
-            } else {
-                (view as BiometricPromptLayout).updatedFingerprintAffordanceSize
-            }
-
         val indicatorMessageView = view.requireViewById<TextView>(R.id.indicator)
 
         // Negative-side (left) buttons
@@ -138,6 +120,25 @@ object BiometricViewBinder {
         // Positive-side (right) buttons
         val confirmationButton = view.requireViewById<Button>(R.id.button_confirm)
         val retryButton = view.requireViewById<Button>(R.id.button_try_again)
+
+        // Handles custom "Cancel Authentication" talkback action
+        val cancelDelegate: AccessibilityDelegateCompat =
+            object : AccessibilityDelegateCompat() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfoCompat
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(
+                        AccessibilityActionCompat(
+                            AccessibilityNodeInfoCompat.ACTION_CLICK,
+                            view.context.getString(R.string.biometric_dialog_cancel_authentication)
+                        )
+                    )
+                }
+            }
+        ViewCompat.setAccessibilityDelegate(backgroundView, cancelDelegate)
+        ViewCompat.setAccessibilityDelegate(cancelButton, cancelDelegate)
 
         // TODO(b/330788871): temporary workaround for the unsafe callbacks & legacy controllers
         val adapter =
@@ -155,24 +156,36 @@ object BiometricViewBinder {
             // these do not change and need to be set before any size transitions
             val modalities = viewModel.modalities.first()
 
-            if (modalities.hasFingerprint) {
-                /**
-                 * Load the given [rawResources] immediately so they are cached for use in the
-                 * [context].
-                 */
-                val rawResources = viewModel.iconViewModel.getRawAssets(modalities.hasSfps)
-                for (res in rawResources) {
-                    LottieCompositionFactory.fromRawRes(view.context, res)
+            /**
+             * Load the given [rawResources] immediately so they are cached for use in the
+             * [context].
+             */
+            val rawResources =
+                if (modalities.hasFaceAndFingerprint) {
+                    viewModel.iconViewModel.getCoexAssetsList(modalities.hasSfps)
+                } else if (modalities.hasFingerprintOnly) {
+                    viewModel.iconViewModel.getFingerprintAssetsList(modalities.hasSfps)
+                } else if (modalities.hasFaceOnly) {
+                    viewModel.iconViewModel.getFaceAssetsList()
+                } else {
+                    listOf()
                 }
+
+            for (res in rawResources) {
+                LottieCompositionFactory.fromRawRes(view.context, res)
             }
 
-            logoView.setImageDrawable(viewModel.logo.first())
-            logoDescriptionView.text = viewModel.logoDescription.first()
+            val logoInfo = viewModel.logoInfo.first()
+            logoView.setImageDrawable(logoInfo.first)
+            // The ellipsize effect on xml happens only when the TextView does not have any free
+            // space on the screen to show the text. So we need to manually truncate.
+            logoDescriptionView.text =
+                logoInfo.second?.ellipsize(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER)
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
 
-            if (Flags.customBiometricPrompt() && constraintBp()) {
+            if (Flags.customBiometricPrompt()) {
                 BiometricCustomizedViewBinder.bind(
                     customizedViewContainer,
                     viewModel.contentView.first(),
@@ -209,22 +222,6 @@ object BiometricViewBinder {
                             descriptionView,
                             customizedViewContainer,
                         ),
-                    viewsToFadeInOnSizeChange =
-                        listOf(
-                            logoView,
-                            logoDescriptionView,
-                            titleView,
-                            subtitleView,
-                            descriptionView,
-                            customizedViewContainer,
-                            indicatorMessageView,
-                            negativeButton,
-                            cancelButton,
-                            retryButton,
-                            confirmationButton,
-                            credentialFallbackButton,
-                        ),
-                    panelViewController = panelViewController,
                     jankListener = jankListener,
                 )
             }
@@ -234,8 +231,6 @@ object BiometricViewBinder {
                     if (!showWithoutIcon) {
                         PromptIconViewBinder.bind(
                             iconView,
-                            iconOverlayView,
-                            iconSizeOverride,
                             viewModel,
                         )
                     }
@@ -286,20 +281,6 @@ object BiometricViewBinder {
                 launch {
                     viewModel.isIndicatorMessageVisible.collect { show ->
                         indicatorMessageView.visibility = show.asVisibleOrHidden()
-                    }
-                }
-
-                // set padding
-                launch {
-                    viewModel.promptPadding.collect { promptPadding ->
-                        if (!constraintBp()) {
-                            view.setPadding(
-                                promptPadding.left,
-                                promptPadding.top,
-                                promptPadding.right,
-                                promptPadding.bottom
-                            )
-                        }
                     }
                 }
 
@@ -358,10 +339,7 @@ object BiometricViewBinder {
                                 else -> null
                             }
                         }
-                        .collect { onTouch ->
-                            iconOverlayView.setOnTouchListener(onTouch)
-                            iconView.setOnTouchListener(onTouch)
-                        }
+                        .collect { onTouch -> iconView.setOnTouchListener(onTouch) }
                 }
 
                 // dismiss prompt when authenticated and confirmed
@@ -376,11 +354,12 @@ object BiometricViewBinder {
                             backgroundView.importantForAccessibility =
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
 
-                            // Allow icon to be used as confirmation button with a11y enabled
-                            if (accessibilityManager.isTouchExplorationEnabled) {
-                                iconOverlayView.setOnClickListener {
-                                    viewModel.confirmAuthenticated()
-                                }
+                            // Allow icon to be used as confirmation button with udfps and a11y
+                            // enabled
+                            if (
+                                accessibilityManager.isTouchExplorationEnabled &&
+                                    modalities.hasUdfps
+                            ) {
                                 iconView.setOnClickListener { viewModel.confirmAuthenticated() }
                             }
                         }
@@ -457,17 +436,10 @@ object BiometricViewBinder {
 
                 // Retry and confirmation when finger on sensor
                 launch {
-                    combine(
-                            viewModel.canTryAgainNow,
-                            viewModel.hasFingerOnSensor,
-                            viewModel.isPendingConfirmation,
-                            ::Triple
-                        )
-                        .collect { (canRetry, fingerAcquired, pendingConfirmation) ->
+                    combine(viewModel.canTryAgainNow, viewModel.hasFingerOnSensor, ::Pair)
+                        .collect { (canRetry, fingerAcquired) ->
                             if (canRetry && fingerAcquired) {
                                 legacyCallback.onButtonTryAgain()
-                            } else if (pendingConfirmation && fingerAcquired) {
-                                viewModel.confirmAuthenticated()
                             }
                         }
                 }
@@ -497,32 +469,22 @@ class Spaghetti(
     @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     interface Callback {
         fun onAuthenticated()
-        fun onUserCanceled()
-        fun onButtonNegative()
-        fun onButtonTryAgain()
-        fun onContentViewMoreOptionsButtonPressed()
-        fun onError()
-        fun onUseDeviceCredential()
-        fun onStartDelayedFingerprintSensor()
-        fun onAuthenticatedAndConfirmed()
-    }
 
-    @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
-    enum class BiometricState {
-        /** Authentication hardware idle. */
-        STATE_IDLE,
-        /** UI animating in, authentication hardware active. */
-        STATE_AUTHENTICATING_ANIMATING_IN,
-        /** UI animated in, authentication hardware active. */
-        STATE_AUTHENTICATING,
-        /** UI animated in, authentication hardware active. */
-        STATE_HELP,
-        /** Hard error, e.g. ERROR_TIMEOUT. Authentication hardware idle. */
-        STATE_ERROR,
-        /** Authenticated, waiting for user confirmation. Authentication hardware idle. */
-        STATE_PENDING_CONFIRMATION,
-        /** Authenticated, dialog animating away soon. */
-        STATE_AUTHENTICATED,
+        fun onUserCanceled()
+
+        fun onButtonNegative()
+
+        fun onButtonTryAgain()
+
+        fun onContentViewMoreOptionsButtonPressed()
+
+        fun onError()
+
+        fun onUseDeviceCredential()
+
+        fun onStartDelayedFingerprintSensor()
+
+        fun onAuthenticatedAndConfirmed()
     }
 
     private var lifecycleScope: CoroutineScope? = null
@@ -579,17 +541,22 @@ class Spaghetti(
         }
     }
 
-    private suspend fun getHelpForSuccessfulAuthentication(
+    private fun getHelpForSuccessfulAuthentication(
         authenticatedModality: BiometricModality,
-    ): Int? =
-        when {
-            // for coex, show a message when face succeeds after fingerprint has also started
-            modalities.hasFaceAndFingerprint &&
-                (viewModel.fingerprintStartMode.first() != FingerprintStartMode.Pending) &&
-                (authenticatedModality == BiometricModality.Face) ->
-                R.string.biometric_dialog_tap_confirm_with_face_alt_1
-            else -> null
+    ): Int? {
+        // for coex, show a message when face succeeds after fingerprint has also started
+        if (authenticatedModality != BiometricModality.Face) {
+            return null
         }
+
+        if (modalities.hasUdfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_alt_1
+        }
+        if (modalities.hasSfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_sfps
+        }
+        return null
+    }
 
     fun onAuthenticationFailed(
         @BiometricAuthenticator.Modality modality: Int,
@@ -655,10 +622,8 @@ class Spaghetti(
         }
 
     fun startTransitionToCredentialUI(isError: Boolean) {
-        applicationScope.launch {
-            viewModel.onSwitchToCredential()
-            legacyCallback?.onUseDeviceCredential()
-        }
+        viewModel.onSwitchToCredential()
+        legacyCallback?.onUseDeviceCredential()
     }
 
     fun cancelAnimation() {
@@ -677,6 +642,9 @@ private fun BiometricModalities.asDefaultHelpMessage(context: Context): String =
         hasFingerprint -> context.getString(R.string.fingerprint_dialog_touch_sensor)
         else -> ""
     }
+
+private fun String.ellipsize(cutOffLength: Int) =
+    if (length <= cutOffLength) this else replaceRange(cutOffLength, length, "...")
 
 private fun Boolean.asVisibleOrGone(): Int = if (this) View.VISIBLE else View.GONE
 

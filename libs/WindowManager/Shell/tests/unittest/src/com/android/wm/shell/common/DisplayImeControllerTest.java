@@ -83,7 +83,7 @@ public class DisplayImeControllerTest extends ShellTestCase {
             }
         }, mExecutor) {
             @Override
-            void removeImeSurface() { }
+            void removeImeSurface(int displayId) { }
         }.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);
     }
 
@@ -119,7 +119,7 @@ public class DisplayImeControllerTest extends ShellTestCase {
     @Test
     public void reappliesVisibilityToChangedLeash() {
         verifyZeroInteractions(mT);
-        mPerDisplay.mImeShowing = true;
+        mPerDisplay.mImeShowing = false;
 
         mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
 

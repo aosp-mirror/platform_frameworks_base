@@ -16,16 +16,16 @@
 
 package com.android.compose.animation.scene.transition.link
 
-import com.android.compose.animation.scene.BaseSceneTransitionLayoutState
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutStateImpl
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.TransitionKey
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A link between a source (implicit) and [target] `SceneTransitionLayoutState`. */
 class StateLink(target: SceneTransitionLayoutState, val transitionLinks: List<TransitionLink>) {
 
-    internal val target = target as BaseSceneTransitionLayoutState
+    internal val target = target as MutableSceneTransitionLayoutStateImpl
 
     /**
      * Links two transitions (source and target) together.

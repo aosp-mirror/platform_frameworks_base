@@ -23,6 +23,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -93,7 +94,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var launchAnimator: DialogTransitionAnimator
-    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
+    @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock
     private lateinit var aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel
@@ -193,10 +195,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
         val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
-                set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
-            }
+            FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         keyguardInteractor = withDeps.keyguardInteractor
@@ -221,7 +220,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -289,6 +287,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
         underTest =
             KeyguardQuickAffordancesCombinedViewModel(
+                applicationScope = testScope.backgroundScope,
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,
@@ -301,6 +300,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
                         logger = logger,
+                        metricsLogger = metricsLogger,
                         devicePolicyManager = devicePolicyManager,
                         dockManager = dockManager,
                         biometricSettingsRepository = biometricSettingsRepository,

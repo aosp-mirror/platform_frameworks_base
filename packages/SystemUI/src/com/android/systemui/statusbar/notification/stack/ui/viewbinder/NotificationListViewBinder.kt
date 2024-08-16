@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.notification.stack.ui.view.NotificationSta
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.notification.ui.viewbinder.HeadsUpNotificationViewBinder
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.ui.isAnimating
@@ -74,7 +73,6 @@ constructor(
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
     private val hunBinder: HeadsUpNotificationViewBinder,
-    private val iconAreaController: NotificationIconAreaController,
     private val loggerOptional: Optional<NotificationStatsLogger>,
     private val metricsLogger: MetricsLogger,
     private val nicBinder: NotificationIconContainerShelfViewBinder,
@@ -128,7 +126,6 @@ constructor(
             viewModel.shelf,
             falsingManager,
             nicBinder,
-            iconAreaController,
         )
     }
 
@@ -183,12 +180,12 @@ constructor(
                 launchNotificationSettings = { view ->
                     notificationActivityStarter
                         .get()
-                        .startHistoryIntent(view, /* showHistory = */ false)
+                        .startHistoryIntent(view, /* showHistory= */ false)
                 },
                 launchNotificationHistory = { view ->
                     notificationActivityStarter
                         .get()
-                        .startHistoryIntent(view, /* showHistory = */ true)
+                        .startHistoryIntent(view, /* showHistory= */ true)
                 },
             )
         launch {

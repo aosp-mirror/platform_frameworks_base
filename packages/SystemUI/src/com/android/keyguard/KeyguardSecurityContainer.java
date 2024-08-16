@@ -647,7 +647,12 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
+        updateSecurityViewFlipper();
+    }
+
+    protected void updateSecurityViewFlipper() {
         mSecurityViewFlipper = findViewById(R.id.view_flipper);
+        setupViewMode();
     }
 
     @Override
@@ -1004,10 +1009,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
             if (mUserSwitcherViewGroup == null) {
                 inflateUserSwitcher();
+                setupUserSwitcher();
+                mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
             }
             updateSecurityViewLocation();
-            setupUserSwitcher();
-            mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
         }
 
         @Override
@@ -1097,7 +1102,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             int yTranslation = mResources.getDimensionPixelSize(R.dimen.disappear_y_translation);
 
             AnimatorSet anims = new AnimatorSet();
-            ObjectAnimator yAnim = ObjectAnimator.ofFloat(mView, View.TRANSLATION_Y, yTranslation);
+            ObjectAnimator yAnim = ObjectAnimator.ofFloat(mViewFlipper, View.TRANSLATION_Y,
+                    yTranslation);
             ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mUserSwitcherViewGroup, View.ALPHA,
                     0f);
 

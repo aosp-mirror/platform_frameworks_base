@@ -19,6 +19,7 @@ import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
@@ -30,6 +31,7 @@ import java.util.function.Consumer
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -42,6 +44,7 @@ import org.mockito.MockitoAnnotations
  * overriding, and should never return any value other than the one provided as the default.
  */
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class FlagManagerTest : SysuiTestCase() {
     private lateinit var mFlagManager: FlagManager
 

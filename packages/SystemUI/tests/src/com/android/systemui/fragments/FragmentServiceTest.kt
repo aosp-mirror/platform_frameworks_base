@@ -2,6 +2,7 @@ package com.android.systemui.fragments
 
 import android.app.Fragment
 import android.os.Looper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -9,8 +10,10 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class FragmentServiceTest : SysuiTestCase() {
     private val fragmentHostManagerFactory: FragmentHostManager.Factory = mock()
 

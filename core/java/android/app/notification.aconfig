@@ -46,10 +46,13 @@ flag {
 }
 
 flag {
-  name: "visit_risky_uris"
+  name: "visit_person_uri"
   namespace: "systemui"
-  description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
+  description: "Guards the security fix that ensures all URIs Person.java are valid"
   bug: "281044385"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 # vvv Prototypes for using app icons in notifications vvv
@@ -198,4 +201,12 @@ flag {
   namespace: "systemui"
   description: "redacts notifications on the lockscreen if they have the 'sensitiveContent' flag"
   bug: "343631648"
+}
+
+flag {
+  name: "api_rich_ongoing"
+  is_exported: true
+  namespace: "systemui"
+  description: "Guards new android.app.richongoingnotification api"
+  bug: "337261753"
 }

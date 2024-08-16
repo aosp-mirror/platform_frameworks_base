@@ -32,6 +32,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource.ScopedParcelState;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
@@ -45,6 +46,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -293,10 +295,14 @@ public class Camera {
     @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     @TestApi
     public static int getNumberOfCameras(@NonNull Context context) {
-        return _getNumberOfCameras(context.getDeviceId(), getDevicePolicyFromContext(context));
+        try (ScopedParcelState clientAttribution =
+                context.getAttributionSource().asScopedParcelState()) {
+            return _getNumberOfCameras(
+                    clientAttribution.getParcel(), getDevicePolicyFromContext(context));
+        }
     }
 
-    private static native int _getNumberOfCameras(int deviceId, int devicePolicy);
+    private static native int _getNumberOfCameras(Parcel clientAttributionParcel, int devicePolicy);
 
     /**
      * Returns the information about a particular camera.
@@ -321,8 +327,16 @@ public class Camera {
     @TestApi
     public static void getCameraInfo(int cameraId, @NonNull Context context,
             int rotationOverride, CameraInfo cameraInfo) {
-        _getCameraInfo(cameraId, rotationOverride, context.getDeviceId(),
-                getDevicePolicyFromContext(context), cameraInfo);
+        try (ScopedParcelState clientAttribution =
+                context.getAttributionSource().asScopedParcelState()) {
+            _getCameraInfo(
+                    cameraId,
+                    rotationOverride,
+                    clientAttribution.getParcel(),
+                    getDevicePolicyFromContext(context),
+                    cameraInfo);
+        }
+
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         IAudioService audioService = IAudioService.Stub.asInterface(b);
         try {
@@ -336,8 +350,12 @@ public class Camera {
         }
     }
 
-    private native static void _getCameraInfo(int cameraId, int rotationOverride,
-            int deviceId, int devicePolicy, CameraInfo cameraInfo);
+    private native static void _getCameraInfo(
+            int cameraId,
+            int rotationOverride,
+            Parcel clientAttributionParcel,
+            int devicePolicy,
+            CameraInfo cameraInfo);
 
     private static int getDevicePolicyFromContext(Context context) {
         if (context.getDeviceId() == DEVICE_ID_DEFAULT
@@ -347,7 +365,9 @@ public class Camera {
 
         VirtualDeviceManager virtualDeviceManager =
                 context.getSystemService(VirtualDeviceManager.class);
-        return virtualDeviceManager.getDevicePolicy(context.getDeviceId(), POLICY_TYPE_CAMERA);
+        return virtualDeviceManager == null
+                ? DEVICE_POLICY_DEFAULT
+                : virtualDeviceManager.getDevicePolicy(context.getDeviceId(), POLICY_TYPE_CAMERA);
     }
 
     /**
@@ -543,9 +563,17 @@ public class Camera {
         }
 
         boolean forceSlowJpegMode = shouldForceSlowJpegMode();
-        return native_setup(new WeakReference<>(this), cameraId,
-                ActivityThread.currentOpPackageName(), rotationOverride, forceSlowJpegMode,
-                context.getDeviceId(), getDevicePolicyFromContext(context));
+
+        try (ScopedParcelState clientAttribution =
+                context.getAttributionSource().asScopedParcelState()) {
+            return native_setup(
+                    new WeakReference<>(this),
+                    cameraId,
+                    rotationOverride,
+                    forceSlowJpegMode,
+                    clientAttribution.getParcel(),
+                    getDevicePolicyFromContext(context));
+        }
     }
 
     private boolean shouldForceSlowJpegMode() {
@@ -628,8 +656,13 @@ public class Camera {
     }
 
     @UnsupportedAppUsage
-    private native int native_setup(Object cameraThis, int cameraId, String packageName,
-            int rotationOverride, boolean forceSlowJpegMode, int deviceId, int devicePolicy);
+    private native int native_setup(
+            Object cameraThis,
+            int cameraId,
+            int rotationOverride,
+            boolean forceSlowJpegMode,
+            Parcel clientAttributionParcel,
+            int devicePolicy);
 
     private native final void native_release();
 
@@ -2265,9 +2298,11 @@ public class Camera {
         private static final String KEY_MIN_EXPOSURE_COMPENSATION = "min-exposure-compensation";
         private static final String KEY_EXPOSURE_COMPENSATION_STEP = "exposure-compensation-step";
         private static final String KEY_AUTO_EXPOSURE_LOCK = "auto-exposure-lock";
-        private static final String KEY_AUTO_EXPOSURE_LOCK_SUPPORTED = "auto-exposure-lock-supported";
+        private static final String KEY_AUTO_EXPOSURE_LOCK_SUPPORTED =
+                "auto-exposure-lock-supported";
         private static final String KEY_AUTO_WHITEBALANCE_LOCK = "auto-whitebalance-lock";
-        private static final String KEY_AUTO_WHITEBALANCE_LOCK_SUPPORTED = "auto-whitebalance-lock-supported";
+        private static final String KEY_AUTO_WHITEBALANCE_LOCK_SUPPORTED =
+                "auto-whitebalance-lock-supported";
         private static final String KEY_METERING_AREAS = "metering-areas";
         private static final String KEY_MAX_NUM_METERING_AREAS = "max-num-metering-areas";
         private static final String KEY_ZOOM = "zoom";
@@ -2284,7 +2319,8 @@ public class Camera {
         private static final String KEY_RECORDING_HINT = "recording-hint";
         private static final String KEY_VIDEO_SNAPSHOT_SUPPORTED = "video-snapshot-supported";
         private static final String KEY_VIDEO_STABILIZATION = "video-stabilization";
-        private static final String KEY_VIDEO_STABILIZATION_SUPPORTED = "video-stabilization-supported";
+        private static final String KEY_VIDEO_STABILIZATION_SUPPORTED =
+                "video-stabilization-supported";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";

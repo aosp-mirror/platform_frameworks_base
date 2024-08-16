@@ -16,14 +16,12 @@
 
 package com.android.systemui.scene.domain
 
-import com.android.systemui.scene.domain.resolver.HomeSceneFamilyResolverModule
 import com.android.systemui.scene.domain.resolver.SceneResolverModule
 import dagger.Module
 
 @Module(
     includes =
         [
-            HomeSceneFamilyResolverModule::class,
             SceneResolverModule::class,
         ]
 )

@@ -71,8 +71,6 @@ import com.android.credentialmanager.model.CredentialType
 import java.util.ArrayList
 import java.util.Objects
 import java.util.concurrent.Executors
-import org.json.JSONException
-import org.json.JSONObject
 
 class CredentialAutofillService : AutofillService() {
 
@@ -81,13 +79,6 @@ class CredentialAutofillService : AutofillService() {
 
         private const val SESSION_ID_KEY = "autofill_session_id"
         private const val REQUEST_ID_KEY = "autofill_request_id"
-        private const val CRED_HINT_PREFIX = "credential="
-        private const val REQUEST_DATA_KEY = "requestData"
-        private const val CANDIDATE_DATA_KEY = "candidateQueryData"
-        private const val SYS_PROVIDER_REQ_KEY = "isSystemProviderRequired"
-        private const val CRED_OPTIONS_KEY = "credentialOptions"
-        private const val TYPE_KEY = "type"
-        private const val REQ_TYPE_KEY = "get"
     }
 
     override fun onFillRequest(
@@ -740,7 +731,6 @@ class CredentialAutofillService : AutofillService() {
             uniqueAutofillIdsForRequest: MutableSet<AutofillId>
     ) {
         val traversedViewNodes: MutableSet<AutofillId> = mutableSetOf()
-        val credentialOptionsFromHints: MutableMap<String, CredentialOption> = mutableMapOf()
         val windowNodes: List<AssistStructure.WindowNode> =
                 structure.run {
                     (0 until windowNodeCount).map { getWindowNodeAt(it) }
@@ -749,7 +739,7 @@ class CredentialAutofillService : AutofillService() {
         windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
             traverseNodeForRequest(
                 windowNode.rootViewNode, cmRequests, responseClientState, traversedViewNodes,
-                credentialOptionsFromHints, sessionId, uniqueAutofillIdsForRequest)
+                sessionId, uniqueAutofillIdsForRequest)
         }
     }
 
@@ -758,7 +748,6 @@ class CredentialAutofillService : AutofillService() {
             cmRequests: MutableList<CredentialOption>,
             responseClientState: Bundle,
             traversedViewNodes: MutableSet<AutofillId>,
-            credentialOptionsFromHints: MutableMap<String, CredentialOption>,
             sessionId: Int,
             uniqueAutofillIdsForRequest: MutableSet<AutofillId>
     ) {
@@ -769,9 +758,8 @@ class CredentialAutofillService : AutofillService() {
                 responseClientState.putBoolean(
                     WEBVIEW_REQUESTED_CREDENTIAL_KEY, true)
             }
-            cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, it, responseClientState,
-                traversedViewNodes, credentialOptionsFromHints, sessionId,
-                uniqueAutofillIdsForRequest)
+            cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, traversedViewNodes,
+                    sessionId, uniqueAutofillIdsForRequest)
             )
             traversedViewNodes.add(it)
         }
@@ -783,18 +771,15 @@ class CredentialAutofillService : AutofillService() {
 
         children.forEach { childNode: AssistStructure.ViewNode ->
             traverseNodeForRequest(
-                childNode, cmRequests, responseClientState, traversedViewNodes,
-                credentialOptionsFromHints, sessionId, uniqueAutofillIdsForRequest
+                childNode, cmRequests, responseClientState, traversedViewNodes, sessionId,
+                    uniqueAutofillIdsForRequest
             )
         }
     }
 
     private fun getCredentialOptionsFromViewNode(
             viewNode: AssistStructure.ViewNode,
-            autofillId: AutofillId,
-            responseClientState: Bundle,
             traversedViewNodes: MutableSet<AutofillId>,
-            credentialOptionsFromHints: MutableMap<String, CredentialOption>,
             sessionId: Int,
             uniqueAutofillIdsForRequest: MutableSet<AutofillId>
     ): MutableList<CredentialOption> {
@@ -830,85 +815,6 @@ class CredentialAutofillService : AutofillService() {
                         }
                 }
         }
-        // TODO(b/325502552): clean up cred option logic in autofill hint
-        val credentialHints: MutableList<String> = mutableListOf()
-
-        if (viewNode.autofillHints != null) {
-            for (hint in viewNode.autofillHints!!) {
-                if (hint.startsWith(CRED_HINT_PREFIX)) {
-                    credentialHints.add(hint.substringAfter(CRED_HINT_PREFIX))
-                    if (viewNode.webDomain != null) {
-                        responseClientState.putBoolean(WEBVIEW_REQUESTED_CREDENTIAL_KEY, true)
-                    }
-                }
-            }
-        }
-
-        for (credentialHint in credentialHints) {
-            try {
-                convertJsonToCredentialOption(
-                    credentialHint, autofillId, credentialOptionsFromHints)
-                        .let { credentialOptions.addAll(it) }
-            } catch (e: JSONException) {
-                Log.i(TAG, "Exception while parsing response: " + e.message)
-            }
-        }
         return credentialOptions
-    }
-
-    private fun convertJsonToCredentialOption(
-        jsonString: String,
-        autofillId: AutofillId,
-        credentialOptionsFromHints: MutableMap<String, CredentialOption>
-    ): List<CredentialOption> {
-        val credentialOptions: MutableList<CredentialOption> = mutableListOf()
-
-        val json = JSONObject(jsonString)
-        val jsonGet = json.getJSONObject(REQ_TYPE_KEY)
-        val options = jsonGet.getJSONArray(CRED_OPTIONS_KEY)
-        for (i in 0 until options.length()) {
-            val option = options.getJSONObject(i)
-            val optionString = option.toString()
-            credentialOptionsFromHints[optionString]
-                    ?.let { credentialOption ->
-                        // if the current credential option was seen before, add the current
-                        // viewNode to the credential option, but do not add it to the option list
-                        // again. This will result in the same result as deduping based on
-                        // traversed viewNode.
-                        credentialOption.candidateQueryData.getParcelableArrayList(
-                            CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId::class.java)
-                                ?.let {
-                                    it.add(autofillId)
-                                    credentialOption.candidateQueryData.putParcelableArrayList(
-                                        CredentialProviderService.EXTRA_AUTOFILL_ID, it)
-                                }
-            } ?: run {
-                val candidateBundle = convertJsonToBundle(option.getJSONObject(CANDIDATE_DATA_KEY))
-                candidateBundle.putParcelableArrayList(
-                    CredentialProviderService.EXTRA_AUTOFILL_ID,
-                    arrayListOf(autofillId))
-                val credentialOption = CredentialOption(
-                    option.getString(TYPE_KEY),
-                    convertJsonToBundle(option.getJSONObject(REQUEST_DATA_KEY)),
-                    candidateBundle,
-                    option.getBoolean(SYS_PROVIDER_REQ_KEY),
-                )
-                credentialOptions.add(credentialOption)
-                credentialOptionsFromHints[optionString] = credentialOption
-            }
-        }
-        return credentialOptions
-    }
-
-    private fun convertJsonToBundle(json: JSONObject): Bundle {
-        val result = Bundle()
-        json.keys().forEach {
-            val v = json.get(it)
-            when (v) {
-                is String -> result.putString(it, v)
-                is Boolean -> result.putBoolean(it, v)
-            }
-        }
-        return result
     }
 }

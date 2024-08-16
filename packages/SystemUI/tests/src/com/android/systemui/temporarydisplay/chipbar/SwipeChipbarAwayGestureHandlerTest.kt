@@ -19,6 +19,7 @@ package com.android.systemui.temporarydisplay.chipbar
 import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer
 import com.android.systemui.SysuiTestCase
@@ -29,8 +30,10 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class SwipeChipbarAwayGestureHandlerTest : SysuiTestCase() {
 
     private lateinit var underTest: SwipeChipbarAwayGestureHandler

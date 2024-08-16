@@ -42,7 +42,7 @@ import java.util.function.Function;
  *
  * @hide
  */
-public final class ChangeReporter {
+public class ChangeReporter {
     private static final String TAG = "CompatChangeReporter";
     private static final Function<Integer, Set<ChangeReport>> NEW_CHANGE_REPORT_SET =
             uid -> Collections.synchronizedSet(new HashSet<>());
@@ -88,17 +88,20 @@ public final class ChangeReporter {
      * Report the change to stats log and to the debug log if the change was not previously
      * logged already.
      *
-     * @param uid             affected by the change
-     * @param changeId        the reported change id
-     * @param state           of the reported change - enabled/disabled/only logged
-     * @param isLoggableBySdk whether debug logging is allowed for this change based on target
-     *                        SDK version. This is combined with other logic to determine whether to
-     *                        actually log. If the sdk version does not matter, should be true.
+     * @param uid              affected by the change
+     * @param changeId         the reported change id
+     * @param state            of the reported change - enabled/disabled/only logged
+     * @param isKnownSystemApp do we know that the affected app is a system app? (if true is
+     *                         definitely a system app, if false it may or may not be a system app)
+     * @param isLoggableBySdk  whether debug logging is allowed for this change based on target
+     *                         SDK version. This is combined with other logic to determine whether
+     *                         to actually log. If the sdk version does not matter, should be true.
      */
-    public void reportChange(int uid, long changeId, int state, boolean isLoggableBySdk) {
+    public void reportChange(int uid, long changeId, int state, boolean isKnownSystemApp,
+            boolean isLoggableBySdk) {
         boolean isAlreadyReported =
                 checkAndSetIsAlreadyReported(uid, new ChangeReport(changeId, state));
-        if (!isAlreadyReported) {
+        if (shouldWriteToStatsLog(isKnownSystemApp, isAlreadyReported)) {
             FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid,
                     changeId, state, mSource);
         }
@@ -116,7 +119,7 @@ public final class ChangeReporter {
      * @param state    of the reported change - enabled/disabled/only logged
      */
     public void reportChange(int uid, long changeId, int state) {
-        reportChange(uid, changeId, state, true);
+        reportChange(uid, changeId, state, false, true);
     }
 
     /**
@@ -136,14 +139,15 @@ public final class ChangeReporter {
     /**
      * Returns whether the next report should be logged to FrameworkStatsLog.
      *
-     * @param uid      affected by the change
-     * @param changeId the reported change id
-     * @param state    of the reported change - enabled/disabled/only logged
+     * @param isKnownSystemApp do we know that the affected app is a system app? (if true is
+     *                         definitely a system app, if false it may or may not be a system app)
+     * @param isAlreadyReported is the change already reported
      * @return true if the report should be logged
      */
     @VisibleForTesting
-    boolean shouldWriteToStatsLog(int uid, long changeId, int state) {
-        return !isAlreadyReported(uid, new ChangeReport(changeId, state));
+    boolean shouldWriteToStatsLog(boolean isKnownSystemApp, boolean isAlreadyReported) {
+        // We don't log where we know the source is a system app or is already reported
+        return !isKnownSystemApp && !isAlreadyReported;
     }
 
     /**
@@ -222,6 +226,19 @@ public final class ChangeReporter {
 
     private boolean isAlreadyReported(int uid, ChangeReport report) {
         return mReportedChanges.getOrDefault(uid, EMPTY_SET).contains(report);
+    }
+
+    /**
+     * Returns whether the next report should be logged.
+     *
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
+     * @return true if the report should be logged
+     */
+    @VisibleForTesting
+    boolean isAlreadyReported(int uid, long changeId, int state) {
+        return isAlreadyReported(uid, new ChangeReport(changeId, state));
     }
 
     private void markAsReported(int uid, ChangeReport report) {

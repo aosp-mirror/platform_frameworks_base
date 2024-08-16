@@ -143,6 +143,7 @@ android.os.Handler
 android.os.HandlerExecutor
 android.os.HandlerThread
 android.os.IBinder
+android.os.LocaleList
 android.os.Looper
 android.os.Message
 android.os.MessageQueue
@@ -274,9 +275,17 @@ android.telephony.CellSignalStrength
 android.telephony.ModemActivityInfo
 android.telephony.ServiceState
 
+android.os.connectivity.CellularBatteryStats
 android.os.connectivity.WifiActivityEnergyInfo
+android.os.connectivity.WifiBatteryStats
 
 com.android.server.LocalServices
+
+com.android.internal.graphics.cam.Cam
+com.android.internal.graphics.cam.CamUtils
+com.android.internal.graphics.cam.Frame
+com.android.internal.graphics.cam.HctSolver
+com.android.internal.graphics.ColorUtils
 
 com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream
@@ -302,6 +311,7 @@ com.android.internal.util.ProcFileReader
 com.android.internal.util.QuickSelect
 com.android.internal.util.RingBuffer
 com.android.internal.util.SizedInputStream
+com.android.internal.util.RateLimitingCache
 com.android.internal.util.StringPool
 com.android.internal.util.TokenBucket
 com.android.internal.util.XmlPullParserWrapper

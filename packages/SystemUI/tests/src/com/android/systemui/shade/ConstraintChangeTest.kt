@@ -15,8 +15,8 @@
  */
 package com.android.systemui.shade
 
-import android.testing.AndroidTestingRunner
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
@@ -27,7 +27,7 @@ import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ConstraintChangeTest : SysuiTestCase() {
 
     @Test

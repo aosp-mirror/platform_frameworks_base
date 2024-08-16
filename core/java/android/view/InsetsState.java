@@ -17,7 +17,9 @@
 package android.view;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.util.SequenceUtils.getInitSeq;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
@@ -53,6 +55,7 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -95,6 +98,9 @@ public class InsetsState implements Parcelable {
     /** The display shape */
     private DisplayShape mDisplayShape = DisplayShape.NONE;
 
+    /** To make sure the info update between client and system server is in order. */
+    private int mSeq = getInitSeq();
+
     public InsetsState() {
         mSources = new SparseArray<>();
     }
@@ -127,18 +133,25 @@ public class InsetsState implements Parcelable {
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
         @InsetsType int forceConsumingTypes = 0;
+        boolean forceConsumingOpaqueCaptionBar = false;
         @InsetsType int suppressScrimTypes = 0;
         final Rect[][] typeBoundingRectsMap = new Rect[Type.SIZE][];
         final Rect[][] typeMaxBoundingRectsMap = new Rect[Type.SIZE][];
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
             final @InsetsType int type = source.getType();
+            final @InsetsSource.Flags int flags = source.getFlags();
 
-            if ((source.getFlags() & InsetsSource.FLAG_FORCE_CONSUMING) != 0) {
+            if ((flags & InsetsSource.FLAG_FORCE_CONSUMING) != 0) {
                 forceConsumingTypes |= type;
             }
 
-            if ((source.getFlags() & InsetsSource.FLAG_SUPPRESS_SCRIM) != 0) {
+            if (Flags.enableCaptionCompatInsetForceConsumptionAlways()
+                    && (flags & FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR) != 0) {
+                forceConsumingOpaqueCaptionBar = true;
+            }
+
+            if ((flags & InsetsSource.FLAG_SUPPRESS_SCRIM) != 0) {
                 suppressScrimTypes |= type;
             }
 
@@ -173,7 +186,8 @@ public class InsetsState implements Parcelable {
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                forceConsumingTypes, suppressScrimTypes, calculateRelativeCutout(frame),
+                forceConsumingTypes, forceConsumingOpaqueCaptionBar, suppressScrimTypes,
+                calculateRelativeCutout(frame),
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
                 calculateRelativeDisplayShape(frame),
@@ -586,6 +600,14 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    public int getSeq() {
+        return mSeq;
+    }
+
+    public void setSeq(int seq) {
+        mSeq = seq;
+    }
+
     public void set(InsetsState other) {
         set(other, false /* copySources */);
     }
@@ -597,6 +619,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         mDisplayShape = other.getDisplayShape();
+        mSeq = other.mSeq;
         mSources.clear();
         for (int i = 0, size = other.mSources.size(); i < size; i++) {
             final InsetsSource otherSource = other.mSources.valueAt(i);
@@ -620,6 +643,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         mDisplayShape = other.getDisplayShape();
+        mSeq = other.mSeq;
         if (types == 0) {
             return;
         }
@@ -705,6 +729,7 @@ public class InsetsState implements Parcelable {
                 || !mRoundedCornerFrame.equals(state.mRoundedCornerFrame)
                 || !mPrivacyIndicatorBounds.equals(state.mPrivacyIndicatorBounds)
                 || !mDisplayShape.equals(state.mDisplayShape)) {
+            // mSeq is for internal bookkeeping only.
             return false;
         }
 
@@ -778,6 +803,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.writeToParcel(dest, flags);
         dest.writeTypedObject(mPrivacyIndicatorBounds, flags);
         dest.writeTypedObject(mDisplayShape, flags);
+        dest.writeInt(mSeq);
         final int size = mSources.size();
         dest.writeInt(size);
         for (int i = 0; i < size; i++) {
@@ -803,6 +829,7 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.readFromParcel(in);
         mPrivacyIndicatorBounds = in.readTypedObject(PrivacyIndicatorBounds.CREATOR);
         mDisplayShape = in.readTypedObject(DisplayShape.CREATOR);
+        mSeq = in.readInt();
         final int size = in.readInt();
         final SparseArray<InsetsSource> sources;
         if (mSources == null) {

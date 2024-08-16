@@ -16,8 +16,8 @@
 
 package com.android.keyguard
 
-import android.testing.AndroidTestingRunner
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class KeyguardClockSwitchControllerWithCoroutinesTest : KeyguardClockSwitchControllerBaseTest() {
 

@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.window.ActivityWindowInfo.getActivityWindowInfo;
 
 import android.annotation.CallSuper;
 import android.annotation.FlaggedApi;
@@ -29,16 +30,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -163,17 +165,12 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      */
     @CallSuper
     public void registerOrganizer() {
-        // TODO(b/302420256) point to registerOrganizer(boolean) when flag is removed.
-        try {
-            getController().registerOrganizer(mInterface, false /* isSystemOrganizer */);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        registerOrganizer(false /* isSystemOrganizer */, null /* outSavedState */);
     }
 
     /**
      * Registers a {@link TaskFragmentOrganizer} to manage TaskFragments.
-     *
+     * <p>
      * Registering a system organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer
      * will have additional system capabilities, including: (1) it will receive SurfaceControl for
      * the organized TaskFragment, and (2) it needs to update the
@@ -185,8 +182,31 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     @RequiresPermission(value = "android.permission.MANAGE_ACTIVITY_TASKS", conditional = true)
     @FlaggedApi(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG)
     public void registerOrganizer(boolean isSystemOrganizer) {
+        registerOrganizer(isSystemOrganizer, null /* outSavedState */);
+    }
+
+    /**
+     * Registers a {@link TaskFragmentOrganizer} to manage TaskFragments.
+     * <p>
+     * Registering a system organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer
+     * will have additional system capabilities, including: (1) it will receive SurfaceControl for
+     * the organized TaskFragment, and (2) it needs to update the
+     * {@link android.view.SurfaceControl} following the window change accordingly.
+     *
+     * @param isSystemOrganizer  If it is a system organizer
+     * @param outSavedState      Returning the saved state (if any) that previously saved. This is
+     *                           useful when retrieve the state from the same TaskFragmentOrganizer
+     *                           that was killed by the system (e.g. to reclaim memory). Note that
+     *                           the save state is dropped and unable to retrieve once the system
+     *                           restarts or the organizer is unregistered.
+     * @hide
+     */
+    @CallSuper
+    @RequiresPermission(value = "android.permission.MANAGE_ACTIVITY_TASKS", conditional = true)
+    public void registerOrganizer(boolean isSystemOrganizer, @Nullable Bundle outSavedState) {
         try {
-            getController().registerOrganizer(mInterface, isSystemOrganizer);
+            getController().registerOrganizer(mInterface, isSystemOrganizer,
+                    outSavedState != null ? outSavedState : new Bundle());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -205,28 +225,24 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Registers remote animations per transition type for the organizer. It will override the
-     * animations if the transition only contains windows that belong to the organized
-     * TaskFragments, and at least one of the transition window is embedded (not filling the Task).
+     * Saves the state in the system, where the state can be restored if the process of
+     * the TaskFragmentOrganizer is restarted.
+     *
      * @hide
+     *
+     * @param state the state to save.
      */
-    @CallSuper
-    public void registerRemoteAnimations(@NonNull RemoteAnimationDefinition definition) {
-        try {
-            getController().registerRemoteAnimations(mInterface, definition);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+    public void setSavedState(@NonNull Bundle state) {
+        if (!Flags.aeBackStackRestore()) {
+            return;
         }
-    }
 
-    /**
-     * Unregisters remote animations per transition type for the organizer.
-     * @hide
-     */
-    @CallSuper
-    public void unregisterRemoteAnimations() {
+        if (state.getSize() > 200000) {
+            throw new IllegalArgumentException("Saved state too large, " + state.getSize());
+        }
+
         try {
-            getController().unregisterRemoteAnimations(mInterface);
+            getController().setSavedState(mInterface, state);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -353,15 +369,15 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
+     * Checks if an activity is organized by a {@link android.window.TaskFragmentOrganizer} and
      * only occupies a portion of Task bounds.
+     *
+     * @see ActivityWindowInfo for additional window info.
      * @hide
      */
-    public boolean isActivityEmbedded(@NonNull IBinder activityToken) {
-        try {
-            return getController().isActivityEmbedded(activityToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    public static boolean isActivityEmbedded(@NonNull Activity activity) {
+        Objects.requireNonNull(activity);
+        final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
+        return activityWindowInfo != null && activityWindowInfo.isEmbedded();
     }
 }

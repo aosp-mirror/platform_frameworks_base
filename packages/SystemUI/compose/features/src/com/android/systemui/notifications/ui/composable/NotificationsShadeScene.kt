@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
@@ -29,7 +28,8 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
-import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneViewModel
+import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -45,16 +45,16 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class NotificationsShadeScene
 @Inject
 constructor(
-    sceneViewModel: NotificationsShadeSceneViewModel,
-    private val overlayShadeViewModel: OverlayShadeViewModel,
-    private val shadeHeaderViewModel: ShadeHeaderViewModel,
-    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
+    private val actionsViewModelFactory: NotificationsShadeSceneActionsViewModel.Factory,
+    private val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
+    private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
+    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -65,22 +65,33 @@ constructor(
 
     override val key = Scenes.NotificationsShade
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        sceneViewModel.destinationScenes
+    private val actionsViewModel: NotificationsShadeSceneActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
+        actionsViewModel.actions
+
+    override suspend fun activate() {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
+        val notificationsPlaceholderViewModel = rememberViewModel {
+            notificationsPlaceholderViewModelFactory.create()
+        }
+
         OverlayShade(
             modifier = modifier,
-            viewModel = overlayShadeViewModel,
-            panelAlignment = Alignment.TopEnd,
+            viewModelFactory = overlayShadeViewModelFactory,
             lockscreenContent = lockscreenContent,
         ) {
             Column {
                 ExpandedShadeHeader(
-                    viewModel = shadeHeaderViewModel,
+                    viewModelFactory = shadeHeaderViewModelFactory,
                     createTintedIconManager = tintedIconManagerFactory::create,
                     createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
                     statusBarIconController = statusBarIconController,
@@ -97,6 +108,12 @@ constructor(
                     shouldReserveSpaceForNavBar = false,
                     shadeMode = ShadeMode.Dual,
                     modifier = Modifier.fillMaxWidth(),
+                )
+
+                // Communicates the bottom position of the drawable area within the shade to NSSL.
+                NotificationStackCutoffGuideline(
+                    stackScrollView = stackScrollView.get(),
+                    viewModel = notificationsPlaceholderViewModel,
                 )
             }
         }

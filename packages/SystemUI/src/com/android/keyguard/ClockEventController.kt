@@ -178,6 +178,7 @@ constructor(
         smallClockOnAttachStateChangeListener =
             object : OnAttachStateChangeListener {
                 var pastVisibility: Int? = null
+
                 override fun onViewAttachedToWindow(view: View) {
                     clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                     // Match the asing for view.parent's layout classes.
@@ -213,6 +214,7 @@ constructor(
                 override fun onViewAttachedToWindow(p0: View) {
                     clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                 }
+
                 override fun onViewDetachedFromWindow(p0: View) {}
             }
         clock.largeClock.view.addOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
@@ -284,8 +286,10 @@ constructor(
 
     var smallRegionSampler: RegionSampler? = null
         private set
+
     var largeRegionSampler: RegionSampler? = null
         private set
+
     var smallTimeListener: TimeListener? = null
     var largeTimeListener: TimeListener? = null
     val shouldTimeListenerRun: Boolean
@@ -560,7 +564,7 @@ constructor(
     internal fun listenForAnyStateToAodTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transitionStepsToState(AOD)
+                .transition(Edge.create(to = AOD))
                 .filter { it.transitionState == TransitionState.STARTED }
                 .filter { it.from != LOCKSCREEN }
                 .collect { handleDoze(1f) }
@@ -571,7 +575,7 @@ constructor(
     internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transitionStepsToState(LOCKSCREEN)
+                .transition(Edge.create(to = LOCKSCREEN))
                 .filter { it.transitionState == TransitionState.STARTED }
                 .filter { it.from != AOD }
                 .collect { handleDoze(0f) }
@@ -586,7 +590,7 @@ constructor(
     internal fun listenForAnyStateToDozingTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transitionStepsToState(DOZING)
+                .transition(Edge.create(to = DOZING))
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect { handleDoze(1f) }
         }

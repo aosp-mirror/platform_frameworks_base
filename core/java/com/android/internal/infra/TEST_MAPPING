@@ -20,12 +20,7 @@
       ]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "com.android.internal.infra."
-        }
-      ]
+      "name": "FrameworksCoreTests_internal_infra"
     }
   ]
 }

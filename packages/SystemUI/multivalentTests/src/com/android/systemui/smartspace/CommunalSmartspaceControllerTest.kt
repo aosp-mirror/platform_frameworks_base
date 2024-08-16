@@ -20,6 +20,7 @@ import android.app.smartspace.SmartspaceSession
 import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.os.Handler
 import android.testing.TestableLooper
 import android.view.View
 import android.widget.FrameLayout
@@ -85,6 +86,8 @@ class CommunalSmartspaceControllerTest : SysuiTestCase() {
         override fun setPrimaryTextColor(color: Int) {}
 
         override fun setUiSurface(uiSurface: String) {}
+
+        override fun setBgHandler(bgHandler: Handler?) {}
 
         override fun setDozeAmount(amount: Float) {}
 

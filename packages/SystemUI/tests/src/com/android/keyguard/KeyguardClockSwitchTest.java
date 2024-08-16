@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -55,11 +56,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 // Need to run on the main thread because KeyguardSliceView$Row init checks for
 // the main thread before acquiring a wake lock. This class is constructed when
 // the keyguard_clock_switch layout is inflated.
 @RunWithLooper(setAsMainLooper = true)
+@DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 public class KeyguardClockSwitchTest extends SysuiTestCase {
     @Mock
     ViewGroup mMockKeyguardSliceView;
@@ -81,8 +83,6 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
-
         MockitoAnnotations.initMocks(this);
         when(mMockKeyguardSliceView.getContext()).thenReturn(mContext);
         when(mMockKeyguardSliceView.findViewById(R.id.keyguard_status_area))

@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
@@ -31,13 +32,12 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class DevicePolicyManagerExtTest : SysuiTestCase() {
 
     @Mock lateinit var devicePolicyManager: DevicePolicyManager

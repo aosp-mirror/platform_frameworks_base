@@ -46,6 +46,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.IssueRecordingService
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
+import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
 import com.android.systemui.recordissue.TraceurMessageSender
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
@@ -196,9 +197,5 @@ constructor(
                 if (TextUtils.isEmpty(secondaryLabel)) label else "$label, $secondaryLabel"
             expandedAccessibilityClassName = Switch::class.java.name
         }
-    }
-
-    companion object {
-        const val TILE_SPEC = "record_issue"
     }
 }

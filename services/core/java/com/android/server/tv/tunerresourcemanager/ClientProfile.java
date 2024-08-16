@@ -67,19 +67,19 @@ public final class ClientProfile {
     /**
      * The handle of the primary frontend resource
      */
-    private int mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
+    private long mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
 
     /**
      * List of the frontend handles that are used by the current client.
      */
-    private Set<Integer> mUsingFrontendHandles = new HashSet<>();
+    private Set<Long> mUsingFrontendHandles = new HashSet<>();
 
     /**
      * List of the client ids that share frontend with the current client.
      */
     private Set<Integer> mShareFeClientIds = new HashSet<>();
 
-    private Set<Integer> mUsingDemuxHandles = new HashSet<>();
+    private Set<Long> mUsingDemuxHandles = new HashSet<>();
 
     /**
      * Client id sharee that has shared frontend with the current client.
@@ -89,7 +89,7 @@ public final class ClientProfile {
     /**
      * List of the Lnb handles that are used by the current client.
      */
-    private Set<Integer> mUsingLnbHandles = new HashSet<>();
+    private Set<Long> mUsingLnbHandles = new HashSet<>();
 
     /**
      * List of the Cas system ids that are used by the current client.
@@ -184,7 +184,7 @@ public final class ClientProfile {
      *
      * @param frontendHandle being used.
      */
-    public void useFrontend(int frontendHandle) {
+    public void useFrontend(long frontendHandle) {
         mUsingFrontendHandles.add(frontendHandle);
     }
 
@@ -193,14 +193,14 @@ public final class ClientProfile {
      *
      * @param frontendHandle being used.
      */
-    public void setPrimaryFrontend(int frontendHandle) {
+    public void setPrimaryFrontend(long frontendHandle) {
         mPrimaryUsingFrontendHandle = frontendHandle;
     }
 
     /**
      * Get the primary frontend used by the client
      */
-    public int getPrimaryFrontend() {
+    public long getPrimaryFrontend() {
         return mPrimaryUsingFrontendHandle;
     }
 
@@ -222,7 +222,7 @@ public final class ClientProfile {
         mShareFeClientIds.remove(clientId);
     }
 
-    public Set<Integer> getInUseFrontendHandles() {
+    public Set<Long> getInUseFrontendHandles() {
         return mUsingFrontendHandles;
     }
 
@@ -253,14 +253,14 @@ public final class ClientProfile {
      *
      * @param demuxHandle the demux being used.
      */
-    public void useDemux(int demuxHandle) {
+    public void useDemux(long demuxHandle) {
         mUsingDemuxHandles.add(demuxHandle);
     }
 
     /**
      * Get the set of demux handles in use.
      */
-    public Set<Integer> getInUseDemuxHandles() {
+    public Set<Long> getInUseDemuxHandles() {
         return mUsingDemuxHandles;
     }
 
@@ -269,7 +269,7 @@ public final class ClientProfile {
      *
      * @param demuxHandle the demux handl being released.
      */
-    public void releaseDemux(int demuxHandle) {
+    public void releaseDemux(long demuxHandle) {
         mUsingDemuxHandles.remove(demuxHandle);
     }
 
@@ -278,11 +278,11 @@ public final class ClientProfile {
      *
      * @param lnbHandle being used.
      */
-    public void useLnb(int lnbHandle) {
+    public void useLnb(long lnbHandle) {
         mUsingLnbHandles.add(lnbHandle);
     }
 
-    public Set<Integer> getInUseLnbHandles() {
+    public Set<Long> getInUseLnbHandles() {
         return mUsingLnbHandles;
     }
 
@@ -291,7 +291,7 @@ public final class ClientProfile {
      *
      * @param lnbHandle being released.
      */
-    public void releaseLnb(int lnbHandle) {
+    public void releaseLnb(long lnbHandle) {
         mUsingLnbHandles.remove(lnbHandle);
     }
 

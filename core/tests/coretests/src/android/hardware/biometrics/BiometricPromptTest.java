@@ -16,7 +16,6 @@
 
 package android.hardware.biometrics;
 
-import static android.hardware.biometrics.BiometricPrompt.MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptContentViewWithMoreOptionsButton.MAX_DESCRIPTION_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptVerticalListContentView.MAX_EACH_ITEM_CHARACTER_NUMBER;
 import static android.hardware.biometrics.PromptVerticalListContentView.MAX_ITEM_NUMBER;
@@ -28,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,19 +116,7 @@ public class BiometricPromptTest {
                 () -> new BiometricPrompt.Builder(mContext).setLogoDescription(null)
         );
 
-        assertThat(e).hasMessageThat().contains(
-                "Logo description passed in can not be null or exceed");
-    }
-
-    @Test
-    public void testLogoDescription_charLimit() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> new BiometricPrompt.Builder(mContext).setLogoDescription(
-                        generateRandomString(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER + 1))
-        );
-
-        assertThat(e).hasMessageThat().contains(
-                "Logo description passed in can not be null or exceed");
+        assertThat(e).hasMessageThat().isEqualTo("Logo description passed in can not be null");
     }
 
     @Test
@@ -207,6 +195,25 @@ public class BiometricPromptTest {
 
         assertThat(e).hasMessageThat().contains(
                 "The number of list items exceeds ");
+    }
+
+    @Test
+    public void testOnDialogDismissed_dialogDismissedNegative() throws RemoteException {
+        final ArgumentCaptor<IBiometricServiceReceiver> biometricServiceReceiverCaptor =
+                ArgumentCaptor.forClass(IBiometricServiceReceiver.class);
+        final BiometricPrompt.AuthenticationCallback callback =
+                mock(BiometricPrompt.AuthenticationCallback.class);
+        mBiometricPrompt.authenticate(mCancellationSignal, mExecutor, callback);
+        mLooper.dispatchAll();
+
+        verify(mService).authenticate(any(), anyLong(), anyInt(),
+                biometricServiceReceiverCaptor.capture(), anyString(), any());
+
+        biometricServiceReceiverCaptor.getValue().onDialogDismissed(
+                BiometricPrompt.DISMISSED_REASON_NEGATIVE);
+
+        verify(callback).onAuthenticationError(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
+                null /* errString */);
     }
 
     private String generateRandomString(int charNum) {

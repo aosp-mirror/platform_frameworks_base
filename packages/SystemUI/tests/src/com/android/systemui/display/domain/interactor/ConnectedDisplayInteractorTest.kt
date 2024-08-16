@@ -19,12 +19,12 @@ package com.android.systemui.display.domain.interactor
 import android.companion.virtual.VirtualDeviceManager
 import android.companion.virtual.flags.Flags.FLAG_INTERACTIVE_SCREEN_MIRROR
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
 import android.view.Display.TYPE_EXTERNAL
 import android.view.Display.TYPE_INTERNAL
 import android.view.Display.TYPE_VIRTUAL
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
@@ -53,7 +53,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyInt
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest

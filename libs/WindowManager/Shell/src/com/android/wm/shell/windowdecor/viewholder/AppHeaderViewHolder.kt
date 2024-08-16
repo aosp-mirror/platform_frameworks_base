@@ -21,6 +21,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
@@ -41,10 +42,15 @@ import com.android.internal.R.attr.materialColorSecondaryContainer
 import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
-import com.android.window.flags.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
+import com.android.wm.shell.windowdecor.common.OPACITY_100
+import com.android.wm.shell.windowdecor.common.OPACITY_11
+import com.android.wm.shell.windowdecor.common.OPACITY_15
+import com.android.wm.shell.windowdecor.common.OPACITY_55
+import com.android.wm.shell.windowdecor.common.OPACITY_65
 import com.android.wm.shell.windowdecor.common.Theme
 import com.android.wm.shell.windowdecor.extension.isLightCaptionBarAppearance
 import com.android.wm.shell.windowdecor.extension.isTransparentCaptionBarAppearance
@@ -131,8 +137,14 @@ internal class AppHeaderViewHolder(
                 onMaximizeHoverAnimationFinishedListener
     }
 
-    override fun bindData(taskInfo: RunningTaskInfo) {
-        if (Flags.enableThemedAppHeaders()) {
+    override fun bindData(
+        taskInfo: RunningTaskInfo,
+        position: Point,
+        width: Int,
+        height: Int,
+        isCaptionVisible: Boolean
+    ) {
+        if (DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
             bindDataWithThemedHeaders(taskInfo)
         } else {
             bindDataLegacy(taskInfo)
@@ -226,12 +238,12 @@ internal class AppHeaderViewHolder(
 
     override fun onHandleMenuClosed() {}
 
-    fun setAnimatingTaskResize(animatingTaskResize: Boolean) {
-        // If animating a task resize, cancel any running hover animations
-        if (animatingTaskResize) {
+    fun setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition: Boolean) {
+        // If animating a task resize or reposition, cancel any running hover animations
+        if (animatingTaskResizeOrReposition) {
             maximizeButtonView.cancelHoverAnimation()
         }
-        maximizeButtonView.hoverDisabled = animatingTaskResize
+        maximizeButtonView.hoverDisabled = animatingTaskResizeOrReposition
     }
 
     fun onMaximizeWindowHoverExit() {
@@ -491,11 +503,5 @@ internal class AppHeaderViewHolder(
         private const val DARK_THEME_UNFOCUSED_OPACITY = 140 // 55%
         private const val LIGHT_THEME_UNFOCUSED_OPACITY = 166 // 65%
         private const val FOCUSED_OPACITY = 255
-
-        private const val OPACITY_100 = 255
-        private const val OPACITY_11 = 28
-        private const val OPACITY_15 = 38
-        private const val OPACITY_55 = 140
-        private const val OPACITY_65 = 166
     }
 }

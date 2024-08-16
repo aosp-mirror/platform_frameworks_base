@@ -16,8 +16,8 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
@@ -44,7 +44,7 @@ import org.mockito.Mock
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AudioSharingInteractorTest : SysuiTestCase() {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -113,7 +113,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
             assertThat(actual)
                 .isEqualTo(
                     AudioSharingButtonState.Visible(
-                        R.string.quick_settings_bluetooth_audio_sharing_button_sharing
+                        R.string.quick_settings_bluetooth_audio_sharing_button_sharing,
+                        isActive = true
                     )
                 )
         }
@@ -163,7 +164,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
             assertThat(actual)
                 .isEqualTo(
                     AudioSharingButtonState.Visible(
-                        R.string.quick_settings_bluetooth_audio_sharing_button
+                        R.string.quick_settings_bluetooth_audio_sharing_button,
+                        isActive = false
                     )
                 )
         }

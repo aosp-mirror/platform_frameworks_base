@@ -29,6 +29,9 @@ interface SceneResolver {
 
     /** The concrete scene that [targetFamily] is currently resolved to. */
     val resolvedScene: StateFlow<SceneKey>
+
+    /** Returns `true` if [scene] can be resolved from [targetFamily]. */
+    fun includesScene(scene: SceneKey): Boolean
 }
 
 @Module

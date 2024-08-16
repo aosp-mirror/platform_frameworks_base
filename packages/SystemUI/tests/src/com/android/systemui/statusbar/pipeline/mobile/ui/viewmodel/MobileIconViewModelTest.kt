@@ -862,6 +862,38 @@ class MobileIconViewModelTest : SysuiTestCase() {
             assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_2)
         }
 
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    fun satelliteIcon_ignoresInflateSignalStrength() =
+        testScope.runTest {
+            // Note that this is the exact same test as above, but with inflateSignalStrength set to
+            // true we note that the level is unaffected by inflation
+            repository.inflateSignalStrength.value = true
+            repository.isNonTerrestrial.value = true
+            repository.setAllLevels(0)
+
+            val latest by
+                collectLastValue(underTest.icon.filterIsInstance(SignalIconModel.Satellite::class))
+
+            // Level 0 -> no connection
+            assertThat(latest).isNotNull()
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_0)
+
+            // 1-2 -> 1 bar
+            repository.setAllLevels(1)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_1)
+
+            repository.setAllLevels(2)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_1)
+
+            // 3-4 -> 2 bars
+            repository.setAllLevels(3)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_2)
+
+            repository.setAllLevels(4)
+            assertThat(latest!!.icon.res).isEqualTo(R.drawable.ic_satellite_connected_2)
+        }
+
     private fun createAndSetViewModel() {
         underTest =
             MobileIconViewModel(

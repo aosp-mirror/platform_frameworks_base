@@ -26,7 +26,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 
-import androidx.window.util.BaseDataProducer;
+import androidx.window.common.layout.CommonFoldingFeature;
 
 import com.android.internal.R;
 
@@ -34,7 +34,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Implementation of {@link androidx.window.util.DataProducer} that produces a
+ * Implementation of {@link BaseDataProducer} that produces a
  * {@link String} that can be parsed to a {@link CommonFoldingFeature}.
  * {@link RawFoldingFeatureProducer} searches for the value in two places. The first check is in
  * settings where the {@link String} property is saved with the key

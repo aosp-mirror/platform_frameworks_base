@@ -19,7 +19,9 @@ package com.android.wm.shell.transition;
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_NONE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
@@ -36,6 +38,7 @@ import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITI
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -54,7 +57,7 @@ import android.window.TransitionInfo;
 
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
@@ -72,6 +75,9 @@ public class TransitionAnimationHelper {
         final int changeFlags = change.getFlags();
         final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
+        final boolean isFreeform = isTask && change.getTaskInfo().isFreeform();
+        final boolean isCoveredByOpaqueFullscreenChange =
+                isCoveredByOpaqueFullscreenChange(info, change);
         final TransitionInfo.AnimationOptions options;
         if (Flags.moveAnimationOptionsToChange()) {
             options = change.getAnimationOptions();
@@ -107,6 +113,24 @@ public class TransitionAnimationHelper {
             animAttr = enter
                     ? R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
                     : R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
+        } else if (!isCoveredByOpaqueFullscreenChange
+                && isFreeform
+                && TransitionUtil.isOpeningMode(type)
+                && change.getMode() == TRANSIT_TO_BACK) {
+            // Set translucent here so TransitionAnimation loads the appropriate animations for
+            // translucent activities and tasks later
+            translucent = (changeFlags & FLAG_TRANSLUCENT) != 0;
+            // The main Task is launching or being brought to front, this Task is being minimized
+            animAttr = R.styleable.WindowAnimation_activityCloseExitAnimation;
+        } else if (!isCoveredByOpaqueFullscreenChange
+                && isFreeform
+                && type == TRANSIT_TO_FRONT
+                && change.getMode() == TRANSIT_TO_FRONT) {
+            // Set translucent here so TransitionAnimation loads the appropriate animations for
+            // translucent activities and tasks later
+            translucent = (changeFlags & FLAG_TRANSLUCENT) != 0;
+            // Bring the minimized Task back to front
+            animAttr = R.styleable.WindowAnimation_activityOpenEnterAnimation;
         } else if (type == TRANSIT_OPEN) {
             // We will translucent open animation for translucent activities and tasks. Choose
             // WindowAnimation_activityOpenEnterAnimation and set translucent here, then
@@ -199,6 +223,15 @@ public class TransitionAnimationHelper {
      */
     public static int getTransitionTypeFromInfo(@NonNull TransitionInfo info) {
         final int type = info.getType();
+        // This back navigation is canceled, check whether the transition should be open or close
+        if (type == TRANSIT_PREPARE_BACK_NAVIGATION
+                || type == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION) {
+            if (!info.getChanges().isEmpty()) {
+                final TransitionInfo.Change change = info.getChanges().get(0);
+                return TransitionUtil.isOpeningMode(change.getMode())
+                        ? TRANSIT_OPEN : TRANSIT_CLOSE;
+            }
+        }
         // If the info transition type is opening transition, iterate its changes to see if it
         // has any opening change, if none, returns TRANSIT_CLOSE type for closing animation.
         if (type == TRANSIT_OPEN) {
@@ -416,5 +449,26 @@ public class TransitionAnimationHelper {
         finishTransaction.remove(edgeExtensionLayer);
 
         return edgeExtensionLayer;
+    }
+
+    /**
+     * Returns whether there is an opaque fullscreen Change positioned in front of the given Change
+     * in the given TransitionInfo.
+     */
+    static boolean isCoveredByOpaqueFullscreenChange(
+            TransitionInfo info, TransitionInfo.Change change) {
+        // TransitionInfo#getChanges() are ordered from front to back
+        for (TransitionInfo.Change coveringChange : info.getChanges()) {
+            if (coveringChange == change) {
+                return false;
+            }
+            if ((coveringChange.getFlags() & FLAG_TRANSLUCENT) == 0
+                    && coveringChange.getTaskInfo() != null
+                    && coveringChange.getTaskInfo().getWindowingMode()
+                    == WindowConfiguration.WINDOWING_MODE_FULLSCREEN) {
+                return true;
+            }
+        }
+        return false;
     }
 }

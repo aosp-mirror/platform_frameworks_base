@@ -19,10 +19,10 @@ package com.android.systemui.shared.clocks
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.testing.AndroidTestingRunner
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.customization.R
@@ -53,7 +53,7 @@ import org.mockito.junit.MockitoJUnit
 private fun DefaultClockProvider.createClock(id: ClockId): DefaultClockController =
     createClock(ClockSettings(id, null)) as DefaultClockController
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DefaultClockProviderTest : SysuiTestCase() {
 
@@ -72,6 +72,10 @@ class DefaultClockProviderTest : SysuiTestCase() {
             .thenReturn(mockSmallClockView)
         whenever(layoutInflater.inflate(eq(R.layout.clock_default_large), any(), anyBoolean()))
             .thenReturn(mockLargeClockView)
+        whenever(resources.getString(R.string.clock_default_name))
+            .thenReturn("DEFAULT_CLOCK_NAME")
+        whenever(resources.getString(R.string.clock_default_description))
+            .thenReturn("DEFAULT_CLOCK_DESC")
         whenever(resources.getDrawable(R.drawable.clock_default_thumbnail, null))
             .thenReturn(mockClockThumbnail)
         whenever(mockSmallClockView.getLayoutParams()).thenReturn(FrameLayout.LayoutParams(10, 10))
@@ -85,7 +89,7 @@ class DefaultClockProviderTest : SysuiTestCase() {
         // All providers need to provide clocks & thumbnails for exposed clocks
         for (metadata in provider.getClocks()) {
             assertNotNull(provider.createClock(metadata.clockId))
-            assertNotNull(provider.getClockThumbnail(metadata.clockId))
+            assertNotNull(provider.getClockPickerConfig(metadata.clockId))
         }
     }
 

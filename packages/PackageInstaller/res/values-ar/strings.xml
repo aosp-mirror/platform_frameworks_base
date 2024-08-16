@@ -66,9 +66,9 @@
     <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"هل تريد أرشفة هذا التطبيق المحفوظ في المساحة الخاصّة؟ سيتم حفظ بياناتك الشخصية."</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"هل تريد إزالة هذا التطبيق "<b>"لكل"</b>" المستخدمين؟ ستتم إزالة التطبيق وبياناته من "<b>"كل"</b>" المستخدمين على هذا الجهاز."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"هل تريد إزالة هذا التطبيق للمستخدم <xliff:g id="USERNAME">%1$s</xliff:g>؟"</string>
-    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"هل تريد إزالة تثبيت هذا التطبيق من ملفك الشخصي للعمل؟"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"هل تريد إزالة تثبيت هذا التطبيق من ملف العمل الخاص بك؟"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"هل تريد استبدال هذا التطبيق بإصدار المصنع؟ ستتم إزالة جميع البيانات."</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"هل تريد إعادة ضبط هذا التطبيق على الإعدادات الأصلية؟ سؤدي ذلك إلى إزالة جميع البيانات، كما سيؤثر على جميع مستخدمي هذا الجهاز، بما في ذلك من لديهم ملفات شخصية للعمل."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"هل تريد إعادة ضبط هذا التطبيق على الإعدادات الأصلية؟ سؤدي ذلك إلى إزالة جميع البيانات، كما سيؤثر على جميع مستخدمي هذا الجهاز، بما في ذلك من لديهم ملفات للعمل."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"الاحتفاظ بـ <xliff:g id="SIZE">%1$s</xliff:g> من بيانات التطبيق."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"هل تريد حذف هذا التطبيق؟"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"هل تريد إلغاء تثبيت هذا التطبيق؟ سيتم أيضًا حذف نسخة \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\" الطبق الأصل."</string>

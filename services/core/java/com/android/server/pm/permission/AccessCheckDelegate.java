@@ -38,6 +38,7 @@ import android.util.SparseArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.DodecFunction;
+import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
@@ -269,8 +270,8 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                 if (isDelegatePermission(permissionName)) {
                     final long identity = Binder.clearCallingIdentity();
                     try {
-                        return checkPermission(SHELL_PKG, permissionName,
-                                persistentDeviceId, userId, superImpl);
+                        return checkPermission(SHELL_PKG, permissionName, persistentDeviceId,
+                                userId, superImpl);
                     } finally {
                         Binder.restoreCallingIdentity(identity);
                     }
@@ -323,8 +324,7 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", null,
-                            virtualDeviceId, raw);
+                    return superImpl.apply(code, shellUid, SHELL_PKG, null, virtualDeviceId, raw);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -340,7 +340,7 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, usage, shellUid, "com.android.shell");
+                    return superImpl.apply(code, usage, shellUid, SHELL_PKG);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -359,9 +359,8 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", featureId,
-                            virtualDeviceId, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage);
+                    return superImpl.apply(code, shellUid, SHELL_PKG, featureId, virtualDeviceId,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -382,8 +381,8 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code,
-                            new AttributionSource(shellUid, Process.INVALID_PID,
-                                    "com.android.shell", attributionSource.getAttributionTag(),
+                            new AttributionSource(shellUid, Process.INVALID_PID, SHELL_PKG,
+                                    attributionSource.getAttributionTag(),
                                     attributionSource.getToken(), /*renouncedPermissions*/ null,
                                     attributionSource.getDeviceId(), attributionSource.getNext()),
                             shouldCollectAsyncNotedOp, message, shouldCollectMessage,
@@ -409,10 +408,9 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(token, code, shellUid, "com.android.shell",
-                            attributionTag, virtualDeviceId, startIfModeDefault,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            attributionFlags, attributionChainId);
+                    return superImpl.apply(token, code, shellUid, SHELL_PKG, attributionTag,
+                            virtualDeviceId, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, attributionFlags, attributionChainId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -438,8 +436,8 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(clientId, code,
-                            new AttributionSource(shellUid, Process.INVALID_PID,
-                                    "com.android.shell", attributionSource.getAttributionTag(),
+                            new AttributionSource(shellUid, Process.INVALID_PID, SHELL_PKG,
+                                    attributionSource.getAttributionTag(),
                                     attributionSource.getToken(), /*renouncedPermissions*/ null,
                                     attributionSource.getDeviceId(), attributionSource.getNext()),
                             startIfModeDefault, shouldCollectAsyncNotedOp, message,
@@ -465,16 +463,37 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     superImpl.apply(clientId, code,
-                            new AttributionSource(shellUid, Process.INVALID_PID,
-                                    "com.android.shell", attributionSource.getAttributionTag(),
+                            new AttributionSource(shellUid, Process.INVALID_PID, SHELL_PKG,
+                                    attributionSource.getAttributionTag(),
                                     attributionSource.getToken(), /*renouncedPermissions*/ null,
                                     attributionSource.getDeviceId(), attributionSource.getNext()),
                             skipProxyOperation);
+                    return;
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
             superImpl.apply(clientId, code, attributionSource, skipProxyOperation);
+        }
+
+        @Override
+        public void finishOperation(IBinder clientId, int code, int uid, String packageName,
+                String attributionTag, int virtualDeviceId, @NonNull HexConsumer<IBinder, Integer,
+                                        Integer, String, String, Integer> superImpl) {
+            if (uid == mDelegateAndOwnerUid && isDelegateOp(code)) {
+                final int shellUid =
+                        UserHandle.getUid(UserHandle.getUserId(uid), Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    superImpl.accept(clientId, code, shellUid, SHELL_PKG, attributionTag,
+                            virtualDeviceId);
+                    return;
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            superImpl.accept(clientId, code, uid, packageName, attributionTag,
+                    virtualDeviceId);
         }
 
         private boolean isDelegatePermission(@NonNull String permission) {

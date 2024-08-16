@@ -28,6 +28,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -62,7 +63,9 @@ constructor(
 /**
  * Collect information for the given [flow], calling [consumer] for each emitted event. Defaults to
  * [LifeCycle.State.CREATED] to better align with legacy ViewController usage of attaching listeners
- * during onViewAttached() and removing during onViewRemoved()
+ * during onViewAttached() and removing during onViewRemoved().
+ *
+ * @return a disposable handle in order to cancel the flow in the future.
  */
 @JvmOverloads
 fun <T> collectFlow(
@@ -71,8 +74,8 @@ fun <T> collectFlow(
     consumer: Consumer<T>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     state: Lifecycle.State = Lifecycle.State.CREATED,
-) {
-    view.repeatWhenAttached(coroutineContext) {
+): DisposableHandle {
+    return view.repeatWhenAttached(coroutineContext) {
         repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
     }
 }
@@ -105,4 +108,14 @@ fun <A, B, C, R> combineFlows(
     trifunction: (A, B, C) -> R
 ): Flow<R> {
     return combine(flow1, flow2, flow3, trifunction)
+}
+
+fun <T1, T2, T3, T4, R> combineFlows(
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    transform: (T1, T2, T3, T4) -> R
+): Flow<R> {
+    return combine(flow, flow2, flow3, flow4, transform)
 }

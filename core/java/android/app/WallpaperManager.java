@@ -123,6 +123,8 @@ import java.util.concurrent.TimeUnit;
  * <p> An app can check whether wallpapers are supported for the current user, by calling
  * {@link #isWallpaperSupported()}, and whether setting of wallpapers is allowed, by calling
  * {@link #isSetWallpaperAllowed()}.
+ * Any public APIs added to WallpaperManager should have a corresponding stub in
+ * {@link DisabledWallpaperManager}.
  */
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
@@ -260,13 +262,6 @@ public class WallpaperManager {
      * @hide
      */
     public static final String COMMAND_GOING_TO_SLEEP = "android.wallpaper.goingtosleep";
-
-    /**
-     * Command for {@link #sendWallpaperCommand}: reported when a physical display switch event
-     * happens, e.g. fold and unfold.
-     * @hide
-     */
-    public static final String COMMAND_DISPLAY_SWITCH = "android.wallpaper.displayswitch";
 
     /**
      * Command for {@link #sendWallpaperCommand}: reported when the wallpaper that was already

@@ -1209,9 +1209,19 @@ public class ResolverActivity extends Activity implements
         if (!isChangingConfigurations() && mPickOptionRequest != null) {
             mPickOptionRequest.cancel();
         }
-        if (mMultiProfilePagerAdapter != null
-                && mMultiProfilePagerAdapter.getActiveListAdapter() != null) {
-            mMultiProfilePagerAdapter.getActiveListAdapter().onDestroy();
+        if (mMultiProfilePagerAdapter != null) {
+            ResolverListAdapter activeAdapter =
+                    mMultiProfilePagerAdapter.getActiveListAdapter();
+            if (activeAdapter != null) {
+                activeAdapter.onDestroy();
+            }
+            if (android.service.chooser.Flags.fixResolverMemoryLeak()) {
+                ResolverListAdapter inactiveAdapter =
+                        mMultiProfilePagerAdapter.getInactiveListAdapter();
+                if (inactiveAdapter != null) {
+                    inactiveAdapter.onDestroy();
+                }
+            }
         }
     }
 

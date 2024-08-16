@@ -24,8 +24,10 @@ import com.android.internal.annotations.KeepForWeakReference
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.InstanceId
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
+import com.android.systemui.media.controls.shared.MediaLogger
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_RESUME
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
@@ -56,6 +58,7 @@ private const val RESUMABLE_MEDIA_MAX_AGE_SECONDS_KEY = "resumable_media_max_age
  * This is added at the end of the pipeline since we may still need to handle callbacks from
  * background users (e.g. timeouts).
  */
+@SysUISingleton
 class MediaDataFilterImpl
 @Inject
 constructor(
@@ -68,11 +71,13 @@ constructor(
     private val logger: MediaUiEventLogger,
     private val mediaFlags: MediaFlags,
     private val mediaFilterRepository: MediaFilterRepository,
+    private val mediaLogger: MediaLogger,
 ) : MediaDataManager.Listener {
     /** Non-UI listeners to media changes. */
     private val _listeners: MutableSet<MediaDataProcessor.Listener> = mutableSetOf()
     val listeners: Set<MediaDataProcessor.Listener>
         get() = _listeners.toSet()
+
     lateinit var mediaDataProcessor: MediaDataProcessor
 
     // Ensure the field (and associated reference) isn't removed during optimization.
@@ -112,10 +117,12 @@ constructor(
             return
         }
 
-        mediaFilterRepository.addSelectedUserMediaEntry(data)
+        val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
 
+        mediaLogger.logMediaLoaded(data.instanceId, data.active, "loading media")
         mediaFilterRepository.addMediaDataLoadingState(
-            MediaDataLoadingModel.Loaded(data.instanceId)
+            MediaDataLoadingModel.Loaded(data.instanceId),
+            isUpdate
         )
 
         // Notify listeners
@@ -167,7 +174,6 @@ constructor(
             if (shouldReactivate) {
                 val lastActiveId = sorted.lastKey() // most recently active id
                 // Update loading state to consider this media active
-                Log.d(TAG, "reactivating $lastActiveId instead of smartspace")
                 mediaFilterRepository.setReactivatedId(lastActiveId)
                 val mediaData = sorted[lastActiveId]!!.copy(active = true)
                 logger.logRecommendationActivated(
@@ -176,7 +182,18 @@ constructor(
                     mediaData.instanceId
                 )
                 mediaFilterRepository.addMediaDataLoadingState(
-                    MediaDataLoadingModel.Loaded(lastActiveId)
+                    MediaDataLoadingModel.Loaded(
+                        lastActiveId,
+                        receivedSmartspaceCardLatency =
+                            (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
+                                .toInt(),
+                        isSsReactivated = true
+                    )
+                )
+                mediaLogger.logMediaLoaded(
+                    mediaData.instanceId,
+                    mediaData.active,
+                    "reactivating media instead of smartspace"
                 )
                 listeners.forEach { listener ->
                     getKey(lastActiveId)?.let { lastActiveKey ->
@@ -210,6 +227,7 @@ constructor(
         mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Loaded(key, shouldPrioritizeMutable)
         )
+        mediaLogger.logRecommendationLoaded(key, data.isActive, "loading recommendations")
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
@@ -220,6 +238,7 @@ constructor(
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Removed(instanceId)
                 )
+                mediaLogger.logMediaRemoved(instanceId, "removing media card")
                 // Only notify listeners if something actually changed
                 listeners.forEach { it.onMediaDataRemoved(key, userInitiated) }
             }
@@ -230,12 +249,12 @@ constructor(
         // First check if we had reactivated media instead of forwarding smartspace
         mediaFilterRepository.reactivatedId.value?.let { lastActiveId ->
             mediaFilterRepository.setReactivatedId(null)
-            Log.d(TAG, "expiring reactivated key $lastActiveId")
             // Update loading state with actual active value
             mediaFilterRepository.selectedUserEntries.value[lastActiveId]?.let {
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Loaded(lastActiveId, immediately)
                 )
+                mediaLogger.logMediaLoaded(lastActiveId, it.active, "expiring reactivated id")
                 listeners.forEach { listener ->
                     getKey(lastActiveId)?.let { lastActiveKey ->
                         listener.onMediaDataLoaded(lastActiveKey, lastActiveKey, it, immediately)
@@ -256,6 +275,7 @@ constructor(
         mediaFilterRepository.setRecommendationsLoadingState(
             SmartspaceMediaLoadingModel.Removed(key, immediately)
         )
+        mediaLogger.logRecommendationRemoved(key, immediately, "removing recommendations card")
         listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
 
@@ -265,11 +285,11 @@ constructor(
         mediaFilterRepository.allUserEntries.value.forEach { (key, data) ->
             if (!lockscreenUserManager.isProfileAvailable(data.userId)) {
                 // Only remove media when the profile is unavailable.
-                if (DEBUG) Log.d(TAG, "Removing $key after profile change")
                 mediaFilterRepository.removeSelectedUserMediaEntry(data.instanceId, data)
                 mediaFilterRepository.addMediaDataLoadingState(
                     MediaDataLoadingModel.Removed(data.instanceId)
                 )
+                mediaLogger.logMediaRemoved(data.instanceId, "Removing $key after profile change")
                 listeners.forEach { listener -> listener.onMediaDataRemoved(key, false) }
             }
         }
@@ -283,10 +303,10 @@ constructor(
         // Clear the list first and update loading state to remove media from UI.
         mediaFilterRepository.clearSelectedUserMedia()
         keyCopy.forEach { instanceId ->
-            if (DEBUG) Log.d(TAG, "Removing $instanceId after user change")
             mediaFilterRepository.addMediaDataLoadingState(
                 MediaDataLoadingModel.Removed(instanceId)
             )
+            mediaLogger.logMediaRemoved(instanceId, "Removing media after user change")
             getKey(instanceId)?.let {
                 listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it, false) }
             }
@@ -294,14 +314,15 @@ constructor(
 
         mediaFilterRepository.allUserEntries.value.forEach { (key, data) ->
             if (lockscreenUserManager.isCurrentProfile(data.userId)) {
-                if (DEBUG)
-                    Log.d(
-                        TAG,
-                        "Re-adding $key with instanceId=${data.instanceId} after user change"
-                    )
-                mediaFilterRepository.addSelectedUserMediaEntry(data)
+                val isUpdate = mediaFilterRepository.addSelectedUserMediaEntry(data)
                 mediaFilterRepository.addMediaDataLoadingState(
-                    MediaDataLoadingModel.Loaded(data.instanceId)
+                    MediaDataLoadingModel.Loaded(data.instanceId),
+                    isUpdate
+                )
+                mediaLogger.logMediaLoaded(
+                    data.instanceId,
+                    data.active,
+                    "Re-adding $key after user change"
                 )
                 listenersCopy.forEach { listener -> listener.onMediaDataLoaded(key, null, data) }
             }
@@ -309,8 +330,9 @@ constructor(
     }
 
     /** Invoked when the user has dismissed the media carousel */
-    fun onSwipeToDismiss() {
+    fun onSwipeToDismiss(surface: Int) {
         if (DEBUG) Log.d(TAG, "Media carousel swiped away")
+        mediaFilterRepository.logSmartspaceCardsOnSwipeToDismiss(surface)
         val mediaEntries = mediaFilterRepository.allUserEntries.value.entries
         mediaEntries.forEach { (key, data) ->
             if (mediaFilterRepository.selectedUserEntries.value.containsKey(data.instanceId)) {

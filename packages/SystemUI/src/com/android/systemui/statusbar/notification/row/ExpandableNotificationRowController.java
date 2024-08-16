@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -112,6 +113,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final ExpandableNotificationRowDragController mDragController;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     private final IStatusBarService mStatusBarService;
+    private final UiEventLogger mUiEventLogger;
 
     private final NotificationSettingsController mSettingsController;
 
@@ -193,6 +195,20 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 ) {
                     mLogBufferLogger.logRemoveTransientRow(childEntry, containerEntry);
                 }
+
+                @Override
+                public void logResetAllContentAlphas(
+                        NotificationEntry entry
+                ) {
+                    mLogBufferLogger.logResetAllContentAlphas(entry);
+                }
+
+                @Override
+                public void logSkipResetAllContentAlphas(
+                        NotificationEntry entry
+                ) {
+                    mLogBufferLogger.logSkipResetAllContentAlphas(entry);
+                }
             };
 
 
@@ -230,7 +246,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
             NotificationSettingsController settingsController,
             ExpandableNotificationRowDragController dragController,
             NotificationDismissibilityProvider dismissibilityProvider,
-            IStatusBarService statusBarService) {
+            IStatusBarService statusBarService,
+            UiEventLogger uiEventLogger) {
         mView = view;
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
@@ -265,6 +282,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mSmartReplyController = smartReplyController;
         mDismissibilityProvider = dismissibilityProvider;
         mStatusBarService = statusBarService;
+        mUiEventLogger = uiEventLogger;
     }
 
     /**
@@ -298,7 +316,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mSmartReplyConstants,
                 mSmartReplyController,
                 mFeatureFlags,
-                mStatusBarService
+                mStatusBarService,
+                mUiEventLogger
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {

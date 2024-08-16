@@ -22,7 +22,6 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
-import android.os.vibrator.Flags;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
@@ -46,6 +45,8 @@ public final class HapticFeedbackVibrationProvider {
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
     private static final VibrationAttributes COMMUNICATION_REQUEST_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST);
+    private static final VibrationAttributes IME_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_IME_FEEDBACK);
 
     private final VibratorInfo mVibratorInfo;
     private final boolean mHapticTextHandleEnabled;
@@ -186,13 +187,13 @@ public final class HapticFeedbackVibrationProvider {
      *
      * @param effectId the haptic feedback effect ID whose respective vibration attributes we want
      *      to get.
-     * @param bypassVibrationIntensitySetting {@code true} if the returned attribute should bypass
-     *      vibration intensity settings. {@code false} otherwise.
-     * @param fromIme the haptic feedback is performed from an IME.
+     * @param flags Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags Additional private flags as per {@link HapticFeedbackConstants}.
      * @return the {@link VibrationAttributes} that should be used for the provided haptic feedback.
      */
-    public VibrationAttributes getVibrationAttributesForHapticFeedback(
-            int effectId, boolean bypassVibrationIntensitySetting, boolean fromIme) {
+    public VibrationAttributes getVibrationAttributesForHapticFeedback(int effectId,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
         VibrationAttributes attrs;
         switch (effectId) {
             case HapticFeedbackConstants.EDGE_SQUEEZE:
@@ -208,7 +209,7 @@ public final class HapticFeedbackVibrationProvider {
                 break;
             case HapticFeedbackConstants.KEYBOARD_TAP:
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
-                attrs = createKeyboardVibrationAttributes(fromIme);
+                attrs = createKeyboardVibrationAttributes(privFlags);
                 break;
             case HapticFeedbackConstants.BIOMETRIC_CONFIRM:
             case HapticFeedbackConstants.BIOMETRIC_REJECT:
@@ -218,18 +219,18 @@ public final class HapticFeedbackVibrationProvider {
                 attrs = TOUCH_VIBRATION_ATTRIBUTES;
         }
 
-        int flags = 0;
+        int vibFlags = 0;
+        boolean bypassVibrationIntensitySetting =
+                (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
         if (bypassVibrationIntensitySetting) {
-            flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+            vibFlags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
         }
         if (shouldBypassInterruptionPolicy(effectId)) {
-            flags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
-        }
-        if (shouldBypassIntensityScale(effectId, fromIme)) {
-            flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
+            vibFlags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
         }
 
-        return flags == 0 ? attrs : new VibrationAttributes.Builder(attrs).setFlags(flags).build();
+        return vibFlags == 0 ? attrs : new VibrationAttributes.Builder(attrs)
+                .setFlags(vibFlags).build();
     }
 
     /**
@@ -346,7 +347,7 @@ public final class HapticFeedbackVibrationProvider {
                 predefinedEffectId = VibrationEffect.EFFECT_CLICK;
                 predefinedEffectFallback = true;
         }
-        if (Flags.keyboardCategoryEnabled() && mKeyboardVibrationFixedAmplitude > 0) {
+        if (mKeyboardVibrationFixedAmplitude > 0) {
             if (mVibratorInfo.isPrimitiveSupported(primitiveId)) {
                 return VibrationEffect.startComposition()
                         .addPrimitive(primitiveId, mKeyboardVibrationFixedAmplitude)
@@ -357,31 +358,13 @@ public final class HapticFeedbackVibrationProvider {
                 /* fallbackForPredefinedEffect= */ predefinedEffectFallback);
     }
 
-    private boolean shouldBypassIntensityScale(int effectId, boolean isIme) {
-        if (!Flags.keyboardCategoryEnabled() || mKeyboardVibrationFixedAmplitude < 0 || !isIme) {
-            // Shouldn't bypass if not support keyboard category, no fixed amplitude or not an IME.
-            return false;
-        }
-        switch (effectId) {
-            case HapticFeedbackConstants.KEYBOARD_TAP:
-                return mVibratorInfo.isPrimitiveSupported(
-                        VibrationEffect.Composition.PRIMITIVE_CLICK);
-            case HapticFeedbackConstants.KEYBOARD_RELEASE:
-                return mVibratorInfo.isPrimitiveSupported(
-                        VibrationEffect.Composition.PRIMITIVE_TICK);
-        }
-        return false;
-    }
-
-    private VibrationAttributes createKeyboardVibrationAttributes(boolean fromIme) {
-        // Use touch attribute when the keyboard category is disable or it's not from an IME.
-        if (!Flags.keyboardCategoryEnabled() || !fromIme) {
+    private VibrationAttributes createKeyboardVibrationAttributes(
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        // Use touch attribute when the haptic is not apply to IME.
+        if ((privFlags & HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS) == 0) {
             return TOUCH_VIBRATION_ATTRIBUTES;
         }
-
-        return new VibrationAttributes.Builder(TOUCH_VIBRATION_ATTRIBUTES)
-                .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
-                .build();
+        return IME_FEEDBACK_VIBRATION_ATTRIBUTES;
     }
 
     @Nullable

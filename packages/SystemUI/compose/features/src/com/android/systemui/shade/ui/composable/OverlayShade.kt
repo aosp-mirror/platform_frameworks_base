@@ -49,11 +49,13 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import com.android.systemui.util.kotlin.getOrNull
 import dagger.Lazy
@@ -62,12 +64,12 @@ import java.util.Optional
 /** The overlay shade renders a lightweight shade UI container on top of a background scene. */
 @Composable
 fun SceneScope.OverlayShade(
-    viewModel: OverlayShadeViewModel,
-    panelAlignment: Alignment,
+    viewModelFactory: OverlayShadeViewModel.Factory,
     lockscreenContent: Lazy<Optional<LockscreenContent>>,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val viewModel = rememberViewModel { viewModelFactory.create() }
     val backgroundScene by viewModel.backgroundScene.collectAsStateWithLifecycle()
 
     Box(modifier) {
@@ -82,7 +84,12 @@ fun SceneScope.OverlayShade(
 
         Box(
             modifier = Modifier.fillMaxSize().panelPadding(),
-            contentAlignment = panelAlignment,
+            contentAlignment =
+                if (viewModel.panelAlignment == ShadeAlignment.Top) {
+                    Alignment.TopEnd
+                } else {
+                    Alignment.BottomEnd
+                },
         ) {
             Panel(
                 modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),
@@ -181,14 +188,14 @@ private fun combinePaddings(vararg paddingValues: PaddingValues): PaddingValues 
 
 object OverlayShade {
     object Elements {
-        val Scrim = ElementKey("OverlayShadeScrim", scenePicker = LowestZIndexScenePicker)
-        val Panel = ElementKey("OverlayShadePanel", scenePicker = LowestZIndexScenePicker)
+        val Scrim = ElementKey("OverlayShadeScrim", contentPicker = LowestZIndexContentPicker)
+        val Panel = ElementKey("OverlayShadePanel", contentPicker = LowestZIndexContentPicker)
         val PanelBackground =
-            ElementKey("OverlayShadePanelBackground", scenePicker = LowestZIndexScenePicker)
+            ElementKey("OverlayShadePanelBackground", contentPicker = LowestZIndexContentPicker)
     }
 
     object Colors {
-        val ScrimBackground = Color(0, 0, 0, alpha = 255 / 3)
+        val ScrimBackground = Color(0f, 0f, 0f, alpha = 0.2f)
         val PanelBackground: Color
             @Composable @ReadOnlyComposable get() = MaterialTheme.colorScheme.surfaceContainer
     }

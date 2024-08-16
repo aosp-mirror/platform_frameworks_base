@@ -68,6 +68,24 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
         return recordings.first()
     }
 
+    /**
+     * Number of progress event for the currently running transition
+     * Returns null if there is no currently running transition
+     */
+    val currentTransitionProgressEventCount: Int?
+        get() = currentRecording?.progressHistory?.size
+
+    /**
+     * Runs [block] and ensures that there was at least once onTransitionProgress event after that
+     */
+    fun waitForProgressChangeAfter(block: () -> Unit) {
+        val eventCount = currentTransitionProgressEventCount
+        block()
+        waitForCondition {
+            currentTransitionProgressEventCount != eventCount
+        }
+    }
+
     fun assertStarted() {
         assertWithMessage("Transition didn't start").that(currentRecording).isNotNull()
     }
@@ -86,7 +104,7 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
     }
 
     class UnfoldTransitionRecording {
-        private val progressHistory: MutableList<Float> = arrayListOf()
+        val progressHistory: MutableList<Float> = arrayListOf()
         private var finishingInvocations: Int = 0
 
         fun addProgress(progress: Float) {
@@ -142,6 +160,6 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
     }
 
     private companion object {
-        private const val MIN_ANIMATION_EVENTS = 5
+        private const val MIN_ANIMATION_EVENTS = 3
     }
 }

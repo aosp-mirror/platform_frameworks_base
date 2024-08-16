@@ -42,7 +42,7 @@ import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;

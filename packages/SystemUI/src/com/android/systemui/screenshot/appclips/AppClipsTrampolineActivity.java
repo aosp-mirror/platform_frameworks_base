@@ -26,6 +26,7 @@ import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -52,6 +53,7 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.DebugLogger;
 import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.notetask.NoteTaskEntryPoint;
 import com.android.systemui.res.R;
@@ -82,9 +84,11 @@ public class AppClipsTrampolineActivity extends Activity {
     private static final String TAG = AppClipsTrampolineActivity.class.getSimpleName();
     static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     static final String EXTRA_SCREENSHOT_URI = TAG + "SCREENSHOT_URI";
+    static final String EXTRA_CLIP_DATA = TAG + "CLIP_DATA";
     static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
     static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
     static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
+    static final String EXTRA_CALLING_PACKAGE_TASK_ID = TAG + "CALLING_PACKAGE_TASK_ID";
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
 
     private final NoteTaskController mNoteTaskController;
@@ -193,12 +197,14 @@ public class AppClipsTrampolineActivity extends Activity {
         ComponentName componentName = ComponentName.unflattenFromString(
                     getString(R.string.config_screenshotAppClipsActivityComponent));
         String callingPackageName = getCallingPackage();
+        int callingPackageTaskId = getTaskId();
 
         Intent intent = new Intent()
                 .setComponent(componentName)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .putExtra(EXTRA_RESULT_RECEIVER, mResultReceiver)
-                .putExtra(EXTRA_CALLING_PACKAGE_NAME, callingPackageName);
+                .putExtra(EXTRA_CALLING_PACKAGE_NAME, callingPackageName)
+                .putExtra(EXTRA_CALLING_PACKAGE_TASK_ID, callingPackageTaskId);
         try {
             startActivity(intent);
 
@@ -260,6 +266,15 @@ public class AppClipsTrampolineActivity extends Activity {
             if (statusCode == CAPTURE_CONTENT_FOR_NOTE_SUCCESS) {
                 Uri uri = resultData.getParcelable(EXTRA_SCREENSHOT_URI, Uri.class);
                 convertedData.setData(uri);
+
+                if (resultData.containsKey(EXTRA_CLIP_DATA)) {
+                    ClipData backlinksData = resultData.getParcelable(EXTRA_CLIP_DATA,
+                            ClipData.class);
+                    convertedData.setClipData(backlinksData);
+
+                    DebugLogger.INSTANCE.logcatMessage(this,
+                            () -> "onReceiveResult: sending notes app ClipData");
+                }
             }
 
             // Broadcast no longer required, setting it to null.

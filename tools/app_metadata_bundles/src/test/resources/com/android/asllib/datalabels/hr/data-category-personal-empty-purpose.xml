@@ -1,5 +1,4 @@
 <data-labels>
-    <data-shared dataCategory="personal"
-    dataType="email_address"
+    <data-shared dataType="personal_data_type_email_address"
     purposes="" />
 </data-labels>

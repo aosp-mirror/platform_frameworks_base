@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
@@ -221,6 +222,21 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     }
 
     @Test
+    public void testOnRestore_bluetoothOnRestoredOnNonWearablesOnly() {
+        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
+        mAgentUnderTest.mSettingsHelper = settingsHelper;
+
+        restoreGlobalSettings(generateBackupData(Map.of(Settings.Global.BLUETOOTH_ON, "0")));
+
+        var isWatch = mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+        if (isWatch) {
+            assertFalse(settingsHelper.mWrittenValues.containsKey(Settings.Global.BLUETOOTH_ON));
+        } else {
+            assertEquals("0", settingsHelper.mWrittenValues.get(Settings.Global.BLUETOOTH_ON));
+        }
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_CONFIGURABLE_FONT_SCALE_DEFAULT)
     public void testFindClosestAllowedFontScale() {
         final String[] availableFontScales = new String[]{"0.5", "0.9", "1.0", "1.1", "1.5"};
@@ -264,6 +280,20 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         }
 
         return buffer.array();
+    }
+
+    private void restoreGlobalSettings(byte[] backupData) {
+        mAgentUnderTest.restoreSettings(
+                backupData,
+                /* pos= */ 0,
+                backupData.length,
+                Settings.Global.CONTENT_URI,
+                null,
+                null,
+                null,
+                R.array.restore_blocked_global_settings,
+                /* dynamicBlockList= */ Collections.emptySet(),
+                /* settingsToPreserve= */ Collections.emptySet());
     }
 
     private byte[] generateUncorruptedHeader() throws IOException {

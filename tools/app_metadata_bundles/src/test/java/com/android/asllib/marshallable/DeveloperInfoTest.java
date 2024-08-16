@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -66,25 +67,25 @@ public class DeveloperInfoTest {
         for (String reqField : REQUIRED_FIELD_NAMES) {
             System.out.println("testing missing required field: " + reqField);
             var developerInfoEle =
-                    TestUtils.getElementsFromResource(
+                    TestUtils.getElementFromResource(
                             Paths.get(DEVELOPER_INFO_HR_PATH, ALL_FIELDS_VALID_FILE_NAME));
-            developerInfoEle.get(0).removeAttribute(reqField);
+            developerInfoEle.removeAttribute(reqField);
 
             assertThrows(
                     MalformedXmlException.class,
-                    () -> new DeveloperInfoFactory().createFromHrElements(developerInfoEle));
+                    () -> new DeveloperInfoFactory().createFromHrElement(developerInfoEle));
         }
 
         for (String reqField : REQUIRED_FIELD_NAMES_OD) {
             System.out.println("testing missing required field od: " + reqField);
             var developerInfoEle =
-                    TestUtils.getElementsFromResource(
+                    TestUtils.getElementFromResource(
                             Paths.get(DEVELOPER_INFO_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
-            TestUtils.removeOdChildEleWithName(developerInfoEle.get(0), reqField);
+            TestUtils.removeOdChildEleWithName(developerInfoEle, reqField);
 
             assertThrows(
                     MalformedXmlException.class,
-                    () -> new DeveloperInfoFactory().createFromOdElements(developerInfoEle));
+                    () -> new DeveloperInfoFactory().createFromOdElement(developerInfoEle));
         }
     }
 
@@ -93,40 +94,46 @@ public class DeveloperInfoTest {
     public void testMissingOptionalFields() throws Exception {
         for (String optField : OPTIONAL_FIELD_NAMES) {
             var developerInfoEle =
-                    TestUtils.getElementsFromResource(
+                    TestUtils.getElementFromResource(
                             Paths.get(DEVELOPER_INFO_HR_PATH, ALL_FIELDS_VALID_FILE_NAME));
-            developerInfoEle.get(0).removeAttribute(optField);
+            developerInfoEle.removeAttribute(optField);
             DeveloperInfo developerInfo =
-                    new DeveloperInfoFactory().createFromHrElements(developerInfoEle);
-            developerInfo.toOdDomElements(TestUtils.document());
+                    new DeveloperInfoFactory().createFromHrElement(developerInfoEle);
+            var unused = developerInfo.toOdDomElement(TestUtils.document());
         }
 
         for (String optField : OPTIONAL_FIELD_NAMES_OD) {
             var developerInfoEle =
-                    TestUtils.getElementsFromResource(
+                    TestUtils.getElementFromResource(
                             Paths.get(DEVELOPER_INFO_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
-            TestUtils.removeOdChildEleWithName(developerInfoEle.get(0), optField);
+            TestUtils.removeOdChildEleWithName(developerInfoEle, optField);
             DeveloperInfo developerInfo =
-                    new DeveloperInfoFactory().createFromOdElements(developerInfoEle);
-            developerInfo.toHrDomElements(TestUtils.document());
+                    new DeveloperInfoFactory().createFromOdElement(developerInfoEle);
+            var unused = developerInfo.toHrDomElement(TestUtils.document());
         }
     }
 
     private void testHrToOdDeveloperInfo(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new DeveloperInfoFactory(),
-                DEVELOPER_INFO_HR_PATH,
-                DEVELOPER_INFO_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        DeveloperInfo developerInfo =
+                new DeveloperInfoFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(DEVELOPER_INFO_HR_PATH, fileName)));
+        Element developerInfoEle = developerInfo.toOdDomElement(doc);
+        doc.appendChild(developerInfoEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(DEVELOPER_INFO_OD_PATH, fileName));
     }
 
     private void testOdToHrDeveloperInfo(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new DeveloperInfoFactory(),
-                DEVELOPER_INFO_OD_PATH,
-                DEVELOPER_INFO_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        DeveloperInfo developerInfo =
+                new DeveloperInfoFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(DEVELOPER_INFO_OD_PATH, fileName)));
+        Element developerInfoEle = developerInfo.toHrDomElement(doc);
+        doc.appendChild(developerInfoEle);
+        TestUtils.testFormatToFormat(doc, Paths.get(DEVELOPER_INFO_HR_PATH, fileName));
     }
 }

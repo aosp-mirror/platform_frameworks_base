@@ -42,6 +42,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
@@ -58,6 +59,10 @@ import java.util.Objects;
 final class NavigationBarController {
 
     private interface Callback {
+
+        default void updateInsets(@NonNull InputMethodService.Insets originalInsets) {
+        }
+
         default void updateTouchableInsets(@NonNull InputMethodService.Insets originalInsets,
                 @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
         }
@@ -96,6 +101,15 @@ final class NavigationBarController {
                 ? new Impl(inputMethodService) : Callback.NOOP;
     }
 
+    /**
+     * Update the given insets to be at least as big as the IME navigation bar, when visible.
+     *
+     * @param originalInsets the insets to check and modify to include the IME navigation bar.
+     */
+    void updateInsets(@NonNull InputMethodService.Insets originalInsets) {
+        mImpl.updateInsets(originalInsets);
+    }
+
     void updateTouchableInsets(@NonNull InputMethodService.Insets originalInsets,
             @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
         mImpl.updateTouchableInsets(originalInsets, dest);
@@ -132,7 +146,8 @@ final class NavigationBarController {
         return mImpl.toDebugString();
     }
 
-    private static final class Impl implements Callback, Window.DecorCallback {
+    private static final class Impl implements Callback, Window.DecorCallback,
+            NavigationBarView.ButtonClickListener {
         private static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
         // Copied from com.android.systemui.animation.Interpolators#LEGACY_DECELERATE
@@ -228,6 +243,7 @@ final class NavigationBarController {
                                     ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN
                                     : 0);
                     navigationBarView.setNavigationIconHints(hints);
+                    navigationBarView.prepareNavButtons(this);
                 }
             } else {
                 mNavigationBarFrame.setLayoutParams(new FrameLayout.LayoutParams(
@@ -267,6 +283,24 @@ final class NavigationBarController {
                 mNavigationBarFrame.setOnApplyWindowInsetsListener(null);
             }
             mNavigationBarFrame = null;
+        }
+
+        @Override
+        public void updateInsets(@NonNull InputMethodService.Insets originalInsets) {
+            if (!mImeDrawsImeNavBar || mNavigationBarFrame == null
+                    || mNavigationBarFrame.getVisibility() != View.VISIBLE
+                    || mService.isFullscreenMode()) {
+                return;
+            }
+
+            final int[] loc = new int[2];
+            mNavigationBarFrame.getLocationInWindow(loc);
+            if (originalInsets.contentTopInsets > loc[1]) {
+                originalInsets.contentTopInsets = loc[1];
+            }
+            if (originalInsets.visibleTopInsets > loc[1]) {
+                originalInsets.visibleTopInsets = loc[1];
+            }
         }
 
         @Override
@@ -559,6 +593,17 @@ final class NavigationBarController {
                 onSystemBarAppearanceChanged(mAppearance);
             }
             return drawLegacyNavigationBarBackground;
+        }
+
+        @Override
+        public void onImeSwitchButtonClick(View v) {
+            mService.onImeSwitchButtonClickFromClient();
+        }
+
+        @Override
+        public boolean onImeSwitchButtonLongClick(View v) {
+            v.getContext().getSystemService(InputMethodManager.class).showInputMethodPicker();
+            return true;
         }
 
         /**

@@ -16,13 +16,13 @@
 
 package com.android.credentialmanager.common.ui.components
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,7 +44,7 @@ fun WearDisplayNameText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = WearMaterialTheme.colors.onSurface,
         textAlign = TextAlign.Center,
         overflow = TextOverflow.Ellipsis,
         maxLines = 2,
@@ -57,17 +57,15 @@ fun WearUsernameText(
     text: String,
     textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
-    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Text(
         modifier = modifier.padding(start = 8.dp, end = 8.dp).wrapContentSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = WearMaterialTheme.colors.onSurface,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = textAlign,
         maxLines = 2,
-        onTextLayout = onTextLayout,
     )
 }
 
@@ -79,7 +77,6 @@ fun WearButtonText(
     maxLines: Int = 1,
     modifier: Modifier = Modifier,
     color: Color = WearMaterialTheme.colors.onSurface,
-    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Text(
         modifier = modifier.wrapContentSize(),
@@ -89,24 +86,22 @@ fun WearButtonText(
         overflow = TextOverflow.Ellipsis,
         textAlign = textAlign,
         maxLines = maxLines,
-        onTextLayout = onTextLayout,
     )
 }
 
 @Composable
 fun WearSecondaryLabel(
     text: String,
-    modifier: Modifier = Modifier,
-    onTextLayout: (TextLayoutResult) -> Unit = {},
+    color: Color = WearMaterialTheme.colors.onSurface,
+    modifier: Modifier = Modifier
 ) {
     Text(
-        modifier = modifier.wrapContentSize(),
+        modifier = modifier.fillMaxSize(),
         text = text,
-        color = WearMaterialTheme.colors.onSurfaceVariant,
+        color = color,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Start,
         maxLines = 1,
-        onTextLayout = onTextLayout,
     )
 }

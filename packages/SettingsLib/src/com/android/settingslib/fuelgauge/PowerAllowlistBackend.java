@@ -327,4 +327,12 @@ public class PowerAllowlistBackend {
             return sInstance;
         }
     }
+
+    /** Testing only. Reset the instance to avoid tests affecting each other. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public static void resetInstance() {
+        synchronized (PowerAllowlistBackend.class) {
+            sInstance = null;
+        }
+    }
 }

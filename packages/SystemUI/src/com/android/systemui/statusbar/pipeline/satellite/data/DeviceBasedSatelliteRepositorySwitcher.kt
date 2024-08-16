@@ -97,6 +97,11 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl)
 
+    override val isSatelliteProvisioned: StateFlow<Boolean> =
+        activeRepo
+            .flatMapLatest { it.isSatelliteProvisioned }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl.isSatelliteProvisioned.value)
+
     override val connectionState: StateFlow<SatelliteConnectionState> =
         activeRepo
             .flatMapLatest { it.connectionState }

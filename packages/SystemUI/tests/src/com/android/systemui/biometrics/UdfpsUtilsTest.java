@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.view.Surface;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -33,11 +34,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class UdfpsUtilsTest extends SysuiTestCase {
     @Rule

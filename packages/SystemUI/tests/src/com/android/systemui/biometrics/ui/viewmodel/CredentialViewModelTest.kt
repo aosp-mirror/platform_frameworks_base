@@ -1,5 +1,6 @@
 package com.android.systemui.biometrics.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
@@ -19,7 +20,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 private const val USER_ID = 9
 private const val REQUEST_ID = 9L
@@ -27,7 +27,7 @@ private const val OPERATION_ID = 10L
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class CredentialViewModelTest : SysuiTestCase() {
 
     private val dispatcher = UnconfinedTestDispatcher()

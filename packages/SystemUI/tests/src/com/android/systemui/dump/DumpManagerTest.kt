@@ -16,6 +16,7 @@
 
 package com.android.systemui.dump
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Dumpable
 import com.android.systemui.SysuiTestCase
@@ -25,10 +26,12 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DumpManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var dumpable1: Dumpable

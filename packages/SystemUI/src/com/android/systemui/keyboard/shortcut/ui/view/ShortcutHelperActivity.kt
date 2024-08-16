@@ -16,21 +16,29 @@
 
 package com.android.systemui.keyboard.shortcut.ui.view
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Insets
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.updatePadding
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelper
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.res.R
+import com.android.systemui.settings.UserTracker
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
@@ -44,6 +52,7 @@ import kotlinx.coroutines.launch
 class ShortcutHelperActivity
 @Inject
 constructor(
+    private val userTracker: UserTracker,
     private val viewModel: ShortcutHelperViewModel,
 ) : ComponentActivity() {
 
@@ -74,16 +83,33 @@ constructor(
     private fun setUpComposeView() {
         requireViewById<ComposeView>(R.id.shortcut_helper_compose_container).apply {
             setContent {
-                PlatformTheme {
-                    ShortcutHelper(
-                        onKeyboardSettingsClicked = ::onKeyboardSettingsClicked,
-                    )
+                CompositionLocalProvider(LocalContext provides userTracker.userContext) {
+                    PlatformTheme {
+                        val shortcutsUiState by
+                            viewModel.shortcutsUiState.collectAsStateWithLifecycle()
+                        ShortcutHelper(
+                            shortcutsUiState = shortcutsUiState,
+                            onKeyboardSettingsClicked = ::onKeyboardSettingsClicked,
+                            onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
+                        )
+                    }
                 }
             }
         }
     }
 
-    private fun onKeyboardSettingsClicked() {}
+    private fun onKeyboardSettingsClicked() {
+        try {
+            startActivityAsUser(
+                Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS),
+                userTracker.userHandle
+            )
+        } catch (e: ActivityNotFoundException) {
+            // From the Settings docs: In some cases, a matching Activity may not exist, so ensure
+            // you safeguard against this.
+            e.printStackTrace()
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -112,7 +138,7 @@ constructor(
             resources.getFloat(R.dimen.shortcut_helper_screen_width_fraction)
         // maxWidth needs to be set before the sheet is drawn, otherwise the call will have no
         // effect.
-        val screenWidth = resources.displayMetrics.widthPixels
+        val screenWidth = windowManager.maximumWindowMetrics.bounds.width()
         bottomSheetBehavior.maxWidth = (sheetScreenWidthFraction * screenWidth).toInt()
     }
 
@@ -121,7 +147,7 @@ constructor(
             val safeDrawingInsets = insets.safeDrawing
             // Make sure the bottom sheet is not covered by the status bar.
             bottomSheetBehavior.maxHeight =
-                resources.displayMetrics.heightPixels - safeDrawingInsets.top
+                windowManager.maximumWindowMetrics.bounds.height() - safeDrawingInsets.top
             // Make sure the contents inside of the bottom sheet are not hidden by system bars, or
             // cutouts.
             bottomSheet.updatePadding(

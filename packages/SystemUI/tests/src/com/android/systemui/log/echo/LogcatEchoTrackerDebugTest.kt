@@ -16,6 +16,7 @@
 
 package com.android.systemui.log.echo
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.core.LogLevel.DEBUG
@@ -39,11 +40,13 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class LogcatEchoTrackerDebugTest : SysuiTestCase() {
 
     private val dispatcher = StandardTestDispatcher()

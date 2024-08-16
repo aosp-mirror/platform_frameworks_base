@@ -21,8 +21,8 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Handler
 import android.os.Looper
-import android.testing.AndroidTestingRunner
 import androidx.core.util.Consumer
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
@@ -50,7 +50,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DeviceFoldStateProviderTest : SysuiTestCase() {
 

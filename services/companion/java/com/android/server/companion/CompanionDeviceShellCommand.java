@@ -21,6 +21,7 @@ import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_S
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
 import android.companion.Flags;
+import android.companion.ObservingDevicePresenceRequest;
 import android.companion.Telecom;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
@@ -102,9 +103,10 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     String packageName = getNextArgRequired();
                     String address = getNextArgRequired();
                     String deviceProfile = getNextArg();
+                    boolean selfManaged = getNextBooleanArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
                     mAssociationRequestsProcessor.createAssociation(userId, packageName, macAddress,
-                            deviceProfile, deviceProfile, /* associatedDevice */ null, false,
+                            deviceProfile, deviceProfile, /* associatedDevice */ null, selfManaged,
                             /* callback */ null, /* resultReceiver */ null);
                 }
                 break;
@@ -189,6 +191,43 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     if (Flags.devicePresence()) {
                         int userId = getNextIntArgRequired();
                         mDevicePresenceProcessor.simulateDeviceEventOnUserUnlocked(userId);
+                    }
+                    break;
+                }
+
+                case "start-observing-device-presence-uuid": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        String packageName = getNextArgRequired();
+                        String uuid = getNextArgRequired();
+                        if ("null".equals(uuid)) {
+                            out.println("UUID can not be null.");
+                            break;
+                        }
+                        ParcelUuid parcelUuid = ParcelUuid.fromString(uuid);
+                        ObservingDevicePresenceRequest request = new ObservingDevicePresenceRequest
+                                .Builder().setUuid(parcelUuid).build();
+                        mDevicePresenceProcessor.startObservingDevicePresence(
+                                request, packageName, userId, /* enforcePermissions */ false);
+
+                    }
+                    break;
+                }
+
+                case "stop-observing-device-presence-uuid": {
+                    if (Flags.devicePresence()) {
+                        int userId = getNextIntArgRequired();
+                        String packageName = getNextArgRequired();
+                        String uuid = getNextArgRequired();
+                        if ("null".equals(uuid)) {
+                            out.println("UUID can not be null.");
+                            break;
+                        }
+                        ParcelUuid parcelUuid = ParcelUuid.fromString(uuid);
+                        ObservingDevicePresenceRequest request = new ObservingDevicePresenceRequest
+                                .Builder().setUuid(parcelUuid).build();
+                        mDevicePresenceProcessor.stopObservingDevicePresence(
+                                request, packageName, userId, /* enforcePermissions */ false);
                     }
                     break;
                 }
@@ -424,6 +463,17 @@ class CompanionDeviceShellCommand extends ShellCommand {
         }
     }
 
+    private boolean getNextBooleanArg() {
+        String arg = getNextArg();
+        if (arg == null || "false".equalsIgnoreCase(arg)) {
+            return false;
+        } else if ("true".equalsIgnoreCase(arg)) {
+            return Boolean.parseBoolean(arg);
+        } else {
+            throw new IllegalArgumentException("Expected a boolean argument but was: " + arg);
+        }
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -432,7 +482,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  list USER_ID");
         pw.println("      List all Associations for a user.");
-        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS [DEVICE_PROFILE]");
+        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS [DEVICE_PROFILE] [SELF_MANAGED]");
         pw.println("      Create a new Association.");
         pw.println("  disassociate USER_ID PACKAGE MAC_ADDRESS");
         pw.println("      Remove an existing Association.");
@@ -514,6 +564,14 @@ class CompanionDeviceShellCommand extends ShellCommand {
             pw.println("  Simulate device unlocked for given user. This will send corresponding");
             pw.println("  callback after simulate-device-event-device-locked");
             pw.println("  command has been called.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  start-observing-device-presence-uuid USER_ID PACKAGE_NAME UUID");
+            pw.println("  Start observing device presence base on the UUID.");
+            pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  stop-observing-device-presence-uuid USER_ID PACKAGE_NAME UUID");
+            pw.println("  Stop observing device presence base on the UUID.");
             pw.println("  USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
         }
 

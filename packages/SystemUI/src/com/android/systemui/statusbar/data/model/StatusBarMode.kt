@@ -16,13 +16,13 @@
 
 package com.android.systemui.statusbar.data.model
 
-import com.android.systemui.statusbar.phone.BarTransitions
-import com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT
-import com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT
-import com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE
-import com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT
-import com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT
-import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode
+import com.android.systemui.shared.statusbar.phone.BarTransitions
+import com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT
+import com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT
+import com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_OPAQUE
+import com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT
+import com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSPARENT
+import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode
 
 /**
  * The possible status bar modes.

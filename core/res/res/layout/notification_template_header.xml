@@ -62,7 +62,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_toStartOf="@id/expand_button"
+        android:layout_toStartOf="@id/notification_buttons_column"
         android:layout_alignWithParentIfMissing="true"
         android:clipChildren="false"
         android:gravity="center_vertical"
@@ -83,11 +83,28 @@
         android:focusable="false"
         />
 
-    <include layout="@layout/notification_expand_button"
+    <LinearLayout
+        android:id="@+id/notification_buttons_column"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        />
+        android:orientation="vertical"
+        >
+
+        <include layout="@layout/notification_close_button"
+            android:layout_width="@dimen/notification_close_button_size"
+            android:layout_height="@dimen/notification_close_button_size"
+            android:layout_gravity="end"
+            android:layout_marginEnd="20dp"
+            />
+
+        <include layout="@layout/notification_expand_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            />
+
+    </LinearLayout>
 
 </NotificationHeaderView>

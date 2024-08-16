@@ -182,6 +182,31 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logOnPanelExpansionChanged(
+        fraction: Float,
+        wasCollapsedEnoughToHide: Boolean,
+        isCollapsedEnoughToHide: Boolean,
+        couldShowPulsingHuns: Boolean,
+        canShowPulsingHuns: Boolean
+    ) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                double1 = fraction.toDouble()
+                bool1 = wasCollapsedEnoughToHide
+                bool2 = isCollapsedEnoughToHide
+                bool3 = couldShowPulsingHuns
+                bool4 = canShowPulsingHuns
+            },
+            {
+                "onPanelExpansionChanged($double1):" +
+                    " collapsedEnoughToHide: $bool1 -> $bool2," +
+                    " canShowPulsingHuns: $bool3 -> $bool4"
+            }
+        )
+    }
+
     fun logSetWakingUp(wakingUp: Boolean, requestDelayedAnimation: Boolean) {
         buffer.log(
             TAG,

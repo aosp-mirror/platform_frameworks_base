@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
@@ -27,6 +28,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.os.Environment;
 import android.util.ArrayMap;
@@ -52,7 +54,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Implementation of {@link SettingsProvider} that reads the base settings provided in a display
@@ -91,11 +96,11 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     @NonNull
     private ReadableSettings mBaseSettings;
     @NonNull
-    private final WritableSettings mOverrideSettings;
+    private WritableSettings mOverrideSettings;
 
     DisplayWindowSettingsProvider() {
         this(new AtomicFileStorage(getVendorSettingsFile()),
-                new AtomicFileStorage(getOverrideSettingsFile()));
+                new AtomicFileStorage(getOverrideSettingsFileForUser(USER_SYSTEM)));
     }
 
     @VisibleForTesting
@@ -131,6 +136,58 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     @VisibleForTesting
     void setBaseSettingsStorage(@NonNull ReadableSettingsStorage baseSettingsStorage) {
         mBaseSettings = new ReadableSettings(baseSettingsStorage);
+    }
+
+    /**
+     * Overrides the storage that should be used to save override settings for a user.
+     *
+     * @see #DATA_DISPLAY_SETTINGS_FILE_PATH
+     */
+    void setOverrideSettingsForUser(@UserIdInt int userId) {
+        final AtomicFile settingsFile = getOverrideSettingsFileForUser(userId);
+        setOverrideSettingsStorage(new AtomicFileStorage(settingsFile));
+    }
+
+    /**
+     * Removes display override settings that are no longer associated with active displays.
+     * <p>
+     * This cleanup process is essential due to the dynamic nature of displays, which can
+     * be added or removed during various system events such as user switching or
+     * system server restarts.
+     *
+     * @param wms  the WindowManagerService instance for retrieving all possible {@link DisplayInfo}
+     *             for the given logical display.
+     * @param root the root window container used to obtain the currently active displays.
+     */
+    void removeStaleDisplaySettingsLocked(@NonNull WindowManagerService wms,
+            @NonNull RootWindowContainer root) {
+        final Set<String> displayIdentifiers = new ArraySet<>();
+        final Consumer<DisplayInfo> addDisplayIdentifier =
+                displayInfo -> displayIdentifiers.add(mOverrideSettings.getIdentifier(displayInfo));
+        root.forAllDisplays(dc -> {
+            // Begin with the current display's information. Note that the display layout of the
+            // current device state might not include this display (e.g., external or virtual
+            // displays), resulting in empty possible display info.
+            addDisplayIdentifier.accept(dc.getDisplayInfo());
+
+            // Then, add all possible display information for this display if available.
+            final List<DisplayInfo> displayInfos = wms.getPossibleDisplayInfoLocked(dc.mDisplayId);
+            final int size = displayInfos.size();
+            for (int i = 0; i < size; i++) {
+                addDisplayIdentifier.accept(displayInfos.get(i));
+            }
+        });
+        mOverrideSettings.removeStaleDisplaySettings(displayIdentifiers);
+    }
+
+    /**
+     * Overrides the storage that should be used to save override settings.
+     *
+     * @see #setOverrideSettingsForUser(int)
+     */
+    @VisibleForTesting
+    void setOverrideSettingsStorage(@NonNull WritableSettingsStorage overrideSettingsStorage) {
+        mOverrideSettings = new WritableSettings(overrideSettingsStorage);
     }
 
     @Override
@@ -302,6 +359,12 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
             mVirtualDisplayIdentifiers.remove(identifier);
         }
 
+        void removeStaleDisplaySettings(@NonNull Set<String> currentDisplayIdentifiers) {
+            if (mSettings.retainAll(currentDisplayIdentifiers)) {
+                writeSettings();
+            }
+        }
+
         private void writeSettings() {
             final FileData fileData = new FileData();
             fileData.mIdentifierType = mIdentifierType;
@@ -332,9 +395,11 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
     }
 
     @NonNull
-    private static AtomicFile getOverrideSettingsFile() {
-        final File overrideSettingsFile = new File(Environment.getDataDirectory(),
-                DATA_DISPLAY_SETTINGS_FILE_PATH);
+    private static AtomicFile getOverrideSettingsFileForUser(@UserIdInt int userId) {
+        final File directory = (userId == USER_SYSTEM)
+                ? Environment.getDataDirectory()
+                : Environment.getDataSystemCeDirectory(userId);
+        final File overrideSettingsFile = new File(directory, DATA_DISPLAY_SETTINGS_FILE_PATH);
         return new AtomicFile(overrideSettingsFile, WM_DISPLAY_COMMIT_TAG);
     }
 

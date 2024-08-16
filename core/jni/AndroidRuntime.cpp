@@ -148,6 +148,7 @@ extern int register_android_os_HwParcel(JNIEnv *env);
 extern int register_android_os_HwRemoteBinder(JNIEnv *env);
 extern int register_android_os_NativeHandle(JNIEnv *env);
 extern int register_android_os_ServiceManager(JNIEnv *env);
+extern int register_android_os_ServiceManagerNative(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_PerformanceHintManager(JNIEnv* env);
@@ -201,6 +202,7 @@ extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
 extern int register_com_android_internal_content_om_OverlayManagerImpl(JNIEnv* env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
+extern int register_com_android_internal_os_DebugStore(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
 extern int register_com_android_internal_os_KernelAllocationStats(JNIEnv* env);
 extern int register_com_android_internal_os_KernelCpuBpfTracking(JNIEnv* env);
@@ -1544,6 +1546,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_HwRemoteBinder),
         REG_JNI(register_android_os_NativeHandle),
         REG_JNI(register_android_os_ServiceManager),
+        REG_JNI(register_android_os_ServiceManagerNative),
         REG_JNI(register_android_os_storage_StorageManager),
         REG_JNI(register_android_service_DataLoaderService),
         REG_JNI(register_android_view_DisplayEventReceiver),
@@ -1597,6 +1600,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_com_android_internal_content_om_OverlayManagerImpl),
         REG_JNI(register_com_android_internal_net_NetworkUtilsInternal),
         REG_JNI(register_com_android_internal_os_ClassLoaderFactory),
+        REG_JNI(register_com_android_internal_os_DebugStore),
         REG_JNI(register_com_android_internal_os_LongArrayMultiStateCounter),
         REG_JNI(register_com_android_internal_os_LongMultiStateCounter),
         REG_JNI(register_com_android_internal_os_Zygote),

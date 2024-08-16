@@ -57,7 +57,7 @@ constructor(
         mediaProjectionRepository.mediaProjectionState.flatMapLatest { projectionState ->
             Log.d(TAG, "MediaProjectionState -> $projectionState")
             when (projectionState) {
-                is MediaProjectionState.SingleTask -> {
+                is MediaProjectionState.Projecting.SingleTask -> {
                     val projectedTask = projectionState.task
                     tasksRepository.foregroundTask.map { foregroundTask ->
                         if (hasForegroundTaskSwitched(projectedTask, foregroundTask)) {
@@ -67,7 +67,7 @@ constructor(
                         }
                     }
                 }
-                is MediaProjectionState.EntireScreen,
+                is MediaProjectionState.Projecting.EntireScreen,
                 is MediaProjectionState.NotProjecting -> {
                     flowOf(TaskSwitchState.NotProjectingTask)
                 }

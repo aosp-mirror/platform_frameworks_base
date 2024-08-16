@@ -166,6 +166,8 @@ public final class ShortcutUtils {
         switch (type) {
             case UserShortcutType.SOFTWARE:
                 return Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS;
+            case UserShortcutType.GESTURE:
+                return Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS;
             case UserShortcutType.HARDWARE:
                 return Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
             case UserShortcutType.TRIPLETAP:
@@ -178,6 +180,28 @@ public final class ShortcutUtils {
                 throw new IllegalArgumentException(
                         "Unsupported user shortcut type: " + type);
         }
+    }
+
+    /**
+     * Converts {@link Settings.Secure} key to {@link UserShortcutType}.
+     *
+     * @param key The shortcut key in Settings.
+     * @return The mapped type
+     */
+    @UserShortcutType
+    public static int convertToType(String key) {
+        return switch (key) {
+            case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS -> UserShortcutType.SOFTWARE;
+            case Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS -> UserShortcutType.GESTURE;
+            case Settings.Secure.ACCESSIBILITY_QS_TARGETS -> UserShortcutType.QUICK_SETTINGS;
+            case Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE -> UserShortcutType.HARDWARE;
+            case Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED ->
+                    UserShortcutType.TRIPLETAP;
+            case Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED ->
+                    UserShortcutType.TWOFINGER_DOUBLETAP;
+            default -> throw new IllegalArgumentException(
+                    "Unsupported user shortcut key: " + key);
+        };
     }
 
     /**
@@ -224,7 +248,9 @@ public final class ShortcutUtils {
                 boolean enableA11yService = servicesWithShortcuts.contains(componentName);
                 AccessibilityUtils.setAccessibilityServiceState(
                         context,
-                        ComponentName.unflattenFromString(componentName), enableA11yService);
+                        ComponentName.unflattenFromString(componentName),
+                        enableA11yService,
+                        userId);
             }
         }
     }

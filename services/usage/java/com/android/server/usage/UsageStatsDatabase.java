@@ -33,6 +33,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -136,6 +137,7 @@ public class UsageStatsDatabase {
     // The obfuscated packages to tokens mappings file
     private final File mPackageMappingsFile;
     // Holds all of the data related to the obfuscated packages and their token mappings.
+    @GuardedBy("mLock")
     final PackagesTokenData mPackagesTokenData = new PackagesTokenData();
 
     /**
@@ -771,27 +773,30 @@ public class UsageStatsDatabase {
      * all of the stats at once has an amortized cost for future calls.
      */
     void filterStats(IntervalStats stats) {
-        if (mPackagesTokenData.removedPackagesMap.isEmpty()) {
-            return;
-        }
-        final ArrayMap<String, Long> removedPackagesMap = mPackagesTokenData.removedPackagesMap;
-
-        // filter out package usage stats
-        final int removedPackagesSize = removedPackagesMap.size();
-        for (int i = 0; i < removedPackagesSize; i++) {
-            final String removedPackage = removedPackagesMap.keyAt(i);
-            final UsageStats usageStats = stats.packageStats.get(removedPackage);
-            if (usageStats != null && usageStats.mEndTimeStamp < removedPackagesMap.valueAt(i)) {
-                stats.packageStats.remove(removedPackage);
+        synchronized (mLock) {
+            if (mPackagesTokenData.removedPackagesMap.isEmpty()) {
+                return;
             }
-        }
+            final ArrayMap<String, Long> removedPackagesMap = mPackagesTokenData.removedPackagesMap;
 
-        // filter out events
-        for (int i = stats.events.size() - 1; i >= 0; i--) {
-            final UsageEvents.Event event = stats.events.get(i);
-            final Long timeRemoved = removedPackagesMap.get(event.mPackage);
-            if (timeRemoved != null && timeRemoved > event.mTimeStamp) {
-                stats.events.remove(i);
+            // filter out package usage stats
+            final int removedPackagesSize = removedPackagesMap.size();
+            for (int i = 0; i < removedPackagesSize; i++) {
+                final String removedPackage = removedPackagesMap.keyAt(i);
+                final UsageStats usageStats = stats.packageStats.get(removedPackage);
+                if (usageStats != null &&
+                        usageStats.mEndTimeStamp < removedPackagesMap.valueAt(i)) {
+                    stats.packageStats.remove(removedPackage);
+                }
+            }
+
+            // filter out events
+            for (int i = stats.events.size() - 1; i >= 0; i--) {
+                final UsageEvents.Event event = stats.events.get(i);
+                final Long timeRemoved = removedPackagesMap.get(event.mPackage);
+                if (timeRemoved != null && timeRemoved > event.mTimeStamp) {
+                    stats.events.remove(i);
+                }
             }
         }
     }
@@ -1226,12 +1231,14 @@ public class UsageStatsDatabase {
     }
 
     void obfuscateCurrentStats(IntervalStats[] currentStats) {
-        if (mCurrentVersion < 5) {
-            return;
-        }
-        for (int i = 0; i < currentStats.length; i++) {
-            final IntervalStats stats = currentStats[i];
-            stats.obfuscateData(mPackagesTokenData);
+        synchronized (mLock) {
+            if (mCurrentVersion < 5) {
+                return;
+            }
+            for (int i = 0; i < currentStats.length; i++) {
+                final IntervalStats stats = currentStats[i];
+                stats.obfuscateData(mPackagesTokenData);
+            }
         }
     }
 

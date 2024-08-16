@@ -18,8 +18,8 @@ package com.android.systemui.classifier;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -33,7 +33,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Collections;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class HistoryTrackerTest extends SysuiTestCase {
 
     private FakeSystemClock mSystemClock = new FakeSystemClock();

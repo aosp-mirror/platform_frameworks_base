@@ -728,7 +728,14 @@ public final class DexOptHelper {
         final int compilationReason =
                 dexManager.getCompilationReasonForInstallScenario(
                         installRequest.getInstallScenario());
-        return new DexoptOptions(packageName, compilationReason, dexoptFlags);
+        final AndroidPackage pkg = ps.getPkg();
+        var options = new DexoptOptions(packageName, compilationReason, dexoptFlags);
+        if (installRequest.getDexoptCompilerFilter() != null) {
+            options = options.overrideCompilerFilter(installRequest.getDexoptCompilerFilter());
+        } else if (pkg != null && pkg.isDebuggable()) {
+            options = options.overrideCompilerFilter(DexoptParams.COMPILER_FILTER_NOOP);
+        }
+        return options;
     }
 
     /**
@@ -772,12 +779,12 @@ public final class DexOptHelper {
                 && installRequest.getInstallSource().mInitiatingPackageName.equals("android"))
                 : true;
 
+        // Don't skip the dexopt call if the compiler filter is "skip". Instead, call dexopt with
+        // the "skip" filter so that ART Service gets notified and skips dexopt itself.
         return (!instantApp || Global.getInt(context.getContentResolver(),
                 Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
                 && pkg != null
-                && !pkg.isDebuggable()
                 && (!onIncremental)
-                && dexoptOptions.isCompilationEnabled()
                 && !isApex
                 && performDexOptForRollback;
     }
