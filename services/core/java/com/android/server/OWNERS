@@ -10,9 +10,6 @@ per-file DisplayThread.java = michaelwr@google.com, ogunwale@google.com
 # Zram writeback
 per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com
 
-# Userspace reboot
-per-file UserspaceRebootLogger.java = ioffe@google.com, dvander@google.com
-
 # ServiceWatcher
 per-file ServiceWatcher.java = sooniln@google.com
 
@@ -48,3 +45,6 @@ per-file VcnManagementService.java = file:/services/core/java/com/android/server
 
 # SystemConfig
 per-file SystemConfig.java = file:/PACKAGE_MANAGER_OWNERS
+
+# CertBlocklister
+per-file Cert*.java = tweek@google.com, brambonne@google.com, prb@google.com, miguelaranda@google.com

@@ -16,12 +16,25 @@
 
 package com.android.systemui.mediaprojection
 
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 
 @Module
 interface MediaProjectionModule {
     @Binds fun mediaRepository(impl: MediaProjectionManagerRepository): MediaProjectionRepository
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @MediaProjectionLog
+        fun provideMediaProjectionLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("MediaProjection", 50)
+        }
+    }
 }

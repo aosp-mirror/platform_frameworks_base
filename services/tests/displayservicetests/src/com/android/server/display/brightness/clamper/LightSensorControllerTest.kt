@@ -26,8 +26,10 @@ import com.android.server.display.TestUtils
 import com.android.server.display.brightness.clamper.LightSensorController.Injector
 import com.android.server.display.brightness.clamper.LightSensorController.LightSensorListener
 import com.android.server.display.config.SensorData
+import com.android.server.display.config.createSensorData
 import com.android.server.display.utils.AmbientFilter
 import org.junit.Before
+import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -51,7 +53,7 @@ class LightSensorControllerTest {
     private val mockAmbientFilter: AmbientFilter = mock()
 
     private val testInjector = TestInjector()
-    private val dummySensorData = SensorData()
+    private val dummySensorData = createSensorData()
 
     private lateinit var controller: LightSensorController
 
@@ -61,31 +63,35 @@ class LightSensorControllerTest {
             mockLightSensorListener, mockHandler, testInjector)
     }
 
-    fun `does not register light sensor if is not configured`() {
+    @Test
+    fun doesNotRegisterLightSensorIfNotConfigured() {
         controller.restart()
 
         verifyNoMoreInteractions(mockSensorManager, mockAmbientFilter, mockLightSensorListener)
     }
 
-    fun `does not register light sensor if missing`() {
+    @Test
+    fun doesNotRegisterLightSensorIfMissing() {
         controller.configure(dummySensorData, DISPLAY_ID)
         controller.restart()
 
         verifyNoMoreInteractions(mockSensorManager, mockAmbientFilter, mockLightSensorListener)
     }
 
-    fun `register light sensor if configured and present`() {
+    @Test
+    fun registerLightSensorIfConfiguredAndPresent() {
         testInjector.lightSensor = TestUtils
                 .createSensor(Sensor.TYPE_LIGHT, Sensor.STRING_TYPE_LIGHT)
         controller.configure(dummySensorData, DISPLAY_ID)
         controller.restart()
 
         verify(mockSensorManager).registerListener(any(),
-            testInjector.lightSensor, LIGHT_SENSOR_RATE * 1000, mockHandler)
+            eq(testInjector.lightSensor), eq(LIGHT_SENSOR_RATE * 1000), eq(mockHandler))
         verifyNoMoreInteractions(mockSensorManager, mockAmbientFilter, mockLightSensorListener)
     }
 
-    fun `register light sensor once if not changed`() {
+    @Test
+    fun registerLightSensorOnceIfNotChanged() {
         testInjector.lightSensor = TestUtils
                 .createSensor(Sensor.TYPE_LIGHT, Sensor.STRING_TYPE_LIGHT)
         controller.configure(dummySensorData, DISPLAY_ID)
@@ -94,11 +100,12 @@ class LightSensorControllerTest {
         controller.restart()
 
         verify(mockSensorManager).registerListener(any(),
-            testInjector.lightSensor, LIGHT_SENSOR_RATE * 1000, mockHandler)
+            eq(testInjector.lightSensor), eq(LIGHT_SENSOR_RATE * 1000), eq(mockHandler))
         verifyNoMoreInteractions(mockSensorManager, mockAmbientFilter, mockLightSensorListener)
     }
 
-    fun `register new light sensor and unregister old if changed`() {
+    @Test
+    fun registerNewAndUnregisterOldLightSensorIfChanged() {
         val lightSensor1 = TestUtils
                 .createSensor(Sensor.TYPE_LIGHT, Sensor.STRING_TYPE_LIGHT)
         testInjector.lightSensor = lightSensor1
@@ -111,19 +118,21 @@ class LightSensorControllerTest {
         controller.configure(dummySensorData, DISPLAY_ID)
         controller.restart()
 
-        inOrder {
+        inOrder(mockSensorManager, mockAmbientFilter, mockLightSensorListener) {
             verify(mockSensorManager).registerListener(any(),
-                lightSensor1, LIGHT_SENSOR_RATE * 1000, mockHandler)
-            verify(mockSensorManager).unregisterListener(any<SensorEventListener>())
+                eq(lightSensor1), eq(LIGHT_SENSOR_RATE * 1000), eq(mockHandler))
+            verify(mockSensorManager).registerListener(any(),
+                eq(lightSensor2), eq(LIGHT_SENSOR_RATE * 1000), eq(mockHandler))
+            verify(mockSensorManager).unregisterListener(any<SensorEventListener>(),
+                eq(lightSensor1))
             verify(mockAmbientFilter).clear()
             verify(mockLightSensorListener).onAmbientLuxChange(LightSensorController.INVALID_LUX)
-            verify(mockSensorManager).registerListener(any(),
-                lightSensor2, LIGHT_SENSOR_RATE * 1000, mockHandler)
         }
         verifyNoMoreInteractions(mockSensorManager, mockAmbientFilter, mockLightSensorListener)
     }
 
-    fun `notifies listener on ambient lux change`() {
+    @Test
+    fun notifiesListenerOnAmbientLuxChange() {
         val expectedLux = 40f
         val eventLux = 50
         val eventTime = 60L
@@ -140,7 +149,7 @@ class LightSensorControllerTest {
         listener.onSensorChanged(TestUtils.createSensorEvent(testInjector.lightSensor,
             eventLux, eventTime * 1_000_000))
 
-        inOrder {
+        inOrder(mockAmbientFilter, mockLightSensorListener) {
             verify(mockAmbientFilter).addValue(eventTime, eventLux.toFloat())
             verify(mockLightSensorListener).onAmbientLuxChange(expectedLux)
         }

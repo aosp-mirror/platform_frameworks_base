@@ -20,14 +20,10 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManagerInternal;
 import android.content.ContentResolver;
-import android.content.Context;
-import android.content.pm.UserInfo;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
@@ -41,6 +37,13 @@ import com.android.server.pm.UserManagerInternal;
  * to the persistent value when the user storage is unlocked.</p>
  */
 final class SecureSettingsWrapper {
+
+    private static final Object sMutationLock = new Object();
+
+    @NonNull
+    private static volatile ImmutableSparseArray<ReaderWriter> sUserMap =
+            ImmutableSparseArray.empty();
+
     @Nullable
     private static volatile ContentResolver sContentResolver = null;
 
@@ -64,8 +67,8 @@ final class SecureSettingsWrapper {
      */
     @AnyThread
     static void endTestMode() {
-        synchronized (sUserMap) {
-            sUserMap.clear();
+        synchronized (sMutationLock) {
+            sUserMap = ImmutableSparseArray.empty();
         }
         sTestMode = false;
     }
@@ -246,10 +249,6 @@ final class SecureSettingsWrapper {
         }
     }
 
-    @GuardedBy("sUserMap")
-    @NonNull
-    private static final SparseArray<ReaderWriter> sUserMap = new SparseArray<>();
-
     private static final ReaderWriter NOOP = new ReaderWriter() {
         @Override
         public void putString(String key, String str) {
@@ -285,15 +284,15 @@ final class SecureSettingsWrapper {
     private static ReaderWriter putOrGet(@UserIdInt int userId,
             @NonNull ReaderWriter readerWriter) {
         final boolean isUnlockedUserImpl = readerWriter instanceof UnlockedUserImpl;
-        synchronized (sUserMap) {
+        synchronized (sMutationLock) {
             final ReaderWriter current = sUserMap.get(userId);
             if (current == null) {
-                sUserMap.put(userId, readerWriter);
+                sUserMap = sUserMap.cloneWithPutOrSelf(userId, readerWriter);
                 return readerWriter;
             }
             // Upgrading from CopyOnWriteImpl to DirectImpl is allowed.
             if (current instanceof LockedUserImpl && isUnlockedUserImpl) {
-                sUserMap.put(userId, readerWriter);
+                sUserMap = sUserMap.cloneWithPutOrSelf(userId, readerWriter);
                 return readerWriter;
             }
             return current;
@@ -303,11 +302,9 @@ final class SecureSettingsWrapper {
     @NonNull
     @AnyThread
     private static ReaderWriter get(@UserIdInt int userId) {
-        synchronized (sUserMap) {
-            final ReaderWriter readerWriter = sUserMap.get(userId);
-            if (readerWriter != null) {
-                return readerWriter;
-            }
+        final ReaderWriter readerWriter = sUserMap.get(userId);
+        if (readerWriter != null) {
+            return readerWriter;
         }
         if (sTestMode) {
             return putOrGet(userId, new FakeReaderWriterImpl());
@@ -321,30 +318,13 @@ final class SecureSettingsWrapper {
     }
 
     /**
-     * Called when {@link InputMethodManagerService} is starting.
+     * Called when the system is starting.
      *
-     * @param context the {@link Context} to be used.
+     * @param contentResolver the {@link ContentResolver} to be used
      */
     @AnyThread
-    static void onStart(@NonNull Context context) {
-        sContentResolver = context.getContentResolver();
-
-        final int userId = LocalServices.getService(ActivityManagerInternal.class)
-                .getCurrentUserId();
-        final UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        putOrGet(userId, createImpl(userManagerInternal, userId));
-
-        userManagerInternal.addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserRemoved(UserInfo user) {
-                        synchronized (sUserMap) {
-                            sUserMap.remove(userId);
-                        }
-                    }
-                }
-        );
+    static void setContentResolver(@NonNull ContentResolver contentResolver) {
+        sContentResolver = contentResolver;
     }
 
     /**
@@ -374,6 +354,35 @@ final class SecureSettingsWrapper {
         }
         final ReaderWriter readerWriter = new UnlockedUserImpl(userId, sContentResolver);
         putOrGet(userId, readerWriter);
+    }
+
+    /**
+     * Called when a user is stopped, which changes the user storage to the locked state again.
+     *
+     * @param userId the ID of the user whose storage is being locked again.
+     */
+    @AnyThread
+    static void onUserStopped(@UserIdInt int userId) {
+        final LockedUserImpl lockedUserImpl = new LockedUserImpl(userId, sContentResolver);
+        synchronized (sMutationLock) {
+            final ReaderWriter current = sUserMap.get(userId);
+            if (current == null || current instanceof LockedUserImpl) {
+                return;
+            }
+            sUserMap = sUserMap.cloneWithPutOrSelf(userId, lockedUserImpl);
+        }
+    }
+
+    /**
+     * Called when a user is being removed.
+     *
+     * @param userId the ID of the user whose storage is being removed
+     */
+    @AnyThread
+    static void onUserRemoved(@UserIdInt int userId) {
+        synchronized (sMutationLock) {
+            sUserMap = sUserMap.cloneWithRemoveOrSelf(userId);
+        }
     }
 
     /**

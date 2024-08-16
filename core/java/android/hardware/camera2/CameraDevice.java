@@ -1406,24 +1406,39 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link android.hardware.camera2.params.MandatoryStreamCombination} are better suited for this
      * purpose.</p>
      *
-     * <p><b>NOTE:</b>
-     * For apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and above,
+     * <p>If this function returns {@code true} for a particular stream combination, the camera
+     * device supports concurrent captures on all of the streams in the same CaptureRequest, with
+     * two exceptions below where concurrent captures are not supported: </p>
+     * <ul>
+     * <li>Supported stream combinations with exclusive dynamic range profiles as specified by
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints}.</li>
+     * <li>Supported combinations of 'default' mode and 'max resolution' mode streams for devices
+     * with ULTRA_HIGH_RESOLUTION_SENSOR capability.</li>
+     * </ul>
+     * <p>For other cases where concurrent captures of a stream combination are not supported,
+     * this function returns {@code false}.</p>
+     *
+     * <p><b>NOTE:</b></p>
+     * <ul>
+     * <li>For apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and above,
      * this method will automatically delegate to
      * {@link CameraDeviceSetup#isSessionConfigurationSupported} whenever possible. This
      * means that the output of this method will consider parameters set through
-     * {@link SessionConfiguration#setSessionParameters} as well.
-     * </p>
+     * {@link SessionConfiguration#setSessionParameters} as well.</li>
      *
-     * <p>Session Parameters will be ignored for apps targeting <=
+     * <li>Session Parameters will be ignored for apps targeting <=
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, or if
      * {@link CameraManager#isCameraDeviceSetupSupported} returns false for the camera id
-     * associated with this {@code CameraDevice}.</p>
+     * associated with this {@code CameraDevice}.</li>
+     * </ul>
      *
      * @return {@code true} if the given session configuration is supported by the camera device
      *         {@code false} otherwise.
      * @throws UnsupportedOperationException if the query operation is not supported by the camera
      *                                       device
-     * @throws IllegalArgumentException if the session configuration is invalid
+     * @throws IllegalArgumentException if the session configuration is invalid, including, if it
+     *                                  contains certain non-supported features queryable via
+     *                                  CameraCharacteristics.
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
@@ -1689,14 +1704,25 @@ public abstract class CameraDevice implements AutoCloseable {
          * CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION} provides the list of
          * feature combinations the camera device will reliably report.</p>
          *
+         * <p>If this function returns {@code true} for a particular stream combination, the camera
+         * device supports concurrent captures on all of the streams in the same CaptureRequest,
+         * with two exceptions below where concurrent captures are not supported: </p>
+         * <ul>
+         * <li>Supported stream combinations with exclusive dynamic range profiles as specified by
+         * {@link android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints}.</li>
+         * <li>Supported combinations of 'default' mode and 'max resolution' mode streams for
+         * devices with ULTRA_HIGH_RESOLUTION_SENSOR capability.</li>
+         * </ul>
+         * <p>For other cases where concurrent captures of a stream combination are not supported,
+         * this function returns {@code false}.</p>
+         *
          * <p><b>IMPORTANT:</b></p>
          * <ul>
-         * <li>If feature support can be queried via
-         * {@link CameraCharacteristics#SCALER_MANDATORY_STREAM_COMBINATIONS} or
-         * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}, applications should
-         * directly use that route rather than calling this function as: (1) using
-         * {@code CameraCharacteristics} is more efficient, and (2) calling this function with
-         * certain non-supported features will throw a {@link IllegalArgumentException}.</li>
+         * <li>If feature support can be queried via {@link CameraCharacteristics}, applications
+         * should directly use that route rather than calling this function as: (1) using
+         * {@code CameraCharacteristics} is more efficient, and (2) querying a feature explicitly
+         * deemed unsupported by CameraCharacteristics may throw a
+         * {@link IllegalArgumentException}.</li>
          *
          * <li>To minimize {@link SessionConfiguration} creation latency due to its dependency on
          * output surfaces, the application can call this method before acquiring valid
@@ -1724,7 +1750,8 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * @throws CameraAccessException if the camera device is no longer connected or has
          * encountered a fatal error
-         * @throws IllegalArgumentException if the session configuration is invalid
+         * @throws IllegalArgumentException if the session configuration is invalid, including,
+         * if it contains certain non-supported features queryable via CameraCharacteristics.
          *
          * @see CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION
          * @see SessionConfiguration

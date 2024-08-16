@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -105,6 +106,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.protolog.ProtoLogService;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -119,6 +121,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.app.GameManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.appfunctions.AppFunctionManagerService;
 import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.appop.AppOpMigrationHelper;
 import com.android.server.appop.AppOpMigrationHelperImpl;
@@ -153,6 +156,7 @@ import com.android.server.contentsuggestions.ContentSuggestionsManagerService;
 import com.android.server.contextualsearch.ContextualSearchManagerService;
 import com.android.server.coverage.CoverageService;
 import com.android.server.cpu.CpuMonitorService;
+import com.android.server.crashrecovery.CrashRecoveryModule;
 import com.android.server.credentials.CredentialManagerService;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -381,6 +385,7 @@ public final class SystemServer implements Dumpable {
                     + "OnDevicePersonalizationSystemService$Lifecycle";
     private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
             "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
+
 
     /*
      * Implementation class names and jar locations for services in
@@ -1085,6 +1090,13 @@ public final class SystemServer implements Dumpable {
         SystemServerInitThreadPool.submit(SystemConfig::getInstance, TAG_SYSTEM_CONFIG);
         t.traceEnd();
 
+        // Orchestrates some ProtoLogging functionality.
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            t.traceBegin("StartProtoLogService");
+            ServiceManager.addService(Context.PROTOLOG_SERVICE, new ProtoLogService());
+            t.traceEnd();
+        }
+
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and
         // possibly others in the future. b/135010838.
         t.traceBegin("PlatformCompat");
@@ -1196,14 +1208,17 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
-        // Initialize RescueParty.
-        RescueParty.registerHealthObserver(mSystemContext);
-        if (!Flags.recoverabilityDetection()) {
-            // Now that we have the bare essentials of the OS up and running, take
-            // note that we just booted, which might send out a rescue party if
-            // we're stuck in a runtime restart loop.
-            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        if (!Flags.refactorCrashrecovery()) {
+            // Initialize RescueParty.
+            RescueParty.registerHealthObserver(mSystemContext);
+            if (!Flags.recoverabilityDetection()) {
+                // Now that we have the bare essentials of the OS up and running, take
+                // note that we just booted, which might send out a rescue party if
+                // we're stuck in a runtime restart loop.
+                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+            }
         }
+
 
         // Manages LEDs and display backlight so we need it to bring up the display.
         t.traceBegin("StartLightsService");
@@ -1714,6 +1729,12 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
+            t.traceBegin("StartAppFunctionManager");
+            if (enableAppFunctionManager()) {
+                mSystemServiceManager.startService(AppFunctionManagerService.class);
+            }
+            t.traceEnd();
+
         } catch (Throwable e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service");
@@ -2134,14 +2155,20 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-            t.traceBegin("StartVpnManagerService");
-            try {
-                vpnManager = VpnManagerService.create(context);
-                ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
-            } catch (Throwable e) {
-                reportWtf("starting VPN Manager Service", e);
+            if (!isWatch || !android.server.Flags.allowRemovingVpnService()) {
+                t.traceBegin("StartVpnManagerService");
+                try {
+                    vpnManager = VpnManagerService.create(context);
+                    ServiceManager.addService(Context.VPN_MANAGEMENT_SERVICE, vpnManager);
+                } catch (Throwable e) {
+                    reportWtf("starting VPN Manager Service", e);
+                }
+                t.traceEnd();
+            } else {
+                // VPN management currently does not work in Wear, so skip starting the
+                // VPN manager SystemService.
+                Slog.i(TAG, "Not starting VpnManagerService");
             }
-            t.traceEnd();
 
             t.traceBegin("StartVcnManagementService");
             try {
@@ -2439,11 +2466,11 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("CertBlacklister");
+            t.traceBegin("CertBlocklister");
             try {
-                CertBlacklister blacklister = new CertBlacklister(context);
+                CertBlocklister blocklister = new CertBlocklister(context);
             } catch (Throwable e) {
-                reportWtf("starting CertBlacklister", e);
+                reportWtf("starting CertBlocklister", e);
             }
             t.traceEnd();
 
@@ -2925,12 +2952,18 @@ public final class SystemServer implements Dumpable {
         mPackageManagerService.systemReady();
         t.traceEnd();
 
-        if (Flags.recoverabilityDetection()) {
-            // Now that we have the essential services needed for mitigations, register the boot
-            // with package watchdog.
-            // Note that we just booted, which might send out a rescue party if we're stuck in a
-            // runtime restart loop.
-            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        if (Flags.refactorCrashrecovery()) {
+            t.traceBegin("StartCrashRecoveryModule");
+            mSystemServiceManager.startService(CrashRecoveryModule.Lifecycle.class);
+            t.traceEnd();
+        } else {
+            if (Flags.recoverabilityDetection()) {
+                // Now that we have the essential services needed for mitigations, register the boot
+                // with package watchdog.
+                // Note that we just booted, which might send out a rescue party if we're stuck in a
+                // runtime restart loop.
+                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+            }
         }
 
         t.traceBegin("MakeDisplayManagerServiceReady");

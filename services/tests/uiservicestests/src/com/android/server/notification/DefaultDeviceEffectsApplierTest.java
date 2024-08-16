@@ -18,8 +18,8 @@ package com.android.server.notification;
 
 import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT;
 import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
-import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_APP;
-import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_USER;
+import static android.service.notification.ZenModeConfig.ORIGIN_APP;
+import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -48,7 +48,6 @@ import android.hardware.display.ColorDisplayManager;
 import android.os.PowerManager;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.ZenDeviceEffects;
-import android.service.notification.ZenModeConfig;
 import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
@@ -78,27 +77,6 @@ public class DefaultDeviceEffectsApplierTest {
     @Mock UiModeManager mUiModeManager;
     @Mock WallpaperManager mWallpaperManager;
 
-    private enum ChangeOrigin {
-        ORIGIN_UNKNOWN(ZenModeConfig.UPDATE_ORIGIN_UNKNOWN),
-        ORIGIN_INIT(ZenModeConfig.UPDATE_ORIGIN_INIT),
-        ORIGIN_INIT_USER(ZenModeConfig.UPDATE_ORIGIN_INIT_USER),
-        ORIGIN_USER(ZenModeConfig.UPDATE_ORIGIN_USER),
-        ORIGIN_APP(ZenModeConfig.UPDATE_ORIGIN_APP),
-        ORIGIN_SYSTEM_OR_SYSTEMUI(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI),
-        ORIGIN_RESTORE_BACKUP(ZenModeConfig.UPDATE_ORIGIN_RESTORE_BACKUP);
-
-        private final int mValue;
-
-        ChangeOrigin(@ZenModeConfig.ConfigChangeOrigin int value) {
-            mValue = value;
-        }
-
-        @ZenModeConfig.ConfigChangeOrigin
-        public int value() {
-            return mValue;
-        }
-    }
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -123,7 +101,7 @@ public class DefaultDeviceEffectsApplierTest {
                 .setShouldDisplayGrayscale(true)
                 .setShouldUseNightMode(true)
                 .build();
-        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+        mApplier.apply(effects, ORIGIN_USER_IN_SYSTEMUI);
 
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
         verify(mColorDisplayManager).setSaturationLevel(eq(0));
@@ -141,14 +119,14 @@ public class DefaultDeviceEffectsApplierTest {
                 .setShouldDisplayGrayscale(true)
                 .setShouldUseNightMode(true)
                 .build();
-        mApplier.apply(previousEffects, UPDATE_ORIGIN_USER);
+        mApplier.apply(previousEffects, ORIGIN_USER_IN_SYSTEMUI);
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
         verify(mColorDisplayManager).setSaturationLevel(eq(0));
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
         verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
 
         ZenDeviceEffects noEffects = new ZenDeviceEffects.Builder().build();
-        mApplier.apply(noEffects, UPDATE_ORIGIN_USER);
+        mApplier.apply(noEffects, ORIGIN_USER_IN_SYSTEMUI);
 
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(false));
         verify(mColorDisplayManager).setSaturationLevel(eq(100));
@@ -163,11 +141,11 @@ public class DefaultDeviceEffectsApplierTest {
         ZenDeviceEffects previousEffects = new ZenDeviceEffects.Builder()
                 .setShouldSuppressAmbientDisplay(true)
                 .build();
-        mApplier.apply(previousEffects, UPDATE_ORIGIN_USER);
+        mApplier.apply(previousEffects, ORIGIN_USER_IN_SYSTEMUI);
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
 
         ZenDeviceEffects noEffects = new ZenDeviceEffects.Builder().build();
-        mApplier.apply(noEffects, UPDATE_ORIGIN_USER);
+        mApplier.apply(noEffects, ORIGIN_USER_IN_SYSTEMUI);
 
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(false));
         verifyZeroInteractions(mColorDisplayManager, mWallpaperManager, mUiModeManager);
@@ -186,7 +164,7 @@ public class DefaultDeviceEffectsApplierTest {
                 .setShouldDisplayGrayscale(true)
                 .setShouldUseNightMode(true)
                 .build();
-        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+        mApplier.apply(effects, ORIGIN_USER_IN_SYSTEMUI);
 
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
         // (And no crash from missing services).
@@ -207,7 +185,7 @@ public class DefaultDeviceEffectsApplierTest {
                 .setShouldDisplayGrayscale(true)
                 .setShouldUseNightMode(true)
                 .build();
-        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+        mApplier.apply(effects, ORIGIN_USER_IN_SYSTEMUI);
 
         verifyNoMoreInteractions(mWallpaperManager);
     }
@@ -220,7 +198,7 @@ public class DefaultDeviceEffectsApplierTest {
                 .setShouldDimWallpaper(true)
                 .setShouldDisplayGrayscale(true)
                 .build();
-        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+        mApplier.apply(effects, ORIGIN_USER_IN_SYSTEMUI);
 
         verify(mColorDisplayManager).setSaturationLevel(eq(0));
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
@@ -234,12 +212,12 @@ public class DefaultDeviceEffectsApplierTest {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         mApplier.apply(new ZenDeviceEffects.Builder().setShouldDimWallpaper(true).build(),
-                UPDATE_ORIGIN_USER);
+                ORIGIN_USER_IN_SYSTEMUI);
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
 
         // Apply a second effect and remove the first one.
         mApplier.apply(new ZenDeviceEffects.Builder().setShouldDisplayGrayscale(true).build(),
-                UPDATE_ORIGIN_USER);
+                ORIGIN_USER_IN_SYSTEMUI);
 
         // Wallpaper dimming was undone, Grayscale was applied, nothing else was touched.
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.0f));
@@ -259,7 +237,7 @@ public class DefaultDeviceEffectsApplierTest {
         when(mPowerManager.isInteractive()).thenReturn(true);
 
         mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
-                UPDATE_ORIGIN_APP);
+                ORIGIN_APP);
 
         // Effect was not yet applied, but a broadcast receiver was registered.
         verifyZeroInteractions(mUiModeManager);
@@ -278,7 +256,7 @@ public class DefaultDeviceEffectsApplierTest {
 
     @Test
     public void apply_nightModeWithScreenOff_appliedImmediately(
-            @TestParameter ChangeOrigin origin) {
+            @TestParameter ZenChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         when(mPowerManager.isInteractive()).thenReturn(false);
@@ -292,9 +270,10 @@ public class DefaultDeviceEffectsApplierTest {
     }
 
     @Test
-    @TestParameters({"{origin: ORIGIN_USER}", "{origin: ORIGIN_INIT}",
-            "{origin: ORIGIN_INIT_USER}"})
-    public void apply_nightModeWithScreenOn_appliedImmediatelyBasedOnOrigin(ChangeOrigin origin) {
+    @TestParameters({"{origin: ORIGIN_USER_IN_SYSTEMUI}", "{origin: ORIGIN_USER_IN_APP}",
+            "{origin: ORIGIN_INIT}", "{origin: ORIGIN_INIT_USER}"})
+    public void apply_nightModeWithScreenOn_appliedImmediatelyBasedOnOrigin(
+            ZenChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -309,8 +288,9 @@ public class DefaultDeviceEffectsApplierTest {
 
     @Test
     @TestParameters({"{origin: ORIGIN_APP}", "{origin: ORIGIN_RESTORE_BACKUP}",
-            "{origin: ORIGIN_SYSTEM_OR_SYSTEMUI}", "{origin: ORIGIN_UNKNOWN}"})
-    public void apply_nightModeWithScreenOn_willBeAppliedLaterBasedOnOrigin(ChangeOrigin origin) {
+            "{origin: ORIGIN_SYSTEM}", "{origin: ORIGIN_UNKNOWN}"})
+    public void apply_nightModeWithScreenOn_willBeAppliedLaterBasedOnOrigin(
+            ZenChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -342,7 +322,7 @@ public class DefaultDeviceEffectsApplierTest {
                 .setShouldDisplayGrayscale(true)
                 .setShouldUseNightMode(true)
                 .build();
-        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+        mApplier.apply(effects, ORIGIN_USER_IN_SYSTEMUI);
 
         // No crashes
     }

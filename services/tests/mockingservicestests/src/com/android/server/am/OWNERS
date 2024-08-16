@@ -1,3 +1,4 @@
 include /services/core/java/com/android/server/am/OWNERS
 
 per-file ApplicationStartInfoTest.java = yforta@google.com, carmenjackson@google.com, jji@google.com
+per-file CachedAppOptimizerTest.java = file:/PERFORMANCE_OWNERS

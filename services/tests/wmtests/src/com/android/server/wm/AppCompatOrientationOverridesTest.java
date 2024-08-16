@@ -15,12 +15,12 @@
  */
 package com.android.server.wm;
 
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
-import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.AppCompatOrientationOverrides.OrientationOverridesState.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
@@ -31,7 +31,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.compat.testing.PlatformCompatChangeRule;
-import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -60,82 +59,6 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_activityRelaunching_returnsTrue() {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ true,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_cameraCompatTreatment_returnsTrue() {
-        runTestScenario((robot) -> {
-            robot.applyOnConf((c) -> {
-                c.enableCameraCompatTreatment(true);
-                c.enableCameraCompatTreatmentAtBuildTime(true);
-                c.enablePolicyForIgnoringRequestedOrientation(true);
-            });
-            robot.applyOnActivity((a) -> {
-                a.createActivityWithComponentInNewTask();
-                a.enableTreatmentForTopActivity(true);
-            });
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(false);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ true,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    public void testShouldIgnoreRequestedOrientation_overrideDisabled_returnsFalse() {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ false,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    public void testShouldIgnoreRequestedOrientation_propertyIsTrue_returnsTrue() {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-            robot.prop().enable(PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
-
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ true,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION})
-    public void testShouldIgnoreRequestedOrientation_propertyIsFalseAndOverride_returnsFalse()
-            throws Exception {
-        runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
-            robot.prop().disable(PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
-
-            robot.activity().createActivityWithComponent();
-            robot.prepareRelaunchingAfterRequestedOrientationChanged(true);
-
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ false,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
-        });
-    }
 
     @Test
     public void testShouldIgnoreOrientationRequestLoop_overrideDisabled_returnsFalse() {
@@ -240,17 +163,68 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH})
-    public void testShouldIgnoreRequestedOrientation_flagIsDisabled_returnsFalse() {
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_override_returnsTrue() {
         runTestScenario((robot) -> {
-            robot.conf().enablePolicyForIgnoringRequestedOrientation(true);
             robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(true);
                 a.createActivityWithComponent();
-                a.setLetterboxedForFixedOrientationAndAspectRatio(false);
             });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ true);
+        });
+    }
 
-            robot.checkShouldIgnoreRequestedOrientation(/* expected */ false,
-                    /* requestedOrientation */ SCREEN_ORIENTATION_UNSPECIFIED);
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_falseProperty_returnsFalse() {
+        runTestScenario((robot) -> {
+            robot.prop().disable(PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE);
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponent();
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
+        });
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_portrait_isFalse() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_PORTRAIT);
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponent();
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
+        });
+    }
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_noIgnoreRequest_isFalse() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(false);
+                a.createActivityWithComponent();
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
+        });
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_inMultiWindowMode_returnsFalse() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setDisplayNaturalOrientation(ORIENTATION_LANDSCAPE);
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponent();
+                a.setTopTaskInMultiWindowMode(/* inMultiWindowMode */ true);
+            });
+            robot.checkShouldUseDisplayLandscapeNaturalOrientation(/* expected */ false);
         });
     }
 
@@ -258,7 +232,7 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<OrientationOverridesRobotTest> consumer) {
-        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(mWm.mAppCompatConfiguration);
         final OrientationOverridesRobotTest robot =
                 new OrientationOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
@@ -276,8 +250,10 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
             mTestCurrentTimeMillisSupplier = new CurrentTimeMillisSupplierFake();
         }
 
-        void prepareRelaunchingAfterRequestedOrientationChanged(boolean enabled) {
-            getTopOrientationOverrides().setRelaunchingAfterRequestedOrientationChanged(enabled);
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         }
 
         // Useful to reduce timeout during tests
@@ -288,12 +264,6 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
 
         void delay() {
             mTestCurrentTimeMillisSupplier.delay(SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS);
-        }
-
-        void checkShouldIgnoreRequestedOrientation(boolean expected,
-                @Configuration.Orientation int requestedOrientation) {
-            assertEquals(expected, getTopOrientationOverrides()
-                    .shouldIgnoreRequestedOrientation(requestedOrientation));
         }
 
         void checkExpectedLoopCount(int expectedCount) {
@@ -319,6 +289,11 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
             for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
                 consumer.accept(i);
             }
+        }
+
+        void checkShouldUseDisplayLandscapeNaturalOrientation(boolean expected) {
+            assertEquals(expected,
+                    getTopOrientationOverrides().shouldUseDisplayLandscapeNaturalOrientation());
         }
 
         private AppCompatOrientationOverrides getTopOrientationOverrides() {

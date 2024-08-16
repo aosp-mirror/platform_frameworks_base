@@ -18,6 +18,7 @@ package com.android.wm.shell.common;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -158,6 +159,19 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         assertTrue(secondListener.insetsControlChangedCount == 1);
         assertTrue(secondListener.showInsetsCount == 1);
         assertTrue(secondListener.hideInsetsCount == 1);
+    }
+
+    @Test
+    public void testGlobalListenerCallback() throws RemoteException {
+        TrackedListener globalListener = new TrackedListener();
+        addDisplay(SECOND_DISPLAY);
+        mController.addGlobalInsetsChangedListener(globalListener);
+
+        mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsChanged(null);
+        mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsChanged(null);
+        mExecutor.flushAll();
+
+        assertEquals(2, globalListener.insetsChangedCount);
     }
 
     private void addDisplay(int displayId) throws RemoteException {

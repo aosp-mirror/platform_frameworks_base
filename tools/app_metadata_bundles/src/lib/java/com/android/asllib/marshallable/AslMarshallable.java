@@ -16,16 +16,11 @@
 
 package com.android.asllib.marshallable;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import java.util.List;
-
 public interface AslMarshallable {
 
     /** Creates the on-device DOM elements from the AslMarshallable Java Object. */
-    List<Element> toOdDomElements(Document doc);
+    // List<Element> toOdDomElements(Document doc);
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    List<Element> toHrDomElements(Document doc);
+    // List<Element> toHrDomElements(Document doc);
 }

@@ -176,6 +176,8 @@ final class SaveUi {
 
     private boolean mDestroyed;
 
+    // System has all permissions, see b/228957088
+    @SuppressWarnings("AndroidFrameworkRequiresPermission")
     SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
            @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
@@ -193,7 +195,7 @@ final class SaveUi {
         mComponentName = componentName;
         mCompatMode = compatMode;
 
-        context = new ContextThemeWrapper(context, mThemeId) {
+        context = new ContextThemeWrapper(Helper.getUserContext(context), mThemeId) {
             @Override
             public void startActivity(Intent intent) {
                 if (resolveActivity(intent) == null) {
@@ -235,6 +237,7 @@ final class SaveUi {
                 return null;
             }
         };
+
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 

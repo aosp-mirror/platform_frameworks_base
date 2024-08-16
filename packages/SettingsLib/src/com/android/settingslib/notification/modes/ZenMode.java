@@ -16,13 +16,18 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_TIME;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
+import static android.service.notification.ZenModeConfig.tryParseCountdownConditionId;
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import static java.util.Objects.requireNonNull;
@@ -33,12 +38,15 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.service.notification.SystemZenRules;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.util.Log;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -56,11 +64,12 @@ import java.util.Objects;
  * <p>It also adapts other rule features that we don't want to expose in the UI, such as
  * interruption filters other than {@code PRIORITY}, rules without specific icons, etc.
  */
-public class ZenMode {
+public class ZenMode implements Parcelable {
 
     private static final String TAG = "ZenMode";
 
-    static final String MANUAL_DND_MODE_ID = "manual_dnd";
+    static final String MANUAL_DND_MODE_ID = ZenModeConfig.MANUAL_RULE_ID;
+    static final String TEMP_NEW_MODE_ID = "temp_new_mode";
 
     // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
     private static final ZenPolicy POLICY_INTERRUPTION_FILTER_ALARMS =
@@ -112,7 +121,7 @@ public class ZenMode {
                 return Status.ENABLED;
             }
         } else {
-            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.UPDATE_ORIGIN_USER) {
+            if (zenRuleExtraData.disabledOrigin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI) {
                 return Status.DISABLED_BY_USER;
             } else {
                 return Status.DISABLED_BY_OTHER; // by APP, SYSTEM, UNKNOWN.
@@ -121,8 +130,31 @@ public class ZenMode {
     }
 
     public static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
-        return new ZenMode(MANUAL_DND_MODE_ID, manualRule,
+        // Manual rule is owned by the system, so we set it here
+        AutomaticZenRule manualRuleWithPkg = new AutomaticZenRule.Builder(manualRule)
+                .setPackage(PACKAGE_ANDROID)
+                .build();
+        return new ZenMode(MANUAL_DND_MODE_ID, manualRuleWithPkg,
                 isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED, true);
+    }
+
+    /**
+     * Returns a new {@link ZenMode} instance that can represent a custom_manual mode that is in the
+     * process of being created (and not yet saved).
+     *
+     * @param name mode name
+     * @param iconResId resource id of the chosen icon, {code 0} if none.
+     */
+    public static ZenMode newCustomManual(String name, @DrawableRes int iconResId) {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder(name,
+                ZenModeConfig.toCustomManualConditionId())
+                .setPackage(ZenModeConfig.getCustomManualConditionProvider().getPackageName())
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .setOwner(ZenModeConfig.getCustomManualConditionProvider())
+                .setIconResId(iconResId)
+                .setManualInvocationAllowed(true)
+                .build();
+        return new ZenMode(TEMP_NEW_MODE_ID, rule, Status.ENABLED, false);
     }
 
     private ZenMode(String id, @NonNull AutomaticZenRule rule, Status status, boolean isManualDnd) {
@@ -130,6 +162,11 @@ public class ZenMode {
         mRule = rule;
         mStatus = status;
         mIsManualDnd = isManualDnd;
+    }
+
+    /** Creates a deep copy of this object. */
+    public ZenMode copy() {
+        return new ZenMode(mId, new AutomaticZenRule.Builder(mRule).build(), mStatus, mIsManualDnd);
     }
 
     @NonNull
@@ -157,9 +194,45 @@ public class ZenMode {
         return mRule.getType();
     }
 
+    /** Returns the trigger description of the mode. */
     @Nullable
     public String getTriggerDescription() {
         return mRule.getTriggerDescription();
+    }
+
+    /**
+     * Returns a "dynamic" trigger description. For some modes (such as manual Do Not Disturb)
+     * when activated, we know when (and if) the mode is expected to end on its own; this dynamic
+     * description reflects that. In other cases, returns {@link #getTriggerDescription}.
+     */
+    @Nullable
+    public String getDynamicDescription(Context context) {
+        if (isManualDnd() && isActive()) {
+            long countdownEndTime = tryParseCountdownConditionId(mRule.getConditionId());
+            if (countdownEndTime > 0) {
+                CharSequence formattedTime = ZenModeConfig.getFormattedTime(context,
+                        countdownEndTime, ZenModeConfig.isToday(countdownEndTime),
+                        context.getUserId());
+                return context.getString(com.android.internal.R.string.zen_mode_until,
+                        formattedTime);
+            }
+        }
+        // TODO: b/333527800 - For TYPE_SCHEDULE_TIME rules we could do the same; however
+        //   according to the snoozing discussions the mode may or may not end at the scheduled
+        //   time if manually activated. When we resolve that point, we could calculate end time
+        //   for these modes as well.
+
+        return getTriggerDescription();
+    }
+
+    /**
+     * Returns an icon "key" that is guaranteed to be different if the icon is different. Note that
+     * the inverse is not true, i.e. two keys can be different and the icon still be visually the
+     * same.
+     */
+    @NonNull
+    public String getIconKey() {
+        return mRule.getType() + ":" + mRule.getPackageName() + ":" + mRule.getIconResId();
     }
 
     @NonNull
@@ -262,11 +335,7 @@ public class ZenMode {
                 mRule, oldCondition, conditionId));
     }
 
-    public boolean canEditName() {
-        return !isManualDnd();
-    }
-
-    public boolean canEditIcon() {
+    public boolean canEditNameAndIcon() {
         return !isManualDnd();
     }
 
@@ -276,6 +345,21 @@ public class ZenMode {
 
     public boolean isManualDnd() {
         return mIsManualDnd;
+    }
+
+    /**
+     * A <em>custom manual</em> mode is a mode created by the user, and not yet assigned an
+     * automatic trigger condition (neither time schedule nor a calendar).
+     */
+    public boolean isCustomManual() {
+        return isSystemOwned()
+                && getType() != TYPE_SCHEDULE_TIME
+                && getType() != TYPE_SCHEDULE_CALENDAR
+                && !isManualDnd();
+    }
+
+    public boolean isEnabled() {
+        return mRule.isEnabled();
     }
 
     public boolean isActive() {
@@ -304,4 +388,34 @@ public class ZenMode {
     public String toString() {
         return mId + " (" + mStatus + ") -> " + mRule;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(mId);
+        dest.writeParcelable(mRule, 0);
+        dest.writeString(mStatus.name());
+        dest.writeBoolean(mIsManualDnd);
+    }
+
+    public static final Creator<ZenMode> CREATOR = new Creator<ZenMode>() {
+        @Override
+        public ZenMode createFromParcel(Parcel in) {
+            return new ZenMode(
+                    in.readString(),
+                    checkNotNull(in.readParcelable(AutomaticZenRule.class.getClassLoader(),
+                            AutomaticZenRule.class)),
+                    Status.valueOf(in.readString()),
+                    in.readBoolean());
+        }
+
+        @Override
+        public ZenMode[] newArray(int size) {
+            return new ZenMode[size];
+        }
+    };
 }

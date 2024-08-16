@@ -16,6 +16,9 @@
 
 package android.os;
 
+import static android.os.vibrator.Flags.FLAG_VIBRATION_ATTRIBUTE_IME_USAGE_API;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +58,7 @@ public final class VibrationAttributes implements Parcelable {
             USAGE_PHYSICAL_EMULATION,
             USAGE_RINGTONE,
             USAGE_TOUCH,
+            USAGE_IME_FEEDBACK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Usage {}
@@ -136,35 +140,16 @@ public final class VibrationAttributes implements Parcelable {
      */
     public static final int USAGE_ACCESSIBILITY = 0x40 | USAGE_CLASS_FEEDBACK;
     /**
+     * Usage value to use for input method editor (IME) haptic feedback.
+     */
+    @FlaggedApi(FLAG_VIBRATION_ATTRIBUTE_IME_USAGE_API)
+    public static final int USAGE_IME_FEEDBACK = 0x50 | USAGE_CLASS_FEEDBACK;
+
+    /**
      * Usage value to use for media vibrations, such as music, movie, soundtrack, animations, games,
      * or any interactive media that isn't for touch feedback specifically.
      */
     public static final int USAGE_MEDIA = 0x10 | USAGE_CLASS_MEDIA;
-
-    /** @hide */
-    @IntDef(prefix = { "CATEGORY_" }, value = {
-            CATEGORY_UNKNOWN,
-            CATEGORY_KEYBOARD,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface Category {}
-
-    /**
-     * Category value when the vibration category is unknown.
-     *
-     * @hide
-     */
-    public static final int CATEGORY_UNKNOWN = 0x0;
-
-    /**
-     * Category value for keyboard vibrations.
-     *
-     * <p>Most typical keyboard vibrations are haptic feedback for virtual keyboard key
-     * press/release, for example.
-     *
-     * @hide
-     */
-    public static final int CATEGORY_KEYBOARD = 1;
 
     /**
      * @hide
@@ -174,7 +159,6 @@ public final class VibrationAttributes implements Parcelable {
             FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
             FLAG_INVALIDATE_SETTINGS_CACHE,
             FLAG_PIPELINED_EFFECT,
-            FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flag{}
@@ -228,31 +212,12 @@ public final class VibrationAttributes implements Parcelable {
     public static final int FLAG_PIPELINED_EFFECT = 1 << 3;
 
     /**
-     * Flag requesting that this vibration effect to be played without applying the user
-     * intensity setting to scale the vibration.
-     *
-     * <p>The user setting is still applied to enable/disable the vibration, but the vibration
-     * effect strength will not be scaled based on the enabled setting value.
-     *
-     * <p>This is intended to be used on scenarios where the system needs to enforce a specific
-     * strength for the vibration effect, regardless of the user preference. Only privileged apps
-     * can ignore user settings, and this flag will be ignored otherwise.
-     *
-     * <p>If you need to bypass the user setting when it's disabling vibrations then this also
-     * needs the flag {@link #FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF} to be set.
-     *
-     * @hide
-     */
-    public static final int FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE = 1 << 4;
-
-    /**
      * All flags supported by vibrator service, update it when adding new flag.
      * @hide
      */
     public static final int FLAG_ALL_SUPPORTED =
             FLAG_BYPASS_INTERRUPTION_POLICY | FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
-                    | FLAG_INVALIDATE_SETTINGS_CACHE | FLAG_PIPELINED_EFFECT
-                    | FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
+                    | FLAG_INVALIDATE_SETTINGS_CACHE | FLAG_PIPELINED_EFFECT;
 
     /** Creates a new {@link VibrationAttributes} instance with given usage. */
     public static @NonNull VibrationAttributes createForUsage(@Usage int usage) {
@@ -262,14 +227,12 @@ public final class VibrationAttributes implements Parcelable {
     private final int mUsage;
     private final int mFlags;
     private final int mOriginalAudioUsage;
-    private final int mCategory;
 
     private VibrationAttributes(@Usage int usage, @AudioAttributes.AttributeUsage int audioUsage,
-            @Flag int flags, @Category int category) {
+            @Flag int flags) {
         mUsage = usage;
         mOriginalAudioUsage = audioUsage;
         mFlags = flags & FLAG_ALL_SUPPORTED;
-        mCategory = category;
     }
 
     /**
@@ -307,20 +270,6 @@ public final class VibrationAttributes implements Parcelable {
     }
 
     /**
-     * Return the vibration category.
-     *
-     * <p>Vibration categories describe the source of the vibration, and it can be combined with
-     * the vibration usage to best match to a user setting, e.g. a vibration with usage touch and
-     * category keyboard can be used to control keyboard haptic feedback independently.
-     *
-     * @hide
-     */
-    @Category
-    public int getCategory() {
-        return mCategory;
-    }
-
-    /**
      * Check whether a flag is set
      * @return true if a flag is set and false otherwise
      */
@@ -349,6 +298,7 @@ public final class VibrationAttributes implements Parcelable {
             case USAGE_RINGTONE:
                 return AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
             case USAGE_TOUCH:
+            case USAGE_IME_FEEDBACK:
                 return AudioAttributes.USAGE_ASSISTANCE_SONIFICATION;
             case USAGE_ALARM:
                 return AudioAttributes.USAGE_ALARM;
@@ -371,14 +321,12 @@ public final class VibrationAttributes implements Parcelable {
         dest.writeInt(mUsage);
         dest.writeInt(mOriginalAudioUsage);
         dest.writeInt(mFlags);
-        dest.writeInt(mCategory);
     }
 
     private VibrationAttributes(Parcel src) {
         mUsage = src.readInt();
         mOriginalAudioUsage = src.readInt();
         mFlags = src.readInt();
-        mCategory = src.readInt();
     }
 
     public static final @NonNull Parcelable.Creator<VibrationAttributes>
@@ -401,12 +349,12 @@ public final class VibrationAttributes implements Parcelable {
         }
         VibrationAttributes rhs = (VibrationAttributes) o;
         return mUsage == rhs.mUsage && mOriginalAudioUsage == rhs.mOriginalAudioUsage
-                && mFlags == rhs.mFlags && mCategory == rhs.mCategory;
+                && mFlags == rhs.mFlags;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUsage, mOriginalAudioUsage, mFlags, mCategory);
+        return Objects.hash(mUsage, mOriginalAudioUsage, mFlags);
     }
 
     @Override
@@ -414,7 +362,6 @@ public final class VibrationAttributes implements Parcelable {
         return "VibrationAttributes{"
                 + "mUsage=" + usageToString()
                 + ", mAudioUsage= " + AudioAttributes.usageToString(mOriginalAudioUsage)
-                + ", mCategory=" + categoryToString()
                 + ", mFlags=" + mFlags
                 + '}';
     }
@@ -447,25 +394,10 @@ public final class VibrationAttributes implements Parcelable {
                 return "PHYSICAL_EMULATION";
             case USAGE_HARDWARE_FEEDBACK:
                 return "HARDWARE_FEEDBACK";
+            case USAGE_IME_FEEDBACK:
+                return "IME";
             default:
                 return "unknown usage " + usage;
-        }
-    }
-
-    /** @hide */
-    public String categoryToString() {
-        return categoryToString(mCategory);
-    }
-
-    /** @hide */
-    public static String categoryToString(@Category int category) {
-        switch (category) {
-            case CATEGORY_UNKNOWN:
-                return "UNKNOWN";
-            case CATEGORY_KEYBOARD:
-                return "KEYBOARD";
-            default:
-                return "unknown category " + category;
         }
     }
 
@@ -478,7 +410,6 @@ public final class VibrationAttributes implements Parcelable {
         private int mUsage = USAGE_UNKNOWN;
         private int mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;
         private int mFlags = 0x0;
-        private int mCategory = CATEGORY_UNKNOWN;
 
         /**
          * Constructs a new Builder with the defaults.
@@ -494,7 +425,6 @@ public final class VibrationAttributes implements Parcelable {
                 mUsage = vib.mUsage;
                 mOriginalAudioUsage = vib.mOriginalAudioUsage;
                 mFlags = vib.mFlags;
-                mCategory = vib.mCategory;
             }
         }
 
@@ -561,7 +491,7 @@ public final class VibrationAttributes implements Parcelable {
          */
         public @NonNull VibrationAttributes build() {
             VibrationAttributes ans = new VibrationAttributes(
-                    mUsage, mOriginalAudioUsage, mFlags, mCategory);
+                    mUsage, mOriginalAudioUsage, mFlags);
             return ans;
         }
 
@@ -573,19 +503,6 @@ public final class VibrationAttributes implements Parcelable {
         public @NonNull Builder setUsage(@Usage int usage) {
             mOriginalAudioUsage = AudioAttributes.USAGE_UNKNOWN;
             mUsage = usage;
-            return this;
-        }
-
-        /**
-         * Sets the attribute describing the category of the corresponding vibration.
-         *
-         * @param category The category for the vibration
-         * @return the same Builder instance.
-         *
-         * @hide
-         */
-        public @NonNull Builder setCategory(@Category int category) {
-            mCategory = category;
             return this;
         }
 

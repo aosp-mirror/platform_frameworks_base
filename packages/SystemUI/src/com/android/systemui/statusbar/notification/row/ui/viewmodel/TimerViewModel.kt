@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.notification.row.ui.viewmodel
 import android.annotation.DrawableRes
 import android.annotation.StringRes
 import android.app.PendingIntent
-import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.row.domain.interactor.NotificationRowInteractor
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingNotificationFlag
@@ -44,7 +44,7 @@ constructor(
 
     private val state: Flow<TimerState> = rowInteractor.timerContentModel.mapNotNull { it.state }
 
-    val icon: Flow<Drawable?> = rowInteractor.timerContentModel.mapNotNull { it.icon.drawable }
+    val icon: Flow<Icon?> = rowInteractor.timerContentModel.mapNotNull { it.icon.icon }
 
     val label: Flow<String> = rowInteractor.timerContentModel.mapNotNull { it.name }
 
@@ -57,13 +57,13 @@ constructor(
         state.map {
             when (it) {
                 is TimerState.Paused ->
-                    ButtonViewModel(
+                    ButtonViewModel.WithSystemAttrs(
                         it.resumeIntent,
                         com.android.systemui.res.R.string.controls_media_resume, // "Resume",
                         com.android.systemui.res.R.drawable.ic_media_play
                     )
                 is TimerState.Running ->
-                    ButtonViewModel(
+                    ButtonViewModel.WithSystemAttrs(
                         it.pauseIntent,
                         com.android.systemui.res.R.string.controls_media_button_pause, // "Pause",
                         com.android.systemui.res.R.drawable.ic_media_pause
@@ -73,31 +73,41 @@ constructor(
 
     val altButtonModel: Flow<ButtonViewModel?> =
         state.map {
-            when (it) {
-                is TimerState.Paused ->
-                    it.resetIntent?.let { resetIntent ->
-                        ButtonViewModel(
-                            resetIntent,
-                            com.android.systemui.res.R.string.reset, // "Reset",
-                            com.android.systemui.res.R.drawable.ic_close_white_rounded
-                        )
-                    }
-                is TimerState.Running ->
-                    it.addOneMinuteIntent?.let { addOneMinuteIntent ->
-                        ButtonViewModel(
-                            addOneMinuteIntent,
-                            com.android.systemui.res.R.string.add, // "Add 1 minute",
-                            com.android.systemui.res.R.drawable.ic_add
-                        )
-                    }
+            it.addMinuteAction?.let { action ->
+                ButtonViewModel.WithCustomAttrs(
+                    action.actionIntent,
+                    action.title, // "1:00",
+                    action.getIcon()
+                )
             }
         }
 
-    data class ButtonViewModel(
-        val pendingIntent: PendingIntent?,
-        @StringRes val labelRes: Int,
-        @DrawableRes val iconRes: Int,
-    )
+    val resetButtonModel: Flow<ButtonViewModel?> =
+        state.map {
+            it.resetAction?.let { action ->
+                ButtonViewModel.WithCustomAttrs(
+                    action.actionIntent,
+                    action.title, // "Reset",
+                    action.getIcon()
+                )
+            }
+        }
+
+    sealed interface ButtonViewModel {
+        val pendingIntent: PendingIntent?
+
+        data class WithSystemAttrs(
+            override val pendingIntent: PendingIntent?,
+            @StringRes val labelRes: Int,
+            @DrawableRes val iconRes: Int,
+        ) : ButtonViewModel
+
+        data class WithCustomAttrs(
+            override val pendingIntent: PendingIntent?,
+            val label: CharSequence,
+            val icon: Icon,
+        ) : ButtonViewModel
+    }
 }
 
 private fun Duration.format(): String {

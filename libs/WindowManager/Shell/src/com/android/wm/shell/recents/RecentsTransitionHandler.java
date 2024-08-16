@@ -19,12 +19,14 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
@@ -63,7 +65,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -74,7 +76,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Handles the Recents (overview) animation. Only one of these can run at a time. A recents
@@ -85,7 +86,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
 
     private final Transitions mTransitions;
     private final ShellExecutor mExecutor;
-    private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
     @Nullable
     private final RecentTasksController mRecentTasksController;
     private IApplicationThread mAnimApp = null;
@@ -103,13 +103,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
 
     public RecentsTransitionHandler(ShellInit shellInit, Transitions transitions,
             @Nullable RecentTasksController recentTasksController,
-            HomeTransitionObserver homeTransitionObserver,
-            Supplier<SurfaceControl.Transaction> transactionSupplier) {
+            HomeTransitionObserver homeTransitionObserver) {
         mTransitions = transitions;
         mExecutor = transitions.getMainExecutor();
         mRecentTasksController = recentTasksController;
         mHomeTransitionObserver = homeTransitionObserver;
-        mTransactionSupplier = transactionSupplier;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) return;
         if (recentTasksController == null) return;
         shellInit.addInitCallback(() -> {
@@ -779,6 +777,20 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     // Don't consider order-only & non-leaf changes as changing apps.
                     if (!TransitionUtil.isOrderOnly(change) && isLeafTask) {
                         hasChangingApp = true;
+                        // Check if the changing app is moving to top and fullscreen. This handles
+                        // the case where we moved from desktop to recents and launching a desktop
+                        // task in fullscreen.
+                        if ((change.getFlags() & FLAG_MOVED_TO_TOP) != 0
+                                && taskInfo != null
+                                && taskInfo.getWindowingMode()
+                                == WINDOWING_MODE_FULLSCREEN) {
+                            if (openingTasks == null) {
+                                openingTasks = new ArrayList<>();
+                                openingTaskIsLeafs = new IntArray();
+                            }
+                            openingTasks.add(change);
+                            openingTaskIsLeafs.add(1);
+                        }
                     } else if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME
                             && !isRecentsTask ) {
                         // Unless it is a 3p launcher. This means that the 3p launcher was already
@@ -1060,7 +1072,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             final Transitions.TransitionFinishCallback finishCB = mFinishCB;
             mFinishCB = null;
 
-            SurfaceControl.Transaction t = mFinishTransaction;
+            final SurfaceControl.Transaction t = mFinishTransaction;
             final WindowContainerTransaction wct = new WindowContainerTransaction();
 
             if (mKeyguardLocked && mRecentsTask != null) {
@@ -1110,16 +1122,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     }
                 }
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION, "  normal finish");
-                if (toHome && !mOpeningTasks.isEmpty()) {
-                    // Attempting to start a task after swipe to home, don't show it,
-                    // move recents to top
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                            "  attempting to start a task after swipe to home");
-                    t = mTransactionSupplier.get();
-                    wct.reorder(mRecentsTask, true /*onTop*/);
-                    mClosingTasks.addAll(mOpeningTasks);
-                    mOpeningTasks.clear();
-                }
                 // The general case: committing to recents, going home, or switching tasks.
                 for (int i = 0; i < mOpeningTasks.size(); ++i) {
                     t.show(mOpeningTasks.get(i).mTaskSurface);
@@ -1187,10 +1189,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     mPipTask = null;
                     mPipTransaction = null;
                 }
-            }
-            if (t != mFinishTransaction) {
-                // apply after merges because these changes are accounting for finishWCT changes.
-                mTransitions.setAfterMergeFinishTransaction(mTransition, t);
             }
             cleanUp();
             finishCB.onTransitionFinished(wct.isEmpty() ? null : wct);

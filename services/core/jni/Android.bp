@@ -79,6 +79,7 @@ cc_library_static {
         "com_android_server_wm_TaskFpsCallbackController.cpp",
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
+        ":lib_freezer_native",
         ":lib_gameManagerService_native",
         ":lib_oomConnection_native",
         ":lib_anrTimer_native",
@@ -193,7 +194,7 @@ cc_defaults {
         "android.hardware.thermal-V2-ndk",
         "android.hardware.tv.input@1.0",
         "android.hardware.tv.input-V2-ndk",
-        "android.hardware.vibrator-V2-cpp",
+        "android.hardware.vibrator-V3-ndk",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
@@ -236,6 +237,13 @@ filegroup {
     name: "lib_cachedAppOptimizer_native",
     srcs: [
         "com_android_server_am_CachedAppOptimizer.cpp",
+    ],
+}
+
+filegroup {
+    name: "lib_freezer_native",
+    srcs: [
+        "com_android_server_am_Freezer.cpp",
     ],
 }
 

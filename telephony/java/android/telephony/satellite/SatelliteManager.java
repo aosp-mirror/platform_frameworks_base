@@ -233,6 +233,21 @@ public final class SatelliteManager {
     public static final String KEY_NTN_SIGNAL_STRENGTH = "ntn_signal_strength";
 
     /**
+     * Bundle key to get the response from
+     * {@link #requestSatelliteSubscriberProvisionStatus(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN =
+            "request_provision_subscriber_id";
+
+    /**
+     * Bundle key to get the response from
+     * {@link #provisionSatellite(List, Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_PROVISION_SATELLITE_TOKENS = "provision_satellite";
+
+    /**
      * The request was successfully processed.
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -389,6 +404,14 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_LOCATION_NOT_AVAILABLE = 26;
 
+    /**
+     * Emergency call is in progress.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS = 27;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -417,7 +440,8 @@ public final class SatelliteManager {
             SATELLITE_RESULT_ILLEGAL_STATE,
             SATELLITE_RESULT_MODEM_TIMEOUT,
             SATELLITE_RESULT_LOCATION_DISABLED,
-            SATELLITE_RESULT_LOCATION_NOT_AVAILABLE
+            SATELLITE_RESULT_LOCATION_NOT_AVAILABLE,
+            SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}
@@ -1055,6 +1079,11 @@ public final class SatelliteManager {
      * @hide
      */
     public static final int DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED = 5;
+    /**
+     * Datagram type indicating that the message to be sent or received is of type SMS.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_SMS = 6;
 
     /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
@@ -1063,7 +1092,8 @@ public final class SatelliteManager {
             DATAGRAM_TYPE_LOCATION_SHARING,
             DATAGRAM_TYPE_KEEP_ALIVE,
             DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP,
-            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED
+            DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED,
+            DATAGRAM_TYPE_SMS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
@@ -1367,6 +1397,16 @@ public final class SatelliteManager {
                                         () -> callback.onSatelliteProvisionStateChanged(
                                                 provisioned)));
                             }
+
+                            @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+                            @Override
+                            public void onSatelliteSubscriptionProvisionStateChanged(
+                                    @NonNull List<SatelliteSubscriberProvisionStatus>
+                                            satelliteSubscriberProvisionStatus) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onSatelliteSubscriptionProvisionStateChanged(
+                                                satelliteSubscriberProvisionStatus)));
+                            }
                         };
                 sSatelliteProvisionStateCallbackMap.put(callback, internalCallback);
                 return telephony.registerForSatelliteProvisionStateChanged(
@@ -1501,6 +1541,12 @@ public final class SatelliteManager {
                     public void onSatelliteModemStateChanged(int state) {
                         executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                 callback.onSatelliteModemStateChanged(state)));
+                    }
+
+                    @Override
+                    public void onEmergencyModeChanged(boolean isEmergency) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                callback.onEmergencyModeChanged(isEmergency)));
                     }
                 };
                 sSatelliteModemStateCallbackMap.put(callback, internalCallback);
@@ -2575,6 +2621,125 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("requestSessionStats() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Request to get list of prioritized satellite subscriber ids to be used for provision.
+     *
+     * Satellite Gateway client will use these subscriber ids to register with satellite gateway
+     * service which identify user subscription with unique subscriber ids. These subscriber ids
+     * can be any unique value like iccid, imsi or msisdn which is decided based upon carrier
+     * requirements.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     * If successful, the callback returns a list of tokens sorted in ascending priority order index
+     * 0 has the highest priority. Otherwise, it returns an error with a SatelliteException.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public void requestSatelliteSubscriberProvisionStatus(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<List<SatelliteSubscriberProvisionStatus>,
+                    SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN)) {
+                                List<SatelliteSubscriberProvisionStatus> list =
+                                        resultData.getParcelableArrayList(
+                                                KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN,
+                                                SatelliteSubscriberProvisionStatus.class);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(list)));
+                            } else {
+                                loge("KEY_REQUEST_PROVISION_SUBSCRIBER_ID_TOKEN does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestSatelliteSubscriberProvisionStatus(receiver);
+            } else {
+                loge("requestSatelliteSubscriberProvisionStatus() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestSatelliteSubscriberProvisionStatus() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Deliver the list of provisioned satellite subscriber infos.
+     *
+     * @param list The list of provisioned satellite subscriber infos.
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public void provisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_PROVISION_SATELLITE_TOKENS)) {
+                                boolean isUpdated =
+                                        resultData.getBoolean(KEY_PROVISION_SATELLITE_TOKENS);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(isUpdated)));
+                            } else {
+                                loge("KEY_REQUEST_PROVISION_TOKENS does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.provisionSatellite(list, receiver);
+            } else {
+                loge("provisionSatellite() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("provisionSatellite() RemoteException: " + ex);
             executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                     new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }

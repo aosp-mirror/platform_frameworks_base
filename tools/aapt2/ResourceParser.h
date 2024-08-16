@@ -27,6 +27,7 @@
 #include "androidfw/IDiagnostics.h"
 #include "androidfw/StringPiece.h"
 #include "androidfw/StringPool.h"
+#include "cmd/Util.h"
 #include "xml/XmlPullParser.h"
 
 namespace aapt {
@@ -54,6 +55,8 @@ struct ResourceParserOptions {
   // If visibility was forced, we need to use it when creating a new resource and also error if we
   // try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
   std::optional<Visibility::Level> visibility;
+
+  FeatureFlagValues feature_flag_values;
 };
 
 struct FlattenedXmlSubTree {
@@ -81,6 +84,8 @@ class ResourceParser {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceParser);
+
+  std::optional<FlagStatus> GetFlagStatus(xml::XmlPullParser* parser);
 
   std::optional<FlattenedXmlSubTree> CreateFlattenSubTree(xml::XmlPullParser* parser);
 

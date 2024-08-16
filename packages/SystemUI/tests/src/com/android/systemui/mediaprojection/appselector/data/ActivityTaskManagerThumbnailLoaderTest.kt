@@ -104,6 +104,7 @@ class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {
             WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
             /* appearance= */ 0,
             /* isTranslucent= */ false,
-            /* hasImeSurface= */ false
+            /* hasImeSurface= */ false,
+            /* uiMode */ 0
         )
 }

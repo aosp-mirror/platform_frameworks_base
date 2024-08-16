@@ -55,9 +55,9 @@ import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
-import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Type.ClassType;
+import com.sun.tools.javac.tree.JCTree.JCNewClass;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import javax.lang.model.element.Name;
@@ -125,6 +124,12 @@ public final class RequiresPermissionChecker extends BugChecker
             instanceMethod()
                     .onDescendantOf("android.content.Context")
                     .withNameMatching(Pattern.compile("^send(Ordered|Sticky)?Broadcast.*$")));
+    private static final Matcher<ExpressionTree> SEND_BROADCAST_AS_USER =
+            methodInvocation(
+                    instanceMethod()
+                            .onDescendantOf("android.content.Context")
+                            .withNameMatching(
+                                    Pattern.compile("^send(Ordered|Sticky)?Broadcast.*AsUser.*$")));
     private static final Matcher<ExpressionTree> SEND_PENDING_INTENT = methodInvocation(
             instanceMethod()
                     .onDescendantOf("android.app.PendingIntent")
@@ -306,18 +311,6 @@ public final class RequiresPermissionChecker extends BugChecker
         }
     }
 
-    private static ExpressionTree findArgumentByParameterName(MethodInvocationTree tree,
-            Predicate<String> paramName) {
-        final MethodSymbol sym = ASTHelpers.getSymbol(tree);
-        final List<VarSymbol> params = sym.getParameters();
-        for (int i = 0; i < params.size(); i++) {
-            if (paramName.test(params.get(i).name.toString())) {
-                return tree.getArguments().get(i);
-            }
-        }
-        return null;
-    }
-
     private static Name resolveName(ExpressionTree tree) {
         if (tree instanceof IdentifierTree) {
             return ((IdentifierTree) tree).getName();
@@ -345,76 +338,85 @@ public final class RequiresPermissionChecker extends BugChecker
 
     private static ParsedRequiresPermission parseBroadcastSourceRequiresPermission(
             MethodInvocationTree methodTree, VisitorState state) {
-        final ExpressionTree arg = findArgumentByParameterName(methodTree,
-                (name) -> name.toLowerCase().contains("intent"));
-        if (arg instanceof IdentifierTree) {
-            final Name argName = ((IdentifierTree) arg).getName();
-            final MethodTree method = state.findEnclosing(MethodTree.class);
-            final AtomicReference<ParsedRequiresPermission> res = new AtomicReference<>();
-            method.accept(new TreeScanner<Void, Void>() {
-                private ParsedRequiresPermission last;
+        if (methodTree.getArguments().size() < 1) {
+            return null;
+        }
+        final ExpressionTree arg = methodTree.getArguments().get(0);
+        if (!(arg instanceof IdentifierTree)) {
+            return null;
+        }
+        final Name argName = ((IdentifierTree) arg).getName();
+        final MethodTree method = state.findEnclosing(MethodTree.class);
+        final AtomicReference<ParsedRequiresPermission> res = new AtomicReference<>();
+        method.accept(new TreeScanner<Void, Void>() {
+            private ParsedRequiresPermission mLast;
 
-                @Override
-                public Void visitMethodInvocation(MethodInvocationTree tree, Void param) {
-                    if (Objects.equal(methodTree, tree)) {
-                        res.set(last);
-                    } else {
-                        final Name name = resolveName(tree.getMethodSelect());
-                        if (Objects.equal(argName, name)
-                                && INTENT_SET_ACTION.matches(tree, state)) {
-                            last = parseIntentAction(tree);
+            @Override
+            public Void visitMethodInvocation(MethodInvocationTree tree, Void param) {
+                if (Objects.equal(methodTree, tree)) {
+                    res.set(mLast);
+                } else {
+                    final Name name = resolveName(tree.getMethodSelect());
+                    if (Objects.equal(argName, name) && INTENT_SET_ACTION.matches(tree, state)) {
+                        mLast = parseIntentAction(tree);
+                    } else if (name == null && tree.getMethodSelect() instanceof MemberSelectTree) {
+                        ExpressionTree innerTree =
+                                ((MemberSelectTree) tree.getMethodSelect()).getExpression();
+                        if (innerTree instanceof JCNewClass) {
+                            mLast = parseIntentAction((NewClassTree) innerTree);
                         }
                     }
-                    return super.visitMethodInvocation(tree, param);
                 }
+                return super.visitMethodInvocation(tree, param);
+            }
 
-                @Override
-                public Void visitAssignment(AssignmentTree tree, Void param) {
-                    final Name name = resolveName(tree.getVariable());
-                    final Tree init = tree.getExpression();
-                    if (Objects.equal(argName, name)
-                            && init instanceof NewClassTree) {
-                        last = parseIntentAction((NewClassTree) init);
-                    }
-                    return super.visitAssignment(tree, param);
+            @Override
+            public Void visitAssignment(AssignmentTree tree, Void param) {
+                final Name name = resolveName(tree.getVariable());
+                final Tree init = tree.getExpression();
+                if (Objects.equal(argName, name) && init instanceof NewClassTree) {
+                    mLast = parseIntentAction((NewClassTree) init);
                 }
+                return super.visitAssignment(tree, param);
+            }
 
-                @Override
-                public Void visitVariable(VariableTree tree, Void param) {
-                    final Name name = tree.getName();
-                    final ExpressionTree init = tree.getInitializer();
-                    if (Objects.equal(argName, name)
-                            && init instanceof NewClassTree) {
-                        last = parseIntentAction((NewClassTree) init);
-                    }
-                    return super.visitVariable(tree, param);
+            @Override
+            public Void visitVariable(VariableTree tree, Void param) {
+                final Name name = tree.getName();
+                final ExpressionTree init = tree.getInitializer();
+                if (Objects.equal(argName, name) && init instanceof NewClassTree) {
+                    mLast = parseIntentAction((NewClassTree) init);
                 }
-            }, null);
-            return res.get();
-        }
-        return null;
+                return super.visitVariable(tree, param);
+            }
+        }, null);
+        return res.get();
     }
 
     private static ParsedRequiresPermission parseBroadcastTargetRequiresPermission(
             MethodInvocationTree tree, VisitorState state) {
-        final ExpressionTree arg = findArgumentByParameterName(tree,
-                (name) -> name.toLowerCase().contains("permission"));
         final ParsedRequiresPermission res = new ParsedRequiresPermission();
-        if (arg != null) {
-            arg.accept(new TreeScanner<Void, Void>() {
-                @Override
-                public Void visitIdentifier(IdentifierTree tree, Void param) {
-                    res.addConstValue(tree);
-                    return super.visitIdentifier(tree, param);
-                }
-
-                @Override
-                public Void visitMemberSelect(MemberSelectTree tree, Void param) {
-                    res.addConstValue(tree);
-                    return super.visitMemberSelect(tree, param);
-                }
-            }, null);
+        int permission_position = 1;
+        if (SEND_BROADCAST_AS_USER.matches(tree, state)) {
+            permission_position = 2;
         }
+        if (tree.getArguments().size() < permission_position + 1) {
+            return res;
+        }
+        final ExpressionTree arg = tree.getArguments().get(permission_position);
+        arg.accept(new TreeScanner<Void, Void>() {
+            @Override
+            public Void visitIdentifier(IdentifierTree tree, Void param) {
+                res.addConstValue(tree);
+                return super.visitIdentifier(tree, param);
+            }
+
+            @Override
+            public Void visitMemberSelect(MemberSelectTree tree, Void param) {
+                res.addConstValue(tree);
+                return super.visitMemberSelect(tree, param);
+            }
+        }, null);
         return res;
     }
 

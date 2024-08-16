@@ -141,6 +141,7 @@ constructor(
     private val communalSceneInteractor: CommunalSceneInteractor,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
+    // TODO(b/349784682): Transform deprecated states for Flexiglass
     private val statesForConstrainedNotifications: Set<KeyguardState> =
         setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
     private val statesForHiddenKeyguard: Set<KeyguardState> = setOf(GONE, OCCLUDED)
@@ -186,7 +187,6 @@ constructor(
         interactor.configurationBasedDimensions
             .map {
                 when {
-                    !it.useSplitShade -> 0
                     it.useLargeScreenHeader -> it.marginTopLargeScreen
                     else -> it.marginTop
                 }
@@ -287,7 +287,7 @@ constructor(
     /** Are we on the dream without the shade/qs? */
     private val isDreamingWithoutShade: Flow<Boolean> =
         combine(
-                keyguardTransitionInteractor.isFinishedInState(DREAMING),
+                keyguardTransitionInteractor.isFinishedIn(DREAMING),
                 isAnyExpanded,
             ) { isDreaming, isAnyExpanded ->
                 isDreaming && !isAnyExpanded
@@ -372,7 +372,7 @@ constructor(
                 paddingTopDimen,
                 interactor.topPosition
                     .sampleCombine(
-                        keyguardTransitionInteractor.isInTransitionToAnyState,
+                        keyguardTransitionInteractor.isInTransition,
                         shadeInteractor.qsExpansion,
                     )
                     .onStart { emit(Triple(0f, false, 0f)) }
@@ -511,7 +511,7 @@ constructor(
                 occludedToAodTransitionViewModel.lockscreenAlpha,
                 occludedToGoneTransitionViewModel.notificationAlpha(viewState),
                 occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-                primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
+                primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                 glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
                 lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
             )

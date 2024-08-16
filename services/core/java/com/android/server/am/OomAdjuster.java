@@ -1708,6 +1708,11 @@ public class OomAdjuster {
                 // priority for this non-top split.
                 schedGroup = SCHED_GROUP_TOP_APP;
                 mAdjType = "resumed-split-screen-activity";
+            } else if ((flags
+                    & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0) {
+                // The recently used non-top visible freeform app.
+                schedGroup = SCHED_GROUP_TOP_APP;
+                mAdjType = "perceptible-freeform-activity";
             }
             foregroundActivities = true;
             mHasVisibleActivities = true;
@@ -2857,6 +2862,11 @@ public class OomAdjuster {
                             // Bail out early, as we only care about the return value for a dryrun.
                             return true;
                         }
+                    }
+
+                    if (newAdj == clientAdj && app.isolated) {
+                        // Make bound isolated processes have slightly worse score than their client
+                        newAdj = clientAdj + 1;
                     }
 
                     if (adj >  newAdj) {

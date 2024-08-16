@@ -62,7 +62,7 @@ class AirplaneModeRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        settings = FakeGlobalSettings()
+        settings = FakeGlobalSettings(testContext)
 
         whenever(telephonyManager.emergencyCallbackMode).thenReturn(false)
         whenever(subscriptionManager.activeSubscriptionIdList).thenReturn(intArrayOf())

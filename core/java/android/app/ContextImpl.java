@@ -1160,7 +1160,7 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivity(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intent, -1, options);
+                (Activity) null, intent, -1, applyLaunchDisplayIfNeeded(options));
     }
 
     /** @hide */
@@ -1170,8 +1170,8 @@ class ContextImpl extends Context {
             ActivityTaskManager.getService().startActivityAsUser(
                     mMainThread.getApplicationThread(), getOpPackageName(), getAttributionTag(),
                     intent, intent.resolveTypeIfNeeded(getContentResolver()),
-                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options,
-                    user.getIdentifier());
+                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
+                    applyLaunchDisplayIfNeeded(options), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1194,7 +1194,8 @@ class ContextImpl extends Context {
         }
         return mMainThread.getInstrumentation().execStartActivitiesAsUser(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intents, options, userHandle.getIdentifier());
+                (Activity) null, intents, applyLaunchDisplayIfNeeded(options),
+                userHandle.getIdentifier());
     }
 
     @Override
@@ -1208,7 +1209,26 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivities(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intents, options);
+                (Activity) null, intents, applyLaunchDisplayIfNeeded(options));
+    }
+
+    private Bundle applyLaunchDisplayIfNeeded(@Nullable Bundle options) {
+        if (!isAssociatedWithDisplay()) {
+            // return if this Context has no associated display.
+            return options;
+        }
+
+        final ActivityOptions activityOptions;
+        if (options != null) {
+            activityOptions = ActivityOptions.fromBundle(options);
+            if (ActivityOptions.hasLaunchTargetContainer(activityOptions)) {
+                // return if the options already has launching target.
+                return options;
+            }
+        } else {
+            activityOptions = ActivityOptions.makeBasic();
+        }
+        return activityOptions.setLaunchDisplayId(getAssociatedDisplayId()).toBundle();
     }
 
     @Override
@@ -1552,6 +1572,17 @@ class ContextImpl extends Context {
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, int appOp, Bundle options, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
+        String[] receiverPermissions = receiverPermission == null ? null
+                : new String[] {receiverPermission};
+        sendOrderedBroadcastAsUserMultiplePermissions(intent, user, receiverPermissions, appOp,
+                options, resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
+    public void sendOrderedBroadcastAsUserMultiplePermissions(Intent intent, UserHandle user,
+            String[] receiverPermissions, int appOp, Bundle options,
+            BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
+            String initialData, Bundle initialExtras) {
         IIntentReceiver rd = null;
         if (resultReceiver != null) {
             if (mPackageInfo != null) {
@@ -1571,8 +1602,6 @@ class ContextImpl extends Context {
             }
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
-        String[] receiverPermissions = receiverPermission == null ? null
-                : new String[] {receiverPermission};
         try {
             intent.prepareToLeaveProcess(this);
             ActivityManager.getService().broadcastIntentWithFeature(
@@ -1595,6 +1624,20 @@ class ContextImpl extends Context {
         }
         sendOrderedBroadcastAsUser(intent, getUser(),
                 receiverPermission, intAppOp, resultReceiver, scheduler, initialCode, initialData,
+                initialExtras);
+    }
+
+    @Override
+    public void sendOrderedBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
+            String receiverAppOp, BroadcastReceiver resultReceiver, Handler scheduler,
+            int initialCode, String initialData, @Nullable Bundle initialExtras,
+            @Nullable Bundle options) {
+        int intAppOp = AppOpsManager.OP_NONE;
+        if (!TextUtils.isEmpty(receiverAppOp)) {
+            intAppOp = AppOpsManager.strOpToOp(receiverAppOp);
+        }
+        sendOrderedBroadcastAsUserMultiplePermissions(intent, getUser(), receiverPermissions,
+                intAppOp, options, resultReceiver, scheduler, initialCode, initialData,
                 initialExtras);
     }
 

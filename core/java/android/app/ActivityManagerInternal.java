@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
 /**
@@ -960,6 +961,17 @@ public abstract class ActivityManagerInternal {
             @Nullable VoiceInteractionManagerProvider provider);
 
     /**
+     * Get whether or not the previous user's packages will be killed before the user is
+     * stopped during a user switch.
+     *
+     * <p> The primary use case of this method is for {@link com.android.server.SystemService}
+     * classes to call this API in their
+     * {@link com.android.server.SystemService#onUserSwitching} method implementation to prevent
+     * restarting any of the previous user's processes that will be killed during the user switch.
+     */
+    public abstract boolean isEarlyPackageKillEnabledForUserSwitch(int fromUserId, int toUserId);
+
+    /**
      * Sets whether the current foreground user (and its profiles) should be stopped after switched
      * out.
      */
@@ -1266,6 +1278,28 @@ public abstract class ActivityManagerInternal {
      * @hide
      */
     public abstract boolean shouldDelayHomeLaunch(int userId);
+
+    /**
+     * Used to track when a process is frozen or unfrozen.
+     */
+    public interface FrozenProcessListener {
+        /**
+         * Called when a process is frozen.
+         */
+        void onProcessFrozen(int pid);
+
+        /**
+         * Called when a process is unfrozen.
+         */
+        void onProcessUnfrozen(int pid);
+    }
+
+    /**
+     * Register the frozen process event listener callback. The same listener may be reused for
+     * multiple pids. Listeners are dropped when the process dies.
+     */
+    public abstract void addFrozenProcessListener(int pid, @NonNull Executor executor,
+            @NonNull FrozenProcessListener listener);
 
     /**
      * Add a startup timestamp to the most recent start of the specified process.

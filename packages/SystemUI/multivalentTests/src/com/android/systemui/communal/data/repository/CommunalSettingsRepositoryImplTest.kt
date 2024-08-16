@@ -68,6 +68,38 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
     @Test
+    fun getFlagEnabled_bothEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
+        assertThat(underTest.getFlagEnabled()).isTrue()
+    }
+
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_bothDisabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyClassicFlagEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyTrunkFlagEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
     fun secondaryUserIsInvalid() =
         testScope.runTest {
             val enabledState by collectLastValue(underTest.getEnabledState(SECONDARY_USER))
@@ -185,7 +217,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
     fun backgroundType_defaultValue() =
         testScope.runTest {
             val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))
-            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.DEFAULT)
+            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.ANIMATED)
         }
 
     @Test

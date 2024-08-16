@@ -19,9 +19,10 @@ package com.android.systemui.keyguard.domain.interactor
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardSurfaceBehindRepository
-import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor.Companion.isSurfaceVisible
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.toPx
@@ -56,12 +57,18 @@ constructor(
      */
     val viewParams: Flow<KeyguardSurfaceBehindModel> =
         combine(
-                transitionInteractor.startedKeyguardTransitionStep,
-                transitionInteractor.currentKeyguardState,
+                transitionInteractor.isInTransition(
+                    edge = Edge.create(to = Scenes.Gone),
+                    edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE),
+                ),
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
+                ),
                 notificationLaunchInteractor.isLaunchAnimationRunning,
-            ) { startedStep, currentState, notifAnimationRunning ->
+            ) { transitioningToGone, isOnGone, notifAnimationRunning ->
                 // If we're in transition to GONE, special unlock animation params apply.
-                if (startedStep.to == KeyguardState.GONE && currentState != KeyguardState.GONE) {
+                if (transitioningToGone) {
                     if (notifAnimationRunning) {
                         // If the notification launch animation is running, leave the alpha at 0f.
                         // The ActivityLaunchAnimator will morph it from the notification at the
@@ -87,14 +94,14 @@ constructor(
                             animateFromTranslationY =
                                 SURFACE_TRANSLATION_Y_DISTANCE_DP.toPx(context).toFloat(),
                             translationY = 0f,
-                            startVelocity = swipeToDismissInteractor.dismissFling.value?.velocity
-                                    ?: 0f,
+                            startVelocity =
+                                swipeToDismissInteractor.dismissFling.value?.velocity ?: 0f,
                         )
                     }
                 }
 
                 // Default to the visibility of the current state, with no animations.
-                KeyguardSurfaceBehindModel(alpha = if (isSurfaceVisible(currentState)) 1f else 0f)
+                KeyguardSurfaceBehindModel(alpha = if (isOnGone) 1f else 0f)
             }
             .distinctUntilChanged()
 
@@ -103,10 +110,14 @@ constructor(
      */
     private val isNotificationLaunchAnimationRunningOnKeyguard =
         notificationLaunchInteractor.isLaunchAnimationRunning
-            .sample(transitionInteractor.finishedKeyguardState, ::Pair)
-            .map { (animationRunning, finishedState) ->
-                animationRunning && finishedState != KeyguardState.GONE
-            }
+            .sample(
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
+                ),
+                ::Pair
+            )
+            .map { (animationRunning, isOnGone) -> animationRunning && !isOnGone }
             .onStart { emit(false) }
 
     /**

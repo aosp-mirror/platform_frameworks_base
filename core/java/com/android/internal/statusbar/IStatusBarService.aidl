@@ -61,8 +61,7 @@ interface IStatusBarService
     void setIconVisibility(String slot, boolean visible);
     @UnsupportedAppUsage
     void removeIcon(String slot);
-    void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher);
+    void setImeWindowStatus(int displayId, int vis, int backDisposition, boolean showImeSwitcher);
     void expandSettingsPanel(String subPanel);
 
     // ---- Methods below are for use by the status bar policy services ----

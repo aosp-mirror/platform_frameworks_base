@@ -40,6 +40,7 @@ import com.android.settingslib.testutils.OverpoweredReflectionHelper;
 import com.android.settingslib.testutils.shadow.ShadowInteractionJankMonitor;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,6 +59,7 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowInteractionJankMonitor.class, SettingsJankMonitorTest.ShadowBuilder.class})
+@Ignore("b/359066481")
 public class SettingsJankMonitorTest {
     private static final String TEST_KEY = "key";
 

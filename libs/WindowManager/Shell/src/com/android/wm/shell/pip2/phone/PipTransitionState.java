@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.util.Preconditions;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -62,6 +63,8 @@ import java.util.List;
  * and throw an <code>IllegalStateException</code> otherwise.</p>
  */
 public class PipTransitionState {
+    private static final String TAG = PipTransitionState.class.getSimpleName();
+
     public static final int UNDEFINED = 0;
 
     // State for Launcher animating the swipe PiP to home animation.
@@ -146,6 +149,12 @@ public class PipTransitionState {
     @Nullable
     private SurfaceControl mSwipePipToHomeOverlay;
 
+    //
+    // Scheduling-related state
+    //
+    @Nullable
+    private Runnable mOnIdlePipTransitionStateRunnable;
+
     /**
      * An interface to track state updates as we progress through PiP transitions.
      */
@@ -190,9 +199,12 @@ public class PipTransitionState {
                     "No extra bundle for " + stateToString(state) + " state.");
         }
         if (mState != state) {
-            dispatchPipTransitionStateChanged(mState, state, extra);
+            final int prevState = mState;
             mState = state;
+            dispatchPipTransitionStateChanged(prevState, mState, extra);
         }
+
+        maybeRunOnIdlePipTransitionStateCallback();
     }
 
     /**
@@ -224,6 +236,29 @@ public class PipTransitionState {
     private void dispatchPipTransitionStateChanged(@TransitionState int oldState,
             @TransitionState int newState, @Nullable Bundle extra) {
         mCallbacks.forEach(l -> l.onPipTransitionStateChanged(oldState, newState, extra));
+    }
+
+    /**
+     * Schedule a callback to run when in a valid idle PiP state.
+     *
+     * <p>We only allow for one callback to be scheduled to avoid cases with multiple transitions
+     * being scheduled. For instance, if user double taps and IME shows, this would
+     * schedule a bounds change transition for IME appearing. But if some other transition would
+     * want to animate PiP before the scheduled callback executes, we would rather want to replace
+     * the existing callback with a new one, to avoid multiple animations
+     * as soon as we are idle.</p>
+     */
+    public void setOnIdlePipTransitionStateRunnable(
+            @Nullable Runnable onIdlePipTransitionStateRunnable) {
+        mOnIdlePipTransitionStateRunnable = onIdlePipTransitionStateRunnable;
+        maybeRunOnIdlePipTransitionStateCallback();
+    }
+
+    private void maybeRunOnIdlePipTransitionStateCallback() {
+        if (mOnIdlePipTransitionStateRunnable != null && isPipStateIdle()) {
+            mOnIdlePipTransitionStateRunnable.run();
+            mOnIdlePipTransitionStateRunnable = null;
+        }
     }
 
     /**
@@ -314,9 +349,21 @@ public class PipTransitionState {
         throw new IllegalStateException("Unknown state: " + state);
     }
 
+    public boolean isPipStateIdle() {
+        // This needs to be a valid in-PiP state that isn't a transient state.
+        return mState == ENTERED_PIP || mState == CHANGED_PIP_BOUNDS;
+    }
+
     @Override
     public String toString() {
         return String.format("PipTransitionState(mState=%s, mInSwipePipToHomeTransition=%b)",
                 stateToString(mState), mInSwipePipToHomeTransition);
+    }
+
+    /** Dumps internal state. */
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mState=" + stateToString(mState));
     }
 }

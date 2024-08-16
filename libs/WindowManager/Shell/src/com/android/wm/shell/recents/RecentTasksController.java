@@ -19,8 +19,6 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.FEATURE_PC;
 
-import static com.android.window.flags.Flags.enableDesktopWindowingTaskbarRunningApps;
-import static com.android.window.flags.Flags.enableTaskStackObserverInShell;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
 import android.app.ActivityManager;
@@ -37,13 +35,14 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.IRecentsAnimationRunner;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -52,9 +51,10 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.shared.DesktopModeStatus;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -350,7 +350,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     private void notifyTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
         if (mListener == null
-                || !enableTaskStackObserverInShell()
+                || !DesktopModeFlags.TASK_STACK_OBSERVER_IN_SHELL.isEnabled(mContext)
                 || taskInfo.realActivity == null) {
             return;
         }
@@ -364,7 +364,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private boolean shouldEnableRunningTasksForDesktopMode() {
         return mPcFeatureEnabled
                 || (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && enableDesktopWindowingTaskbarRunningApps());
+                && DesktopModeFlags.TASKBAR_RUNNING_APPS.isEnabled(mContext));
     }
 
     @VisibleForTesting
@@ -457,11 +457,31 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     /**
-     * Find the background task that match the given component.
+     * Returns the top running leaf task ignoring {@param ignoreTaskToken} if it is specified.
+     * NOTE: This path currently makes assumptions that ignoreTaskToken is for the top task.
+     */
+    @Nullable
+    public ActivityManager.RunningTaskInfo getTopRunningTask(
+            @Nullable WindowContainerToken ignoreTaskToken) {
+        List<ActivityManager.RunningTaskInfo> tasks = mActivityTaskManager.getTasks(2,
+                false /* filterOnlyVisibleRecents */);
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RunningTaskInfo task = tasks.get(i);
+            if (task.token.equals(ignoreTaskToken)) {
+                continue;
+            }
+            return task;
+        }
+        return null;
+    }
+
+    /**
+     * Find the background task that match the given component.  Ignores tasks match
+     * {@param ignoreTaskToken} if it is non-null.
      */
     @Nullable
     public ActivityManager.RecentTaskInfo findTaskInBackground(ComponentName componentName,
-            int userId) {
+            int userId, @Nullable WindowContainerToken ignoreTaskToken) {
         if (componentName == null) {
             return null;
         }
@@ -471,6 +491,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
         for (int i = 0; i < tasks.size(); i++) {
             final ActivityManager.RecentTaskInfo task = tasks.get(i);
             if (task.isVisible) {
+                continue;
+            }
+            if (task.token.equals(ignoreTaskToken)) {
                 continue;
             }
             if (componentName.equals(task.baseIntent.getComponent()) && userId == task.userId) {
@@ -640,7 +663,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         @Override
         public ActivityManager.RunningTaskInfo[] getRunningTasks(int maxNum) {
             final ActivityManager.RunningTaskInfo[][] tasks =
-                    new ActivityManager.RunningTaskInfo[][] {null};
+                    new ActivityManager.RunningTaskInfo[][]{null};
             executeRemoteCallWithTaskPermission(mController, "getRunningTasks",
                     (controller) -> tasks[0] = ActivityTaskManager.getInstance().getTasks(maxNum)
                             .toArray(new ActivityManager.RunningTaskInfo[0]),

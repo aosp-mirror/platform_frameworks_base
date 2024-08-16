@@ -58,6 +58,7 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -70,6 +71,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -243,7 +245,15 @@ public final class PresentationStatsEventLogger {
             Slog.e(TAG, "Failed to start new event because already have active event.");
             return;
         }
+        Slog.d(TAG, "Started new PresentationStatsEvent");
         mEventInternal = Optional.of(new PresentationStatsEventInternal());
+    }
+
+    /**
+     * Test use only, returns a copy of the events object
+     */
+    Optional<PresentationStatsEventInternal> getInternalEvent() {
+        return mEventInternal;
     }
 
     /**
@@ -338,10 +348,16 @@ public final class PresentationStatsEventLogger {
         });
     }
 
-    public void maybeSetCountShown(int datasets) {
+    /**
+     * This is called when a dataset is shown to the user. Will set the count shown,
+     * related timestamps and presentation reason.
+     */
+    public void logWhenDatasetShown(int datasets) {
         mEventInternal.ifPresent(
                 event -> {
+                    maybeSetSuggestionPresentedTimestampMs();
                     event.mCountShown = datasets;
+                    event.mNoPresentationReason = NOT_SHOWN_REASON_ANY_SHOWN;
                 });
     }
 
@@ -404,7 +420,12 @@ public final class PresentationStatsEventLogger {
 
     public void maybeSetDisplayPresentationType(@UiType int uiType) {
         mEventInternal.ifPresent(event -> {
-            event.mDisplayPresentationType = getDisplayPresentationType(uiType);
+            // There are cases in which another UI type will show up after selects a dataset
+            // such as with Inline after Fill Dialog. Set as the first presentation type only.
+            if (event.mDisplayPresentationType
+                    == AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE) {
+                event.mDisplayPresentationType = getDisplayPresentationType(uiType);
+            }
         });
     }
 
@@ -429,9 +450,12 @@ public final class PresentationStatsEventLogger {
     }
 
     public void maybeSetSuggestionSentTimestampMs(int timestamp) {
-        mEventInternal.ifPresent(event -> {
-            event.mSuggestionSentTimestampMs = timestamp;
-        });
+        mEventInternal.ifPresent(
+                event -> {
+                    if (event.mSuggestionSentTimestampMs == DEFAULT_VALUE_INT) {
+                        event.mSuggestionSentTimestampMs = timestamp;
+                    }
+                });
     }
 
     public void maybeSetSuggestionSentTimestampMs() {
@@ -480,8 +504,6 @@ public final class PresentationStatsEventLogger {
 
     public void maybeSetInlinePresentationAndSuggestionHostUid(Context context, int userId) {
         mEventInternal.ifPresent(event -> {
-            event.mDisplayPresentationType =
-                    AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
             String imeString = Settings.Secure.getStringForUser(context.getContentResolver(),
                     Settings.Secure.DEFAULT_INPUT_METHOD, userId);
             if (TextUtils.isEmpty(imeString)) {
@@ -601,40 +623,56 @@ public final class PresentationStatsEventLogger {
     }
 
     /**
+     * Sets the field length whenever the text changes. Will keep track of the first
+     * and last modification lengths.
+     */
+    public void updateTextFieldLength(AutofillValue value) {
+        mEventInternal.ifPresent(event -> {
+            if (value == null || !value.isText()) {
+                return;
+            }
+
+            int length = value.getTextValue().length();
+
+            if (event.mFieldFirstLength == DEFAULT_VALUE_INT) {
+                event.mFieldFirstLength = length;
+            }
+            event.mFieldLastLength = length;
+        });
+    }
+
+    /**
      * Set various timestamps whenever the ViewState is modified
      *
      * <p>If the ViewState contains ViewState.STATE_AUTOFILLED, sets field_autofilled_timestamp_ms
      * else, set field_first_modified_timestamp_ms (if unset) and field_last_modified_timestamp_ms
      */
-    public void onFieldTextUpdated(ViewState state, int length) {
+    public void onFieldTextUpdated(ViewState state, AutofillValue value) {
         mEventInternal.ifPresent(event -> {
-                    int timestamp = getElapsedTime();
-                    // Focused id should be set before this is called
-                    if (state == null || state.id == null || state.id.getViewId() != event.mFocusedId) {
-                        // if these don't match, the currently field different than before
-                        Slog.w(
-                                TAG,
-                                "Bad view state for: " + event.mFocusedId);
-                        return;
-                    }
+            int timestamp = getElapsedTime();
+            // Focused id should be set before this is called
+            if (state == null || state.id == null || state.id.getViewId() != event.mFocusedId) {
+                // if these don't match, the currently field different than before
+                Slog.w(
+                        TAG,
+                        "Bad view state for: " + event.mFocusedId + ", state: " + state);
+                return;
+            }
 
-                    // Text changed because filling into form, just log Autofill timestamp
-                    if ((state.getState() & ViewState.STATE_AUTOFILLED) != 0) {
-                        event.mAutofilledTimestampMs = timestamp;
-                        return;
-                    }
+            updateTextFieldLength(value);
 
-                    // Set length variables
-                    if (event.mFieldFirstLength == DEFAULT_VALUE_INT) {
-                        event.mFieldFirstLength = length;
-                    }
-                    event.mFieldLastLength = length;
+            // Text changed because filling into form, just log Autofill timestamp
+            if ((state.getState() & ViewState.STATE_AUTOFILLED) != 0) {
+                event.mAutofilledTimestampMs = timestamp;
+                return;
+            }
 
-                    // Set timestamp variables
-                    if (event.mFieldModifiedFirstTimestampMs == DEFAULT_VALUE_INT) {
-                        event.mFieldModifiedFirstTimestampMs = timestamp;
-                    }
-                    event.mFieldModifiedLastTimestampMs = timestamp;
+
+            // Set timestamp variables
+            if (event.mFieldModifiedFirstTimestampMs == DEFAULT_VALUE_INT) {
+                event.mFieldModifiedFirstTimestampMs = timestamp;
+            }
+            event.mFieldModifiedLastTimestampMs = timestamp;
         });
     }
 
@@ -685,6 +723,19 @@ public final class PresentationStatsEventLogger {
     }
 
     /**
+     * Set views_fillable_total_count as long as mEventInternal presents.
+     */
+    public void maybeUpdateViewFillablesForRefillAttempt(List<AutofillId> autofillIds) {
+        mEventInternal.ifPresent(event -> {
+            // These autofill ids would be the ones being re-attempted.
+            event.mAutofillIdsAttemptedAutofill = new ArraySet<>(autofillIds);
+            // These autofill id's are being refilled, so they had failed previously.
+            // Note that these autofillIds correspond to the new autofill ids after relayout.
+            event.mFailedAutofillIds = new ArraySet<>(autofillIds);
+        });
+    }
+
+    /**
      * Set how many views are filtered from fill because they are not in current session
      */
     public void maybeSetFilteredFillableViewsCount(int filteredViewsCount) {
@@ -697,9 +748,16 @@ public final class PresentationStatsEventLogger {
      * Set views_filled_failure_count using failure count as long as mEventInternal
      * presents.
      */
-    public void maybeSetViewFillFailureCounts(int failureCount) {
+    public void maybeSetViewFillFailureCounts(@NonNull List<AutofillId> ids, boolean isRefill) {
         mEventInternal.ifPresent(event -> {
-            event.mViewFillFailureCount = failureCount;
+            int failureCount = ids.size();
+            if (isRefill) {
+                event.mViewFailedOnRefillCount = failureCount;
+            } else {
+                event.mViewFillFailureCount = failureCount;
+                event.mViewFailedPriorToRefillCount = failureCount;
+                event.mFailedAutofillIds = new ArraySet<>(ids);
+            }
         });
     }
 
@@ -719,7 +777,7 @@ public final class PresentationStatsEventLogger {
      * Set views_filled_failure_count using failure count as long as mEventInternal
      * presents.
      */
-    public void maybeAddSuccessId(AutofillId autofillId) {
+    public synchronized void maybeAddSuccessId(AutofillId autofillId) {
         mEventInternal.ifPresent(event -> {
             ArraySet<AutofillId> autofillIds = event.mAutofillIdsAttemptedAutofill;
             if (autofillIds == null) {
@@ -727,9 +785,21 @@ public final class PresentationStatsEventLogger {
                         + " successfully filled");
                 event.mViewFilledButUnexpectedCount++;
             } else if (autofillIds.contains(autofillId)) {
-                if (sVerbose) {
-                    Slog.v(TAG, "Logging autofill for id:" + autofillId);
+                ArraySet<AutofillId> failedIds = event.mFailedAutofillIds;
+                if (failedIds.contains(autofillId)) {
+                    if (sVerbose) {
+                        Slog.v(TAG, "Logging autofill refill of id:" + autofillId);
+                    }
+                    // This indicates the success after refill attempt
+                    event.mViewFilledSuccessfullyOnRefillCount++;
+                    // Remove so if we don't reprocess duplicate requests
+                    failedIds.remove(autofillId);
+                } else {
+                    if (sVerbose) {
+                        Slog.v(TAG, "Logging autofill for id:" + autofillId);
+                    }
                 }
+                // Common actions to take irrespective of being filled by refill attempt or not.
                 event.mViewFillSuccessCount++;
                 autofillIds.remove(autofillId);
                 event.mAlreadyFilledAutofillIds.add(autofillId);
@@ -746,7 +816,27 @@ public final class PresentationStatsEventLogger {
         });
     }
 
-    public void logAndEndEvent() {
+    /**
+     * Set how many views are filtered from fill because they are not in current session
+     */
+    public void maybeSetNotifyNotExpiringResponseDuringAuth() {
+        mEventInternal.ifPresent(event -> {
+            event.mFixExpireResponseDuringAuthCount++;
+        });
+    }
+    /**
+     * Set how many views are filtered from fill because they are not in current session
+     */
+    public void notifyViewEnteredIgnoredDuringAuthCount() {
+        mEventInternal.ifPresent(event -> {
+            event.mNotifyViewEnteredIgnoredDuringAuthCount++;
+        });
+    }
+
+    /**
+     * Finish and log the event.
+     */
+    public void logAndEndEvent(String caller) {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
                     + "event");
@@ -754,7 +844,8 @@ public final class PresentationStatsEventLogger {
         }
         PresentationStatsEventInternal event = mEventInternal.get();
         if (sVerbose) {
-            Slog.v(TAG, "Log AutofillPresentationEventReported:"
+            Slog.v(TAG, "(" + caller + ") "
+                    + "Log AutofillPresentationEventReported:"
                     + " requestId=" + event.mRequestId
                     + " sessionId=" + mSessionId
                     + " mNoPresentationEventReason=" + event.mNoPresentationReason
@@ -804,7 +895,15 @@ public final class PresentationStatsEventLogger {
                     + event.mSuggestionPresentedLastTimestampMs
                     + " event.mFocusedVirtualAutofillId=" + event.mFocusedVirtualAutofillId
                     + " event.mFieldFirstLength=" + event.mFieldFirstLength
-                    + " event.mFieldLastLength=" + event.mFieldLastLength);
+                    + " event.mFieldLastLength=" + event.mFieldLastLength
+                    + " event.mViewFailedPriorToRefillCount=" + event.mViewFailedPriorToRefillCount
+                    + " event.mViewFilledSuccessfullyOnRefillCount="
+                    + event.mViewFilledSuccessfullyOnRefillCount
+                    + " event.mViewFailedOnRefillCount=" + event.mViewFailedOnRefillCount
+                    + " event.notExpiringResponseDuringAuthCount="
+                    + event.mFixExpireResponseDuringAuthCount
+                    + " event.notifyViewEnteredIgnoredDuringAuthCount="
+                    + event.mNotifyViewEnteredIgnoredDuringAuthCount);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -846,7 +945,6 @@ public final class PresentationStatsEventLogger {
                 mCallingAppUid,
                 event.mIsCredentialRequest,
                 event.mWebviewRequestedCredential,
-                event.mFilteredFillabaleViewCount,
                 event.mViewFillableTotalCount,
                 event.mViewFillFailureCount,
                 event.mFocusedId,
@@ -859,11 +957,17 @@ public final class PresentationStatsEventLogger {
                 event.mSuggestionPresentedLastTimestampMs,
                 event.mFocusedVirtualAutofillId,
                 event.mFieldFirstLength,
-                event.mFieldLastLength);
+                event.mFieldLastLength,
+                event.mFilteredFillabaleViewCount,
+                event.mViewFailedPriorToRefillCount,
+                event.mViewFilledSuccessfullyOnRefillCount,
+                event.mViewFailedOnRefillCount,
+                event.mFixExpireResponseDuringAuthCount,
+                event.mNotifyViewEnteredIgnoredDuringAuthCount);
         mEventInternal = Optional.empty();
     }
 
-    private static final class PresentationStatsEventInternal {
+    static final class PresentationStatsEventInternal {
         int mRequestId;
         @NotShownReason int mNoPresentationReason = NOT_SHOWN_REASON_UNKNOWN;
         boolean mIsDatasetAvailable;
@@ -912,8 +1016,15 @@ public final class PresentationStatsEventLogger {
         // uninitialized doesn't help much, as this would be non-zero only if callback is received.
         int mViewFillSuccessCount = 0;
         int mViewFilledButUnexpectedCount = 0;
+        int mViewFailedPriorToRefillCount = 0;
+        int mViewFailedOnRefillCount = 0;
+        int mViewFilledSuccessfullyOnRefillCount = 0;
+
+        int mFixExpireResponseDuringAuthCount = 0;
+        int mNotifyViewEnteredIgnoredDuringAuthCount = 0;
 
         ArraySet<AutofillId> mAutofillIdsAttemptedAutofill;
+        ArraySet<AutofillId> mFailedAutofillIds = new ArraySet<>();
         ArraySet<AutofillId> mAlreadyFilledAutofillIds = new ArraySet<>();
 
         // Not logged - used for internal logic

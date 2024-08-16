@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.vibrator.IVibratorManager;
 import android.os.CombinedVibration;
@@ -74,6 +75,7 @@ final class StartSequentialEffectStep extends Step {
         return mVibratorsOnMaxDuration;
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "StartSequentialEffectStep");
@@ -111,6 +113,7 @@ final class StartSequentialEffectStep extends Step {
         return nextSteps;
     }
 
+    @NonNull
     @Override
     public List<Step> cancel() {
         return VibrationStepConductor.EMPTY_STEP_LIST;
@@ -173,13 +176,12 @@ final class StartSequentialEffectStep extends Step {
         for (int i = 0; i < vibratorCount; i++) {
             steps[i] = conductor.nextVibrateStep(vibrationStartTime,
                     conductor.getVibrators().get(effectMapping.vibratorIdAt(i)),
-                    effectMapping.effectAt(i),
-                    /* segmentIndex= */ 0, /* vibratorOffTimeout= */ 0);
+                    effectMapping.effectAt(i));
         }
 
         if (steps.length == 1) {
             // No need to prepare and trigger sync effects on a single vibrator.
-            return startVibrating(steps[0], nextSteps);
+            return startVibrating(steps[0], effectMapping.effectAt(0), nextSteps);
         }
 
         // This synchronization of vibrators should be executed one at a time, even if we are
@@ -196,8 +198,8 @@ final class StartSequentialEffectStep extends Step {
                 effectMapping.getRequiredSyncCapabilities(),
                 effectMapping.getVibratorIds());
 
-        for (AbstractVibratorStep step : steps) {
-            long duration = startVibrating(step, nextSteps);
+        for (int i = 0; i < vibratorCount; i++) {
+            long duration = startVibrating(steps[i], effectMapping.effectAt(i), nextSteps);
             if (duration < 0) {
                 // One vibrator has failed, fail this entire sync attempt.
                 hasFailed = true;
@@ -231,7 +233,12 @@ final class StartSequentialEffectStep extends Step {
         return hasFailed ? -1 : maxDuration;
     }
 
-    private long startVibrating(AbstractVibratorStep step, List<Step> nextSteps) {
+    private long startVibrating(@Nullable AbstractVibratorStep step, VibrationEffect effect,
+            List<Step> nextSteps) {
+        if (step == null) {
+            // Failed to create a step for VibrationEffect.
+            return -1;
+        }
         nextSteps.addAll(step.play());
         long stepDuration = step.getVibratorOnDuration();
         if (stepDuration < 0) {
@@ -239,7 +246,7 @@ final class StartSequentialEffectStep extends Step {
             return stepDuration;
         }
         // Return the longest estimation for the entire effect.
-        return Math.max(stepDuration, step.effect.getDuration());
+        return Math.max(stepDuration, effect.getDuration());
     }
 
     /**
@@ -249,28 +256,20 @@ final class StartSequentialEffectStep extends Step {
      * play all of the effects in sync.
      */
     final class DeviceEffectMap {
-        private final SparseArray<VibrationEffect.Composed> mVibratorEffects;
+        private final SparseArray<VibrationEffect> mVibratorEffects;
         private final int[] mVibratorIds;
         private final long mRequiredSyncCapabilities;
 
         DeviceEffectMap(CombinedVibration.Mono mono) {
             SparseArray<VibratorController> vibrators = conductor.getVibrators();
             VibrationEffect effect = mono.getEffect();
-            if (effect instanceof VibrationEffect.Composed) {
-                mVibratorEffects = new SparseArray<>(vibrators.size());
-                mVibratorIds = new int[vibrators.size()];
+            mVibratorEffects = new SparseArray<>(vibrators.size());
+            mVibratorIds = new int[vibrators.size()];
 
-                VibrationEffect.Composed composedEffect = (VibrationEffect.Composed) effect;
-                for (int i = 0; i < vibrators.size(); i++) {
-                    int vibratorId = vibrators.keyAt(i);
-                    mVibratorEffects.put(vibratorId, composedEffect);
-                    mVibratorIds[i] = vibratorId;
-                }
-            } else {
-                Slog.wtf(VibrationThread.TAG,
-                        "Unable to map device vibrators to unexpected effect: " + effect);
-                mVibratorEffects = new SparseArray<>();
-                mVibratorIds = new int[0];
+            for (int i = 0; i < vibrators.size(); i++) {
+                int vibratorId = vibrators.keyAt(i);
+                mVibratorEffects.put(vibratorId, effect);
+                mVibratorIds[i] = vibratorId;
             }
             mRequiredSyncCapabilities = calculateRequiredSyncCapabilities(mVibratorEffects);
         }
@@ -282,13 +281,7 @@ final class StartSequentialEffectStep extends Step {
             for (int i = 0; i < stereoEffects.size(); i++) {
                 int vibratorId = stereoEffects.keyAt(i);
                 if (vibrators.contains(vibratorId)) {
-                    VibrationEffect effect = stereoEffects.valueAt(i);
-                    if (effect instanceof VibrationEffect.Composed) {
-                        mVibratorEffects.put(vibratorId, (VibrationEffect.Composed) effect);
-                    } else {
-                        Slog.wtf(VibrationThread.TAG,
-                                "Unable to map device vibrators to unexpected effect: " + effect);
-                    }
+                    mVibratorEffects.put(vibratorId, stereoEffects.valueAt(i));
                 }
             }
             mVibratorIds = new int[mVibratorEffects.size()];
@@ -326,7 +319,7 @@ final class StartSequentialEffectStep extends Step {
         }
 
         /** Return the {@link VibrationEffect} at given index. */
-        public VibrationEffect.Composed effectAt(int index) {
+        public VibrationEffect effectAt(int index) {
             return mVibratorEffects.valueAt(index);
         }
 
@@ -338,16 +331,24 @@ final class StartSequentialEffectStep extends Step {
          * IVibratorManager.CAP_PREPARE_* and IVibratorManager.CAP_MIXED_TRIGGER_* capabilities.
          */
         private long calculateRequiredSyncCapabilities(
-                SparseArray<VibrationEffect.Composed> effects) {
+                SparseArray<VibrationEffect> effects) {
             long prepareCap = 0;
             for (int i = 0; i < effects.size(); i++) {
-                VibrationEffectSegment firstSegment = effects.valueAt(i).getSegments().get(0);
-                if (firstSegment instanceof StepSegment) {
-                    prepareCap |= IVibratorManager.CAP_PREPARE_ON;
-                } else if (firstSegment instanceof PrebakedSegment) {
+                VibrationEffect effect = effects.valueAt(i);
+                if (effect instanceof VibrationEffect.VendorEffect) {
                     prepareCap |= IVibratorManager.CAP_PREPARE_PERFORM;
-                } else if (firstSegment instanceof PrimitiveSegment) {
-                    prepareCap |= IVibratorManager.CAP_PREPARE_COMPOSE;
+                } else if (effect instanceof VibrationEffect.Composed composed) {
+                    VibrationEffectSegment firstSegment = composed.getSegments().get(0);
+                    if (firstSegment instanceof StepSegment) {
+                        prepareCap |= IVibratorManager.CAP_PREPARE_ON;
+                    } else if (firstSegment instanceof PrebakedSegment) {
+                        prepareCap |= IVibratorManager.CAP_PREPARE_PERFORM;
+                    } else if (firstSegment instanceof PrimitiveSegment) {
+                        prepareCap |= IVibratorManager.CAP_PREPARE_COMPOSE;
+                    }
+                } else {
+                    Slog.wtf(VibrationThread.TAG,
+                            "Unable to check sync capabilities to unexpected effect: " + effect);
                 }
             }
             int triggerCap = 0;

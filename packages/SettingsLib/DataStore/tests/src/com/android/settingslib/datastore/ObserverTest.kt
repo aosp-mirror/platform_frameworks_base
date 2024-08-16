@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
@@ -33,10 +34,11 @@ import org.mockito.kotlin.verify
 class ObserverTest {
     private val observer1 = mock<Observer>()
     private val observer2 = mock<Observer>()
+    private val originalObservable = mock<Observable>()
 
     private val executor1: Executor = MoreExecutors.directExecutor()
     private val executor2: Executor = MoreExecutors.newDirectExecutorService()
-    private val observable = DataObservable()
+    private val observable = DataObservable(originalObservable)
 
     @Test
     fun addObserver_sameExecutor() {
@@ -55,7 +57,7 @@ class ObserverTest {
     @Test
     fun addObserver_weaklyReferenced() {
         val counter = AtomicInteger()
-        var observer: Observer? = Observer { counter.incrementAndGet() }
+        var observer: Observer? = Observer { _, _ -> counter.incrementAndGet() }
         observable.addObserver(observer!!, executor1)
 
         observable.notifyChange(DataChangeReason.UPDATE)
@@ -77,21 +79,21 @@ class ObserverTest {
 
         observable.notifyChange(DataChangeReason.DELETE)
 
-        verify(observer1).onChanged(DataChangeReason.DELETE)
-        verify(observer2).onChanged(DataChangeReason.DELETE)
+        verify(observer1).onChanged(originalObservable, DataChangeReason.DELETE)
+        verify(observer2).onChanged(originalObservable, DataChangeReason.DELETE)
 
         reset(observer1, observer2)
         observable.removeObserver(observer2)
 
         observable.notifyChange(DataChangeReason.UPDATE)
-        verify(observer1).onChanged(DataChangeReason.UPDATE)
-        verify(observer2, never()).onChanged(DataChangeReason.UPDATE)
+        verify(observer1).onChanged(originalObservable, DataChangeReason.UPDATE)
+        verify(observer2, never()).onChanged(any(), any())
     }
 
     @Test
     fun notifyChange_addObserverWithinCallback() {
         // ConcurrentModificationException is raised if it is not implemented correctly
-        val observer = Observer { observable.addObserver(observer1, executor1) }
+        val observer = Observer { _, _ -> observable.addObserver(observer1, executor1) }
         observable.addObserver(observer, executor1)
         observable.notifyChange(DataChangeReason.UPDATE)
         observable.removeObserver(observer)

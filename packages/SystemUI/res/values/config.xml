@@ -287,7 +287,8 @@
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
 
     <!-- Doze: Table that translates sensor values from the doze_brightness_sensor_type sensor
-               to brightness values; -1 means keeping the current brightness. -->
+               to brightness values in the integer scale [1, 255]; -1 means keeping the current
+               brightness. -->
     <integer-array name="config_doze_brightness_sensor_to_brightness">
         <item>-1</item> <!-- 0: OFF -->
         <item>2</item> <!-- 1: NIGHT -->
@@ -1049,4 +1050,18 @@
 
     <!-- Only applicable for dual shade - Allow Notifications/QS shade to anchor to the bottom. -->
     <bool name="config_dualShadeAlignedToBottom">false</bool>
+
+    <!-- List of packages for which we want to use activity info (instead of application info) for biometric prompt logo. Empty for AOSP. [DO NOT TRANSLATE] -->
+    <string-array name="config_useActivityLogoForBiometricPrompt" translatable="false"/>
+
+    <!--
+    Whether to enable the desktop specific feature set.
+
+    Refrain from using this from code that needs to make decisions
+    regarding the size or density of the display.
+
+    Variant owners and OEMs should override this to true when they want to
+    enable the desktop specific features.
+    -->
+    <bool name="config_enableDesktopFeatureSet">false</bool>
 </resources>

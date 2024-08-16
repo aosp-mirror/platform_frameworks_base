@@ -22,6 +22,7 @@ import android.app.TaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.os.IBinder
+import android.os.Trace
 import android.util.SparseArray
 import android.view.SurfaceControl
 import android.view.WindowManager
@@ -35,7 +36,7 @@ import androidx.core.util.plus
 import androidx.core.util.putAll
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
@@ -46,11 +47,12 @@ import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
-import com.android.wm.shell.shared.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.util.KtProtoLog
+
+const val VISIBLE_TASKS_COUNTER_NAME = "DESKTOP_MODE_VISIBLE_TASKS"
 
 /**
  * A [Transitions.TransitionObserver] that observes transitions and the proposed changes to log
@@ -106,7 +108,7 @@ class DesktopModeLoggerTransitionObserver(
     ) {
         // this was a new recents animation
         if (info.isExitToRecentsTransition() && tasksSavedForRecents.isEmpty()) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopModeLogger: Recents animation running, saving tasks for later"
             )
@@ -132,7 +134,7 @@ class DesktopModeLoggerTransitionObserver(
                 info.flags == 0 &&
                 tasksSavedForRecents.isNotEmpty()
         ) {
-            KtProtoLog.v(
+            ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
                 "DesktopModeLogger: Canceled recents animation, restoring tasks"
             )
@@ -202,7 +204,7 @@ class DesktopModeLoggerTransitionObserver(
             }
         }
 
-        KtProtoLog.v(
+        ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: taskInfo map after processing changes %s",
             postTransitionFreeformTasks.size()
@@ -293,8 +295,14 @@ class DesktopModeLoggerTransitionObserver(
             val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
             when {
                 // new tasks added
-                previousTaskInfo == null ->
+                previousTaskInfo == null -> {
                     desktopModeEventLogger.logTaskAdded(sessionId, currentTaskUpdate)
+                    Trace.setCounter(
+                        Trace.TRACE_TAG_WINDOW_MANAGER,
+                        VISIBLE_TASKS_COUNTER_NAME,
+                        postTransitionVisibleFreeformTasks.size().toLong()
+                    )
+                }
                 // old tasks that were resized or repositioned
                 // TODO(b/347935387): Log changes only once they are stable.
                 buildTaskUpdateForTask(previousTaskInfo) != currentTaskUpdate ->
@@ -306,6 +314,11 @@ class DesktopModeLoggerTransitionObserver(
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
                 desktopModeEventLogger.logTaskRemoved(sessionId, buildTaskUpdateForTask(taskInfo))
+                Trace.setCounter(
+                    Trace.TRACE_TAG_WINDOW_MANAGER,
+                    VISIBLE_TASKS_COUNTER_NAME,
+                    postTransitionVisibleFreeformTasks.size().toLong()
+                )
             }
         }
     }
@@ -348,7 +361,7 @@ class DesktopModeLoggerTransitionObserver(
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
-                    "Unknown enter reason for transition type ${transitionInfo.type}",
+                    "Unknown enter reason for transition type: %s",
                     transitionInfo.type
                 )
                 EnterReason.UNKNOWN_ENTER
@@ -369,7 +382,7 @@ class DesktopModeLoggerTransitionObserver(
             else -> {
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
-                    "Unknown exit reason for transition type ${transitionInfo.type}",
+                    "Unknown exit reason for transition type: %s",
                     transitionInfo.type
                 )
                 ExitReason.UNKNOWN_EXIT

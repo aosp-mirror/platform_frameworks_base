@@ -60,10 +60,10 @@ public class UserBatteryConsumer extends BatteryConsumer {
         pw.print("User ");
         pw.print(getUserId());
         pw.print(": ");
-        pw.print(BatteryStats.formatCharge(consumedPower));
-        pw.print(" ( ");
-        mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
-        pw.print(" ) ");
+        pw.println(BatteryStats.formatCharge(consumedPower));
+        pw.print("      ");
+        mPowerComponents.dump(pw, SCREEN_STATE_ANY, POWER_STATE_ANY,
+                skipEmptyComponents  /* skipTotalPowerComponent */);
     }
 
     /** Serializes this object to XML */

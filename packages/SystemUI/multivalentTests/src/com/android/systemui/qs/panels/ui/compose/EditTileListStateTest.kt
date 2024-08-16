@@ -21,6 +21,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.google.common.truth.Truth.assertThat
@@ -33,22 +35,25 @@ class EditTileListStateTest : SysuiTestCase() {
     val underTest = EditTileListState(TestEditTiles)
 
     @Test
-    fun movingNonExistentTile_listUnchanged() {
-        underTest.move(TileSpec.create("other_tile"), TestEditTiles[0].tileSpec)
+    fun movingNonExistentTile_tileAdded() {
+        val newTile = createEditTile("other_tile", false)
+        underTest.move(newTile, TestEditTiles[0].tile.tileSpec)
 
-        assertThat(underTest.tiles).containsExactly(*TestEditTiles.toTypedArray())
+        assertThat(underTest.tiles[0]).isEqualTo(newTile)
+        assertThat(underTest.tiles.subList(1, underTest.tiles.size))
+            .containsExactly(*TestEditTiles.toTypedArray())
     }
 
     @Test
     fun movingTileToNonExistentTarget_listUnchanged() {
-        underTest.move(TestEditTiles[0].tileSpec, TileSpec.create("other_tile"))
+        underTest.move(TestEditTiles[0], TileSpec.create("other_tile"))
 
         assertThat(underTest.tiles).containsExactly(*TestEditTiles.toTypedArray())
     }
 
     @Test
     fun movingTileToItself_listUnchanged() {
-        underTest.move(TestEditTiles[0].tileSpec, TestEditTiles[0].tileSpec)
+        underTest.move(TestEditTiles[0], TestEditTiles[0].tile.tileSpec)
 
         assertThat(underTest.tiles).containsExactly(*TestEditTiles.toTypedArray())
     }
@@ -56,7 +61,7 @@ class EditTileListStateTest : SysuiTestCase() {
     @Test
     fun movingTileToSameSection_listUpdates() {
         // Move tile at index 0 to index 1. Tile 0 should remain current.
-        underTest.move(TestEditTiles[0].tileSpec, TestEditTiles[1].tileSpec)
+        underTest.move(TestEditTiles[0], TestEditTiles[1].tile.tileSpec)
 
         // Assert the tiles 0 and 1 have changed places.
         assertThat(underTest.tiles[0]).isEqualTo(TestEditTiles[1])
@@ -67,33 +72,29 @@ class EditTileListStateTest : SysuiTestCase() {
             .containsExactly(*TestEditTiles.subList(2, 5).toTypedArray())
     }
 
-    @Test
-    fun movingTileToDifferentSection_listAndTileUpdates() {
-        // Move tile at index 0 to index 3. Tile 0 should no longer be current.
-        underTest.move(TestEditTiles[0].tileSpec, TestEditTiles[3].tileSpec)
+    fun removingTile_listUpdates() {
+        // Remove tile at index 0
+        underTest.remove(TestEditTiles[0].tile.tileSpec)
 
-        // Assert tile 0 is now at index 3 and is no longer current.
-        assertThat(underTest.tiles[3]).isEqualTo(TestEditTiles[0].copy(isCurrent = false))
-
-        // Assert previous tiles have shifted places
-        assertThat(underTest.tiles[0]).isEqualTo(TestEditTiles[1])
-        assertThat(underTest.tiles[1]).isEqualTo(TestEditTiles[2])
-        assertThat(underTest.tiles[2]).isEqualTo(TestEditTiles[3])
-
-        // Assert the rest of the list is unchanged
-        assertThat(underTest.tiles.subList(4, 5))
-            .containsExactly(*TestEditTiles.subList(4, 5).toTypedArray())
+        // Assert the tile was removed
+        assertThat(underTest.tiles).containsExactly(*TestEditTiles.subList(1, 6).toTypedArray())
     }
 
     companion object {
-        private fun createEditTile(tileSpec: String, isCurrent: Boolean): EditTileViewModel {
-            return EditTileViewModel(
-                tileSpec = TileSpec.create(tileSpec),
-                icon = Icon.Resource(0, null),
-                label = Text.Loaded("unused"),
-                appName = null,
-                isCurrent = isCurrent,
-                availableEditActions = emptySet(),
+        private fun createEditTile(
+            tileSpec: String,
+            isCurrent: Boolean
+        ): SizedTile<EditTileViewModel> {
+            return SizedTileImpl(
+                EditTileViewModel(
+                    tileSpec = TileSpec.create(tileSpec),
+                    icon = Icon.Resource(0, null),
+                    label = Text.Loaded("unused"),
+                    appName = null,
+                    isCurrent = isCurrent,
+                    availableEditActions = emptySet(),
+                ),
+                1,
             )
         }
 

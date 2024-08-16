@@ -151,6 +151,43 @@ public class BiometricNotificationUtils {
     }
 
     /**
+     * Shows a fingerprint notification for loss of enrollment
+     */
+    public static void showFingerprintLoeNotification(@NonNull Context context) {
+        Slog.d(TAG, "Showing fingerprint LOE notification");
+
+        final String name =
+                context.getString(R.string.device_unlock_notification_name);
+        final String title = context.getString(R.string.fingerprint_dangling_notification_title);
+        final String content = context.getString(R.string.fingerprint_loe_notification_msg);
+
+        // Create "Set up" notification action button.
+        final Intent setupIntent =
+                new Intent(BiometricDanglingReceiver.ACTION_FINGERPRINT_RE_ENROLL_LAUNCH);
+        final PendingIntent setupPendingIntent = PendingIntent.getBroadcastAsUser(context, 0,
+                setupIntent, PendingIntent.FLAG_IMMUTABLE, UserHandle.CURRENT);
+        final String setupText =
+                context.getString(R.string.biometric_dangling_notification_action_set_up);
+        final Notification.Action setupAction = new Notification.Action.Builder(
+                null, setupText, setupPendingIntent).build();
+
+        // Create "Not now" notification action button.
+        final Intent notNowIntent =
+                new Intent(BiometricDanglingReceiver.ACTION_FINGERPRINT_RE_ENROLL_DISMISS);
+        final PendingIntent notNowPendingIntent = PendingIntent.getBroadcastAsUser(context, 0,
+                notNowIntent, PendingIntent.FLAG_IMMUTABLE, UserHandle.CURRENT);
+        final String notNowText = context.getString(
+                R.string.biometric_dangling_notification_action_not_now);
+        final Notification.Action notNowAction = new Notification.Action.Builder(
+                null, notNowText, notNowPendingIntent).build();
+
+        showNotificationHelper(context, name, title, content, setupPendingIntent, setupAction,
+                notNowAction, Notification.CATEGORY_SYSTEM, FINGERPRINT_RE_ENROLL_CHANNEL,
+                FINGERPRINT_RE_ENROLL_NOTIFICATION_TAG, Notification.VISIBILITY_SECRET, false,
+                Notification.FLAG_NO_CLEAR);
+    }
+
+    /**
      * Shows a fingerprint bad calibration notification.
      */
     public static void showBadCalibrationNotification(@NonNull Context context) {

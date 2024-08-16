@@ -128,8 +128,13 @@ public class TouchMonitor {
                     completer.set(predecessor);
                 }
 
-                if (mActiveTouchSessions.isEmpty() && mStopMonitoringPending) {
-                    stopMonitoring(false);
+                if (mActiveTouchSessions.isEmpty()) {
+                    if (mStopMonitoringPending) {
+                        stopMonitoring(false);
+                    } else {
+                        // restart monitoring to reset any destructive state on the input session
+                        startMonitoring();
+                    }
                 }
             });
 
@@ -574,6 +579,10 @@ public class TouchMonitor {
         mLifecycle.removeObserver(mLifecycleObserver);
         if (Flags.ambientTouchMonitorListenToDisplayChanges()) {
             mBoundsFlow.cancel(new CancellationException());
+        }
+
+        for (TouchHandler handler : mHandlers) {
+            handler.onDestroy();
         }
 
         mInitialized = false;

@@ -973,8 +973,12 @@ public final class InputMethodManager {
 
         @GuardedBy("mH")
         private void setCurrentRootViewLocked(ViewRootImpl rootView) {
+            final boolean wasEmpty = mCurRootView == null;
             mImeDispatcher.switchRootView(mCurRootView, rootView);
             mCurRootView = rootView;
+            if (wasEmpty && mCurRootView != null) {
+                mImeDispatcher.updateReceivingDispatcher(mCurRootView.getOnBackInvokedDispatcher());
+            }
         }
     }
 
@@ -1350,15 +1354,26 @@ public final class InputMethodManager {
                     return;
                 }
                 case MSG_SET_VISIBILITY:
-                    final boolean visible = msg.arg1 != 0;
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    final boolean visible = (boolean) args.arg1;
+                    final ImeTracker.Token statsToken = (ImeTracker.Token) args.arg2;
                     synchronized (mH) {
-                        if (visible) {
-                            showSoftInput(mServedView, /* flags */ 0);
-                        } else {
-                            if (mCurRootView != null
-                                    && mCurRootView.getInsetsController() != null) {
-                                mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                        if (mCurRootView != null) {
+                            final var insetsController = mCurRootView.getInsetsController();
+                            if (insetsController != null) {
+                                ImeTracker.forLogging().onProgress(statsToken,
+                                        ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
+                                if (visible) {
+                                    insetsController.show(WindowInsets.Type.ime(),
+                                            false /* fromIme */, null /* statsToken */);
+                                } else {
+                                    insetsController.hide(WindowInsets.Type.ime(),
+                                            false /* fromIme */, null /* statsToken */);
+                                }
                             }
+                        } else {
+                            ImeTracker.forLogging().onFailed(statsToken,
+                                    ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
                         }
                     }
                     break;
@@ -1459,8 +1474,13 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void setImeVisibility(boolean visible) {
-            mH.obtainMessage(MSG_SET_VISIBILITY, visible ? 1 : 0, 0).sendToTarget();
+        public void setImeVisibility(boolean visible, @Nullable ImeTracker.Token statsToken) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = visible;
+            args.arg2 = statsToken;
+            ImeTracker.forLogging().onProgress(statsToken,
+                    ImeTracker.PHASE_CLIENT_SET_IME_VISIBILITY);
+            mH.obtainMessage(MSG_SET_VISIBILITY, args).sendToTarget();
         }
 
         @Override
@@ -2334,16 +2354,22 @@ public final class InputMethodManager {
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             if (Flags.refactorInsetsController()) {
+                final var viewRootImpl = view.getViewRootImpl();
                 // In case of a running show IME animation, it should not be requested visible,
                 // otherwise the animation would jump and not be controlled by the user anymore
-                if ((mCurRootView.getInsetsController().computeUserAnimatingTypes()
-                        & WindowInsets.Type.ime()) == 0) {
+                if (viewRootImpl != null
+                        && (viewRootImpl.getInsetsController().computeUserAnimatingTypes()
+                                & WindowInsets.Type.ime()) == 0) {
+                    ImeTracker.forLogging().onProgress(statsToken,
+                            ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
                     // TODO(b/322992891) handle case of SHOW_IMPLICIT
-                    view.getWindowInsetsController().show(WindowInsets.Type.ime());
+                    viewRootImpl.getInsetsController().show(WindowInsets.Type.ime(),
+                            false /* fromIme */, statsToken);
                     return true;
-                } else {
-                    return false;
                 }
+                ImeTracker.forLogging().onCancelled(statsToken,
+                        ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
+                return false;
             } else {
                 // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
                 // TODO(b/229426865): call WindowInsetsController#show instead.
@@ -2497,7 +2523,10 @@ public final class InputMethodManager {
 
             if (Flags.refactorInsetsController()) {
                 // TODO(b/322992891) handle case of HIDE_IMPLICIT_ONLY
-                servedView.getWindowInsetsController().hide(WindowInsets.Type.ime());
+                final var viewRootImpl = servedView.getViewRootImpl();
+                if (viewRootImpl != null) {
+                    viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
+                }
                 return true;
             } else {
                 return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken,
@@ -2858,6 +2887,11 @@ public final class InputMethodManager {
      * initiation delegation was previously requested using
      * {@link #prepareStylusHandwritingDelegation(View)} from the delegator.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * <p>Note: If delegator and delegate are in different application packages, use
      * {@link #acceptStylusHandwritingDelegation(View, String)} instead.</p>
      *
@@ -2866,14 +2900,9 @@ public final class InputMethodManager {
      *  {@link #prepareStylusHandwritingDelegation(View)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View)
      * @see #acceptStylusHandwritingDelegation(View, String)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, Executor,
+     *     ConnectionlessHandwritingCallback)
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Otherwise, if the delegator view previously started delegation using {@link
-    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo)},
-    // requests the IME to commit the recognised handwritten text from the connectionless session to
-    // the delegate view.
-    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
-    //     CursorAnchorInfo)
     public boolean acceptStylusHandwritingDelegation(@NonNull View delegateView) {
         return startStylusHandwritingInternal(
                 delegateView, delegateView.getContext().getOpPackageName(),
@@ -2886,6 +2915,11 @@ public final class InputMethodManager {
      * {@link #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view
      * belongs to a specified delegate package.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * <p>Note: If delegator and delegate are in the same application package, use
      * {@link #acceptStylusHandwritingDelegation(View)} instead.</p>
      *
@@ -2895,15 +2929,10 @@ public final class InputMethodManager {
      *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String,
+     *     Executor, ConnectionlessHandwritingCallback)
      * TODO (b/293640003): deprecate this method once flag is enabled.
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Otherwise, if the delegator view previously started delegation using {@link
-    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
-    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
-    // session to the delegate view.
-    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
-    //     CursorAnchorInfo, String)
     public boolean acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName) {
         Objects.requireNonNull(delegatorPackageName);
@@ -2917,6 +2946,11 @@ public final class InputMethodManager {
      * {@link #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view
      * belongs to a specified delegate package.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * @param delegateView delegate view capable of receiving input via {@link InputConnection}
      *  on which {@link #startStylusHandwriting(View)} will be called.
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
@@ -2924,9 +2958,12 @@ public final class InputMethodManager {
      * @param callback Consumer callback that provides {@code true} if view belongs to allowed
      *                delegate package declared in
      *                {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting
-     *                session can start.
+     *                session can start. Note: The caller should hold a reference to the callback.
+     *                The framework only holds a weak reference.
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String,
+     *     Executor, ConnectionlessHandwritingCallback)
      */
     @FlaggedApi(Flags.FLAG_USE_ZERO_JANK_PROXY)
     public void acceptStylusHandwritingDelegation(
@@ -2947,6 +2984,11 @@ public final class InputMethodManager {
      * #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view belongs to
      * a specified delegate package.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * <p>Note: If delegator and delegate are in the same application package, use {@link
      * #acceptStylusHandwritingDelegation(View)} instead.
      *
@@ -2954,18 +2996,13 @@ public final class InputMethodManager {
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
      * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
      * @param executor The executor to run the callback on.
-     * @param callback {@code true>} would be received if delegation was accepted.
+     * @param callback {@code true} would be received if delegation was accepted. The caller should
+     *                 hold a reference to the callback. The framework only holds a weak reference.
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String,
+     *     Executor, ConnectionlessHandwritingCallback)
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Otherwise, if the delegator view previously started delegation using {@link
-    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
-    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
-    // session to the delegate view.
-    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
-    //     CursorAnchorInfo, String)
-    //
     @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
     public void acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName,
@@ -4351,6 +4388,20 @@ public final class InputMethodManager {
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
     public boolean isInputMethodPickerShown() {
         return IInputMethodManagerGlobalInvoker.isInputMethodPickerShownForTest();
+    }
+
+    /**
+     * Called when the IME switch button was clicked from the system. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
+     * method picker dialog.
+     *
+     * @param displayId The ID of the display where the input method picker dialog should be shown.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void onImeSwitchButtonClickFromSystem(int displayId) {
+        IInputMethodManagerGlobalInvoker.onImeSwitchButtonClickFromSystem(displayId);
     }
 
     /**

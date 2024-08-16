@@ -72,7 +72,7 @@ class CloseImeToAppOnPressBackTest(flicker: LegacyFlickerTest) : BaseTest(flicke
     @Presubmit
     @Test
     override fun navBarLayerPositionAtStartAndEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         Assume.assumeFalse(flicker.scenario.isLandscapeOrSeascapeAtStart)
         flicker.navBarLayerPositionAtStartAndEnd()
     }
@@ -80,7 +80,7 @@ class CloseImeToAppOnPressBackTest(flicker: LegacyFlickerTest) : BaseTest(flicke
     @Presubmit
     @Test
     fun navBarLayerPositionAtStartAndEndLandscapeOrSeascapeAtStart() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         flicker.navBarLayerPositionAtStartAndEnd()
     }

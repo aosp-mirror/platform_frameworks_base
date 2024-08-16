@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 
 import java.util.function.Consumer;
@@ -28,10 +29,12 @@ abstract class AppCompatRobotBase {
     private static final int DEFAULT_DISPLAY_WIDTH = 1000;
     private static final int DEFAULT_DISPLAY_HEIGHT = 2000;
 
+    static final float FLOAT_TOLLERANCE = 0.01f;
+
     @NonNull
     private final AppCompatActivityRobot mActivityRobot;
     @NonNull
-    private final AppCompatLetterboxConfigurationRobot mConfigurationRobot;
+    private final AppCompatConfigurationRobot mConfigurationRobot;
     @NonNull
     private final AppCompatComponentPropRobot mOptPropRobot;
 
@@ -40,9 +43,10 @@ abstract class AppCompatRobotBase {
             @NonNull ActivityTaskSupervisor supervisor,
             int displayWidth, int displayHeight) {
         mActivityRobot = new AppCompatActivityRobot(wm, atm, supervisor,
-                displayWidth, displayHeight);
+                displayWidth, displayHeight, this::onPostActivityCreation,
+                this::onPostDisplayContentCreation);
         mConfigurationRobot =
-                new AppCompatLetterboxConfigurationRobot(wm.mLetterboxConfiguration);
+                new AppCompatConfigurationRobot(wm.mAppCompatConfiguration);
         mOptPropRobot = new AppCompatComponentPropRobot(wm);
     }
 
@@ -52,13 +56,33 @@ abstract class AppCompatRobotBase {
         this(wm, atm, supervisor, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
     }
 
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link ActivityRecord}. Common case is to invoke spyOn().
+     *
+     * @param activity THe newly created {@link ActivityRecord}.
+     */
+    @CallSuper
+    void onPostActivityCreation(@NonNull ActivityRecord activity) {
+    }
+
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link DisplayContent}. Common case is to invoke spyOn().
+     *
+     * @param displayContent THe newly created {@link DisplayContent}.
+     */
+    @CallSuper
+    void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+    }
+
     @NonNull
-    AppCompatLetterboxConfigurationRobot conf() {
+    AppCompatConfigurationRobot conf() {
         return mConfigurationRobot;
     }
 
     @NonNull
-    void applyOnConf(@NonNull Consumer<AppCompatLetterboxConfigurationRobot> consumer) {
+    void applyOnConf(@NonNull Consumer<AppCompatConfigurationRobot> consumer) {
         consumer.accept(mConfigurationRobot);
     }
 

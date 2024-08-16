@@ -33,9 +33,10 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.recordissue.IssueRecordingState.Companion.TAG_TITLE_DELIMITER
 import com.android.traceur.FileSender
 import com.android.traceur.MessageConstants
-import com.android.traceur.TraceUtils.PresetTraceType
+import com.android.traceur.TraceConfig
 import javax.inject.Inject
 
 private const val TAG = "TraceurMessageSender"
@@ -45,11 +46,15 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
     private var binder: Messenger? = null
     private var isBound: Boolean = false
 
+    val onBoundToTraceur = mutableListOf<Runnable>()
+
     private val traceurConnection =
         object : ServiceConnection {
             override fun onServiceConnected(className: ComponentName, service: IBinder) {
                 binder = Messenger(service)
                 isBound = true
+                onBoundToTraceur.forEach(Runnable::run)
+                onBoundToTraceur.clear()
             }
 
             override fun onServiceDisconnected(className: ComponentName) {
@@ -93,9 +98,9 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
     }
 
     @WorkerThread
-    fun startTracing(traceType: PresetTraceType) {
+    fun startTracing(traceType: TraceConfig) {
         val data =
-            Bundle().apply { putSerializable(MessageConstants.INTENT_EXTRA_TRACE_TYPE, traceType) }
+            Bundle().apply { putParcelable(MessageConstants.INTENT_EXTRA_TRACE_TYPE, traceType) }
         notifyTraceur(MessageConstants.START_WHAT, data)
     }
 
@@ -103,8 +108,14 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
 
     @WorkerThread
     fun shareTraces(context: Context, screenRecord: Uri?) {
-        val replyHandler = Messenger(TraceurMessageHandler(context, screenRecord, backgroundLooper))
+        val replyHandler = Messenger(ShareFilesHandler(context, screenRecord, backgroundLooper))
         notifyTraceur(MessageConstants.SHARE_WHAT, replyTo = replyHandler)
+    }
+
+    @WorkerThread
+    fun getTags(state: IssueRecordingState) {
+        val replyHandler = Messenger(TagsHandler(backgroundLooper, state))
+        notifyTraceur(MessageConstants.TAGS_WHAT, replyTo = replyHandler)
     }
 
     @WorkerThread
@@ -122,7 +133,7 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
         }
     }
 
-    private class TraceurMessageHandler(
+    private class ShareFilesHandler(
         private val context: Context,
         private val screenRecord: Uri?,
         looper: Looper,
@@ -152,6 +163,27 @@ class TraceurMessageSender @Inject constructor(@Background private val backgroun
                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
                     )
             context.startActivity(fileSharingIntent)
+        }
+    }
+
+    private class TagsHandler(looper: Looper, private val state: IssueRecordingState) :
+        Handler(looper) {
+
+        override fun handleMessage(msg: Message) {
+            if (MessageConstants.TAGS_WHAT == msg.what) {
+                val keys = msg.data.getStringArrayList(MessageConstants.BUNDLE_KEY_TAGS)
+                val values =
+                    msg.data.getStringArrayList(MessageConstants.BUNDLE_KEY_TAG_DESCRIPTIONS)
+                if (keys == null || values == null) {
+                    throw IllegalArgumentException(
+                        "Neither keys: $keys, nor values: $values can be null"
+                    )
+                }
+                state.tagTitles =
+                    keys.zip(values).map { it.first + TAG_TITLE_DELIMITER + it.second }.toSet()
+            } else {
+                throw IllegalArgumentException("received unknown msg.what: " + msg.what)
+            }
         }
     }
 }

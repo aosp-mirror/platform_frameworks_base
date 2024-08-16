@@ -27,6 +27,9 @@ import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.R;
 
 import java.time.Duration;
@@ -57,6 +60,12 @@ public class ZenModesBackend {
             sInstance = new ZenModesBackend(context.getApplicationContext());
         }
         return sInstance;
+    }
+
+    /** Replaces the singleton instance of {@link ZenModesBackend} by the provided one. */
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public static void setInstance(@Nullable ZenModesBackend backend) {
+        sInstance = backend;
     }
 
     ZenModesBackend(Context context) {
@@ -107,7 +116,6 @@ public class ZenModesBackend {
 
     private ZenMode getManualDndMode(ZenModeConfig config) {
         ZenModeConfig.ZenRule manualRule = config.manualRule;
-        // TODO: b/333682392 - Replace with final strings for name & trigger description
         AutomaticZenRule manualDndRule = new AutomaticZenRule.Builder(
                 mContext.getString(R.string.zen_mode_settings_title), manualRule.conditionId)
                 .setType(manualRule.type)
@@ -118,7 +126,7 @@ public class ZenModesBackend {
                 .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
                 .build();
 
-        return ZenMode.manualDndMode(manualDndRule, config != null && config.isManualActive());
+        return ZenMode.manualDndMode(manualDndRule, config.isManualActive());
     }
 
     public void updateMode(ZenMode mode) {
@@ -166,7 +174,6 @@ public class ZenModesBackend {
             mNotificationManager.setZenMode(Settings.Global.ZEN_MODE_OFF, null, TAG,
                     /* fromUser= */ true);
         } else {
-            // TODO: b/333527800 - This should (potentially) snooze the rule if it was active.
             mNotificationManager.setAutomaticZenRuleState(mode.getId(),
                     new Condition(mode.getRule().getConditionId(), "", Condition.STATE_FALSE,
                             Condition.SOURCE_USER_ACTION));
@@ -184,18 +191,13 @@ public class ZenModesBackend {
      * Creates a new custom mode with the provided {@code name}. The mode will be "manual" (i.e.
      * not have a schedule), this can be later updated by the user in the mode settings page.
      *
+     * @param name mode name
+     * @param iconResId resource id of the chosen icon, {code 0} if none.
      * @return the created mode. Only {@code null} if creation failed due to an internal error
      */
     @Nullable
-    public ZenMode addCustomMode(String name) {
-        AutomaticZenRule rule = new AutomaticZenRule.Builder(name,
-                ZenModeConfig.toCustomManualConditionId())
-                .setPackage(ZenModeConfig.getCustomManualConditionProvider().getPackageName())
-                .setType(AutomaticZenRule.TYPE_OTHER)
-                .setOwner(ZenModeConfig.getCustomManualConditionProvider())
-                .setManualInvocationAllowed(true)
-                .build();
-
+    public ZenMode addCustomManualMode(String name, @DrawableRes int iconResId) {
+        AutomaticZenRule rule = ZenMode.newCustomManual(name, iconResId).getRule();
         String ruleId = mNotificationManager.addAutomaticZenRule(rule);
         return getMode(ruleId);
     }

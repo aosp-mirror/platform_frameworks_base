@@ -73,7 +73,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
@@ -496,7 +496,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
-        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.onStartSwipePipToHome();
+        } else {
+            sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        }
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
     }
@@ -636,6 +640,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
+        // bail early if leash is null
+        if (mLeash == null) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "exitPip: leash is null");
+            return;
+        }
+
         final Rect destinationBounds = new Rect(getExitDestinationBounds());
         final int direction = syncWithSplitScreenBounds(destinationBounds, requestEnterSplit)
                 ? TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
@@ -684,16 +695,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 return;
             }
 
-            if (mSplitScreenOptional.isPresent()) {
-                // If pip activity will reparent to origin task case and if the origin task still
-                // under split root, apply exit split transaction to make it expand to fullscreen.
-                SplitScreenController split = mSplitScreenOptional.get();
-                if (split.isTaskInSplitScreen(mTaskInfo.lastParentTaskIdBeforePip)) {
-                    split.prepareExitSplitScreen(wct, split.getStageOfTask(
-                            mTaskInfo.lastParentTaskIdBeforePip),
-                            SplitScreenController.EXIT_REASON_APP_FINISHED);
-                }
-            }
             mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
             return;
         }
@@ -1974,12 +1975,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             }
             clearContentOverlay();
         }
-        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
-            // Avoid double removal, which is fatal.
-            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: trying to remove overlay (%s) while in UNDEFINED state", TAG, surface);
-            return;
-        }
         if (surface == null || !surface.isValid()) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: trying to remove invalid content overlay (%s)", TAG, surface);
@@ -2023,7 +2018,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             removeContentOverlay(mPipOverlay, null /* callback */);
         }
         if (animator != null) {
-            PipAnimationController.quietCancel(animator);
+            animator.cancel();
             mPipAnimationController.resetAnimatorState();
         }
     }

@@ -1131,9 +1131,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         @Override
-        public void onUserUnlocked(@NonNull TargetUser user) {
-            if (user.isPreCreated()) return;
-            mService.handleOnUserUnlocked(user.getUserIdentifier());
+        public void onUserSwitching(@NonNull TargetUser from, @NonNull TargetUser to) {
+            if (to.isPreCreated()) return;
+            mService.handleOnUserSwitching(from.getUserIdentifier(), to.getUserIdentifier());
         }
     }
 
@@ -1378,7 +1378,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Clear always-on configuration if it wasn't set by the admin.
         if (adminConfiguredVpnPkg == null) {
-            mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(userId, null, false, null);
+            VpnManager vpnManager = mInjector.getVpnManager();
+            if (vpnManager != null) {
+                vpnManager.setAlwaysOnVpnPackageForUser(userId, null, false, null);
+            }
         }
 
         // Clear app authorizations to establish VPNs. When DISALLOW_CONFIG_VPN is enforced apps
@@ -1789,6 +1792,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return mContext.getSystemService(ConnectivityManager.class);
         }
 
+        @Nullable
         VpnManager getVpnManager() {
             return mContext.getSystemService(VpnManager.class);
         }
@@ -3616,8 +3620,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             default -> {
                 Slogf.wtf(LOG_TAG, "Unhandled password complexity: " + passwordComplexity);
-                // The following line is unreachable as Slogf.wtf crashes the process.
-                // But we need this to avoid compilation error missing return statement.
                 return DEVICE_POLICY_STATE__PASSWORD_COMPLEXITY__COMPLEXITY_UNSPECIFIED;
             }
         }
@@ -3831,8 +3833,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mDevicePolicyEngine.handleUnlockUser(userId);
     }
 
-    void handleOnUserUnlocked(int userId) {
-        showNewUserDisclaimerIfNecessary(userId);
+    void handleOnUserSwitching(int fromUserId, int toUserId) {
+        showNewUserDisclaimerIfNecessary(toUserId);
     }
 
     void handleStopUser(int userId) {
@@ -3943,10 +3945,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * @param adminReceiver The admin to add
      * @param refreshing true = update an active admin, no error
+     * @param userHandle which user this admin will be set on
+     * @param provisioningContext additional information for debugging
      */
     @Override
     public void setActiveAdmin(
-            ComponentName adminReceiver, boolean refreshing, int userHandle) {
+            ComponentName adminReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
         if (!mHasFeature) {
             return;
         }
@@ -3972,6 +3980,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 newAdmin.testOnlyAdmin =
                         (existingAdmin != null) ? existingAdmin.testOnlyAdmin
                                 : isPackageTestOnly(adminReceiver.getPackageName(), userHandle);
+                newAdmin.setProvisioningContext(provisioningContext);
                 policy.mAdminMap.put(adminReceiver, newAdmin);
                 int replaceIndex = -1;
                 final int N = policy.mAdminList.size();
@@ -7697,8 +7706,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             // If some package is uninstalled after the check above, it will be ignored by CM.
-            if (!mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(
-                    userId, vpnPackage, lockdown, lockdownAllowlist)) {
+            VpnManager vpnManager = mInjector.getVpnManager();
+            if (vpnManager == null
+                    || !mInjector.getVpnManager().setAlwaysOnVpnPackageForUser(
+                            userId, vpnPackage, lockdown, lockdownAllowlist)) {
                 throw new UnsupportedOperationException();
             }
         });
@@ -7746,8 +7757,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwner(caller));
 
+        VpnManager vpnManager = mInjector.getVpnManager();
+        if (vpnManager == null) {
+            return null;
+        }
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getVpnManager().getAlwaysOnVpnPackageForUser(caller.getUserId()));
+                () -> vpnManager.getAlwaysOnVpnPackageForUser(caller.getUserId()));
     }
 
     @Override
@@ -7774,8 +7789,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     isDefaultDeviceOwner(caller) || isProfileOwner(caller));
         }
 
+        VpnManager vpnManager = mInjector.getVpnManager();
+        if (vpnManager == null) {
+            return false;
+        }
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getVpnManager().isVpnLockdownEnabled(caller.getUserId()));
+                () -> vpnManager.isVpnLockdownEnabled(caller.getUserId()));
     }
 
     @Override
@@ -7797,8 +7816,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwner(caller));
 
+        VpnManager vpnManager = mInjector.getVpnManager();
+        if (vpnManager == null) {
+            return null;
+        }
         return mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getVpnManager().getVpnLockdownAllowlist(caller.getUserId()));
+                () -> vpnManager.getVpnLockdownAllowlist(caller.getUserId()));
     }
 
     private void forceWipeDeviceNoLock(boolean wipeExtRequested, String reason, boolean wipeEuicc,
@@ -12830,7 +12853,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
 
         // Set admin.
-        setActiveAdmin(profileOwner, /* refreshing= */ true, userId);
+        setActiveAdmin(profileOwner, /* refreshing= */ true, userId, null);
         setProfileOwner(profileOwner, userId);
 
         synchronized (getLockObject()) {
@@ -13611,7 +13634,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setBackwardCompatibleUserRestriction(
                     caller, admin, key, enabledFromThisOwner, parent);
         }
-        logUserRestrictionCall(key, enabledFromThisOwner, parent, caller);
+        logUserRestrictionCall(key, enabledFromThisOwner, parent, caller, affectedUserId);
+    }
+
+    @Override
+    public void setUserRestrictionForUser(
+            @NonNull String systemEntity, String key, boolean enabled, @UserIdInt int targetUser) {
+        Objects.requireNonNull(systemEntity);
+
+        CallerIdentity caller = getCallerIdentity();
+        if (caller.getUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only system services can call setUserRestrictionForUser"
+                    + " on a target user: " + targetUser);
+        }
+        if (VERBOSE_LOG) {
+            Slogf.v(LOG_TAG, "Creating SystemEnforcingAdmin %s for calling package %s",
+                    systemEntity, caller.getPackageName());
+        }
+        EnforcingAdmin admin = EnforcingAdmin.createSystemEnforcingAdmin(systemEntity);
+
+        setLocalUserRestrictionInternal(admin, key, enabled, targetUser);
+
+        logUserRestrictionCall(key, enabled, /* parent= */ false, caller, targetUser);
     }
 
     private void checkAdminCanSetRestriction(CallerIdentity caller, boolean parent, String key) {
@@ -13732,7 +13776,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         setGlobalUserRestrictionInternal(admin, key, /* enabled= */ true);
 
-        logUserRestrictionCall(key, /* enabled= */ true, /* parent= */ false, caller);
+        logUserRestrictionCall(key, /* enabled= */ true, /* parent= */ false, caller,
+                UserHandle.USER_ALL);
     }
     private void setLocalUserRestrictionInternal(
             EnforcingAdmin admin, String key, boolean enabled, int userId) {
@@ -13768,7 +13813,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void logUserRestrictionCall(
-            String key, boolean enabled, boolean parent, CallerIdentity caller) {
+            String key, boolean enabled, boolean parent, CallerIdentity caller, int targetUserId) {
         final int eventId = enabled
                 ? DevicePolicyEnums.ADD_USER_RESTRICTION
                 : DevicePolicyEnums.REMOVE_USER_RESTRICTION;
@@ -13784,8 +13829,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             SecurityLog.writeEvent(eventTag, caller.getPackageName(), caller.getUserId(), key);
         }
 
-        Slogf.i(LOG_TAG, "Changing user restriction %s to: %b caller: %s",
-                key, enabled, caller.toString());
+        Slogf.i(LOG_TAG, "Changing user restriction %s on %s to: %b caller: %s",
+                key, (targetUserId == UserHandle.USER_ALL ? "all users" : ("user " + targetUserId)),
+                enabled, caller.toString());
     }
 
     @Override
@@ -13949,6 +13995,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, new String[]{MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION});
+        USER_RESTRICTION_PERMISSIONS.put(
+                UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO, new String[]{MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_UNIFIED_PASSWORD, new String[]{MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS});
         USER_RESTRICTION_PERMISSIONS.put(
@@ -21883,7 +21931,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             @UserIdInt int userId, @UserIdInt int callingUserId, ComponentName adminComponent) {
         final String adminPackage = adminComponent.getPackageName();
         enablePackage(adminPackage, callingUserId);
-        setActiveAdmin(adminComponent, /* refreshing= */ true, userId);
+        setActiveAdmin(adminComponent, /* refreshing= */ true, userId, null);
     }
 
     private void enablePackage(String packageName, @UserIdInt int userId) {

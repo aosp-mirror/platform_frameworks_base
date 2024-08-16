@@ -9202,6 +9202,14 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
+    public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
+        setActiveAdmin(policyReceiver, refreshing, myUserId());
+    }
+
+    /**
+     * @hide
+     */
     @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(allOf = {
@@ -9210,21 +9218,45 @@ public class DevicePolicyManager {
     })
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
-        if (mService != null) {
-            try {
-                mService.setActiveAdmin(policyReceiver, refreshing, userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        setActiveAdminInternal(policyReceiver, refreshing, userHandle, null);
     }
 
     /**
      * @hide
      */
-    @UnsupportedAppUsage
-    public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
-        setActiveAdmin(policyReceiver, refreshing, myUserId());
+    @TestApi
+    @RequiresPermission(allOf = {
+            MANAGE_DEVICE_ADMINS,
+            INTERACT_ACROSS_USERS_FULL
+    })
+    @FlaggedApi(Flags.FLAG_PROVISIONING_CONTEXT_PARAMETER)
+    public void setActiveAdmin(
+            @NonNull ComponentName policyReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
+        setActiveAdminInternal(policyReceiver, refreshing, userHandle, provisioningContext);
+    }
+
+    private void setActiveAdminInternal(
+            @NonNull ComponentName policyReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
+        if (mService != null) {
+            try {
+                mService.setActiveAdmin(
+                        policyReceiver,
+                        refreshing,
+                        userHandle,
+                        provisioningContext
+                );
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -9678,7 +9710,7 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 final int myUserId = myUserId();
-                mService.setActiveAdmin(admin, false, myUserId);
+                mService.setActiveAdmin(admin, false, myUserId, null);
                 return mService.setProfileOwner(admin, myUserId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
@@ -11932,6 +11964,34 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Adds a user restriction on {@code targetUser}, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity  The service entity that adds the restriction. A user restriction set by
+     *                       a service entity can only be cleared by the same entity. This can be
+     *                       just the calling package name, or any string of the caller's choice
+     *                       can be used.
+     * @param key  The key of the restriction.
+     * @param targetUser  The user to add the restriction on.
+     * @throws SecurityException if the caller is not a system service
+     *
+     * @hide
+     */
+    public void addUserRestriction(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key, @UserIdInt int targetUser) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionForUser(
+                        systemEntity, key, /* enable= */ true, targetUser);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by a profile owner, device owner or a holder of any permission that is associated with
      *  a user restriction to set a user restriction specified by the provided {@code key} globally
      *  on all users. To clear the restriction use {@link #clearUserRestriction}.
@@ -11939,7 +11999,7 @@ public class DevicePolicyManager {
      * <p>For a given user, a restriction will be set if it was applied globally or locally by any
      * admin.
      *
-     * <p> The calling device admin must be a profile owner, device owner or or a holder of any
+     * <p> The calling device admin must be a profile owner, device owner or a holder of any
      * permission that is associated with a user restriction; if it is not, a security
      * exception will be thrown.
      *
@@ -12033,6 +12093,34 @@ public class DevicePolicyManager {
             try {
                 mService.setUserRestriction(
                         admin, mContext.getPackageName(), key, false, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clears a user restriction from {@code targetUser}, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity  The system entity that clears the restriction. A user restriction
+     *                         set by a system entity can only be cleared by the same entity. This
+     *                         can be just the calling package name, or any string of the caller's
+     *                         choice can be used.
+     * @param key  The key of the restriction.
+     * @param targetUser  The user to clear the restriction from.
+     * @throws SecurityException if the caller is not a system service
+     *
+     * @hide
+     */
+    public void clearUserRestriction(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key, @UserIdInt int targetUser) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionForUser(
+                        systemEntity, key, /* enable= */ false, targetUser);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

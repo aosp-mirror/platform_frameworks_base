@@ -34,7 +34,9 @@ import kotlinx.coroutines.flow.stateIn
 
 internal sealed class AudioSharingButtonState {
     object Gone : AudioSharingButtonState()
-    data class Visible(@StringRes val resId: Int) : AudioSharingButtonState()
+
+    data class Visible(@StringRes val resId: Int, val isActive: Boolean) :
+        AudioSharingButtonState()
 }
 
 /** Holds business logic for the audio sharing state. */
@@ -73,7 +75,8 @@ constructor(
             // Show sharing audio when broadcasting
             BluetoothUtils.isBroadcasting(localBluetoothManager) ->
                 AudioSharingButtonState.Visible(
-                    R.string.quick_settings_bluetooth_audio_sharing_button_sharing
+                    R.string.quick_settings_bluetooth_audio_sharing_button_sharing,
+                    isActive = true
                 )
             // When not broadcasting, don't show button if there's connected source in any device
             deviceItem.any {
@@ -85,7 +88,8 @@ constructor(
             // Show audio sharing when there's a connected LE audio device
             deviceItem.any { BluetoothUtils.isActiveLeAudioDevice(it.cachedBluetoothDevice) } ->
                 AudioSharingButtonState.Visible(
-                    R.string.quick_settings_bluetooth_audio_sharing_button
+                    R.string.quick_settings_bluetooth_audio_sharing_button,
+                    isActive = false
                 )
             else -> AudioSharingButtonState.Gone
         }

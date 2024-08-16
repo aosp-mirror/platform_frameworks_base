@@ -154,6 +154,10 @@ public class DisplayManagerFlags {
             Flags::useFusionProxSensor
     );
 
+    private final FlagState mDozeBrightnessFloat = new FlagState(
+            Flags.FLAG_DOZE_BRIGHTNESS_FLOAT,
+            Flags::dozeBrightnessFloat);
+
     private final FlagState mOffloadControlsDozeAutoBrightness = new FlagState(
             Flags.FLAG_OFFLOAD_CONTROLS_DOZE_AUTO_BRIGHTNESS,
             Flags::offloadControlsDozeAutoBrightness
@@ -183,6 +187,16 @@ public class DisplayManagerFlags {
             new FlagState(
                     Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
                     Flags::offloadSessionCancelBlockScreenOn);
+
+    private final FlagState mNewHdrBrightnessModifier =
+            new FlagState(
+                    Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
+                    Flags::newHdrBrightnessModifier);
+
+    private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
+            Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
+            Flags::normalBrightnessForDozeParameter
+    );
 
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
@@ -342,6 +356,10 @@ public class DisplayManagerFlags {
         return mUseFusionProxSensor.getName();
     }
 
+    public boolean isDozeBrightnessFloatEnabled() {
+        return mDozeBrightnessFloat.isEnabled();
+    }
+
     /**
      * @return Whether DisplayOffload should control auto-brightness in doze
      */
@@ -370,6 +388,20 @@ public class DisplayManagerFlags {
 
     public boolean isSynthetic60HzModesEnabled() {
         return mSynthetic60hzModes.isEnabled();
+    }
+
+    /**
+     * @return Whether to use new HDR brightness modifier or not
+     */
+    public boolean useNewHdrBrightnessModifier() {
+        return mNewHdrBrightnessModifier.isEnabled();
+    }
+
+    /**
+     * @return Whether the useDozeBrightness parameter should be used
+     */
+    public boolean isNormalBrightnessForDozeParameterEnabled() {
+        return mNormalBrightnessForDozeParameter.isEnabled();
     }
 
     /**
@@ -403,12 +435,15 @@ public class DisplayManagerFlags {
         pw.println(" " + mRefactorDisplayPowerController);
         pw.println(" " + mResolutionBackupRestore);
         pw.println(" " + mUseFusionProxSensor);
+        pw.println(" " + mDozeBrightnessFloat);
         pw.println(" " + mOffloadControlsDozeAutoBrightness);
         pw.println(" " + mPeakRefreshRatePhysicalLimit);
         pw.println(" " + mIgnoreAppPreferredRefreshRate);
         pw.println(" " + mSynthetic60hzModes);
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
+        pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mNormalBrightnessForDozeParameter);
     }
 
     private static class FlagState {

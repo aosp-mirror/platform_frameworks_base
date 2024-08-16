@@ -145,13 +145,6 @@ public abstract class ActivityTaskManagerInternal {
         void acquire(int displayId);
 
         /**
-         * Acquires a sleep token.
-         * @param displayId The display to apply to.
-         * @param isSwappingDisplay Whether the display is swapping to another physical display.
-         */
-        void acquire(int displayId, boolean isSwappingDisplay);
-
-        /**
          * Releases the sleep token.
          * @param displayId The display to apply to.
          */
@@ -591,7 +584,7 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void clearLockedTasks(String reason);
     public abstract void updateUserConfiguration();
-    public abstract boolean canShowErrorDialogs();
+    public abstract boolean canShowErrorDialogs(int userId);
 
     public abstract void setProfileApp(String profileApp);
     public abstract void setProfileProc(WindowProcessController wpc);

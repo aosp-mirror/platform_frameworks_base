@@ -1617,10 +1617,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @NonNull
     public WorkSource deriveWorkSource(int sourceUid, @Nullable String sourcePackageName) {
-        if (WorkSource.isChainedBatteryAttributionEnabled(getContext())) {
+        if (Flags.createWorkChainByDefault()
+                || WorkSource.isChainedBatteryAttributionEnabled(getContext())) {
             WorkSource ws = new WorkSource();
             ws.createWorkChain()
-                    .addNode(sourceUid, sourcePackageName)
+                    .addNode(sourceUid, null)
                     .addNode(Process.SYSTEM_UID, "JobScheduler");
             return ws;
         } else {

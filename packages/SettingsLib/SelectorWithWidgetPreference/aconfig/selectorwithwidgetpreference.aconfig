@@ -1,0 +1,13 @@
+package: "com.android.settingslib.widget.selectorwithwidgetpreference.flags"
+container: "system"
+
+flag {
+    name: "allow_set_title_max_lines"
+    namespace: "accessibility"
+    description: "Allow changes to the title max lines so it's not always fixed to 2"
+    bug: "356726764"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

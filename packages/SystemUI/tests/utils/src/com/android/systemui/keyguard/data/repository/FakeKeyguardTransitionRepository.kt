@@ -283,7 +283,7 @@ class FakeKeyguardTransitionRepository(
         )
     }
 
-    override fun updateTransition(
+    override suspend fun updateTransition(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState

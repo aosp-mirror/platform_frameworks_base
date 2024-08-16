@@ -22,24 +22,7 @@
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "include-filter": "android.content.ContextTest"
-        },
-        {
-          "include-filter": "android.content.ComponentCallbacksControllerTest"
-        },
-        {
-          "include-filter": "android.content.ContextWrapperTest"
-        }
-      ],
+      "name": "FrameworksCoreTests_android_content",
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java", "(/|^)ComponentCallbacksController.java"]
     },
     {

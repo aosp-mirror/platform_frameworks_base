@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume;
 
+import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Handler;
@@ -26,6 +28,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.volume.domain.interactor.AudioSharingInteractor;
 
 import java.io.PrintWriter;
 
@@ -41,23 +44,29 @@ public class VolumeUI implements CoreStartable, ConfigurationController.Configur
     private boolean mEnabled;
     private final Context mContext;
     private VolumeDialogComponent mVolumeComponent;
+    private AudioSharingInteractor mAudioSharingInteractor;
 
     @Inject
-    public VolumeUI(Context context, VolumeDialogComponent volumeDialogComponent) {
+    public VolumeUI(Context context, VolumeDialogComponent volumeDialogComponent,
+            AudioSharingInteractor audioSharingInteractor) {
         mContext = context;
         mVolumeComponent = volumeDialogComponent;
+        mAudioSharingInteractor = audioSharingInteractor;
     }
 
     @Override
     public void start() {
         boolean enableVolumeUi = mContext.getResources().getBoolean(R.bool.enable_volume_ui);
         boolean enableSafetyWarning =
-            mContext.getResources().getBoolean(R.bool.enable_safety_warning);
+                mContext.getResources().getBoolean(R.bool.enable_safety_warning);
         mEnabled = enableVolumeUi || enableSafetyWarning;
         if (!mEnabled) return;
 
         mVolumeComponent.setEnableDialogs(enableVolumeUi, enableSafetyWarning);
         setDefaultVolumeController();
+        if (volumeDialogAudioSharingFix()) {
+            mAudioSharingInteractor.handlePrimaryGroupChange();
+        }
     }
 
     @Override

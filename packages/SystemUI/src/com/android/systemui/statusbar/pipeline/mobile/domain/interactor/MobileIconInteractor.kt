@@ -325,7 +325,7 @@ class MobileIconInteractorImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), true)
 
-    private val shownLevel: StateFlow<Int> =
+    private val cellularShownLevel: StateFlow<Int> =
         combine(
                 level,
                 isInService,
@@ -337,15 +337,19 @@ class MobileIconInteractorImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
+    // Satellite level is unaffected by the isInService or inflateSignalStrength properties
+    // See b/346904529 for details
+    private val satelliteShownLevel: StateFlow<Int> = level
+
     private val cellularIcon: Flow<SignalIconModel.Cellular> =
         combine(
-            shownLevel,
+            cellularShownLevel,
             numberOfLevels,
             showExclamationMark,
             carrierNetworkChangeActive,
-        ) { shownLevel, numberOfLevels, showExclamationMark, carrierNetworkChange ->
+        ) { cellularShownLevel, numberOfLevels, showExclamationMark, carrierNetworkChange ->
             SignalIconModel.Cellular(
-                shownLevel,
+                cellularShownLevel,
                 numberOfLevels,
                 showExclamationMark,
                 carrierNetworkChange,
@@ -353,7 +357,7 @@ class MobileIconInteractorImpl(
         }
 
     private val satelliteIcon: Flow<SignalIconModel.Satellite> =
-        shownLevel.map {
+        satelliteShownLevel.map {
             SignalIconModel.Satellite(
                 level = it,
                 icon =
@@ -365,7 +369,7 @@ class MobileIconInteractorImpl(
     override val signalLevelIcon: StateFlow<SignalIconModel> = run {
         val initial =
             SignalIconModel.Cellular(
-                shownLevel.value,
+                cellularShownLevel.value,
                 numberOfLevels.value,
                 showExclamationMark.value,
                 carrierNetworkChangeActive.value,

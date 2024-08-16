@@ -113,7 +113,7 @@ public class UserWakeupStore {
     }
 
     /**
-     * Add user wakeup for the alarm.
+     * Add user wakeup for the alarm if needed.
      * @param userId Id of the user that scheduled alarm.
      * @param alarmTime time when alarm is expected to trigger.
      */

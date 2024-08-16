@@ -50,6 +50,7 @@ import android.view.accessibility.IMagnificationConnectionCallback;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
@@ -96,6 +97,8 @@ public class MagnificationTest extends SysuiTestCase {
     private AccessibilityLogger mA11yLogger;
     @Mock
     private IWindowManager mIWindowManager;
+    @Mock
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
     @Before
     public void setUp() throws Exception {
@@ -129,7 +132,8 @@ public class MagnificationTest extends SysuiTestCase {
                 mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
                 getContext().getSystemService(DisplayManager.class), mA11yLogger, mIWindowManager,
-                getContext().getSystemService(AccessibilityManager.class));
+                getContext().getSystemService(AccessibilityManager.class),
+                mViewCaptureAwareWindowManager);
         mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
@@ -213,6 +217,16 @@ public class MagnificationTest extends SysuiTestCase {
                 eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED),
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
         );
+    }
+
+    @Test
+    public void onRestoreWindowSize_updateSettingsButtonStatusOnRestore() {
+        mMagnification.mWindowMagnifierCallback
+                .onWindowMagnifierBoundsRestored(TEST_DISPLAY, MagnificationSize.SMALL);
+        waitForIdleSync();
+
+        verify(mMagnificationSettingsController)
+                .updateSettingsButtonStatusOnRestore(MagnificationSize.SMALL);
     }
 
     @Test

@@ -34,7 +34,6 @@ import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -223,11 +222,6 @@ constructor(
             val nowExpanding = isPulseExpanding()
             val changed = nowExpanding != pulseExpanding
             pulseExpanding = nowExpanding
-            if (!NotificationIconContainerRefactor.isEnabled) {
-                for (listener in wakeUpListeners) {
-                    listener.onPulseExpansionAmountChanged(changed)
-                }
-            }
             if (changed) {
                 for (listener in wakeUpListeners) {
                     listener.onPulseExpandingChanged(pulseExpanding)
@@ -469,10 +463,24 @@ constructor(
         get() = state
 
     override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
-        val collapsedEnough = event.fraction <= 0.9f
-        if (collapsedEnough != this.collapsedEnoughToHide) {
-            val couldShowPulsingHuns = canShowPulsingHuns
-            this.collapsedEnoughToHide = collapsedEnough
+        val fraction = event.fraction
+
+        val wasCollapsedEnoughToHide = collapsedEnoughToHide
+        val isCollapsedEnoughToHide = fraction <= 0.9f
+
+        if (isCollapsedEnoughToHide != wasCollapsedEnoughToHide) {
+            val couldShowPulsingHuns = this.canShowPulsingHuns
+            this.collapsedEnoughToHide = isCollapsedEnoughToHide
+            val canShowPulsingHuns = this.canShowPulsingHuns
+
+            logger.logOnPanelExpansionChanged(
+                fraction,
+                wasCollapsedEnoughToHide,
+                isCollapsedEnoughToHide,
+                couldShowPulsingHuns,
+                canShowPulsingHuns
+            )
+
             if (couldShowPulsingHuns && !canShowPulsingHuns) {
                 updateNotificationVisibility(animate = true, increaseSpeed = true)
                 headsUpManager.releaseAllImmediately()
@@ -667,17 +675,6 @@ constructor(
     interface WakeUpListener {
         /** Called whenever the notifications are fully hidden or shown */
         fun onFullyHiddenChanged(isFullyHidden: Boolean) {}
-
-        /**
-         * Called whenever the pulseExpansion changes
-         *
-         * @param expandingChanged if the user has started or stopped expanding
-         */
-        @Deprecated(
-            message = "Use onPulseExpandedChanged instead.",
-            replaceWith = ReplaceWith("onPulseExpandedChanged"),
-        )
-        fun onPulseExpansionAmountChanged(expandingChanged: Boolean) {}
 
         /**
          * Called when the animator started by [scheduleDelayedDozeAmountAnimation] begins running

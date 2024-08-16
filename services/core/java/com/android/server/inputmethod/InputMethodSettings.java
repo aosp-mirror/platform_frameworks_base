@@ -54,7 +54,7 @@ final class InputMethodSettings {
     /**
      * An integer code that represents "no subtype" when a subtype hashcode is used.
      *
-     * <p>Due to historical confusions with {@link InputMethodUtils#NOT_A_SUBTYPE_ID}, we have
+     * <p>Due to historical confusions with {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX}, we have
      * used {@code -1} here. We cannot change this value as it's already saved into secure settings.
      * </p>
      */
@@ -62,7 +62,7 @@ final class InputMethodSettings {
     /**
      * A string code that represents "no subtype" when a subtype hashcode is used.
      *
-     * <p>Due to historical confusions with {@link InputMethodUtils#NOT_A_SUBTYPE_ID}, we have
+     * <p>Due to historical confusions with {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX}, we have
      * used {@code "-1"} here. We cannot change this value as it's already saved into secure
      * settings.</p>
      */
@@ -84,8 +84,8 @@ final class InputMethodSettings {
         // Inputmethod and subtypes are saved in the settings as follows:
         // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
         for (int i = 0; i < ime.second.size(); ++i) {
-            final String subtypeId = ime.second.get(i);
-            builder.append(INPUT_METHOD_SUBTYPE_SEPARATOR).append(subtypeId);
+            final String subtypeHashCode = ime.second.get(i);
+            builder.append(INPUT_METHOD_SUBTYPE_SEPARATOR).append(subtypeHashCode);
         }
     }
 
@@ -350,12 +350,12 @@ final class InputMethodSettings {
         if (lastImi == null) return null;
         try {
             final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-            final int lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi,
+            final int lastSubtypeIndex = SubtypeUtils.getSubtypeIndexFromHashCode(lastImi,
                     lastSubtypeHash);
-            if (lastSubtypeId < 0 || lastSubtypeId >= lastImi.getSubtypeCount()) {
+            if (lastSubtypeIndex < 0 || lastSubtypeIndex >= lastImi.getSubtypeCount()) {
                 return null;
             }
-            return lastImi.getSubtypeAt(lastSubtypeId);
+            return lastImi.getSubtypeAt(lastSubtypeIndex);
         } catch (NumberFormatException e) {
             return null;
         }
@@ -427,7 +427,7 @@ final class InputMethodSettings {
                     for (int j = 0; j < explicitlyEnabledSubtypes.size(); ++j) {
                         final String s = explicitlyEnabledSubtypes.get(j);
                         if (s.equals(subtypeHashCode)) {
-                            // If both imeId and subtype are enabled, return subtypeId.
+                            // If both imeId and subtype are enabled, return subtypeHashCode.
                             try {
                                 final int hashCode = Integer.parseInt(subtypeHashCode);
                                 // Check whether the subtype is valid or not
@@ -494,11 +494,11 @@ final class InputMethodSettings {
         putString(Settings.Secure.DEFAULT_INPUT_METHOD, imeId);
     }
 
-    void putSelectedSubtype(int subtypeId) {
+    void putSelectedSubtype(int subtypeHashCode) {
         if (DEBUG) {
-            Slog.d(TAG, "putSelectedInputMethodSubtypeStr: " + subtypeId + ", " + mUserId);
+            Slog.d(TAG, "putSelectedInputMethodSubtypeStr: " + subtypeHashCode + ", " + mUserId);
         }
-        putInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, subtypeId);
+        putInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, subtypeHashCode);
     }
 
     @Nullable
@@ -551,13 +551,13 @@ final class InputMethodSettings {
         return mUserId;
     }
 
-    int getSelectedInputMethodSubtypeId(String selectedImiId) {
+    int getSelectedInputMethodSubtypeIndex(String selectedImiId) {
         final InputMethodInfo imi = mMethodMap.get(selectedImiId);
         if (imi == null) {
-            return InputMethodUtils.NOT_A_SUBTYPE_ID;
+            return InputMethodUtils.NOT_A_SUBTYPE_INDEX;
         }
         final int subtypeHashCode = getSelectedInputMethodSubtypeHashCode();
-        return SubtypeUtils.getSubtypeIdFromHashCode(imi, subtypeHashCode);
+        return SubtypeUtils.getSubtypeIndexFromHashCode(imi, subtypeHashCode);
     }
 
     void saveCurrentInputMethodAndSubtypeToHistory(String curMethodId,
@@ -569,57 +569,6 @@ final class InputMethodSettings {
         if (InputMethodUtils.canAddToLastInputMethod(currentSubtype)) {
             addSubtypeToHistory(curMethodId, subtypeHashCodeStr);
         }
-    }
-
-    /**
-     * A variant of {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()} for
-     * non-current users.
-     *
-     * <p>TODO: Address code duplication between this and
-     * {@link InputMethodManagerService#getCurrentInputMethodSubtypeLocked()}.</p>
-     *
-     * @return {@link InputMethodSubtype} if exists. {@code null} otherwise.
-     */
-    @Nullable
-    InputMethodSubtype getCurrentInputMethodSubtypeForNonCurrentUsers() {
-        final String selectedMethodId = getSelectedInputMethod();
-        if (selectedMethodId == null) {
-            return null;
-        }
-        final InputMethodInfo imi = mMethodMap.get(selectedMethodId);
-        if (imi == null || imi.getSubtypeCount() == 0) {
-            return null;
-        }
-
-        final int subtypeHashCode = getSelectedInputMethodSubtypeHashCode();
-        if (subtypeHashCode != INVALID_SUBTYPE_HASHCODE) {
-            final int subtypeIndex = SubtypeUtils.getSubtypeIdFromHashCode(imi,
-                    subtypeHashCode);
-            if (subtypeIndex >= 0) {
-                return imi.getSubtypeAt(subtypeIndex);
-            }
-        }
-
-        // If there are no selected subtypes, the framework will try to find the most applicable
-        // subtype from explicitly or implicitly enabled subtypes.
-        final List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypes =
-                getEnabledInputMethodSubtypeList(imi, true);
-        // If there is only one explicitly or implicitly enabled subtype, just returns it.
-        if (explicitlyOrImplicitlyEnabledSubtypes.isEmpty()) {
-            return null;
-        }
-        if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
-            return explicitlyOrImplicitlyEnabledSubtypes.get(0);
-        }
-        final String locale = SystemLocaleWrapper.get(mUserId).get(0).toString();
-        final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtype(
-                explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
-                locale, true);
-        if (subtype != null) {
-            return subtype;
-        }
-        return SubtypeUtils.findLastResortApplicableSubtype(
-                explicitlyOrImplicitlyEnabledSubtypes, null, locale, true);
     }
 
     @NonNull

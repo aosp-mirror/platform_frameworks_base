@@ -449,9 +449,16 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
-        if (previous.getSbn().getOverrideGroupKey() != null && !getSbn().isAppGroup()) {
-            getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
+        if (android.service.notification.Flags.notificationForceGrouping()) {
+            if (previous.getSbn().getOverrideGroupKey() != null) {
+                getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
+            }
+        } else {
+            if (previous.getSbn().getOverrideGroupKey() != null && !getSbn().isAppGroup()) {
+                getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
+            }
         }
+
         // Don't copy importance information or mGlobalSortKey, recompute them.
     }
 
@@ -1154,6 +1161,21 @@ public final class NotificationRecord {
 
     public void setOverrideGroupKey(String overrideGroupKey) {
         getSbn().setOverrideGroupKey(overrideGroupKey);
+    }
+
+    /**
+     * Get the original group key that was set via {@link Notification.Builder#setGroup}
+     *
+     * This value is different than the value returned by {@link #getGroupKey()} as it does
+     * not contain any userId or package name.
+     *
+     * This value is different than the value returned
+     * by {@link StatusBarNotification#getGroup()} if the notification group
+     * was overridden: by NotificationAssistantService or by autogrouping.
+     */
+    @Nullable
+    public String getOriginalGroupKey() {
+        return getSbn().getNotification().getGroup();
     }
 
     public NotificationChannel getChannel() {

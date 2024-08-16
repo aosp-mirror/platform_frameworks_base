@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.content.Context
+import android.graphics.Insets
 import android.graphics.Rect
 import android.os.PowerManager
 import android.os.SystemClock
@@ -25,6 +26,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
@@ -37,6 +39,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.Flags
+import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
@@ -48,20 +52,22 @@ import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
-import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.collectFlow
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -76,6 +82,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val communalViewModel: CommunalViewModel,
     private val keyguardInteractor: KeyguardInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
     private val communalColors: CommunalColors,
@@ -83,6 +90,8 @@ constructor(
     private val communalContent: CommunalContent,
     @Communal private val dataSourceDelegator: SceneDataSourceDelegator,
     private val notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
+    private val keyguardMediaController: KeyguardMediaController,
+    private val lockscreenSmartspaceController: LockscreenSmartspaceController
 ) : LifecycleOwner {
 
     private class CommunalWrapper(context: Context) : FrameLayout(context) {
@@ -128,13 +137,6 @@ constructor(
     private var touchMonitor: TouchMonitor? = null
 
     /**
-     * The width of the area in which a right edge swipe can open the hub, in pixels. Read from
-     * resources when [initView] is called.
-     */
-    // TODO(b/320786721): support RTL layouts
-    private var rightEdgeSwipeRegionWidth: Int = 0
-
-    /**
      * True if we are currently tracking a touch intercepted by the hub, either because the hub is
      * open or being opened.
      */
@@ -148,10 +150,21 @@ constructor(
     private var hubShowing = false
 
     /**
+     * True if we're transitioning to or from edit mode
+     *
+     * We block all touches and gestures when edit mode is open to prevent funky transition issues
+     * when entering and exiting edit mode because we delay exiting the hub scene when entering edit
+     * mode and enter the hub scene early when exiting edit mode to make for a smoother transition.
+     * Gestures during these transitions can result in broken and unexpected UI states.
+     *
+     * Tracks [CommunalInteractor.editActivityShowing] and the [KeyguardState.GONE] to
+     * [KeyguardState.GLANCEABLE_HUB] transition.
+     */
+    private var inEditModeTransition = false
+
+    /**
      * True if either the primary or alternate bouncer are open, meaning the hub should not receive
      * any touch input.
-     *
-     * Tracks [KeyguardTransitionInteractor.isFinishedInState] for [KeyguardState.isBouncerState].
      */
     private var anyBouncerShowing = false
 
@@ -166,7 +179,14 @@ constructor(
      *
      * Based on [ShadeInteractor.isAnyFullyExpanded] and [ShadeInteractor.isUserInteracting].
      */
-    private var shadeShowing = false
+    private var shadeShowingAndConsumingTouches = false
+
+    /**
+     * True if the shade ever fully expands and the user isn't interacting with it (aka finger on
+     * screen dragging). In this case, the shade should handle all touch events until it has fully
+     * collapsed.
+     */
+    private var userNotInteractiveAtShadeFullyExpanded = false
 
     /**
      * True if the device is dreaming, in which case we shouldn't do anything for top/bottom swipes
@@ -242,11 +262,6 @@ constructor(
 
         communalContainerView = containerView
 
-        rightEdgeSwipeRegionWidth =
-            containerView.resources.getDimensionPixelSize(
-                R.dimen.communal_right_edge_swipe_region_width
-            )
-
         val topEdgeSwipeRegionWidth =
             containerView.resources.getDimensionPixelSize(
                 R.dimen.communal_top_edge_swipe_region_height
@@ -263,15 +278,46 @@ constructor(
             // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
             // occluded.
             lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val exclusionRect =
+                // Avoid adding exclusion to end/start edges to allow back gestures.
+                val insets =
+                    if (glanceableHubBackGesture()) {
+                        containerView.rootWindowInsets.getInsets(WindowInsets.Type.systemGestures())
+                    } else {
+                        Insets.NONE
+                    }
+
+                val ltr = containerView.layoutDirection == View.LAYOUT_DIRECTION_LTR
+
+                val backGestureInset =
                     Rect(
+                        if (ltr) 0 else insets.left,
                         0,
-                        topEdgeSwipeRegionWidth,
-                        containerView.right,
-                        containerView.bottom - bottomEdgeSwipeRegionWidth
+                        if (ltr) insets.right else containerView.right,
+                        containerView.bottom,
                     )
 
-                containerView.systemGestureExclusionRects = listOf(exclusionRect)
+                containerView.systemGestureExclusionRects =
+                    if (Flags.hubmodeFullscreenVerticalSwipeFix()) {
+                        listOf(
+                            // Disable back gestures on the left side of the screen, to avoid
+                            // conflicting with scene transitions.
+                            backGestureInset
+                        )
+                    } else {
+                        listOf(
+                            // Only allow swipe up to bouncer and swipe down to shade in the very
+                            // top/bottom to avoid conflicting with widgets in the hub grid.
+                            Rect(
+                                insets.left,
+                                topEdgeSwipeRegionWidth,
+                                containerView.right - insets.right,
+                                containerView.bottom - bottomEdgeSwipeRegionWidth
+                            ),
+                            // Disable back gestures on the left side of the screen, to avoid
+                            // conflicting with scene transitions.
+                            backGestureInset
+                        )
+                    }
             }
         }
 
@@ -300,9 +346,41 @@ constructor(
         )
         collectFlow(
             containerView,
-            allOf(shadeInteractor.isAnyFullyExpanded, not(shadeInteractor.isUserInteracting)),
+            // When leaving edit mode, editActivityShowing is true until the edit mode activity
+            // finishes itself and the device locks, after which isInTransition will be true until
+            // we're fully on the hub.
+            anyOf(
+                communalInteractor.editActivityShowing,
+                keyguardTransitionInteractor.isInTransition(
+                    Edge.create(KeyguardState.GONE, KeyguardState.GLANCEABLE_HUB)
+                )
+            ),
             {
-                shadeShowing = it
+                inEditModeTransition = it
+                updateTouchHandlingState()
+            }
+        )
+        collectFlow(
+            containerView,
+            combine(
+                shadeInteractor.isAnyFullyExpanded,
+                shadeInteractor.isUserInteracting,
+                shadeInteractor.isShadeFullyCollapsed,
+                ::Triple
+            ),
+            { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
+                val expandedAndNotInteractive = isFullyExpanded && !isUserInteracting
+
+                // If we ever are fully expanded and not interacting, capture this state as we
+                // should not handle touches until we fully collapse again
+                userNotInteractiveAtShadeFullyExpanded =
+                    !isShadeFullyCollapsed &&
+                        (userNotInteractiveAtShadeFullyExpanded || expandedAndNotInteractive)
+
+                // If the shade reaches full expansion without interaction, then we should allow it
+                // to consume touches rather than handling it here until it disappears.
+                shadeShowingAndConsumingTouches =
+                    userNotInteractiveAtShadeFullyExpanded || expandedAndNotInteractive
                 updateTouchHandlingState()
             }
         )
@@ -320,7 +398,11 @@ constructor(
      * Also clears gesture exclusion zones when the hub is occluded or gone.
      */
     private fun updateTouchHandlingState() {
-        val shouldInterceptGestures = hubShowing && !(shadeShowing || anyBouncerShowing)
+        // Only listen to gestures when we're settled in the hub keyguard state and the shade
+        // bouncer are not showing on top.
+        val shouldInterceptGestures =
+            hubShowing &&
+                !(shadeShowingAndConsumingTouches || anyBouncerShowing || inEditModeTransition)
         if (shouldInterceptGestures) {
             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         } else {
@@ -367,22 +449,28 @@ constructor(
         // the touch.
         if (
             !hubShowing &&
-                !notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y)
+                (!notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y) ||
+                    keyguardMediaController.isWithinMediaViewBounds(ev.x.toInt(), ev.y.toInt()) ||
+                    lockscreenSmartspaceController.isWithinSmartspaceBounds(
+                        ev.x.toInt(),
+                        ev.y.toInt()
+                    ))
         ) {
             return false
         }
 
-        return communalContainerView?.let { handleTouchEventOnCommunalView(it, ev) } ?: false
+        return communalContainerView?.let { handleTouchEventOnCommunalView(ev) } ?: false
     }
 
-    private fun handleTouchEventOnCommunalView(view: View, ev: MotionEvent): Boolean {
+    private fun handleTouchEventOnCommunalView(ev: MotionEvent): Boolean {
         val isDown = ev.actionMasked == MotionEvent.ACTION_DOWN
         val isUp = ev.actionMasked == MotionEvent.ACTION_UP
+        val isMove = ev.actionMasked == MotionEvent.ACTION_MOVE
         val isCancel = ev.actionMasked == MotionEvent.ACTION_CANCEL
 
-        val hubOccluded = anyBouncerShowing || shadeShowing
+        val hubOccluded = anyBouncerShowing || shadeShowingAndConsumingTouches
 
-        if (isDown && !hubOccluded) {
+        if ((isDown || isMove) && !hubOccluded) {
             isTrackingHubTouch = true
         }
 
@@ -390,7 +478,7 @@ constructor(
             if (isUp || isCancel) {
                 isTrackingHubTouch = false
             }
-            return dispatchTouchEvent(view, ev)
+            return dispatchTouchEvent(ev)
         }
 
         return false
@@ -400,7 +488,14 @@ constructor(
      * Dispatches the touch event to the communal container and sends a user activity event to reset
      * the screen timeout.
      */
-    private fun dispatchTouchEvent(view: View, ev: MotionEvent): Boolean {
+    private fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (inEditModeTransition) {
+            // Consume but ignore touches while we're transitioning to or from edit mode so that the
+            // user can't trigger another transition, such as by swiping the hub away, tapping a
+            // widget, or opening the shade/bouncer. Doing any of these while transitioning can
+            // result in broken states.
+            return true
+        }
         try {
             var handled = false
             communalContainerWrapper?.dispatchTouchEvent(ev) {

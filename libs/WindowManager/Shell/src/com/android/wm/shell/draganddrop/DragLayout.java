@@ -20,13 +20,12 @@ import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenUtils.getResizingBackgroundColor;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
@@ -41,6 +40,7 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -52,11 +52,13 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.widget.LinearLayout;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
@@ -289,9 +291,11 @@ public class DragLayout extends LinearLayout
                 final int activityType = taskInfo1.getActivityType();
                 if (activityType == ACTIVITY_TYPE_STANDARD) {
                     Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
-                    int bgColor1 = getResizingBackgroundColor(taskInfo1).toArgb();
+                    int bgColor1 = getResizingBackgroundColor(taskInfo1);
                     mDropZoneView1.setAppInfo(bgColor1, icon1);
                     mDropZoneView2.setAppInfo(bgColor1, icon1);
+                    mDropZoneView1.setForceIgnoreBottomMargin(false);
+                    mDropZoneView2.setForceIgnoreBottomMargin(false);
                     updateDropZoneSizes(null, null); // passing null splits the views evenly
                 } else {
                     // We use the first drop zone to show the fullscreen highlight, and don't need
@@ -309,10 +313,10 @@ public class DragLayout extends LinearLayout
                     mSplitScreenController.getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
             if (topOrLeftTask != null && bottomOrRightTask != null) {
                 Drawable topOrLeftIcon = mIconProvider.getIcon(topOrLeftTask.topActivityInfo);
-                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask).toArgb();
+                int topOrLeftColor = getResizingBackgroundColor(topOrLeftTask);
                 Drawable bottomOrRightIcon = mIconProvider.getIcon(
                         bottomOrRightTask.topActivityInfo);
-                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask).toArgb();
+                int bottomOrRightColor = getResizingBackgroundColor(bottomOrRightTask);
                 mDropZoneView1.setAppInfo(topOrLeftColor, topOrLeftIcon);
                 mDropZoneView2.setAppInfo(bottomOrRightColor, bottomOrRightIcon);
             }
@@ -484,13 +488,13 @@ public class DragLayout extends LinearLayout
     /**
      * Handles the drop onto a target and animates out the visible drop targets.
      */
-    public boolean drop(DragEvent event, SurfaceControl dragSurface,
-            Runnable dropCompleteCallback) {
+    public boolean drop(DragEvent event, @NonNull SurfaceControl dragSurface,
+            @Nullable WindowContainerToken hideTaskToken, Runnable dropCompleteCallback) {
         final boolean handledDrop = mCurrentTarget != null;
         mHasDropped = true;
 
         // Process the drop
-        mPolicy.handleDrop(mCurrentTarget);
+        mPolicy.handleDrop(mCurrentTarget, hideTaskToken);
 
         // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
@@ -500,7 +504,7 @@ public class DragLayout extends LinearLayout
         return handledDrop;
     }
 
-    private void hideDragSurface(SurfaceControl dragSurface) {
+    private void hideDragSurface(@NonNull SurfaceControl dragSurface) {
         final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
         final ValueAnimator dragSurfaceAnimator = ValueAnimator.ofFloat(0f, 1f);
         // Currently the splash icon animation runs with the default ValueAnimator duration of
@@ -581,6 +585,11 @@ public class DragLayout extends LinearLayout
             mDropZoneView1.setShowingHighlight(false);
             mDropZoneView2.setShowingHighlight(true);
         }
+    }
+
+    private static int getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
+        final int taskBgColor = taskInfo.taskDescription.getBackgroundColor();
+        return Color.valueOf(taskBgColor == -1 ? Color.WHITE : taskBgColor).toArgb();
     }
 
     /**

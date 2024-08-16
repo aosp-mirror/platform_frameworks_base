@@ -19,14 +19,20 @@ package com.android.settingslib.notification.modes;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.app.AutomaticZenRule;
 import android.net.Uri;
+import android.os.Parcel;
 import android.service.notification.Condition;
+import android.service.notification.SystemZenRules;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
+
+import com.android.internal.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,14 +58,17 @@ public class ZenModeTest {
         assertThat(zenMode.getId()).isEqualTo("id");
         assertThat(zenMode.getRule()).isEqualTo(ZEN_RULE);
         assertThat(zenMode.isManualDnd()).isFalse();
+        assertThat(zenMode.canEditNameAndIcon()).isTrue();
         assertThat(zenMode.canBeDeleted()).isTrue();
         assertThat(zenMode.isActive()).isTrue();
 
         ZenMode manualMode = ZenMode.manualDndMode(ZEN_RULE, false);
         assertThat(manualMode.getId()).isEqualTo(ZenMode.MANUAL_DND_MODE_ID);
         assertThat(manualMode.isManualDnd()).isTrue();
+        assertThat(manualMode.canEditNameAndIcon()).isFalse();
         assertThat(manualMode.canBeDeleted()).isFalse();
         assertThat(manualMode.isActive()).isFalse();
+        assertThat(manualMode.getRule().getPackageName()).isEqualTo(PACKAGE_ANDROID);
     }
 
     @Test
@@ -86,7 +95,7 @@ public class ZenModeTest {
     public void constructor_disabledRuleByUser_statusDisabledByUser() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_USER;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_USER);
@@ -96,10 +105,65 @@ public class ZenModeTest {
     public void constructor_disabledRuleByOther_statusDisabledByOther() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_APP;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_APP;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_OTHER);
+    }
+
+    @Test
+    public void isCustomManual_customManualMode() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isTrue();
+    }
+
+    @Test
+    public void isCustomManual_scheduleTime_false() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_SCHEDULE_TIME)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isFalse();
+    }
+
+    @Test
+    public void isCustomManual_scheduleCalendar_false() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_SCHEDULE_CALENDAR)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isFalse();
+    }
+
+    @Test
+    public void isCustomManual_appProvidedMode_false() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage("com.some.package")
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .build();
+        ZenMode mode = new ZenMode("id", rule, zenConfigRuleFor(rule, false));
+
+        assertThat(mode.isCustomManual()).isFalse();
+    }
+
+    @Test
+    public void isCustomManual_manualDnd_false() {
+        AutomaticZenRule dndRule = new AutomaticZenRule.Builder("Mode", Uri.parse("x"))
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_OTHER)
+                .build();
+        ZenMode mode = ZenMode.manualDndMode(dndRule, false);
+
+        assertThat(mode.isCustomManual()).isFalse();
     }
 
     @Test
@@ -159,6 +223,30 @@ public class ZenModeTest {
                 INTERRUPTION_FILTER_PRIORITY);
         assertThat(zenMode.getPolicy()).isEqualTo(ZEN_POLICY);
         assertThat(zenMode.getRule().getZenPolicy()).isEqualTo(ZEN_POLICY);
+    }
+
+    @Test
+    public void writeToParcel_equals() {
+        assertUnparceledIsEqualToOriginal("example",
+                new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, false)));
+
+        assertUnparceledIsEqualToOriginal("dnd", ZenMode.manualDndMode(ZEN_RULE, true));
+
+        assertUnparceledIsEqualToOriginal("custom_manual",
+                ZenMode.newCustomManual("New mode", R.drawable.ic_zen_mode_type_immersive));
+    }
+
+    private static void assertUnparceledIsEqualToOriginal(String type, ZenMode original) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            original.writeToParcel(parcel, 0);
+            parcel.setDataPosition(0);
+            ZenMode unparceled = ZenMode.CREATOR.createFromParcel(parcel);
+
+            assertWithMessage("Comparing " + type).that(unparceled).isEqualTo(original);
+        } finally {
+            parcel.recycle();
+        }
     }
 
     private static ZenModeConfig.ZenRule zenConfigRuleFor(AutomaticZenRule azr, boolean isActive) {

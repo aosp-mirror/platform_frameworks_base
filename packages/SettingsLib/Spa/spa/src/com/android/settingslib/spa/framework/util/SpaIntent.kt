@@ -25,7 +25,6 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 const val SESSION_UNKNOWN = "unknown"
 const val SESSION_BROWSE = "browse"
 const val SESSION_SEARCH = "search"
-const val SESSION_SLICE = "slice"
 const val SESSION_EXTERNAL = "external"
 
 const val KEY_DESTINATION = "spaActivityDestination"

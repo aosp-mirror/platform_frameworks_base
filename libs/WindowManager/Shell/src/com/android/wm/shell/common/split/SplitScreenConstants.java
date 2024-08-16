@@ -29,6 +29,8 @@ import com.android.wm.shell.shared.TransitionUtil;
 public class SplitScreenConstants {
     /** Duration used for every split fade-in or fade-out. */
     public static final int FADE_DURATION = 133;
+    /** Duration where we keep an app veiled to allow it to redraw itself behind the scenes. */
+    public static final int VEIL_DELAY_DURATION = 400;
 
     /** Key for passing in widget intents when invoking split from launcher workspace. */
     public static final String KEY_EXTRA_WIDGET_INTENT = "key_extra_widget_intent";

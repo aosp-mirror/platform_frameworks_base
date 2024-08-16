@@ -73,7 +73,7 @@ public class SurfaceControlRegistry {
             }
             // Sort entries by time registered when dumping
             // TODO: Or should it sort by name?
-            entries.sort((o1, o2) -> (int) (o1.getValue() - o2.getValue()));
+            entries.sort((o1, o2) -> Long.compare(o1.getValue(), o2.getValue()));
             final int size = Math.min(entries.size(), limit);
 
             pw.println("SurfaceControlRegistry");
@@ -295,16 +295,7 @@ public class SurfaceControlRegistry {
         }
 
         sCallStackDebuggingInitialized = true;
-        sCallStackDebuggingMatchCall =
-                SystemProperties.get("persist.wm.debug.sc.tx.log_match_call", null)
-                        .toLowerCase();
-        sCallStackDebuggingMatchName =
-                SystemProperties.get("persist.wm.debug.sc.tx.log_match_name", null)
-                        .toLowerCase();
-        sLogAllTxCallsOnApply = sCallStackDebuggingMatchCall.contains("apply");
-        // Only enable stack debugging if any of the match filters are set
-        sCallStackDebuggingEnabled = !sCallStackDebuggingMatchCall.isEmpty()
-                || !sCallStackDebuggingMatchName.isEmpty();
+        updateCallStackDebuggingParams();
         if (sCallStackDebuggingEnabled) {
             Log.d(TAG, "Enabling transaction call stack debugging:"
                     + " matchCall=" + sCallStackDebuggingMatchCall
@@ -325,6 +316,11 @@ public class SurfaceControlRegistry {
     final void checkCallStackDebugging(@NonNull String call,
             @Nullable SurfaceControl.Transaction tx, @Nullable SurfaceControl sc,
             @Nullable String details) {
+
+        if (sCallStackDebuggingInitialized && sCallStackDebuggingEnabled) {
+            updateCallStackDebuggingParams();
+        }
+
         if (!sCallStackDebuggingEnabled) {
             return;
         }
@@ -353,6 +349,22 @@ public class SurfaceControlRegistry {
             }
             Log.e(TAG, msg, new Throwable());
         }
+    }
+
+    /**
+     * Updates the call stack debugging params from the system properties.
+     */
+    private static void updateCallStackDebuggingParams() {
+        sCallStackDebuggingMatchCall =
+                SystemProperties.get("persist.wm.debug.sc.tx.log_match_call", null)
+                        .toLowerCase();
+        sCallStackDebuggingMatchName =
+                SystemProperties.get("persist.wm.debug.sc.tx.log_match_name", null)
+                        .toLowerCase();
+        sLogAllTxCallsOnApply = sCallStackDebuggingMatchCall.contains("apply");
+        // Only enable stack debugging if any of the match filters are set
+        sCallStackDebuggingEnabled = !sCallStackDebuggingMatchCall.isEmpty()
+                || !sCallStackDebuggingMatchName.isEmpty();
     }
 
     /**

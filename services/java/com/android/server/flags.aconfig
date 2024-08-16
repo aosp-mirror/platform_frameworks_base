@@ -22,3 +22,10 @@ flag {
      description: "Remove WearableSensingManagerService on Wear"
      bug: "340929916"
 }
+
+flag {
+     name: "allow_removing_vpn_service"
+     namespace: "wear_frameworks"
+     description: "Allow removing VpnManagerService"
+     bug: "340928692"
+}

@@ -22,11 +22,13 @@ import com.android.hoststubgen.log
 import com.android.hoststubgen.normalizeTextLine
 import com.android.hoststubgen.whitespaceRegex
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.tree.ClassNode
 import java.io.BufferedReader
 import java.io.FileReader
 import java.io.PrintWriter
 import java.util.Objects
+import java.util.regex.Pattern
 
 /**
  * Print a class node as a "keep" policy.
@@ -60,11 +62,12 @@ fun createFilterFromTextPolicyFile(
         filename: String,
         classes: ClassNodes,
         fallback: OutputFilter,
-        ): OutputFilter {
+        ): Pair<OutputFilter, Remapper?> {
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
         val subclassFilter = SubclassFilter(classes, fallback)
-        val imf = InMemoryOutputFilter(classes, subclassFilter)
+        val packageFilter = PackageFilter(subclassFilter)
+        val imf = InMemoryOutputFilter(classes, packageFilter)
 
         var lineNo = 0
 
@@ -72,16 +75,14 @@ fun createFilterFromTextPolicyFile(
         var featureFlagsPolicy: FilterPolicyWithReason? = null
         var syspropsPolicy: FilterPolicyWithReason? = null
         var rFilePolicy: FilterPolicyWithReason? = null
+        val typeRenameSpec = mutableListOf<TextFilePolicyRemapper.TypeRenameSpec>()
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
                 var className = ""
 
                 while (true) {
-                    var line = reader.readLine()
-                    if (line == null) {
-                        break
-                    }
+                    var line = reader.readLine() ?: break
                     lineNo++
 
                     line = normalizeTextLine(line)
@@ -95,6 +96,31 @@ fun createFilterFromTextPolicyFile(
 
                     val fields = line.split(whitespaceRegex).toTypedArray()
                     when (fields[0].lowercase()) {
+                        "p", "package" -> {
+                            if (fields.size < 3) {
+                                throw ParseException("Package ('p') expects 2 fields.")
+                            }
+                            val name = fields[1]
+                            val rawPolicy = fields[2]
+                            if (resolveExtendingClass(name) != null) {
+                                throw ParseException("Package can't be a super class type")
+                            }
+                            if (resolveSpecialClass(name) != SpecialClass.NotSpecial) {
+                                throw ParseException("Package can't be a special class type")
+                            }
+                            if (rawPolicy.startsWith("!")) {
+                                throw ParseException("Package can't have a substitution")
+                            }
+                            if (rawPolicy.startsWith("~")) {
+                                throw ParseException("Package can't have a class load hook")
+                            }
+                            val policy = parsePolicy(rawPolicy)
+                            if (!policy.isUsableWithClasses) {
+                                throw ParseException("Package can't have policy '$policy'")
+                            }
+                            packageFilter.addPolicy(name, policy.withReason(FILTER_REASON))
+                        }
+
                         "c", "class" -> {
                             if (fields.size < 3) {
                                 throw ParseException("Class ('c') expects 2 fields.")
@@ -228,6 +254,22 @@ fun createFilterFromTextPolicyFile(
                                 imf.setRenameTo(className, fromName, signature, name)
                             }
                         }
+                        "r", "rename" -> {
+                            if (fields.size < 3) {
+                                throw ParseException("Rename ('r') expects 2 fields.")
+                            }
+                            // Add ".*" to make it a prefix match.
+                            val pattern = Pattern.compile(fields[1] + ".*")
+
+                            // Removing the leading /'s from the prefix. This allows
+                            // using a single '/' as an empty suffix, which is useful to have a
+                            // "negative" rename rule to avoid subsequent raname's from getting
+                            // applied. (Which is needed for services.jar)
+                            val prefix = fields[2].trimStart('/')
+
+                            typeRenameSpec += TextFilePolicyRemapper.TypeRenameSpec(
+                                pattern, prefix)
+                        }
 
                         else -> {
                             throw ParseException("Unknown directive \"${fields[0]}\"")
@@ -239,9 +281,16 @@ fun createFilterFromTextPolicyFile(
             throw e.withSourceInfo(filename, lineNo)
         }
 
+        var remapper: TextFilePolicyRemapper? = null
+        if (typeRenameSpec.isNotEmpty()) {
+            remapper = TextFilePolicyRemapper(typeRenameSpec)
+        }
+
         // Wrap the in-memory-filter with AHF.
-        return AndroidHeuristicsFilter(
-                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, imf)
+        return Pair(
+            AndroidHeuristicsFilter(
+                classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, rFilePolicy, imf),
+            remapper)
     }
 }
 

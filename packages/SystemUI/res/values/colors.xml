@@ -160,8 +160,8 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#EA4335</color>
-    <color name="GM2_red_600">#B3261E</color>
     <color name="GM2_red_700">#C5221F</color>
+    <color name="GM2_red_800">#B3261E</color>
 
     <color name="GM2_blue_300">#8AB4F8</color>
 
@@ -236,11 +236,8 @@
     <!-- Internet Dialog -->
     <!-- Material next state on color-->
     <color name="settingslib_state_on_color">@color/settingslib_state_on</color>
-    <!-- Material next track on color-->
-    <color name="settingslib_track_on_color">@color/settingslib_track_on</color>
     <!-- Material next track off color-->
     <color name="settingslib_track_off_color">@color/settingslib_track_off</color>
-    <color name="connected_network_primary_color">#191C18</color>
     <color name="connected_network_secondary_color">#41493D</color>
 
     <color name="dream_overlay_camera_mic_off_dot_color">#FCBE03</color>

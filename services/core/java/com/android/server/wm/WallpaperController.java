@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WallpaperManager.COMMAND_DISPLAY_SWITCH;
 import static android.app.WallpaperManager.COMMAND_FREEZE;
 import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -57,7 +56,7 @@ import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
 import com.android.window.flags.Flags;
@@ -119,11 +118,6 @@ class WallpaperController {
 
     private boolean mShouldOffsetWallpaperCenter;
 
-    /**
-     * Whether the wallpaper has been notified about a physical display switch event is started.
-     */
-    private volatile boolean mIsWallpaperNotifiedOnDisplaySwitch;
-
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         final boolean useShellTransition = w.mTransitionController.isShellTransitionsEnabled();
         if (!useShellTransition) {
@@ -183,8 +177,8 @@ class WallpaperController {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             return true;
-        } else if (hasWallpaper && w.isOnScreen()
-                && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
+        } else if (hasWallpaper
+                && (w.mActivityRecord != null ? w.isOnScreen() : w.isReadyForDisplay())) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             mFindResults.setIsWallpaperTargetForLetterbox(w.hasWallpaperForLetterboxBackground());
@@ -1070,13 +1064,17 @@ class WallpaperController {
 
     /**
      * Mirrors the visible wallpaper if it's available.
+     * <p>
+     * We mirror at the WallpaperWindowToken level because scale and translation is applied at
+     * the WindowState level and mirroring the WindowState's SurfaceControl will remove any local
+     * scale and translation.
      *
      * @return A SurfaceControl for the parent of the mirrored wallpaper.
      */
     SurfaceControl mirrorWallpaperSurface() {
         final WindowState wallpaperWindowState = getTopVisibleWallpaper();
         return wallpaperWindowState != null
-                ? SurfaceControl.mirrorSurface(wallpaperWindowState.getSurfaceControl())
+                ? SurfaceControl.mirrorSurface(wallpaperWindowState.mToken.getSurfaceControl())
                 : null;
     }
 
@@ -1091,52 +1089,6 @@ class WallpaperController {
             }
         }
         return null;
-    }
-
-    /**
-     * Notifies the wallpaper that the display turns off when switching physical device. If the
-     * wallpaper is currently visible, its client visibility will be preserved until the display is
-     * confirmed to be off or on.
-     */
-    void onDisplaySwitchStarted() {
-        mIsWallpaperNotifiedOnDisplaySwitch = notifyDisplaySwitch(true /* start */);
-    }
-
-    /**
-     * Called when the screen has finished turning on or the device goes to sleep. This is no-op if
-     * the operation is not part of a display switch.
-     */
-    void onDisplaySwitchFinished() {
-        // The method can be called outside WM lock (turned on), so only acquire lock if needed.
-        // This is to optimize the common cases that regular devices don't have display switch.
-        if (mIsWallpaperNotifiedOnDisplaySwitch) {
-            synchronized (mService.mGlobalLock) {
-                mIsWallpaperNotifiedOnDisplaySwitch = false;
-                notifyDisplaySwitch(false /* start */);
-            }
-        }
-    }
-
-    private boolean notifyDisplaySwitch(boolean start) {
-        boolean notified = false;
-        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            for (int i = token.getChildCount() - 1; i >= 0; i--) {
-                final WindowState w = token.getChildAt(i);
-                if (start && !w.mWinAnimator.getShown()) {
-                    continue;
-                }
-                try {
-                    w.mClient.dispatchWallpaperCommand(COMMAND_DISPLAY_SWITCH, 0 /* x */, 0 /* y */,
-                            start ? 1 : 0 /* use z as start or finish */,
-                            null /* bundle */, false /* sync */);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to dispatch COMMAND_DISPLAY_SWITCH " + e);
-                }
-                notified = true;
-            }
-        }
-        return notified;
     }
 
     /**

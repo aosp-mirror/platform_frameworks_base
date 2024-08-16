@@ -129,13 +129,16 @@ constructor(
         }
     }
 
-    /** Notifies that the user has long-pressed on the lock screen. */
-    fun onLongPress() {
+    /** Notifies that the user has long-pressed on the lock screen.
+     *
+     * @param isA11yAction: Whether the action was performed as an a11y action
+     */
+    fun onLongPress(isA11yAction: Boolean = false) {
         if (!isLongPressHandlingEnabled.value) {
             return
         }
 
-        if (featureFlags.isEnabled(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP)) {
+        if (isA11yAction) {
             showSettings()
         } else {
             showMenu()

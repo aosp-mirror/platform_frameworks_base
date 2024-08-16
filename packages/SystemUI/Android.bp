@@ -23,7 +23,10 @@ package {
 // See: http://go/android-license-faq
 license {
     name: "frameworks_base_packages_SystemUI_license",
-    visibility: [":__subpackages__"],
+    visibility: [
+        ":__subpackages__",
+        "//development/samples/SceneTransitionLayoutDemo:__subpackages__",
+    ],
     license_kinds: [
         "SPDX-license-identifier-Apache-2.0",
     ],
@@ -193,7 +196,7 @@ filegroup {
         "tests/src/**/systemui/media/dialog/MediaOutputDialogTest.java",
         "tests/src/**/systemui/media/controls/domain/resume/MediaResumeListenerTest.kt",
         "tests/src/**/systemui/mediaprojection/taskswitcher/ui/TaskSwitcherNotificationCoordinatorTest.kt",
-        "tests/src/**/systemui/navigationbar/NavigationBarButtonTest.java",
+        "tests/src/**/systemui/navigationbar/views/NavigationBarButtonTest.java",
         "tests/src/**/systemui/people/PeopleProviderTest.java",
         "tests/src/**/systemui/people/PeopleSpaceUtilsTest.java",
         "tests/src/**/systemui/people/widget/PeopleSpaceWidgetManagerTest.java",
@@ -255,6 +258,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/policy/LocationControllerImplTest.java",
         "tests/src/**/systemui/statusbar/policy/RemoteInputViewTest.java",
         "tests/src/**/systemui/statusbar/policy/SmartReplyViewTest.java",
+        "tests/src/**/systemui/statusbar/policy/ui/dialog/ModesDialogDelegateTest.kt",
         "tests/src/**/systemui/statusbar/StatusBarStateControllerImplTest.kt",
         "tests/src/**/systemui/theme/ThemeOverlayApplierTest.java",
         "tests/src/**/systemui/touch/TouchInsetManagerTest.java",
@@ -449,7 +453,7 @@ filegroup {
         "tests/src/**/systemui/doze/DozeScreenStateTest.java",
         "tests/src/**/systemui/keyguard/WorkLockActivityControllerTest.java",
         "tests/src/**/systemui/media/dialog/MediaOutputControllerTest.java",
-        "tests/src/**/systemui/navigationbar/NavigationBarTest.java",
+        "tests/src/**/systemui/navigationbar/views/NavigationBarTest.java",
         "tests/src/**/systemui/power/PowerNotificationWarningsTest.java",
         "tests/src/**/systemui/power/PowerUITest.java",
         "tests/src/**/systemui/qs/QSFooterViewControllerTest.java",
@@ -536,6 +540,7 @@ android_library {
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
         "androidx.concurrent_concurrent-futures",
+        "androidx.concurrent_concurrent-futures-ktx",
         "androidx.mediarouter_mediarouter",
         "androidx.palette_palette",
         "androidx.legacy_legacy-preference-v14",
@@ -552,6 +557,7 @@ android_library {
         "androidx.exifinterface_exifinterface",
         "androidx.room_room-runtime",
         "androidx.room_room-ktx",
+        "androidx.datastore_datastore-preferences",
         "com.google.android.material_material",
         "device_state_flags_lib",
         "kotlinx_coroutines_android",
@@ -565,9 +571,12 @@ android_library {
         "jsr305",
         "jsr330",
         "lottie",
+        "lottie_compose",
         "LowLightDreamLib",
         "TraceurCommon",
+        "Traceur-res",
         "//frameworks/libs/systemui:motion_tool_lib",
+        "//frameworks/libs/systemui:contextualeducationlib",
         "notification_flags_lib",
         "PlatformComposeCore",
         "PlatformComposeSceneTransitionLayout",
@@ -577,7 +586,6 @@ android_library {
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
-        "device_policy_aconfig_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -637,6 +645,15 @@ filegroup {
 }
 
 filegroup {
+    name: "SystemUI-robotest-utils",
+    srcs: [
+        "tests/robolectric/src/com/android/systemui/testutils/**/*.kt",
+        "tests/robolectric/src/com/android/systemui/testutils/**/*.java",
+    ],
+    path: "tests/robolectric/src/com/android/systemui/testutils",
+}
+
+filegroup {
     name: "SystemUI-tests-multivalent",
     srcs: [
         "multivalentTests/src/**/*.kt",
@@ -665,6 +682,7 @@ android_library {
     ],
     asset_dirs: [
         "tests/goldens",
+        "schemas",
     ],
     static_libs: [
         "SystemUI-res",
@@ -704,7 +722,9 @@ android_library {
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
         "androidx.room_room-runtime",
+        "androidx.room_room-testing",
         "androidx.room_room-ktx",
+        "androidx.datastore_datastore-preferences",
         "device_state_flags_lib",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
@@ -720,12 +740,15 @@ android_library {
         "truth",
         "monet",
         "libmonet",
+        "lottie_compose",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
         "LowLightDreamLib",
         "//frameworks/libs/systemui:motion_tool_lib",
+        "//frameworks/libs/systemui:contextualeducationlib",
         "androidx.core_core-animation-testing",
+        "androidx.lifecycle_lifecycle-runtime-testing",
         "androidx.compose.ui_ui",
         "flag-junit",
         "ravenwood-junit",
@@ -740,6 +763,7 @@ android_library {
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "TraceurCommon",
+        "Traceur-res",
     ],
 }
 
@@ -766,6 +790,7 @@ android_library {
         "SystemUI-tests-base",
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",
+        "androidx.lifecycle_lifecycle-runtime-testing",
         "mockito-target-extended-minus-junit4",
         "mockito-kotlin-nodeps",
         "androidx.test.ext.junit",
@@ -784,7 +809,11 @@ android_library {
         "android.test.mock",
         "keepanno-annotations",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        // TODO(b/352363800): Why do we need this?
+        "-J-Xmx8192M",
+    ],
     aaptflags: [
         "--extra-packages",
         "com.android.systemui",
@@ -926,35 +955,36 @@ android_robolectric_test {
     strict_mode: false,
 }
 
-android_ravenwood_test {
-    name: "SystemUiRavenTests",
-    srcs: [
-        ":SystemUI-tests-utils",
-        ":SystemUI-tests-multivalent",
-        // TODO(b/294256649): pivot to using {.aapt.jar} and re-enable
-        // use_resource_processor: true when better supported by soong
-        ":SystemUIRobo-stub{.aapt.srcjar}",
-    ],
-    static_libs: [
-        "SystemUI-core",
-        "SystemUI-res",
-        "SystemUI-tests-base",
-        "androidx.test.uiautomator_uiautomator",
-        "androidx.core_core-animation-testing",
-        "androidx.test.ext.junit",
-        "kosmos",
-        "mockito-kotlin-nodeps",
-    ],
-    libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
-    ],
-    auto_gen_config: true,
-    plugins: [
-        "dagger2-compiler",
-    ],
-}
+// Disable for now. TODO(b/356666754) Re-enable it
+// android_ravenwood_test {
+//     name: "SystemUiRavenTests",
+//     srcs: [
+//         ":SystemUI-tests-utils",
+//         ":SystemUI-tests-multivalent",
+//         // TODO(b/294256649): pivot to using {.aapt.jar} and re-enable
+//         // use_resource_processor: true when better supported by soong
+//         ":SystemUIRobo-stub{.aapt.srcjar}",
+//     ],
+//     static_libs: [
+//         "SystemUI-core",
+//         "SystemUI-res",
+//         "SystemUI-tests-base",
+//         "androidx.test.uiautomator_uiautomator",
+//         "androidx.core_core-animation-testing",
+//         "androidx.test.ext.junit",
+//         "kosmos",
+//         "mockito-kotlin-nodeps",
+//     ],
+//     libs: [
+//         "android.test.runner",
+//         "android.test.base",
+//         "android.test.mock",
+//     ],
+//     auto_gen_config: true,
+//     plugins: [
+//         "dagger2-compiler",
+//     ],
+// }
 
 // Opt-out config for optimizing the SystemUI target using R8.
 // Disabled via `export SYSTEMUI_OPTIMIZE_JAVA=false`, or explicitly in Make via
@@ -1015,7 +1045,5 @@ android_app {
     },
     required: [
         "privapp_whitelist_com.android.systemui",
-        "wmshell.protolog.json.gz",
-        "wmshell.protolog.pb",
     ],
 }

@@ -951,12 +951,14 @@ public final class ProcessList {
                             try {
                                 switch (inputData.readInt()) {
                                     case LMK_PROCKILL:
-                                        if (receivedLen != 12) {
+                                        if (receivedLen != 16) {
                                             return false;
                                         }
                                         final int pid = inputData.readInt();
                                         final int uid = inputData.readInt();
-                                        mAppExitInfoTracker.scheduleNoteLmkdProcKilled(pid, uid);
+                                        final int rssKb = inputData.readInt();
+                                        mAppExitInfoTracker.scheduleNoteLmkdProcKilled(pid, uid,
+                                                rssKb);
                                         return true;
                                     case LMK_KILL_OCCURRED:
                                         if (receivedLen
@@ -3003,7 +3005,7 @@ public final class ProcessList {
         return freezePackageCgroup(packageUID, false);
     }
 
-    private static void freezeBinderAndPackageCgroup(List<Pair<ProcessRecord, Boolean>> procs,
+    private void freezeBinderAndPackageCgroup(List<Pair<ProcessRecord, Boolean>> procs,
                                                      int packageUID) {
         // Freeze all binder processes under the target UID (whose cgroup is about to be frozen).
         // Since we're going to kill these, we don't need to unfreze them later.
@@ -3017,7 +3019,7 @@ public final class ProcessList {
                 try {
                     int rc;
                     do {
-                        rc = CachedAppOptimizer.freezeBinder(pid, true, 10 /* timeout_ms */);
+                        rc = mService.getFreezer().freezeBinder(pid, true, 10 /* timeout_ms */);
                     } while (rc == -EAGAIN && nRetries++ < 1);
                     if (rc != 0) Slog.e(TAG, "Unable to freeze binder for " + pid + ": " + rc);
                 } catch (RuntimeException e) {
@@ -5559,8 +5561,9 @@ public final class ProcessList {
     void noteAppKill(final ProcessRecord app, final @Reason int reason,
             final @SubReason int subReason, final String msg) {
         if (DEBUG_PROCESSES) {
-            Slog.i(TAG, "note: " + app + " is being killed, reason: " + reason
-                    + ", sub-reason: " + subReason + ", message: " + msg);
+            Slog.i(TAG, "note: " + app + " is being killed, reason: "
+                    + ApplicationExitInfo.reasonCodeToString(reason) + ", sub-reason: "
+                    + ApplicationExitInfo.subreasonToString(subReason) + ", message: " + msg);
         }
         if (app.getPid() > 0 && !app.isolated && app.getDeathRecipient() != null) {
             // We are killing it, put it into the dying process list.

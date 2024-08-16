@@ -166,11 +166,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         mWindowLayoutComponent = windowLayoutComponent;
         mController = controller;
         registerOrganizer();
-        if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
-            // TODO(b/207070762): cleanup with legacy app transition
-            // Animation will be handled by WM Shell when Shell transition is enabled.
-            overrideSplitAnimation();
-        }
     }
 
     /**
@@ -410,8 +405,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         // Sets the dim area when the two TaskFragments are adjacent.
         final boolean dimOnTask = !isStacked
-                && splitAttributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
-                && Flags.fullscreenDimFlag();
+                && splitAttributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK;
         setTaskFragmentDimOnTask(wct, primaryContainer.getTaskFragmentToken(), dimOnTask);
         setTaskFragmentDimOnTask(wct, secondaryContainer.getTaskFragmentToken(), dimOnTask);
 
@@ -651,7 +645,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 container);
         final boolean isFillParent = relativeBounds.isEmpty();
         final boolean dimOnTask = !isFillParent
-                && Flags.fullscreenDimFlag()
                 && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK;
         final IBinder fragmentToken = container.getTaskFragmentToken();
 
@@ -1363,5 +1356,17 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                         configuration.windowConfiguration);
         return new ParentContainerInfo(taskProperties.getTaskMetrics(), configuration,
                 windowLayoutInfo);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    static String positionToString(@ContainerPosition int position) {
+        return switch (position) {
+            case CONTAINER_POSITION_LEFT -> "left";
+            case CONTAINER_POSITION_TOP -> "top";
+            case CONTAINER_POSITION_RIGHT -> "right";
+            case CONTAINER_POSITION_BOTTOM -> "bottom";
+            default -> "Unknown position:" + position;
+        };
     }
 }

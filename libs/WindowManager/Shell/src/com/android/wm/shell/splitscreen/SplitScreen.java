@@ -113,6 +113,9 @@ public interface SplitScreen {
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
 
+    /** Called when device starts going to sleep (screen off). */
+    void onStartedGoingToSleep();
+
     /** Called when requested to go to fullscreen from the current active split app. */
     void goToFullscreenFromSplit();
 

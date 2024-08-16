@@ -2,14 +2,6 @@ package: "android.service.chooser"
 container: "system"
 
 flag {
-    name: "enable_sharesheet_metadata_extra"
-    is_exported: true
-    namespace: "intentresolver"
-    description: "This flag enables sharesheet metadata to be displayed to users."
-    bug: "318942069"
-}
-
-flag {
   name: "chooser_payload_toggling"
   is_exported: true
   namespace: "intentresolver"

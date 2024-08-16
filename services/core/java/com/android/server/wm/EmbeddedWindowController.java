@@ -35,7 +35,7 @@ import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.window.InputTransferToken;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.input.InputManagerService;
 
 /**
@@ -403,7 +403,7 @@ class EmbeddedWindowController {
 
         @Override
         public void dumpProto(ProtoOutputStream proto, long fieldId,
-                              @WindowTraceLogLevel int logLevel) {
+                              @WindowTracingLogLevel int logLevel) {
             final long token = proto.start(fieldId);
 
             final long token2 = proto.start(IDENTIFIER);

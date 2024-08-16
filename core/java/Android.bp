@@ -22,11 +22,9 @@ filegroup {
         ":framework-nfc-non-updatable-sources",
         ":messagequeue-gen",
     ],
-    // Exactly one of the below will be added to srcs by messagequeue-gen
+    // Exactly one MessageQueue.java will be added to srcs by messagequeue-gen
     exclude_srcs: [
-        "android/os/LegacyMessageQueue/MessageQueue.java",
-        "android/os/ConcurrentMessageQueue/MessageQueue.java",
-        "android/os/SemiConcurrentMessageQueue/MessageQueue.java",
+        "android/os/*MessageQueue/**/*.java",
     ],
     visibility: ["//frameworks/base"],
 }

@@ -18,8 +18,6 @@ package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
-import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
@@ -194,12 +192,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         int topPadding = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         if (!LargeScreenUtils.shouldUseLargeScreenShadeHeader(mContext.getResources())) {
-            topPadding =
-                    centralizedStatusBarHeightFix()
-                            ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext)
-                            : mContext.getResources()
-                                    .getDimensionPixelSize(
-                                            R.dimen.large_screen_shade_header_height);
+            topPadding = LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext);
         }
         if (mQSPanelContainer != null) {
             mQSPanelContainer.setPaddingRelative(
@@ -266,12 +259,26 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     /**
+     * @return height with the squishiness fraction applied.
+     */
+    int getSquishedQqsHeight() {
+        return mHeader.getSquishedHeight();
+    }
+
+    /**
      * Returns the size of QS (or the QSCustomizer), regardless of the measured size of this view
      * @return size in pixels of QS (or QSCustomizer)
      */
     public int getQsHeight() {
         return mQSCustomizer.isCustomizing() ? mQSCustomizer.getMeasuredHeight()
                 : mQSPanel.getMeasuredHeight();
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    int getSquishedQsHeight() {
+        return mQSPanel.getSquishedHeight();
     }
 
     public void setExpansion(float expansion) {

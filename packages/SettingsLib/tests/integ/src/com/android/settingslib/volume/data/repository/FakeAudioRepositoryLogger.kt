@@ -16,10 +16,11 @@
 
 package com.android.settingslib.volume.data.repository
 
+import com.android.settingslib.volume.shared.AudioLogger
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 
-class FakeAudioRepositoryLogger : AudioRepositoryImpl.Logger {
+class FakeAudioRepositoryLogger : AudioLogger {
 
     private val mutableLogs: MutableList<String> = mutableListOf()
     val logs: List<String>

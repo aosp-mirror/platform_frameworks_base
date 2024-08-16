@@ -440,12 +440,13 @@ public class CompanionAssociationActivity extends FragmentActivity implements
             return;
         }
 
-        title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), deviceName);
+        title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), mAppLabel,
+                getString(R.string.device_type), deviceName);
 
         if (PROFILE_SUMMARIES.containsKey(deviceProfile)) {
             final int summaryResourceId = PROFILE_SUMMARIES.get(deviceProfile);
             final Spanned summary = getHtmlFromResources(this, summaryResourceId,
-                    deviceName);
+                    mAppLabel, getString(R.string.device_type), deviceName);
             mSummary.setText(summary);
         } else {
             mSummary.setVisibility(View.GONE);
@@ -554,11 +555,18 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         mSelectedDevice = requireNonNull(selectedDevice);
 
         Slog.d(TAG, "onDeviceClicked(): " + mSelectedDevice.toShortString());
-
+        // The permission consent dialog should not be displayed if it's a isSkipPrompt(true)
+        // AssociationRequest or when there is no device profile available
+        // for the multiple devices dialog.
+        // See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
+        final String deviceProfile = mRequest.getDeviceProfile();
+        if (deviceProfile == null || mRequest.isSkipPrompt()) {
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        }
+        // The permission consent dialog should be displayed for the multiple device
+        // dialog if a device profile exists.
         updateSingleDeviceUi();
-
-        if (mRequest.isSkipPrompt()) return;
-
         mSummary.setVisibility(View.VISIBLE);
         mButtonAllow.setVisibility(View.VISIBLE);
         mButtonNotAllow.setVisibility(View.VISIBLE);
@@ -588,9 +596,6 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         if (deviceProfile == null && mRequest.isSingleDevice()) {
             summary = getHtmlFromResources(this, summaryResourceId, remoteDeviceName);
             mConstraintList.setVisibility(View.GONE);
-        } else if (deviceProfile == null) {
-            onUserSelectedDevice(mSelectedDevice);
-            return;
         } else {
             summary = getHtmlFromResources(
                     this, summaryResourceId, getString(R.string.device_type));
@@ -642,6 +647,11 @@ public class CompanionAssociationActivity extends FragmentActivity implements
     // and when mPermissionListRecyclerView is fully populated.
     // Lastly, disable the Allow and Don't allow buttons.
     private void setupPermissionList(String deviceProfile) {
+        if (!PROFILE_PERMISSIONS.containsKey(deviceProfile)) {
+            // Nothing to do if there are no permission types.
+            return;
+        }
+
         final List<Integer> permissionTypes = new ArrayList<>(
                 PROFILE_PERMISSIONS.get(deviceProfile));
         if (permissionTypes.isEmpty()) {

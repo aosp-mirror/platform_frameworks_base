@@ -244,6 +244,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 // We should call onBackCancelled() when an active callback is removed from
                 // dispatcher.
                 sendCancelledIfInProgress(callback);
+                mHandler.post(mProgressAnimator::reset);
                 setTopOnBackInvokedCallback(getTopCallback());
             }
         }
@@ -305,7 +306,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     private boolean callOnKeyPreIme() {
-        if (mViewRoot != null && !isOnBackInvokedCallbackEnabled(mViewRoot.mContext)) {
+        if (mViewRoot != null && !isOnBackInvokedCallbackEnabled()) {
             return mViewRoot.injectBackKeyEvents(/*preImeOnly*/ true);
         } else {
             return false;
@@ -489,7 +490,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     return;
                 }
                 OnBackAnimationCallback animationCallback = getBackAnimationCallback();
-                if (animationCallback != null) {
+                if (animationCallback != null
+                        && !(callback instanceof ImeBackAnimationController)) {
                     mProgressAnimator.onBackInvoked(callback::onBackInvoked);
                 } else {
                     mProgressAnimator.reset();
@@ -503,7 +505,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             if (callback instanceof ImeBackAnimationController
                     || callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback) {
                 // call onKeyPreIme API if the current callback is an IME callback and the app has
-                // not set enableOnBackInvokedCallback="false"
+                // not set enableOnBackInvokedCallback="true"
                 try {
                     boolean consumed = mOnKeyPreIme.getAsBoolean();
                     if (consumed) {

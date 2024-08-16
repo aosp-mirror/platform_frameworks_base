@@ -376,6 +376,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
                             mContext.getContentResolver(),
                             Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE,
                             defaultStationaryThrottlingSetting) != 0;
+                    if (Flags.disableStationaryThrottling() && !(
+                            Flags.keepGnssStationaryThrottling() && enableStationaryThrottling
+                                    && GPS_PROVIDER.equals(manager.getName()))) {
+                        enableStationaryThrottling = false;
+                    }
                     if (enableStationaryThrottling) {
                         realProvider = new StationaryThrottlingLocationProvider(manager.getName(),
                                 mInjector, realProvider);

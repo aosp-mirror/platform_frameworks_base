@@ -17,15 +17,42 @@
 package com.android.systemui.volume.data.repository
 
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
-import kotlinx.coroutines.flow.Flow
+import com.android.settingslib.volume.data.repository.GroupIdToVolumes
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class FakeAudioSharingRepository : AudioSharingRepository {
     private val mutableInAudioSharing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val mutablePrimaryGroupId: MutableStateFlow<Int> =
+        MutableStateFlow(TEST_GROUP_ID_INVALID)
+    private val mutableSecondaryGroupId: MutableStateFlow<Int> =
+        MutableStateFlow(TEST_GROUP_ID_INVALID)
+    private val mutableVolumeMap: MutableStateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())
 
-    override val inAudioSharing: Flow<Boolean> = mutableInAudioSharing
+    override val inAudioSharing: StateFlow<Boolean> = mutableInAudioSharing
+    override val primaryGroupId: StateFlow<Int> = mutablePrimaryGroupId
+    override val secondaryGroupId: StateFlow<Int> = mutableSecondaryGroupId
+    override val volumeMap: StateFlow<GroupIdToVolumes> = mutableVolumeMap
+
+    override suspend fun setSecondaryVolume(volume: Int) {}
 
     fun setInAudioSharing(state: Boolean) {
         mutableInAudioSharing.value = state
+    }
+
+    fun setPrimaryGroupId(groupId: Int) {
+        mutablePrimaryGroupId.value = groupId
+    }
+
+    fun setSecondaryGroupId(groupId: Int) {
+        mutableSecondaryGroupId.value = groupId
+    }
+
+    fun setVolumeMap(volumeMap: GroupIdToVolumes) {
+        mutableVolumeMap.value = volumeMap
+    }
+
+    private companion object {
+        const val TEST_GROUP_ID_INVALID = -1
     }
 }

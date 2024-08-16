@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
@@ -59,9 +60,11 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH;
@@ -123,8 +126,8 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
@@ -319,11 +322,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // This is a direct call from shell, so the entire transition lifecycle is
                     // contained in the provided transaction if provided. Thus, we can setReady
                     // immediately after apply.
-                    final Transition.ReadyCondition wctApplied =
-                            new Transition.ReadyCondition("start WCT applied");
                     final boolean needsSetReady = t != null;
                     final Transition nextTransition = new Transition(type, 0 /* flags */,
                             mTransitionController, mService.mWindowManager.mSyncEngine);
+                    final Transition.ReadyCondition wctApplied =
+                            new Transition.ReadyCondition("start WCT applied");
                     nextTransition.mReadyTracker.add(wctApplied);
                     nextTransition.calcParallelCollectType(wct);
                     mTransitionController.startCollectOrQueue(nextTransition,
@@ -339,6 +342,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             });
                     return nextTransition.getToken();
                 }
+                // The transition already started collecting before sending a request to shell,
+                // so just start here.
+                if (!transition.isCollecting() && !transition.isForcePlaying()) {
+                    Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
+                            + " means Shell took too long to respond to a request. WM State may be"
+                            + " incorrect now, please file a bug");
+                    applyTransaction(wct, -1 /*syncId*/, null /*transition*/, caller);
+                    return transition.getToken();
+                }
                 // Currently, application of wct can span multiple looper loops (ie.
                 // waitAsyncStart), so add a condition to ensure that it finishes applying.
                 final Transition.ReadyCondition wctApplied;
@@ -347,18 +359,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     transition.mReadyTracker.add(wctApplied);
                 } else {
                     wctApplied = null;
-                }
-                // The transition already started collecting before sending a request to shell,
-                // so just start here.
-                if (!transition.isCollecting() && !transition.isForcePlaying()) {
-                    Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
-                            + " means Shell took too long to respond to a request. WM State may be"
-                            + " incorrect now, please file a bug");
-                    applyTransaction(wct, -1 /*syncId*/, null /*transition*/, caller);
-                    if (wctApplied != null) {
-                        wctApplied.meet();
-                    }
-                    return transition.getToken();
                 }
                 transition.mLogger.mStartWCT = wct;
                 if (transition.shouldApplyOnDisplayThread()) {
@@ -389,7 +389,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private static boolean hasActivityLaunch(@NonNull WindowContainerTransaction wct) {
         for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
-            if (wct.getHierarchyOps().get(i).getType() == HIERARCHY_OP_TYPE_LAUNCH_TASK) {
+            final WindowContainerTransaction.HierarchyOp op = wct.getHierarchyOps().get(i);
+            if (op.getType() == HIERARCHY_OP_TYPE_LAUNCH_TASK
+                    || (op.getType() == HIERARCHY_OP_TYPE_PENDING_INTENT
+                            && op.getPendingIntent().isActivity())) {
                 return true;
             }
         }
@@ -430,6 +433,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             // in its own transition.
             // TODO(b/232042367): explicitly ensure the #startActivity and this transaction are in
             // the same transition instead of relying on this possible racing condition.
+            return;
+        }
+        if (transition.mType == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION
+                && mService.mBackNavigationController.restoreBackNavigationSetTransitionReady(
+                        transition)) {
             return;
         }
 
@@ -617,7 +625,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             if (transition.isCollecting()) {
                 deferTransitionReady = true;
                 transition.deferTransitionReady();
-            } else if (Flags.alwaysDeferTransitionWhenApplyWct()) {
+            } else {
                 Slog.w(TAG, "Transition is not collecting when applyTransaction."
                         + " transition=" + transition + " state=" + transition.getState());
                 transition = null;
@@ -840,7 +848,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
 
             final int prevMode = container.getRequestedOverrideWindowingMode();
-            container.setWindowingMode(windowingMode);
+            if (container.asTask() != null && container.asTask().isRootTask()) {
+                container.asTask().setRootTaskWindowingMode(windowingMode);
+            } else {
+                container.setWindowingMode(windowingMode);
+            }
             if (prevMode != container.getWindowingMode()) {
                 // The activity in the container may become focusable or non-focusable due to
                 // windowing modes changes (such as entering or leaving pinned windowing mode),
@@ -878,15 +890,20 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         final int childWindowingMode = c.getActivityWindowingMode();
         if (!ActivityTaskManagerService.isPip2ExperimentEnabled()
-                && tr.getWindowingMode() == WINDOWING_MODE_PINNED
-                && (childWindowingMode == WINDOWING_MODE_PINNED
-                || childWindowingMode == WINDOWING_MODE_UNDEFINED)) {
-            // If setActivityWindowingMode requested to match its pinned task's windowing mode,
-            // remove any inconsistency checking timeout callbacks for PiP.
-            Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
-                    + "abort PiP callbacks scheduled if needed; task_win_mode="
-                    + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
-            mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+                && tr.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            if (childWindowingMode == WINDOWING_MODE_PINNED
+                    || childWindowingMode == WINDOWING_MODE_UNDEFINED) {
+                // If setActivityWindowingMode requested to match its pinned task's windowing mode,
+                // remove any inconsistency checking timeout callbacks for PiP.
+                Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
+                        + "abort PiP callbacks scheduled if needed; task_win_mode="
+                        + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
+                mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+            } else if (shouldApplyLifecycleEffectOnPipChange()) {
+                // This is leaving PiP: task is pinned mode and activity changes to non-pip mode.
+                // Then the activity can be resumed because it becomes focusable.
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
@@ -911,6 +928,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (canEnterPip) {
                     canEnterPip = mService.mActivityClientController
                             .requestPictureInPictureMode(activity);
+                    if (canEnterPip && shouldApplyLifecycleEffectOnPipChange()) {
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                    }
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
@@ -920,6 +940,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         return effects;
+    }
+
+    // TODO(b/333452456): For testing on local easier. Remove after the use case is gone.
+    @VisibleForTesting
+    static boolean shouldApplyLifecycleEffectOnPipChange() {
+        return android.os.SystemProperties.getBoolean(
+                "persist.wm.debug.apply_lifecycle_on_pip_change", false)
+                || com.android.window.flags.Flags.applyLifecycleOnPipChange();
     }
 
     private int applyDisplayAreaChanges(DisplayArea displayArea,
@@ -1105,6 +1133,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 if (activity.isVisible() || activity.isVisibleRequested()) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     // Prevent the transition from being executed too early if the activity is
                     // visible.
                     activity.finishIfPossible("finish-activity-op", false /* oomAdj */);
@@ -1122,6 +1151,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 final SafeActivityOptions safeOptions =
                         SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
                         caller.mPid, caller.mUid, taskId, safeOptions));
                 break;
@@ -1165,7 +1195,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         }
                     }
                 }
-                effects |= sanitizeAndApplyHierarchyOp(wc, hop);
+                if (wc.asTask() != null) {
+                    effects |= sanitizeAndApplyHierarchyOpForTask(wc.asTask(), hop);
+                } else if (wc.asDisplayArea() != null) {
+                    effects |= sanitizeAndApplyHierarchyOpForDisplayArea(wc.asDisplayArea(), hop);
+                } else {
+                    throw new IllegalArgumentException("Invalid container in hierarchy op");
+                }
                 break;
             }
             case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION: {
@@ -1351,6 +1387,23 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             "Cannot set reparent leaf task flag on non-root task : " + task);
                 }
                 task.setReparentLeafTaskIfRelaunch(hop.isReparentLeafTaskIfRelaunch());
+                break;
+            }
+            case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                final Task task = container != null ? container.asTask() : null;
+                if (task == null || !task.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                task.setTrimmableFromRecents(hop.isTrimmableFromRecents());
+                break;
+            }
+            case HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION: {
+                if (mService.mBackNavigationController.restoreBackNavigation()) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
                 break;
             }
         }
@@ -1578,7 +1631,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekFirst() != taskFragment) {
+                    if (task.getBottomChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(0, taskFragment);
                         if (!taskFragment.hasChild()) {
@@ -1594,7 +1647,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    if (task.mChildren.peekLast() != taskFragment) {
+                    if (task.getTopChild() != taskFragment) {
                         task.mChildren.remove(taskFragment);
                         task.mChildren.add(taskFragment);
                         if (!taskFragment.hasChild()) {
@@ -1804,12 +1857,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return starterResult[0];
     }
 
-    private int sanitizeAndApplyHierarchyOp(WindowContainer container,
-            WindowContainerTransaction.HierarchyOp hop) {
-        final Task task = container.asTask();
-        if (task == null) {
-            throw new IllegalArgumentException("Invalid container in hierarchy op");
+    private int sanitizeAndApplyHierarchyOpForDisplayArea(@NonNull DisplayArea displayArea,
+            @NonNull WindowContainerTransaction.HierarchyOp hop) {
+        if (hop.getType() != HIERARCHY_OP_TYPE_REORDER) {
+            throw new UnsupportedOperationException("DisplayArea only supports reordering");
         }
+        if (displayArea.getParent() == null) {
+            return TRANSACT_EFFECTS_NONE;
+        }
+        displayArea.getParent().positionChildAt(
+                hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
+                displayArea, hop.includingParents());
+        return TRANSACT_EFFECTS_LIFECYCLE;
+    }
+
+    private int sanitizeAndApplyHierarchyOpForTask(@NonNull Task task,
+            @NonNull WindowContainerTransaction.HierarchyOp hop) {
         final DisplayContent dc = task.getDisplayContent();
         if (dc == null) {
             Slog.w(TAG, "Container is no longer attached: " + task);

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <string name="str">plain string</string>
+
+    <string name="str1" android:featureFlag="test.package.falseFlag">DONTFIND</string>
+
+    <string-array name="strarr1">
+        <item>one</item>
+        <item>two</item>
+        <item android:featureFlag="test.package.falseFlag">remove</item>
+        <item android:featureFlag="test.package.trueFlag">three</item>
+    </string-array>
+</resources>
