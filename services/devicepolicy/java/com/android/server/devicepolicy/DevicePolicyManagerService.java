@@ -13972,11 +13972,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     UserManager.DISALLOW_THREAD_NETWORK,
                     new String[]{MANAGE_DEVICE_POLICY_THREAD_NETWORK});
         }
-        if (Flags.assistContentUserRestrictionEnabled()) {
-            USER_RESTRICTION_PERMISSIONS.put(
-                    UserManager.DISALLOW_ASSIST_CONTENT,
-                    new String[]{MANAGE_DEVICE_POLICY_ASSIST_CONTENT});
-        }
+        USER_RESTRICTION_PERMISSIONS.put(
+                UserManager.DISALLOW_ASSIST_CONTENT,
+                new String[]{MANAGE_DEVICE_POLICY_ASSIST_CONTENT});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, new String[]{MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION});
         USER_RESTRICTION_PERMISSIONS.put(
