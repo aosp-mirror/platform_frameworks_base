@@ -217,16 +217,6 @@ flag {
 }
 
 flag {
-  name: "disallow_user_control_bg_usage_fix"
-  namespace: "enterprise"
-  description: "Make DPM.setUserControlDisabledPackages() ensure background usage is allowed"
-  bug: "326031059"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "disallow_user_control_stopped_state_fix"
   namespace: "enterprise"
   description: "Ensure DPM.setUserControlDisabledPackages() clears FLAG_STOPPED for the app"
