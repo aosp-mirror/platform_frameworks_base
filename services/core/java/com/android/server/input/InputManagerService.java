@@ -95,6 +95,7 @@ import android.os.vibrator.VibrationEffectSegment;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -3261,10 +3262,22 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void setInteractive(boolean interactive) {
-            mNative.setInteractive(interactive);
-            mBatteryController.onInteractiveChanged(interactive);
-            mKeyboardBacklightController.onInteractiveChanged(interactive);
+        public void setDisplayInteractivities(SparseBooleanArray displayInteractivities) {
+            boolean globallyInteractive = false;
+            ArraySet<Integer> nonInteractiveDisplays = new ArraySet<>();
+            for (int i = 0; i < displayInteractivities.size(); i++) {
+                final int displayId = displayInteractivities.keyAt(i);
+                final boolean displayInteractive = displayInteractivities.get(displayId);
+                if (displayInteractive) {
+                    globallyInteractive = true;
+                } else {
+                    nonInteractiveDisplays.add(displayId);
+                }
+            }
+            mNative.setNonInteractiveDisplays(
+                    nonInteractiveDisplays.stream().mapToInt(Integer::intValue).toArray());
+            mBatteryController.onInteractiveChanged(globallyInteractive);
+            mKeyboardBacklightController.onInteractiveChanged(globallyInteractive);
         }
 
         // TODO(b/358569822): Remove this method from InputManagerInternal after key gesture
