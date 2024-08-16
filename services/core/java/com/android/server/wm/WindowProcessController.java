@@ -1689,7 +1689,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 resolvedConfig,
                 false /* optsOutEdgeToEdge */,
                 false /* hasFixedRotationTransform */,
-                false /* hasCompatDisplayInsets */);
+                false /* hasCompatDisplayInsets */,
+                null /* task */);
     }
 
     void dispatchConfiguration(@NonNull Configuration config) {
