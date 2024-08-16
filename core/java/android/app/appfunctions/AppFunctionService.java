@@ -16,6 +16,7 @@
 
 package android.app.appfunctions;
 
+import static android.app.appfunctions.ExecuteAppFunctionResponse.getResultCode;
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
@@ -85,13 +86,6 @@ public abstract class AppFunctionService extends Service {
                     }
                 }
             };
-
-    private static int getResultCode(@NonNull Throwable t) {
-        if (t instanceof IllegalArgumentException) {
-            return ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT;
-        }
-        return ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR;
-    }
 
     @NonNull
     @Override
