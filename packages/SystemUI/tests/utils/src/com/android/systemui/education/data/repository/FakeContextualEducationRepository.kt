@@ -25,13 +25,13 @@ import kotlinx.coroutines.flow.asStateFlow
 class FakeContextualEducationRepository : ContextualEducationRepository {
 
     private val userGestureMap = mutableMapOf<Int, GestureEduModel>()
-    private val _gestureEduModels = MutableStateFlow(GestureEduModel())
+    private val _gestureEduModels = MutableStateFlow(GestureEduModel(userId = 0))
     private val gestureEduModelsFlow = _gestureEduModels.asStateFlow()
     private var currentUser: Int = 0
 
     override fun setUser(userId: Int) {
         if (!userGestureMap.contains(userId)) {
-            userGestureMap[userId] = GestureEduModel()
+            userGestureMap[userId] = GestureEduModel(userId = userId)
         }
         // save data of current user to the map
         userGestureMap[currentUser] = _gestureEduModels.value
