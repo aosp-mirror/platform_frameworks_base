@@ -32,7 +32,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -61,17 +60,6 @@ sealed class TransitionInteractor(
     abstract val internalTransitionInteractor: InternalKeyguardTransitionInteractor
 
     abstract fun start()
-
-    /* Use background dispatcher for all [KeyguardTransitionInteractor] flows. Necessary because
-     * the [sample] utility internally runs a collect on the Unconfined dispatcher, resulting
-     * in continuations on the main thread. We don't want that for classes that inherit from this.
-     */
-    val startedKeyguardTransitionStep =
-        transitionInteractor.startedKeyguardTransitionStep.flowOn(bgDispatcher)
-    // The following are MutableSharedFlows, and do not require flowOn
-    val startedKeyguardState = transitionInteractor.startedKeyguardState
-    val finishedKeyguardState = transitionInteractor.finishedKeyguardState
-    val currentKeyguardState = transitionInteractor.currentKeyguardState
 
     suspend fun startTransitionTo(
         toState: KeyguardState,
@@ -207,7 +195,7 @@ sealed class TransitionInteractor(
         powerInteractor.isAsleep
             .filter { isAsleep -> isAsleep }
             .filterRelevantKeyguardState()
-            .sample(startedKeyguardTransitionStep)
+            .sample(transitionInteractor.startedKeyguardTransitionStep)
             .map(modeOnCanceledFromStartedStep)
             .collect { modeOnCanceled ->
                 startTransitionTo(

@@ -113,29 +113,6 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun startedKeyguardStateTests() =
-        testScope.runTest {
-            val startedStates by collectValues(underTest.startedKeyguardState)
-            runCurrent()
-            val steps = mutableListOf<TransitionStep>()
-
-            steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0f, STARTED))
-            steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0.5f, RUNNING))
-            steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 1f, FINISHED))
-            steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0f, STARTED))
-            steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0.9f, RUNNING))
-            steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 1f, FINISHED))
-            steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
-
-            steps.forEach {
-                repository.sendTransitionStep(it)
-                runCurrent()
-            }
-
-            assertThat(startedStates).isEqualTo(listOf(LOCKSCREEN, PRIMARY_BOUNCER, AOD, GONE))
-        }
-
-    @Test
     fun startedKeyguardTransitionStepTests() =
         testScope.runTest {
             val startedSteps by collectValues(underTest.startedKeyguardTransitionStep)

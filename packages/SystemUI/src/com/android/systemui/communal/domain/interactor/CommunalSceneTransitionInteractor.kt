@@ -224,7 +224,7 @@ constructor(
             collectProgress(transition)
         } else if (transition.toScene == CommunalScenes.Communal) {
             if (currentToState == KeyguardState.GLANCEABLE_HUB) {
-                transitionKtfTo(transitionInteractor.getStartedFromState())
+                transitionKtfTo(transitionInteractor.startedKeyguardTransitionStep.value.from)
             }
             startTransitionToGlanceableHub()
             collectProgress(transition)

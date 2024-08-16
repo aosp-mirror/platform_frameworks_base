@@ -286,25 +286,10 @@ constructor(
     }
 
     /** The last [TransitionStep] with a [TransitionState] of STARTED */
-    val startedKeyguardTransitionStep: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
-
-    /** The destination state of the last [TransitionState.STARTED] transition. */
-    @SuppressLint("SharedFlowCreation")
-    val startedKeyguardState: SharedFlow<KeyguardState> =
-        startedKeyguardTransitionStep
-            .map { step -> step.to }
-            .buffer(2, BufferOverflow.DROP_OLDEST)
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
-
-    /** The from state of the last [TransitionState.STARTED] transition. */
-    // TODO: is it performant to have several SharedFlows side by side instead of one?
-    @SuppressLint("SharedFlowCreation")
-    val startedKeyguardFromState: SharedFlow<KeyguardState> =
-        startedKeyguardTransitionStep
-            .map { step -> step.from }
-            .buffer(2, BufferOverflow.DROP_OLDEST)
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+    val startedKeyguardTransitionStep: StateFlow<TransitionStep> =
+        repository.transitions
+            .filter { step -> step.transitionState == TransitionState.STARTED }
+            .stateIn(scope, SharingStarted.Eagerly, TransitionStep())
 
     /**
      * The last [KeyguardState] to which we [TransitionState.FINISHED] a transition.
@@ -412,7 +397,6 @@ constructor(
                     it.from
                 }
             }
-            .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, OFF)
 
     val isInTransition =
@@ -525,10 +509,6 @@ constructor(
 
     fun getCurrentState(): KeyguardState {
         return currentKeyguardState.replayCache.last()
-    }
-
-    fun getStartedFromState(): KeyguardState {
-        return startedKeyguardFromState.replayCache.last()
     }
 
     fun getFinishedState(): KeyguardState {

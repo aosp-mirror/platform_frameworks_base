@@ -132,8 +132,8 @@ constructor(
     val burnInModel = _burnInModel.asStateFlow()
 
     val burnInLayerVisibility: Flow<Int> =
-        keyguardTransitionInteractor.startedKeyguardState
-            .filter { it == AOD || it == LOCKSCREEN }
+        keyguardTransitionInteractor.startedKeyguardTransitionStep
+            .filter { it.to == AOD || it.to == LOCKSCREEN }
             .map { VISIBLE }
 
     val goneToAodTransition =
