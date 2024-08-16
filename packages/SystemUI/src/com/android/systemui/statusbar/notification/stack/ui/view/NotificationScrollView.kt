@@ -86,6 +86,9 @@ interface NotificationScrollView {
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
 
+    /** Sets whether the view is displayed in pulsing mode. */
+    fun setPulsing(pulsing: Boolean, animated: Boolean)
+
     /** Gets the inset for HUNs when they are not visible */
     fun getHeadsUpInset(): Int
 

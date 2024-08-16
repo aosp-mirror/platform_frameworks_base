@@ -39,6 +39,8 @@ import dagger.Lazy
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
@@ -210,6 +212,23 @@ constructor(
             flowOf(false)
         } else {
             keyguardInteractor.get().isDozing.dumpWhileCollecting("isDozing")
+        }
+    }
+
+    /** Whether the notification stack is displayed in pulsing mode. */
+    val isPulsing: Flow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            keyguardInteractor.get().isPulsing.dumpWhileCollecting("isPulsing")
+        }
+    }
+
+    val shouldAnimatePulse: StateFlow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            MutableStateFlow(false)
+        } else {
+            keyguardInteractor.get().isAodAvailable
         }
     }
 
