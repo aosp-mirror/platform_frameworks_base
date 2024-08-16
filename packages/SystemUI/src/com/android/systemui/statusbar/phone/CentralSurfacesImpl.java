@@ -29,7 +29,6 @@ import static androidx.lifecycle.Lifecycle.State.RESUMED;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.keyboardShortcutHelperRewrite;
 import static com.android.systemui.Flags.lightRevealMigration;
-import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.Flags.relockWithPowerButtonImmediately;
 import static com.android.systemui.Flags.statusBarSignalPolicyRefactor;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
@@ -2547,7 +2546,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
                 mDeviceInteractive = true;
 
-                boolean isFlaggedOff = newAodTransition() && MigrateClocksToBlueprint.isEnabled();
+                boolean isFlaggedOff = MigrateClocksToBlueprint.isEnabled();
                 if (!isFlaggedOff && shouldAnimateDozeWakeup()) {
                     // If this is false, the power button must be physically pressed in order to
                     // trigger fingerprint authentication.
