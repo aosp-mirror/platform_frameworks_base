@@ -66,7 +66,7 @@ public class TunerResourceManager {
     private static final String TAG = "TunerResourceManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final long INVALID_RESOURCE_HANDLE = -1;
+    public static final int INVALID_RESOURCE_HANDLE = -1;
     public static final int INVALID_OWNER_ID = -1;
     /**
      * Tuner resource type to help generate resource handle
@@ -275,7 +275,7 @@ public class TunerResourceManager {
      * Updates the current TRM of the TunerHAL Frontend information.
      *
      * <p><strong>Note:</strong> This update must happen before the first
-     * {@link #requestFrontend(TunerFrontendRequest, long[])} and
+     * {@link #requestFrontend(TunerFrontendRequest, int[])} and
      * {@link #releaseFrontend(int, int)} call.
      *
      * @param infos an array of the available {@link TunerFrontendInfo} information.
@@ -331,7 +331,7 @@ public class TunerResourceManager {
      *
      * @param lnbIds ids of the updating lnbs.
      */
-    public void setLnbInfoList(long[] lnbIds) {
+    public void setLnbInfoList(int[] lnbIds) {
         try {
             mService.setLnbInfoList(lnbIds);
         } catch (RemoteException e) {
@@ -406,8 +406,8 @@ public class TunerResourceManager {
      *
      * @return true if there is frontend granted.
      */
-    public boolean requestFrontend(
-            @NonNull TunerFrontendRequest request, @Nullable long[] frontendHandle) {
+    public boolean requestFrontend(@NonNull TunerFrontendRequest request,
+                @Nullable int[] frontendHandle) {
         boolean result = false;
         try {
             result = mService.requestFrontend(request, frontendHandle);
@@ -511,7 +511,7 @@ public class TunerResourceManager {
      *
      * @return true if there is Demux granted.
      */
-    public boolean requestDemux(@NonNull TunerDemuxRequest request, @NonNull long[] demuxHandle) {
+    public boolean requestDemux(@NonNull TunerDemuxRequest request, @NonNull int[] demuxHandle) {
         boolean result = false;
         try {
             result = mService.requestDemux(request, demuxHandle);
@@ -544,8 +544,8 @@ public class TunerResourceManager {
      *
      * @return true if there is Descrambler granted.
      */
-    public boolean requestDescrambler(
-            @NonNull TunerDescramblerRequest request, @NonNull long[] descramblerHandle) {
+    public boolean requestDescrambler(@NonNull TunerDescramblerRequest request,
+                @NonNull int[] descramblerHandle) {
         boolean result = false;
         try {
             result = mService.requestDescrambler(request, descramblerHandle);
@@ -577,8 +577,8 @@ public class TunerResourceManager {
      *
      * @return true if there is CAS session granted.
      */
-    public boolean requestCasSession(
-            @NonNull CasSessionRequest request, @NonNull long[] casSessionHandle) {
+    public boolean requestCasSession(@NonNull CasSessionRequest request,
+                @NonNull int[] casSessionHandle) {
         boolean result = false;
         try {
             result = mService.requestCasSession(request, casSessionHandle);
@@ -610,7 +610,7 @@ public class TunerResourceManager {
      *
      * @return true if there is ciCam granted.
      */
-    public boolean requestCiCam(TunerCiCamRequest request, long[] ciCamHandle) {
+    public boolean requestCiCam(TunerCiCamRequest request, int[] ciCamHandle) {
         boolean result = false;
         try {
             result = mService.requestCiCam(request, ciCamHandle);
@@ -635,7 +635,7 @@ public class TunerResourceManager {
      * <li>If no Lnb system can be granted, the API would return false.
      * <ul>
      *
-     * <p><strong>Note:</strong> {@link #setLnbInfoList(long[])} must be called before this request.
+     * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this request.
      *
      * @param request {@link TunerLnbRequest} information of the current request.
      * @param lnbHandle a one-element array to return the granted Lnb handle.
@@ -643,7 +643,7 @@ public class TunerResourceManager {
      *
      * @return true if there is Lnb granted.
      */
-    public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull long[] lnbHandle) {
+    public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle) {
         boolean result = false;
         try {
             result = mService.requestLnb(request, lnbHandle);
@@ -664,7 +664,7 @@ public class TunerResourceManager {
      * @param frontendHandle the handle of the released frontend.
      * @param clientId the id of the client that is releasing the frontend.
      */
-    public void releaseFrontend(long frontendHandle, int clientId) {
+    public void releaseFrontend(int frontendHandle, int clientId) {
         try {
             mService.releaseFrontend(frontendHandle, clientId);
         } catch (RemoteException e) {
@@ -680,7 +680,7 @@ public class TunerResourceManager {
      * @param demuxHandle the handle of the released Tuner Demux.
      * @param clientId the id of the client that is releasing the demux.
      */
-    public void releaseDemux(long demuxHandle, int clientId) {
+    public void releaseDemux(int demuxHandle, int clientId) {
         try {
             mService.releaseDemux(demuxHandle, clientId);
         } catch (RemoteException e) {
@@ -696,7 +696,7 @@ public class TunerResourceManager {
      * @param descramblerHandle the handle of the released Tuner Descrambler.
      * @param clientId the id of the client that is releasing the descrambler.
      */
-    public void releaseDescrambler(long descramblerHandle, int clientId) {
+    public void releaseDescrambler(int descramblerHandle, int clientId) {
         try {
             mService.releaseDescrambler(descramblerHandle, clientId);
         } catch (RemoteException e) {
@@ -715,7 +715,7 @@ public class TunerResourceManager {
      * @param casSessionHandle the handle of the released CAS session.
      * @param clientId the id of the client that is releasing the cas session.
      */
-    public void releaseCasSession(long casSessionHandle, int clientId) {
+    public void releaseCasSession(int casSessionHandle, int clientId) {
         try {
             mService.releaseCasSession(casSessionHandle, clientId);
         } catch (RemoteException e) {
@@ -734,7 +734,7 @@ public class TunerResourceManager {
      * @param ciCamHandle the handle of the releasing CiCam.
      * @param clientId the id of the client that is releasing the CiCam.
      */
-    public void releaseCiCam(long ciCamHandle, int clientId) {
+    public void releaseCiCam(int ciCamHandle, int clientId) {
         try {
             mService.releaseCiCam(ciCamHandle, clientId);
         } catch (RemoteException e) {
@@ -747,12 +747,12 @@ public class TunerResourceManager {
      *
      * <p>Client must call this whenever it releases an Lnb.
      *
-     * <p><strong>Note:</strong> {@link #setLnbInfoList(long[])} must be called before this release.
+     * <p><strong>Note:</strong> {@link #setLnbInfoList(int[])} must be called before this release.
      *
      * @param lnbHandle the handle of the released Tuner Lnb.
      * @param clientId the id of the client that is releasing the lnb.
      */
-    public void releaseLnb(long lnbHandle, int clientId) {
+    public void releaseLnb(int lnbHandle, int clientId) {
         try {
             mService.releaseLnb(lnbHandle, clientId);
         } catch (RemoteException e) {
