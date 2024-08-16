@@ -212,7 +212,11 @@ static ResourceTable::CollisionResult MergeConfigValue(
     collision_result =
         ResolveMergeCollision(override_styles_instead_of_overlaying, dst_value, src_value, pool);
   } else {
-    collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
+    collision_result =
+        ResourceTable::ResolveFlagCollision(dst_value->GetFlagStatus(), src_value->GetFlagStatus());
+    if (collision_result == CollisionResult::kConflict) {
+      collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
+    }
   }
 
   if (collision_result == CollisionResult::kConflict) {

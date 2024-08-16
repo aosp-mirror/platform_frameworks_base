@@ -293,4 +293,11 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
             }
         });
     }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
+    @Override
+    public int getSensorId() {
+        super.getSensorId_enforcePermission();
+        return mSensorId;
+    }
 }

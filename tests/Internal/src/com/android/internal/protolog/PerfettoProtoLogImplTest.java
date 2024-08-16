@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static java.io.File.createTempFile;
-import static java.nio.file.Files.createTempDirectory;
 
 import android.content.Context;
 import android.os.SystemClock;
@@ -45,6 +44,7 @@ import android.tracing.perfetto.DataSource;
 import android.util.proto.ProtoInputStream;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
@@ -67,7 +67,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -78,7 +77,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Presubmit
 @RunWith(JUnit4.class)
 public class PerfettoProtoLogImplTest {
-    private final File mTracingDirectory = createTempDirectory("temp").toFile();
+    private final File mTracingDirectory = InstrumentationRegistry.getInstrumentation()
+            .getTargetContext().getFilesDir();
 
     private final ResultWriter mWriter = new ResultWriter()
             .forScenario(new ScenarioBuilder()
@@ -126,30 +126,35 @@ public class PerfettoProtoLogImplTest {
                                 .setMessage("My Test Debug Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_DEBUG)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:123")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(2)
                                 .setMessage("My Test Verbose Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_VERBOSE)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:342")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(3)
                                 .setMessage("My Test Warn Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_WARN)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:563")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(4)
                                 .setMessage("My Test Error Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_ERROR)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:156")
                 ).addMessages(
                         Protolog.ProtoLogViewerConfig.MessageData.newBuilder()
                                 .setMessageId(5)
                                 .setMessage("My Test WTF Log Message %b")
                                 .setLevel(ProtologCommon.ProtoLogLevel.PROTOLOG_LEVEL_WTF)
                                 .setGroupId(1)
+                                .setLocation("com/test/MyTestClass.java:192")
                 );
 
         ViewerConfigInputStreamProvider viewerConfigInputStreamProvider = Mockito.mock(
@@ -379,7 +384,7 @@ public class PerfettoProtoLogImplTest {
                 new Object[]{5});
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
-                LogLevel.INFO), eq("UNKNOWN MESSAGE#1234 (5)"));
+                LogLevel.INFO), eq("UNKNOWN MESSAGE args = (5)"));
         verify(mReader).getViewerString(eq(1234L));
     }
 
@@ -446,8 +451,8 @@ public class PerfettoProtoLogImplTest {
             before = SystemClock.elapsedRealtimeNanos();
             mProtoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP,
-                    "My test message :: %s, %d, %o, %x, %f, %b",
-                    "test", 1, 2, 3, 0.4, true);
+                    "My test message :: %s, %d, %x, %f, %b",
+                    "test", 1, 3, 0.4, true);
             after = SystemClock.elapsedRealtimeNanos();
         } finally {
             traceMonitor.stop(mWriter);
@@ -462,7 +467,27 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages.getFirst().getTimestamp().getElapsedNanos())
                 .isAtMost(after);
         Truth.assertThat(protolog.messages.getFirst().getMessage())
-                .isEqualTo("My test message :: test, 2, 4, 6, 0.400000, true");
+                .isEqualTo("My test message :: test, 2, 6, 0.400000, true");
+    }
+
+    @Test
+    public  void supportsLocationInformation() throws IOException {
+        PerfettoTraceMonitor traceMonitor =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true).build();
+        try {
+            traceMonitor.start();
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
+                    LogDataType.BOOLEAN, new Object[]{true});
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protolog = reader.readProtoLogTrace();
+
+        Truth.assertThat(protolog.messages).hasSize(1);
+        Truth.assertThat(protolog.messages.get(0).getLocation())
+                .isEqualTo("com/test/MyTestClass.java:123");
     }
 
     private long addMessageToConfig(ProtologCommon.ProtoLogLevel logLevel, String message) {
@@ -698,7 +723,7 @@ public class PerfettoProtoLogImplTest {
             traceMonitor.start();
 
             mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP,
-                    "My test null string: %s", null);
+                    "My test null string: %s", (Object) null);
         } finally {
             traceMonitor.stop(mWriter);
         }

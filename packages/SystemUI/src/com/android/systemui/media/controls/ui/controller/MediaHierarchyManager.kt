@@ -1210,7 +1210,6 @@ constructor(
             (onCommunalNotDreaming && qsExpansion == 0.0f) || onCommunalDreamingAndShadeExpanding
         val location =
             when {
-                mediaFlags.isSceneContainerEnabled() -> desiredLocation
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
                 onCommunal -> LOCATION_COMMUNAL_HUB
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS

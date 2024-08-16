@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -248,9 +247,9 @@ public class SizeCompatTests extends WindowTestsBase {
                 .build();
         mTask.addChild(translucentActivity);
 
-        spyOn(translucentActivity.mLetterboxUiController);
-        doReturn(true).when(translucentActivity.mLetterboxUiController)
-                .shouldShowLetterboxUi(any());
+        spyOn(translucentActivity.mAppCompatController.getAppCompatLetterboxPolicy());
+        doReturn(true).when(translucentActivity.mAppCompatController
+                .getAppCompatLetterboxPolicy()).shouldShowLetterboxUi(any());
 
         addWindowToActivity(translucentActivity);
         translucentActivity.mRootWindowContainer.performSurfacePlacement();
@@ -258,7 +257,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final Function<ActivityRecord, Rect> innerBoundsOf =
                 (ActivityRecord a) -> {
                     final Rect bounds = new Rect();
-                    a.mLetterboxUiController.getLetterboxInnerBounds(bounds);
+                    a.getLetterboxInnerBounds(bounds);
                     return bounds;
                 };
         final Runnable checkLetterboxPositions = () -> assertEquals(innerBoundsOf.apply(mActivity),
@@ -282,7 +281,8 @@ public class SizeCompatTests extends WindowTestsBase {
         if (horizontalReachability) {
             final Consumer<Integer> doubleClick =
                     (Integer x) -> {
-                        mActivity.mLetterboxUiController.handleHorizontalDoubleTap(x);
+                        mActivity.mAppCompatController.getAppCompatReachabilityPolicy()
+                                .handleDoubleTap(x, displayHeight / 2);
                         mActivity.mRootWindowContainer.performSurfacePlacement();
                     };
 
@@ -311,7 +311,8 @@ public class SizeCompatTests extends WindowTestsBase {
         } else {
             final Consumer<Integer> doubleClick =
                     (Integer y) -> {
-                        mActivity.mLetterboxUiController.handleVerticalDoubleTap(y);
+                        mActivity.mAppCompatController.getAppCompatReachabilityPolicy()
+                                .handleDoubleTap(displayWidth / 2, y);
                         mActivity.mRootWindowContainer.performSurfacePlacement();
                     };
 
@@ -368,13 +369,14 @@ public class SizeCompatTests extends WindowTestsBase {
         final Function<ActivityRecord, Rect> innerBoundsOf =
                 (ActivityRecord a) -> {
                     final Rect bounds = new Rect();
-                    a.mLetterboxUiController.getLetterboxInnerBounds(bounds);
+                    a.getLetterboxInnerBounds(bounds);
                     return bounds;
                 };
 
         final Consumer<Integer> doubleClick =
                 (Integer y) -> {
-                    activity.mLetterboxUiController.handleVerticalDoubleTap(y);
+                    activity.mAppCompatController.getAppCompatReachabilityPolicy()
+                            .handleDoubleTap(dw / 2, y);
                     activity.mRootWindowContainer.performSurfacePlacement();
                 };
 
@@ -630,16 +632,15 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertEquals(window, mActivity.findMainWindow());
 
-        spyOn(mActivity.mLetterboxUiController);
         doReturn(true).when(mActivity).isVisibleRequested();
 
-        assertTrue(mActivity.mLetterboxUiController.shouldShowLetterboxUi(
-                mActivity.findMainWindow()));
+        assertTrue(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .shouldShowLetterboxUi(mActivity.findMainWindow()));
 
         window.mAttrs.flags |= FLAG_SHOW_WALLPAPER;
 
-        assertFalse(mActivity.mLetterboxUiController.shouldShowLetterboxUi(
-                mActivity.findMainWindow()));
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .shouldShowLetterboxUi(mActivity.findMainWindow()));
     }
 
     @Test
@@ -789,7 +790,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Change the fixed orientation.
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertTrue(mActivity.isRelaunching());
-        assertTrue(mActivity.mLetterboxUiController
+        assertTrue(mActivity.mAppCompatController.getAppCompatOrientationOverrides()
                 .getIsRelaunchingAfterRequestedOrientationChanged());
 
         assertFitted();
@@ -887,7 +888,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask).onSizeCompatActivityChanged();
         ActivityManager.RunningTaskInfo taskInfo = mTask.getTaskInfo();
 
-        assertTrue(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
+        assertTrue(taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat());
 
         // Make the activity resizable again by restarting it
         clearInvocations(mTask);
@@ -902,7 +903,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask).onSizeCompatActivityChanged();
         taskInfo = mTask.getTaskInfo();
 
-        assertFalse(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
+        assertFalse(taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat());
     }
 
     @Test
@@ -920,7 +921,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask).onSizeCompatActivityChanged();
         ActivityManager.RunningTaskInfo taskInfo = mTask.getTaskInfo();
 
-        assertTrue(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
+        assertTrue(taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat());
 
         // Create another Task to hold another size compat activity.
         clearInvocations(mTask);
@@ -940,7 +941,7 @@ public class SizeCompatTests extends WindowTestsBase {
         verify(mTask, never()).onSizeCompatActivityChanged();
         taskInfo = secondTask.getTaskInfo();
 
-        assertTrue(taskInfo.appCompatTaskInfo.topActivityInSizeCompat);
+        assertTrue(taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat());
     }
 
     @Test
@@ -1755,7 +1756,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
         mActivity.mRootWindowContainer.performSurfacePlacement();
 
-        LetterboxDetails letterboxDetails = mActivity.mLetterboxUiController.getLetterboxDetails();
+        LetterboxDetails letterboxDetails = mActivity.mAppCompatController
+                .getAppCompatLetterboxPolicy().getLetterboxDetails();
 
         assertEquals(dh / scale, letterboxDetails.getLetterboxInnerBounds().width());
         assertEquals(dw / scale, letterboxDetails.getLetterboxInnerBounds().height());
@@ -3015,6 +3017,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @SuppressWarnings("GuardedBy")
     public void testDisplayIgnoreOrientationRequest_pausedAppNotLostSizeCompat() {
         // Set up a display in landscape and ignoring orientation request.
         setUpDisplaySizeWithApp(2800, 1400);
@@ -3041,7 +3044,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertActivityMaxBoundsSandboxed();
 
         final Rect activityBounds = new Rect(mActivity.getBounds());
-        mTask.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */);
+        mTask.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */,
+                false /* deferPause */);
 
         // App still in size compat, and the bounds don't change.
         verify(mActivity, never()).clearSizeCompatMode();
@@ -3432,9 +3436,10 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.getWindowConfiguration().setBounds(null);
 
         setUpAllowThinLetterboxed(/* thinLetterboxAllowed */ false);
-
-        assertFalse(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
-        assertFalse(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mActivity.mAppCompatController.getAppCompatReachabilityOverrides();
+        assertFalse(reachabilityOverrides.isVerticalReachabilityEnabled());
+        assertFalse(reachabilityOverrides.isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3457,7 +3462,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
 
         // Horizontal reachability is disabled because the app is in split screen.
-        assertFalse(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3480,7 +3486,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
 
         // Vertical reachability is disabled because the app is in split screen.
-        assertFalse(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isVerticalReachabilityEnabled());
     }
 
     @Test
@@ -3502,7 +3509,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // Vertical reachability is disabled because the app does not match parent width
         assertNotEquals(mActivity.getScreenResolvedBounds().width(),
                 mActivity.mDisplayContent.getBounds().width());
-        assertFalse(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isVerticalReachabilityEnabled());
     }
 
     @Test
@@ -3519,7 +3527,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
 
         // Vertical reachability is still enabled as resolved bounds is not empty
-        assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isVerticalReachabilityEnabled());
     }
 
     @Test
@@ -3536,7 +3545,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
 
         // Horizontal reachability is still enabled as resolved bounds is not empty
-        assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3550,7 +3560,8 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareMinAspectRatio(mActivity, OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
                 SCREEN_ORIENTATION_PORTRAIT);
 
-        assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3564,7 +3575,8 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareMinAspectRatio(mActivity, OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
                 SCREEN_ORIENTATION_LANDSCAPE);
 
-        assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isVerticalReachabilityEnabled());
     }
 
     @Test
@@ -3586,7 +3598,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // Horizontal reachability is disabled because the app does not match parent height
         assertNotEquals(mActivity.getScreenResolvedBounds().height(),
                 mActivity.mDisplayContent.getBounds().height());
-        assertFalse(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3608,7 +3621,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // Horizontal reachability is enabled because the app matches parent height
         assertEquals(mActivity.getScreenResolvedBounds().height(),
                 mActivity.mDisplayContent.getBounds().height());
-        assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3630,7 +3644,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // Vertical reachability is enabled because the app matches parent width
         assertEquals(mActivity.getScreenResolvedBounds().width(),
                 mActivity.mDisplayContent.getBounds().width());
-        assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+                .isVerticalReachabilityEnabled());
     }
 
     @Test
@@ -3812,7 +3827,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         mActivity.mRootWindowContainer.performSurfacePlacement();
 
-        LetterboxDetails letterboxDetails = mActivity.mLetterboxUiController.getLetterboxDetails();
+        LetterboxDetails letterboxDetails = mActivity.mAppCompatController
+                .getAppCompatLetterboxPolicy().getLetterboxDetails();
 
         // Letterboxed activity at bottom
         assertEquals(new Rect(0, 2100, 1400, 2800), mActivity.getBounds());
@@ -4307,15 +4323,17 @@ public class SizeCompatTests extends WindowTestsBase {
         resizeDisplay(mTask.mDisplayContent, 1400, 2800);
 
         // Make sure app doesn't jump to top (default tabletop position) when unfolding.
-        assertEquals(1.0f, mActivity.mLetterboxUiController.getVerticalPositionMultiplier(
-                mActivity.getParent().getConfiguration()), 0);
+        assertEquals(1.0f, mActivity.mAppCompatController
+                .getAppCompatReachabilityOverrides().getVerticalPositionMultiplier(mActivity
+                        .getParent().getConfiguration()), 0);
 
         // Simulate display fully open after unfolding.
         setFoldablePosture(false /* isHalfFolded */, false /* isTabletop */);
         doReturn(false).when(mActivity.mDisplayContent).inTransition();
 
-        assertEquals(1.0f, mActivity.mLetterboxUiController.getVerticalPositionMultiplier(
-                mActivity.getParent().getConfiguration()), 0);
+        assertEquals(1.0f, mActivity.mAppCompatController
+                .getAppCompatReachabilityOverrides().getVerticalPositionMultiplier(mActivity
+                        .getParent().getConfiguration()), 0);
     }
 
     @Test
@@ -4729,7 +4747,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
         assertEquals(mActivity.getState(), PAUSED);
         assertTrue(mActivity.isVisible());
-        assertTrue(mTask.getTaskInfo().appCompatTaskInfo.topActivityInSizeCompat);
+        assertTrue(mTask.getTaskInfo().appCompatTaskInfo.isTopActivityInSizeCompat());
     }
 
     /**
@@ -4809,57 +4827,13 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(newDensity, mActivity.getConfiguration().densityDpi);
     }
 
-    @Test
-    public void testShouldSendFakeFocus_compatFakeFocusEnabled() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setOnTop(true)
-                // Set the component to be that of the test class in order to enable compat changes
-                .setComponent(ComponentName.createRelative(mContext,
-                        com.android.server.wm.SizeCompatTests.class.getName()))
-                .build();
-        final Task task = activity.getTask();
-        spyOn(activity.mLetterboxUiController);
-        doReturn(true).when(activity.mLetterboxUiController).shouldSendFakeFocus();
-
-        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        assertTrue(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_PINNED);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-    }
-
-    @Test
-    public void testShouldSendFakeFocus_compatFakeFocusDisabled() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setOnTop(true)
-                // Set the component to be that of the test class in order to enable compat changes
-                .setComponent(ComponentName.createRelative(mContext,
-                        com.android.server.wm.SizeCompatTests.class.getName()))
-                .build();
-        final Task task = activity.getTask();
-        spyOn(activity.mLetterboxUiController);
-        doReturn(false).when(activity.mLetterboxUiController).shouldSendFakeFocus();
-
-        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_PINNED);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-
-        task.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertFalse(activity.shouldSendCompatFakeFocus());
-    }
-
     private void setUpAllowThinLetterboxed(boolean thinLetterboxAllowed) {
-        spyOn(mActivity.mLetterboxUiController);
-        doReturn(thinLetterboxAllowed).when(mActivity.mLetterboxUiController)
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mActivity.mAppCompatController.getAppCompatReachabilityOverrides();
+        spyOn(reachabilityOverrides);
+        doReturn(thinLetterboxAllowed).when(reachabilityOverrides)
                 .allowVerticalReachabilityForThinLetterbox();
-        doReturn(thinLetterboxAllowed).when(mActivity.mLetterboxUiController)
+        doReturn(thinLetterboxAllowed).when(reachabilityOverrides)
                 .allowHorizontalReachabilityForThinLetterbox();
     }
 

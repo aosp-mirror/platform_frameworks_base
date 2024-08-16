@@ -19,12 +19,10 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
@@ -38,8 +36,8 @@ import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -58,9 +56,9 @@ import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
-import com.android.systemui.statusbar.notification.NotificationUtils.interpolate
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -90,10 +88,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf(
-                    FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX,
-                )
-                .andSceneContainer()
+            return parameterizeSceneContainerFlag()
         }
     }
 
@@ -141,11 +136,14 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     val communalSceneRepository
         get() = kosmos.communalSceneRepository
 
+    val shadeRepository
+        get() = kosmos.fakeShadeRepository
+
     lateinit var underTest: SharedNotificationContainerViewModel
 
     @Before
     fun setUp() {
-        overrideResource(R.bool.config_use_split_notification_shade, false)
+        shadeTestUtil.setSplitShade(false)
         movementFlow = MutableStateFlow(BurnInModel())
         whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)
         underTest = kosmos.sharedNotificationContainerViewModel
@@ -154,7 +152,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validateMarginStartInSplitShade() =
         testScope.runTest {
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            shadeTestUtil.setSplitShade(true)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -167,7 +165,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @Test
     fun validateMarginStart() =
         testScope.runTest {
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -178,29 +176,10 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    fun validatePaddingTopInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
+    fun validatePaddingTopInSplitShade_usesLargeHeaderHelper() =
         testScope.runTest {
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
-
-            val paddingTop by collectLastValue(underTest.paddingTopDimen)
-
-            configurationRepository.onAnyConfigurationChange()
-
-            // Should directly use the header height (flagged off value)
-            assertThat(paddingTop).isEqualTo(10)
-        }
-
-    @Test
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    fun validatePaddingTopInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
-        testScope.runTest {
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            shadeTestUtil.setSplitShade(true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -216,7 +195,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun validatePaddingTopInNonSplitShade_usesLargeScreenHeader() =
         testScope.runTest {
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -232,7 +211,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun validatePaddingTopInNonSplitShade_doesNotUseLargeScreenHeader() =
         testScope.runTest {
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(10)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             overrideResource(R.bool.config_use_large_screen_shade_header, false)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -268,49 +247,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     @DisableSceneContainer
-    fun validateMarginTopWithLargeScreenHeader_refactorFlagOff_usesResource() =
-        testScope.runTest {
-            val headerResourceHeight = 50
-            val headerHelperHeight = 100
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
-                .thenReturn(headerHelperHeight)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
-            overrideResource(R.dimen.notification_panel_margin_top, 0)
-
-            val dimens by collectLastValue(underTest.configurationBasedDimensions)
-
-            configurationRepository.onAnyConfigurationChange()
-
-            assertThat(dimens!!.marginTop).isEqualTo(headerResourceHeight)
-        }
-
-    @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    @EnableSceneContainer
-    fun validateMarginTopWithLargeScreenHeader_refactorFlagOff_sceneContainerFlagOn_stillZero() =
-        testScope.runTest {
-            val headerResourceHeight = 50
-            val headerHelperHeight = 100
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
-                .thenReturn(headerHelperHeight)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
-            overrideResource(R.dimen.notification_panel_margin_top, 0)
-
-            val dimens by collectLastValue(underTest.configurationBasedDimensions)
-
-            configurationRepository.onAnyConfigurationChange()
-
-            assertThat(dimens!!.marginTop).isEqualTo(0)
-        }
-
-    @Test
-    @DisableSceneContainer
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-    fun validateMarginTopWithLargeScreenHeader_refactorFlagOn_usesHelper() =
+    fun validateMarginTopWithLargeScreenHeader_usesHelper() =
         testScope.runTest {
             val headerResourceHeight = 50
             val headerHelperHeight = 100
@@ -329,7 +267,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @EnableSceneContainer
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     fun validateMarginTopWithLargeScreenHeader_sceneContainerFlagOn_stillZero() =
         testScope.runTest {
             val headerResourceHeight = 50
@@ -575,7 +512,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             val bounds by collectLastValue(underTest.bounds)
 
             // When not in split shade
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             configurationRepository.onAnyConfigurationChange()
             runCurrent()
 
@@ -590,50 +527,51 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         }
 
     @Test
-    @DisableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     @DisableSceneContainer
-    fun boundsOnLockscreenInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
+    fun boundsDoNotChangeWhileLockscreenToAodTransitionIsActive() =
         testScope.runTest {
             val bounds by collectLastValue(underTest.bounds)
-
-            // When in split shade
-            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 10)
-            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
-
-            configurationRepository.onAnyConfigurationChange()
-            runCurrent()
 
             // Start on lockscreen
             showLockscreen()
 
             keyguardInteractor.setNotificationContainerBounds(
-                NotificationContainerBounds(top = 1f, bottom = 52f)
+                NotificationContainerBounds(top = 1f, bottom = 1f)
+            )
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 1f))
+
+            // Begin transition to AOD
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, AOD, 0f, TransitionState.STARTED)
             )
             runCurrent()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, AOD, 0.5f, TransitionState.RUNNING)
+            )
 
-            // Top should be equal to bounds (1) - padding adjustment (10)
-            assertThat(bounds)
-                .isEqualTo(
-                    NotificationContainerBounds(
-                        top = -9f,
-                        bottom = 2f,
-                    )
-                )
+            // Attempt to update bounds
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 5f, bottom = 5f)
+            )
+            // Bounds should not have moved
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 1f))
+
+            // Transition is over, now move
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(LOCKSCREEN, AOD, 1f, TransitionState.FINISHED)
+            )
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 5f, bottom = 5f))
         }
 
     @Test
-    @EnableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
     @DisableSceneContainer
-    fun boundsOnLockscreenInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
+    fun boundsOnLockscreenInSplitShade_usesLargeHeaderHelper() =
         testScope.runTest {
             val bounds by collectLastValue(underTest.bounds)
 
             // When in split shade
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
+            shadeTestUtil.setSplitShade(true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -694,7 +632,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             advanceTimeBy(50L)
             showLockscreen()
 
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             configurationRepository.onAnyConfigurationChange()
 
             assertThat(maxNotifications).isEqualTo(10)
@@ -722,7 +660,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             advanceTimeBy(50L)
             showLockscreen()
 
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             configurationRepository.onAnyConfigurationChange()
 
             assertThat(maxNotifications).isEqualTo(10)
@@ -756,7 +694,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // Show lockscreen with shade expanded
             showLockscreenWithShadeExpanded()
 
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeTestUtil.setSplitShade(false)
             configurationRepository.onAnyConfigurationChange()
 
             // -1 means No Limit
@@ -820,54 +758,6 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @DisableSceneContainer
-    fun updateBounds_fromKeyguardRoot() =
-        testScope.runTest {
-            val startProgress = 0f
-            val startStep = TransitionStep(LOCKSCREEN, AOD, startProgress, TransitionState.STARTED)
-            val boundsChangingProgress = 0.2f
-            val boundsChangingStep =
-                TransitionStep(LOCKSCREEN, AOD, boundsChangingProgress, TransitionState.RUNNING)
-            val boundsInterpolatingProgress = 0.6f
-            val boundsInterpolatingStep =
-                TransitionStep(
-                    LOCKSCREEN,
-                    AOD,
-                    boundsInterpolatingProgress,
-                    TransitionState.RUNNING
-                )
-            val finishProgress = 1.0f
-            val finishStep =
-                TransitionStep(LOCKSCREEN, AOD, finishProgress, TransitionState.FINISHED)
-
-            val bounds by collectLastValue(underTest.bounds)
-            val top = 123f
-            val bottom = 456f
-
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(startStep)
-            runCurrent()
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(boundsChangingStep)
-            runCurrent()
-            keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
-
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(boundsInterpolatingStep)
-            runCurrent()
-            val adjustedProgress =
-                (boundsInterpolatingProgress - boundsChangingProgress) /
-                    (1 - boundsChangingProgress)
-            val interpolatedTop = interpolate(0f, top, adjustedProgress)
-            val interpolatedBottom = interpolate(0f, bottom, adjustedProgress)
-            assertThat(bounds)
-                .isEqualTo(
-                    NotificationContainerBounds(top = interpolatedTop, bottom = interpolatedBottom)
-                )
-
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(finishStep)
-            runCurrent()
-            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
-        }
-
-    @Test
-    @DisableSceneContainer
     fun updateBounds_fromGone_withoutTransitions() =
         testScope.runTest {
             // Start step is already at 1.0
@@ -878,9 +768,9 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             val top = 123f
             val bottom = 456f
 
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(runningStep)
+            keyguardTransitionRepository.sendTransitionStep(runningStep)
             runCurrent()
-            kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(finishStep)
+            keyguardTransitionRepository.sendTransitionStep(finishStep)
             runCurrent()
             keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
             runCurrent()
@@ -1096,7 +986,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            // Resets to 1f after communal scene is hidden
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
@@ -1151,7 +1042,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
@@ -1208,7 +1099,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            // Resets to 1f after communal scene is hidden
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
@@ -1263,7 +1155,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
                 )
             )
             runCurrent()
-            assertThat(alpha).isEqualTo(0f)
+            assertThat(alpha).isEqualTo(1f)
         }
 
     private suspend fun TestScope.showLockscreen() {

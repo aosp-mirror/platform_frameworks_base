@@ -207,4 +207,28 @@ public class SystemZenRulesTest extends UiServiceTestCase {
         assertThat(getTriggerDescriptionForScheduleTime(mContext, scheduleInfo))
                 .isEqualTo("Mon,Wed,Fri-Sat,10:00 AM-4:00 PM");
     }
+
+    @Test
+    public void getShortDaysSummary_onlyDays() {
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.startHour = 10;
+        scheduleInfo.endHour = 16;
+        scheduleInfo.days = new int[] {Calendar.MONDAY, Calendar.TUESDAY,
+                Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY};
+
+        assertThat(SystemZenRules.getShortDaysSummary(mContext, scheduleInfo))
+                .isEqualTo("Mon-Fri");
+    }
+
+    @Test
+    public void getTimeSummary_onlyTime() {
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.startHour = 11;
+        scheduleInfo.endHour = 15;
+        scheduleInfo.days = new int[] {Calendar.MONDAY, Calendar.TUESDAY,
+                Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY};
+
+        assertThat(SystemZenRules.getTimeSummary(mContext, scheduleInfo))
+                .isEqualTo("11:00 AM-3:00 PM");
+    }
 }

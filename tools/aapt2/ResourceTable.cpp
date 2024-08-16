@@ -605,12 +605,12 @@ bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) 
     if (!config_value->value) {
       // Resource does not exist, add it now.
       config_value->value = std::move(res.value);
-      config_value->flag_status = res.flag_status;
     } else {
       // When validation is enabled, ensure that a resource cannot have multiple values defined for
       // the same configuration unless protected by flags.
-      auto result = validate ? ResolveFlagCollision(config_value->flag_status, res.flag_status)
-                             : CollisionResult::kKeepBoth;
+      auto result =
+          validate ? ResolveFlagCollision(config_value->value->GetFlagStatus(), res.flag_status)
+                   : CollisionResult::kKeepBoth;
       if (result == CollisionResult::kConflict) {
         result = ResolveValueCollision(config_value->value.get(), res.value.get());
       }
@@ -619,7 +619,6 @@ bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) 
           // Insert the value ignoring for duplicate configurations
           entry->values.push_back(util::make_unique<ResourceConfigValue>(res.config, res.product));
           entry->values.back()->value = std::move(res.value);
-          entry->values.back()->flag_status = res.flag_status;
           break;
 
         case CollisionResult::kTakeNew:

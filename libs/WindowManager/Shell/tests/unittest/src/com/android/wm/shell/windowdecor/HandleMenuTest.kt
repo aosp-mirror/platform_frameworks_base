@@ -57,6 +57,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 /**
@@ -109,6 +110,9 @@ class HandleMenuTest : ShellTestCase() {
         whenever(mockDesktopWindowDecoration.addWindow(
             anyInt(), any(), any(), any(), anyInt(), anyInt(), anyInt(), anyInt())
         ).thenReturn(mockAdditionalViewHostViewContainer)
+        whenever(mockDesktopWindowDecoration.addWindow(
+            any<View>(), any(), any(), any(), anyInt(), anyInt(), anyInt(), anyInt())
+        ).thenReturn(mockAdditionalViewHostViewContainer)
         whenever(mockAdditionalViewHostViewContainer.view).thenReturn(menuView)
         whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
         whenever(displayLayout.width()).thenReturn(DISPLAY_BOUNDS.width())
@@ -130,7 +134,7 @@ class HandleMenuTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     fun testFullscreenMenuUsesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_FULLSCREEN, SPLIT_POSITION_UNDEFINED)
-        val handleMenu = createAndShowHandleMenu()
+        val handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
         // Verify menu is created at coordinates that, when added to WindowManager,
         // show at the top-center of display.
@@ -142,7 +146,7 @@ class HandleMenuTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     fun testFreeformMenu_usesViewHostViewContainer() {
         createTaskInfo(WINDOWING_MODE_FREEFORM, SPLIT_POSITION_UNDEFINED)
-        handleMenu = createAndShowHandleMenu()
+        handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalViewHostViewContainer)
         // Verify menu is created near top-left of task.
         val expected = Point(MENU_START_MARGIN, MENU_TOP_MARGIN)
@@ -153,7 +157,7 @@ class HandleMenuTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     fun testSplitLeftMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_TOP_OR_LEFT)
-        handleMenu = createAndShowHandleMenu()
+        handleMenu = createAndShowHandleMenu(SPLIT_POSITION_TOP_OR_LEFT)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
         // Verify menu is created at coordinates that, when added to WindowManager,
         // show at the top-center of split left task.
@@ -168,7 +172,7 @@ class HandleMenuTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     fun testSplitRightMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_BOTTOM_OR_RIGHT)
-        handleMenu = createAndShowHandleMenu()
+        handleMenu = createAndShowHandleMenu(SPLIT_POSITION_BOTTOM_OR_RIGHT)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
         // Verify menu is created at coordinates that, when added to WindowManager,
         // show at the top-center of split right task.
@@ -208,17 +212,31 @@ class HandleMenuTest : ShellTestCase() {
         }
     }
 
-    private fun createAndShowHandleMenu(): HandleMenu {
+    private fun createAndShowHandleMenu(splitPosition: Int): HandleMenu {
         val layoutId = if (mockDesktopWindowDecoration.mTaskInfo.isFreeform) {
             R.layout.desktop_mode_app_header
         } else {
             R.layout.desktop_mode_app_handle
         }
-        val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId,
-                onClickListener, onTouchListener, appIcon, appName, displayController,
-                splitScreenController, true /* shouldShowWindowingPill */,
-                true /* shouldShowBrowserPill */, 50 /* captionHeight */)
-        handleMenu.show()
+        val captionX = when (mockDesktopWindowDecoration.mTaskInfo.windowingMode) {
+            WINDOWING_MODE_FULLSCREEN -> (DISPLAY_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
+            WINDOWING_MODE_FREEFORM -> 0
+            WINDOWING_MODE_MULTI_WINDOW -> {
+                if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
+                    (SPLIT_LEFT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
+                } else {
+                    (SPLIT_RIGHT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
+                }
+            }
+            else -> error("Invalid windowing mode")
+        }
+        val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId, appIcon, appName,
+            splitScreenController, shouldShowWindowingPill = true,
+            shouldShowNewWindowButton = true,
+            null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
+            captionX = captionX
+        )
+        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock())
         return handleMenu
     }
 
@@ -233,5 +251,6 @@ class HandleMenuTest : ShellTestCase() {
         private const val MENU_START_MARGIN = 20
         private const val MENU_PILL_ELEVATION = 2
         private const val MENU_PILL_SPACING_MARGIN = 4
+        private const val HANDLE_WIDTH = 80
     }
 }

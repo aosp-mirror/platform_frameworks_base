@@ -74,7 +74,12 @@ constructor(
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(
-            flowWhenShadeIsNotExpanded = lockscreenAlpha,
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = 250.milliseconds,
+                    onStep = { 1f - it },
+                    onCancel = { 0f },
+                ),
             flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 

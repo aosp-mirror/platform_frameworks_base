@@ -39,12 +39,16 @@ import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintChanges;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An implementation of PaintContext for the Android Canvas.
  * This is used to play the RemoteCompose operations on Android.
  */
 public class AndroidPaintContext extends PaintContext {
     Paint mPaint = new Paint();
+    List<Paint> mPaintList = new ArrayList<>();
     Canvas mCanvas;
     Rect mTmpRect = new Rect(); // use in calculation of bounds
 
@@ -59,6 +63,21 @@ public class AndroidPaintContext extends PaintContext {
 
     public void setCanvas(Canvas canvas) {
         this.mCanvas = canvas;
+    }
+
+    @Override
+    public void save() {
+        mCanvas.save();
+    }
+
+    @Override
+    public void saveLayer(float x, float y, float width, float height) {
+        mCanvas.saveLayer(x, y, x + width, y + height, mPaint);
+    }
+
+    @Override
+    public void restore() {
+        mCanvas.restore();
     }
 
     /**
@@ -159,6 +178,16 @@ public class AndroidPaintContext extends PaintContext {
     @Override
     public void drawRect(float left, float top, float right, float bottom) {
         mCanvas.drawRect(left, top, right, bottom, mPaint);
+    }
+
+    @Override
+    public void savePaint() {
+        mPaintList.add(new Paint(mPaint));
+    }
+
+    @Override
+    public void restorePaint() {
+        mPaint = mPaintList.remove(mPaintList.size() - 1);
     }
 
     @Override
@@ -335,6 +364,11 @@ public class AndroidPaintContext extends PaintContext {
         return null;
     }
 
+    /**
+     * This applies paint changes to the current paint
+     *
+     * @param mPaintData the list change to the paint
+     */
     @Override
     public void applyPaint(PaintBundle mPaintData) {
         mPaintData.applyPaintChange((PaintContext) this, new PaintChanges() {
@@ -591,6 +625,19 @@ public class AndroidPaintContext extends PaintContext {
     @Override
     public void clipRect(float left, float top, float right, float bottom) {
         mCanvas.clipRect(left, top, right, bottom);
+    }
+
+    @Override
+    public void roundedClipRect(float width, float height,
+                                float topStart, float topEnd,
+                                float bottomStart, float bottomEnd) {
+        Path roundedPath = new Path();
+        float[] radii = new float[] { topStart, topStart,
+                topEnd, topEnd, bottomEnd, bottomEnd, bottomStart, bottomStart};
+
+        roundedPath.addRoundRect(0f, 0f, width, height,
+                radii, android.graphics.Path.Direction.CW);
+        mCanvas.clipPath(roundedPath);
     }
 
     @Override

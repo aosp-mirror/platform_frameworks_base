@@ -122,9 +122,14 @@ sealed class TransitionInteractor(
      * SHOW_WHEN_LOCKED activity, or back to [KeyguardState.GONE], for some power button launch
      * gesture cases. If so, start the transition.
      *
+     * @param startTransition A callback which is triggered to start the transition to the desired
+     *   KeyguardState. Allows caller to hook into the transition start if needed.
+     *
      * Returns true if a transition was started, false otherwise.
      */
-    suspend fun maybeStartTransitionToOccludedOrInsecureCamera(): Boolean {
+    suspend fun maybeStartTransitionToOccludedOrInsecureCamera(
+        startTransition: suspend (state: KeyguardState, reason: String) -> UUID?
+    ): Boolean {
         // The refactor is required for the occlusion interactor to work.
         KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
 
@@ -136,10 +141,7 @@ sealed class TransitionInteractor(
             if (!maybeHandleInsecurePowerGesture()) {
                 // Otherwise, the double tap gesture occurred while not GONE and not dismissable,
                 // which means we will launch the secure camera, which OCCLUDES the keyguard.
-                startTransitionTo(
-                    KeyguardState.OCCLUDED,
-                    ownerReason = "Power button gesture on lockscreen"
-                )
+                startTransition(KeyguardState.OCCLUDED, "Power button gesture on lockscreen")
             }
 
             return true
@@ -147,10 +149,7 @@ sealed class TransitionInteractor(
             // A SHOW_WHEN_LOCKED activity is on top of the task stack. Transition to OCCLUDED so
             // it's visible.
             // TODO(b/307976454) - Centralize transition to DREAMING here.
-            startTransitionTo(
-                KeyguardState.OCCLUDED,
-                ownerReason = "SHOW_WHEN_LOCKED activity on top"
-            )
+            startTransition(KeyguardState.OCCLUDED, "SHOW_WHEN_LOCKED activity on top")
 
             return true
         } else {

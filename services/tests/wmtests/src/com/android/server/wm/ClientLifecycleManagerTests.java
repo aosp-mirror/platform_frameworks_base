@@ -87,24 +87,6 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
     }
 
     @Test
-    public void testScheduleTransaction_recycleBinderClientTransaction() throws Exception {
-        final ClientTransaction item = spy(ClientTransaction.obtain(mClient));
-
-        mLifecycleManager.scheduleTransaction(item);
-
-        verify(item).recycle();
-    }
-
-    @Test
-    public void testScheduleTransaction_notRecycleNonBinderClientTransaction() throws Exception {
-        final ClientTransaction item = spy(ClientTransaction.obtain(mNonBinderClient));
-
-        mLifecycleManager.scheduleTransaction(item);
-
-        verify(item, never()).recycle();
-    }
-
-    @Test
     public void testScheduleTransactionItem() throws RemoteException {
         spyOn(mWms.mWindowPlacerLocked);
         doReturn(true).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
@@ -194,7 +176,6 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
 
         assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
         verify(mTransaction).schedule();
-        verify(mTransaction).recycle();
     }
 
     @Test

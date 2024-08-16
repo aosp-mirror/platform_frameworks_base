@@ -2391,10 +2391,15 @@ public class UserManager {
      */
     public static final int USER_OPERATION_ERROR_DISABLED_USER = 8;
     /**
-     * Indicates user operation failed because user is disabled on the device.
+     * Indicates user operation failed because private space is disabled on the device.
      * @hide
      */
     public static final int USER_OPERATION_ERROR_PRIVATE_PROFILE = 9;
+    /**
+     * Indicates user operation failed because user is restricted on the device.
+     * @hide
+     */
+    public static final int USER_OPERATION_ERROR_USER_RESTRICTED = 10;
 
     /**
      * Result returned from various user operations.
@@ -2413,6 +2418,7 @@ public class UserManager {
             USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS,
             USER_OPERATION_ERROR_DISABLED_USER,
             USER_OPERATION_ERROR_PRIVATE_PROFILE,
+            USER_OPERATION_ERROR_USER_RESTRICTED,
     })
     public @interface UserOperationResult {}
 
@@ -4818,6 +4824,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to become admin
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
@@ -4838,6 +4845,7 @@ public class UserManager {
      * <p>Note that this does not alter the user's pre-existing user restrictions.
      *
      * @param userId the id of the user to revoke admin rights from
+     * @throws SecurityException if changing ADMIN status of the user is not allowed
      * @hide
      */
     @RequiresPermission(allOf = {
@@ -6442,7 +6450,11 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public int getUserSerialNumber(@UserIdInt int userId) {
-        if (android.multiuser.Flags.cacheUserSerialNumber()) {
+        // Read only flag should is to fix early access to this API
+        // cacheUserSerialNumber to be removed after the
+        // cacheUserSerialNumberReadOnly is fully rolled out
+        if (android.multiuser.Flags.cacheUserSerialNumberReadOnly()
+                || android.multiuser.Flags.cacheUserSerialNumber()) {
             // System user serial number is always 0, and it always exists.
             // There is no need to call binder for that.
             if (userId == UserHandle.USER_SYSTEM) {

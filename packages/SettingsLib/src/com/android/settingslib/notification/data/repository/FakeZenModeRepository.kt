@@ -40,6 +40,8 @@ class FakeZenModeRepository : ZenModeRepository {
     override val modes: Flow<List<ZenMode>>
         get() = mutableModesFlow.asStateFlow()
 
+    private val activeModesDurations = mutableMapOf<String, Duration?>()
+
     init {
         updateNotificationPolicy()
     }
@@ -64,8 +66,22 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
     }
 
+    fun getMode(id: String): ZenMode? {
+        return mutableModesFlow.value.find { it.id == id }
+    }
+
     override fun activateMode(zenMode: ZenMode, duration: Duration?) {
         activateMode(zenMode.id)
+        activeModesDurations[zenMode.id] = duration
+    }
+
+    fun getModeActiveDuration(id: String): Duration? {
+        if (!activeModesDurations.containsKey(id)) {
+            throw IllegalArgumentException(
+                "mode $id not manually activated, you need to call activateMode"
+            )
+        }
+        return activeModesDurations[id]
     }
 
     override fun deactivateMode(zenMode: ZenMode) {
@@ -73,15 +89,23 @@ class FakeZenModeRepository : ZenModeRepository {
     }
 
     fun activateMode(id: String) {
-        val oldMode = mutableModesFlow.value.find { it.id == id } ?: return
-        removeMode(id)
-        mutableModesFlow.value += TestModeBuilder(oldMode).setActive(true).build()
+        updateModeActiveState(id = id, isActive = true)
     }
 
     fun deactivateMode(id: String) {
-        val oldMode = mutableModesFlow.value.find { it.id == id } ?: return
-        removeMode(id)
-        mutableModesFlow.value += TestModeBuilder(oldMode).setActive(false).build()
+        updateModeActiveState(id = id, isActive = false)
+        activeModesDurations.remove(id)
+    }
+
+    // Update the active state while maintaining the mode's position in the list
+    private fun updateModeActiveState(id: String, isActive: Boolean) {
+        val modes = mutableModesFlow.value.toMutableList()
+        val index = modes.indexOfFirst { it.id == id }
+        if (index < 0) {
+            throw IllegalArgumentException("mode $id not found")
+        }
+        modes[index] = TestModeBuilder(modes[index]).setActive(isActive).build()
+        mutableModesFlow.value = modes
     }
 }
 
@@ -101,7 +125,8 @@ fun FakeZenModeRepository.updateNotificationPolicy(
             suppressedVisualEffects,
             state,
             priorityConversationSenders,
-        ))
+        )
+    )
 
 private fun newMode(id: String, active: Boolean = false): ZenMode {
     return TestModeBuilder().setId(id).setName("Mode $id").setActive(active).build()

@@ -112,6 +112,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             MagnificationConstants.SCALE_MAX_VALUE);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
+    private static final float[] COLOR_BLACK_ARRAY = {0f, 0f, 0f};
     private final SparseArray<Float> mMagnificationSizeScaleOptions = new SparseArray<>();
 
     private final Context mContext;
@@ -127,6 +128,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final WindowManager mWm;
 
     private float mScale;
+    private int mSettingsButtonIndex = MagnificationSize.DEFAULT;
 
     /**
      * MagnificationFrame represents the bound of {@link #mMirrorSurfaceView} and is constrained
@@ -436,6 +438,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (!mMagnificationSizeScaleOptions.contains(index)) {
             return;
         }
+        mSettingsButtonIndex = index;
         int size = getMagnificationWindowSizeFromIndex(index);
         setWindowSize(size, size);
     }
@@ -444,6 +447,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final float scale = mMagnificationSizeScaleOptions.get(index, 1.0f);
         int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 3;
         return (int) (initSize * scale) - (int) (initSize * scale) % 2;
+    }
+
+    int getMagnificationFrameSizeFromIndex(@MagnificationSize int index) {
+        return getMagnificationWindowSizeFromIndex(index) - 2 * mMirrorSurfaceMargin;
     }
 
     void setEditMagnifierSizeMode(boolean enable) {
@@ -457,8 +464,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         if (!enable) {
             // Keep the magnifier size when exiting edit mode
-            mWindowMagnificationFrameSizePrefs.saveSizeForCurrentDensity(
+            mWindowMagnificationFrameSizePrefs.saveIndexAndSizeForCurrentDensity(
+                    mSettingsButtonIndex,
                     new Size(mMagnificationFrame.width(), mMagnificationFrame.height()));
+        } else {
+            mSettingsButtonIndex = MagnificationSize.CUSTOM;
         }
     }
 
@@ -944,7 +954,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void setMagnificationFrame(int width, int height, int centerX, int centerY) {
-        mWindowMagnificationFrameSizePrefs.saveSizeForCurrentDensity(new Size(width, height));
+        mWindowMagnificationFrameSizePrefs.saveIndexAndSizeForCurrentDensity(
+                mSettingsButtonIndex, new Size(width, height));
 
         // Sets the initial frame area for the mirror and place it to the given center on the
         // display.
@@ -954,6 +965,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private Size restoreMagnificationWindowFrameSizeIfPossible() {
+        if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
+            return restoreMagnificationWindowFrameIndexAndSizeIfPossible();
+        }
+
         if (!mWindowMagnificationFrameSizePrefs.isPreferenceSavedForCurrentDensity()) {
             return getDefaultMagnificationWindowFrameSize();
         }
@@ -961,8 +976,37 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         return mWindowMagnificationFrameSizePrefs.getSizeForCurrentDensity();
     }
 
+    private Size restoreMagnificationWindowFrameIndexAndSizeIfPossible() {
+        if (!mWindowMagnificationFrameSizePrefs.isPreferenceSavedForCurrentDensity()) {
+            notifyWindowSizeRestored(MagnificationSize.DEFAULT);
+            return getDefaultMagnificationWindowFrameSize();
+        }
+
+        // This will return DEFAULT index if the stored preference is in an invalid format.
+        // Therefore, except CUSTOM, we would like to calculate the window width and height based
+        // on the restored MagnificationSize index.
+        int restoredIndex = mWindowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
+        notifyWindowSizeRestored(restoredIndex);
+        if (restoredIndex == MagnificationSize.CUSTOM) {
+            return mWindowMagnificationFrameSizePrefs.getSizeForCurrentDensity();
+        }
+
+        int restoredSize = getMagnificationFrameSizeFromIndex(restoredIndex);
+        return new Size(restoredSize, restoredSize);
+    }
+
+    private void notifyWindowSizeRestored(@MagnificationSize int index) {
+        mSettingsButtonIndex = index;
+        if (isActivated()) {
+            // Send the callback only if the window magnification is activated. The check is to
+            // avoid updating the settings panel in the cases that window magnification is not yet
+            // activated such as during the constructor initialization of this class.
+            mWindowMagnifierCallback.onWindowMagnifierBoundsRestored(mDisplayId, index);
+        }
+    }
+
     private Size getDefaultMagnificationWindowFrameSize() {
-        final int defaultSize = getMagnificationWindowSizeFromIndex(MagnificationSize.MEDIUM)
+        final int defaultSize = getMagnificationWindowSizeFromIndex(MagnificationSize.DEFAULT)
                 - 2 * mMirrorSurfaceMargin;
         return new Size(defaultSize, defaultSize);
     }
@@ -975,6 +1019,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMirrorSurface = mirrorDisplay(mDisplayId);
         if (!mMirrorSurface.isValid()) {
             return;
+        }
+        // Set the surface of the SurfaceView to black to avoid users seeing the contents below the
+        // magnifier when the mirrored surface has an alpha less than 1.
+        if (Flags.addBlackBackgroundForWindowMagnifier()) {
+            mTransaction.setColor(mMirrorSurfaceView.getSurfaceControl(), COLOR_BLACK_ARRAY);
         }
         mTransaction.show(mMirrorSurface)
                 .reparent(mMirrorSurface, mMirrorSurfaceView.getSurfaceControl());

@@ -16,6 +16,7 @@
 
 package com.android.internal.protolog;
 
+import static android.content.Context.PROTOLOG_SERVICE;
 import static android.internal.perfetto.protos.InternedDataOuterClass.InternedData.PROTOLOG_STACKTRACE;
 import static android.internal.perfetto.protos.InternedDataOuterClass.InternedData.PROTOLOG_STRING_ARGS;
 import static android.internal.perfetto.protos.ProfileCommon.InternedString.IID;
@@ -33,6 +34,7 @@ import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Gro
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.GROUP_ID;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LEVEL;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LOCATION;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.INTERNED_DATA;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_MESSAGE;
@@ -45,6 +47,8 @@ import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -75,6 +79,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -88,7 +93,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A service for the ProtoLog logging system.
  */
-public class PerfettoProtoLogImpl implements IProtoLog {
+public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProtoLog {
     private static final String LOG_TAG = "ProtoLog";
     public static final String NULL_STRING = "null";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
@@ -100,38 +105,47 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     );
     @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
+    @Nullable
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
+    @NonNull
     private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
+    @NonNull
     private final Runnable mCacheUpdater;
 
+    @Nullable // null when the flag android.tracing.client_side_proto_logging is not flipped
+    private final IProtoLogService mProtoLogService;
+
+    @NonNull
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
+    @NonNull
     private final Map<String, int[]> mLogLevelCounts = new ArrayMap<>();
+    @NonNull
     private final Map<String, Integer> mCollectStackTraceGroupCounts = new ArrayMap<>();
 
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(String viewerConfigFilePath, Runnable cacheUpdater) {
-        this(() -> {
-            try {
-                return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
-            } catch (FileNotFoundException e) {
-                Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
-                return null;
-            }
-        }, cacheUpdater);
+    public PerfettoProtoLogImpl() {
+        this(null, null, null, () -> {});
     }
 
-    public PerfettoProtoLogImpl() {
-        this(null, null, () -> {});
+    public PerfettoProtoLogImpl(@NonNull Runnable cacheUpdater) {
+        this(null, null, null, cacheUpdater);
     }
 
     public PerfettoProtoLogImpl(
-            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            Runnable cacheUpdater
-    ) {
-        this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider),
+            @NonNull String viewerConfigFilePath,
+            @NonNull Runnable cacheUpdater) {
+        this(viewerConfigFilePath,
+                null,
+                new ProtoLogViewerConfigReader(() -> {
+                    try {
+                        return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(
+                                "Failed to load viewer config file " + viewerConfigFilePath, e);
+                    }
+                }),
                 cacheUpdater);
     }
 
@@ -139,8 +153,20 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     public PerfettoProtoLogImpl(
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            Runnable cacheUpdater
-    ) {
+            @NonNull Runnable cacheUpdater) {
+        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater);
+    }
+
+    private PerfettoProtoLogImpl(
+            @Nullable String viewerConfigFilePath,
+            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
+            @NonNull Runnable cacheUpdater) {
+        if (viewerConfigFilePath != null && viewerConfigInputStreamProvider != null) {
+            throw new RuntimeException("Only one of viewerConfigFilePath and "
+                    + "viewerConfigInputStreamProvider can be set");
+        }
+
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
                 new DataSourceParams.Builder()
@@ -152,6 +178,27 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mCacheUpdater = cacheUpdater;
+
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            mProtoLogService =
+                    IProtoLogService.Stub.asInterface(ServiceManager.getService(PROTOLOG_SERVICE));
+            Objects.requireNonNull(mProtoLogService,
+                    "ServiceManager returned a null ProtoLog service");
+
+            try {
+                var args = new ProtoLogService.RegisterClientArgs();
+
+                if (viewerConfigFilePath != null) {
+                    args.setViewerConfigFile(viewerConfigFilePath);
+                }
+
+                mProtoLogService.registerClient(this, args);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Failed to register ProtoLog client");
+            }
+        } else {
+            mProtoLogService = null;
+        }
     }
 
     /**
@@ -203,13 +250,23 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return mTracingInstances.get() > 0;
     }
 
+    @Override
+    public void toggleLogcat(boolean enabled, String[] groups) {
+        final ILogger logger = (message) -> Log.d(LOG_TAG, message);
+        if (enabled) {
+            startLoggingToLogcat(groups, logger);
+        } else {
+            stopLoggingToLogcat(groups, logger);
+        }
+    }
+
     /**
      * Start text logging
      * @param groups Groups to start text logging for
      * @param logger A logger to write status updates to
      * @return status code
      */
-    public int startLoggingToLogcat(String[] groups, ILogger logger) {
+    public int startLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
         if (mViewerConfigReader != null) {
             mViewerConfigReader.loadViewerConfig(groups, logger);
         }
@@ -222,7 +279,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
      * @param logger A logger to write status updates to
      * @return status code
      */
-    public int stopLoggingToLogcat(String[] groups, ILogger logger) {
+    public int stopLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
         if (mViewerConfigReader != null) {
             mViewerConfigReader.unloadViewerConfig(groups, logger);
         }
@@ -242,13 +299,29 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
             mLogGroups.put(protoLogGroup.name(), protoLogGroup);
         }
+
+        final String[] groupsLoggingToLogcat = Arrays.stream(protoLogGroups)
+                .filter(IProtoLogGroup::isLogToLogcat)
+                .map(IProtoLogGroup::name)
+                .toArray(String[]::new);
+
+        if (mViewerConfigReader != null) {
+            mViewerConfigReader.loadViewerConfig(groupsLoggingToLogcat);
+        }
     }
 
     /**
      * Responds to a shell command.
      */
+    @Deprecated
     public int onShellCommand(ShellCommand shell) {
         PrintWriter pw = shell.getOutPrintWriter();
+
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            pw.println("Command deprecated. Please use 'cmd protolog' instead.");
+            return -1;
+        }
+
         String cmd = shell.getNextArg();
         if (cmd == null) {
             return unknownCommand(pw);
@@ -306,6 +379,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     private void onTracingFlush() {
+        Log.d(LOG_TAG, "Executing onTracingFlush");
+
         final ExecutorService loggingService;
         try {
             mBackgroundServiceLock.lock();
@@ -326,14 +401,18 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             Log.e(LOG_TAG, "Failed to wait for tracing to finish", e);
         }
 
-        dumpTransitionTraceConfig();
+        dumpViewerConfig();
+
+        Log.d(LOG_TAG, "Finished onTracingFlush");
     }
 
-    private void dumpTransitionTraceConfig() {
+    private void dumpViewerConfig() {
         if (mViewerConfigInputStreamProvider == null) {
             // No viewer config available
             return;
         }
+
+        Log.d(LOG_TAG, "Dumping viewer config to trace");
 
         ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
 
@@ -364,6 +443,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 Log.e(LOG_TAG, "Failed to read ProtoLog viewer config to dump on tracing end", e);
             }
         });
+
+        Log.d(LOG_TAG, "Dumped viewer config to trace");
     }
 
     private static void writeViewerConfigGroup(
@@ -415,6 +496,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 case (int) GROUP_ID:
                     os.write(GROUP_ID, pis.readInt(GROUP_ID));
                     break;
+                case (int) LOCATION:
+                    os.write(LOCATION, pis.readInt(LOCATION));
                 default:
                     throw new RuntimeException(
                             "Unexpected field id " + pis.getFieldNumber());
@@ -653,7 +736,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return UUID.nameUUIDFromBytes(fullStringIdentifier.getBytes()).getMostSignificantBits();
     }
 
-    private static final int STACK_SIZE_TO_PROTO_LOG_ENTRY_CALL = 12;
+    private static final int STACK_SIZE_TO_PROTO_LOG_ENTRY_CALL = 6;
 
     private String collectStackTrace() {
         StackTraceElement[] stackTrace =  Thread.currentThread().getStackTrace();
@@ -742,7 +825,10 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         return -1;
     }
 
-    private synchronized void onTracingInstanceStart(ProtoLogDataSource.ProtoLogConfig config) {
+    private synchronized void onTracingInstanceStart(
+            int instanceIdx, ProtoLogDataSource.ProtoLogConfig config) {
+        Log.d(LOG_TAG, "Executing onTracingInstanceStart");
+
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
         for (int i = defaultLogFrom.ordinal(); i < LogLevel.values().length; i++) {
             mDefaultLogLevelCounts[i]++;
@@ -773,9 +859,13 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         mCacheUpdater.run();
 
         this.mTracingInstances.incrementAndGet();
+
+        Log.d(LOG_TAG, "Finished onTracingInstanceStart");
     }
 
-    private synchronized void onTracingInstanceStop(ProtoLogDataSource.ProtoLogConfig config) {
+    private synchronized void onTracingInstanceStop(
+            int instanceIdx, ProtoLogDataSource.ProtoLogConfig config) {
+        Log.d(LOG_TAG, "Executing onTracingInstanceStop");
         this.mTracingInstances.decrementAndGet();
 
         final LogLevel defaultLogFrom = config.getDefaultGroupConfig().logFrom;
@@ -807,6 +897,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
         }
 
         mCacheUpdater.run();
+        Log.d(LOG_TAG, "Finished onTracingInstanceStop");
     }
 
     private static void logAndPrintln(@Nullable PrintWriter pw, String msg) {

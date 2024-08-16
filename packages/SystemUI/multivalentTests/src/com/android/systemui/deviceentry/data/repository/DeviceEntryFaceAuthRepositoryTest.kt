@@ -58,7 +58,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.BiometricType
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -78,7 +77,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectionStatus
@@ -116,7 +114,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
-    private val kosmos = testKosmos().apply { this.commandQueue = this.fakeCommandQueue }
+    private val kosmos = testKosmos()
     private lateinit var underTest: DeviceEntryFaceAuthRepositoryImpl
 
     @Mock private lateinit var faceManager: FaceManager
@@ -162,7 +160,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     private val displayStateInteractor = kosmos.displayStateInteractor
     private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
     private val displayRepository = kosmos.displayRepository
-    private val fakeCommandQueue = kosmos.fakeCommandQueue
     private val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
     private lateinit var featureFlags: FakeFeatureFlags
 
@@ -572,9 +569,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 bouncerRepository.setAlternateVisible(false)
                 // Keyguard is occluded when secure camera is active.
                 keyguardRepository.setKeyguardOccluded(true)
-                fakeCommandQueue.doForEachCallback {
-                    it.onCameraLaunchGestureDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
-                }
+                keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
             }
         }
 
@@ -589,9 +584,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             assertThat(canFaceAuthRun()).isTrue()
 
             // launch secure camera
-            fakeCommandQueue.doForEachCallback {
-                it.onCameraLaunchGestureDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
-            }
+            keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
             keyguardRepository.setKeyguardOccluded(true)
             runCurrent()
             assertThat(canFaceAuthRun()).isFalse()
@@ -870,9 +863,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 bouncerRepository.setAlternateVisible(false)
                 // Keyguard is occluded when secure camera is active.
                 keyguardRepository.setKeyguardOccluded(true)
-                fakeCommandQueue.doForEachCallback {
-                    it.onCameraLaunchGestureDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
-                }
+                keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
             }
         }
 

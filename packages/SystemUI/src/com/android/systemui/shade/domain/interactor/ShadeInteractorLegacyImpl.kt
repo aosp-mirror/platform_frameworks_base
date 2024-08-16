@@ -16,10 +16,12 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.FlowTracing.traceAsCounter
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
@@ -45,6 +47,10 @@ constructor(
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) : BaseShadeInteractor {
+    init {
+        SceneContainerFlag.assertInLegacyMode()
+    }
+
     /**
      * The amount [0-1] that the shade has been opened. Uses stateIn to avoid redundant calculations
      * in downstream flows.
@@ -74,6 +80,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .traceAsCounter("panel_expansion") { (it * 100f).toInt() }
             .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override val qsExpansion: StateFlow<Float> = repository.qsExpansion

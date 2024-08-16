@@ -33,6 +33,7 @@ val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
             fromAodTransitionInteractor = { fromAodTransitionInteractor },
             fromAlternateBouncerTransitionInteractor = { fromAlternateBouncerTransitionInteractor },
             fromDozingTransitionInteractor = { fromDozingTransitionInteractor },
+            fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
             sceneInteractor = sceneInteractor
         )
     }

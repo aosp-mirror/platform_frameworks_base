@@ -155,6 +155,15 @@ public class PackageWatchdog {
     private static final int DEFAULT_MAJOR_USER_IMPACT_LEVEL_THRESHOLD =
             PackageHealthObserverImpact.USER_IMPACT_LEVEL_71;
 
+    // Comma separated list of all packages exempt from user impact level threshold. If a package
+    // in the list is crash looping, all the mitigations including factory reset will be performed.
+    private static final String PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD =
+            "persist.device_config.configuration.packages_exempt_from_impact_level_threshold";
+
+    // Comma separated list of default packages exempt from user impact level threshold.
+    private static final String DEFAULT_PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD =
+            "com.android.systemui";
+
     private long mNumberOfNativeCrashPollsRemaining;
 
     private static final int DB_VERSION = 1;
@@ -200,6 +209,8 @@ public class PackageWatchdog {
     private final BootThreshold mBootThreshold;
     private final DeviceConfig.OnPropertiesChangedListener
             mOnPropertyChangedListener = this::onPropertyChanged;
+
+    private final Set<String> mPackagesExemptFromImpactLevelThreshold = new ArraySet<>();
 
     // The set of packages that have been synced with the ExplicitHealthCheckController
     @GuardedBy("mLock")
@@ -523,12 +534,19 @@ public class PackageWatchdog {
                               @FailureReasons int failureReason,
                               int currentObserverImpact,
                               int mitigationCount) {
-        if (currentObserverImpact < getUserImpactLevelLimit()) {
+        if (allowMitigations(currentObserverImpact, versionedPackage)) {
             synchronized (mLock) {
                 mLastMitigation = mSystemClock.uptimeMillis();
             }
             currentObserverToNotify.execute(versionedPackage, failureReason, mitigationCount);
         }
+    }
+
+    private boolean allowMitigations(int currentObserverImpact,
+            VersionedPackage versionedPackage) {
+        return currentObserverImpact < getUserImpactLevelLimit()
+                || getPackagesExemptFromImpactLevelThreshold().contains(
+                versionedPackage.getPackageName());
     }
 
     private long getMitigationWindowMs() {
@@ -660,6 +678,15 @@ public class PackageWatchdog {
     private int getUserImpactLevelLimit() {
         return SystemProperties.getInt(MAJOR_USER_IMPACT_LEVEL_THRESHOLD,
                 DEFAULT_MAJOR_USER_IMPACT_LEVEL_THRESHOLD);
+    }
+
+    private Set<String> getPackagesExemptFromImpactLevelThreshold() {
+        if (mPackagesExemptFromImpactLevelThreshold.isEmpty()) {
+            String packageNames = SystemProperties.get(PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD,
+                    DEFAULT_PACKAGES_EXEMPT_FROM_IMPACT_LEVEL_THRESHOLD);
+            return Set.of(packageNames.split("\\s*,\\s*"));
+        }
+        return mPackagesExemptFromImpactLevelThreshold;
     }
 
     /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */

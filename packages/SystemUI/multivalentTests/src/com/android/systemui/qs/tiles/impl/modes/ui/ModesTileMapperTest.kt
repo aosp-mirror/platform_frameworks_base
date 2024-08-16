@@ -54,21 +54,35 @@ class ModesTileMapperTest : SysuiTestCase() {
 
     @Test
     fun inactiveState() {
-        val model = ModesTileModel(isActivated = false)
+        val model = ModesTileModel(isActivated = false, activeModes = emptyList())
 
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.INACTIVE)
         assertThat(state.iconRes).isEqualTo(R.drawable.qs_dnd_icon_off)
+        assertThat(state.secondaryLabel).isEqualTo("No active modes")
     }
 
     @Test
-    fun activeState() {
-        val model = ModesTileModel(isActivated = true)
+    fun activeState_oneMode() {
+        val model = ModesTileModel(isActivated = true, activeModes = listOf("DND"))
 
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.ACTIVE)
         assertThat(state.iconRes).isEqualTo(R.drawable.qs_dnd_icon_on)
+        assertThat(state.secondaryLabel).isEqualTo("DND is active")
+    }
+
+    @Test
+    fun activeState_multipleModes() {
+        val model =
+            ModesTileModel(isActivated = true, activeModes = listOf("Mode 1", "Mode 2", "Mode 3"))
+
+        val state = underTest.map(config, model)
+
+        assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.ACTIVE)
+        assertThat(state.iconRes).isEqualTo(R.drawable.qs_dnd_icon_on)
+        assertThat(state.secondaryLabel).isEqualTo("3 modes are active")
     }
 }

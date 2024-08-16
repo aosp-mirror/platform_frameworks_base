@@ -439,8 +439,7 @@ final class InputMonitor {
                         final InputMethodManagerInternal inputMethodManagerInternal =
                                 LocalServices.getService(InputMethodManagerInternal.class);
                         if (inputMethodManagerInternal != null) {
-                            // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
-                            inputMethodManagerInternal.hideAllInputMethods(
+                            inputMethodManagerInternal.hideInputMethod(
                                     SoftInputShowHideReason.HIDE_RECENTS_ANIMATION,
                                     mDisplayContent.getDisplayId());
                         }

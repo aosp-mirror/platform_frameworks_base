@@ -17,6 +17,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/handle_menu"
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="wrap_content"
     android:clipChildren="false"
@@ -124,7 +125,7 @@
     <LinearLayout
         android:id="@+id/more_actions_pill"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/desktop_mode_handle_menu_more_actions_pill_height"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
         android:layout_marginStart="1dp"
         android:orientation="vertical"
@@ -138,6 +139,14 @@
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_screenshot"
             android:drawableTint="?androidprv:attr/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton"/>
+
+        <Button
+            android:id="@+id/new_window_button"
+            android:contentDescription="@string/new_window_text"
+            android:text="@string/new_window_text"
+            android:drawableStart="@drawable/desktop_mode_ic_handle_menu_new_window"
+            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            style="@style/DesktopModeHandleMenuActionButton" />
     </LinearLayout>
 
     <LinearLayout

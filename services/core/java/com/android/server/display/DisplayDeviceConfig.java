@@ -99,6 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -587,22 +588,43 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <minorVersion>0</minorVersion>
  *     </usiVersion>
  *     <evenDimmer enabled="true">
- *       <transitionPoint>0.1</transitionPoint>
- *
- *       <nits>0.2</nits>
- *       <nits>2.0</nits>
- *       <nits>500.0</nits>
- *       <nits>1000.0</nits>
- *
- *       <backlight>0</backlight>
- *       <backlight>0.0001</backlight>
- *       <backlight>0.5</backlight>
- *       <backlight>1.0</backlight>
- *
- *       <brightness>0</brightness>
- *       <brightness>0.1</brightness>
- *       <brightness>0.5</brightness>
- *       <brightness>1.0</brightness>
+ *         <transitionPoint>0.1</transitionPoint>
+ *         <brightnessMapping>
+ *             <brightnessPoint>
+ *                 <nits>0.2</nits>
+ *                 <backlight>0</backlight>
+ *                 <brightness>0</brightness>
+ *                 </brightnessPoint>
+ *             <brightnessPoint>
+ *                 <nits>2.0</nits>
+ *                 <backlight>0.01</backlight>
+ *                 <brightness>0.002</brightness>
+ *             </brightnessPoint>
+ *             <brightnessPoint>
+ *                 <nits>500.0</nits>
+ *                 <backlight>0.5</backlight>
+ *                 <brightness>0.5</brightness>
+ *             </brightnessPoint>
+ *             <brightnessPoint>
+ *                 <nits>1000</nits>
+ *                 <backlight>1.0</backlight>
+ *                 <brightness>1.0</brightness>
+ *             </brightnessPoint>
+ *         </brightnessMapping>
+ *         <luxToMinimumNitsMap>
+ *             <point>
+ *                 <value>10</value>
+ *                 <nits>0.3</nits>
+ *             </point>
+ *             <point>
+ *                 <value>50</value>
+ *                 <nits>0.7</nits>
+ *             </point>
+ *             <point>
+ *                 <value>100</value>
+ *                 <nits>1.0</nits>
+ *             </point>
+ *         </luxToMinimumNitsMap>
  *     </evenDimmer>
  *     <screenBrightnessCapForWearBedtimeMode>0.1</screenBrightnessCapForWearBedtimeMode>
  *     <idleScreenRefreshRateTimeout>
@@ -1192,6 +1214,18 @@ public class DisplayDeviceConfig {
      */
     public float getHdrBrightnessFromSdr(float brightness, float maxDesiredHdrSdrRatio) {
         Spline sdrToHdrSpline = mHbmData != null ? mHbmData.sdrToHdrRatioSpline : null;
+        return getHdrBrightnessFromSdr(brightness, maxDesiredHdrSdrRatio, sdrToHdrSpline);
+    }
+
+    /**
+     * Calculate the HDR brightness for the specified SDR brightenss, restricted by the
+     * maxDesiredHdrSdrRatio (the ratio between the HDR luminance and SDR luminance) and specific
+     * sdrToHdrSpline
+     *
+     * @return the HDR brightness or BRIGHTNESS_INVALID when no mapping exists.
+     */
+    public float getHdrBrightnessFromSdr(float brightness, float maxDesiredHdrSdrRatio,
+            @Nullable Spline sdrToHdrSpline) {
         if (sdrToHdrSpline == null) {
             return PowerManager.BRIGHTNESS_INVALID;
         }
@@ -1786,15 +1820,17 @@ public class DisplayDeviceConfig {
                 loadThermalThrottlingConfig(config);
                 loadPowerThrottlingConfigData(config);
                 // Backlight and evenDimmer data should be loaded for HbmData
-                mHbmData = HighBrightnessModeData.loadHighBrightnessModeData(config, (hbm) -> {
+                Function<HighBrightnessMode, Float> transitionPointProvider = (hbm) -> {
                     float transitionPointBacklightScale = hbm.getTransitionPoint_all().floatValue();
                     if (transitionPointBacklightScale >= mBacklightMaximum) {
                         throw new IllegalArgumentException("HBM transition point invalid. "
-                                + mHbmData.transitionPoint + " is not less than "
+                                + transitionPointBacklightScale + " is not less than "
                                 + mBacklightMaximum);
                     }
                     return  getBrightnessFromBacklight(transitionPointBacklightScale);
-                });
+                };
+                mHbmData = HighBrightnessModeData.loadHighBrightnessModeData(config,
+                        transitionPointProvider);
                 if (mHbmData.isHighBrightnessModeEnabled && mHbmData.refreshRateLimit != null) {
                     // TODO(b/331650248): cleanup, DMD can use mHbmData.refreshRateLimit
                     mRefreshRateLimitations.add(new RefreshRateLimitation(
@@ -1818,7 +1854,7 @@ public class DisplayDeviceConfig {
                 loadRefreshRateSetting(config);
                 loadScreenOffBrightnessSensorValueToLuxFromDdc(config);
                 loadUsiVersion(config);
-                mHdrBrightnessData = HdrBrightnessData.loadConfig(config);
+                mHdrBrightnessData = HdrBrightnessData.loadConfig(config, transitionPointProvider);
                 loadBrightnessCapForWearBedtimeMode(config);
                 loadIdleScreenRefreshRateTimeoutConfigs(config);
                 mVrrSupportEnabled = config.getSupportsVrr();

@@ -163,10 +163,7 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
 
         mLayout.setConsumedEnergy(mPowerStats.stats, 0, uJtoUc(energyDelta, averageVoltage));
 
-        for (int i = mPowerStats.uidStats.size() - 1; i >= 0; i--) {
-            mLayout.setUidConsumedEnergy(mPowerStats.uidStats.valueAt(i), 0, 0);
-        }
-
+        mPowerStats.uidStats.clear();
         if (energy != null) {
             for (int i = energy.length - 1; i >= 0; i--) {
                 EnergyConsumerAttribution[] perUid = energy[i].attribution;
@@ -176,9 +173,12 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
 
                 for (EnergyConsumerAttribution attribution : perUid) {
                     int uid = mUidResolver.mapUid(attribution.uid);
-                    long lastEnergy = mLastConsumerEnergyPerUid.get(uid);
-                    long deltaEnergy = attribution.energyUWs - lastEnergy;
+                    long lastEnergy = mLastConsumerEnergyPerUid.get(uid, ENERGY_UNSPECIFIED);
                     mLastConsumerEnergyPerUid.put(uid, attribution.energyUWs);
+                    if (lastEnergy == ENERGY_UNSPECIFIED) {
+                        continue;
+                    }
+                    long deltaEnergy = attribution.energyUWs - lastEnergy;
                     if (deltaEnergy <= 0) {
                         continue;
                     }
@@ -189,7 +189,8 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
                     }
 
                     mLayout.setUidConsumedEnergy(uidStats, 0,
-                            mLayout.getUidConsumedEnergy(uidStats, 0) + deltaEnergy);
+                            mLayout.getUidConsumedEnergy(uidStats, 0)
+                                    + uJtoUc(deltaEnergy, averageVoltage));
                 }
             }
         }

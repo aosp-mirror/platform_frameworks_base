@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.app.Notification
-import android.app.Notification.RichOngoingStyle
 import android.app.PendingIntent
 import android.content.Context
 import android.util.Log
@@ -69,14 +68,12 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         builder: Notification.Builder,
         systemUIContext: Context,
         packageContext: Context
-    ): RichOngoingContentModel? {
-        if (builder.style !is RichOngoingStyle) return null
-
+    ): RichOngoingContentModel? =
         try {
             val sbn = entry.sbn
             val notification = sbn.notification
             val icon = IconModel(notification.smallIcon)
-            return if (sbn.packageName == "com.google.android.deskclock") {
+            if (sbn.packageName == "com.google.android.deskclock") {
                 when (notification.channelId) {
                     "Timers v2" -> {
                         parseTimerNotification(notification, icon)
@@ -93,9 +90,8 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
             } else null
         } catch (e: Exception) {
             Log.e("RONs", "Error parsing RON", e)
-            return null
+            null
         }
-    }
 
     /**
      * FOR PROTOTYPING ONLY: create a RON TimerContentModel using the time information available
@@ -122,12 +118,15 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
                 val timeRemaining = parseTimeDelta(remaining)
                 TimerContentModel(
                     icon = icon,
-                    name = total,
+                    // TODO: b/352142761 - define and use a string resource rather than " Timer".
+                    // (The UX isn't final so using " Timer" for now).
+                    name = total.replace("Σ", "") + " Timer",
                     state =
                         TimerContentModel.TimerState.Paused(
                             timeRemaining = timeRemaining,
-                            resumeIntent = notification.findActionWithName("Resume"),
-                            resetIntent = notification.findActionWithName("Reset"),
+                            resumeIntent = notification.findStartIntent(),
+                            addMinuteAction = notification.findAddMinuteAction(),
+                            resetAction = notification.findResetAction(),
                         )
                 )
             }
@@ -136,12 +135,15 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
                 val finishTime = parseCurrentTime(current) + parseTimeDelta(remaining).toMillis()
                 TimerContentModel(
                     icon = icon,
-                    name = total,
+                    // TODO: b/352142761 - define and use a string resource rather than " Timer".
+                    // (The UX isn't final so using " Timer" for now).
+                    name = total.replace("Σ", "") + " Timer",
                     state =
                         TimerContentModel.TimerState.Running(
                             finishTime = finishTime,
-                            pauseIntent = notification.findActionWithName("Pause"),
-                            addOneMinuteIntent = notification.findActionWithName("Add 1 min"),
+                            pauseIntent = notification.findPauseIntent(),
+                            addMinuteAction = notification.findAddMinuteAction(),
+                            resetAction = notification.findResetAction(),
                         )
                 )
             }
@@ -149,8 +151,34 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         }
     }
 
-    private fun Notification.findActionWithName(name: String): PendingIntent? {
-        return actions.firstOrNull { name == it.title?.toString() }?.actionIntent
+    private fun Notification.findPauseIntent(): PendingIntent? {
+        return actions
+            .firstOrNull { it.actionIntent.intent?.action?.endsWith(".PAUSE_TIMER") == true }
+            ?.actionIntent
+    }
+
+    private fun Notification.findStartIntent(): PendingIntent? {
+        return actions
+            .firstOrNull { it.actionIntent.intent?.action?.endsWith(".START_TIMER") == true }
+            ?.actionIntent
+    }
+
+    // TODO: b/352142761 - switch to system attributes for label and icon.
+    //   - We probably want a consistent look for the Reset button. (Double check with UX.)
+    //   - Using the custom assets now since I couldn't an existing "Reset" icon.
+    private fun Notification.findResetAction(): Notification.Action? {
+        return actions.firstOrNull {
+            it.actionIntent.intent?.action?.endsWith(".RESET_TIMER") == true
+        }
+    }
+
+    // TODO: b/352142761 - check with UX on whether this should be required.
+    //   - Alternative is to allow for optional actions in addition to main and reset.
+    //   - For optional actions, we should take the custom label and icon.
+    private fun Notification.findAddMinuteAction(): Notification.Action? {
+        return actions.firstOrNull {
+            it.actionIntent.intent?.action?.endsWith(".ADD_MINUTE_TIMER") == true
+        }
     }
 
     private fun parseCurrentTime(current: String): Long {

@@ -25,6 +25,7 @@ import static android.view.KeyEvent.KEYCODE_DEL;
 import static android.view.KeyEvent.KEYCODE_E;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 import static android.view.KeyEvent.KEYCODE_H;
+import static android.view.KeyEvent.KEYCODE_J;
 import static android.view.KeyEvent.KEYCODE_K;
 import static android.view.KeyEvent.KEYCODE_M;
 import static android.view.KeyEvent.KEYCODE_META_LEFT;
@@ -40,6 +41,7 @@ import static android.view.KeyEvent.KEYCODE_U;
 import static android.view.KeyEvent.KEYCODE_Z;
 
 import android.app.role.RoleManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -105,6 +107,17 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
             sendKeyCombination(new int[]{KEYCODE_META_LEFT, keyCode}, 0);
             mPhoneWindowManager.assertLaunchRole(role);
         }
+
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_B}, 0);
+        mPhoneWindowManager.assertLaunchRole(RoleManager.ROLE_BROWSER);
+
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_C}, 0);
+        mPhoneWindowManager.assertLaunchCategory(Intent.CATEGORY_APP_CONTACTS);
+
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_J}, 0);
+        mPhoneWindowManager.assertActivityTargetLaunched(
+                new ComponentName("com.test", "com.test.BookmarkTest"));
+
     }
 
     /**

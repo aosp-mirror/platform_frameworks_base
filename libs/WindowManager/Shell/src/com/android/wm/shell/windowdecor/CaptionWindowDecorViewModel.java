@@ -33,6 +33,7 @@ import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -56,6 +57,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -72,6 +74,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final IWindowManager mWindowManager;
     private final Context mContext;
     private final Handler mMainHandler;
+    private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final ShellExecutor mMainExecutor;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
@@ -108,6 +111,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     public CaptionWindowDecorViewModel(
             Context context,
             Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellExecutor shellExecutor,
             Choreographer mainChoreographer,
             IWindowManager windowManager,
@@ -120,6 +124,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mWindowManager = windowManager;
         mMainChoreographer = mainChoreographer;
         mTaskOrganizer = taskOrganizer;
@@ -284,11 +289,13 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         final CaptionWindowDecoration windowDecoration =
                 new CaptionWindowDecoration(
                         mContext,
+                        mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
                         mTaskOrganizer,
                         taskInfo,
                         taskSurface,
                         mMainHandler,
+                        mBgExecutor,
                         mMainChoreographer,
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);

@@ -1163,6 +1163,21 @@ public final class NotificationRecord {
         getSbn().setOverrideGroupKey(overrideGroupKey);
     }
 
+    /**
+     * Get the original group key that was set via {@link Notification.Builder#setGroup}
+     *
+     * This value is different than the value returned by {@link #getGroupKey()} as it does
+     * not contain any userId or package name.
+     *
+     * This value is different than the value returned
+     * by {@link StatusBarNotification#getGroup()} if the notification group
+     * was overridden: by NotificationAssistantService or by autogrouping.
+     */
+    @Nullable
+    public String getOriginalGroupKey() {
+        return getSbn().getNotification().getGroup();
+    }
+
     public NotificationChannel getChannel() {
         return mChannel;
     }

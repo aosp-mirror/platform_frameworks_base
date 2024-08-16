@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.window.flags.Flags.FLAG_APP_COMPAT_UI_FRAMEWORK;
 
@@ -26,7 +24,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.platform.test.annotations.RequiresFlagsDisabled;
@@ -98,7 +95,7 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false);
         mWindowManager = new UserAspectRatioSettingsWindowManager(mContext, mTaskInfo,
                 mSyncTransactionQueue, mTaskListener, new DisplayLayout(),
                 new CompatUIController.CompatUIHintsState(),
@@ -155,13 +152,10 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
         verify(mLayout).setUserAspectRatioSettingsHintVisibility(/* show= */ false);
     }
 
-    private static TaskInfo createTaskInfo(boolean hasSizeCompat,
-            @CameraCompatControlState int cameraCompatControlState) {
+    private static TaskInfo createTaskInfo(boolean hasSizeCompat) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
-        taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                cameraCompatControlState;
+        taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.realActivity = new ComponentName("com.mypackage.test", "TestActivity");
         return taskInfo;
     }

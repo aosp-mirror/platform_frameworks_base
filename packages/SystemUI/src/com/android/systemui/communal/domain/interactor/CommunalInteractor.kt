@@ -23,6 +23,7 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
+import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -64,10 +65,12 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,6 +97,7 @@ class CommunalInteractor
 @Inject
 constructor(
     @Application val applicationScope: CoroutineScope,
+    @Background private val bgScope: CoroutineScope,
     @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val widgetRepository: CommunalWidgetRepository,
@@ -117,8 +121,24 @@ constructor(
 
     private val _editModeOpen = MutableStateFlow(false)
 
-    /** Whether edit mode is currently open. */
+    /**
+     * Whether edit mode is currently open. This will be true from onCreate to onDestroy in
+     * [EditWidgetsActivity] and thus does not correspond to whether or not the activity is visible.
+     *
+     * Note that since this is called in onDestroy, it's not guaranteed to ever be set to false when
+     * edit mode is closed, such as in the case that a user exits edit mode manually with a back
+     * gesture or navigation gesture.
+     */
     val editModeOpen: StateFlow<Boolean> = _editModeOpen.asStateFlow()
+
+    private val _editActivityShowing = MutableStateFlow(false)
+
+    /**
+     * Whether the edit mode activity is currently showing. This is true from onStart to onStop in
+     * [EditWidgetsActivity] so may be false even when the user is in edit mode, such as when a
+     * widget's individual configuration activity has launched.
+     */
+    val editActivityShowing: StateFlow<Boolean> = _editActivityShowing.asStateFlow()
 
     /** Whether communal features are enabled. */
     val isCommunalEnabled: StateFlow<Boolean> = communalSettingsInteractor.isCommunalEnabled
@@ -148,12 +168,27 @@ constructor(
                 replay = 1,
             )
 
+    private val _isDisclaimerDismissed = MutableStateFlow(false)
+    val isDisclaimerDismissed: Flow<Boolean> = _isDisclaimerDismissed.asStateFlow()
+
+    fun setDisclaimerDismissed() {
+        bgScope.launch("$TAG#setDisclaimerDismissed") {
+            _isDisclaimerDismissed.value = true
+            delay(DISCLAIMER_RESET_MILLIS)
+            _isDisclaimerDismissed.value = false
+        }
+    }
+
     /** Whether to show communal when exiting the occluded state. */
     val showCommunalFromOccluded: Flow<Boolean> =
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .filter { step -> step.to == KeyguardState.OCCLUDED }
             .combine(isCommunalAvailable, ::Pair)
-            .map { (step, available) -> available && step.from == KeyguardState.GLANCEABLE_HUB }
+            .map { (step, available) ->
+                available &&
+                    (step.from == KeyguardState.GLANCEABLE_HUB ||
+                        step.from == KeyguardState.DREAMING)
+            }
             .flowOn(bgDispatcher)
             .stateIn(
                 scope = applicationScope,
@@ -294,11 +329,18 @@ constructor(
     @Deprecated(
         "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
     )
-    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) =
-        communalSceneInteractor.changeScene(newScene, transitionKey)
+    fun changeScene(
+        newScene: SceneKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null
+    ) = communalSceneInteractor.changeScene(newScene, loggingReason, transitionKey)
 
     fun setEditModeOpen(isOpen: Boolean) {
         _editModeOpen.value = isOpen
+    }
+
+    fun setEditActivityShowing(isOpen: Boolean) {
+        _editActivityShowing.value = isOpen
     }
 
     /** Show the widget editor Activity. */
@@ -398,6 +440,7 @@ constructor(
                     is CommunalWidgetContentModel.Available -> {
                         WidgetContent.Widget(
                             appWidgetId = widget.appWidgetId,
+                            priority = widget.priority,
                             providerInfo = widget.providerInfo,
                             appWidgetHost = appWidgetHost,
                             inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
@@ -406,7 +449,8 @@ constructor(
                     is CommunalWidgetContentModel.Pending -> {
                         WidgetContent.PendingWidget(
                             appWidgetId = widget.appWidgetId,
-                            packageName = widget.packageName,
+                            priority = widget.priority,
+                            componentName = widget.componentName,
                             icon = widget.icon,
                         )
                     }
@@ -472,7 +516,7 @@ constructor(
                 )
 
                 // Add UMO
-                if (mediaHostVisible && media.hasActiveMediaOrRecommendation) {
+                if (mediaHostVisible && media.hasAnyMediaOrRecommendation) {
                     ongoingContent.add(
                         CommunalContentModel.Umo(
                             createdTimestampMillis = media.createdTimestampMillis,
@@ -510,6 +554,14 @@ constructor(
     }
 
     companion object {
+        const val TAG = "CommunalInteractor"
+
+        /**
+         * The amount of time between showing the widget disclaimer to the user as measured from the
+         * moment the disclaimer is dimsissed.
+         */
+        val DISCLAIMER_RESET_MILLIS = 30.minutes
+
         /**
          * The user activity timeout which should be used when the communal hub is opened. A value
          * of -1 means that the user's chosen screen timeout will be used instead.

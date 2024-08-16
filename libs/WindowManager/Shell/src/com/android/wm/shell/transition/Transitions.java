@@ -38,9 +38,9 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
-import static com.android.window.flags.Flags.enforceShellThreadModel;
 import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary;
+import static com.android.window.flags.Flags.migratePredictiveBackTransition;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
@@ -189,6 +189,9 @@ public class Transitions implements RemoteCallable<Transitions>,
     public static final int TRANSIT_TASK_FRAGMENT_DRAG_RESIZE =
             // TRANSIT_FIRST_CUSTOM + 17
             TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_DRAG_RESIZE;
+
+    /** Remote Transition that split accepts but ultimately needs to be animated by the remote. */
+    public static final int TRANSIT_SPLIT_PASSTHROUGH = TRANSIT_FIRST_CUSTOM + 18;
 
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
@@ -714,7 +717,11 @@ public class Transitions implements RemoteCallable<Transitions>,
                 Log.e(TAG, "Got duplicate transitionReady for " + transitionToken);
                 // The transition is already somewhere else in the pipeline, so just return here.
                 t.apply();
-                existing.mFinishT.merge(finishT);
+                if (existing.mFinishT != null) {
+                    existing.mFinishT.merge(finishT);
+                } else {
+                    existing.mFinishT = finishT;
+                }
                 return;
             }
             // This usually means the system is in a bad state and may not recover; however,
@@ -819,7 +826,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             // The change has already animated by back gesture, don't need to play transition
             // animation on it.
-            if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
+            if (!migratePredictiveBackTransition()
+                    && change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
                 info.getChanges().remove(i);
             }
         }
@@ -933,9 +941,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     }
 
     private void onMerged(@NonNull IBinder playingToken, @NonNull IBinder mergedToken) {
-        if (enforceShellThreadModel()) {
-            mMainExecutor.assertCurrentThread();
-        }
+        mMainExecutor.assertCurrentThread();
 
         ActiveTransition playing = mKnownTransitions.get(playingToken);
         if (playing == null) {
@@ -1084,9 +1090,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     }
 
     private void onFinish(IBinder token, @Nullable WindowContainerTransaction wct) {
-        if (enforceShellThreadModel()) {
-            mMainExecutor.assertCurrentThread();
-        }
+        mMainExecutor.assertCurrentThread();
 
         final ActiveTransition active = mKnownTransitions.get(token);
         if (active == null) {

@@ -21,8 +21,12 @@ import android.content.mockedContext
 import android.hardware.fingerprint.FingerprintManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.communal.data.repository.communalSceneRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
@@ -41,6 +45,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -65,6 +70,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     private val bouncerRepository = kosmos.keyguardBouncerRepository
     private val powerRepository = kosmos.fakePowerRepository
     private val biometricSettingsRepository = kosmos.biometricSettingsRepository
+    private val communalSceneRepository = kosmos.communalSceneRepository
     private val mockedContext = kosmos.mockedContext
     private val mockedActivityStarter = kosmos.activityStarter
 
@@ -132,6 +138,20 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     fun lockout_notOnOccludingApp_neverGoToHomeScreen() =
         testScope.runTest {
             givenOnOccludingApp(false)
+            fingerprintAuthRepository.setAuthenticationStatus(
+                ErrorFingerprintAuthenticationStatus(
+                    FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
+                    "lockoutTest"
+                )
+            )
+            runCurrent()
+            verifyNeverGoToHomeScreen()
+        }
+
+    @Test
+    fun lockout_onOccludingApp_onCommunal_neverGoToHomeScreen() =
+        testScope.runTest {
+            givenOnOccludingApp(isOnOccludingApp = true, isOnCommunal = true)
             fingerprintAuthRepository.setAuthenticationStatus(
                 ErrorFingerprintAuthenticationStatus(
                     FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
@@ -261,7 +281,10 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             assertThat(message).isNull()
         }
 
-    private suspend fun givenOnOccludingApp(isOnOccludingApp: Boolean) {
+    private suspend fun givenOnOccludingApp(
+        isOnOccludingApp: Boolean,
+        isOnCommunal: Boolean = false
+    ) {
         powerRepository.setInteractive(true)
         keyguardRepository.setIsDozing(false)
         keyguardRepository.setKeyguardOccluded(isOnOccludingApp)
@@ -269,6 +292,14 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         keyguardRepository.setDreaming(false)
         bouncerRepository.setPrimaryShow(!isOnOccludingApp)
         bouncerRepository.setAlternateVisible(!isOnOccludingApp)
+
+        kosmos.fakeCommunalSceneRepository.setTransitionState(
+            flowOf(
+                ObservableTransitionState.Idle(
+                    if (isOnCommunal) CommunalScenes.Communal else CommunalScenes.Blank
+                )
+            )
+        )
 
         if (isOnOccludingApp) {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(

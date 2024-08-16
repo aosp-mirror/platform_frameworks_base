@@ -104,7 +104,7 @@ public final class VibrationXmlSerializer {
     public static void serialize(@NonNull VibrationEffect effect, @NonNull Writer writer,
             @Flags int flags) throws IOException {
         // Serialize effect first to fail early.
-        XmlSerializedVibration<VibrationEffect> serializedVibration =
+        XmlSerializedVibration<? extends VibrationEffect> serializedVibration =
                 toSerializedVibration(effect, flags);
         TypedXmlSerializer xmlSerializer = Xml.newFastSerializer();
         xmlSerializer.setFeature(XML_FEATURE_INDENT_OUTPUT, (flags & FLAG_PRETTY_PRINT) != 0);
@@ -114,9 +114,9 @@ public final class VibrationXmlSerializer {
         xmlSerializer.endDocument();
     }
 
-    private static XmlSerializedVibration<VibrationEffect> toSerializedVibration(
+    private static XmlSerializedVibration<? extends VibrationEffect> toSerializedVibration(
             VibrationEffect effect, @Flags int flags) throws SerializationFailedException {
-        XmlSerializedVibration<VibrationEffect> serializedVibration;
+        XmlSerializedVibration<? extends VibrationEffect> serializedVibration;
         int serializerFlags = 0;
         if ((flags & FLAG_ALLOW_HIDDEN_APIS) != 0) {
             serializerFlags |= XmlConstants.FLAG_ALLOW_HIDDEN_APIS;

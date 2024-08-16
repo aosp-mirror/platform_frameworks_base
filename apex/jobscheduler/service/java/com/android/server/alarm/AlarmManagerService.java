@@ -116,7 +116,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.ThreadLocalWorkSource;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -166,6 +165,7 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.SystemTimeZone;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -179,9 +179,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.zone.ZoneOffsetTransition;
-import java.time.zone.ZoneRules;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -193,7 +190,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -232,13 +228,6 @@ public class AlarmManagerService extends SystemService {
     static final int NEVER_INDEX = 4;
 
     private static final long TEMPORARY_QUOTA_DURATION = INTERVAL_DAY;
-
-    // System properties read on some device configurations to initialize time properly and
-    // perform DST transitions at the bootloader level.
-    private static final String TIMEOFFSET_PROPERTY = "persist.sys.time.offset";
-    private static final String DST_TRANSITION_PROPERTY = "persist.sys.time.dst_transition";
-    private static final String DST_OFFSET_PROPERTY = "persist.sys.time.dst_offset";
-
 
     private final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
@@ -330,7 +319,7 @@ public class AlarmManagerService extends SystemService {
      */
     int mSystemUiUid;
 
-    static boolean isTimeTickAlarm(Alarm a) {
+    private static boolean isTimeTickAlarm(Alarm a) {
         return a.uid == Process.SYSTEM_UID && TIME_TICK_TAG.equals(a.listenerTag);
     }
 
@@ -368,6 +357,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     // TODO(b/172085676): Move inside alarm store.
+    @GuardedBy("mLock")
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
             new SparseArray<>();
     private final SparseArray<AlarmManager.AlarmClockInfo> mTmpSparseAlarmClockArray =
@@ -2127,22 +2117,6 @@ public class AlarmManagerService extends SystemService {
             // "GMT" if the ID is unrecognized). The parameter ID is used here rather than
             // newZone.getId(). It will be rejected if it is invalid.
             timeZoneWasChanged = SystemTimeZone.setTimeZoneId(tzId, confidence, logInfo);
-
-            final int gmtOffset = newZone.getOffset(mInjector.getCurrentTimeMillis());
-            SystemProperties.set(TIMEOFFSET_PROPERTY, String.valueOf(gmtOffset));
-
-            final ZoneRules rules = newZone.toZoneId().getRules();
-            final ZoneOffsetTransition transition = rules.nextTransition(Instant.now());
-            if (null != transition) {
-                // Get the offset between the time after the DST transition and before.
-                final long transitionOffset = TimeUnit.SECONDS.toMillis((
-                        transition.getOffsetAfter().getTotalSeconds()
-                        - transition.getOffsetBefore().getTotalSeconds()));
-                // Time when the next DST transition is programmed.
-                final long nextTransition = TimeUnit.SECONDS.toMillis(transition.toEpochSecond());
-                SystemProperties.set(DST_TRANSITION_PROPERTY, String.valueOf(nextTransition));
-                SystemProperties.set(DST_OFFSET_PROPERTY, String.valueOf(transitionOffset));
-            }
         }
 
         // Clear the default time zone in the system server process. This forces the next call
@@ -2642,6 +2616,13 @@ public class AlarmManagerService extends SystemService {
             synchronized (mLock) {
                 mInFlightListeners.add(callback);
             }
+        }
+
+        /** @see AlarmManagerInternal#getNextAlarmTriggerTimeForUser(int) */
+        @Override
+        public long getNextAlarmTriggerTimeForUser(@UserIdInt int userId) {
+            final AlarmManager.AlarmClockInfo nextAlarm = getNextAlarmClockImpl(userId);
+            return nextAlarm != null ? nextAlarm.getTriggerTime() : 0;
         }
     }
 
@@ -3791,8 +3772,10 @@ public class AlarmManagerService extends SystemService {
             }
             mNextAlarmClockForUser.put(userId, alarmClock);
             if (mStartUserBeforeScheduledAlarms) {
-                mUserWakeupStore.addUserWakeup(userId, convertToElapsed(
-                        mNextAlarmClockForUser.get(userId).getTriggerTime(), RTC));
+                if (shouldAddWakeupForUser(userId)) {
+                    mUserWakeupStore.addUserWakeup(userId, convertToElapsed(
+                            mNextAlarmClockForUser.get(userId).getTriggerTime(), RTC));
+                }
             }
         } else {
             if (DEBUG_ALARM_CLOCK) {
@@ -3809,6 +3792,23 @@ public class AlarmManagerService extends SystemService {
         mPendingSendNextAlarmClockChangedForUser.put(userId, true);
         mHandler.removeMessages(AlarmHandler.SEND_NEXT_ALARM_CLOCK_CHANGED);
         mHandler.sendEmptyMessage(AlarmHandler.SEND_NEXT_ALARM_CLOCK_CHANGED);
+    }
+
+    /**
+     * Checks whether the user is of type that needs to be started before the alarm.
+     */
+    @VisibleForTesting
+    boolean shouldAddWakeupForUser(@UserIdInt int userId) {
+        final UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+        if (umInternal.getUserInfo(userId) == null || umInternal.getUserInfo(userId).isGuest()) {
+            // Guest user should not be started in the background.
+            return false;
+        } else {
+            // SYSTEM user is always running, so no need to schedule wakeup for it.
+            // Profiles are excluded from the wakeup list because users can explicitly stop them and
+            // so starting them in the background would go against the user's intent.
+            return userId != UserHandle.USER_SYSTEM && umInternal.getUserInfo(userId).isFull();
+        }
     }
 
     /**
@@ -3954,6 +3954,9 @@ public class AlarmManagerService extends SystemService {
             }
             if (!RemovedAlarm.isLoggable(reason)) {
                 continue;
+            }
+            if (isTimeTickAlarm(removed)) {
+                Slog.wtf(TAG, "Removed TIME_TICK alarm");
             }
             RingBuffer<RemovedAlarm> bufferForUid = mRemovalHistory.get(removed.uid);
             if (bufferForUid == null) {
@@ -4449,6 +4452,11 @@ public class AlarmManagerService extends SystemService {
         public void run() {
             ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
 
+            synchronized (mLock) {
+                mLastTimeChangeClockTime = mInjector.getCurrentTimeMillis();
+                mLastTimeChangeRealtime = mInjector.getElapsedRealtimeMillis();
+            }
+
             while (true) {
                 int result = mInjector.waitForAlarm();
                 final long nowRTC = mInjector.getCurrentTimeMillis();
@@ -4472,10 +4480,9 @@ public class AlarmManagerService extends SystemService {
                         expectedClockTime = lastTimeChangeClockTime
                                 + (nowELAPSED - mLastTimeChangeRealtime);
                     }
-                    if (lastTimeChangeClockTime == 0 || nowRTC < (expectedClockTime - 1000)
+                    if (nowRTC < (expectedClockTime - 1000)
                             || nowRTC > (expectedClockTime + 1000)) {
-                        // The change is by at least +/- 1000 ms (or this is the first change),
-                        // let's do it!
+                        // The change is by at least +/- 1000 ms, let's do it!
                         if (DEBUG_BATCH) {
                             Slog.v(TAG, "Time changed notification from kernel; rebatching");
                         }
@@ -4523,8 +4530,9 @@ public class AlarmManagerService extends SystemService {
                             final int[] userIds =
                                     mUserWakeupStore.getUserIdsToWakeup(nowELAPSED);
                             for (int i = 0; i < userIds.length; i++) {
-                                if (!mActivityManagerInternal.startUserInBackground(
-                                        userIds[i])) {
+                                if (mActivityManagerInternal.isUserRunning(userIds[i], 0)
+                                        || !mActivityManagerInternal.startUserInBackground(
+                                                userIds[i])) {
                                     mUserWakeupStore.removeUserWakeup(userIds[i]);
                                 }
                             }

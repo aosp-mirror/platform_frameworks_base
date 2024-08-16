@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -35,7 +36,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun PredictiveBackHandler(
-    state: BaseSceneTransitionLayoutState,
+    state: MutableSceneTransitionLayoutStateImpl,
     coroutineScope: CoroutineScope,
     targetSceneForBack: SceneKey? = null,
 ) {
@@ -65,7 +66,7 @@ internal fun PredictiveBackHandler(
 }
 
 private class PredictiveBackTransition(
-    val state: BaseSceneTransitionLayoutState,
+    val state: MutableSceneTransitionLayoutStateImpl,
     val coroutineScope: CoroutineScope,
     fromScene: SceneKey,
     toScene: SceneKey,
@@ -77,8 +78,17 @@ private class PredictiveBackTransition(
     private var progressAnimatable by mutableStateOf<Animatable<Float, AnimationVector1D>?>(null)
     var dragProgress: Float by mutableFloatStateOf(0f)
 
+    override val previewProgress: Float
+        get() = dragProgress
+
+    override val previewProgressVelocity: Float
+        get() = 0f // Currently, velocity is not exposed by predictive back API
+
+    override val isInPreviewStage: Boolean
+        get() = progressAnimatable == null && previewTransformationSpec != null
+
     override val progress: Float
-        get() = progressAnimatable?.value ?: dragProgress
+        get() = progressAnimatable?.value ?: previewTransformationSpec?.let { 0f } ?: dragProgress
 
     override val progressVelocity: Float
         get() = progressAnimatable?.velocity ?: 0f
@@ -109,8 +119,8 @@ private class PredictiveBackTransition(
                 toScene -> 1f
                 else -> error("scene $currentScene should be either $fromScene or $toScene")
             }
-
-        val animatable = Animatable(dragProgress).also { progressAnimatable = it }
+        val startProgress = if (previewTransformationSpec != null) 0f else dragProgress
+        val animatable = Animatable(startProgress).also { progressAnimatable = it }
 
         // Important: We start atomically to make sure that we start the coroutine even if it is
         // cancelled right after it is launched, so that finishTransition() is correctly called.
@@ -119,7 +129,7 @@ private class PredictiveBackTransition(
                 try {
                     animatable.animateTo(targetProgress)
                 } finally {
-                    state.finishTransition(this@PredictiveBackTransition, scene)
+                    state.finishTransition(this@PredictiveBackTransition)
                 }
             }
             .also { animationJob = it }

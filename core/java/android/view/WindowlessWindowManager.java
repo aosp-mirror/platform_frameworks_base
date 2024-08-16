@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.View.FocusDirection;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
@@ -503,16 +504,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public boolean performHapticFeedback(int effectId, int flags, int privFlags) {
-        return false;
-    }
-
-    @Override
-    public void performHapticFeedbackAsync(int effectId, int flags, int privFlags) {
-        performHapticFeedback(effectId, flags, privFlags);
-    }
-
-    @Override
     public android.os.IBinder performDrag(android.view.IWindow window, int flags,
             android.view.SurfaceControl surface, int touchSource, int touchDeviceId,
             int touchPointerId, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
@@ -596,7 +587,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void updateRequestedVisibleTypes(IWindow window,
-            @InsetsType int requestedVisibleTypes)  {
+            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token imeStatsToken)  {
     }
 
     @Override
@@ -675,6 +666,11 @@ public class WindowlessWindowManager implements IWindowSession {
         Log.e(TAG, "Received request to moveFocusToAdjacentWindow on"
                 + " WindowlessWindowManager. We shouldn't get here!");
         return false;
+    }
+
+    @Override
+    public void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            @NonNull ImeTracker.Token statsToken) {
     }
 
     void setParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {

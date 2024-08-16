@@ -17,17 +17,13 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
-import android.view.MotionEvent.ACTION_DOWN
-import android.view.MotionEvent.ACTION_MOVE
-import android.view.MotionEvent.ACTION_POINTER_DOWN
-import android.view.MotionEvent.ACTION_POINTER_UP
-import android.view.MotionEvent.ACTION_UP
-import android.view.MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT
-import android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE
-import android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
+import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,125 +32,57 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class BackGestureMonitorTest : SysuiTestCase() {
 
-    private var gestureDoneWasCalled = false
-    private val gestureDoneCallback = { gestureDoneWasCalled = true }
-    private val gestureMonitor = BackGestureMonitor(SWIPE_DISTANCE.toInt(), gestureDoneCallback)
+    private var gestureState = NOT_STARTED
+    private val gestureMonitor =
+        BackGestureMonitor(
+            gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
+            gestureStateChangedCallback = { gestureState = it }
+        )
 
-    companion object {
-        const val SWIPE_DISTANCE = 100f
+    @Test
+    fun triggersGestureFinishedForThreeFingerGestureRight() {
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeRight(), expectedState = FINISHED)
     }
 
     @Test
-    fun triggersGestureDoneForThreeFingerGestureRight() {
-        val events =
-            listOf(
-                threeFingerEvent(ACTION_DOWN, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_POINTER_DOWN, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_POINTER_DOWN, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_MOVE, x = SWIPE_DISTANCE / 2, y = 0f),
-                threeFingerEvent(ACTION_POINTER_UP, x = SWIPE_DISTANCE, y = 0f),
-                threeFingerEvent(ACTION_POINTER_UP, x = SWIPE_DISTANCE, y = 0f),
-                threeFingerEvent(ACTION_UP, x = SWIPE_DISTANCE, y = 0f),
-            )
-
-        events.forEach { gestureMonitor.processTouchpadEvent(it) }
-
-        assertThat(gestureDoneWasCalled).isTrue()
+    fun triggersGestureFinishedForThreeFingerGestureLeft() {
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeLeft(), expectedState = FINISHED)
     }
 
     @Test
-    fun triggersGestureDoneForThreeFingerGestureLeft() {
-        val events =
-            listOf(
-                threeFingerEvent(ACTION_DOWN, x = SWIPE_DISTANCE, y = 0f),
-                threeFingerEvent(ACTION_POINTER_DOWN, x = SWIPE_DISTANCE, y = 0f),
-                threeFingerEvent(ACTION_POINTER_DOWN, x = SWIPE_DISTANCE, y = 0f),
-                threeFingerEvent(ACTION_MOVE, x = SWIPE_DISTANCE / 2, y = 0f),
-                threeFingerEvent(ACTION_POINTER_UP, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_POINTER_UP, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_UP, x = 0f, y = 0f),
-            )
-
-        events.forEach { gestureMonitor.processTouchpadEvent(it) }
-
-        assertThat(gestureDoneWasCalled).isTrue()
-    }
-
-    private fun threeFingerEvent(action: Int, x: Float, y: Float): MotionEvent {
-        return motionEvent(
-            action = action,
-            x = x,
-            y = y,
-            classification = CLASSIFICATION_MULTI_FINGER_SWIPE,
-            axisValues = mapOf(AXIS_GESTURE_SWIPE_FINGER_COUNT to 3f)
+    fun triggersGestureProgressForThreeFingerGestureStarted() {
+        assertStateAfterEvents(
+            events = ThreeFingerGesture.startEvents(x = 0f, y = 0f),
+            expectedState = IN_PROGRESS
         )
     }
 
     @Test
-    fun doesntTriggerGestureDone_onThreeFingersSwipeUp() {
-        val events =
-            listOf(
-                threeFingerEvent(ACTION_DOWN, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_POINTER_DOWN, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_POINTER_DOWN, x = 0f, y = 0f),
-                threeFingerEvent(ACTION_MOVE, x = 0f, y = SWIPE_DISTANCE / 2),
-                threeFingerEvent(ACTION_POINTER_UP, x = 0f, y = SWIPE_DISTANCE),
-                threeFingerEvent(ACTION_POINTER_UP, x = 0f, y = SWIPE_DISTANCE),
-                threeFingerEvent(ACTION_UP, x = 0f, y = SWIPE_DISTANCE),
-            )
-
-        events.forEach { gestureMonitor.processTouchpadEvent(it) }
-
-        assertThat(gestureDoneWasCalled).isFalse()
+    fun doesntTriggerGestureFinished_onGestureDistanceTooShort() {
+        assertStateAfterEvents(
+            events = ThreeFingerGesture.swipeLeft(distancePx = SWIPE_DISTANCE / 2),
+            expectedState = NOT_STARTED
+        )
     }
 
     @Test
-    fun doesntTriggerGestureDone_onTwoFingersSwipe() {
-        fun twoFingerEvent(action: Int, x: Float, y: Float) =
-            motionEvent(
-                action = action,
-                x = x,
-                y = y,
-                classification = CLASSIFICATION_TWO_FINGER_SWIPE,
-                axisValues = mapOf(AXIS_GESTURE_SWIPE_FINGER_COUNT to 2f)
-            )
-        val events =
-            listOf(
-                twoFingerEvent(ACTION_DOWN, x = 0f, y = 0f),
-                twoFingerEvent(ACTION_MOVE, x = SWIPE_DISTANCE / 2, y = 0f),
-                twoFingerEvent(ACTION_UP, x = SWIPE_DISTANCE, y = 0f),
-            )
-
-        events.forEach { gestureMonitor.processTouchpadEvent(it) }
-
-        assertThat(gestureDoneWasCalled).isFalse()
+    fun doesntTriggerGestureFinished_onThreeFingersSwipeInOtherDirections() {
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = NOT_STARTED)
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeDown(), expectedState = NOT_STARTED)
     }
 
     @Test
-    fun doesntTriggerGestureDone_onFourFingersSwipe() {
-        fun fourFingerEvent(action: Int, x: Float, y: Float) =
-            motionEvent(
-                action = action,
-                x = x,
-                y = y,
-                classification = CLASSIFICATION_MULTI_FINGER_SWIPE,
-                axisValues = mapOf(AXIS_GESTURE_SWIPE_FINGER_COUNT to 4f)
-            )
-        val events =
-            listOf(
-                fourFingerEvent(ACTION_DOWN, x = 0f, y = 0f),
-                fourFingerEvent(ACTION_POINTER_DOWN, x = 0f, y = 0f),
-                fourFingerEvent(ACTION_POINTER_DOWN, x = 0f, y = 0f),
-                fourFingerEvent(ACTION_POINTER_DOWN, x = 0f, y = 0f),
-                fourFingerEvent(ACTION_MOVE, x = SWIPE_DISTANCE / 2, y = 0f),
-                fourFingerEvent(ACTION_POINTER_UP, x = SWIPE_DISTANCE, y = 0f),
-                fourFingerEvent(ACTION_POINTER_UP, x = SWIPE_DISTANCE, y = 0f),
-                fourFingerEvent(ACTION_POINTER_UP, x = SWIPE_DISTANCE, y = 0f),
-                fourFingerEvent(ACTION_UP, x = SWIPE_DISTANCE, y = 0f),
-            )
+    fun doesntTriggerGestureFinished_onTwoFingersSwipe() {
+        assertStateAfterEvents(events = TwoFingerGesture.swipeRight(), expectedState = NOT_STARTED)
+    }
 
+    @Test
+    fun doesntTriggerGestureFinished_onFourFingersSwipe() {
+        assertStateAfterEvents(events = FourFingerGesture.swipeRight(), expectedState = NOT_STARTED)
+    }
+
+    private fun assertStateAfterEvents(events: List<MotionEvent>, expectedState: GestureState) {
         events.forEach { gestureMonitor.processTouchpadEvent(it) }
-
-        assertThat(gestureDoneWasCalled).isFalse()
+        assertThat(gestureState).isEqualTo(expectedState)
     }
 }

@@ -16,6 +16,9 @@
 
 package com.android.server.policy;
 
+import static com.android.server.flags.Flags.modifierShortcutManagerMultiuser;
+
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.role.RoleManager;
 import android.content.ActivityNotFoundException;
@@ -26,16 +29,16 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
-import android.hardware.input.InputManager;
+import android.hardware.input.KeyGestureEvent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
@@ -45,17 +48,19 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
-import com.android.server.input.KeyboardMetricsCollector;
-import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
+import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages quick launch shortcuts by:
@@ -81,6 +86,10 @@ public class ModifierShortcutManager {
     private final SparseArray<String> mRoleShortcuts = new SparseArray<String>();
     private final SparseArray<String> mShiftRoleShortcuts = new SparseArray<String>();
     private final Map<String, Intent> mRoleIntents = new HashMap<String, Intent>();
+    private final SparseArray<ComponentName> mComponentShortcuts = new SparseArray<>();
+    private final SparseArray<ComponentName> mShiftComponentShortcuts = new SparseArray<>();
+    private final Map<ComponentName, Intent> mComponentIntents =
+            new HashMap<ComponentName, Intent>();
 
     private LongSparseArray<IShortcutService> mShortcutKeyServices = new LongSparseArray<>();
 
@@ -114,21 +123,31 @@ public class ModifierShortcutManager {
 
     private final Context mContext;
     private final Handler mHandler;
-    private final RoleManager mRoleManager;
-    private final PackageManager mPackageManager;
+    private final InputManagerInternal mInputManagerInternal;
     private boolean mSearchKeyShortcutPending = false;
     private boolean mConsumeSearchKeyUp = true;
+    private UserHandle mCurrentUser;
 
-    ModifierShortcutManager(Context context, Handler handler) {
+    ModifierShortcutManager(Context context, Handler handler, UserHandle currentUser) {
         mContext = context;
         mHandler = handler;
-        mPackageManager = mContext.getPackageManager();
-        mRoleManager = mContext.getSystemService(RoleManager.class);
-        mRoleManager.addOnRoleHoldersChangedListenerAsUser(mContext.getMainExecutor(),
+        RoleManager rm = mContext.getSystemService(RoleManager.class);
+        rm.addOnRoleHoldersChangedListenerAsUser(mContext.getMainExecutor(),
                 (String roleName, UserHandle user) -> {
                     mRoleIntents.remove(roleName);
                 }, UserHandle.ALL);
+        mCurrentUser = currentUser;
+        mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         loadShortcuts();
+    }
+
+    void setCurrentUser(UserHandle newUser) {
+        mCurrentUser = newUser;
+
+        // Role based shortcuts may resolve to different apps for different users
+        // so clear the cache.
+        mRoleIntents.clear();
+        mComponentIntents.clear();
     }
 
     /**
@@ -146,9 +165,11 @@ public class ModifierShortcutManager {
      * to invoke the shortcut.
      * @return The intent that matches the shortcut, or null if not found.
      */
+    @Nullable
     private Intent getIntent(KeyCharacterMap kcm, int keyCode, int metaState) {
         // If a modifier key other than shift is also pressed, skip it.
-        final boolean isShiftOn = KeyEvent.metaStateHasModifiers(metaState, KeyEvent.META_SHIFT_ON);
+        final boolean isShiftOn = KeyEvent.metaStateHasModifiers(
+                metaState, KeyEvent.META_SHIFT_ON);
         if (!isShiftOn && !KeyEvent.metaStateHasNoModifiers(metaState)) {
             return null;
         }
@@ -160,37 +181,54 @@ public class ModifierShortcutManager {
 
         // First try the exact keycode (with modifiers).
         int shortcutChar = kcm.get(keyCode, metaState);
-        if (shortcutChar != 0) {
+        if (shortcutChar == 0) {
+            return null;
+        }
+        shortcutIntent = shortcutMap.get(shortcutChar);
+
+        if (shortcutIntent == null) {
+            // Next try the primary character on that key.
+            shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
+            if (shortcutChar == 0) {
+                return null;
+            }
             shortcutIntent = shortcutMap.get(shortcutChar);
         }
 
-        // Next try the primary character on that key.
         if (shortcutIntent == null) {
-            shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
-            if (shortcutChar != 0) {
-                shortcutIntent = shortcutMap.get(shortcutChar);
-
-                if (shortcutIntent == null) {
-                    // Check for role based shortcut
-                    String role = isShiftOn ? mShiftRoleShortcuts.get(shortcutChar)
-                            : mRoleShortcuts.get(shortcutChar);
-                    if (role != null) {
-                        shortcutIntent = getRoleLaunchIntent(role);
-                    }
-                }
+            // Next check for role based shortcut with primary character.
+            String role = isShiftOn ? mShiftRoleShortcuts.get(shortcutChar)
+                    : mRoleShortcuts.get(shortcutChar);
+            if (role != null) {
+                shortcutIntent = getRoleLaunchIntent(role);
             }
         }
 
+        if (modifierShortcutManagerMultiuser()) {
+            if (shortcutIntent == null) {
+                // Next check component based shortcuts with primary character.
+                ComponentName component = isShiftOn
+                        ? mShiftComponentShortcuts.get(shortcutChar)
+                        : mComponentShortcuts.get(shortcutChar);
+                if (component != null) {
+                    shortcutIntent = resolveComponentNameIntent(component);
+                }
+            }
+        }
         return shortcutIntent;
     }
 
     private Intent getRoleLaunchIntent(String role) {
         Intent intent = mRoleIntents.get(role);
         if (intent == null) {
-            if (mRoleManager.isRoleAvailable(role)) {
-                String rolePackage = mRoleManager.getDefaultApplication(role);
+            Context context = modifierShortcutManagerMultiuser()
+                    ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
+            RoleManager rm = context.getSystemService(RoleManager.class);
+            PackageManager pm = context.getPackageManager();
+            if (rm.isRoleAvailable(role)) {
+                String rolePackage = rm.getDefaultApplication(role);
                 if (rolePackage != null) {
-                    intent = mPackageManager.getLaunchIntentForPackage(rolePackage);
+                    intent = pm.getLaunchIntentForPackage(rolePackage);
                     if (intent != null) {
                         intent.putExtra(EXTRA_ROLE, role);
                         mRoleIntents.put(role, intent);
@@ -248,31 +286,17 @@ public class ModifierShortcutManager {
                                 + " className=" + className + " shortcutChar=" + shortcutChar);
                         continue;
                     }
-                    ComponentName componentName = new ComponentName(packageName, className);
-                    try {
-                        mPackageManager.getActivityInfo(componentName,
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                        | PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        String[] packages = mPackageManager.canonicalToCurrentPackageNames(
-                                new String[] { packageName });
-                        componentName = new ComponentName(packages[0], className);
-                        try {
-                            mPackageManager.getActivityInfo(componentName,
-                                    PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                        } catch (PackageManager.NameNotFoundException e1) {
-                            Log.w(TAG, "Unable to add bookmark: " + packageName
-                                    + "/" + className + " not found.");
-                            continue;
+                    if (modifierShortcutManagerMultiuser()) {
+                        ComponentName componentName = new ComponentName(packageName, className);
+                        if (isShiftShortcut) {
+                            mShiftComponentShortcuts.put(shortcutChar, componentName);
+                        } else {
+                            mComponentShortcuts.put(shortcutChar, componentName);
                         }
+                        continue;
+                    } else {
+                        intent = resolveComponentNameIntent(packageName, className);
                     }
-
-                    intent = new Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                    intent.setComponent(componentName);
                 } else if (categoryName != null) {
                     if (roleName != null) {
                         Log.w(TAG, "Cannot specify role bookmark when category is present for"
@@ -308,6 +332,50 @@ public class ModifierShortcutManager {
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "Got exception parsing bookmarks.", e);
         }
+    }
+
+    @Nullable
+    private Intent resolveComponentNameIntent(ComponentName componentName) {
+        Intent intent = mComponentIntents.get(componentName);
+        if (intent == null) {
+            intent = resolveComponentNameIntent(
+                    componentName.getPackageName(), componentName.getClassName());
+            if (intent != null) {
+                mComponentIntents.put(componentName, intent);
+            }
+        }
+        return intent;
+    }
+
+    @Nullable
+    private Intent resolveComponentNameIntent(String packageName, String className) {
+        Context context = modifierShortcutManagerMultiuser()
+                ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
+        PackageManager pm = context.getPackageManager();
+        int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        if (!modifierShortcutManagerMultiuser()) {
+            flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE
+                    | PackageManager.MATCH_UNINSTALLED_PACKAGES;
+        }
+        ComponentName componentName = new ComponentName(packageName, className);
+        try {
+            pm.getActivityInfo(componentName, flags);
+        } catch (PackageManager.NameNotFoundException e) {
+            String[] packages = pm.canonicalToCurrentPackageNames(
+                    new String[] { packageName });
+            componentName = new ComponentName(packages[0], className);
+            try {
+                pm.getActivityInfo(componentName, flags);
+            } catch (PackageManager.NameNotFoundException e1) {
+                Log.w(TAG, "Unable to add bookmark: " + packageName
+                        + "/" + className + " not found.");
+                return null;
+            }
+        }
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setComponent(componentName);
+        return intent;
     }
 
     void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
@@ -396,14 +464,18 @@ public class ModifierShortcutManager {
             if (intent != null) {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 try {
-                    mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    if (modifierShortcutManagerMultiuser()) {
+                        mContext.startActivityAsUser(intent, mCurrentUser);
+                    } else {
+                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    }
                 } catch (ActivityNotFoundException ex) {
                     Slog.w(TAG, "Dropping application launch key because "
                             + "the activity to which it is registered was not found: "
                             + "keyCode=" + KeyEvent.keyCodeToString(keyCode) + ","
                             + " category=" + category + " role=" + role);
                 }
-                logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(intent));
+                notifyKeyGestureCompleted(keyEvent, getKeyGestureTypeFromIntent(intent));
                 return true;
             } else {
                 return false;
@@ -414,28 +486,29 @@ public class ModifierShortcutManager {
         if (shortcutIntent != null) {
             shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             try {
-                mContext.startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
+                if (modifierShortcutManagerMultiuser()) {
+                    mContext.startActivityAsUser(shortcutIntent, mCurrentUser);
+                } else {
+                    mContext.startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
+                }
             } catch (ActivityNotFoundException ex) {
                 Slog.w(TAG, "Dropping shortcut key combination because "
                         + "the activity to which it is registered was not found: "
                         + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode));
             }
-            logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(shortcutIntent));
+            notifyKeyGestureCompleted(keyEvent, getKeyGestureTypeFromIntent(shortcutIntent));
             return true;
         }
         return false;
     }
 
-    private void logKeyboardShortcut(KeyEvent event, KeyboardLogEvent logEvent) {
-        mHandler.post(() -> handleKeyboardLogging(event, logEvent));
-    }
-
-    private void handleKeyboardLogging(KeyEvent event, KeyboardLogEvent logEvent) {
-        final InputManager inputManager = mContext.getSystemService(InputManager.class);
-        final InputDevice inputDevice = inputManager != null
-                ? inputManager.getInputDevice(event.getDeviceId()) : null;
-        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(inputDevice,
-                logEvent, event.getMetaState(), event.getKeyCode());
+    private void notifyKeyGestureCompleted(KeyEvent event,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
+        if (gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
+            return;
+        }
+        mInputManagerInternal.notifyKeyGestureCompleted(event.getDeviceId(),
+                new int[]{event.getKeyCode()}, event.getMetaState(), gestureType);
     }
 
     /**
@@ -523,6 +596,30 @@ public class ModifierShortcutManager {
             }
         }
 
+        if (modifierShortcutManagerMultiuser()) {
+            for (int i = 0; i < mComponentShortcuts.size(); i++) {
+                ComponentName component = mComponentShortcuts.valueAt(i);
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                        (char) (mComponentShortcuts.keyAt(i)),
+                        resolveComponentNameIntent(component),
+                        false);
+                if (info != null) {
+                    shortcuts.add(info);
+                }
+            }
+
+            for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
+                ComponentName component = mShiftComponentShortcuts.valueAt(i);
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                        (char) (mShiftComponentShortcuts.keyAt(i)),
+                        resolveComponentNameIntent(component),
+                        true);
+                if (info != null) {
+                    shortcuts.add(info);
+                }
+            }
+        }
+
         return new KeyboardShortcutGroup(
                 mContext.getString(R.string.keyboard_shortcut_group_applications),
                 shortcuts);
@@ -545,23 +642,26 @@ public class ModifierShortcutManager {
 
         CharSequence label;
         Icon icon;
+        Context context = modifierShortcutManagerMultiuser()
+                ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
+        PackageManager pm = context.getPackageManager();
         ActivityInfo resolvedActivity = intent.resolveActivityInfo(
-                mPackageManager, PackageManager.MATCH_DEFAULT_ONLY);
+                pm, PackageManager.MATCH_DEFAULT_ONLY);
         if (resolvedActivity == null) {
             return null;
         }
         boolean isResolver = com.android.internal.app.ResolverActivity.class.getName().equals(
                 resolvedActivity.name);
         if (isResolver) {
-            label = getIntentCategoryLabel(mContext,
+            label = getIntentCategoryLabel(context,
                     intent.getSelector().getCategories().iterator().next());
             if (label == null) {
                 return null;
             }
-            icon = Icon.createWithResource(mContext, R.drawable.sym_def_app_icon);
+            icon = Icon.createWithResource(context, R.drawable.sym_def_app_icon);
 
         } else {
-            label = resolvedActivity.loadLabel(mPackageManager);
+            label = resolvedActivity.loadLabel(pm);
             icon = Icon.createWithResource(
                     resolvedActivity.packageName, resolvedActivity.getIconResource());
         }
@@ -607,4 +707,150 @@ public class ModifierShortcutManager {
         return context.getString(resid);
     };
 
+
+    /**
+     * Find Key gesture type corresponding to intent filter category. Returns
+     * {@code KEY_GESTURE_TYPE_UNSPECIFIED if no matching event found}
+     */
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromIntent(Intent intent) {
+        Intent selectorIntent = intent.getSelector();
+        if (selectorIntent != null) {
+            Set<String> selectorCategories = selectorIntent.getCategories();
+            if (selectorCategories != null && !selectorCategories.isEmpty()) {
+                for (String intentCategory : selectorCategories) {
+                    int keyGestureType = getKeyGestureTypeFromSelectorCategory(intentCategory);
+                    if (keyGestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
+                        continue;
+                    }
+                    return keyGestureType;
+                }
+            }
+        }
+
+        // The shortcut may be targeting a system role rather than using an intent selector,
+        // so check for that.
+        String role = intent.getStringExtra(ModifierShortcutManager.EXTRA_ROLE);
+        if (!TextUtils.isEmpty(role)) {
+            return getKeyGestureTypeFromRole(role);
+        }
+
+        Set<String> intentCategories = intent.getCategories();
+        if (intentCategories == null || intentCategories.isEmpty()
+                || !intentCategories.contains(Intent.CATEGORY_LAUNCHER)) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+        if (intent.getComponent() == null) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+
+        // TODO(b/280423320): Add new field package name associated in the
+        //  KeyboardShortcutEvent atom and log it accordingly.
+        return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME;
+    }
+
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromSelectorCategory(String category) {
+        switch (category) {
+            case Intent.CATEGORY_APP_BROWSER:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER;
+            case Intent.CATEGORY_APP_EMAIL:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL;
+            case Intent.CATEGORY_APP_CONTACTS:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS;
+            case Intent.CATEGORY_APP_CALENDAR:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR;
+            case Intent.CATEGORY_APP_CALCULATOR:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR;
+            case Intent.CATEGORY_APP_MUSIC:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC;
+            case Intent.CATEGORY_APP_MAPS:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS;
+            case Intent.CATEGORY_APP_MESSAGING:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING;
+            case Intent.CATEGORY_APP_GALLERY:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_GALLERY;
+            case Intent.CATEGORY_APP_FILES:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FILES;
+            case Intent.CATEGORY_APP_WEATHER:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_WEATHER;
+            case Intent.CATEGORY_APP_FITNESS:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS;
+            default:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+    }
+
+    /**
+     * Find KeyGestureType corresponding to the provide system role name.
+     * Returns {@code KEY_GESTURE_TYPE_UNSPECIFIED} if no matching event found.
+     */
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromRole(String role) {
+        if (RoleManager.ROLE_BROWSER.equals(role)) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER;
+        } else if (RoleManager.ROLE_SMS.equals(role)) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING;
+        } else {
+            Log.w(TAG, "Keyboard gesture event to launch " + role + " not supported for logging");
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw,  "  ", prefix);
+        ipw.println("ModifierShortcutManager shortcuts:");
+
+        ipw.increaseIndent();
+        ipw.println("Roles");
+        ipw.increaseIndent();
+        for (int i = 0; i <  mRoleShortcuts.size(); i++) {
+            String role = mRoleShortcuts.valueAt(i);
+            char shortcutChar = (char) mRoleShortcuts.keyAt(i);
+            Intent intent = getRoleLaunchIntent(role);
+            ipw.println(shortcutChar + " " + role + " " + intent);
+        }
+
+        for (int i = 0; i <  mShiftRoleShortcuts.size(); i++) {
+            String role = mShiftRoleShortcuts.valueAt(i);
+            char shortcutChar = (char) mShiftRoleShortcuts.keyAt(i);
+            Intent intent = getRoleLaunchIntent(role);
+            ipw.println("SHIFT+" + shortcutChar + " " + role + " " + intent);
+        }
+
+        ipw.decreaseIndent();
+        ipw.println("Selectors");
+        ipw.increaseIndent();
+        for (int i = 0; i <  mIntentShortcuts.size(); i++) {
+            char shortcutChar = (char) mIntentShortcuts.keyAt(i);
+            Intent intent = mIntentShortcuts.valueAt(i);
+            ipw.println(shortcutChar + " " + intent);
+        }
+
+        for (int i = 0; i <  mShiftShortcuts.size(); i++) {
+            char shortcutChar = (char) mShiftShortcuts.keyAt(i);
+            Intent intent = mShiftShortcuts.valueAt(i);
+            ipw.println("SHIFT+" + shortcutChar + " " + intent);
+
+        }
+
+        if (modifierShortcutManagerMultiuser()) {
+            ipw.decreaseIndent();
+            ipw.println("ComponentNames");
+            ipw.increaseIndent();
+            for (int i = 0; i < mComponentShortcuts.size(); i++) {
+                char shortcutChar = (char) mComponentShortcuts.keyAt(i);
+                ComponentName component = mComponentShortcuts.valueAt(i);
+                Intent intent = resolveComponentNameIntent(component);
+                ipw.println(shortcutChar + " " + component + " " + intent);
+            }
+
+            for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
+                char shortcutChar = (char) mShiftComponentShortcuts.keyAt(i);
+                ComponentName component = mShiftComponentShortcuts.valueAt(i);
+                Intent intent = resolveComponentNameIntent(component);
+                ipw.println("SHIFT+" + shortcutChar + " " + component + " " + intent);
+            }
+        }
+    }
 }

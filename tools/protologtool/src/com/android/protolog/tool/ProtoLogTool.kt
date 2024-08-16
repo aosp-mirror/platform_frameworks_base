@@ -26,7 +26,6 @@ import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
-import com.github.javaparser.ast.body.InitializerDeclaration
 import com.github.javaparser.ast.expr.ArrayAccessExpr
 import com.github.javaparser.ast.expr.ArrayCreationExpr
 import com.github.javaparser.ast.expr.ArrayInitializerExpr
@@ -42,7 +41,10 @@ import com.github.javaparser.ast.expr.NullLiteralExpr
 import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.ast.expr.StringLiteralExpr
+import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.stmt.BlockStmt
+import com.github.javaparser.ast.stmt.ReturnStmt
+import com.github.javaparser.ast.type.ClassOrInterfaceType
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -195,6 +197,7 @@ object ProtoLogTool {
         groups: Map<String, LogGroup>,
         protoLogGroupsClassName: String
     ) {
+        var needsCreateLogGroupsMap = false
         classDeclaration.fields.forEach { field ->
             field.getAnnotationByClass(ProtoLogToolInjected::class.java)
                     .ifPresent { annotationExpr ->
@@ -222,33 +225,10 @@ object ProtoLogTool {
                                             } ?: NullLiteralExpr())
                                 }
                                 ProtoLogToolInjected.Value.LOG_GROUPS.name -> {
-                                    val initializerBlockStmt = BlockStmt()
-                                    for (group in groups) {
-                                        initializerBlockStmt.addStatement(
-                                            MethodCallExpr()
-                                                    .setName("put")
-                                                    .setArguments(
-                                                        NodeList(StringLiteralExpr(group.key),
-                                                            FieldAccessExpr()
-                                                                    .setScope(
-                                                                        NameExpr(
-                                                                            protoLogGroupsClassName
-                                                                        ))
-                                                                    .setName(group.value.name)))
-                                        )
-                                        group.key
-                                    }
-
-                                    val treeMapCreation = ObjectCreationExpr()
-                                            .setType("TreeMap<String, IProtoLogGroup>")
-                                            .setAnonymousClassBody(NodeList(
-                                                InitializerDeclaration().setBody(
-                                                    initializerBlockStmt
-                                                )
-                                            ))
-
+                                    needsCreateLogGroupsMap = true
                                     field.setFinal(true)
-                                    field.variables.first().setInitializer(treeMapCreation)
+                                    field.variables.first().setInitializer(
+                                        MethodCallExpr().setName("createLogGroupsMap"))
                                 }
                                 ProtoLogToolInjected.Value.CACHE_UPDATER.name -> {
                                     field.setFinal(true)
@@ -260,6 +240,45 @@ object ProtoLogTool {
                             }
                         }
                     }
+        }
+
+        if (needsCreateLogGroupsMap) {
+            val body = BlockStmt()
+            body.addStatement(AssignExpr(
+                VariableDeclarationExpr(
+                    ClassOrInterfaceType("TreeMap<String, IProtoLogGroup>"),
+                    "result"
+                ),
+                ObjectCreationExpr().setType("TreeMap<String, IProtoLogGroup>"),
+                AssignExpr.Operator.ASSIGN
+            ))
+            for (group in groups) {
+                body.addStatement(
+                    MethodCallExpr(
+                        NameExpr("result"),
+                        "put",
+                        NodeList(
+                                StringLiteralExpr(group.key),
+                                FieldAccessExpr()
+                                        .setScope(
+                                            NameExpr(
+                                                protoLogGroupsClassName
+                                            ))
+                                        .setName(group.value.name)
+                        )
+                    )
+                )
+            }
+            body.addStatement(ReturnStmt(NameExpr("result")))
+
+            val method = classDeclaration.addMethod(
+                "createLogGroupsMap",
+                Modifier.Keyword.PRIVATE,
+                Modifier.Keyword.STATIC,
+                Modifier.Keyword.FINAL
+            )
+            method.setType("TreeMap<String, IProtoLogGroup>")
+            method.setBody(body)
         }
     }
 

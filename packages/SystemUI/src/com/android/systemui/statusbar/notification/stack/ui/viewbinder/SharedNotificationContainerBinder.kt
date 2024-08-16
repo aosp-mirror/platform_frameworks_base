@@ -99,19 +99,20 @@ constructor(
         disposables +=
             view.repeatWhenAttached(mainImmediateDispatcher) {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    launch {
-                        // Only temporarily needed, until flexi notifs go live
-                        viewModel.shadeCollapseFadeIn.collect { fadeIn ->
-                            if (fadeIn) {
-                                android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
-                                    duration = 250
-                                    addUpdateListener { animation ->
-                                        controller.setMaxAlphaForKeyguard(
-                                            animation.animatedFraction,
-                                            "SharedNotificationContainerVB (collapseFadeIn)"
-                                        )
+                    if (!SceneContainerFlag.isEnabled) {
+                        launch {
+                            viewModel.shadeCollapseFadeIn.collect { fadeIn ->
+                                if (fadeIn) {
+                                    android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+                                        duration = 250
+                                        addUpdateListener { animation ->
+                                            controller.setMaxAlphaForKeyguard(
+                                                animation.animatedFraction,
+                                                "SharedNotificationContainerVB (collapseFadeIn)"
+                                            )
+                                        }
+                                        start()
                                     }
-                                    start()
                                 }
                             }
                         }

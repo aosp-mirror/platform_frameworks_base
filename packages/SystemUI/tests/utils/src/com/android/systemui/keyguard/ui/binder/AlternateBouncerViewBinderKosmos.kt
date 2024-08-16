@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.content.applicationContext
-import android.view.layoutInflater
 import android.view.mockedLayoutInflater
 import android.view.windowManager
 import com.android.systemui.biometrics.domain.interactor.fingerprintPropertyInteractor
@@ -52,6 +51,7 @@ val Kosmos.alternateBouncerViewBinder by
         )
     }
 
+@ExperimentalCoroutinesApi
 private val Kosmos.alternateBouncerDependencies by
     Kosmos.Fixture {
         AlternateBouncerDependencies(
@@ -67,6 +67,7 @@ private val Kosmos.alternateBouncerDependencies by
         )
     }
 
+@ExperimentalCoroutinesApi
 private val Kosmos.alternateBouncerUdfpsIconViewModel by
     Kosmos.Fixture {
         AlternateBouncerUdfpsIconViewModel(

@@ -19,6 +19,7 @@ package com.android.systemui.qs
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.fragments.FragmentService
+import com.android.systemui.qs.composefragment.QSFragmentCompose
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -31,12 +32,17 @@ class QSFragmentStartable
 @Inject
 constructor(
     private val fragmentService: FragmentService,
-    private val qsFragmentLegacyProvider: Provider<QSFragmentLegacy>
+    private val qsFragmentLegacyProvider: Provider<QSFragmentLegacy>,
+    private val qsFragmentComposeProvider: Provider<QSFragmentCompose>,
 ) : CoreStartable {
     override fun start() {
         fragmentService.addFragmentInstantiationProvider(
             QSFragmentLegacy::class.java,
             qsFragmentLegacyProvider
+        )
+        fragmentService.addFragmentInstantiationProvider(
+            QSFragmentCompose::class.java,
+            qsFragmentComposeProvider
         )
     }
 }

@@ -26,8 +26,10 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler.TouchSession
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shared.system.InputChannelCompat
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -50,11 +52,11 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class ShadeTouchHandlerTest : SysuiTestCase() {
     private var kosmos = testKosmos()
-
     private var mCentralSurfaces = mock<CentralSurfaces>()
     private var mShadeViewController = mock<ShadeViewController>()
     private var mDreamManager = mock<DreamManager>()
     private var mTouchSession = mock<TouchSession>()
+    private var communalViewModel = mock<CommunalViewModel>()
 
     private lateinit var mTouchHandler: ShadeTouchHandler
 
@@ -65,9 +67,11 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
     fun setup() {
         mTouchHandler =
             ShadeTouchHandler(
+                kosmos.testScope,
                 Optional.of(mCentralSurfaces),
                 mShadeViewController,
                 mDreamManager,
+                communalViewModel,
                 kosmos.communalSettingsInteractor,
                 TOUCH_HEIGHT
             )
@@ -75,6 +79,7 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
 
     // Verifies that a swipe down in the gesture region is captured by the shade touch handler.
     @Test
+    @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun testSwipeDown_captured() {
         val captured = swipe(Direction.DOWN)
         Truth.assertThat(captured).isTrue()
@@ -82,6 +87,7 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
 
     // Verifies that a swipe in the upward direction is not captured.
     @Test
+    @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun testSwipeUp_notCaptured() {
         val captured = swipe(Direction.UP)
 
@@ -91,6 +97,7 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
 
     // Verifies that a swipe down forwards captured touches to central surfaces for handling.
     @Test
+    @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
     fun testSwipeDown_communalEnabled_sentToCentralSurfaces() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
@@ -103,7 +110,7 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
 
     // Verifies that a swipe down forwards captured touches to the shade view for handling.
     @Test
-    @DisableFlags(Flags.FLAG_COMMUNAL_HUB)
+    @DisableFlags(Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun testSwipeDown_communalDisabled_sentToShadeView() {
         swipe(Direction.DOWN)
 
@@ -114,6 +121,7 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
     // Verifies that a swipe down while dreaming forwards captured touches to the shade view for
     // handling.
     @Test
+    @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun testSwipeDown_dreaming_sentToShadeView() {
         whenever(mDreamManager.isDreaming).thenReturn(true)
         swipe(Direction.DOWN)
@@ -124,6 +132,7 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
 
     // Verifies that a swipe up is not forwarded to central surfaces.
     @Test
+    @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
     fun testSwipeUp_communalEnabled_touchesNotSent() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
@@ -137,13 +146,76 @@ class ShadeTouchHandlerTest : SysuiTestCase() {
 
     // Verifies that a swipe up is not forwarded to the shade view.
     @Test
-    @DisableFlags(Flags.FLAG_COMMUNAL_HUB)
+    @DisableFlags(Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun testSwipeUp_communalDisabled_touchesNotSent() {
         swipe(Direction.UP)
 
         // Motion events are not sent for the shade view to process as the swipe is going in the
         // wrong direction.
         verify(mShadeViewController, never()).handleExternalTouch(any())
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun testCancelMotionEvent_popsTouchSession() {
+        swipe(Direction.DOWN)
+        val event = MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
+        mInputListenerCaptor.lastValue.onInputEvent(event)
+        verify(mTouchSession).pop()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun testFullVerticalSwipe_initiatedWhenAvailable() {
+        // Indicate touches are available
+        mTouchHandler.onGlanceableTouchAvailable(true)
+
+        // Verify swipe is handled
+        val captured = swipe(Direction.DOWN)
+        Truth.assertThat(captured).isTrue()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun testFullVerticalSwipe_notInitiatedWhenNotAvailable() {
+        // Indicate touches aren't available
+        mTouchHandler.onGlanceableTouchAvailable(false)
+
+        // Verify swipe is not handled
+        val captured = swipe(Direction.DOWN)
+        Truth.assertThat(captured).isFalse()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun testFullVerticalSwipe_resetsTouchStateOnUp() {
+        // Indicate touches are available
+        mTouchHandler.onGlanceableTouchAvailable(true)
+
+        // Verify swipe is handled
+        swipe(Direction.DOWN)
+
+        val upEvent: MotionEvent = mock()
+        whenever(upEvent.action).thenReturn(MotionEvent.ACTION_UP)
+        mInputListenerCaptor.lastValue.onInputEvent(upEvent)
+
+        verify(communalViewModel).onResetTouchState()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun testFullVerticalSwipe_resetsTouchStateOnCancel() {
+        // Indicate touches are available
+        mTouchHandler.onGlanceableTouchAvailable(true)
+
+        // Verify swipe is handled
+        swipe(Direction.DOWN)
+
+        val upEvent: MotionEvent = mock()
+        whenever(upEvent.action).thenReturn(MotionEvent.ACTION_CANCEL)
+        mInputListenerCaptor.lastValue.onInputEvent(upEvent)
+
+        verify(communalViewModel).onResetTouchState()
     }
 
     /**

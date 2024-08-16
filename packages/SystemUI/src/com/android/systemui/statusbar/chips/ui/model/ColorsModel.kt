@@ -41,8 +41,9 @@ sealed interface ColorsModel {
 
     /** The chip should have a red background with white text. */
     data object Red : ColorsModel {
-        override fun background(context: Context): ColorStateList =
-            ColorStateList.valueOf(context.getColor(R.color.GM2_red_600))
+        override fun background(context: Context): ColorStateList {
+            return ColorStateList.valueOf(context.getColor(R.color.GM2_red_700))
+        }
 
         override fun text(context: Context) = context.getColor(android.R.color.white)
     }

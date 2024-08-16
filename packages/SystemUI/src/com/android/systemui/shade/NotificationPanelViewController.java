@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade;
 
-import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
@@ -57,7 +56,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.StatusBarManager;
 import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -233,7 +231,6 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
-import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.Utils;
@@ -705,7 +702,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             FalsingCollector falsingCollector,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
-            StatusBarWindowStateController statusBarWindowStateController,
             NotificationShadeWindowController notificationShadeWindowController,
             DozeLog dozeLog,
             DozeParameters dozeParameters,
@@ -913,7 +909,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mMediaDataManager = mediaDataManager;
         mTapAgainViewController = tapAgainViewController;
         mSysUiState = sysUiState;
-        statusBarWindowStateController.addListener(this::onStatusBarWindowStateChanged);
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
@@ -1099,14 +1094,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             @Override
             public void onFullyHiddenChanged(boolean isFullyHidden) {
                 mKeyguardStatusBarViewController.updateForHeadsUp();
-            }
-
-            @Override
-            public void onPulseExpansionAmountChanged(boolean expandingChanged) {
-                if (mKeyguardBypassController.getBypassEnabled()) {
-                    // Position the notifications while dragging down while pulsing
-                    requestScrollerTopPaddingUpdate(false /* animate */);
-                }
             }
 
             @Override
@@ -1310,10 +1297,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** Updates the StatusBarViewController and updates any that depend on it. */
     public void updateStatusViewController() {
         // Re-associate the KeyguardStatusViewController
-        if (mKeyguardStatusViewController != null) {
-            mKeyguardStatusViewController.onDestroy();
-        }
-
         if (MigrateClocksToBlueprint.isEnabled()) {
             // Need a shared controller until mKeyguardStatusViewController can be removed from
             // here, due to important state being set in that controller. Rebind in order to pick
@@ -1356,6 +1339,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 "NotificationPanelViewController.updateResources");
 
         if (splitShadeChanged) {
+            if (isPanelVisibleBecauseOfHeadsUp()) {
+                // workaround for b/324642496, because HUNs set state to OPENING
+                onPanelStateChanged(STATE_CLOSED);
+            }
             onSplitShadeEnabledChanged();
         }
 
@@ -4880,16 +4867,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @VisibleForTesting
     StateListener getStatusBarStateListener() {
         return mStatusBarStateListener;
-    }
-
-    private void onStatusBarWindowStateChanged(@StatusBarManager.WindowVisibleState int state) {
-        if (state != WINDOW_STATE_SHOWING
-                && mStatusBarStateController.getState() == StatusBarState.SHADE) {
-            collapse(
-                    false /* animate */,
-                    false /* delayed */,
-                    1.0f /* speedUpFactor */);
-        }
     }
 
     /** Handles MotionEvents for the Shade. */

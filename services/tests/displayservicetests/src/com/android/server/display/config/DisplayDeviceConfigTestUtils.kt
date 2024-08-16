@@ -24,6 +24,17 @@ import java.io.ByteArrayOutputStream
 import java.io.OutputStreamWriter
 import org.xmlpull.v1.XmlSerializer
 
+@JvmOverloads
+fun createSensorData(
+    type: String? = null,
+    name: String? = null,
+    minRefreshRate: Float = 0f,
+    maxRefreshRate: Float = Float.POSITIVE_INFINITY,
+    supportedModes: List<SupportedModeData> = emptyList()
+): SensorData {
+    return SensorData(type, name, minRefreshRate, maxRefreshRate, supportedModes)
+}
+
 fun createRefreshRateData(
     defaultRefreshRate: Int = 60,
     defaultPeakRefreshRate: Int = 60,
@@ -46,6 +57,7 @@ fun createHdrBrightnessData(
     screenBrightnessRampIncrease: Float = 0.02f,
     brightnessDecreaseDebounceMillis: Long = 3000,
     screenBrightnessRampDecrease: Float = 0.04f,
+    transitionPoint: Float = 0.65f,
     minimumHdrPercentOfScreenForNbm: Float = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT,
     minimumHdrPercentOfScreenForHbm: Float = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT,
     allowInLowPowerMode: Boolean = false,
@@ -57,6 +69,7 @@ fun createHdrBrightnessData(
         screenBrightnessRampIncrease,
         brightnessDecreaseDebounceMillis,
         screenBrightnessRampDecrease,
+        transitionPoint,
         minimumHdrPercentOfScreenForNbm,
         minimumHdrPercentOfScreenForHbm,
         allowInLowPowerMode,

@@ -20,8 +20,10 @@ import android.annotation.Nullable;
 import android.hardware.vibrator.IVibrator;
 import android.os.Binder;
 import android.os.IVibratorStateListener;
+import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -262,6 +264,35 @@ final class VibratorController {
     }
 
     /**
+     * Plays vendor vibration effect, using {@code vibrationId} for completion callback to
+     * {@link OnVibrationCompleteListener}.
+     *
+     * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The positive duration of the vibration started, if successful, zero if the vibrator
+     * do not support the input or a negative number if the operation failed.
+     */
+    public long on(VibrationEffect.VendorEffect vendorEffect, long vibrationId) {
+        synchronized (mLock) {
+            Parcel vendorData = Parcel.obtain();
+            try {
+                vendorEffect.getVendorData().writeToParcel(vendorData, /* flags= */ 0);
+                vendorData.setDataPosition(0);
+                long duration = mNativeWrapper.performVendorEffect(vendorData,
+                        vendorEffect.getEffectStrength(), vendorEffect.getScale(),
+                        vendorEffect.getAdaptiveScale(), vibrationId);
+                if (duration > 0) {
+                    mCurrentAmplitude = -1;
+                    notifyListenerOnVibrating(true);
+                }
+                return duration;
+            } finally {
+                vendorData.recycle();
+            }
+        }
+    }
+
+    /**
      * Plays predefined vibration effect, using {@code vibrationId} for completion callback to
      * {@link OnVibrationCompleteListener}.
      *
@@ -427,6 +458,9 @@ final class VibratorController {
         private static native long performEffect(long nativePtr, long effect, long strength,
                 long vibrationId);
 
+        private static native long performVendorEffect(long nativePtr, Parcel vendorData,
+                long strength, float scale, float adaptiveScale, long vibrationId);
+
         private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
                 long vibrationId);
 
@@ -480,6 +514,13 @@ final class VibratorController {
         /** Turns vibrator on to perform one of the supported effects. */
         public long perform(long effect, long strength, long vibrationId) {
             return performEffect(mNativePtr, effect, strength, vibrationId);
+        }
+
+        /** Turns vibrator on to perform a vendor-specific effect. */
+        public long performVendorEffect(Parcel vendorData, long strength, float scale,
+                float adaptiveScale, long vibrationId) {
+            return performVendorEffect(mNativePtr, vendorData, strength, scale, adaptiveScale,
+                    vibrationId);
         }
 
         /** Turns vibrator on to perform effect composed of give primitives effect. */

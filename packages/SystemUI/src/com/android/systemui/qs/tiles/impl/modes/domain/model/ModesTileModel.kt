@@ -15,4 +15,4 @@
  */
 
 package com.android.systemui.qs.tiles.impl.modes.domain.model
-data class ModesTileModel(val isActivated: Boolean)
+data class ModesTileModel(val isActivated: Boolean, val activeModes: List<String>)

@@ -1399,6 +1399,10 @@
          Settings.System.RING_VIBRATION_INTENSITY more details on the constant values and
          meanings. -->
     <integer name="config_defaultRingVibrationIntensity">2</integer>
+    <!-- The default intensity level for keyboard vibrations. Note that this will only be applied
+         on devices where config_keyboardVibrationSettingsSupported is true, otherwise the
+         keyboard vibration will follow config_defaultHapticFeedbackIntensity -->
+    <integer name="config_defaultKeyboardVibrationIntensity">2</integer>
 
     <!-- Whether to use the strict phone number matcher by default. -->
     <bool name="config_use_strict_phone_number_comparation">false</bool>
@@ -3061,10 +3065,13 @@
         frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller.java -->
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
 
-    <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
-     it can't be deleted or downgraded to non-admin status.
-     This is generally only relevant on headless system user mode devices; on other devices, the
-     main user is the system user which is always a permanent admin anyway. -->
+    <!-- Whether the device will automatically (at first boot) have a designated main user and treat
+         it as a permanent admin.
+         Since the main user is a permanent admin user it can't be deleted or downgraded to
+         non-admin status.
+         This is generally only relevant on headless system user mode (HSUM) devices; on other
+         devices, the main user is the system user which is always a permanent admin anyway.
+         Note that HSUM devices without this enabled will not automatically have a main user. -->
     <bool name="config_isMainUserPermanentAdmin">true</bool>
 
     <!-- Whether switch to headless system user is allowed. If allowed,
@@ -3075,7 +3082,7 @@
     <bool name="config_enableMultiUserUI">false</bool>
 
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
-     with admin privileges and admin privileges can be granted/revoked from existing users. -->
+         with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
 
     <!-- Whether there is a communal profile which should always be running.
@@ -3956,6 +3963,9 @@
     <!-- The default value for always on magnification feature flag if the remote feature
          flag does not exist -->
     <bool name="config_magnification_always_on_enabled">true</bool>
+
+    <!-- Whether to keep fullscreen magnification zoom level when context changes. -->
+    <bool name="config_magnification_keep_zoom_level_when_context_changed">false</bool>
 
     <!-- If true, the display will be shifted around in ambient mode. -->
     <bool name="config_enableBurnInProtection">false</bool>
@@ -4972,7 +4982,7 @@
     <!-- URI for camera shutter sound -->
     <string translatable="false" name="config_cameraShutterSound">/product/media/audio/ui/camera_click.ogg</string>
 
-    <!-- URI for default ringtone sound file to be used for silent ringer vibration -->
+    <!-- @deprecated This configuration is no longer used. -->
     <string translatable="false" name="config_defaultRingtoneVibrationSound"></string>
 
     <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
@@ -6154,10 +6164,6 @@
         is enabled and activity is connected to the camera in fullscreen. -->
     <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
 
-    <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
-         treatment for stretched issues in camera viewfinder. -->
-    <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
-
     <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
          handled. If true, the configuration change will be sent but activities will not be
          relaunched upon docking. Apps with desk resources will behave like normal, since they may
@@ -7069,6 +7075,9 @@
     <!-- Whether desktop mode is supported on the current device  -->
     <bool name="config_isDesktopModeSupported">false</bool>
 
+    <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
+    <integer name="config_maxDesktopWindowingActiveTasks">0</integer>
+
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
@@ -7090,4 +7099,15 @@
     <!-- Whether to show GAIA education screen during account login of private space setup.
          OEM/Partner can explicitly opt to disable the screen. -->
     <bool name="config_enableGaiaEducationInPrivateSpace">true</bool>
+
+    <!-- Whether to enable usb state update via udc sysfs. -->
+    <bool name="config_enableUdcSysfsUsbStateUpdate">false</bool>
+
+    <!-- Whether to enable the private space search illustration and search tile content in "Hide Private Space" settings page.
+         OEM/Partner can explicitly opt to hide the illustration and search tile content. -->
+    <bool name="config_enableSearchTileHideIllustrationInPrivateSpace">true</bool>
+
+    <!-- The maximum number of call log entries for each sim card that can be stored in the call log
+         provider on the device. -->
+    <integer name="config_maximumCallLogEntriesPerSim">500</integer>
 </resources>

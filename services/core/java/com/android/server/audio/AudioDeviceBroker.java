@@ -1432,6 +1432,8 @@ public class AudioDeviceBroker {
         }
         mCurCommunicationPortId = portId;
 
+        mAudioService.postScoDeviceActive(isBluetoothScoActive());
+
         final int nbDispatchers = mCommDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
@@ -2797,6 +2799,10 @@ public class AudioDeviceBroker {
             return;
         }
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
+        if (settingsAdapter == null) {
+            Log.e(TAG, "No settings adapter when saving AdiDeviceState: " + deviceSettings);
+            return;
+        }
         try {
             boolean res = settingsAdapter.putSecureStringForUser(mAudioService.getContentResolver(),
                     Settings.Secure.AUDIO_DEVICE_INVENTORY,
@@ -2812,6 +2818,12 @@ public class AudioDeviceBroker {
     private String readDeviceSettings() {
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
         final ContentResolver contentResolver = mAudioService.getContentResolver();
+        if (settingsAdapter == null || contentResolver == null) {
+            // should not happen, throw Exception for stack trace
+            Log.e(TAG, "No settings adapter or content resolver to read device settings",
+                    new Exception("readDeviceSettings_NPE"));
+            return "";
+        }
         return settingsAdapter.getSecureStringForUser(contentResolver,
                 Settings.Secure.AUDIO_DEVICE_INVENTORY, UserHandle.USER_CURRENT);
     }

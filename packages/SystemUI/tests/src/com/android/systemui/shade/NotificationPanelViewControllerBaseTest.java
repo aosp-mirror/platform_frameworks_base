@@ -192,6 +192,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
@@ -428,6 +429,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mock(DeviceEntryUdfpsInteractor.class);
         when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(MutableStateFlow(false));
 
+        final SplitShadeStateController splitShadeStateController =
+                new ResourcesSplitShadeStateController();
+
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 mKosmos.getDeviceProvisioningInteractor(),
@@ -445,7 +449,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         new SharedNotificationContainerInteractor(
                                 new FakeConfigurationRepository(),
                                 mContext,
-                                new ResourcesSplitShadeStateController(),
+                                () -> splitShadeStateController,
+                                () -> mShadeInteractor,
                                 mKeyguardInteractor,
                                 deviceEntryUdfpsInteractor,
                                 () -> mLargeScreenHeaderHelper
@@ -479,7 +484,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardLogger,
                 mKosmos.getInteractionJankMonitor(),
                 mKeyguardInteractor,
-                mDumpManager,
                 mPowerInteractor));
 
         when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(false);
@@ -675,8 +679,14 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
+        LongPressHandlingView longPressHandlingView = mock(LongPressHandlingView.class);
         when(mView.requireViewById(R.id.keyguard_long_press))
-                .thenReturn(mock(LongPressHandlingView.class));
+                .thenReturn(longPressHandlingView);
+
+        Resources longPressHandlingViewRes = mock(Resources.class);
+        when(longPressHandlingView.getResources()).thenReturn(longPressHandlingViewRes);
+        when(longPressHandlingViewRes.getString(anyInt())).thenReturn("");
+
 
         mHeadsUpNotificationInteractor =
                 new HeadsUpNotificationInteractor(mFakeHeadsUpNotificationRepository,
@@ -692,7 +702,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFalsingManager, new FalsingCollectorFake(),
                 mKeyguardStateController,
                 mStatusBarStateController,
-                mStatusBarWindowStateController,
                 mNotificationShadeWindowController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mAccessibilityManager, 0, mUpdateMonitor,

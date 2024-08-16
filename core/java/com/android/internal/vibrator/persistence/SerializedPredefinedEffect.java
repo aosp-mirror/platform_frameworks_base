@@ -25,7 +25,7 @@ import android.annotation.NonNull;
 import android.os.VibrationEffect;
 import android.os.vibrator.PrebakedSegment;
 
-import com.android.internal.vibrator.persistence.SerializedVibrationEffect.SerializedSegment;
+import com.android.internal.vibrator.persistence.SerializedComposedEffect.SerializedSegment;
 import com.android.internal.vibrator.persistence.XmlConstants.PredefinedEffectName;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;

@@ -20,14 +20,40 @@ import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.VolumeLog
-import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.VolumePanelGlobalState
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 import javax.inject.Inject
 
 private const val TAG = "SysUI_VolumePanel"
 
 /** Logs events related to the Volume Panel. */
-@VolumePanelScope
 class VolumePanelLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuffer) {
+
+    fun onVolumePanelStateChanged(state: VolumePanelState) {
+        logBuffer.log(TAG, LogLevel.DEBUG, { str1 = state.toString() }, { "State changed: $str1" })
+    }
+
+    fun onComponentAvailabilityChanged(key: VolumePanelComponentKey, isAvailable: Boolean) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = key
+                bool1 = isAvailable
+            },
+            { "$str1 isAvailable=$bool1" }
+        )
+    }
+
+    fun onVolumePanelGlobalStateChanged(globalState: VolumePanelGlobalState) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { bool1 = globalState.isVisible },
+            { "Global state changed: isVisible=$bool1" }
+        )
+    }
 
     fun onSetVolumeRequested(audioStream: AudioStream, volume: Int) {
         logBuffer.log(

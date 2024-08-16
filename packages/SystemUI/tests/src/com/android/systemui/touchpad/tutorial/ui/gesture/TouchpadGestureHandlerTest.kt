@@ -20,19 +20,14 @@ import android.view.InputDevice.SOURCE_MOUSE
 import android.view.InputDevice.SOURCE_TOUCHSCREEN
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
-import android.view.MotionEvent.ACTION_HOVER_ENTER
-import android.view.MotionEvent.ACTION_MOVE
-import android.view.MotionEvent.ACTION_POINTER_DOWN
-import android.view.MotionEvent.ACTION_POINTER_UP
-import android.view.MotionEvent.ACTION_UP
-import android.view.MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT
-import android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE
 import android.view.MotionEvent.TOOL_TYPE_FINGER
 import android.view.MotionEvent.TOOL_TYPE_MOUSE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGesture.BACK
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
+import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,12 +36,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TouchpadGestureHandlerTest : SysuiTestCase() {
 
-    private var gestureDone = false
-    private val handler = TouchpadGestureHandler(BACK, SWIPE_DISTANCE) { gestureDone = true }
-
-    companion object {
-        const val SWIPE_DISTANCE = 100
-    }
+    private var gestureState = NOT_STARTED
+    private val handler =
+        TouchpadGestureHandler(
+            BackGestureMonitor(
+                gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
+                gestureStateChangedCallback = { gestureState = it }
+            )
+        )
 
     @Test
     fun handlesEventsFromTouchpad() {
@@ -84,41 +81,14 @@ class TouchpadGestureHandlerTest : SysuiTestCase() {
     fun triggersGestureDoneForThreeFingerGesture() {
         backGestureEvents().forEach { handler.onMotionEvent(it) }
 
-        assertThat(gestureDone).isTrue()
+        assertThat(gestureState).isEqualTo(FINISHED)
     }
 
     private fun backGestureEvents(): List<MotionEvent> {
-        // list of motion events read from device while doing back gesture
-        val y = 100f
-        return listOf(
-            touchpadEvent(ACTION_HOVER_ENTER, x = 759f, y = y, pointerCount = 1),
-            threeFingerTouchpadEvent(ACTION_DOWN, x = 759f, y = y, pointerCount = 1),
-            threeFingerTouchpadEvent(ACTION_POINTER_DOWN, x = 759f, y = y, pointerCount = 2),
-            threeFingerTouchpadEvent(ACTION_POINTER_DOWN, x = 759f, y = y, pointerCount = 3),
-            threeFingerTouchpadEvent(ACTION_MOVE, x = 767f, y = y, pointerCount = 3),
-            threeFingerTouchpadEvent(ACTION_MOVE, x = 785f, y = y, pointerCount = 3),
-            threeFingerTouchpadEvent(ACTION_MOVE, x = 814f, y = y, pointerCount = 3),
-            threeFingerTouchpadEvent(ACTION_MOVE, x = 848f, y = y, pointerCount = 3),
-            threeFingerTouchpadEvent(ACTION_MOVE, x = 943f, y = y, pointerCount = 3),
-            threeFingerTouchpadEvent(ACTION_POINTER_UP, x = 943f, y = y, pointerCount = 3),
-            threeFingerTouchpadEvent(ACTION_POINTER_UP, x = 943f, y = y, pointerCount = 2),
-            threeFingerTouchpadEvent(ACTION_UP, x = 943f, y = y, pointerCount = 1)
-        )
-    }
-
-    private fun threeFingerTouchpadEvent(
-        action: Int,
-        x: Float,
-        y: Float,
-        pointerCount: Int
-    ): MotionEvent {
-        return touchpadEvent(
-            action = action,
-            x = x,
-            y = y,
-            pointerCount = pointerCount,
-            classification = CLASSIFICATION_MULTI_FINGER_SWIPE,
-            axisValues = mapOf(AXIS_GESTURE_SWIPE_FINGER_COUNT to 3f)
-        )
+        return ThreeFingerGesture.createEvents {
+            move(deltaX = SWIPE_DISTANCE / 4)
+            move(deltaX = SWIPE_DISTANCE / 2)
+            move(deltaX = SWIPE_DISTANCE)
+        }
     }
 }

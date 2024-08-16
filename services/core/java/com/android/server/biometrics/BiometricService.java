@@ -21,6 +21,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_NO_AUTHENTICATION;
+import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_IDLE;
 
@@ -41,6 +42,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
@@ -54,8 +56,12 @@ import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.camera2.CameraManager;
+import android.hardware.face.FaceManager;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.net.Uri;
 import android.os.Binder;
@@ -234,6 +240,8 @@ public class BiometricService extends SystemService {
         private static final boolean DEFAULT_APP_ENABLED = true;
         private static final boolean DEFAULT_ALWAYS_REQUIRE_CONFIRMATION = false;
         private static final boolean DEFAULT_MANDATORY_BIOMETRICS_STATUS = false;
+        private static final boolean DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS =
+                true;
 
         // Some devices that shipped before S already have face-specific settings. Instead of
         // migrating, which is complicated, let's just keep using the existing settings.
@@ -256,14 +264,23 @@ public class BiometricService extends SystemService {
                 Settings.Secure.getUriFor(Settings.Secure.BIOMETRIC_APP_ENABLED);
         private final Uri MANDATORY_BIOMETRICS_ENABLED =
                 Settings.Secure.getUriFor(Settings.Secure.MANDATORY_BIOMETRICS);
+        private final Uri MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED = Settings.Secure.getUriFor(
+                Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED);
 
         private final ContentResolver mContentResolver;
         private final List<BiometricService.EnabledOnKeyguardCallback> mCallbacks;
+        private final UserManager mUserManager;
 
         private final Map<Integer, Boolean> mBiometricEnabledOnKeyguard = new HashMap<>();
         private final Map<Integer, Boolean> mBiometricEnabledForApps = new HashMap<>();
         private final Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
         private final Map<Integer, Boolean> mMandatoryBiometricsEnabled = new HashMap<>();
+        private final Map<Integer, Boolean> mMandatoryBiometricsRequirementsSatisfied =
+                new HashMap<>();
+        private final Map<Integer, Boolean> mFingerprintEnrolledForUser =
+                new HashMap<>();
+        private final Map<Integer, Boolean> mFaceEnrolledForUser =
+                new HashMap<>();
 
         /**
          * Creates a content observer.
@@ -275,6 +292,7 @@ public class BiometricService extends SystemService {
             super(handler);
             mContentResolver = context.getContentResolver();
             mCallbacks = callbacks;
+            mUserManager = context.getSystemService(UserManager.class);
 
             final boolean hasFingerprint = context.getPackageManager()
                     .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
@@ -285,10 +303,8 @@ public class BiometricService extends SystemService {
             mUseLegacyFaceOnlySettings =
                     Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.Q
                     && hasFace && !hasFingerprint;
-            mMandatoryBiometricsEnabled.put(context.getUserId(), Settings.Secure.getIntForUser(
-                    mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
-                    DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0, context.getUserId()) != 0);
 
+            addBiometricListenersForMandatoryBiometrics(context);
             updateContentObserver();
         }
 
@@ -319,6 +335,10 @@ public class BiometricService extends SystemService {
                     this /* observer */,
                     UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(MANDATORY_BIOMETRICS_ENABLED,
+                    false /* notifyForDescendants */,
+                    this /* observer */,
+                    UserHandle.USER_ALL);
+            mContentResolver.registerContentObserver(MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
                     false /* notifyForDescendants */,
                     this /* observer */,
                     UserHandle.USER_ALL);
@@ -365,11 +385,9 @@ public class BiometricService extends SystemService {
                         DEFAULT_APP_ENABLED ? 1 : 0 /* default */,
                         userId) != 0);
             } else if (MANDATORY_BIOMETRICS_ENABLED.equals(uri)) {
-                mMandatoryBiometricsEnabled.put(userId, Settings.Secure.getIntForUser(
-                        mContentResolver,
-                        Settings.Secure.MANDATORY_BIOMETRICS,
-                        DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0 /* default */,
-                        userId) != 0);
+                updateMandatoryBiometricsForAllProfiles(userId);
+            } else if (MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED.equals(uri)) {
+                updateMandatoryBiometricsRequirementsForAllProfiles(userId);
             }
         }
 
@@ -411,9 +429,20 @@ public class BiometricService extends SystemService {
             }
         }
 
-        public boolean getMandatoryBiometricsEnabledForUser(int userId) {
+        public boolean getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(int userId) {
+            if (!mMandatoryBiometricsEnabled.containsKey(userId)) {
+                updateMandatoryBiometricsForAllProfiles(userId);
+            }
+            if (!mMandatoryBiometricsRequirementsSatisfied.containsKey(userId)) {
+                updateMandatoryBiometricsRequirementsForAllProfiles(userId);
+            }
             return mMandatoryBiometricsEnabled.getOrDefault(userId,
-                    DEFAULT_MANDATORY_BIOMETRICS_STATUS);
+                    DEFAULT_MANDATORY_BIOMETRICS_STATUS)
+                    && mMandatoryBiometricsRequirementsSatisfied.getOrDefault(userId,
+                    DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS)
+                    && getEnabledForApps(userId)
+                    && (mFingerprintEnrolledForUser.getOrDefault(userId, false /* default */)
+                    || mFaceEnrolledForUser.getOrDefault(userId, false /* default */));
         }
 
         void notifyEnabledOnKeyguardCallbacks(int userId) {
@@ -422,6 +451,107 @@ public class BiometricService extends SystemService {
                 callbacks.get(i).notify(
                         mBiometricEnabledOnKeyguard.getOrDefault(userId, DEFAULT_KEYGUARD_ENABLED),
                         userId);
+            }
+        }
+
+        private void updateMandatoryBiometricsForAllProfiles(int userId) {
+            int effectiveUserId = userId;
+            if (mUserManager.getMainUser() != null) {
+                effectiveUserId = mUserManager.getMainUser().getIdentifier();
+            }
+            for (int profileUserId: mUserManager.getEnabledProfileIds(effectiveUserId)) {
+                mMandatoryBiometricsEnabled.put(profileUserId,
+                        Settings.Secure.getIntForUser(
+                                mContentResolver, Settings.Secure.MANDATORY_BIOMETRICS,
+                                DEFAULT_MANDATORY_BIOMETRICS_STATUS ? 1 : 0,
+                                effectiveUserId) != 0);
+            }
+        }
+
+        private void updateMandatoryBiometricsRequirementsForAllProfiles(int userId) {
+            int effectiveUserId = userId;
+            if (mUserManager.getMainUser() != null) {
+                effectiveUserId = mUserManager.getMainUser().getIdentifier();
+            }
+            for (int profileUserId: mUserManager.getEnabledProfileIds(effectiveUserId)) {
+                mMandatoryBiometricsRequirementsSatisfied.put(profileUserId,
+                        Settings.Secure.getIntForUser(mContentResolver,
+                                Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
+                                DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS ? 1 : 0,
+                                effectiveUserId) != 0);
+            }
+        }
+
+        private void addBiometricListenersForMandatoryBiometrics(Context context) {
+            final FingerprintManager fingerprintManager = context.getSystemService(
+                    FingerprintManager.class);
+            final FaceManager faceManager = context.getSystemService(FaceManager.class);
+            if (fingerprintManager != null) {
+                fingerprintManager.addAuthenticatorsRegisteredCallback(
+                        new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                            @Override
+                            public void onAllAuthenticatorsRegistered(
+                                    List<FingerprintSensorPropertiesInternal> list) {
+                                if (list == null || list.isEmpty()) {
+                                    Slog.d(TAG, "No fingerprint authenticators registered.");
+                                    return;
+                                }
+                                final FingerprintSensorPropertiesInternal
+                                        fingerprintSensorProperties = list.get(0);
+                                if (fingerprintSensorProperties.sensorStrength
+                                        == STRENGTH_STRONG) {
+                                    fingerprintManager.registerBiometricStateListener(
+                                            new BiometricStateListener() {
+                                                @Override
+                                                public void onEnrollmentsChanged(
+                                                        int userId,
+                                                        int sensorId,
+                                                        boolean hasEnrollments
+                                                ) {
+                                                    if (sensorId == fingerprintSensorProperties
+                                                            .sensorId) {
+                                                        mFingerprintEnrolledForUser.put(userId,
+                                                                hasEnrollments);
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+            }
+            if (faceManager != null) {
+                faceManager.addAuthenticatorsRegisteredCallback(
+                        new IFaceAuthenticatorsRegisteredCallback.Stub() {
+                            @Override
+                            public void onAllAuthenticatorsRegistered(
+                                    List<FaceSensorPropertiesInternal> list) {
+                                if (list == null || list.isEmpty()) {
+                                    Slog.d(TAG, "No face authenticators registered.");
+                                    return;
+                                }
+                                final FaceSensorPropertiesInternal
+                                        faceSensorPropertiesInternal = list.get(0);
+                                if (faceSensorPropertiesInternal.sensorStrength
+                                        == STRENGTH_STRONG) {
+                                    faceManager.registerBiometricStateListener(
+                                            new BiometricStateListener() {
+                                                @Override
+                                                public void onEnrollmentsChanged(
+                                                        int userId,
+                                                        int sensorId,
+                                                        boolean hasEnrollments
+                                                ) {
+                                                    if (sensorId
+                                                            == faceSensorPropertiesInternal
+                                                            .sensorId) {
+                                                        mFaceEnrolledForUser.put(userId,
+                                                                hasEnrollments);
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
             }
         }
     }

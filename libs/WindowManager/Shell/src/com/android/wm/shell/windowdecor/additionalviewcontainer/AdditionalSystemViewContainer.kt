@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor.additionalviewcontainer
 
+import android.annotation.LayoutRes
 import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
@@ -29,34 +30,67 @@ import android.view.WindowManager
  * for view containers that should be above the status bar layer.
  */
 class AdditionalSystemViewContainer(
-    private val context: Context,
-    layoutId: Int,
+    context: Context,
     taskId: Int,
     x: Int,
     y: Int,
     width: Int,
-    height: Int
-) : AdditionalViewContainer() {
+    height: Int,
+    flags: Int,
     override val view: View
+) : AdditionalViewContainer() {
+
+    constructor(
+        context: Context,
+        taskId: Int,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        flags: Int,
+        @LayoutRes layoutId: Int
+    ) : this(
+        context = context,
+        taskId = taskId,
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        flags = flags,
+        view = LayoutInflater.from(context).inflate(layoutId, null /* parent */)
+    )
+
+    constructor(
+        context: Context, taskId: Int, x: Int, y: Int, width: Int, height: Int, flags: Int
+    ) : this(
+        context = context,
+        taskId = taskId,
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        flags = flags,
+        view = View(context)
+    )
+
+    val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
 
     init {
-        view = LayoutInflater.from(context).inflate(layoutId, null)
         val lp = WindowManager.LayoutParams(
             width, height, x, y,
             WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            flags,
             PixelFormat.TRANSPARENT
         ).apply {
             title = "Additional view container of Task=$taskId"
             gravity = Gravity.LEFT or Gravity.TOP
             setTrustedOverlay()
         }
-        val wm: WindowManager? = context.getSystemService(WindowManager::class.java)
-        wm?.addView(view, lp)
+        windowManager?.addView(view, lp)
     }
 
     override fun releaseView() {
-        context.getSystemService(WindowManager::class.java)?.removeViewImmediate(view)
+        windowManager?.removeViewImmediate(view)
     }
 
     override fun setPosition(t: SurfaceControl.Transaction, x: Float, y: Float) {
@@ -64,6 +98,6 @@ class AdditionalSystemViewContainer(
             this.x = x.toInt()
             this.y = y.toInt()
         }
-        view.layoutParams = lp
+        windowManager?.updateViewLayout(view, lp)
     }
 }

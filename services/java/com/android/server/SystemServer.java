@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -105,6 +106,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.protolog.ProtoLogService;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -119,6 +121,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.app.GameManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.appfunctions.AppFunctionManagerService;
 import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.appop.AppOpMigrationHelper;
 import com.android.server.appop.AppOpMigrationHelperImpl;
@@ -153,6 +156,7 @@ import com.android.server.contentsuggestions.ContentSuggestionsManagerService;
 import com.android.server.contextualsearch.ContextualSearchManagerService;
 import com.android.server.coverage.CoverageService;
 import com.android.server.cpu.CpuMonitorService;
+import com.android.server.crashrecovery.CrashRecoveryModule;
 import com.android.server.credentials.CredentialManagerService;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -381,8 +385,6 @@ public final class SystemServer implements Dumpable {
                     + "OnDevicePersonalizationSystemService$Lifecycle";
     private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
             "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
-    private static final String CRASHRECOVERY_MODULE_LIFECYCLE_CLASS =
-            "com.android.server.crashrecovery.CrashRecoveryModule$Lifecycle";
 
 
     /*
@@ -1088,6 +1090,13 @@ public final class SystemServer implements Dumpable {
         SystemServerInitThreadPool.submit(SystemConfig::getInstance, TAG_SYSTEM_CONFIG);
         t.traceEnd();
 
+        // Orchestrates some ProtoLogging functionality.
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            t.traceBegin("StartProtoLogService");
+            ServiceManager.addService(Context.PROTOLOG_SERVICE, new ProtoLogService());
+            t.traceEnd();
+        }
+
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and
         // possibly others in the future. b/135010838.
         t.traceBegin("PlatformCompat");
@@ -1718,6 +1727,12 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartLogcatManager");
             mSystemServiceManager.startService(LogcatManagerService.class);
+            t.traceEnd();
+
+            t.traceBegin("StartAppFunctionManager");
+            if (enableAppFunctionManager()) {
+                mSystemServiceManager.startService(AppFunctionManagerService.class);
+            }
             t.traceEnd();
 
         } catch (Throwable e) {
@@ -2939,7 +2954,7 @@ public final class SystemServer implements Dumpable {
 
         if (Flags.refactorCrashrecovery()) {
             t.traceBegin("StartCrashRecoveryModule");
-            mSystemServiceManager.startService(CRASHRECOVERY_MODULE_LIFECYCLE_CLASS);
+            mSystemServiceManager.startService(CrashRecoveryModule.Lifecycle.class);
             t.traceEnd();
         } else {
             if (Flags.recoverabilityDetection()) {

@@ -77,7 +77,7 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                         mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(
                                 intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
                         dispatchEmergencyStateChanged();
-                    } catch (IllegalStateException e) {
+                    } catch (IllegalStateException | UnsupportedOperationException e) {
                         Log.w(TAG, "Failed to call TelephonyManager.isEmergencyNumber().", e);
                     }
                 }

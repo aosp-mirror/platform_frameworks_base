@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility.magnification;
 
+import static android.view.InputDevice.SOURCE_MOUSE;
+import static android.view.InputDevice.SOURCE_STYLUS;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_UP;
@@ -125,26 +127,41 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
         if (DEBUG_EVENT_STREAM) {
             storeEventInto(mDebugInputEventHistory, event);
         }
-        if (shouldDispatchTransformedEvent(event)) {
-            dispatchTransformedEvent(event, rawEvent, policyFlags);
-        } else {
-            onMotionEventInternal(event, rawEvent, policyFlags);
+        switch (event.getSource()) {
+            case SOURCE_TOUCHSCREEN: {
+                if (magnificationShortcutExists()) {
+                    // Observe touchscreen events while magnification activation is detected.
+                    onMotionEventInternal(event, rawEvent, policyFlags);
 
-            final int action = event.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                mCallback.onTouchInteractionStart(mDisplayId, getMode());
-            } else if (action == ACTION_UP || action == ACTION_CANCEL) {
-                mCallback.onTouchInteractionEnd(mDisplayId, getMode());
+                    final int action = event.getAction();
+                    if (action == MotionEvent.ACTION_DOWN) {
+                        mCallback.onTouchInteractionStart(mDisplayId, getMode());
+                    } else if (action == ACTION_UP || action == ACTION_CANCEL) {
+                        mCallback.onTouchInteractionEnd(mDisplayId, getMode());
+                    }
+                    // Return early: Do not dispatch event through normal eventing
+                    // flow, it has been fully consumed by the magnifier.
+                    return;
+                }
+            } break;
+            case SOURCE_MOUSE:
+            case SOURCE_STYLUS: {
+                if (magnificationShortcutExists() && Flags.enableMagnificationFollowsMouse()) {
+                    handleMouseOrStylusEvent(event, rawEvent, policyFlags);
+                }
             }
+                break;
+            default:
+                break;
         }
+        // Dispatch event through normal eventing flow.
+        dispatchTransformedEvent(event, rawEvent, policyFlags);
     }
 
-    private boolean shouldDispatchTransformedEvent(MotionEvent event) {
-        if ((!mDetectSingleFingerTripleTap && !mDetectTwoFingerTripleTap && !mDetectShortcutTrigger)
-                || !event.isFromSource(SOURCE_TOUCHSCREEN)) {
-            return true;
-        }
-        return false;
+    private boolean magnificationShortcutExists() {
+        return (mDetectSingleFingerTripleTap
+                || mDetectTwoFingerTripleTap
+                || mDetectShortcutTrigger);
     }
 
     final void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
@@ -175,6 +192,13 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
      * Called when this MagnificationGestureHandler handles the motion event.
      */
     abstract void onMotionEventInternal(MotionEvent event, MotionEvent rawEvent, int policyFlags);
+
+    /**
+     * Called when this MagnificationGestureHandler should handle a mouse or stylus motion event,
+     * but not re-dispatch it when completed.
+     */
+    abstract void handleMouseOrStylusEvent(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags);
 
     /**
      * Called when the shortcut target is magnification.

@@ -53,7 +53,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             val currentScene by collectLastValue(underTest.currentScene)
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
 
-            underTest.changeScene(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal, "test")
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 
@@ -63,7 +63,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             val currentScene by collectLastValue(underTest.currentScene)
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
 
-            underTest.snapToScene(CommunalScenes.Communal)
+            underTest.snapToScene(CommunalScenes.Communal, "test")
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
         }
 
@@ -75,6 +75,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
             underTest.snapToScene(
                 CommunalScenes.Communal,
+                "test",
                 ActivityTransitionAnimator.TIMINGS.totalDuration
             )
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
@@ -86,7 +87,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
     fun changeSceneForActivityStartOnDismissKeyguard() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            underTest.snapToScene(CommunalScenes.Communal)
+            underTest.snapToScene(CommunalScenes.Communal, "test")
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
 
             underTest.changeSceneForActivityStartOnDismissKeyguard()
@@ -97,7 +98,7 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
     fun changeSceneForActivityStartOnDismissKeyguard_willNotChangeScene_forEditModeActivity() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            underTest.snapToScene(CommunalScenes.Communal)
+            underTest.snapToScene(CommunalScenes.Communal, "test")
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
 
             underTest.setEditModeState(EditModeState.STARTING)

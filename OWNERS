@@ -14,6 +14,7 @@ michaelwr@google.com #{LAST_RESORT_SUGGESTION}
 nandana@google.com #{LAST_RESORT_SUGGESTION}
 narayan@google.com #{LAST_RESORT_SUGGESTION}
 ogunwale@google.com #{LAST_RESORT_SUGGESTION}
+omakoto@google.com #{LAST_RESORT_SUGGESTION}
 roosa@google.com #{LAST_RESORT_SUGGESTION}
 smoreland@google.com #{LAST_RESORT_SUGGESTION}
 yamasani@google.com #{LAST_RESORT_SUGGESTION}
@@ -28,7 +29,7 @@ per-file */TEST_MAPPING = *
 # Support bulk translation updates
 per-file */res*/values*/*.xml = byi@google.com, delphij@google.com
 
-per-file **.bp,**.mk = hansson@google.com, joeo@google.com, lamontjones@google.com
+per-file **.bp,**.mk =joeo@google.com, lamontjones@google.com
 per-file TestProtoLibraries.bp = file:platform/platform_testing:/libraries/health/OWNERS
 per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 

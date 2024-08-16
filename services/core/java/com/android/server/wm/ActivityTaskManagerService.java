@@ -190,6 +190,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -282,6 +283,7 @@ import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
@@ -381,6 +383,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private PermissionPolicyInternal mPermissionPolicyInternal;
     private StatusBarManagerInternal mStatusBarManagerInternal;
     private WallpaperManagerInternal mWallpaperManagerInternal;
+    private UserManagerInternal mUserManagerInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     private PowerManagerInternal mPowerManagerInternal;
@@ -2113,16 +2116,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "removeTask: No task remove with id=" + taskId);
                     return false;
                 }
-
-                if (task.isLeafTask()) {
-                    mTaskSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task");
-                } else {
-                    mTaskSupervisor.removeRootTask(task);
-                }
+                removeTask(task);
                 return true;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    void removeTask(@NonNull Task task) {
+        if (task.isLeafTask()) {
+            mTaskSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task");
+        } else {
+            mTaskSupervisor.removeRootTask(task);
         }
     }
 
@@ -2935,7 +2941,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             }
                             getTransitionController().requestStartTransition(transition, task,
                                     null /* remoteTransition */, null /* displayChange */);
-                            getTransitionController().collect(task);
+                            transition.collect(task);
                             task.resize(bounds, resizeMode, preserveWindow);
                             transition.setReady(task, true);
                         });
@@ -3141,9 +3147,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT, 0) != null;
     }
 
+    /**
+     * Requests assist data for a particular Task.
+     *
+     * <p>This is used by the system components to request assist data for a Task.
+     *
+     * @param receiver The receiver to send the assist data to.
+     * @param taskId The Task to request assist data for.
+     * @param callingPackageName The package name of the caller.
+     * @param callingAttributionTag The attribution tag of the caller.
+     * @param fetchStructure Whether to fetch the assist structure. Note that this is slow and
+     *     should be avoided if possible.
+     * @return Whether the request was successful.
+     */
     @Override
     public boolean requestAssistDataForTask(IAssistDataReceiver receiver, int taskId,
-            String callingPackageName, @Nullable String callingAttributionTag) {
+            String callingPackageName, @Nullable String callingAttributionTag,
+            boolean fetchStructure) {
         mAmInternal.enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "requestAssistDataForTask()");
         final long callingId = Binder.clearCallingIdentity();
@@ -3168,7 +3188,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         List<IBinder> topActivityToken = new ArrayList<>();
         topActivityToken.add(tokens.getActivityToken());
         requester.requestAssistData(topActivityToken, true /* fetchData */,
-                false /* fetchScreenshot */, false /* fetchStructure */, true /* allowFetchData */,
+                false /* fetchScreenshot */, fetchStructure, true /* allowFetchData */,
                 false /* allowFetchScreenshot*/, true /* ignoreFocusCheck */,
                 Binder.getCallingUid(), callingPackageName, callingAttributionTag);
 
@@ -3751,6 +3771,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // Shell calls back into Core with the entry bounds to be applied with startWCT.
             final Transition enterPipTransition = new Transition(TRANSIT_PIP,
                     0 /* flags */, getTransitionController(), mWindowManager.mSyncEngine);
+            r.setPictureInPictureParams(params);
             enterPipTransition.setPipActivity(r);
             r.mAutoEnteringPip = isAutoEnter;
             getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
@@ -4899,14 +4920,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * dialog / global actions also might want different behaviors.
      */
     private void updateShouldShowDialogsLocked(Configuration config) {
+        mShowDialogs = shouldShowDialogs(config, /* checkUiMode= */ true);
+    }
+
+    private boolean shouldShowDialogs(Configuration config, boolean checkUiMode) {
         final boolean inputMethodExists = !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                 && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
                 && config.navigation == Configuration.NAVIGATION_NONAV);
         final boolean hideDialogsSet = Settings.Global.getInt(mContext.getContentResolver(),
                 HIDE_ERROR_DIALOGS, 0) != 0;
-        mShowDialogs = inputMethodExists
-                && ActivityTaskManager.currentUiModeSupportsErrorDialogs(config)
-                && !hideDialogsSet;
+        boolean showDialogs = inputMethodExists && !hideDialogsSet;
+        if (checkUiMode) {
+            showDialogs = showDialogs
+                    && ActivityTaskManager.currentUiModeSupportsErrorDialogs(config);
+        }
+        return showDialogs;
     }
 
     private void updateFontScaleIfNeeded(@UserIdInt int userId) {
@@ -5456,6 +5484,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mWallpaperManagerInternal;
     }
 
+    UserManagerInternal getUserManagerInternal() {
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUserManagerInternal;
+    }
+
     AppWarnings getAppWarningsLocked() {
         return mAppWarnings;
     }
@@ -5514,7 +5549,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final int procCount = procs.size();
             for (int i = 0; i < procCount; i++) {
                 final int procUid = procs.keyAt(i);
-                if (UserHandle.isApp(procUid) || !UserHandle.isSameUser(procUid, uid)) {
+                if (!UserHandle.isCore(procUid) || !UserHandle.isSameUser(procUid, uid)) {
                     // Don't use an app process or different user process for system component.
                     continue;
                 }
@@ -7148,15 +7183,48 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public boolean canShowErrorDialogs() {
+        public boolean canShowErrorDialogs(int userId) {
             synchronized (mGlobalLock) {
-                return mShowDialogs && !mSleeping && !mShuttingDown
+                final boolean showDialogs = mShowDialogs
+                        || shouldShowDialogsForVisibleBackgroundUserLocked(userId);
+                final UserInfo userInfo = getUserManager().getUserInfo(userId);
+                if (userInfo == null) {
+                    // Unable to retrieve user information. Returning false, assuming there is
+                    // no valid user with the given id.
+                    return false;
+                }
+                return showDialogs && !mSleeping && !mShuttingDown
                         && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
-                        && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
-                        mAmInternal.getCurrentUserId())
+                        && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS, userId)
                         && !(UserManager.isDeviceInDemoMode(mContext)
-                        && mAmInternal.getCurrentUser().isDemo());
+                        && userInfo.isDemo());
             }
+        }
+
+        /**
+         * In a car environment, {@link ActivityTaskManagerService#mShowDialogs} is always set to
+         * {@code false} from {@link ActivityTaskManagerService#updateShouldShowDialogsLocked}
+         * because its UI mode is {@link Configuration#UI_MODE_TYPE_CAR}. Thus, error dialogs are
+         * not displayed when an ANR or a crash occurs. However, in the automotive multi-user
+         * multi-display environment, this can confuse the passenger users and leave them
+         * uninformed when an app is terminated by the ANR or crash without any notification.
+         * To address this, error dialogs are allowed for the passenger users who have UI access
+         * on assigned displays (a.k.a. visible background users) on devices that have
+         * config_multiuserVisibleBackgroundUsers enabled even though the UI mode is
+         * {@link Configuration#UI_MODE_TYPE_CAR}.
+         *
+         * @see ActivityTaskManagerService#updateShouldShowDialogsLocked
+         */
+        private boolean shouldShowDialogsForVisibleBackgroundUserLocked(int userId) {
+            if (!mWindowManager.mUmInternal.isVisibleBackgroundFullUser(userId)) {
+                return false;
+            }
+            final int displayId = mWindowManager.mUmInternal.getMainDisplayAssignedToUser(userId);
+            final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
+            if (dc == null) {
+                return false;
+            }
+            return shouldShowDialogs(dc.getConfiguration(), /* checkUiMode= */ false);
         }
 
         @Override

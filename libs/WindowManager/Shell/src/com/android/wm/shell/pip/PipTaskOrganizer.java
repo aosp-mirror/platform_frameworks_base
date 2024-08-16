@@ -423,7 +423,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             });
             mPipTransitionController.setPipOrganizer(this);
             displayController.addDisplayWindowListener(this);
-            pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+            pipTransitionController.registerPipTransitionCallback(
+                    mPipTransitionCallback, mMainExecutor);
         }
     }
 
@@ -495,7 +496,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
-        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.onStartSwipePipToHome();
+        } else {
+            sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        }
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
     }
@@ -690,16 +695,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 return;
             }
 
-            if (mSplitScreenOptional.isPresent()) {
-                // If pip activity will reparent to origin task case and if the origin task still
-                // under split root, apply exit split transaction to make it expand to fullscreen.
-                SplitScreenController split = mSplitScreenOptional.get();
-                if (split.isTaskInSplitScreen(mTaskInfo.lastParentTaskIdBeforePip)) {
-                    split.prepareExitSplitScreen(wct, split.getStageOfTask(
-                            mTaskInfo.lastParentTaskIdBeforePip),
-                            SplitScreenController.EXIT_REASON_APP_FINISHED);
-                }
-            }
             mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
             return;
         }
@@ -2023,7 +2018,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             removeContentOverlay(mPipOverlay, null /* callback */);
         }
         if (animator != null) {
-            PipAnimationController.quietCancel(animator);
+            animator.cancel();
             mPipAnimationController.resetAnimatorState();
         }
     }

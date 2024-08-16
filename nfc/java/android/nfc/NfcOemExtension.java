@@ -26,6 +26,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -89,13 +91,11 @@ public final class NfcOemExtension {
                         + "registering");
                 throw new IllegalArgumentException();
             }
-            try {
+            NfcAdapter.callService(() -> {
                 NfcAdapter.sService.registerOemExtensionCallback(mOemNfcExtensionCallback);
                 mCallback = callback;
                 mExecutor = executor;
-            } catch (RemoteException e) {
-                mAdapter.attemptDeadServiceRecovery(e);
-            }
+            });
         }
     }
 
@@ -117,13 +117,11 @@ public final class NfcOemExtension {
                 Log.e(TAG, "Callback not registered");
                 throw new IllegalArgumentException();
             }
-            try {
+            NfcAdapter.callService(() -> {
                 NfcAdapter.sService.unregisterOemExtensionCallback(mOemNfcExtensionCallback);
                 mCallback = null;
                 mExecutor = null;
-            } catch (RemoteException e) {
-                mAdapter.attemptDeadServiceRecovery(e);
-            }
+            });
         }
     }
 
@@ -134,11 +132,7 @@ public final class NfcOemExtension {
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void clearPreference() {
-        try {
-            NfcAdapter.sService.clearPreference();
-        } catch (RemoteException e) {
-            mAdapter.attemptDeadServiceRecovery(e);
-        }
+        NfcAdapter.callService(() -> NfcAdapter.sService.clearPreference());
     }
 
     /**
@@ -147,11 +141,7 @@ public final class NfcOemExtension {
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void synchronizeScreenState() {
-        try {
-            NfcAdapter.sService.setScreenState();
-        } catch (RemoteException e) {
-            mAdapter.attemptDeadServiceRecovery(e);
-        }
+        NfcAdapter.callService(() -> NfcAdapter.sService.setScreenState());
     }
 
     /**
@@ -162,11 +152,20 @@ public final class NfcOemExtension {
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void maybeTriggerFirmwareUpdate() {
-        try {
-            NfcAdapter.sService.checkFirmware();
-        } catch (RemoteException e) {
-            mAdapter.attemptDeadServiceRecovery(e);
-        }
+        NfcAdapter.callService(() -> NfcAdapter.sService.checkFirmware());
+    }
+
+    /**
+     * Get the Active NFCEE (NFC Execution Environment) List
+     *
+     * @return List of activated secure elements on success
+     *         which can contain "eSE" and "UICC", otherwise empty list.
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public List<String> getActiveNfceeList() {
+        return NfcAdapter.callServiceReturn(() ->
+            NfcAdapter.sService.fetchActiveNfceeList(), new ArrayList<String>());
     }
 
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {

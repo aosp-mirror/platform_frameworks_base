@@ -79,6 +79,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -1488,15 +1489,30 @@ public class BiometricServiceTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MANDATORY_BIOMETRICS)
     public void testCanAuthenticate_whenLockoutTimed() throws Exception {
         testCanAuthenticate_whenLockedOut(LockoutTracker.LOCKOUT_TIMED);
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MANDATORY_BIOMETRICS)
     public void testCanAuthenticate_whenLockoutPermanent() throws Exception {
         testCanAuthenticate_whenLockedOut(LockoutTracker.LOCKOUT_PERMANENT);
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCanAuthenticate_whenLockoutTimed_returnsLockoutError() throws Exception {
+        testCanAuthenticate_whenLockedOut_returnLockoutError(LockoutTracker.LOCKOUT_TIMED);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCanAuthenticate_whenLockoutPermanent_returnsLockoutError() throws Exception {
+        testCanAuthenticate_whenLockedOut_returnLockoutError(LockoutTracker.LOCKOUT_PERMANENT);
+    }
+
+    @RequiresFlagsDisabled(Flags.FLAG_MANDATORY_BIOMETRICS)
     private void testCanAuthenticate_whenLockedOut(@LockoutTracker.LockoutMode int lockoutMode)
             throws Exception {
         // When only biometric is requested, and sensor is strong enough
@@ -1510,6 +1526,21 @@ public class BiometricServiceTest {
                 invokeCanAuthenticate(mBiometricService, Authenticators.BIOMETRIC_STRONG));
     }
 
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    private void testCanAuthenticate_whenLockedOut_returnLockoutError(
+            @LockoutTracker.LockoutMode int lockoutMode)
+            throws Exception {
+        // When only biometric is requested, and sensor is strong enough
+        setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+
+        when(mFingerprintAuthenticator.getLockoutModeForUser(anyInt()))
+                .thenReturn(lockoutMode);
+
+        // Lockout is not considered an error for BiometricManager#canAuthenticate
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_LOCKOUT,
+                invokeCanAuthenticate(mBiometricService, Authenticators.BIOMETRIC_STRONG));
+    }
+
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
     public void testCanAuthenticate_whenMandatoryBiometricsRequested()
@@ -1518,7 +1549,8 @@ public class BiometricServiceTest {
         mBiometricService.onStart();
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(false);
-        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+        when(mBiometricService.mSettingObserver
+                .getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(anyInt()))
                 .thenReturn(true);
 
         setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
@@ -1528,7 +1560,7 @@ public class BiometricServiceTest {
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(true);
 
-        assertEquals(BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE,
                 invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
     }
 
@@ -1540,7 +1572,8 @@ public class BiometricServiceTest {
         mBiometricService.onStart();
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(false);
-        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+        when(mBiometricService.mSettingObserver
+                .getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(anyInt()))
                 .thenReturn(true);
 
         setupAuthForOnly(TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
@@ -1564,12 +1597,13 @@ public class BiometricServiceTest {
         mBiometricService.onStart();
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(false);
-        when(mBiometricService.mSettingObserver.getMandatoryBiometricsEnabledForUser(anyInt()))
+        when(mBiometricService.mSettingObserver
+                .getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(anyInt()))
                 .thenReturn(true);
 
         setupAuthForOnly(TYPE_CREDENTIAL, Authenticators.DEVICE_CREDENTIAL);
 
-        assertEquals(BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
                 invokeCanAuthenticate(mBiometricService, Authenticators.MANDATORY_BIOMETRICS));
 
         when(mTrustManager.isInSignificantPlace()).thenReturn(true);

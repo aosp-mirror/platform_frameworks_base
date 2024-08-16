@@ -20,6 +20,7 @@ import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
+import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -90,7 +91,9 @@ constructor(
         listenForLockscreenToPrimaryBouncerDragging()
         listenForLockscreenToAlternateBouncer()
         listenForLockscreenTransitionToCamera()
-        listenForLockscreenToGlanceableHub()
+        if (!communalSceneKtfRefactor()) {
+            listenForLockscreenToGlanceableHub()
+        }
     }
 
     /**
@@ -297,7 +300,9 @@ constructor(
                 swipeToDismissInteractor.dismissFling
                     .filterNotNull()
                     .filterRelevantKeyguardState()
-                    .collect { _ -> startTransitionTo(KeyguardState.GONE) }
+                    .collect { _ ->
+                        startTransitionTo(KeyguardState.GONE, ownerReason = "dismissFling != null")
+                    }
             }
         }
     }
@@ -348,7 +353,6 @@ constructor(
      * keyguard transition.
      */
     private fun listenForLockscreenToGlanceableHub() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
             return
@@ -391,7 +395,7 @@ constructor(
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
-        val TO_OCCLUDED_DURATION = 450.milliseconds
+        val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_AOD_FOLD_DURATION = 1100.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION

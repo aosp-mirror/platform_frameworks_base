@@ -1573,13 +1573,22 @@ public class TransitionTests extends WindowTestsBase {
         enteringAnimReports.clear();
         doCallRealMethod().when(mWm.mRoot).ensureActivitiesVisible(any(), anyBoolean());
         final boolean[] wasInFinishingTransition = { false };
-        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener() {
+        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener(
+                mDisplayContent.mDisplayId) {
             @Override
             public void onAppTransitionFinishedLocked(IBinder token) {
                 final ActivityRecord r = ActivityRecord.forToken(token);
                 if (r != null) {
                     wasInFinishingTransition[0] = controller.inFinishingTransition(r);
                 }
+            }
+        });
+        final boolean[] calledListenerOnOtherDisplay = { false };
+        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener(
+                mDisplayContent.mDisplayId + 1234) {
+            @Override
+            public void onAppTransitionFinishedLocked(IBinder token) {
+                calledListenerOnOtherDisplay[0] = true;
             }
         });
         assertTrue(activity1.isVisible());
@@ -1592,6 +1601,7 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.finishTransition(closeTransition);
         assertTrue(wasInFinishingTransition[0]);
+        assertFalse(calledListenerOnOtherDisplay[0]);
         assertNull(controller.mFinishingTransition);
 
         assertTrue(activity2.isVisible());
@@ -2011,7 +2021,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
-    public void testOverrideAnimationOptionsToInfoIfNecessary_nonCustomAnimOptions() {
+    public void testOverrideAnimationOptionsToInfoIfNecessary_fromStyleAnimOptions() {
         initializeOverrideAnimationOptionsTest();
         TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
                 .makeCommonAnimOptions("testPackage");
@@ -2029,6 +2039,32 @@ public class TransitionTests extends WindowTestsBase {
                 displayChange.getAnimationOptions());
         assertNull("Task change's AnimationOptions must not be overridden.",
                 taskChange.getAnimationOptions());
+        assertNull("Embedded TF change's AnimationOptions must not be overridden.",
+                embeddedTfChange.getAnimationOptions());
+        assertEquals("Activity change's AnimationOptions must be overridden.",
+                options, activityChange.getAnimationOptions());
+    }
+
+    @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
+    @Test
+    public void testOverrideAnimationOptionsToInfoIfNecessary_sceneAnimOptions() {
+        initializeOverrideAnimationOptionsTest();
+        TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
+                .makeSceneTransitionAnimOptions();
+        mTransition.setOverrideAnimation(options, null /* startCallback */,
+                null /* finishCallback */);
+
+        mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
+
+        final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
+        final TransitionInfo.Change taskChange = mInfo.getChanges().get(1);
+        final TransitionInfo.Change embeddedTfChange = mInfo.getChanges().get(2);
+        final TransitionInfo.Change activityChange = mInfo.getChanges().get(3);
+
+        assertNull("Display change's AnimationOptions must not be overridden.",
+                displayChange.getAnimationOptions());
+        assertEquals("Task change's AnimationOptions must be overridden.",
+                options, taskChange.getAnimationOptions());
         assertNull("Embedded TF change's AnimationOptions must not be overridden.",
                 embeddedTfChange.getAnimationOptions());
         assertEquals("Activity change's AnimationOptions must be overridden.",

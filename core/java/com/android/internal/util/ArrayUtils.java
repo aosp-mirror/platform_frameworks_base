@@ -620,10 +620,10 @@ public class ArrayUtils {
     }
 
     /**
-     * Adds value to given array if not already present, providing set-like
-     * behavior.
+     * Adds value to given array. The method allows duplicate values.
      */
-    public static boolean[] appendBoolean(@Nullable boolean[] cur, boolean val) {
+    public static boolean[] appendBooleanDuplicatesAllowed(@Nullable boolean[] cur,
+            boolean val) {
         if (cur == null) {
             return new boolean[] { val };
         }

@@ -50,8 +50,8 @@ import android.view.DisplayInfo;
 import android.window.ActivityWindowInfo;
 import android.window.WindowTokenClient;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -59,7 +59,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.BiConsumer;
@@ -75,6 +76,8 @@ import java.util.function.BiConsumer;
 @Presubmit
 public class ClientTransactionListenerControllerTest {
 
+    @Rule
+    public final MockitoRule mocks = MockitoJUnit.rule();
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
@@ -100,7 +103,6 @@ public class ClientTransactionListenerControllerTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mDisplayManager = new DisplayManagerGlobal(mIDisplayManager);
         mHandler = getInstrumentation().getContext().getMainThreadHandler();
         mController = spy(ClientTransactionListenerController

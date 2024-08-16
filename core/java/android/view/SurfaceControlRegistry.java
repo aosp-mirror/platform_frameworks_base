@@ -73,7 +73,7 @@ public class SurfaceControlRegistry {
             }
             // Sort entries by time registered when dumping
             // TODO: Or should it sort by name?
-            entries.sort((o1, o2) -> (int) (o1.getValue() - o2.getValue()));
+            entries.sort((o1, o2) -> Long.compare(o1.getValue(), o2.getValue()));
             final int size = Math.min(entries.size(), limit);
 
             pw.println("SurfaceControlRegistry");

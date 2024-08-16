@@ -487,6 +487,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
+            <intent-filter>
+                <action android:name="com.android.systemui.action.TOUCHPAD_KEYBOARD_TUTORIAL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
         <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
             android:exported="false"
             android:singleUser="true"
@@ -1059,6 +1068,14 @@
             android:exported="false">
             <intent-filter android:priority="1">
                 <action android:name="com.android.systemui.action.LAUNCH_HEARING_DEVICES_DIALOG" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".accessibility.extradim.ExtraDimDialogReceiver"
+            android:singleUser="true"
+            android:exported="false">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.systemui.action.LAUNCH_REMOVE_EXTRA_DIM_DIALOG" />
             </intent-filter>
         </receiver>
 

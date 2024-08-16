@@ -24,7 +24,6 @@ import android.os.UserHandle
 import android.service.quicksettings.Tile
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE
 import com.android.systemui.Flags.FLAG_QS_NEW_TILES
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -107,7 +106,6 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        mSetFlagsRule.enableFlags(FLAG_QS_NEW_PIPELINE)
         mSetFlagsRule.enableFlags(FLAG_QS_NEW_TILES)
 
         userRepository.setUserInfos(listOf(USER_INFO_0, USER_INFO_1))
@@ -673,6 +671,24 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
 
             assertThat(tiles!!.size).isEqualTo(3)
+        }
+
+    @Test
+    fun changeInPackagesTiles_doesntTriggerUserChange_logged() =
+        testScope.runTest(USER_INFO_0) {
+            val specs =
+                listOf(
+                    TileSpec.create("a"),
+                )
+            tileSpecRepository.setTiles(USER_INFO_0.id, specs)
+            runCurrent()
+            // Settled on the same list of tiles.
+            assertThat(underTest.currentTilesSpecs).isEqualTo(specs)
+
+            installedTilesPackageRepository.setInstalledPackagesForUser(USER_INFO_0.id, emptySet())
+            runCurrent()
+
+            verify(logger, never()).logTileUserChanged(TileSpec.create("a"), 0)
         }
 
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {

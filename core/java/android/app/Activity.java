@@ -2214,6 +2214,9 @@ public class Activity extends ContextThemeWrapper
         notifyVoiceInteractionManagerServiceActivityEvent(
                 VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_RESUME);
 
+        // Notify autofill
+        getAutofillClientController().onActivityPostResumed();
+
         mCalled = true;
     }
 
@@ -7309,7 +7312,7 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void finish(int finishTask) {
         if (DEBUG_FINISH_ACTIVITY) {
-            Log.d("Instrumentation", "finishActivity: finishTask=" + finishTask, new Throwable());
+            Log.d(Instrumentation.TAG, "finishActivity: finishTask=" + finishTask, new Throwable());
         }
         if (mParent == null) {
             int resultCode;

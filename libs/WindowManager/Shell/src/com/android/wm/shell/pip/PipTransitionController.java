@@ -53,8 +53,9 @@ import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Responsible supplying PiP Transitions.
@@ -66,7 +67,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final ShellTaskOrganizer mShellTaskOrganizer;
     protected final PipMenuController mPipMenuController;
     protected final Transitions mTransitions;
-    private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
+    private final Map<PipTransitionCallback, Executor> mPipTransitionCallbacks = new HashMap<>();
     protected PipTaskOrganizer mPipOrganizer;
     protected DefaultMixedHandler mMixedHandler;
 
@@ -183,18 +184,49 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     /**
      * Registers {@link PipTransitionCallback} to receive transition callbacks.
      */
-    public void registerPipTransitionCallback(PipTransitionCallback callback) {
-        mPipTransitionCallbacks.add(callback);
+    public void registerPipTransitionCallback(
+            @NonNull PipTransitionCallback callback, @NonNull Executor executor) {
+        mPipTransitionCallbacks.put(callback, executor);
+    }
+
+    protected void onStartSwipePipToHome() {
+        if (Flags.enablePipUiStateCallbackOnEntering()) {
+            try {
+                ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
+                        new PictureInPictureUiState.Builder()
+                                .setTransitioningToPip(true)
+                                .build());
+            } catch (RemoteException | IllegalStateException e) {
+                ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Failed to set alert PiP state change.");
+            }
+        }
+    }
+
+    /**
+     * Used in {@link #sendOnPipTransitionStarted(int)} to decide whether we should send the
+     * PictureInPictureUiState change callback on transition start.
+     * For instance, in auto-enter-pip case, {@link #onStartSwipePipToHome()} should have signaled
+     * the app, and we can return {@code true} here to avoid double callback.
+     *
+     * @return {@code true} if there is a ongoing swipe pip to home transition.
+     */
+    protected boolean isInSwipePipToHomeTransition() {
+        return false;
     }
 
     protected void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
         final Rect pipBounds = mPipBoundsState.getBounds();
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionStarted(direction, pipBounds);
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionStarted direction=%d, bounds=%s", direction, pipBounds);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionStarted(direction, pipBounds));
         }
-        if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
+        if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()
+                && !isInSwipePipToHomeTransition()) {
             try {
                 ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
                         new PictureInPictureUiState.Builder()
@@ -209,9 +241,12 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionFinished(direction);
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionFinished direction=%d", direction);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionFinished(direction));
         }
         if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
             try {
@@ -228,9 +263,12 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionCancelled(
             @PipAnimationController.TransitionDirection int direction) {
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionCanceled(direction);
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionCancelled direction=%d", direction);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionCanceled(direction));
         }
     }
 

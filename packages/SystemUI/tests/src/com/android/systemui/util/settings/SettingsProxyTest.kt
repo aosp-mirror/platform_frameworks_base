@@ -275,6 +275,18 @@ class SettingsProxyTest : SysuiTestCase() {
     }
 
     @Test
+    fun getInt_keyMalformed_returnDefaultValue() {
+        mSettings.putString(TEST_SETTING, "nan")
+        assertThat(mSettings.getInt(TEST_SETTING, 5)).isEqualTo(5)
+    }
+
+    @Test
+    fun getInt_keyMalformed_throwException() {
+        mSettings.putString(TEST_SETTING, "nan")
+        assertThrows(SettingNotFoundException::class.java) { mSettings.getInt(TEST_SETTING) }
+    }
+
+    @Test
     fun getBool_keyPresent_returnValidValue() {
         mSettings.putBool(TEST_SETTING, true)
         assertThat(mSettings.getBool(TEST_SETTING)).isTrue()
@@ -323,6 +335,18 @@ class SettingsProxyTest : SysuiTestCase() {
     }
 
     @Test
+    fun getLong_keyMalformed_throwException() {
+        mSettings.putString(TEST_SETTING, "nan")
+        assertThrows(SettingNotFoundException::class.java) { mSettings.getLong(TEST_SETTING) }
+    }
+
+    @Test
+    fun getLong_keyMalformed_returnDefaultValue() {
+        mSettings.putString(TEST_SETTING, "nan")
+        assertThat(mSettings.getLong(TEST_SETTING, 2L)).isEqualTo(2L)
+    }
+
+    @Test
     fun getFloat_keyPresent_returnValidValue() {
         mSettings.putFloat(TEST_SETTING, 2.5F)
         assertThat(mSettings.getFloat(TEST_SETTING)).isEqualTo(2.5F)
@@ -346,10 +370,22 @@ class SettingsProxyTest : SysuiTestCase() {
         assertThat(mSettings.getFloat(TEST_SETTING, 2.5F)).isEqualTo(2.5F)
     }
 
+    @Test
+    fun getFloat_keyMalformed_throwException() {
+        mSettings.putString(TEST_SETTING, "nan")
+        assertThrows(SettingNotFoundException::class.java) { mSettings.getFloat(TEST_SETTING) }
+    }
+
+    @Test
+    fun getFloat_keyMalformed_returnDefaultValue() {
+        mSettings.putString(TEST_SETTING, "nan")
+        assertThat(mSettings.getFloat(TEST_SETTING, 2.5F)).isEqualTo(2.5F)
+    }
+
     private class FakeSettingsProxy(val testDispatcher: CoroutineDispatcher) : SettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
-        private val settingToValueMap: MutableMap<String, String> = mutableMapOf()
+        private val settingToValueMap: MutableMap<String, String?> = mutableMapOf()
 
         override fun getContentResolver() = mContentResolver
 
@@ -363,15 +399,15 @@ class SettingsProxyTest : SysuiTestCase() {
             return settingToValueMap[name] ?: ""
         }
 
-        override fun putString(name: String, value: String): Boolean {
+        override fun putString(name: String, value: String?): Boolean {
             settingToValueMap[name] = value
             return true
         }
 
         override fun putString(
             name: String,
-            value: String,
-            tag: String,
+            value: String?,
+            tag: String?,
             makeDefault: Boolean
         ): Boolean {
             settingToValueMap[name] = value

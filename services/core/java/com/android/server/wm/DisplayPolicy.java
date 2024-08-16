@@ -588,7 +588,7 @@ public class DisplayPolicy {
                     gesturesPointerEventCallbacks);
             displayContent.registerPointerEventListener(mSystemGestures);
         }
-        mAppTransitionListener = new WindowManagerInternal.AppTransitionListener() {
+        mAppTransitionListener = new WindowManagerInternal.AppTransitionListener(displayId) {
 
             private Runnable mAppTransitionPending = () -> {
                 StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
@@ -1596,7 +1596,7 @@ public class DisplayPolicy {
             final ActivityRecord currentActivity = win.getActivityRecord();
             if (currentActivity != null) {
                 final LetterboxDetails currentLetterboxDetails = currentActivity
-                        .mLetterboxUiController.getLetterboxDetails();
+                        .mAppCompatController.getAppCompatLetterboxPolicy().getLetterboxDetails();
                 if (currentLetterboxDetails != null) {
                     mLetterboxDetails.add(currentLetterboxDetails);
                 }

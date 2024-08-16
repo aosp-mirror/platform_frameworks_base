@@ -133,6 +133,7 @@ import static com.android.window.flags.Flags.enableCaptionCompatInsetForceConsum
 import static com.android.window.flags.Flags.insetsControlChangedItem;
 import static com.android.window.flags.Flags.insetsControlSeq;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
+import static com.android.window.flags.Flags.systemUiImmersiveConfirmationDialog;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -145,7 +146,6 @@ import android.annotation.Size;
 import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
-import android.app.ICompatCameraControlCallback;
 import android.app.ResourcesManager;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
@@ -208,6 +208,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.sysprop.ViewProperties;
@@ -363,14 +364,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean ENABLE_INPUT_LATENCY_TRACKING = true;
 
     /**
-     * Controls whether to use the new oneway performHapticFeedback call. This returns
-     * true in a few more conditions, but doesn't affect which haptics happen. Notably, it
-     * makes the call to performHapticFeedback non-blocking, which reduces potential UI jank.
-     * This is intended as a temporary flag, ultimately becoming permanently 'true'.
-     */
-    private static final boolean USE_ASYNC_PERFORM_HAPTIC_FEEDBACK = true;
-
-    /**
      * Whether the client (system UI) is handling the transient gesture and the corresponding
      * animation.
      * @hide
@@ -386,7 +379,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final boolean CLIENT_IMMERSIVE_CONFIRMATION =
-            SystemProperties.getBoolean("persist.wm.debug.client_immersive_confirmation", false);
+            systemUiImmersiveConfirmationDialog();
 
     /**
      * Set this system property to true to force the view hierarchy to render
@@ -516,17 +509,6 @@ public final class ViewRootImpl implements ViewParent,
                 int newDisplayId, @Nullable ActivityWindowInfo activityWindowInfo) {
             onConfigurationChanged(overrideConfig, newDisplayId);
         }
-
-        /**
-         * Notify the corresponding activity about the request to show or hide a camera compat
-         * control for stretched issues in the viewfinder.
-         *
-         * @param showControl Whether the control should be shown or hidden.
-         * @param transformationApplied Whether the treatment is already applied.
-         * @param callback The callback executed when the user clicks on a control.
-         */
-        void requestCompatCameraControl(boolean showControl, boolean transformationApplied,
-                ICompatCameraControlCallback callback);
     }
 
     /**
@@ -727,8 +709,6 @@ public final class ViewRootImpl implements ViewParent,
     boolean mUpcomingWindowFocus;
     @GuardedBy("this")
     boolean mUpcomingInTouchMode;
-    // While set, allow this VRI to handle back key without drop it.
-    private boolean mProcessingBackKey;
     /**
      * Compatibility {@link OnBackInvokedCallback} for windowless window, to forward the back
      * key event host app.
@@ -970,6 +950,11 @@ public final class ViewRootImpl implements ViewParent,
      */
     AudioManager mAudioManager;
 
+    /**
+     * see {@link #performHapticFeedback(int, int, int)}
+     */
+    Vibrator mVibrator;
+
     final AccessibilityManager mAccessibilityManager;
 
     AccessibilityInteractionController mAccessibilityInteractionController;
@@ -1135,6 +1120,8 @@ public final class ViewRootImpl implements ViewParent,
     // Take 24 and 30 as an example, 24 is not a divisor of 30.
     // We consider there is a conflict.
     private boolean mIsFrameRateConflicted = false;
+    // Used to check whether SurfaceControl has been replaced.
+    private boolean mSurfaceReplaced = false;
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
             FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
@@ -2834,6 +2821,12 @@ public final class ViewRootImpl implements ViewParent,
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.setSurfaceControl(null, null);
         }
+
+        // Also reset the VRR relevant values.
+        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
+        mLastPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
+        mPreferredFrameRate = 0;
+        mLastPreferredFrameRate = 0;
     }
 
     /**
@@ -3831,6 +3824,7 @@ public final class ViewRootImpl implements ViewParent,
                 surfaceReplaced = (surfaceGenerationId != mSurface.getGenerationId()
                         || surfaceControlChanged) && mSurface.isValid();
                 if (surfaceReplaced) {
+                    mSurfaceReplaced = true;
                     mSurfaceSequenceId++;
                 }
                 if (alwaysConsumeSystemBarsChanged) {
@@ -4443,6 +4437,7 @@ public final class ViewRootImpl implements ViewParent,
             mPreferredFrameRate = -1;
             mIsFrameRateConflicted = false;
             mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_UNKNOWN;
+            mSurfaceReplaced = false;
         } else if (mPreferredFrameRate == 0) {
             // From MSG_FRAME_RATE_SETTING, where mPreferredFrameRate is set to 0
             setPreferredFrameRate(0);
@@ -7265,7 +7260,7 @@ public final class ViewRootImpl implements ViewParent,
             // Find a reason for dropping or canceling the event.
             final String reason;
             // The embedded window is focused, allow this VRI to handle back key.
-            if (!mAttachInfo.mHasWindowFocus && !(mProcessingBackKey && isBack(q.mEvent))
+            if (!mAttachInfo.mHasWindowFocus && !isBack(q.mEvent)
                     && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
                     && !isAutofillUiShowing()) {
                 // This is a non-pointer event and the window doesn't currently have input focus
@@ -7543,7 +7538,6 @@ public final class ViewRootImpl implements ViewParent,
                             animationCallback.onBackCancelled();
                         } else {
                             topCallback.onBackInvoked();
-                            return FINISH_HANDLED;
                         }
                         break;
                 }
@@ -7551,14 +7545,16 @@ public final class ViewRootImpl implements ViewParent,
                 if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
                     if (!keyEvent.isCanceled()) {
                         topCallback.onBackInvoked();
-                        return FINISH_HANDLED;
                     } else {
                         Log.d(mTag, "Skip onBackInvoked(), reason: keyEvent.isCanceled=true");
                     }
                 }
             }
-
-            return FINISH_NOT_HANDLED;
+            if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                // forward a cancelled event so that following stages cancel their back logic
+                keyEvent.cancel();
+            }
+            return FORWARD;
         }
 
         @Override
@@ -9245,6 +9241,13 @@ public final class ViewRootImpl implements ViewParent,
         return mAudioManager;
     }
 
+    private Vibrator getSystemVibrator() {
+        if (mVibrator == null) {
+            mVibrator = mContext.getSystemService(Vibrator.class);
+        }
+        return mVibrator;
+    }
+
     private @Nullable AutofillManager getAutofillManager() {
         if (mView instanceof ViewGroup) {
             ViewGroup decorView = (ViewGroup) mView;
@@ -9671,17 +9674,23 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        try {
-            if (USE_ASYNC_PERFORM_HAPTIC_FEEDBACK) {
-                mWindowSession.performHapticFeedbackAsync(effectId, flags, privFlags);
-                return true;
-            } else {
-                // Original blocking binder call path.
-                return mWindowSession.performHapticFeedback(effectId, flags, privFlags);
-            }
-        } catch (RemoteException e) {
-            return false;
+        getSystemVibrator().performHapticFeedback(
+                effectId, "ViewRootImpl#performHapticFeedback", flags, privFlags);
+        return true;
+    }
+
+    @Override
+    public void performHapticFeedbackForInputDevice(int effectId,
+            int inputDeviceId, int inputSource,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        if ((mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            return;
         }
+
+        getSystemVibrator().performHapticFeedbackForInputDevice(effectId,
+                inputDeviceId, inputSource, "ViewRootImpl#performHapticFeedbackForInputDevice",
+                flags, privFlags);
     }
 
     /**
@@ -10051,6 +10060,24 @@ public final class ViewRootImpl implements ViewParent,
         }
         Message msg = mHandler.obtainMessage(MSG_WINDOW_MOVED, newX, newY);
         mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Dispatches the statsToken and IME visibility to the ImeInsetsSourceProvider.
+     *
+     * @param visible {@code true} if it became visible, {@code false} otherwise.
+     * @param statsToken the token tracking the current IME request.
+     *
+     * @hide
+     */
+    public void notifyImeVisibilityChanged(boolean visible, @NonNull ImeTracker.Token statsToken) {
+        ImeTracker.forLogging().onProgress(statsToken,
+                ImeTracker.PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED);
+        try {
+            mWindowSession.notifyImeWindowVisibilityChangedFromClient(mWindow, visible, statsToken);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -11211,11 +11238,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void dispatchScrollCaptureRequest(@NonNull IScrollCaptureResponseListener listener) {
         mHandler.obtainMessage(MSG_REQUEST_SCROLL_CAPTURE, listener).sendToTarget();
-    }
-
-    // Make this VRI able to process back key without drop it.
-    void processingBackKey(boolean processing) {
-        mProcessingBackKey = processing;
     }
 
     /**
@@ -12487,20 +12509,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    /**
-     * Shows or hides a Camera app compat toggle for stretched issues with the requested state
-     * for the corresponding activity.
-     *
-     * @param showControl Whether the control should be shown or hidden.
-     * @param transformationApplied Whether the treatment is already applied.
-     * @param callback The callback executed when the user clicks on a control.
-    */
-    public void requestCompatCameraControl(boolean showControl, boolean transformationApplied,
-                ICompatCameraControlCallback callback) {
-        mActivityConfigCallback.requestCompatCameraControl(
-                showControl, transformationApplied, callback);
-    }
-
     boolean wasRelayoutRequested() {
         return mRelayoutRequested;
     }
@@ -12549,15 +12557,8 @@ public final class ViewRootImpl implements ViewParent,
      * @return whether the event was handled (i.e. onKeyPreIme consumed it if preImeOnly=true)
      */
     public boolean injectBackKeyEvents(boolean preImeOnly) {
-        boolean consumed;
-        try {
-            processingBackKey(true);
-            sendBackKeyEvent(KeyEvent.ACTION_DOWN, preImeOnly);
-            consumed = sendBackKeyEvent(KeyEvent.ACTION_UP, preImeOnly);
-        } finally {
-            processingBackKey(false);
-        }
-        return consumed;
+        sendBackKeyEvent(KeyEvent.ACTION_DOWN, preImeOnly);
+        return sendBackKeyEvent(KeyEvent.ACTION_UP, preImeOnly);
     }
 
     private boolean sendBackKeyEvent(int action, boolean preImeOnly) {
@@ -12891,11 +12892,6 @@ public final class ViewRootImpl implements ViewParent,
                     mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
         }
 
-        // If it's currently an intermittent update,
-        // we should keep mPreferredFrameRateCategory as NORMAL
-        if (intermittentUpdateState() == INTERMITTENT_STATE_INTERMITTENT) {
-            return;
-        }
 
         if (mFrameRateCategoryHighCount > 0) {
             mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
@@ -12933,8 +12929,9 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean traceFrameRateCategory = false;
         try {
-            if (frameRateCategory != FRAME_RATE_CATEGORY_DEFAULT
-                    && mLastPreferredFrameRateCategory != frameRateCategory) {
+            if ((frameRateCategory != FRAME_RATE_CATEGORY_DEFAULT
+                    && mLastPreferredFrameRateCategory != frameRateCategory)
+                    || mSurfaceReplaced) {
                 traceFrameRateCategory = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
                 if (traceFrameRateCategory) {
                     String reason = reasonToString(frameRateReason);
@@ -12998,7 +12995,7 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean traceFrameRate = false;
         try {
-            if (mLastPreferredFrameRate != preferredFrameRate) {
+            if (mLastPreferredFrameRate != preferredFrameRate || mSurfaceReplaced) {
                 traceFrameRate = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
                 if (traceFrameRate) {
                     Trace.traceBegin(

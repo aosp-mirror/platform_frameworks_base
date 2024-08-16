@@ -19,6 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import android.content.mockedContext
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -42,5 +43,6 @@ val Kosmos.occludingAppDeviceEntryInteractor by
             activityStarter = activityStarter,
             powerInteractor = powerInteractor,
             keyguardTransitionInteractor = keyguardTransitionInteractor,
+            communalSceneInteractor = communalSceneInteractor,
         )
     }

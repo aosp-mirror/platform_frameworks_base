@@ -68,6 +68,7 @@ import androidx.annotation.Nullable;
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ContrastColorUtil;
@@ -101,6 +102,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
+import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCompactMessagingTemplateViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
@@ -996,6 +998,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mNotificationParent = isChildInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(isChildInGroup);
+        if (LockscreenOtpRedaction.isEnabled()) {
+            mPublicLayout.setIsChildInGroup(isChildInGroup);
+        }
 
         updateBackgroundForGroupState();
         updateClickAndFocus();
@@ -1799,6 +1804,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 NotificationEntry childEntry,
                 NotificationEntry containerEntry
         );
+
+        /**
+         * Called when resetting the alpha value for content views
+         */
+        void logResetAllContentAlphas(
+                NotificationEntry entry
+        );
+
+        /**
+         * Called when resetting the alpha value for content views is skipped
+         */
+        void logSkipResetAllContentAlphas(
+                NotificationEntry entry
+        );
     }
 
     /**
@@ -1873,7 +1892,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
             FeatureFlags featureFlags,
-            IStatusBarService statusBarService) {
+            IStatusBarService statusBarService,
+            UiEventLogger uiEventLogger) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1901,7 +1921,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     rivSubcomponentFactory,
                     smartReplyConstants,
                     smartReplyController,
-                    statusBarService);
+                    statusBarService,
+                    uiEventLogger
+            );
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
         mBubblesManagerOptional = bubblesManagerOptional;
@@ -2993,6 +3015,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     mChildrenContainer.animate().cancel();
                 }
                 resetAllContentAlphas();
+            } else {
+                mLogger.logSkipResetAllContentAlphas(getEntry());
             }
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
@@ -3178,6 +3202,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected void resetAllContentAlphas() {
+        mLogger.logResetAllContentAlphas(getEntry());
         mPrivateLayout.setAlpha(1f);
         mPrivateLayout.setLayerType(LAYER_TYPE_NONE, null);
         mPublicLayout.setAlpha(1f);

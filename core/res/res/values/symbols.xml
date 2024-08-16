@@ -523,6 +523,8 @@
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
   <java-symbol type="bool" name="config_notificationCloseButtonSupported"/>
   <java-symbol type="bool" name="config_enableGaiaEducationInPrivateSpace"/>
+  <java-symbol type="bool" name="config_enableUdcSysfsUsbStateUpdate"/>
+  <java-symbol type="bool" name="config_enableSearchTileHideIllustrationInPrivateSpace"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -2243,6 +2245,7 @@
   <java-symbol type="string" name="heavy_weight_notification_detail" />
   <java-symbol type="string" name="image_wallpaper_component" />
   <java-symbol type="string" name="input_method_binding_label" />
+  <java-symbol type="string" name="input_method_ime_switch_long_click_action_desc" />
   <java-symbol type="string" name="launch_warning_original" />
   <java-symbol type="string" name="launch_warning_replace" />
   <java-symbol type="string" name="launch_warning_title" />
@@ -4221,6 +4224,7 @@
   <java-symbol type="integer" name="config_defaultMediaVibrationIntensity" />
   <java-symbol type="integer" name="config_defaultNotificationVibrationIntensity" />
   <java-symbol type="integer" name="config_defaultRingVibrationIntensity" />
+  <java-symbol type="integer" name="config_defaultKeyboardVibrationIntensity" />
 
   <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
 
@@ -4764,7 +4768,6 @@
   <java-symbol type="bool" name="config_isCompatFakeFocusEnabled" />
   <java-symbol type="bool" name="config_isWindowManagerCameraCompatTreatmentEnabled" />
   <java-symbol type="bool" name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled" />
-  <java-symbol type="bool" name="config_isCameraCompatControlForStretchedIssuesEnabled" />
   <java-symbol type="bool" name="config_skipActivityRelaunchWhenDocking" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
@@ -4777,6 +4780,7 @@
 
   <java-symbol type="bool" name="config_magnification_area" />
   <java-symbol type="bool" name="config_magnification_always_on_enabled" />
+  <java-symbol type="bool" name="config_magnification_keep_zoom_level_when_context_changed" />
 
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
   <!-- FullScreenMagnification thumbnail -->
@@ -5458,7 +5462,9 @@
   <java-symbol type="bool" name="config_enable_a11y_fullscreen_magnification_overscroll_handler" />
   <java-symbol type="dimen" name="accessibility_fullscreen_magnification_gesture_edge_slop" />
 
+  <!-- For HapticFeedbackConstants configurability defined at HapticFeedbackCustomization -->
   <java-symbol type="string" name="config_hapticFeedbackCustomizationFile" />
+  <java-symbol type="xml" name="haptic_feedback_customization" />
 
   <!-- For ActivityManager PSS profiling configurability -->
   <java-symbol type="bool" name="config_am_disablePssProfiling" />
@@ -5497,6 +5503,8 @@
   <!-- System notification for satellite service -->
   <java-symbol type="string" name="satellite_notification_title" />
   <java-symbol type="string" name="satellite_notification_summary" />
+  <java-symbol type="string" name="satellite_notification_manual_title" />
+  <java-symbol type="string" name="satellite_notification_manual_summary" />
   <java-symbol type="string" name="satellite_notification_open_message" />
   <java-symbol type="string" name="satellite_notification_how_it_works" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
@@ -5521,10 +5529,15 @@
   <!-- Whether desktop mode is supported on the current device  -->
   <java-symbol type="bool" name="config_isDesktopModeSupported" />
 
+  <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
+  <java-symbol type="integer" name="config_maxDesktopWindowingActiveTasks"/>
+
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 
   <java-symbol type="integer" name="config_defaultMinEmergencyGestureTapDurationMillis" />
+  <java-symbol type="integer" name="config_maximumCallLogEntriesPerSim" />
+
   <!-- Back swipe thresholds -->
   <java-symbol type="dimen" name="navigation_edge_action_progress_threshold" />
   <java-symbol type="dimen" name="back_progress_non_linear_factor" />
@@ -5576,4 +5589,7 @@
   <java-symbol type="string" name="keyboard_shortcut_group_applications_music" />
   <java-symbol type="string" name="keyboard_shortcut_group_applications_sms" />
   <java-symbol type="string" name="keyboard_shortcut_group_applications" />
+
+  <!-- Fingerprint loe notification string -->
+  <java-symbol type="string" name="fingerprint_loe_notification_msg" />
 </resources>

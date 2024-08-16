@@ -34,6 +34,7 @@ import com.android.systemui.dreams.DreamOverlayCallbackController
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
@@ -90,11 +91,11 @@ interface KeyguardRepository {
      * the z-order (which is not really above the system UI window, but rather - the lock-screen
      * becomes invisible to reveal the "occluding activity").
      */
-    val isKeyguardShowing: Flow<Boolean>
+    val isKeyguardShowing: StateFlow<Boolean>
 
     /** Is an activity showing over the keyguard? */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
-    val isKeyguardOccluded: Flow<Boolean>
+    val isKeyguardOccluded: StateFlow<Boolean>
 
     /**
      * Whether the device is locked or unlocked right now. This is true when keyguard has been
@@ -231,11 +232,17 @@ interface KeyguardRepository {
     /** Receive an event for doze time tick */
     val dozeTimeTick: Flow<Long>
 
+    /** Receive an event lockscreen being shown in a dismissible state */
+    val showDismissibleKeyguard: MutableStateFlow<Long>
+
     /** Observable for DismissAction */
     val dismissAction: StateFlow<DismissAction>
 
     /** Observable updated when keyguardDone should be called either now or soon. */
     val keyguardDone: Flow<KeyguardDone>
+
+    /** Last camera launch detection event */
+    val onCameraLaunchDetected: MutableStateFlow<CameraLaunchSourceModel>
 
     /**
      * Emits after the keyguard is done animating away.
@@ -300,6 +307,8 @@ interface KeyguardRepository {
     fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 
     fun dozeTimeTick()
+
+    fun showDismissibleKeyguard()
 
     fun setDismissAction(dismissAction: DismissAction)
 
@@ -380,6 +389,8 @@ constructor(
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
 
+    override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
+
     override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
 
     private val _clockShouldBeCentered = MutableStateFlow(true)
@@ -431,6 +442,12 @@ constructor(
 
     override fun dozeTimeTick() {
         _dozeTimeTick.value = systemClock.uptimeMillis()
+    }
+
+    override val showDismissibleKeyguard = MutableStateFlow<Long>(0L)
+
+    override fun showDismissibleKeyguard() {
+        showDismissibleKeyguard.value = systemClock.uptimeMillis()
     }
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)

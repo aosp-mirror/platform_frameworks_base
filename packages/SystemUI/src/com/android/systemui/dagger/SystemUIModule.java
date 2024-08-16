@@ -48,6 +48,7 @@ import com.android.systemui.brightness.dagger.ScreenBrightnessModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.common.data.CommonDataLayerModule;
+import com.android.systemui.common.usagestats.data.CommonUsageStatsDataLayerModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
@@ -80,6 +81,7 @@ import com.android.systemui.model.SceneContainerPlugin;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.motiontool.MotionToolModule;
 import com.android.systemui.navigationbar.NavigationBarComponent;
+import com.android.systemui.navigationbar.gestural.dagger.GestureModule;
 import com.android.systemui.notetask.NoteTaskModule;
 import com.android.systemui.people.PeopleModule;
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin;
@@ -102,6 +104,7 @@ import com.android.systemui.screenrecord.ScreenRecordModule;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
@@ -130,7 +133,6 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationRowCom
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ConfigurationControllerModule;
 import com.android.systemui.statusbar.phone.LetterboxModule;
-import com.android.systemui.statusbar.phone.NotificationIconAreaControllerModule;
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -143,6 +145,7 @@ import com.android.systemui.statusbar.ui.binder.StatusBarViewBinderModule;
 import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.telephony.data.repository.TelephonyRepositoryModule;
 import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
+import com.android.systemui.touchpad.TouchpadModule;
 import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.user.domain.UserDomainLayerModule;
@@ -152,6 +155,7 @@ import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.kotlin.SysUICoroutinesModule;
 import com.android.systemui.util.reference.ReferenceModule;
 import com.android.systemui.util.sensors.SensorModule;
+import com.android.systemui.util.settings.SettingsProxy;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
@@ -202,6 +206,7 @@ import javax.inject.Named;
         ClockRegistryModule.class,
         CommunalModule.class,
         CommonDataLayerModule.class,
+        CommonUsageStatsDataLayerModule.class,
         ConfigurationControllerModule.class,
         ConnectivityModule.class,
         ControlsModule.class,
@@ -215,6 +220,7 @@ import javax.inject.Named;
         FlagsModule.class,
         FlagDependenciesModule.class,
         FooterActionsModule.class,
+        GestureModule.class,
         InputMethodModule.class,
         KeyEventRepositoryModule.class,
         KeyboardModule.class,
@@ -225,7 +231,6 @@ import javax.inject.Named;
         MediaProjectionTaskSwitcherModule.class,
         MediaRouterModule.class,
         MotionToolModule.class,
-        NotificationIconAreaControllerModule.class,
         PeopleHubModule.class,
         PeopleModule.class,
         PluginModule.class,
@@ -257,6 +262,7 @@ import javax.inject.Named;
         CommonSystemUIUnfoldModule.class,
         TelephonyRepositoryModule.class,
         TemporaryDisplayModule.class,
+        TouchpadModule.class,
         TunerModule.class,
         UserDomainLayerModule.class,
         UserModule.class,
@@ -264,15 +270,15 @@ import javax.inject.Named;
         NoteTaskModule.class,
         WalletModule.class,
         ContextualEducationModule.class
-        },
+},
         subcomponents = {
-            ComplicationComponent.class,
-            DozeComponent.class,
-            ExpandableNotificationRowComponent.class,
-            KeyguardBouncerComponent.class,
-            NavigationBarComponent.class,
-            NotificationRowComponent.class,
-            WindowRootViewComponent.class,
+                ComplicationComponent.class,
+                DozeComponent.class,
+                ExpandableNotificationRowComponent.class,
+                KeyguardBouncerComponent.class,
+                NavigationBarComponent.class,
+                NotificationRowComponent.class,
+                WindowRootViewComponent.class,
         })
 public abstract class SystemUIModule {
 
@@ -439,4 +445,9 @@ public abstract class SystemUIModule {
 
     @Binds
     abstract SceneDataSource bindSceneDataSource(SceneDataSourceDelegator delegator);
+
+    @Provides
+    static SettingsProxy.CurrentUserIdProvider provideCurrentUserId(UserTracker userTracker) {
+        return userTracker::getUserId;
+    }
 }

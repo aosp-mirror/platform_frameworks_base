@@ -30,6 +30,7 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
@@ -138,15 +139,6 @@ interface IWindowSession {
     @UnsupportedAppUsage
     oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
             int seqId);
-
-    @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, int flags, int privFlags);
-
-    /**
-     * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
-     * permission.
-     */
-    oneway void performHapticFeedbackAsync(int effectId, int flags, int privFlags);
 
     /**
      * Initiate the drag operation itself
@@ -276,7 +268,8 @@ interface IWindowSession {
     /**
      * Updates the requested visible types of insets.
      */
-    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes);
+    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes,
+            in @nullable ImeTracker.Token imeStatsToken);
 
     /**
      * Called when the system gesture exclusion has changed.
@@ -369,4 +362,14 @@ interface IWindowSession {
      * @return {@code true} if the focus changes. Otherwise, {@code false}.
      */
     boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
+
+    /**
+     * Notifies the statsToken and IME visibility to the ImeInsetsSourceProvider.
+     *
+     * @param window The window that is used to get the ImeInsetsSourceProvider.
+     * @param visible {@code true} to make it visible, {@code false} to hide it.
+     * @param statsToken the token tracking the current IME request.
+     */
+    oneway void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            in ImeTracker.Token statsToken);
 }

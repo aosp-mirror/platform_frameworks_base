@@ -54,7 +54,6 @@ import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -97,6 +96,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.window.WindowProviderService.isWindowProviderService;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
@@ -118,12 +118,12 @@ import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.PhoneWindowManager.TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
-import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
-import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
+import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
@@ -357,7 +357,6 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
-import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -790,7 +789,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     WindowManagerInternal.OnImeRequestedChangedListener mOnImeRequestedChangedListener;
-    @Nullable ImeTargetChangeListener mImeTargetChangeListener;
 
     SettingsObserver mSettingsObserver;
     final EmbeddedWindowController mEmbeddedWindowController;
@@ -1070,7 +1068,6 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Whether or not a layout can cause a wake up when theater mode is enabled. */
     boolean mAllowTheaterModeWakeFromLayout;
 
-    final TaskPositioningController mTaskPositioningController;
     final DragDropController mDragDropController;
 
     /** For frozen screen animations. */
@@ -1428,7 +1425,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
-        mTaskPositioningController = new TaskPositioningController(this);
         mDragDropController = new DragDropController(this, mH.getLooper());
 
         mHighRefreshRateDenylist = HighRefreshRateDenylist.create(context.getResources());
@@ -1900,7 +1896,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.computeImeTarget(true /* updateImeTarget */);
                 if (win.isImeOverlayLayeringTarget()) {
                     dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
-                            win.isVisibleRequestedOrAdding(), false /* removed */);
+                            win.isVisibleRequestedOrAdding(), false /* removed */,
+                            displayContent.getDisplayId());
                 }
             }
 
@@ -2664,13 +2661,13 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean winVisibleChanged = win.isVisible() != wasVisible;
             if (win.isImeOverlayLayeringTarget() && winVisibleChanged) {
                 dispatchImeTargetOverlayVisibilityChanged(client.asBinder(), win.mAttrs.type,
-                        win.isVisible(), false /* removed */);
+                        win.isVisible(), false /* removed */, win.getDisplayId());
             }
             // Notify listeners about IME input target window visibility change.
             final boolean isImeInputTarget = win.getDisplayContent().getImeInputTarget() == win;
             if (isImeInputTarget && winVisibleChanged) {
                 dispatchImeInputTargetVisibilityChanged(win.mClient.asBinder(),
-                        win.isVisible() /* visible */, false /* removed */);
+                        win.isVisible() /* visible */, false /* removed */, win.getDisplayId());
             }
 
             if (outRelayoutResult != null) {
@@ -3518,28 +3515,29 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void dispatchImeTargetOverlayVisibilityChanged(@NonNull IBinder token,
             @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-            boolean removed) {
-        if (mImeTargetChangeListener != null) {
-            if (DEBUG_INPUT_METHOD) {
-                Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
-                        + ", type=" + ViewDebug.intToString(WindowManager.LayoutParams.class,
-                        "type", windowType) + "visible=" + visible + ", removed=" + removed);
-            }
-            mH.post(() -> mImeTargetChangeListener.onImeTargetOverlayVisibilityChanged(token,
-                    windowType, visible, removed));
+            boolean removed, int displayId) {
+        if (DEBUG_INPUT_METHOD) {
+            Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
+                    + ", type=" + ViewDebug.intToString(WindowManager.LayoutParams.class,
+                    "type", windowType) + "visible=" + visible + ", removed=" + removed
+                    + ", displayId=" + displayId);
         }
+        // Ignoring the starting window since it's ok to cover the IME target
+        // window in temporary without affecting the IME visibility.
+        final boolean hasOverlay = visible && !removed && windowType != TYPE_APPLICATION_STARTING;
+        mH.post(() -> InputMethodManagerInternal.get().setHasVisibleImeLayeringOverlay(hasOverlay,
+                displayId));
     }
 
     void dispatchImeInputTargetVisibilityChanged(@NonNull IBinder token, boolean visible,
-            boolean removed) {
-        if (mImeTargetChangeListener != null) {
-            if (DEBUG_INPUT_METHOD) {
-                Slog.d(TAG, "onImeInputTargetVisibilityChanged, win=" + mWindowMap.get(token)
-                        + "visible=" + visible + ", removed=" + removed);
-            }
-            mH.post(() -> mImeTargetChangeListener.onImeInputTargetVisibilityChanged(token,
-                    visible, removed));
+            boolean removed, int displayId) {
+        if (DEBUG_INPUT_METHOD) {
+            Slog.d(TAG, "onImeInputTargetVisibilityChanged, win=" + mWindowMap.get(token)
+                    + "visible=" + visible + ", removed=" + removed + ", displayId=" + displayId);
         }
+        final boolean visibleAndNotRemoved = visible && !removed;
+        mH.post(() -> InputMethodManagerInternal.get().onImeInputTargetVisibilityChanged(token,
+                visibleAndNotRemoved, displayId));
     }
 
     @Override
@@ -3752,7 +3750,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mCurrentUserId = newUserId;
             mDisplayWindowSettingsProvider.setOverrideSettingsForUser(newUserId);
-            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettingsLocked(this, mRoot);
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
@@ -4719,8 +4717,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
+                // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
+                //  IME provider. Check if we have to create a new request here
                 dc.getInsetsStateController().onRequestedVisibleTypesChanged(
-                        dc.mRemoteInsetsControlTarget);
+                        dc.mRemoteInsetsControlTarget, null /* statsToken */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -5491,7 +5491,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.forAllDisplays(DisplayContent::reconfigureDisplayLocked);
             // Per-user display settings may leave outdated settings after user switches, especially
             // during reboots starting with the default user without setCurrentUser called.
-            mDisplayWindowSettingsProvider.removeStaleDisplaySettings(mRoot);
+            mDisplayWindowSettingsProvider.removeStaleDisplaySettingsLocked(this, mRoot);
         }
     }
 
@@ -7656,7 +7656,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         displayId);
                 return REMOVE_CONTENT_MODE_UNDEFINED;
             }
-            return mDisplayWindowSettings.getRemoveContentModeLocked(displayContent);
+            return displayContent.getRemoveContentMode();
         }
     }
 
@@ -8095,11 +8095,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
-                @NonNull IBinder imeTargetWindowToken) {
+        public void updateInputMethodTargetWindow(@NonNull IBinder imeTargetWindowToken) {
             // TODO (b/34628091): Use this method to address the window animation issue.
             if (DEBUG_INPUT_METHOD) {
-                Slog.w(TAG_WM, "updateInputMethodTargetWindow: imeToken=" + imeToken
+                Slog.w(TAG_WM, "updateInputMethodTargetWindow:"
                         + " imeTargetWindowToken=" + imeTargetWindowToken);
             }
             synchronized (mGlobalLock) {
@@ -8674,13 +8673,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setInputMethodTargetChangeListener(@NonNull ImeTargetChangeListener listener) {
-            synchronized (mGlobalLock) {
-                mImeTargetChangeListener = listener;
-            }
-        }
-
-        @Override
         public void setOrientationRequestPolicy(boolean respected,
                 int[] fromOrientations, int[] toOrientations) {
             synchronized (mGlobalLock) {
@@ -9037,7 +9029,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // Otherwise, handle the touch-outside event directly.
         final WindowState w = t.getWindowState();
         final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        if (activity != null && activity.isEmbedded()
+        if (mFocusedInputTarget != t && mFocusedInputTarget != null
+                && activity != null && activity.isEmbedded()
                 && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
             mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
@@ -9379,40 +9372,77 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Move focus to the adjacent embedded activity if the adjacent activity is more recently
-     * created or has a window more recently added.
+     * Returns the Activity that has the most recently created window in the adjacent activities
+     * if any.
      */
-    boolean moveFocusToAdjacentEmbeddedWindow(@NonNull WindowState focusedWindow) {
-        final TaskFragment taskFragment = focusedWindow.getTaskFragment();
+    @NonNull
+    ActivityRecord getMostRecentActivityInAdjacent(@NonNull ActivityRecord focusedActivity) {
+        final TaskFragment taskFragment = focusedActivity.getTaskFragment();
         if (taskFragment == null) {
-            // Skip if not an Activity window.
-            return false;
+            // Return if activity no attached.
+            return focusedActivity;
         }
 
-        if (!Flags.embeddedActivityBackNavFlag()) {
-            // Skip if flag is not enabled.
-            return false;
-        }
-
-        if (!focusedWindow.mActivityRecord.isEmbedded()) {
-            // Skip if the focused activity is not embedded
-            return false;
+        if (!focusedActivity.isEmbedded()) {
+            // Return if the focused activity is not embedded.
+            return focusedActivity;
         }
 
         final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
         final ActivityRecord adjacentTopActivity =
                 adjacentTaskFragment != null ? adjacentTaskFragment.topRunningActivity() : null;
         if (adjacentTopActivity == null) {
-            return false;
+            // Return if no adjacent activity.
+            return focusedActivity;
         }
 
         if (adjacentTopActivity.getLastWindowCreateTime()
-                < focusedWindow.mActivityRecord.getLastWindowCreateTime()) {
-            // Skip if the current focus activity has more recently active window.
+                < focusedActivity.getLastWindowCreateTime()) {
+            // Return if the current focus activity has more recently active window.
+            return focusedActivity;
+        }
+
+        return adjacentTopActivity;
+    }
+
+    @NonNull
+    WindowState getMostRecentUsedEmbeddedWindowForBack(@NonNull WindowState focusedWindow) {
+        final ActivityRecord focusedActivity = focusedWindow.getActivityRecord();
+        if (focusedActivity == null) {
+            // Not an Activity.
+            return focusedWindow;
+        }
+
+        final ActivityRecord mostRecentActivityInAdjacent = getMostRecentActivityInAdjacent(
+                focusedActivity);
+        if (mostRecentActivityInAdjacent == focusedActivity) {
+            // Already be the most recent window.
+            return focusedWindow;
+        }
+
+        // Looks for a candidate focused window on the adjacent Activity for the back event.
+        final WindowState candidate =
+                mostRecentActivityInAdjacent.getDisplayContent().findFocusedWindow(
+                        mostRecentActivityInAdjacent);
+        return candidate != null ? candidate : focusedWindow;
+    }
+
+    /**
+     * Move focus to the adjacent embedded activity if the adjacent activity is more recently
+     * created or has a window more recently added.
+     * <p>
+     * Returns {@code true} if the focused window is changed. Otherwise, returns {@code false}.
+     */
+    boolean moveFocusToAdjacentEmbeddedWindow(@NonNull WindowState focusedWindow) {
+        final ActivityRecord activity = focusedWindow.getActivityRecord();
+        if (activity == null) {
             return false;
         }
 
-        moveFocusToActivity(adjacentTopActivity);
+        final ActivityRecord mostRecentActivityInAdjacent = getMostRecentActivityInAdjacent(
+                activity);
+
+        moveFocusToActivity(mostRecentActivityInAdjacent);
         return !focusedWindow.isFocused();
     }
 
@@ -9736,7 +9766,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.e(TAG, "Host window not found");
                 return;
             }
-            if (hostWindow.mInputChannel == null) {
+            if (hostWindow.mInputChannelToken == null) {
                 Slog.e(TAG, "Host window does not have an input channel");
                 return;
             }

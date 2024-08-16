@@ -22,7 +22,7 @@
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Справаздача <xliff:g id="ID">#%d</xliff:g> пра памылку зафіксавана"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Дадаванне падрабязнасцей да справаздачы пра памылкі"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Калі ласка, пачакайце..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Паведамленне пра памылку хутка з\'явіцца на тэлефоне"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Паведамленне пра памылку хутка з’явіцца на тэлефоне"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Выберыце, каб абагуліць справаздачу пра памылку"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Дакраніцеся, каб абагуліць сваю справаздачу пра памылку"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Выберыце, каб абагуліць справаздачу пра памылку без здымка экрана, або чакайце атрымання здымка"</string>

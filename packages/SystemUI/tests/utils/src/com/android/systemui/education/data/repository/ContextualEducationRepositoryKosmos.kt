@@ -20,4 +20,6 @@ import com.android.systemui.kosmos.Kosmos
 import java.time.Instant
 
 var Kosmos.contextualEducationRepository: ContextualEducationRepository by
-    Kosmos.Fixture { FakeContextualEducationRepository(FakeEduClock(Instant.MIN)) }
+    Kosmos.Fixture { FakeContextualEducationRepository() }
+
+var Kosmos.fakeEduClock: FakeEduClock by Kosmos.Fixture { FakeEduClock(Instant.MIN) }

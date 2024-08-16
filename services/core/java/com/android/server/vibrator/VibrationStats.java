@@ -79,6 +79,7 @@ final class VibrationStats {
     private int mVibratorSetAmplitudeCount;
     private int mVibratorSetExternalControlCount;
     private int mVibratorPerformCount;
+    private int mVibratorPerformVendorCount;
     private int mVibratorComposeCount;
     private int mVibratorComposePwleCount;
 
@@ -239,6 +240,11 @@ final class VibrationStats {
         }
     }
 
+    /** Report a call to vibrator method to trigger a vendor vibration effect. */
+    void reportPerformVendorEffect(long halResult) {
+        mVibratorPerformVendorCount++;
+    }
+
     /** Report a call to vibrator method to trigger a vibration as a composition of primitives. */
     void reportComposePrimitives(long halResult, PrimitiveSegment[] primitives) {
         mVibratorComposeCount++;
@@ -313,6 +319,7 @@ final class VibrationStats {
         public final int halOnCount;
         public final int halOffCount;
         public final int halPerformCount;
+        public final int halPerformVendorCount;
         public final int halSetAmplitudeCount;
         public final int halSetExternalControlCount;
         public final int halCompositionSize;
@@ -357,6 +364,7 @@ final class VibrationStats {
             halOnCount = stats.mVibratorOnCount;
             halOffCount = stats.mVibratorOffCount;
             halPerformCount = stats.mVibratorPerformCount;
+            halPerformVendorCount = stats.mVibratorPerformVendorCount;
             halSetAmplitudeCount = stats.mVibratorSetAmplitudeCount;
             halSetExternalControlCount = stats.mVibratorSetExternalControlCount;
             halCompositionSize = stats.mVibrationCompositionTotalSize;
@@ -390,7 +398,8 @@ final class VibrationStats {
                     halOnCount, halOffCount, halPerformCount, halSetAmplitudeCount,
                     halSetExternalControlCount, halSupportedCompositionPrimitivesUsed,
                     halSupportedEffectsUsed, halUnsupportedCompositionPrimitivesUsed,
-                    halUnsupportedEffectsUsed, halCompositionSize, halPwleSize, adaptiveScale);
+                    halUnsupportedEffectsUsed, halCompositionSize, halPwleSize, adaptiveScale,
+                    halPerformVendorCount);
         }
 
         private static int[] filteredKeys(SparseBooleanArray supportArray, boolean supported) {

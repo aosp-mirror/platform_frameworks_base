@@ -14,6 +14,8 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static com.android.systemui.Flags.removeUpdateListenerInQsIconViewImpl;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
@@ -204,6 +206,9 @@ public class QSIconViewImpl extends QSIconView {
             values.setEvaluator(ArgbEvaluator.getInstance());
             mColorAnimator.setValues(values);
             mColorAnimator.removeAllListeners();
+            if (removeUpdateListenerInQsIconViewImpl()) {
+                mColorAnimator.removeAllUpdateListeners();
+            }
             mColorAnimator.addUpdateListener(animation -> {
                 setTint(iv, (int) animation.getAnimatedValue());
             });

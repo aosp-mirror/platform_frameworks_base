@@ -43,8 +43,8 @@ import android.os.Parcel;
 import android.os.UserHandle;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.collect.ImmutableList;
 

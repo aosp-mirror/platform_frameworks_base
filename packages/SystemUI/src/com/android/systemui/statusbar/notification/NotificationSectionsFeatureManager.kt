@@ -52,8 +52,11 @@ constructor(val proxy: DeviceConfigProxy, val context: Context) {
     }
 
     fun getNotificationBuckets(): IntArray {
-        if (PriorityPeopleSection.isEnabled || NotificationMinimalismPrototype.V2.isEnabled
-            || NotificationClassificationFlag.isEnabled) {
+        if (
+            PriorityPeopleSection.isEnabled ||
+                NotificationMinimalismPrototype.isEnabled ||
+                NotificationClassificationFlag.isEnabled
+        ) {
             // We don't need this list to be adaptive, it can be the superset of all features.
             return PriorityBucket.getAllInOrder()
         }

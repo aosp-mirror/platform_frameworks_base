@@ -423,6 +423,7 @@ package android.app {
   public final class PictureInPictureParams implements android.os.Parcelable {
     method public float getAspectRatioFloat();
     method public float getExpandedAspectRatioFloat();
+    method public static boolean isSameAspectRatio(@NonNull android.graphics.Rect, @NonNull android.util.Rational);
   }
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
@@ -618,6 +619,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void resetDefaultCrossProfileIntentFilters(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState();
     method @RequiresPermission(allOf={android.Manifest.permission.MANAGE_DEVICE_ADMINS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int);
+    method @FlaggedApi("android.app.admin.flags.provisioning_context_parameter") @RequiresPermission(allOf={android.Manifest.permission.MANAGE_DEVICE_ADMINS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwner(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, int);
     method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
@@ -2575,6 +2577,17 @@ package android.os {
   public static final class VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException extends java.lang.IllegalStateException {
   }
 
+  @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final class VibrationEffect.VendorEffect extends android.os.VibrationEffect {
+    method @Nullable public long[] computeCreateWaveformOffOnTimingsOrNull();
+    method public float getAdaptiveScale();
+    method public long getDuration();
+    method public int getEffectStrength();
+    method public float getScale();
+    method @NonNull public android.os.PersistableBundle getVendorData();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.VendorEffect> CREATOR;
+  }
+
   public static class VibrationEffect.VibrationParameter {
     method @NonNull public static android.os.VibrationEffect.VibrationParameter targetAmplitude(@FloatRange(from=0, to=1) float);
     method @NonNull public static android.os.VibrationEffect.VibrationParameter targetFrequency(@FloatRange(from=1) float);
@@ -4413,8 +4426,13 @@ package android.window {
 
   public class WindowInfosListenerForTest {
     ctor public WindowInfosListenerForTest();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
-    method public void removeWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+    method public void removeWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+  }
+
+  public static class WindowInfosListenerForTest.DisplayInfo {
+    field public final int displayId;
+    field @NonNull public final android.graphics.Matrix transform;
   }
 
   public static class WindowInfosListenerForTest.WindowInfo {

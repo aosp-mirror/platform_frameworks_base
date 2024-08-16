@@ -16,7 +16,6 @@
 package com.android.server.webkit;
 
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
@@ -92,7 +91,6 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
     private static final int MULTIPROCESS_SETTING_OFF_VALUE = Integer.MIN_VALUE;
 
     private final SystemInterface mSystemInterface;
-    private final Context mContext;
 
     private long mMinimumVersionCode = -1;
 
@@ -110,8 +108,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
 
     private final Object mLock = new Object();
 
-    WebViewUpdateServiceImpl(Context context, SystemInterface systemInterface) {
-        mContext = context;
+    WebViewUpdateServiceImpl(SystemInterface systemInterface) {
         mSystemInterface = systemInterface;
     }
 
@@ -173,7 +170,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
         try {
             synchronized (mLock) {
                 mCurrentWebViewPackage = findPreferredWebViewPackage();
-                String userSetting = mSystemInterface.getUserChosenWebViewProvider(mContext);
+                String userSetting = mSystemInterface.getUserChosenWebViewProvider();
                 if (userSetting != null
                         && !userSetting.equals(mCurrentWebViewPackage.packageName)) {
                     // Don't persist the user-chosen setting across boots if the package being
@@ -181,8 +178,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
                     // be surprised by the device switching to using a certain webview package,
                     // that was uninstalled/disabled a long time ago, if it is installed/enabled
                     // again.
-                    mSystemInterface.updateUserSetting(mContext,
-                            mCurrentWebViewPackage.packageName);
+                    mSystemInterface.updateUserSetting(mCurrentWebViewPackage.packageName);
                 }
                 onWebViewProviderChanged(mCurrentWebViewPackage);
             }
@@ -203,8 +199,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
             WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
             if (fallbackProvider != null) {
                 Slog.w(TAG, "No valid provider, trying to enable " + fallbackProvider.packageName);
-                mSystemInterface.enablePackageForAllUsers(mContext, fallbackProvider.packageName,
-                                                          true);
+                mSystemInterface.enablePackageForAllUsers(fallbackProvider.packageName, true);
             } else {
                 Slog.e(TAG, "No valid provider and no fallback available.");
             }
@@ -316,7 +311,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
             oldPackage = mCurrentWebViewPackage;
 
             if (newProviderName != null) {
-                mSystemInterface.updateUserSetting(mContext, newProviderName);
+                mSystemInterface.updateUserSetting(newProviderName);
             }
 
             try {
@@ -447,7 +442,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
     private PackageInfo findPreferredWebViewPackage() throws WebViewPackageMissingException {
         ProviderAndPackageInfo[] providers = getValidWebViewPackagesAndInfos();
 
-        String userChosenProvider = mSystemInterface.getUserChosenWebViewProvider(mContext);
+        String userChosenProvider = mSystemInterface.getUserChosenWebViewProvider();
 
         // If the user has chosen provider, use that (if it's installed and enabled for all
         // users).
@@ -455,7 +450,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
             if (providerAndPackage.provider.packageName.equals(userChosenProvider)) {
                 // userPackages can contain null objects.
                 List<UserPackage> userPackages =
-                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext,
+                        mSystemInterface.getPackageInfoForProviderAllUsers(
                                 providerAndPackage.provider);
                 if (isInstalledAndEnabledForAllUsers(userPackages)) {
                     return providerAndPackage.packageInfo;
@@ -470,7 +465,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
             if (providerAndPackage.provider.availableByDefault) {
                 // userPackages can contain null objects.
                 List<UserPackage> userPackages =
-                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext,
+                        mSystemInterface.getPackageInfoForProviderAllUsers(
                                 providerAndPackage.provider);
                 if (isInstalledAndEnabledForAllUsers(userPackages)) {
                     return providerAndPackage.packageInfo;
@@ -658,7 +653,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
 
     @Override
     public boolean isMultiProcessEnabled() {
-        int settingValue = mSystemInterface.getMultiProcessSetting(mContext);
+        int settingValue = mSystemInterface.getMultiProcessSetting();
         if (mSystemInterface.isMultiProcessDefaultEnabled()) {
             // Multiprocess should be enabled unless the user has turned it off manually.
             return settingValue > MULTIPROCESS_SETTING_OFF_VALUE;
@@ -671,7 +666,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
     @Override
     public void enableMultiProcess(boolean enable) {
         PackageInfo current = getCurrentWebViewPackage();
-        mSystemInterface.setMultiProcessSetting(mContext,
+        mSystemInterface.setMultiProcessSetting(
                 enable ? MULTIPROCESS_SETTING_ON_VALUE : MULTIPROCESS_SETTING_OFF_VALUE);
         mSystemInterface.notifyZygote(enable);
         if (current != null) {
@@ -725,7 +720,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
         pw.println("  WebView packages:");
         for (WebViewProviderInfo provider : allProviders) {
             List<UserPackage> userPackages =
-                    mSystemInterface.getPackageInfoForProviderAllUsers(mContext, provider);
+                    mSystemInterface.getPackageInfoForProviderAllUsers(provider);
             PackageInfo systemUserPackageInfo =
                     userPackages.get(UserHandle.USER_SYSTEM).getPackageInfo();
             if (systemUserPackageInfo == null) {
@@ -741,7 +736,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
                     systemUserPackageInfo.applicationInfo.targetSdkVersion);
             if (validity == VALIDITY_OK) {
                 boolean installedForAllUsers = isInstalledAndEnabledForAllUsers(
-                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext, provider));
+                        mSystemInterface.getPackageInfoForProviderAllUsers(provider));
                 pw.println(String.format(
                         "    Valid package %s (%s) is %s installed/enabled for all users",
                         systemUserPackageInfo.packageName,

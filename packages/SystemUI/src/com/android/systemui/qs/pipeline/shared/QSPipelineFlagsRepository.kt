@@ -9,19 +9,10 @@ import javax.inject.Inject
 @SysUISingleton
 class QSPipelineFlagsRepository @Inject constructor() {
 
-    val pipelineEnabled: Boolean
-        get() = AconfigFlags.qsNewPipeline()
-
     val tilesEnabled: Boolean
         get() = AconfigFlags.qsNewTiles()
 
     companion object Utils {
-        fun assertInLegacyMode() =
-            RefactorFlagUtils.assertInLegacyMode(
-                AconfigFlags.qsNewPipeline(),
-                AconfigFlags.FLAG_QS_NEW_PIPELINE
-            )
-
         fun assertNewTiles() =
             RefactorFlagUtils.assertInNewMode(
                 AconfigFlags.qsNewTiles(),

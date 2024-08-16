@@ -16,6 +16,9 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.service.notification.ZenModeConfig.ORIGIN_UNKNOWN;
+import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
+
 import android.app.AutomaticZenRule;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -37,13 +40,17 @@ public class TestModeBuilder {
     private ZenModeConfig.ZenRule mConfigZenRule;
 
     public static final ZenMode EXAMPLE = new TestModeBuilder().build();
-    public static final ZenMode MANUAL_DND = ZenMode.manualDndMode(
-            new AutomaticZenRule.Builder("Manual DND", Uri.parse("rule://dnd"))
-                    .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
-                    .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
-                    .build(),
-            true /* isActive */
-    );
+    public static final ZenMode MANUAL_DND_ACTIVE = manualDnd(Uri.EMPTY, true);
+    public static final ZenMode MANUAL_DND_INACTIVE = manualDnd(Uri.EMPTY, false);
+
+    public static ZenMode manualDnd(Uri conditionId, boolean isActive) {
+        return ZenMode.manualDndMode(
+                new AutomaticZenRule.Builder("Do Not Disturb", conditionId)
+                        .setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+                        .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
+                        .build(),
+                isActive);
+    }
 
     public TestModeBuilder() {
         // Reasonable defaults
@@ -144,8 +151,15 @@ public class TestModeBuilder {
     }
 
     public TestModeBuilder setEnabled(boolean enabled) {
+        return setEnabled(enabled, /* byUser= */ false);
+    }
+
+    public TestModeBuilder setEnabled(boolean enabled, boolean byUser) {
         mRule.setEnabled(enabled);
         mConfigZenRule.enabled = enabled;
+        if (!enabled) {
+            mConfigZenRule.disabledOrigin = byUser ? ORIGIN_USER_IN_SYSTEMUI : ORIGIN_UNKNOWN;
+        }
         return this;
     }
 

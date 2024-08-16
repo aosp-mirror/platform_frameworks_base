@@ -16,8 +16,10 @@
 
 package com.android.systemui.volume.domain.interactor
 
+import android.media.AudioManager.STREAM_MUSIC
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -40,17 +42,75 @@ class AudioSharingInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        with(kosmos) { underTest = audioSharingInteractor }
+        with(kosmos) {
+            with(audioSharingRepository) { setVolumeMap(mapOf(TEST_GROUP_ID to TEST_VOLUME)) }
+            underTest = audioSharingInteractor
+        }
     }
 
     @Test
-    fun volumeChanges_returnVolume() {
+    fun handleInAudioSharingChange() {
         with(kosmos) {
             testScope.runTest {
-                with(audioSharingRepository) {
-                    setSecondaryGroupId(TEST_GROUP_ID)
-                    setVolumeMap(mapOf(TEST_GROUP_ID to TEST_VOLUME))
-                }
+                with(audioSharingRepository) { setInAudioSharing(true) }
+                val inAudioSharing by collectLastValue(underTest.isInAudioSharing)
+                runCurrent()
+
+                Truth.assertThat(inAudioSharing).isEqualTo(true)
+
+                with(audioSharingRepository) { setInAudioSharing(false) }
+                runCurrent()
+
+                Truth.assertThat(inAudioSharing).isEqualTo(false)
+            }
+        }
+    }
+
+    @Test
+    fun handlePrimaryGroupChange_nullVolume() {
+        with(kosmos) {
+            testScope.runTest {
+                with(audioSharingRepository) { setPrimaryGroupId(TEST_GROUP_ID_INVALID) }
+                val preMusicStream by
+                    collectLastValue(
+                        audioVolumeInteractor.getAudioStream(AudioStream(STREAM_MUSIC))
+                    )
+                val preVolume = preMusicStream?.volume
+                runCurrent()
+                underTest.handlePrimaryGroupChange()
+                val musicStream by
+                    collectLastValue(
+                        audioVolumeInteractor.getAudioStream(AudioStream(STREAM_MUSIC))
+                    )
+                runCurrent()
+
+                Truth.assertThat(musicStream?.volume).isEqualTo(preVolume)
+            }
+        }
+    }
+
+    @Test
+    fun handlePrimaryGroupChange_setStreamVolume() {
+        with(kosmos) {
+            testScope.runTest {
+                with(audioSharingRepository) { setPrimaryGroupId(TEST_GROUP_ID) }
+                underTest.handlePrimaryGroupChange()
+                val musicStream by
+                    collectLastValue(
+                        audioVolumeInteractor.getAudioStream(AudioStream(STREAM_MUSIC))
+                    )
+                runCurrent()
+
+                Truth.assertThat(musicStream?.volume).isEqualTo(TEST_MUSIC_VOLUME)
+            }
+        }
+    }
+
+    @Test
+    fun secondaryGroupVolumeChanges_returnVolume() {
+        with(kosmos) {
+            testScope.runTest {
+                with(audioSharingRepository) { setSecondaryGroupId(TEST_GROUP_ID) }
                 val volume by collectLastValue(underTest.volume)
                 runCurrent()
 
@@ -60,13 +120,10 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun volumeChanges_returnNull() {
+    fun secondaryGroupVolumeChanges_returnNull() {
         with(kosmos) {
             testScope.runTest {
-                with(audioSharingRepository) {
-                    setSecondaryGroupId(TEST_GROUP_ID_INVALID)
-                    setVolumeMap(mapOf(TEST_GROUP_ID to TEST_VOLUME))
-                }
+                with(audioSharingRepository) { setSecondaryGroupId(TEST_GROUP_ID_INVALID) }
                 val volume by collectLastValue(underTest.volume)
                 runCurrent()
 
@@ -76,7 +133,7 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun volumeChanges_returnDefaultVolume() {
+    fun secondaryGroupVolumeChanges_returnDefaultVolume() {
         with(kosmos) {
             testScope.runTest {
                 with(audioSharingRepository) {
@@ -94,7 +151,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     private companion object {
         const val TEST_GROUP_ID = 1
         const val TEST_GROUP_ID_INVALID = -1
-        const val TEST_VOLUME = 10
+        const val TEST_MUSIC_VOLUME = 10
+        const val TEST_VOLUME = 255
         const val TEST_VOLUME_DEFAULT = 20
     }
 }

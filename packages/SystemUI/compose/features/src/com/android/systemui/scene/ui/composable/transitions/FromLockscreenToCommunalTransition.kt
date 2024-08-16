@@ -25,8 +25,8 @@ fun TransitionBuilder.lockscreenToCommunalTransition() {
     spec = tween(durationMillis = 500)
 
     // Translate lockscreen to the left.
-    translate(Scenes.Lockscreen.rootElementKey, Edge.Left)
+    translate(Scenes.Lockscreen.rootElementKey, Edge.Start)
 
     // Translate communal from the right.
-    translate(Scenes.Communal.rootElementKey, Edge.Right)
+    translate(Scenes.Communal.rootElementKey, Edge.End)
 }

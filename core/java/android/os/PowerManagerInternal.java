@@ -104,8 +104,10 @@ public abstract class PowerManagerInternal {
      * This method must only be called by the window manager.
      *
      * @param brightness The overridden brightness, or Float.NaN to disable the override.
+     * @param tag Source identifier of the app window that requests the override.
      */
-    public abstract void setScreenBrightnessOverrideFromWindowManager(float brightness);
+    public abstract void setScreenBrightnessOverrideFromWindowManager(
+            float brightness, CharSequence tag);
 
     /**
      * Used by the window manager to override the user activity timeout based on the
@@ -137,11 +139,17 @@ public abstract class PowerManagerInternal {
      * @param screenState The overridden screen state, or {@link Display#STATE_UNKNOWN}
      * to disable the override.
      * @param reason The reason for overriding the screen state.
-     * @param screenBrightness The overridden screen brightness, or
-     * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override.
+     * @param screenBrightnessFloat The overridden screen brightness between
+     * {@link PowerManager#BRIGHTNESS_MIN} and {@link PowerManager#BRIGHTNESS_MAX}, or
+     * {@link PowerManager#BRIGHTNESS_INVALID_FLOAT} if screenBrightnessInt should be used instead.
+     * @param screenBrightnessInt The overridden screen brightness between 1 and 255, or
+     * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override. Not used if
+     *                            screenBrightnessFloat is provided (is not NaN).
+     * @param useNormalBrightnessForDoze Whether use normal brightness while device is dozing.
      */
     public abstract void setDozeOverrideFromDreamManager(
-            int screenState, @Display.StateReason int reason, int screenBrightness);
+            int screenState, @Display.StateReason int reason, float screenBrightnessFloat,
+            int screenBrightnessInt, boolean useNormalBrightnessForDoze);
 
     /**
      * Used by sidekick manager to tell the power manager if it shouldn't change the display state

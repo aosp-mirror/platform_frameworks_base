@@ -696,7 +696,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 2,
                         priority = 2,
-                        packageName = "pk_2",
+                        componentName = ComponentName("pk_2", "cls_2"),
                         icon = fakeIcon,
                         user = mainUser,
                     ),
@@ -731,7 +731,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 1,
                         priority = 1,
-                        packageName = "pk_1",
+                        componentName = ComponentName("pk_1", "cls_1"),
                         icon = fakeIcon,
                         user = mainUser,
                     ),

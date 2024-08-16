@@ -736,7 +736,8 @@ class InstallRepository(private val context: Context) {
             val appInfo = packageManager.getApplicationInfo(
                 pkgName, PackageManager.MATCH_UNINSTALLED_PACKAGES
             )
-            if (appInfo.flags and ApplicationInfo.FLAG_INSTALLED == 0) {
+            // If the package is archived, treat it as an update case.
+            if (!appInfo.isArchived && appInfo.flags and ApplicationInfo.FLAG_INSTALLED == 0) {
                 return false
             }
         } catch (e: PackageManager.NameNotFoundException) {
@@ -912,8 +913,10 @@ class InstallRepository(private val context: Context) {
                     "message: $message"
             )
         }
+
+        val shouldReturnResult = intent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)
+
         if (statusCode == PackageInstaller.STATUS_SUCCESS) {
-            val shouldReturnResult = intent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)
             val resultIntent = if (shouldReturnResult) {
                 Intent().putExtra(Intent.EXTRA_INSTALL_RESULT, PackageManager.INSTALL_SUCCEEDED)
             } else {
@@ -922,12 +925,34 @@ class InstallRepository(private val context: Context) {
             }
             _installResult.setValue(InstallSuccess(appSnippet, shouldReturnResult, resultIntent))
         } else {
-            if (statusCode != PackageInstaller.STATUS_FAILURE_ABORTED) {
+            // TODO (b/346655018): Use INSTALL_FAILED_ABORTED legacyCode in the condition
+            // statusCode can be STATUS_FAILURE_ABORTED if:
+            // 1. GPP blocks an install.
+            // 2. User denies ownership update explicitly.
+            // InstallFailed dialog must not be shown only when the user denies ownership update. We
+            // must show this dialog for all other install failures.
+
+            val userDenied =
+                    statusCode == PackageInstaller.STATUS_FAILURE_ABORTED &&
+                    legacyStatus != PackageManager.INSTALL_FAILED_VERIFICATION_TIMEOUT &&
+                    legacyStatus != PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE
+
+            if (shouldReturnResult) {
+                val resultIntent = Intent().putExtra(Intent.EXTRA_INSTALL_RESULT, legacyStatus)
                 _installResult.setValue(
-                    InstallFailed(appSnippet, statusCode, legacyStatus, message)
+                    InstallFailed(
+                        legacyCode = legacyStatus,
+                        statusCode = statusCode,
+                        shouldReturnResult = true,
+                        resultIntent = resultIntent
+                    )
                 )
-            } else {
+            } else if (userDenied) {
                 _installResult.setValue(InstallAborted(ABORT_REASON_INTERNAL_ERROR))
+            } else {
+                _installResult.setValue(
+                    InstallFailed(appSnippet, legacyStatus, statusCode, message)
+                )
             }
         }
     }

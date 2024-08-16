@@ -52,7 +52,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -106,7 +105,6 @@ public final class DozeServiceHost implements DozeHost {
     private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final AuthController mAuthController;
-    private final NotificationIconAreaController mNotificationIconAreaController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final ShadeLockscreenInteractor mShadeLockscreenInteractor;
     private View mAmbientIndicationContainer;
@@ -129,7 +127,6 @@ public final class DozeServiceHost implements DozeHost {
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             AuthController authController,
-            NotificationIconAreaController notificationIconAreaController,
             ShadeLockscreenInteractor shadeLockscreenInteractor,
             DozeInteractor dozeInteractor) {
         super();
@@ -149,7 +146,6 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mAuthController = authController;
-        mNotificationIconAreaController = notificationIconAreaController;
         mShadeLockscreenInteractor = shadeLockscreenInteractor;
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mDozeInteractor = dozeInteractor;
@@ -196,13 +192,12 @@ public final class DozeServiceHost implements DozeHost {
 
     void fireNotificationPulse(NotificationEntry entry) {
         Runnable pulseSuppressedListener = () -> {
-            if (NotificationIconContainerRefactor.isEnabled()) {
-                mHeadsUpManager.removeNotification(
-                        entry.getKey(), /* releaseImmediately= */ true, /* animate= */ false);
-            } else {
-                entry.setPulseSuppressed(true);
-                mNotificationIconAreaController.updateAodNotificationIcons();
-            }
+            mHeadsUpManager.removeNotification(
+                    entry.getKey(),
+                    /* releaseImmediately= */ true,
+                    /* animate= */ false,
+                    "fireNotificationPulse"
+            );
         };
         Assert.isMainThread();
         for (Callback callback : mCallbacks) {
@@ -433,8 +428,13 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void setDozeScreenBrightness(int brightness) {
-        mDozeLog.traceDozeScreenBrightness(brightness);
         mNotificationShadeWindowController.setDozeScreenBrightness(brightness);
+    }
+
+
+    @Override
+    public void setDozeScreenBrightnessFloat(float brightness) {
+        mNotificationShadeWindowController.setDozeScreenBrightnessFloat(brightness);
     }
 
     @Override

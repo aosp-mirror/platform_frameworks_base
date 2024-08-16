@@ -201,7 +201,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .setWindowContainer(mImeWindow, null, null);
         getController().onImeControlTargetChanged(base);
         base.setRequestedVisibleTypes(ime(), ime());
-        getController().onRequestedVisibleTypesChanged(base);
+        getController().onRequestedVisibleTypesChanged(base, null /* statsToken */);
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");
@@ -445,7 +445,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         waitUntilHandlersIdle();
         clearInvocations(mDisplayContent);
-        imeSourceProvider.updateControlForTarget(app, false /* force */);
+        imeSourceProvider.updateControlForTarget(app, false /* force */, null /* statsToken */);
         imeSourceProvider.setClientVisible(true);
         verify(mDisplayContent).assignWindowLayers(anyBoolean());
         waitUntilHandlersIdle();
@@ -497,7 +497,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.updateImeInputAndControlTarget(app);
 
         app.setRequestedVisibleTypes(ime(), ime());
-        getController().onRequestedVisibleTypesChanged(app);
+        getController().onRequestedVisibleTypesChanged(app, null /* statsToken */);
         assertTrue(ime.getControllableInsetProvider().getSource().isVisible());
 
         getController().updateAboveInsetsState(true /* notifyInsetsChange */);
@@ -544,7 +544,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         imeInsetsProvider.setWindowContainer(mImeWindow, null, null);
         imeInsetsProvider.updateSourceFrame(mImeWindow.getFrame());
 
-        imeInsetsProvider.updateControlForTarget(app1, false);
+        imeInsetsProvider.updateControlForTarget(app1, false, null /* statsToken */);
         imeInsetsProvider.onPostLayout();
         final InsetsSourceControl control1 = imeInsetsProvider.getControl(app1);
         assertNotNull(control1);
@@ -553,7 +553,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         // Simulate the IME control target updated from app1 to app2 when IME insets was invisible.
         imeInsetsProvider.setServerVisible(false);
-        imeInsetsProvider.updateControlForTarget(app2, false);
+        imeInsetsProvider.updateControlForTarget(app2, false, null /* statsToken */);
 
         // Verify insetsHint of the new control is same as last IME source frame after the layout.
         imeInsetsProvider.onPostLayout();
