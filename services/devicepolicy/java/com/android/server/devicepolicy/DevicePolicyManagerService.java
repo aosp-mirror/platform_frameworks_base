@@ -19755,16 +19755,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void transferSubscriptionOwnership(ComponentName admin, ComponentName target) {
-        if (Flags.esimManagementEnabled()) {
-            SubscriptionManager subscriptionManager = mContext.getSystemService(
-                    SubscriptionManager.class);
-            for (int subId : getSubscriptionIdsInternal(admin.getPackageName()).toArray()) {
-                try {
-                    subscriptionManager.setGroupOwner(subId, target.getPackageName());
-                } catch (Exception e) {
-                    // Shouldn't happen.
-                    Slogf.e(LOG_TAG, e, "Error setting group owner for subId: " + subId);
-                }
+        SubscriptionManager subscriptionManager = mContext.getSystemService(
+                SubscriptionManager.class);
+        for (int subId : getSubscriptionIdsInternal(admin.getPackageName()).toArray()) {
+            try {
+                subscriptionManager.setGroupOwner(subId, target.getPackageName());
+            } catch (Exception e) {
+                // Shouldn't happen.
+                Slogf.e(LOG_TAG, e, "Error setting group owner for subId: " + subId);
             }
         }
     }

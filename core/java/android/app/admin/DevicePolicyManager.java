@@ -56,7 +56,6 @@ import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
@@ -17742,7 +17741,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller is not authorized to call this method.
      * @return ids of all managed subscriptions currently downloaded by an admin on the device.
      */
-    @FlaggedApi(FLAG_ESIM_MANAGEMENT_ENABLED)
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS)
     @NonNull
     public Set<Integer> getSubscriptionIds() {
