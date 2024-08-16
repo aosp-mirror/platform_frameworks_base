@@ -304,6 +304,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 /**
@@ -1201,8 +1202,7 @@ public final class ViewRootImpl implements ViewParent,
     private String mLargestViewTraceName;
 
     private final boolean mAppStartInfoTimestampsFlagValue;
-    @GuardedBy("this")
-    private boolean mAppStartTimestampsSent = false;
+    private AtomicBoolean mAppStartTimestampsSent = new AtomicBoolean(false);
     private boolean mAppStartTrackingStarted = false;
     private long mRenderThreadDrawStartTimeNs = -1;
     private long mFirstFramePresentedTimeNs = -1;
@@ -2647,7 +2647,7 @@ public final class ViewRootImpl implements ViewParent,
                 destroySurface();
 
                 // Reset so they can be sent again for warm starts.
-                mAppStartTimestampsSent = false;
+                mAppStartTimestampsSent.set(false);
                 mAppStartTrackingStarted = false;
                 mRenderThreadDrawStartTimeNs = -1;
                 mFirstFramePresentedTimeNs = -1;
@@ -4503,42 +4503,29 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void maybeSendAppStartTimes() {
-        synchronized (this) {
-            if (mAppStartTimestampsSent) {
-                // Don't send timestamps more than once.
-                return;
-            }
-
-            // If we already have {@link mRenderThreadDrawStartTimeNs} then pass it through, if not
-            // post to main thread and check if we have it there.
-            if (mRenderThreadDrawStartTimeNs != -1) {
-                sendAppStartTimesLocked();
-            } else {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (ViewRootImpl.this) {
-                            if (mRenderThreadDrawStartTimeNs == -1) {
-                                return;
-                            }
-                            sendAppStartTimesLocked();
-                        }
-                    }
-                });
-            }
+        if (mAppStartTimestampsSent.get()) {
+            // Don't send timestamps more than once.
+            return;
         }
-    }
 
-    @GuardedBy("this")
-    private void sendAppStartTimesLocked() {
-        try {
-            ActivityManager.getService().reportStartInfoViewTimestamps(
-                    mRenderThreadDrawStartTimeNs, mFirstFramePresentedTimeNs);
-            mAppStartTimestampsSent = true;
-        } catch (RemoteException e) {
-            // Ignore, timestamps may be lost.
-            if (DBG) Log.d(TAG, "Exception attempting to report start timestamps.", e);
-        }
+        // Post to main thread
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mRenderThreadDrawStartTimeNs == -1) {
+                    return;
+                }
+
+                try {
+                    ActivityManager.getService().reportStartInfoViewTimestamps(
+                            mRenderThreadDrawStartTimeNs, mFirstFramePresentedTimeNs);
+                    mAppStartTimestampsSent.set(true);
+                } catch (RemoteException e) {
+                    // Ignore, timestamps may be lost.
+                    if (DBG) Log.d(TAG, "Exception attempting to report start timestamps.", e);
+                }
+            }
+        });
     }
 
     /**
