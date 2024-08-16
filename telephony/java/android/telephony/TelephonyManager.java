@@ -23,6 +23,7 @@ import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.BoolRes;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -6886,6 +6887,26 @@ public class TelephonyManager {
         }
     }
 
+    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
+    // partition SDK level, not application's target SDK version.
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private boolean hasCapability(@NonNull String feature, @BoolRes int legacySetting) {
+        if (mContext == null) return true;
+
+        if (mContext.getPackageManager().hasSystemFeature(feature)) return true;
+
+        // Check SDK version of the vendor partition.
+        final int vendorApiLevel = SystemProperties.getInt(
+                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        // Devices shipped with 2024Q2 or later are required to declare FEATURE_TELEPHONY_*
+        // for individual sub-features (calling, messaging, data), so there's no need to check
+        // the legacy setting.
+        if (vendorApiLevel < Build.VENDOR_API_2024_Q2) {
+            return mContext.getResources().getBoolean(legacySetting);
+        }
+        return false;
+    }
+
     // TODO(b/316183370): replace all @code with @link in javadoc after feature is released
     /**
      * @return true if the current device is "voice capable".
@@ -6905,11 +6926,9 @@ public class TelephonyManager {
      * device (when {@code #isDeviceVoiceCapable} return {@code true}), caller should check for
      * subscription-level voice capability as well. See {@code #isDeviceVoiceCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @Deprecated
     public boolean isVoiceCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_CALLING,
                 com.android.internal.R.bool.config_voice_capable);
     }
 
@@ -6932,7 +6951,6 @@ public class TelephonyManager {
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceVoiceCapable() {
         return isVoiceCapable();
@@ -6951,10 +6969,9 @@ public class TelephonyManager {
      * device (when {@code #isDeviceSmsCapable} return {@code true}), caller should check for
      * subscription-level SMS capability as well. See {@code #isDeviceSmsCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+    @Deprecated
     public boolean isSmsCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_MESSAGING,
                 com.android.internal.R.bool.config_sms_capable);
     }
 
@@ -6974,7 +6991,6 @@ public class TelephonyManager {
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceSmsCapable() {
         return isSmsCapable();
@@ -14542,10 +14558,8 @@ public class TelephonyManager {
      * data connections over the telephony network.
      * <p>
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_DATA)
     public boolean isDataCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_DATA,
                 com.android.internal.R.bool.config_mobile_data_capable);
     }
 
