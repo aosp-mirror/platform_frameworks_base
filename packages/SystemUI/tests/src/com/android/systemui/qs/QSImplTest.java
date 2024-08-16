@@ -51,6 +51,7 @@ import android.widget.FrameLayout;
 
 import androidx.compose.ui.platform.ComposeView;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -611,7 +612,8 @@ public class QSImplTest extends SysuiTestCase {
         when(mQSContainerImplController.getView()).thenReturn(mContainer);
         when(mQSPanelController.getTileLayout()).thenReturn(mQQsTileLayout);
         when(mQuickQSPanelController.getTileLayout()).thenReturn(mQsTileLayout);
-        when(mFooterActionsViewModelFactory.create(any())).thenReturn(mFooterActionsViewModel);
+        when(mFooterActionsViewModelFactory.create(any(LifecycleOwner.class)))
+                .thenReturn(mFooterActionsViewModel);
     }
 
     private void setUpMedia() {

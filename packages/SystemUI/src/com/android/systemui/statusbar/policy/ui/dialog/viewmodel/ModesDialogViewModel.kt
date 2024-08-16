@@ -30,6 +30,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogEventLogger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +50,7 @@ constructor(
     zenModeInteractor: ZenModeInteractor,
     @Background val bgDispatcher: CoroutineDispatcher,
     private val dialogDelegate: ModesDialogDelegate,
+    private val dialogEventLogger: ModesDialogEventLogger,
 ) {
     private val zenDialogMetricsLogger = QSZenModeDialogMetricsLogger(context)
 
@@ -94,14 +96,17 @@ constructor(
                             if (!mode.rule.isEnabled) {
                                 openSettings(mode)
                             } else if (mode.isActive) {
+                                dialogEventLogger.logModeOff(mode)
                                 zenModeInteractor.deactivateMode(mode)
                             } else {
                                 if (mode.rule.isManualInvocationAllowed) {
                                     if (zenModeInteractor.shouldAskForZenDuration(mode)) {
+                                        dialogEventLogger.logOpenDurationDialog(mode)
                                         // NOTE: The dialog handles turning on the mode itself.
                                         val dialog = makeZenModeDialog()
                                         dialog.show()
                                     } else {
+                                        dialogEventLogger.logModeOn(mode)
                                         zenModeInteractor.activateMode(mode)
                                     }
                                 }
@@ -114,6 +119,7 @@ constructor(
             .flowOn(bgDispatcher)
 
     private fun openSettings(mode: ZenMode) {
+        dialogEventLogger.logModeSettings(mode)
         val intent: Intent =
             Intent(ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
                 .putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, mode.id)

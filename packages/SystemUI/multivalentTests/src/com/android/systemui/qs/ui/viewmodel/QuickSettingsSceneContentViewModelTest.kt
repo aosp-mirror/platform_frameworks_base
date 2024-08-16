@@ -17,6 +17,7 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import android.testing.TestableLooper.RunWithLooper
+import androidx.lifecycle.LifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -59,7 +60,7 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
     private val footerActionsViewModel = mock<FooterActionsViewModel>()
     private val footerActionsViewModelFactory =
         mock<FooterActionsViewModel.Factory> {
-            whenever(create(any())).thenReturn(footerActionsViewModel)
+            whenever(create(any<LifecycleOwner>())).thenReturn(footerActionsViewModel)
         }
     private val footerActionsController = mock<FooterActionsController>()
 
