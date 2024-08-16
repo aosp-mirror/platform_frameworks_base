@@ -16,7 +16,56 @@
 
 package com.android.wm.shell.util
 
+import android.app.ActivityManager.RunningTaskInfo
+import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.content.pm.ActivityInfo
+import android.graphics.Rect
+import com.android.wm.shell.desktopmode.CaptionState
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
+
+/**
+ * Create an instance of [CaptionState.AppHandle] with parameters as properties.
+ *
+ * Any fields without corresponding parameters will retain their default values.
+ */
+fun createAppHandleState(
+    runningTaskInfo: RunningTaskInfo = createTaskInfo(),
+    isHandleMenuExpanded: Boolean = false,
+    globalAppHandleBounds: Rect = Rect(),
+): CaptionState.AppHandle =
+    CaptionState.AppHandle(
+        runningTaskInfo = runningTaskInfo,
+        isHandleMenuExpanded = isHandleMenuExpanded,
+        globalAppHandleBounds = globalAppHandleBounds)
+
+/**
+ * Create an instance of [CaptionState.AppHeader] with parameters as properties.
+ *
+ * Any fields without corresponding parameters will retain their default values.
+ */
+fun createAppHeaderState(
+    runningTaskInfo: RunningTaskInfo = createTaskInfo(),
+    isHeaderMenuExpanded: Boolean = false,
+    globalAppChipBounds: Rect = Rect(),
+): CaptionState.AppHeader =
+    CaptionState.AppHeader(
+        runningTaskInfo = runningTaskInfo,
+        isHeaderMenuExpanded = isHeaderMenuExpanded,
+        globalAppChipBounds = globalAppChipBounds)
+
+/**
+ * Create an instance of [RunningTaskInfo] with parameters as properties.
+ *
+ * Any fields without corresponding parameters will retain their default values.
+ */
+fun createTaskInfo(
+    deviceWindowingMode: Int = WINDOWING_MODE_UNDEFINED,
+    runningTaskPackageName: String = GMAIL_PACKAGE_NAME,
+): RunningTaskInfo =
+    RunningTaskInfo().apply {
+      configuration.windowConfiguration.windowingMode = deviceWindowingMode
+      topActivityInfo = ActivityInfo().apply { packageName = runningTaskPackageName }
+    }
 
 /**
  * Constructs a [WindowingEducationProto] object, populating its fields with the provided
@@ -61,3 +110,7 @@ fun createAppHandleEducationProto(
           }
         }
         .build()
+
+const val GMAIL_PACKAGE_NAME = "com.google.android.gm"
+const val YOUTUBE_PACKAGE_NAME = "com.google.android.youtube"
+const val LAUNCHER_PACKAGE_NAME = "com.google.android.apps.nexuslauncher"

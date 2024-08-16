@@ -28,6 +28,8 @@ import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
+import androidx.annotation.OptIn;
+
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -116,6 +118,8 @@ import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
 import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
+import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
+import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -123,6 +127,8 @@ import dagger.Module;
 import dagger.Provides;
 
 import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.MainCoroutineDispatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -305,6 +311,11 @@ public abstract class WMShellModule {
             @ShellBackgroundThread ShellExecutor bgExecutor
     ) {
         return new AssistContentRequester(context, shellExecutor, bgExecutor);
+    }
+
+    @Provides
+    static AdditionalSystemViewContainer.Factory provideAdditionalSystemViewContainerFactory() {
+        return new AdditionalSystemViewContainer.Factory();
     }
 
     //
@@ -783,13 +794,30 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static DesktopWindowingEducationTooltipController
+            provideDesktopWindowingEducationTooltipController(
+            Context context,
+            AdditionalSystemViewContainer.Factory additionalSystemViewContainerFactory
+    ) {
+        return new DesktopWindowingEducationTooltipController(context,
+                additionalSystemViewContainerFactory);
+    }
+
+    @OptIn(markerClass = ExperimentalCoroutinesApi.class)
+    @WMSingleton
+    @Provides
     static AppHandleEducationController provideAppHandleEducationController(
+            Context context,
             AppHandleEducationFilter appHandleEducationFilter,
-            ShellTaskOrganizer shellTaskOrganizer,
             AppHandleEducationDatastoreRepository appHandleEducationDatastoreRepository,
-            @ShellMainThread CoroutineScope applicationScope) {
-        return new AppHandleEducationController(appHandleEducationFilter,
-                shellTaskOrganizer, appHandleEducationDatastoreRepository, applicationScope);
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
+            DesktopWindowingEducationTooltipController desktopWindowingEducationTooltipController,
+            @ShellMainThread CoroutineScope applicationScope, @ShellBackgroundThread
+            MainCoroutineDispatcher backgroundDispatcher) {
+        return new AppHandleEducationController(context, appHandleEducationFilter,
+                appHandleEducationDatastoreRepository, windowDecorCaptionHandleRepository,
+                desktopWindowingEducationTooltipController, applicationScope,
+                backgroundDispatcher);
     }
 
     @WMSingleton
