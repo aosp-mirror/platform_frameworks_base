@@ -211,17 +211,10 @@ class ImplGeneratingAdapter(
             }
 
             if (policy.policy == FilterPolicy.Ignore) {
-                when (Type.getReturnType(descriptor)) {
-                    Type.VOID_TYPE -> {
-                        log.v("Making method ignored...")
-                        return IgnoreMethodAdapter(
-                                access, name, descriptor, signature, exceptions, innerVisitor)
-                            .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
-                    }
-                    else -> {
-                        throw RuntimeException("Ignored policy only allowed for void methods")
-                    }
-                }
+                log.v("Making method ignored...")
+                return IgnoreMethodAdapter(
+                    access, name, descriptor, signature, exceptions, innerVisitor)
+                    .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
             }
         }
         if (substituted) {
@@ -290,14 +283,37 @@ class ImplGeneratingAdapter(
      */
     private inner class IgnoreMethodAdapter(
             access: Int,
-            val name: String,
-            descriptor: String,
+            name: String,
+            val descriptor: String,
             signature: String?,
             exceptions: Array<String>?,
             next: MethodVisitor?
     ) : BodyReplacingMethodVisitor(access, name, descriptor, signature, exceptions, next) {
         override fun emitNewCode() {
-            visitInsn(Opcodes.RETURN)
+            when (Type.getReturnType(descriptor)) {
+                Type.VOID_TYPE -> visitInsn(Opcodes.RETURN)
+                Type.BOOLEAN_TYPE, Type.BYTE_TYPE, Type.CHAR_TYPE, Type.SHORT_TYPE,
+                Type.INT_TYPE -> {
+                    visitInsn(Opcodes.ICONST_0)
+                    visitInsn(Opcodes.IRETURN)
+                }
+                Type.LONG_TYPE -> {
+                    visitInsn(Opcodes.LCONST_0)
+                    visitInsn(Opcodes.LRETURN)
+                }
+                Type.FLOAT_TYPE -> {
+                    visitInsn(Opcodes.FCONST_0)
+                    visitInsn(Opcodes.FRETURN)
+                }
+                Type.DOUBLE_TYPE -> {
+                    visitInsn(Opcodes.DCONST_0)
+                    visitInsn(Opcodes.DRETURN)
+                }
+                else -> {
+                    visitInsn(Opcodes.ACONST_NULL)
+                    visitInsn(Opcodes.ARETURN)
+                }
+            }
             visitMaxs(0, 0) // We let ASM figure them out.
         }
     }

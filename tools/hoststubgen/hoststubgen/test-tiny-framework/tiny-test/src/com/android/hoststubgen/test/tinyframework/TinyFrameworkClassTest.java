@@ -53,6 +53,20 @@ public class TinyFrameworkClassTest {
 //    }
 
     @Test
+    public void testIgnore() {
+        TinyFrameworkForTextPolicy tfc = new TinyFrameworkForTextPolicy();
+        tfc.toBeIgnoredV();
+        assertThat(tfc.toBeIgnoredZ()).isEqualTo(false);
+        assertThat(tfc.toBeIgnoredB()).isEqualTo(0);
+        assertThat(tfc.toBeIgnoredC()).isEqualTo(0);
+        assertThat(tfc.toBeIgnoredS()).isEqualTo(0);
+        assertThat(tfc.toBeIgnoredI()).isEqualTo(0);
+        assertThat(tfc.toBeIgnoredF()).isEqualTo(0);
+        assertThat(tfc.toBeIgnoredD()).isEqualTo(0);
+        assertThat(tfc.toBeIgnoredObj()).isEqualTo(null);
+    }
+
+    @Test
     public void testSubstitute() {
         TinyFrameworkForTextPolicy tfc = new TinyFrameworkForTextPolicy();
         assertThat(tfc.addTwo(1)).isEqualTo(3);

@@ -330,6 +330,7 @@ private fun parsePolicy(s: String): FilterPolicy {
         "r", "remove" -> FilterPolicy.Remove
         "sc", "stubclass" -> FilterPolicy.StubClass
         "kc", "keepclass" -> FilterPolicy.KeepClass
+        "i", "ignore" -> FilterPolicy.Ignore
         else -> {
             if (s.startsWith("@")) {
                 FilterPolicy.SubstituteAndStub
