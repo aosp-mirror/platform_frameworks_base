@@ -110,7 +110,14 @@ class WindowTracingPerfetto extends WindowTracing {
                     if (!isDataSourceStarting) {
                         return;
                     }
-                } else if (isOnFrameLogEvent != dataSourceConfig.mLogOnFrame) {
+                } else if (isOnFrameLogEvent) {
+                    boolean isDataSourceLoggingOnFrame =
+                            dataSourceConfig.mLogFrequency == WindowTraceLogFrequency.FRAME;
+                    if (!isDataSourceLoggingOnFrame) {
+                        return;
+                    }
+                } else if (dataSourceConfig.mLogFrequency == WindowTraceLogFrequency.SINGLE_DUMP) {
+                    // In it is a dump, write only the start log event and skip the following ones
                     return;
                 }
 
@@ -141,21 +148,21 @@ class WindowTracingPerfetto extends WindowTracing {
     }
 
     private void onStart(WindowTracingDataSource.Config config) {
-        if (config.mLogOnFrame) {
+        if (config.mLogFrequency == WindowTraceLogFrequency.FRAME) {
             mCountSessionsOnFrame.incrementAndGet();
-        } else {
+        } else if (config.mLogFrequency == WindowTraceLogFrequency.TRANSACTION) {
             mCountSessionsOnTransaction.incrementAndGet();
         }
 
         Log.i(TAG, "Started with logLevel: " + config.mLogLevel
-                + " logOnFrame: " + config.mLogOnFrame);
+                + " logFrequency: " + config.mLogFrequency);
         log(WHERE_START_TRACING);
     }
 
     private void onStop(WindowTracingDataSource.Config config) {
-        if (config.mLogOnFrame) {
+        if (config.mLogFrequency == WindowTraceLogFrequency.FRAME) {
             mCountSessionsOnFrame.decrementAndGet();
-        } else {
+        } else if (config.mLogFrequency == WindowTraceLogFrequency.TRANSACTION) {
             mCountSessionsOnTransaction.decrementAndGet();
         }
         Log.i(TAG, "Stopped");
