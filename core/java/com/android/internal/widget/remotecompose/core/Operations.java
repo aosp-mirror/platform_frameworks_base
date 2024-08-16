@@ -37,6 +37,7 @@ import com.android.internal.widget.remotecompose.core.operations.DrawTweenPath;
 import com.android.internal.widget.remotecompose.core.operations.FloatConstant;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.Header;
+import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRotate;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
@@ -53,7 +54,24 @@ import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
+import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
+import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
+import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.ColumnLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.RowLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BackgroundModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BorderModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
+import com.android.internal.widget.remotecompose.core.types.BooleanConstant;
+import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
 
 /**
  * List of operations supported in a RemoteCompose document
@@ -109,8 +127,32 @@ public class Operations {
     public static final int TEXT_MERGE = 136;
     public static final int NAMED_VARIABLE = 137;
     public static final int COLOR_CONSTANT = 138;
+    public static final int DATA_INT = 140;
+    public static final int DATA_BOOLEAN = 143;
+    public static final int INTEGER_EXPRESSION = 144;
 
     /////////////////////////////////////////======================
+
+    ////////////////////////////////////////
+    // Layout commands
+    ////////////////////////////////////////
+
+    public static final int LAYOUT_ROOT = 200;
+    public static final int LAYOUT_CONTENT = 201;
+    public static final int LAYOUT_BOX = 202;
+    public static final int LAYOUT_ROW = 203;
+    public static final int LAYOUT_COLUMN = 204;
+    public static final int COMPONENT_START = 2;
+    public static final int COMPONENT_END = 3;
+    public static final int MODIFIER_WIDTH = 16;
+    public static final int MODIFIER_HEIGHT = 67;
+    public static final int MODIFIER_BACKGROUND = 55;
+    public static final int MODIFIER_BORDER = 107;
+    public static final int MODIFIER_PADDING = 58;
+    public static final int MODIFIER_CLIP_RECT = 108;
+    public static final int MODIFIER_ROUNDED_CLIP_RECT = 54;
+    public static final int ANIMATION_SPEC = 14;
+
     public static IntMap<CompanionOperation> map = new IntMap<>();
 
     static {
@@ -153,6 +195,29 @@ public class Operations {
         map.put(TEXT_MERGE, TextMerge.COMPANION);
         map.put(NAMED_VARIABLE, NamedVariable.COMPANION);
         map.put(COLOR_CONSTANT, ColorConstant.COMPANION);
+        map.put(DATA_INT, IntegerConstant.COMPANION);
+        map.put(INTEGER_EXPRESSION, IntegerExpression.COMPANION);
+        map.put(DATA_BOOLEAN, BooleanConstant.COMPANION);
+
+        // Layout
+
+        map.put(COMPONENT_START, ComponentStart.COMPANION);
+        map.put(COMPONENT_END, ComponentEnd.COMPANION);
+        map.put(ANIMATION_SPEC, AnimationSpec.COMPANION);
+
+        map.put(MODIFIER_WIDTH, WidthModifierOperation.COMPANION);
+        map.put(MODIFIER_HEIGHT, HeightModifierOperation.COMPANION);
+        map.put(MODIFIER_PADDING, PaddingModifierOperation.COMPANION);
+        map.put(MODIFIER_BACKGROUND, BackgroundModifierOperation.COMPANION);
+        map.put(MODIFIER_BORDER, BorderModifierOperation.COMPANION);
+        map.put(MODIFIER_ROUNDED_CLIP_RECT, RoundedClipRectModifierOperation.COMPANION);
+        map.put(MODIFIER_CLIP_RECT, ClipRectModifierOperation.COMPANION);
+
+        map.put(LAYOUT_ROOT, RootLayoutComponent.COMPANION);
+        map.put(LAYOUT_CONTENT, LayoutComponentContent.COMPANION);
+        map.put(LAYOUT_BOX, BoxLayout.COMPANION);
+        map.put(LAYOUT_COLUMN, ColumnLayout.COMPANION);
+        map.put(LAYOUT_ROW, RowLayout.COMPANION);
     }
 
 }

@@ -112,6 +112,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             MagnificationConstants.SCALE_MAX_VALUE);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
+    private static final float[] COLOR_BLACK_ARRAY = {0f, 0f, 0f};
     private final SparseArray<Float> mMagnificationSizeScaleOptions = new SparseArray<>();
 
     private final Context mContext;
@@ -1018,6 +1019,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMirrorSurface = mirrorDisplay(mDisplayId);
         if (!mMirrorSurface.isValid()) {
             return;
+        }
+        // Set the surface of the SurfaceView to black to avoid users seeing the contents below the
+        // magnifier when the mirrored surface has an alpha less than 1.
+        if (Flags.addBlackBackgroundForWindowMagnifier()) {
+            mTransaction.setColor(mMirrorSurfaceView.getSurfaceControl(), COLOR_BLACK_ARRAY);
         }
         mTransaction.show(mMirrorSurface)
                 .reparent(mMirrorSurface, mMirrorSurfaceView.getSurfaceControl());

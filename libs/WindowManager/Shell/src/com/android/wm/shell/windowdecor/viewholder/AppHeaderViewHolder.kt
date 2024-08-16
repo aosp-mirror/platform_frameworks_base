@@ -238,12 +238,12 @@ internal class AppHeaderViewHolder(
 
     override fun onHandleMenuClosed() {}
 
-    fun setAnimatingTaskResize(animatingTaskResize: Boolean) {
-        // If animating a task resize, cancel any running hover animations
-        if (animatingTaskResize) {
+    fun setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition: Boolean) {
+        // If animating a task resize or reposition, cancel any running hover animations
+        if (animatingTaskResizeOrReposition) {
             maximizeButtonView.cancelHoverAnimation()
         }
-        maximizeButtonView.hoverDisabled = animatingTaskResize
+        maximizeButtonView.hoverDisabled = animatingTaskResizeOrReposition
     }
 
     fun onMaximizeWindowHoverExit() {

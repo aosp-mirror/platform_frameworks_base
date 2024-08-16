@@ -93,8 +93,10 @@ public class BatteryUsageStatsProvider {
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_BLUETOOTH)) {
                     mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
                 }
-                mPowerCalculators.add(new SensorPowerCalculator(
-                        mContext.getSystemService(SensorManager.class)));
+                if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_SENSORS)) {
+                    mPowerCalculators.add(new SensorPowerCalculator(
+                            mContext.getSystemService(SensorManager.class)));
+                }
                 if (!mPowerStatsExporterEnabled.get(BatteryConsumer.POWER_COMPONENT_GNSS)) {
                     mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
                 }
@@ -426,5 +428,6 @@ public class BatteryUsageStatsProvider {
      */
     public void setPowerStatsExporterEnabled(int powerComponentId, boolean enabled) {
         mPowerStatsExporterEnabled.put(powerComponentId, enabled);
+        mPowerStatsExporter.setPowerComponentEnabled(powerComponentId, enabled);
     }
 }

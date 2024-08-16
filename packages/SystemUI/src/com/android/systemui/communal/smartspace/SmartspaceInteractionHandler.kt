@@ -25,6 +25,9 @@ import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.util.InteractionHandlerDelegate
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
 
@@ -34,12 +37,29 @@ class SmartspaceInteractionHandler
 constructor(
     private val activityStarter: ActivityStarter,
     communalSceneInteractor: CommunalSceneInteractor,
+    @CommunalLog val logBuffer: LogBuffer,
 ) : RemoteViews.InteractionHandler {
+
+    private companion object {
+        const val TAG = "SmartspaceInteractionHandler"
+    }
+
     private val delegate =
         InteractionHandlerDelegate(
             communalSceneInteractor,
             findViewToAnimate = { view -> view is SmartspaceAppWidgetHostView },
-            intentStarter = this::startIntent,
+            intentStarter =
+                object : InteractionHandlerDelegate.IntentStarter {
+                    override fun startActivity(
+                        intent: PendingIntent,
+                        fillInIntent: Intent,
+                        activityOptions: ActivityOptions,
+                        controller: ActivityTransitionAnimator.Controller?
+                    ): Boolean {
+                        return startIntent(intent, fillInIntent, activityOptions, controller)
+                    }
+                },
+            logger = Logger(logBuffer, TAG),
         )
 
     override fun onInteraction(

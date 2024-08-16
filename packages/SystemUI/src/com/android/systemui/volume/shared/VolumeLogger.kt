@@ -16,7 +16,8 @@
 
 package com.android.systemui.volume.shared
 
-import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
+import com.android.settingslib.volume.shared.AudioLogger
+import com.android.settingslib.volume.shared.AudioSharingLogger
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.systemui.dagger.SysUISingleton
@@ -30,7 +31,7 @@ private const val TAG = "SysUI_Volume"
 /** Logs general System UI volume events. */
 @SysUISingleton
 class VolumeLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuffer) :
-    AudioRepositoryImpl.Logger {
+    AudioLogger, AudioSharingLogger {
 
     override fun onSetVolumeRequested(audioStream: AudioStream, volume: Int) {
         logBuffer.log(
@@ -54,5 +55,36 @@ class VolumeLogger @Inject constructor(@VolumeLog private val logBuffer: LogBuff
             },
             { "Volume update received: stream=$str1 volume=$int1" }
         )
+    }
+
+    override fun onAudioSharingStateChanged(state: Boolean) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { bool1 = state },
+            { "Audio sharing state update: state=$bool1" }
+        )
+    }
+
+    override fun onSecondaryGroupIdChanged(groupId: Int) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { int1 = groupId },
+            { "Secondary group id in audio sharing update: groupId=$int1" }
+        )
+    }
+
+    override fun onVolumeMapChanged(map: Map<Int, Int>) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = map.toString() },
+            { "Volume map update: map=$str1" }
+        )
+    }
+
+    override fun onSetDeviceVolumeRequested(volume: Int) {
+        logBuffer.log(TAG, LogLevel.DEBUG, { int1 = volume }, { "Set device volume: volume=$int1" })
     }
 }

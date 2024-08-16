@@ -29,7 +29,7 @@ import android.net.sntp.Timestamp64;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import libcore.util.HexEncoding;
 

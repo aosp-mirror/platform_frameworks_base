@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -45,6 +46,12 @@ import org.mockito.invocation.InvocationOnMock;
 
 import java.util.function.Supplier;
 
+/**
+ * Test class for {@link Letterbox}.
+ * <p>
+ * Build/Install/Run:
+ * atest WmTests:LetterboxTest
+ */
 @SmallTest
 @Presubmit
 public class LetterboxTest {
@@ -53,21 +60,21 @@ public class LetterboxTest {
     SurfaceControlMocker mSurfaces;
     SurfaceControl.Transaction mTransaction;
 
-    private boolean mAreCornersRounded = false;
-    private int mColor = Color.BLACK;
-    private boolean mHasWallpaperBackground = false;
-    private int mBlurRadius = 0;
-    private float mDarkScrimAlpha = 0.5f;
     private SurfaceControl mParentSurface = mock(SurfaceControl.class);
+    private AppCompatLetterboxOverrides mLetterboxOverrides;
 
     @Before
     public void setUp() throws Exception {
         mSurfaces = new SurfaceControlMocker();
+        mLetterboxOverrides =  mock(AppCompatLetterboxOverrides.class);
+        doReturn(false).when(mLetterboxOverrides).shouldLetterboxHaveRoundedCorners();
+        doReturn(Color.valueOf(Color.BLACK)).when(mLetterboxOverrides)
+                .getLetterboxBackgroundColor();
+        doReturn(false).when(mLetterboxOverrides).hasWallpaperBackgroundForLetterbox();
+        doReturn(0).when(mLetterboxOverrides).getLetterboxWallpaperBlurRadiusPx();
+        doReturn(0.5f).when(mLetterboxOverrides).getLetterboxWallpaperDarkScrimAlpha();
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
-                () -> mAreCornersRounded, () -> Color.valueOf(mColor),
-                () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha,
-                /* doubleTapCallbackX= */ x -> {}, /* doubleTapCallbackY= */ y -> {},
-                () -> mParentSurface);
+                mock(AppCompatReachabilityPolicy.class), mLetterboxOverrides, () -> mParentSurface);
         mTransaction = spy(StubTransaction.class);
     }
 
@@ -183,7 +190,8 @@ public class LetterboxTest {
 
         verify(mTransaction).setColor(mSurfaces.top, new float[]{0, 0, 0});
 
-        mColor = Color.GREEN;
+        doReturn(Color.valueOf(Color.GREEN)).when(mLetterboxOverrides)
+                .getLetterboxBackgroundColor();
 
         assertTrue(mLetterbox.needsApplySurfaceChanges());
 
@@ -200,12 +208,12 @@ public class LetterboxTest {
         verify(mTransaction).setAlpha(mSurfaces.top, 1.0f);
         assertFalse(mLetterbox.needsApplySurfaceChanges());
 
-        mHasWallpaperBackground = true;
+        doReturn(true).when(mLetterboxOverrides).hasWallpaperBackgroundForLetterbox();
 
         assertTrue(mLetterbox.needsApplySurfaceChanges());
 
         applySurfaceChanges();
-        verify(mTransaction).setAlpha(mSurfaces.fullWindowSurface, mDarkScrimAlpha);
+        verify(mTransaction).setAlpha(mSurfaces.fullWindowSurface, /* alpha */ 0.5f);
     }
 
     @Test
@@ -234,7 +242,7 @@ public class LetterboxTest {
 
     @Test
     public void testApplySurfaceChanges_cornersRounded_surfaceFullWindowSurfaceCreated() {
-        mAreCornersRounded = true;
+        doReturn(true).when(mLetterboxOverrides).shouldLetterboxHaveRoundedCorners();
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
         applySurfaceChanges();
 
@@ -243,7 +251,7 @@ public class LetterboxTest {
 
     @Test
     public void testApplySurfaceChanges_wallpaperBackground_surfaceFullWindowSurfaceCreated() {
-        mHasWallpaperBackground = true;
+        doReturn(true).when(mLetterboxOverrides).hasWallpaperBackgroundForLetterbox();
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
         applySurfaceChanges();
 
@@ -252,7 +260,7 @@ public class LetterboxTest {
 
     @Test
     public void testNotIntersectsOrFullyContains_cornersRounded() {
-        mAreCornersRounded = true;
+        doReturn(true).when(mLetterboxOverrides).shouldLetterboxHaveRoundedCorners();
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(0, 0));
         applySurfaceChanges();
 

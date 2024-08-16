@@ -971,6 +971,16 @@ void Array::Print(std::ostream* out) const {
   *out << "(array) [" << util::Joiner(elements, ", ") << "]";
 }
 
+void Array::RemoveFlagDisabledElements() {
+  const auto end_iter = elements.end();
+  const auto remove_iter = std::stable_partition(
+      elements.begin(), end_iter, [](const std::unique_ptr<Item>& item) -> bool {
+        return item->GetFlagStatus() != FlagStatus::Disabled;
+      });
+
+  elements.erase(remove_iter, end_iter);
+}
+
 bool Plural::Equals(const Value* value) const {
   const Plural* other = ValueCast<Plural>(value);
   if (!other) {
@@ -1092,6 +1102,7 @@ template <typename T>
 std::unique_ptr<T> CopyValueFields(std::unique_ptr<T> new_value, const T* value) {
   new_value->SetSource(value->GetSource());
   new_value->SetComment(value->GetComment());
+  new_value->SetFlagStatus(value->GetFlagStatus());
   return new_value;
 }
 

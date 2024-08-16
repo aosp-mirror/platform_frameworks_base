@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
@@ -49,6 +52,11 @@ class AppCompatConfigurationRobot {
         doReturn(enabled).when(mAppCompatConfiguration).isCameraCompatTreatmentEnabled();
     }
 
+    void enableSplitScreenAspectRatioForUnresizableApps(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration)
+                .getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+    }
+
     void enableCameraCompatTreatmentAtBuildTime(boolean enabled) {
         doReturn(enabled).when(mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabledAtBuildTime();
@@ -69,5 +77,45 @@ class AppCompatConfigurationRobot {
 
     void enableCompatFakeFocus(boolean enabled) {
         doReturn(enabled).when(mAppCompatConfiguration).isCompatFakeFocusEnabled();
+    }
+
+    void enableDisplayAspectRatioEnabledForFixedOrientationLetterbox(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration)
+                .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
+    }
+
+    void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
+        doReturn(aspectRatio).when(mAppCompatConfiguration)
+                .getFixedOrientationLetterboxAspectRatio();
+    }
+
+    void setThinLetterboxWidthPx(int thinWidthPx) {
+        doReturn(thinWidthPx).when(mAppCompatConfiguration)
+                .getThinLetterboxWidthPx();
+    }
+
+    void setThinLetterboxHeightPx(int thinHeightPx) {
+        doReturn(thinHeightPx).when(mAppCompatConfiguration)
+                .getThinLetterboxHeightPx();
+    }
+
+    void checkToNextLeftStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForHorizontalReachabilityToNextLeftStop(anyBoolean());
+    }
+
+    void checkToNextRightStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForHorizontalReachabilityToNextRightStop(anyBoolean());
+    }
+
+    void checkToNextBottomStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForVerticalReachabilityToNextBottomStop(anyBoolean());
+    }
+
+    void checkToNextTopStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForVerticalReachabilityToNextTopStop(anyBoolean());
     }
 }

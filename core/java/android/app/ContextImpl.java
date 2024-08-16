@@ -1160,7 +1160,7 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivity(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intent, -1, options);
+                (Activity) null, intent, -1, applyLaunchDisplayIfNeeded(options));
     }
 
     /** @hide */
@@ -1170,8 +1170,8 @@ class ContextImpl extends Context {
             ActivityTaskManager.getService().startActivityAsUser(
                     mMainThread.getApplicationThread(), getOpPackageName(), getAttributionTag(),
                     intent, intent.resolveTypeIfNeeded(getContentResolver()),
-                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options,
-                    user.getIdentifier());
+                    null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,
+                    applyLaunchDisplayIfNeeded(options), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1194,7 +1194,8 @@ class ContextImpl extends Context {
         }
         return mMainThread.getInstrumentation().execStartActivitiesAsUser(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intents, options, userHandle.getIdentifier());
+                (Activity) null, intents, applyLaunchDisplayIfNeeded(options),
+                userHandle.getIdentifier());
     }
 
     @Override
@@ -1208,7 +1209,26 @@ class ContextImpl extends Context {
         }
         mMainThread.getInstrumentation().execStartActivities(
                 getOuterContext(), mMainThread.getApplicationThread(), null,
-                (Activity) null, intents, options);
+                (Activity) null, intents, applyLaunchDisplayIfNeeded(options));
+    }
+
+    private Bundle applyLaunchDisplayIfNeeded(@Nullable Bundle options) {
+        if (!isAssociatedWithDisplay()) {
+            // return if this Context has no associated display.
+            return options;
+        }
+
+        final ActivityOptions activityOptions;
+        if (options != null) {
+            activityOptions = ActivityOptions.fromBundle(options);
+            if (ActivityOptions.hasLaunchTargetContainer(activityOptions)) {
+                // return if the options already has launching target.
+                return options;
+            }
+        } else {
+            activityOptions = ActivityOptions.makeBasic();
+        }
+        return activityOptions.setLaunchDisplayId(getAssociatedDisplayId()).toBundle();
     }
 
     @Override

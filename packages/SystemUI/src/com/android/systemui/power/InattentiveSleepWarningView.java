@@ -16,6 +16,8 @@
 
 package com.android.systemui.power;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
+
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
@@ -29,7 +31,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.res.R;
+
+import kotlin.Lazy;
 
 /**
  * View that shows a warning shortly before the device goes into sleep
@@ -37,13 +43,15 @@ import com.android.systemui.res.R;
  */
 public class InattentiveSleepWarningView extends FrameLayout {
     private final IBinder mWindowToken = new Binder();
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private Animator mFadeOutAnimator;
     private boolean mDismissing;
 
-    InattentiveSleepWarningView(Context context) {
+    InattentiveSleepWarningView(Context context, Lazy<ViewCapture> lazyViewCapture) {
         super(context);
-        mWindowManager = mContext.getSystemService(WindowManager.class);
+        WindowManager wm = mContext.getSystemService(WindowManager.class);
+        mWindowManager = new ViewCaptureAwareWindowManager(wm, lazyViewCapture,
+                enableViewCaptureTracing());
 
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         layoutInflater.inflate(R.layout.inattentive_sleep_warning, this, true /* attachToRoot */);

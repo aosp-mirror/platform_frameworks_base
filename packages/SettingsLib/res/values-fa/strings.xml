@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"نمایش بازخورد تصویری برای ضربه‌ها"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"نمایش فشار کلیدها"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"نمایش بازخورد بصری برای فشار دادن کلیدهای فیزیکی"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"نمایش ورودی صفحه لمسی"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"رونهاد صفحه که داده‌های ورودی صفحه لمسی و اشاره‌های شناسایی‌شده را نمایش می‌دهد"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"نمایش به‌روزرسانی سطح"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"هنگام به‌روزرسانی سطوح پنجره همه فلش شوند"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"نمایش به‌روزرسانی‌های نما"</string>
@@ -427,11 +429,10 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"نمایش هشدارهای کانال اعلان"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"هنگامی که برنامه‌ای بدون وجود کانالی معتبر، اعلانی پست می‌کند، هشدار روی صفحه‌ای نمایش می‌دهد"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"اجازه اجباری به برنامه‌های دستگاه ذخیره خارجی"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"بدون توجه به مقادیر آشکار، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"صرف‌نظر از مقادیر مانیفست، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"اجبار فعالیت‌ها به قابل تغییر اندازه بودن"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"بدون توجه به مقادیر مانیفست، اندازه همه فعالیت‌ها برای حالت چند پنجره‌ای می‌تواند تغییر کند."</string>
-    <string name="enable_freeform_support" msgid="8409932201445109106">"فعال کردن پنجره‌های با قالب آزاد (قدیمی)"</string>
-    <string name="enable_freeform_support_summary" msgid="2242481082356957934">"فعال کردن پشتیبانی از پنجره‌های با قالب آزاد قدیمی آزمایشی."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"صرف‌نظر از مقادیر مانیفست، اندازه همه فعالیت‌ها را برای حالت چندپنجره‌ای قابل‌تغییر می‌کند."</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"فعال کردن پنجره قالب آزاد"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"گذرواژه پشتیبان‌گیری محلی"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"پشتیبان‌گیری کامل رایانه درحال حاضر محافظت نمی‌شود"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"برای تغییر یا حذف گذرواژه برای نسخه‌های پشتیبان کامل رایانه‌ای تک‌ضرب بزنید"</string>
@@ -496,7 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ بهینه شده است"</string>
+    <string name="power_charging_limited" msgid="4144004473976005214">"‫<xliff:g id="LEVEL">%1$s</xliff:g> - برای محافظت از باتری، شارژ موقتاً متوقف شده است"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - درحال شارژ"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"‫<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - تا <xliff:g id="TIME">%3$s</xliff:g> کامل می‌شود"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"‫<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ تا <xliff:g id="TIME">%2$s</xliff:g> کامل می‌شود"</string>
@@ -668,7 +669,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"حذف"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ذخیره"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"خروج از حالت مهمان"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"بازنشاندن جلسه مهمان"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"بازنشانی جلسه مهمان"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"خروج مهمان"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"همه فعالیت‌ها هنگام خروج حذف خواهد شد"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"می‌توانید فعالیتتان را هنگام خروج ذخیره یا حذف کنید"</string>

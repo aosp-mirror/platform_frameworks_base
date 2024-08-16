@@ -346,7 +346,7 @@ public abstract class VibrationEffect implements Parcelable {
     @RequiresPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS)
     public static VibrationEffect createVendorEffect(@NonNull PersistableBundle effect) {
         VibrationEffect vendorEffect = new VendorEffect(effect, VendorEffect.DEFAULT_STRENGTH,
-                VendorEffect.DEFAULT_SCALE);
+                VendorEffect.DEFAULT_SCALE, VendorEffect.DEFAULT_SCALE);
         vendorEffect.validate();
         return vendorEffect;
     }
@@ -623,7 +623,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @hide
      */
     @NonNull
-    public abstract VibrationEffect scaleLinearly(float scaleFactor);
+    public abstract VibrationEffect applyAdaptiveScale(float scaleFactor);
 
     /**
      * Ensures that the effect is repeating indefinitely or not. This is a lossy operation and
@@ -663,6 +663,15 @@ public abstract class VibrationEffect implements Parcelable {
      * @hide
      */
     public static float scale(float intensity, float scaleFactor) {
+        if (Flags.hapticsScaleV2Enabled()) {
+            if (Float.compare(scaleFactor, 1) <= 0 || Float.compare(intensity, 0) == 0) {
+                // Scaling down or scaling zero intensity is straightforward.
+                return scaleFactor * intensity;
+            }
+            // Using S * x / (1 + (S - 1) * x^2) as the scale up function to converge to 1.0.
+            return (scaleFactor * intensity) / (1 + (scaleFactor - 1) * intensity * intensity);
+        }
+
         // Applying gamma correction to the scale factor, which is the same as encoding the input
         // value, scaling it, then decoding the scaled value.
         float scale = MathUtils.pow(scaleFactor, 1f / SCALE_GAMMA);
@@ -939,7 +948,7 @@ public abstract class VibrationEffect implements Parcelable {
         /** @hide */
         @NonNull
         @Override
-        public Composed scaleLinearly(float scaleFactor) {
+        public Composed applyAdaptiveScale(float scaleFactor) {
             return applyToSegments(VibrationEffectSegment::scaleLinearly, scaleFactor);
         }
 
@@ -1024,6 +1033,7 @@ public abstract class VibrationEffect implements Parcelable {
                 new Creator<Composed>() {
                     @Override
                     public Composed createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
                         return new Composed(in);
                     }
 
@@ -1090,21 +1100,23 @@ public abstract class VibrationEffect implements Parcelable {
 
         private final PersistableBundle mVendorData;
         private final int mEffectStrength;
-        private final float mLinearScale;
+        private final float mScale;
+        private final float mAdaptiveScale;
 
         /** @hide */
         VendorEffect(@NonNull Parcel in) {
             this(Objects.requireNonNull(
                     in.readPersistableBundle(VibrationEffect.class.getClassLoader())),
-                    in.readInt(), in.readFloat());
+                    in.readInt(), in.readFloat(), in.readFloat());
         }
 
         /** @hide */
         public VendorEffect(@NonNull PersistableBundle vendorData, int effectStrength,
-                float linearScale) {
+                float scale, float adaptiveScale) {
             mVendorData = vendorData;
             mEffectStrength = effectStrength;
-            mLinearScale = linearScale;
+            mScale = scale;
+            mAdaptiveScale = adaptiveScale;
         }
 
         @NonNull
@@ -1116,8 +1128,12 @@ public abstract class VibrationEffect implements Parcelable {
             return mEffectStrength;
         }
 
-        public float getLinearScale() {
-            return mLinearScale;
+        public float getScale() {
+            return mScale;
+        }
+
+        public float getAdaptiveScale() {
+            return mAdaptiveScale;
         }
 
         /** @hide */
@@ -1165,7 +1181,8 @@ public abstract class VibrationEffect implements Parcelable {
             if (mEffectStrength == effectStrength) {
                 return this;
             }
-            VendorEffect updated = new VendorEffect(mVendorData, effectStrength, mLinearScale);
+            VendorEffect updated = new VendorEffect(mVendorData, effectStrength, mScale,
+                    mAdaptiveScale);
             updated.validate();
             return updated;
         }
@@ -1174,18 +1191,24 @@ public abstract class VibrationEffect implements Parcelable {
         @NonNull
         @Override
         public VendorEffect scale(float scaleFactor) {
-            // Vendor effect strength cannot be scaled with this method.
-            return this;
+            if (Float.compare(mScale, scaleFactor) == 0) {
+                return this;
+            }
+            VendorEffect updated = new VendorEffect(mVendorData, mEffectStrength, scaleFactor,
+                    mAdaptiveScale);
+            updated.validate();
+            return updated;
         }
 
         /** @hide */
         @NonNull
         @Override
-        public VibrationEffect scaleLinearly(float scaleFactor) {
-            if (Float.compare(mLinearScale, scaleFactor) == 0) {
+        public VibrationEffect applyAdaptiveScale(float scaleFactor) {
+            if (Float.compare(mAdaptiveScale, scaleFactor) == 0) {
                 return this;
             }
-            VendorEffect updated = new VendorEffect(mVendorData, mEffectStrength, scaleFactor);
+            VendorEffect updated = new VendorEffect(mVendorData, mEffectStrength, mScale,
+                    scaleFactor);
             updated.validate();
             return updated;
         }
@@ -1206,29 +1229,31 @@ public abstract class VibrationEffect implements Parcelable {
                 return false;
             }
             return mEffectStrength == other.mEffectStrength
-                    && (Float.compare(mLinearScale, other.mLinearScale) == 0)
+                    && (Float.compare(mScale, other.mScale) == 0)
+                    && (Float.compare(mAdaptiveScale, other.mAdaptiveScale) == 0)
                     && isPersistableBundleEquals(mVendorData, other.mVendorData);
         }
 
         @Override
         public int hashCode() {
             // PersistableBundle does not implement hashCode, so use its size as a shortcut.
-            return Objects.hash(mVendorData.size(), mEffectStrength, mLinearScale);
+            return Objects.hash(mVendorData.size(), mEffectStrength, mScale, mAdaptiveScale);
         }
 
         @Override
         public String toString() {
             return String.format(Locale.ROOT,
-                    "VendorEffect{vendorData=%s, strength=%s, scale=%.2f}",
-                    mVendorData, effectStrengthToString(mEffectStrength), mLinearScale);
+                    "VendorEffect{vendorData=%s, strength=%s, scale=%.2f, adaptiveScale=%.2f}",
+                    mVendorData, effectStrengthToString(mEffectStrength), mScale, mAdaptiveScale);
         }
 
         /** @hide */
         @Override
         public String toDebugString() {
-            return String.format(Locale.ROOT, "vendorEffect=%s, strength=%s, scale=%.2f",
+            return String.format(Locale.ROOT,
+                    "vendorEffect=%s, strength=%s, scale=%.2f, adaptiveScale=%.2f",
                     mVendorData.toShortString(), effectStrengthToString(mEffectStrength),
-                    mLinearScale);
+                    mScale, mAdaptiveScale);
         }
 
         @Override
@@ -1241,7 +1266,8 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(PARCEL_TOKEN_VENDOR_EFFECT);
             out.writePersistableBundle(mVendorData);
             out.writeInt(mEffectStrength);
-            out.writeFloat(mLinearScale);
+            out.writeFloat(mScale);
+            out.writeFloat(mAdaptiveScale);
         }
 
         /**
@@ -1298,6 +1324,7 @@ public abstract class VibrationEffect implements Parcelable {
                 new Creator<VendorEffect>() {
                     @Override
                     public VendorEffect createFromParcel(Parcel in) {
+                        in.readInt(); // Skip the parcel type token
                         return new VendorEffect(in);
                     }
 

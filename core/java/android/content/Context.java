@@ -16,6 +16,7 @@
 
 package android.content;
 
+import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
 
 import android.annotation.AttrRes;
@@ -51,6 +52,7 @@ import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
 import android.app.ambientcontext.AmbientContextManager;
+import android.app.appfunctions.AppFunctionManager;
 import android.app.people.PeopleManager;
 import android.app.time.TimeManager;
 import android.companion.virtual.VirtualDeviceManager;
@@ -6310,6 +6312,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link AppFunctionManager} for
+     * executing app functions.
+     *
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final String APP_FUNCTION_SERVICE = "app_function";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.content.integrity.AppIntegrityManager}.
      * @hide
      */
@@ -6674,6 +6686,16 @@ public abstract class Context {
             com.android.server.telecom.flags.Flags.FLAG_TELECOM_MAINLINE_BLOCKED_NUMBERS_MANAGER)
     @SystemApi
     public static final String BLOCKED_NUMBERS_SERVICE = "blocked_numbers";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve the
+     * {@link com.android.internal.protolog.ProtoLogService} for registering ProtoLog clients.
+     *
+     * @see #getSystemService(String)
+     * @see com.android.internal.protolog.ProtoLogService
+     * @hide
+     */
+    public static final String PROTOLOG_SERVICE = "protolog";
 
     /**
      * Determine whether the given permission is allowed for a particular

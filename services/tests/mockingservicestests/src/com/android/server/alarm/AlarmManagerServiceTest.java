@@ -132,6 +132,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -149,6 +150,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
@@ -176,6 +178,7 @@ import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -249,6 +252,8 @@ public final class AlarmManagerServiceTest {
     private AppStandbyInternal mAppStandbyInternal;
     @Mock
     private ActivityManagerInternal mActivityManagerInternal;
+    @Mock
+    private UserManagerInternal mUserManagerInternal;
     @Mock
     private ActivityManager mActivityManager;
     @Mock
@@ -447,6 +452,8 @@ public final class AlarmManagerServiceTest {
                 () -> LocalServices.getService(PermissionManagerServiceInternal.class));
         doReturn(mActivityManagerInternal).when(
                 () -> LocalServices.getService(ActivityManagerInternal.class));
+        doReturn(mUserManagerInternal).when(
+                () -> LocalServices.getService(UserManagerInternal.class));
         doReturn(mPackageManagerInternal).when(
                 () -> LocalServices.getService(PackageManagerInternal.class));
         doReturn(mAppStateTracker).when(() -> LocalServices.getService(AppStateTracker.class));
@@ -505,6 +512,9 @@ public final class AlarmManagerServiceTest {
         when(mPermissionManagerInternal.getAppOpPermissionPackages(
                 SCHEDULE_EXACT_ALARM)).thenReturn(EmptyArray.STRING);
 
+        // Initialize timestamps with arbitrary values of time
+        mNowElapsedTest = 12;
+        mNowRtcTest = 345;
         mInjector = new Injector(mMockContext);
         mService = new AlarmManagerService(mMockContext, mInjector);
         spyOn(mService);
@@ -764,6 +774,61 @@ public final class AlarmManagerServiceTest {
         final long triggerElapsed2 = mTestTimer.getElapsed();
         assertEquals("Invalid movement of triggerElapsed following time change", triggerElapsed2,
                 triggerElapsed1 - timeDelta);
+    }
+
+    @Test
+    public void timeChangeBroadcastForward() throws Exception {
+        final long timeDelta = 12345;
+        // AlarmManagerService sends the broadcast if real time clock proceeds 1000ms more than boot
+        // time clock.
+        mNowRtcTest += timeDelta + 1001;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        verify(mMockContext)
+                .sendBroadcastAsUser(
+                        argThat((intent) -> intent.getAction() == Intent.ACTION_TIME_CHANGED),
+                        eq(UserHandle.ALL),
+                        isNull(),
+                        any());
+    }
+
+    @Test
+    public void timeChangeBroadcastBackward() throws Exception {
+        final long timeDelta = 12345;
+        // AlarmManagerService sends the broadcast if real time clock proceeds 1000ms less than boot
+        // time clock.
+        mNowRtcTest += timeDelta - 1001;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        verify(mMockContext)
+                .sendBroadcastAsUser(
+                        argThat((intent) -> intent.getAction() == Intent.ACTION_TIME_CHANGED),
+                        eq(UserHandle.ALL),
+                        isNull(),
+                        any());
+    }
+
+    @Test
+    public void timeChangeFilterMinorAdjustment() throws Exception {
+        final long timeDelta = 12345;
+        // AlarmManagerService does not send the broadcast if real time clock proceeds within 1000ms
+        // than boot time clock.
+        mNowRtcTest += timeDelta + 1000;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        mNowRtcTest += timeDelta - 1000;
+        mNowElapsedTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+
+        verify(mMockContext, never())
+                .sendBroadcastAsUser(
+                        argThat((intent) -> intent.getAction() == Intent.ACTION_TIME_CHANGED),
+                        any(),
+                        any(),
+                        any());
     }
 
     @Test
@@ -1249,6 +1314,26 @@ public final class AlarmManagerServiceTest {
                 TEST_CALLING_PACKAGE)).thenReturn(true);
         mListener.removeAlarmsForUid(TEST_CALLING_UID);
         assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+    }
+
+    @Test
+    public void wakeupShouldBeScheduledForFullUsers_skipsGuestSystemAndProfiles() {
+        final int systemUserId = 0;
+        final int fullUserId = 10;
+        final int privateProfileId = 12;
+        final int guestUserId = 13;
+        when(mUserManagerInternal.getUserInfo(fullUserId)).thenReturn(new UserInfo(fullUserId,
+                "TestUser2", UserInfo.FLAG_FULL));
+        when(mUserManagerInternal.getUserInfo(privateProfileId)).thenReturn(new UserInfo(
+                privateProfileId, "TestUser3", UserInfo.FLAG_PROFILE));
+        when(mUserManagerInternal.getUserInfo(guestUserId)).thenReturn(new UserInfo(
+                guestUserId, "TestUserGuest", null, 0, UserManager.USER_TYPE_FULL_GUEST));
+        when(mUserManagerInternal.getUserInfo(systemUserId)).thenReturn(new UserInfo(
+                systemUserId, "TestUserSystem", null, 0, UserManager.USER_TYPE_FULL_SYSTEM));
+        assertTrue(mService.shouldAddWakeupForUser(fullUserId));
+        assertFalse(mService.shouldAddWakeupForUser(systemUserId));
+        assertFalse(mService.shouldAddWakeupForUser(privateProfileId));
+        assertFalse(mService.shouldAddWakeupForUser(guestUserId));
     }
 
     @Test

@@ -50,10 +50,9 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
@@ -71,12 +70,13 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 public class VibrationScalerTest {
+    private static final float TOLERANCE = 1e-2f;
+    private static final int TEST_DEFAULT_AMPLITUDE = 255;
+    private static final float TEST_DEFAULT_SCALE_LEVEL_GAIN = 1.4f;
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
@@ -96,6 +96,10 @@ public class VibrationScalerTest {
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
+        when(mVibrationConfigMock.getDefaultVibrationAmplitude())
+                .thenReturn(TEST_DEFAULT_AMPLITUDE);
+        when(mVibrationConfigMock.getDefaultVibrationScaleLevelGain())
+                .thenReturn(TEST_DEFAULT_SCALE_LEVEL_GAIN);
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
@@ -107,7 +111,7 @@ public class VibrationScalerTest {
 
         mVibrationSettings = new VibrationSettings(
                 mContextSpy, new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
-        mVibrationScaler = new VibrationScaler(mContextSpy, mVibrationSettings);
+        mVibrationScaler = new VibrationScaler(mVibrationConfigMock, mVibrationSettings);
 
         mVibrationSettings.onSystemReady();
     }
@@ -147,33 +151,76 @@ public class VibrationScalerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
-    public void testAdaptiveHapticsScale_withAdaptiveHapticsAvailable() {
-        setDefaultIntensity(USAGE_TOUCH, Vibrator.VIBRATION_INTENSITY_LOW);
-        setDefaultIntensity(USAGE_RINGTONE, Vibrator.VIBRATION_INTENSITY_LOW);
-        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_HIGH);
-        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_HIGH);
+    @DisableFlags(Flags.FLAG_HAPTICS_SCALE_V2_ENABLED)
+    public void testGetScaleFactor_withLegacyScaling() {
+        // Default scale gain will be ignored.
+        when(mVibrationConfigMock.getDefaultVibrationScaleLevelGain()).thenReturn(1.4f);
+        mVibrationScaler = new VibrationScaler(mVibrationConfigMock, mVibrationSettings);
 
+        setDefaultIntensity(USAGE_TOUCH, Vibrator.VIBRATION_INTENSITY_LOW);
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_HIGH);
+        assertEquals(1.4f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // VERY_HIGH
+
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
+        assertEquals(1.2f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // HIGH
+
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_LOW);
+        assertEquals(1f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // NONE
+
+        setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_MEDIUM);
+        assertEquals(0.8f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // LOW
+
+        setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_HIGH);
+        assertEquals(0.6f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // VERY_LOW
+
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
+        // Vibration setting being bypassed will use default setting and not scale.
+        assertEquals(1f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // NONE
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HAPTICS_SCALE_V2_ENABLED)
+    public void testGetScaleFactor_withScalingV2() {
+        // Test scale factors for a default gain of 1.4
+        when(mVibrationConfigMock.getDefaultVibrationScaleLevelGain()).thenReturn(1.4f);
+        mVibrationScaler = new VibrationScaler(mVibrationConfigMock, mVibrationSettings);
+
+        setDefaultIntensity(USAGE_TOUCH, Vibrator.VIBRATION_INTENSITY_LOW);
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_HIGH);
+        assertEquals(1.95f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // VERY_HIGH
+
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
+        assertEquals(1.4f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // HIGH
+
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_LOW);
+        assertEquals(1f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // NONE
+
+        setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_MEDIUM);
+        assertEquals(0.71f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // LOW
+
+        setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_HIGH);
+        assertEquals(0.51f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // VERY_LOW
+
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
+        // Vibration setting being bypassed will use default setting and not scale.
+        assertEquals(1f, mVibrationScaler.getScaleFactor(USAGE_TOUCH), TOLERANCE); // NONE
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    public void testAdaptiveHapticsScale_withAdaptiveHapticsAvailable() {
         mVibrationScaler.updateAdaptiveHapticsScale(USAGE_TOUCH, 0.5f);
         mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.2f);
 
         assertEquals(0.5f, mVibrationScaler.getAdaptiveHapticsScale(USAGE_TOUCH));
         assertEquals(0.2f, mVibrationScaler.getAdaptiveHapticsScale(USAGE_RINGTONE));
         assertEquals(1f, mVibrationScaler.getAdaptiveHapticsScale(USAGE_NOTIFICATION));
-
-        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
-        // Vibration setting being bypassed will apply adaptive haptics scales.
         assertEquals(0.2f, mVibrationScaler.getAdaptiveHapticsScale(USAGE_RINGTONE));
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    @DisableFlags(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void testAdaptiveHapticsScale_flagDisabled_adaptiveHapticScaleAlwaysNone() {
-        setDefaultIntensity(USAGE_TOUCH, Vibrator.VIBRATION_INTENSITY_LOW);
-        setDefaultIntensity(USAGE_RINGTONE, Vibrator.VIBRATION_INTENSITY_LOW);
-        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_HIGH);
-        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_HIGH);
-
         mVibrationScaler.updateAdaptiveHapticsScale(USAGE_TOUCH, 0.5f);
         mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.2f);
 
@@ -233,9 +280,9 @@ public class VibrationScalerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
-    public void scale_withVendorEffect_setsEffectStrengthBasedOnSettings() {
-        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_LOW);
+    @EnableFlags(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void scale_withVendorEffect_setsEffectStrengthAndScaleBasedOnSettings() {
+        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_HIGH);
         PersistableBundle vendorData = new PersistableBundle();
         vendorData.putString("key", "value");
@@ -244,20 +291,27 @@ public class VibrationScalerTest {
         VibrationEffect.VendorEffect scaled =
                 (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_STRONG);
+        // Notification scales up.
+        assertTrue(scaled.getScale() > 1);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 VIBRATION_INTENSITY_MEDIUM);
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        // Notification does not scale.
+        assertEquals(1, scaled.getScale(), TOLERANCE);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW);
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        // Notification scales down.
+        assertTrue(scaled.getScale() < 1);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_NOTIFICATION);
         // Vibration setting being bypassed will use default setting.
-        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        assertEquals(scaled.getEffectStrength(), VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        assertEquals(1, scaled.getScale(), TOLERANCE);
     }
 
     @Test
@@ -269,13 +323,13 @@ public class VibrationScalerTest {
         StepSegment resolved = getFirstSegment(mVibrationScaler.scale(
                 VibrationEffect.createOneShot(10, VibrationEffect.DEFAULT_AMPLITUDE),
                 USAGE_RINGTONE));
-        assertTrue(resolved.getAmplitude() > 0);
+        assertEquals(TEST_DEFAULT_AMPLITUDE / 255f, resolved.getAmplitude(), TOLERANCE);
 
         resolved = getFirstSegment(mVibrationScaler.scale(
                 VibrationEffect.createWaveform(new long[]{10},
                         new int[]{VibrationEffect.DEFAULT_AMPLITUDE}, -1),
                 USAGE_RINGTONE));
-        assertTrue(resolved.getAmplitude() > 0);
+        assertEquals(TEST_DEFAULT_AMPLITUDE / 255f, resolved.getAmplitude(), TOLERANCE);
     }
 
     @Test
@@ -301,7 +355,7 @@ public class VibrationScalerTest {
         scaled = getFirstSegment(mVibrationScaler.scale(VibrationEffect.createOneShot(128, 128),
                 USAGE_TOUCH));
         // Haptic feedback does not scale.
-        assertEquals(128f / 255, scaled.getAmplitude(), 1e-5);
+        assertEquals(128f / 255, scaled.getAmplitude(), TOLERANCE);
     }
 
     @Test
@@ -326,11 +380,11 @@ public class VibrationScalerTest {
 
         scaled = getFirstSegment(mVibrationScaler.scale(composed, USAGE_TOUCH));
         // Haptic feedback does not scale.
-        assertEquals(0.5, scaled.getScale(), 1e-5);
+        assertEquals(0.5, scaled.getScale(), TOLERANCE);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    @EnableFlags(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void scale_withAdaptiveHaptics_scalesVibrationsCorrectly() {
         setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_HIGH);
         setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_HIGH);
@@ -351,7 +405,7 @@ public class VibrationScalerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    @EnableFlags(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void scale_clearAdaptiveHapticsScales_clearsAllCachedScales() {
         setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_HIGH);
         setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_HIGH);
@@ -373,7 +427,7 @@ public class VibrationScalerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    @EnableFlags(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void scale_removeAdaptiveHapticsScale_removesCachedScale() {
         setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_HIGH);
         setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_HIGH);
@@ -395,11 +449,11 @@ public class VibrationScalerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled({
+    @EnableFlags({
             android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED,
             android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS,
     })
-    public void scale_adaptiveHapticsOnVendorEffect_setsLinearScaleParameter() {
+    public void scale_adaptiveHapticsOnVendorEffect_setsAdaptiveScaleParameter() {
         setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_HIGH);
 
         mVibrationScaler.updateAdaptiveHapticsScale(USAGE_RINGTONE, 0.5f);
@@ -410,12 +464,12 @@ public class VibrationScalerTest {
 
         VibrationEffect.VendorEffect scaled =
                 (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_RINGTONE);
-        assertEquals(scaled.getLinearScale(), 0.5f);
+        assertEquals(scaled.getAdaptiveScale(), 0.5f);
 
         mVibrationScaler.removeAdaptiveHapticsScale(USAGE_RINGTONE);
 
         scaled = (VibrationEffect.VendorEffect) mVibrationScaler.scale(effect, USAGE_RINGTONE);
-        assertEquals(scaled.getLinearScale(), 1.0f);
+        assertEquals(scaled.getAdaptiveScale(), 1.0f);
     }
 
     private void setDefaultIntensity(@VibrationAttributes.Usage int usage,

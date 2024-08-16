@@ -3105,6 +3105,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testLifetimeExtendedCancelledOnClick() throws Exception {
+        // Adds a lifetime extended notification.
+        final NotificationRecord notif = generateNotificationRecord(mTestNotificationChannel, 1,
+                null, false);
+        notif.getSbn().getNotification().flags =
+                Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(notif);
+        // Verify that the notification is posted and active.
+        assertThat(mBinderService.getActiveNotifications(mPkg).length).isEqualTo(1);
+
+        // Click the notification.
+        final NotificationVisibility nv = NotificationVisibility.obtain(notif.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationClick(mUid, Binder.getCallingPid(),
+                notif.getKey(), nv);
+        waitForIdle();
+
+        // The notification has been cancelled.
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(mPkg);
+        assertThat(notifs.length).isEqualTo(0);
+    }
+
+    @Test
     public void testCancelNotificationWithTag_fromApp_cannotCancelFgsChild()
             throws Exception {
         when(mAmi.applyForegroundServiceNotification(
@@ -10041,7 +10064,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10063,7 +10086,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10083,7 +10106,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in the package name from the arg, not the owner
         verify(mockZenModeHelper).addAutomaticZenRule(
-                eq("another.package"), eq(rule), eq(ZenModeConfig.UPDATE_ORIGIN_APP),
+                eq("another.package"), eq(rule), eq(ZenModeConfig.ORIGIN_APP),
                 anyString(), anyInt());  // doesn't count as a system/systemui call
     }
 
@@ -10198,7 +10221,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ true);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10210,7 +10233,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ false);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), anyInt());
     }
 
     @Test
@@ -10222,7 +10245,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.addAutomaticZenRule(SOME_ZEN_RULE, "pkg", /* fromUser= */ false);
 
         verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_APP), anyString(), anyInt());
     }
 
     @Test
@@ -10244,7 +10267,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.updateAutomaticZenRule("id", SOME_ZEN_RULE, /* fromUser= */ true);
 
         verify(zenModeHelper).updateAutomaticZenRule(eq("id"), eq(SOME_ZEN_RULE),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10266,7 +10289,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.removeAutomaticZenRule("id", /* fromUser= */ true);
 
         verify(zenModeHelper).removeAutomaticZenRule(eq("id"),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyString(), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyString(), anyInt());
     }
 
     @Test
@@ -10281,7 +10304,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_conditionFromUser_mappedToOriginUser() throws Exception {
+    public void setAutomaticZenRuleState_fromAppWithConditionFromUser_originUserInApp()
+            throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
 
@@ -10290,12 +10314,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceUser);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceUser),
-                eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyInt());
+                eq(ZenModeConfig.ORIGIN_USER_IN_APP), anyInt());
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromAppWithConditionNotFromUser_mappedToOriginApp()
+    public void setAutomaticZenRuleState_fromAppWithConditionNotFromUser_originApp()
             throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
@@ -10305,12 +10329,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceContext);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyInt());
+                eq(ZenModeConfig.ORIGIN_APP), anyInt());
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromSystemWithConditionNotFromUser_mappedToOriginSystem()
+    public void setAutomaticZenRuleState_fromSystemWithConditionFromUser_originUserInSystemUi()
+            throws Exception {
+        ZenModeHelper zenModeHelper = setUpMockZenTest();
+        mService.isSystemUid = true;
+
+        Condition withSourceContext = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
+                SOURCE_USER_ACTION);
+        mBinderService.setAutomaticZenRuleState("id", withSourceContext);
+
+        verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
+                eq(ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI), anyInt());
+    }
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void setAutomaticZenRuleState_fromSystemWithConditionNotFromUser_originSystem()
             throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.isSystemUid = true;
@@ -10320,7 +10358,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setAutomaticZenRuleState("id", withSourceContext);
 
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyInt());
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyInt());
     }
 
     /** Prepares for a zen-related test that uses a mocked {@link ZenModeHelper}. */
@@ -13026,6 +13064,100 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testCancelAutogroupSummary_cancelsAllChildren() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+        final int summaryId = Integer.MAX_VALUE;
+        // Add 2 group notifications without a summary
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 1, originalGroupName, false);
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.mSummaryByGroupKey.remove(nr0.getGroupKey());
+
+        // GroupHelper is a mock, so make the calls it would make
+        // Add aggregate group summary
+        NotificationAttributes attr = new NotificationAttributes(GroupHelper.BASE_FLAGS,
+                mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN,
+                nr0.getChannel().getId());
+        NotificationRecord aggregateSummary = mService.createAutoGroupSummary(nr0.getUserId(),
+                nr0.getSbn().getPackageName(), nr0.getKey(), aggregateGroupName, summaryId, attr);
+        mService.addNotification(aggregateSummary);
+        nr0.setOverrideGroupKey(aggregateGroupName);
+        nr1.setOverrideGroupKey(aggregateGroupName);
+        final String fullAggregateGroupKey = nr0.getGroupKey();
+
+        // Check that the aggregate group summary was created
+        assertThat(aggregateSummary.getNotification().getGroup()).isEqualTo(aggregateGroupName);
+        assertThat(aggregateSummary.getNotification().getChannelId()).isEqualTo(
+                nr0.getChannel().getId());
+        assertThat(mService.mSummaryByGroupKey.containsKey(fullAggregateGroupKey)).isTrue();
+
+        // Cancel aggregate group summary
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, aggregateSummary.getSbn().getTag(),
+                aggregateSummary.getSbn().getId(), aggregateSummary.getSbn().getUserId());
+        waitForIdle();
+
+        // Check that child notifications are also removed
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(aggregateSummary));
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr0));
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr1));
+
+        // Make sure the summary was removed and not re-posted
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testCancelAutogroupSummary_forceGrouping_cancelsAllChildren() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+        final int summaryId = Integer.MAX_VALUE;
+        // Add 2 group notifications without a summary
+        NotificationRecord nr0 =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        NotificationRecord nr1 =
+                generateNotificationRecord(mTestNotificationChannel, 1, originalGroupName, false);
+        mService.addNotification(nr0);
+        mService.addNotification(nr1);
+        mService.mSummaryByGroupKey.remove(nr0.getGroupKey());
+
+        // GroupHelper is a mock, so make the calls it would make
+        // Add aggregate group summary
+        NotificationAttributes attr = new NotificationAttributes(GroupHelper.BASE_FLAGS,
+                mock(Icon.class), 0, VISIBILITY_PRIVATE, GROUP_ALERT_CHILDREN,
+                nr0.getChannel().getId());
+        NotificationRecord aggregateSummary = mService.createAutoGroupSummary(nr0.getUserId(),
+                nr0.getSbn().getPackageName(), nr0.getKey(), aggregateGroupName, summaryId, attr);
+        mService.addNotification(aggregateSummary);
+        nr0.setOverrideGroupKey(aggregateGroupName);
+        nr1.setOverrideGroupKey(aggregateGroupName);
+        final String fullAggregateGroupKey = nr0.getGroupKey();
+
+        // Check that the aggregate group summary was created
+        assertThat(aggregateSummary.getNotification().getGroup()).isEqualTo(aggregateGroupName);
+        assertThat(aggregateSummary.getNotification().getChannelId()).isEqualTo(
+                nr0.getChannel().getId());
+        assertThat(mService.mSummaryByGroupKey.containsKey(fullAggregateGroupKey)).isTrue();
+
+        // Cancel aggregate group summary
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, aggregateSummary.getSbn().getTag(),
+                aggregateSummary.getSbn().getId(), aggregateSummary.getSbn().getUserId());
+        waitForIdle();
+
+        // Check that child notifications are also removed
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(aggregateSummary), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr0), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(nr1), any());
+
+        // Make sure the summary was removed and not re-posted
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(0);
+    }
+
+    @Test
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testUngroupingOngoingAutoSummary() throws Exception {
         NotificationRecord nr0 =
                 generateNotificationRecord(mTestNotificationChannel, 0);
@@ -15485,7 +15617,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.setInterruptionFilter("package", INTERRUPTION_FILTER_PRIORITY, false);
 
         verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
-                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(), eq("package"),
+                eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(), eq("package"),
                 anyInt());
     }
 
@@ -15531,7 +15663,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         if (canSetGlobalPolicy) {
             verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
-                    eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), eq("package"), anyInt());
+                    eq(ZenModeConfig.ORIGIN_APP), anyString(), eq("package"), anyInt());
         } else {
             verify(zenModeHelper).applyGlobalZenModeAsImplicitZenRule(anyString(), anyInt(),
                     eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
@@ -15571,7 +15703,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 INTERRUPTION_FILTER_PRIORITY);
 
         verify(mService.mZenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS),
-                eq(null), eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyString(),
+                eq(null), eq(ZenModeConfig.ORIGIN_SYSTEM), anyString(),
                 eq("pkg"), eq(mUid));
     }
 

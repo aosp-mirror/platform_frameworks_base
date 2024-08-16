@@ -18,11 +18,15 @@ package com.android.systemui.statusbar.policy.domain.interactor
 
 import android.content.Context
 import android.provider.Settings
+import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
+import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
+import android.util.Log
 import androidx.concurrent.futures.await
 import com.android.settingslib.notification.data.repository.ZenModeRepository
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
 import java.time.Duration
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -34,11 +38,16 @@ import kotlinx.coroutines.flow.map
  * An interactor that performs business logic related to the status and configuration of Zen Mode
  * (or Do Not Disturb/DND Mode).
  */
-class ZenModeInteractor @Inject constructor(private val repository: ZenModeRepository) {
+class ZenModeInteractor
+@Inject
+constructor(
+    private val zenModeRepository: ZenModeRepository,
+    private val notificationSettingsRepository: NotificationSettingsRepository,
+) {
     private val iconLoader: ZenIconLoader = ZenIconLoader.getInstance()
 
     val isZenModeEnabled: Flow<Boolean> =
-        repository.globalZenMode
+        zenModeRepository.globalZenMode
             .map {
                 when (it ?: Settings.Global.ZEN_MODE_OFF) {
                     Settings.Global.ZEN_MODE_ALARMS -> true
@@ -51,7 +60,9 @@ class ZenModeInteractor @Inject constructor(private val repository: ZenModeRepos
             .distinctUntilChanged()
 
     val areNotificationsHiddenInShade: Flow<Boolean> =
-        combine(isZenModeEnabled, repository.consolidatedNotificationPolicy) { dndEnabled, policy ->
+        combine(isZenModeEnabled, zenModeRepository.consolidatedNotificationPolicy) {
+                dndEnabled,
+                policy ->
                 if (!dndEnabled) {
                     false
                 } else {
@@ -61,17 +72,45 @@ class ZenModeInteractor @Inject constructor(private val repository: ZenModeRepos
             }
             .distinctUntilChanged()
 
-    val modes: Flow<List<ZenMode>> = repository.modes
+    val modes: Flow<List<ZenMode>> = zenModeRepository.modes
 
     suspend fun getModeIcon(mode: ZenMode, context: Context): Icon {
         return Icon.Loaded(mode.getIcon(context, iconLoader).await(), contentDescription = null)
     }
 
-    fun activateMode(zenMode: ZenMode, duration: Duration? = null) {
-        repository.activateMode(zenMode, duration)
+    fun activateMode(zenMode: ZenMode) {
+        if (zenMode.isManualDnd) {
+            val duration =
+                when (zenDuration) {
+                    ZEN_DURATION_PROMPT -> {
+                        Log.e(
+                            TAG,
+                            "Interactor cannot handle showing the zen duration prompt. " +
+                                "Please use EnableZenModeDialog when this setting is active."
+                        )
+                        null
+                    }
+                    ZEN_DURATION_FOREVER -> null
+                    else -> Duration.ofMinutes(zenDuration.toLong())
+                }
+
+            zenModeRepository.activateMode(zenMode, duration)
+        } else {
+            zenModeRepository.activateMode(zenMode)
+        }
     }
 
     fun deactivateMode(zenMode: ZenMode) {
-        repository.deactivateMode(zenMode)
+        zenModeRepository.deactivateMode(zenMode)
+    }
+
+    private val zenDuration
+        get() = notificationSettingsRepository.zenDuration.value
+
+    fun shouldAskForZenDuration(mode: ZenMode): Boolean =
+        mode.isManualDnd && (zenDuration == ZEN_DURATION_PROMPT)
+
+    companion object {
+        private const val TAG = "ZenModeInteractor"
     }
 }

@@ -156,7 +156,6 @@ public class DragDropControllerTests extends WindowTestsBase {
         window.openInputChannel(channel);
         window.mHasSurface = true;
         mWm.mWindowMap.put(window.mClient.asBinder(), window);
-        mWm.mInputToWindowMap.put(window.mInputChannelToken, window);
         return window;
     }
 
@@ -216,16 +215,6 @@ public class DragDropControllerTests extends WindowTestsBase {
     @Test
     public void testPerformDrag_NullDataWithGrantUri() {
         doDragAndDrop(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 0, 0);
-    }
-
-    @Test
-    public void testPerformDrag_NullDataToOtherUser() {
-        final WindowState otherUsersWindow =
-                createDropTargetWindow("Other user's window", 1 * UserHandle.PER_USER_RANGE);
-        doReturn(otherUsersWindow).when(mDisplayContent).getTouchableWinAtPointLocked(10, 10);
-
-        doDragAndDrop(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 10, 10);
-        mToken = otherUsersWindow.mClient.asBinder();
     }
 
     @Test

@@ -21,6 +21,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
+import com.android.systemui.qs.panels.ui.model.GridCell
+import com.android.systemui.qs.panels.ui.model.SpacerGridCell
+import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.google.common.truth.Truth.assertThat
@@ -30,74 +35,130 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class EditTileListStateTest : SysuiTestCase() {
-    val underTest = EditTileListState(TestEditTiles)
+    private val underTest = EditTileListState(TestEditTiles, 4)
 
     @Test
-    fun movingNonExistentTile_tileAdded() {
-        val newTile = createEditTile("other_tile", false)
-        underTest.move(newTile, TestEditTiles[0].tileSpec)
-
-        assertThat(underTest.tiles[0]).isEqualTo(newTile)
-        assertThat(underTest.tiles.subList(1, underTest.tiles.size))
-            .containsExactly(*TestEditTiles.toTypedArray())
+    fun noDrag_listUnchanged() {
+        underTest.tiles.forEach { assertThat(it).isNotInstanceOf(SpacerGridCell::class.java) }
+        assertThat(underTest.tiles.map { (it as TileGridCell).tile.tileSpec })
+            .containsExactly(*TestEditTiles.map { it.tile.tileSpec }.toTypedArray())
     }
 
     @Test
-    fun movingTileToNonExistentTarget_listUnchanged() {
-        underTest.move(TestEditTiles[0], TileSpec.create("other_tile"))
+    fun startDrag_listHasSpacers() {
+        underTest.onStarted(TestEditTiles[0])
 
-        assertThat(underTest.tiles).containsExactly(*TestEditTiles.toTypedArray())
+        // [ a ] [ b ] [ c ] [ X ]
+        // [ Large D ] [ e ] [ X ]
+        assertThat(underTest.tiles.toStrings())
+            .isEqualTo(listOf("a", "b", "c", "spacer", "d", "e", "spacer"))
+        assertThat(underTest.isMoving(TestEditTiles[0].tile.tileSpec)).isTrue()
+        assertThat(underTest.dragInProgress).isTrue()
     }
 
     @Test
-    fun movingTileToItself_listUnchanged() {
-        underTest.move(TestEditTiles[0], TestEditTiles[0].tileSpec)
+    fun moveDrag_listChanges() {
+        underTest.onStarted(TestEditTiles[4])
+        underTest.onMoved(3, false)
 
-        assertThat(underTest.tiles).containsExactly(*TestEditTiles.toTypedArray())
+        // Tile E goes to index 3
+        // [ a ] [ b ] [ c ] [ e ]
+        // [ Large D ] [ X ] [ X ]
+        assertThat(underTest.tiles.toStrings())
+            .isEqualTo(listOf("a", "b", "c", "e", "d", "spacer", "spacer"))
     }
 
     @Test
-    fun movingTileToSameSection_listUpdates() {
-        // Move tile at index 0 to index 1. Tile 0 should remain current.
-        underTest.move(TestEditTiles[0], TestEditTiles[1].tileSpec)
+    fun moveDragOnSidesOfLargeTile_listChanges() {
+        val draggedCell = TestEditTiles[4]
 
-        // Assert the tiles 0 and 1 have changed places.
-        assertThat(underTest.tiles[0]).isEqualTo(TestEditTiles[1])
-        assertThat(underTest.tiles[1]).isEqualTo(TestEditTiles[0])
+        underTest.onStarted(draggedCell)
+        underTest.onMoved(4, true)
 
-        // Assert the rest of the list is unchanged
-        assertThat(underTest.tiles.subList(2, 5))
-            .containsExactly(*TestEditTiles.subList(2, 5).toTypedArray())
+        // Tile E goes to the right side of tile D, list is unchanged
+        // [ a ] [ b ] [ c ] [ X ]
+        // [ Large D ] [ e ] [ X ]
+        assertThat(underTest.tiles.toStrings())
+            .isEqualTo(listOf("a", "b", "c", "spacer", "d", "e", "spacer"))
+
+        underTest.onMoved(4, false)
+
+        // Tile E goes to the left side of tile D, they swap positions
+        // [ a ] [ b ] [ c ] [ e ]
+        // [ Large D ] [ X ] [ X ]
+        assertThat(underTest.tiles.toStrings())
+            .isEqualTo(listOf("a", "b", "c", "e", "d", "spacer", "spacer"))
     }
 
-    fun removingTile_listUpdates() {
-        // Remove tile at index 0
-        underTest.remove(TestEditTiles[0].tileSpec)
+    @Test
+    fun moveNewTile_tileIsAdded() {
+        val newTile = createEditTile("newTile", 2)
 
-        // Assert the tile was removed
-        assertThat(underTest.tiles).containsExactly(*TestEditTiles.subList(1, 6).toTypedArray())
+        underTest.onStarted(newTile)
+        underTest.onMoved(5, false)
+
+        // New tile goes to index 5
+        // [ a ] [ b ] [ c ] [ X ]
+        // [ Large D ] [ newTile ]
+        // [ e ] [ X ] [ X ] [ X ]
+        assertThat(underTest.tiles.toStrings())
+            .isEqualTo(
+                listOf("a", "b", "c", "spacer", "d", "newTile", "e", "spacer", "spacer", "spacer")
+            )
+    }
+
+    @Test
+    fun droppedNewTile_spacersDisappear() {
+        underTest.onStarted(TestEditTiles[0])
+        underTest.onDrop()
+
+        assertThat(underTest.tiles.toStrings()).isEqualTo(listOf("a", "b", "c", "d", "e"))
+        assertThat(underTest.isMoving(TestEditTiles[0].tile.tileSpec)).isFalse()
+        assertThat(underTest.dragInProgress).isFalse()
+    }
+
+    @Test
+    fun movedTileOutOfBounds_tileDisappears() {
+        underTest.onStarted(TestEditTiles[0])
+        underTest.movedOutOfBounds()
+
+        assertThat(underTest.tiles.toStrings()).doesNotContain(TestEditTiles[0].tile.tileSpec.spec)
+    }
+
+    private fun List<GridCell>.toStrings(): List<String> {
+        return map {
+            if (it is TileGridCell) {
+                it.tile.tileSpec.spec
+            } else {
+                "spacer"
+            }
+        }
     }
 
     companion object {
-        private fun createEditTile(tileSpec: String, isCurrent: Boolean): EditTileViewModel {
-            return EditTileViewModel(
-                tileSpec = TileSpec.create(tileSpec),
-                icon = Icon.Resource(0, null),
-                label = Text.Loaded("unused"),
-                appName = null,
-                isCurrent = isCurrent,
-                availableEditActions = emptySet(),
+        private fun createEditTile(tileSpec: String, width: Int): SizedTile<EditTileViewModel> {
+            return SizedTileImpl(
+                EditTileViewModel(
+                    tileSpec = TileSpec.create(tileSpec),
+                    icon = Icon.Resource(0, null),
+                    label = Text.Loaded("unused"),
+                    appName = null,
+                    isCurrent = true,
+                    availableEditActions = emptySet(),
+                ),
+                width,
             )
         }
 
+        // [ a ] [ b ] [ c ]
+        // [ Large D ] [ e ] [ f ]
         private val TestEditTiles =
             listOf(
-                createEditTile("tileA", true),
-                createEditTile("tileB", true),
-                createEditTile("tileC", true),
-                createEditTile("tileD", false),
-                createEditTile("tileE", false),
-                createEditTile("tileF", false),
+                createEditTile("a", 1),
+                createEditTile("b", 1),
+                createEditTile("c", 1),
+                createEditTile("d", 2),
+                createEditTile("e", 1),
             )
     }
 }

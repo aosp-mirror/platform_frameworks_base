@@ -22,12 +22,12 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
@@ -56,13 +56,14 @@ constructor(
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
+        val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
-            items(tiles.size, span = { index -> GridItemSpan(tiles[index].spec.width()) }) { index
-                ->
+            items(sizedTiles.size, span = { index -> GridItemSpan(sizedTiles[index].width) }) {
+                index ->
                 Tile(
-                    tile = tiles[index],
-                    iconOnly = iconTilesViewModel.isIconTile(tiles[index].spec),
+                    tile = sizedTiles[index].tile,
+                    iconOnly = iconTilesViewModel.isIconTile(sizedTiles[index].tile.spec),
                     modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
                 )
             }
@@ -75,19 +76,32 @@ constructor(
         modifier: Modifier,
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit,
+        onSetTiles: (List<TileSpec>) -> Unit,
     ) {
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
-        val isIcon: (TileSpec) -> Boolean by rememberUpdatedState { tileSpec ->
-            iconTilesViewModel.isIconTile(tileSpec)
-        }
+        val largeTiles by iconTilesViewModel.largeTiles.collectAsStateWithLifecycle()
 
+        // Non-current tiles should always be displayed as icon tiles.
+        val sizedTiles =
+            remember(tiles, largeTiles) {
+                tiles.map {
+                    SizedTileImpl(
+                        it,
+                        if (!it.isCurrent || !largeTiles.contains(it.tileSpec)) 1 else 2,
+                    )
+                }
+            }
+
+        val (currentTiles, otherTiles) = sizedTiles.partition { it.tile.isCurrent }
+        val currentListState = rememberEditListState(currentTiles, columns)
         DefaultEditTileGrid(
-            tiles = tiles,
-            isIconOnly = isIcon,
+            currentListState = currentListState,
+            otherTiles = otherTiles,
             columns = columns,
             modifier = modifier,
             onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
+            onSetTiles = onSetTiles,
             onResize = iconTilesViewModel::resize,
         )
     }
@@ -99,7 +113,7 @@ constructor(
     ): List<List<TileViewModel>> {
 
         return PaginatableGridLayout.splitInRows(
-                tiles.map { SizedTile(it, it.spec.width()) },
+                tiles.map { SizedTileImpl(it, it.spec.width()) },
                 columns,
             )
             .chunked(rows)

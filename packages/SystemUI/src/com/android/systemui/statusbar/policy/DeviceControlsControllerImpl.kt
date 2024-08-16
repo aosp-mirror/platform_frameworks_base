@@ -21,13 +21,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.provider.Settings
 import android.util.Log
-import com.android.systemui.res.R
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
-import com.android.systemui.statusbar.phone.AutoTileManager
 import com.android.systemui.statusbar.policy.DeviceControlsController.Callback
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
@@ -35,14 +34,16 @@ import javax.inject.Inject
 /**
  * Watches for Device Controls QS Tile activation, which can happen in two ways:
  * <ol>
- *   <li>Migration from Power Menu - For existing Android 11 users, create a tile in a high
- *       priority position.
- *   <li>Device controls service becomes available - For non-migrated users, create a tile and
- *       place at the end of active tiles, and initiate seeding where possible.
+ * <li>Migration from Power Menu - For existing Android 11 users, create a tile in a high priority
+ *   position.
+ * <li>Device controls service becomes available - For non-migrated users, create a tile and place
+ *   at the end of active tiles, and initiate seeding where possible.
  * </ol>
  */
 @SysUISingleton
-public class DeviceControlsControllerImpl @Inject constructor(
+public class DeviceControlsControllerImpl
+@Inject
+constructor(
     private val context: Context,
     private val controlsComponent: ControlsComponent,
     private val userContextProvider: UserContextProvider,
@@ -52,13 +53,14 @@ public class DeviceControlsControllerImpl @Inject constructor(
     private var callback: Callback? = null
     internal var position: Int? = null
 
-    private val listingCallback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
-            if (!serviceInfos.isEmpty()) {
-                seedFavorites(serviceInfos)
+    private val listingCallback =
+        object : ControlsListingController.ControlsListingCallback {
+            override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
+                if (!serviceInfos.isEmpty()) {
+                    seedFavorites(serviceInfos)
+                }
             }
         }
-    }
 
     companion object {
         private const val TAG = "DeviceControlsControllerImpl"
@@ -80,7 +82,7 @@ public class DeviceControlsControllerImpl @Inject constructor(
     }
 
     /**
-     * This migration logic assumes that something like [AutoTileManager] is tracking state
+     * This migration logic assumes that something like [AutoAddTracker] is tracking state
      * externally, and won't call this method after receiving a response via
      * [Callback#onControlsUpdate], once per user. Otherwise the calculated position may be
      * incorrect.
@@ -118,16 +120,19 @@ public class DeviceControlsControllerImpl @Inject constructor(
     }
 
     /**
-     * See if any available control service providers match one of the preferred components. If
-     * they do, and there are no current favorites for that component, query the preferred
-     * component for a limited number of suggested controls.
+     * See if any available control service providers match one of the preferred components. If they
+     * do, and there are no current favorites for that component, query the preferred component for
+     * a limited number of suggested controls.
      */
     private fun seedFavorites(serviceInfos: List<ControlsServiceInfo>) {
-        val preferredControlsPackages = context.getResources().getStringArray(
-            R.array.config_controlsPreferredPackages)
+        val preferredControlsPackages =
+            context.getResources().getStringArray(R.array.config_controlsPreferredPackages)
 
-        val prefs = userContextProvider.userContext.getSharedPreferences(
-            PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
+        val prefs =
+            userContextProvider.userContext.getSharedPreferences(
+                PREFS_CONTROLS_FILE,
+                Context.MODE_PRIVATE
+            )
         val seededPackages =
             prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, emptySet()) ?: emptySet()
 
@@ -157,21 +162,22 @@ public class DeviceControlsControllerImpl @Inject constructor(
         if (componentsToSeed.isEmpty()) return
 
         controlsController.seedFavoritesForComponents(
-                componentsToSeed,
-                { response ->
-                    Log.d(TAG, "Controls seeded: $response")
-                    if (response.accepted) {
-                        addPackageToSeededSet(prefs, response.packageName)
-                        if (position == null) {
-                            position = QS_DEFAULT_POSITION
-                        }
-                        fireControlsUpdate()
-
-                        controlsComponent.getControlsListingController().ifPresent {
-                            it.removeCallback(listingCallback)
-                        }
+            componentsToSeed,
+            { response ->
+                Log.d(TAG, "Controls seeded: $response")
+                if (response.accepted) {
+                    addPackageToSeededSet(prefs, response.packageName)
+                    if (position == null) {
+                        position = QS_DEFAULT_POSITION
                     }
-                })
+                    fireControlsUpdate()
+
+                    controlsComponent.getControlsListingController().ifPresent {
+                        it.removeCallback(listingCallback)
+                    }
+                }
+            }
+        )
     }
 
     private fun addPackageToSeededSet(prefs: SharedPreferences, pkg: String) {

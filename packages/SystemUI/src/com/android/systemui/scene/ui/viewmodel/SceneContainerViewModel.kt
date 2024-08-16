@@ -23,25 +23,26 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 /** Models UI state for the scene container. */
-@SysUISingleton
 class SceneContainerViewModel
-@Inject
+@AssistedInject
 constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-) {
+    @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
+) : SysUiViewModel() {
     /**
      * Keys of all scenes in the container.
      *
@@ -55,6 +56,29 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
+
+    override suspend fun onActivated() {
+        try {
+            // Sends a MotionEventHandler to the owner of the view-model so they can report
+            // MotionEvents into the view-model.
+            motionEventHandlerReceiver(
+                object : MotionEventHandler {
+                    override fun onMotionEvent(motionEvent: MotionEvent) {
+                        this@SceneContainerViewModel.onMotionEvent(motionEvent)
+                    }
+
+                    override fun onMotionEventComplete() {
+                        this@SceneContainerViewModel.onMotionEventComplete()
+                    }
+                }
+            )
+            awaitCancellation()
+        } finally {
+            // Clears the previously-sent MotionEventHandler so the owner of the view-model releases
+            // their reference to it.
+            motionEventHandlerReceiver(null)
+        }
+    }
 
     /**
      * Binds the given flow so the system remembers it.
@@ -136,21 +160,22 @@ constructor(
         }
     }
 
-    private fun replaceSceneFamilies(
-        destinationScenes: Map<UserAction, UserActionResult>,
-    ): Flow<Map<UserAction, UserActionResult>> {
-        return destinationScenes
-            .mapValues { (_, actionResult) ->
-                sceneInteractor.resolveSceneFamily(actionResult.toScene).map { scene ->
-                    actionResult.copy(toScene = scene)
-                }
-            }
-            .combineValueFlows()
+    /** Defines interface for classes that can handle externally-reported [MotionEvent]s. */
+    interface MotionEventHandler {
+        /** Notifies that a [MotionEvent] has occurred. */
+        fun onMotionEvent(motionEvent: MotionEvent)
+
+        /**
+         * Notifies that the previous [MotionEvent] reported by [onMotionEvent] has finished
+         * processing.
+         */
+        fun onMotionEventComplete()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
+        ): SceneContainerViewModel
     }
 }
-
-private fun <K, V> Map<K, Flow<V>>.combineValueFlows(): Flow<Map<K, V>> =
-    combine(
-        asIterable().map { (k, fv) -> fv.map { k to it } },
-        transform = Array<Pair<K, V>>::toMap,
-    )

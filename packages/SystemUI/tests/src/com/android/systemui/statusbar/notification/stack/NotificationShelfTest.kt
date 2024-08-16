@@ -1,6 +1,5 @@
 package com.android.systemui.statusbar.notification.stack
 
-import android.platform.test.annotations.DisableFlags
 import android.service.notification.StatusBarNotification
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
@@ -21,7 +20,6 @@ import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.StackScrollAlgorithmState
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
@@ -69,32 +67,6 @@ open class NotificationShelfTest : SysuiTestCase() {
 
         shelf.bind(ambientState, hostLayout, roundnessManager)
         shelf.layout(/* left */ 0, /* top */ 0, /* right */ 30, /* bottom */ 5)
-    }
-
-    @Test
-    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
-    fun testShadeWidth_BasedOnFractionToShade() {
-        setFractionToShade(0f)
-        setOnLockscreen(true)
-
-        shelf.updateActualWidth(/* fractionToShade */ 0f, /* shortestWidth */ 10f)
-        assertTrue(shelf.actualWidth == 10)
-
-        shelf.updateActualWidth(/* fractionToShade */ 0.5f, /* shortestWidth */ 10f)
-        assertTrue(shelf.actualWidth == 20)
-
-        shelf.updateActualWidth(/* fractionToShade */ 1f, /* shortestWidth */ 10f)
-        assertTrue(shelf.actualWidth == 30)
-    }
-
-    @Test
-    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
-    fun testShelfIsLong_WhenNotOnLockscreen() {
-        setFractionToShade(0f)
-        setOnLockscreen(false)
-
-        shelf.updateActualWidth(/* fraction */ 0f, /* shortestWidth */ 10f)
-        assertTrue(shelf.actualWidth == 30)
     }
 
     @Test

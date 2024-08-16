@@ -26,6 +26,7 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import android.compat.testing.PlatformCompatChangeRule;
 import android.platform.test.annotations.Presubmit;
@@ -246,7 +247,6 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
         });
     }
 
-
     @Test
     @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
     public void testshouldOverrideMinAspectRatio_propertyFalse_overrideEnabled_returnsFalse() {
@@ -269,11 +269,28 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    public void testGetFixedOrientationLetterboxAspectRatio_splitScreenAspectEnabled() {
+        runTestScenario((robot)-> {
+            robot.applyOnConf((c) -> {
+                c.enableCameraCompatTreatment(/* enabled */ true);
+                c.enableCameraCompatTreatmentAtBuildTime(/* enabled */ true);
+                c.enableCameraCompatSplitScreenAspectRatio(/* enabled */ true);
+                c.enableDisplayAspectRatioEnabledForFixedOrientationLetterbox(/* enabled */ false);
+                c.setFixedOrientationLetterboxAspectRatio(/* aspectRatio */ 1.5f);
+            });
+            robot.activity().createActivityWithComponentInNewTaskAndDisplay();
+            robot.checkFixedOrientationLetterboxAspectRatioForTopParent(/* expected */ 1.5f);
+
+            robot.activity().enableTreatmentForTopActivity(/* enabled */ true);
+            robot.checkAspectRatioForTopParentIsSplitScreenRatio(/* expected */ true);
+        });
+    }
+
     /**
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<AspectRatioOverridesRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
         final AspectRatioOverridesRobotTest robot =
                 new AspectRatioOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
@@ -285,6 +302,18 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
                 @NonNull ActivityTaskManagerService atm,
                 @NonNull ActivityTaskSupervisor supervisor) {
             super(wm, atm, supervisor);
+        }
+
+        @Override
+        void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+            super.onPostDisplayContentCreation(displayContent);
+            spyOn(displayContent.mAppCompatCameraPolicy);
+        }
+
+        @Override
+        void onPostActivityCreation(@NonNull ActivityRecord activity) {
+            super.onPostActivityCreation(activity);
+            spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
         }
 
         void checkShouldApplyUserFullscreenOverride(boolean expected) {
@@ -308,6 +337,28 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
         }
 
         @NonNull
+        void checkFixedOrientationLetterboxAspectRatioForTopParent(float expected) {
+            assertEquals(expected,
+                    getTopActivityAppCompatAspectRatioOverrides()
+                            .getFixedOrientationLetterboxAspectRatio(
+                                    activity().top().getParent().getConfiguration()),
+                                        FLOAT_TOLLERANCE);
+        }
+
+        void checkAspectRatioForTopParentIsSplitScreenRatio(boolean expected) {
+            final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                    getTopActivityAppCompatAspectRatioOverrides();
+            if (expected) {
+                assertEquals(aspectRatioOverrides.getSplitScreenAspectRatio(),
+                        aspectRatioOverrides.getFixedOrientationLetterboxAspectRatio(
+                                activity().top().getParent().getConfiguration()), FLOAT_TOLLERANCE);
+            } else {
+                assertNotEquals(aspectRatioOverrides.getSplitScreenAspectRatio(),
+                        aspectRatioOverrides.getFixedOrientationLetterboxAspectRatio(
+                                activity().top().getParent().getConfiguration()), FLOAT_TOLLERANCE);
+            }
+        }
+
         private AppCompatAspectRatioOverrides getTopActivityAppCompatAspectRatioOverrides() {
             return activity().top().mAppCompatController.getAppCompatAspectRatioOverrides();
         }

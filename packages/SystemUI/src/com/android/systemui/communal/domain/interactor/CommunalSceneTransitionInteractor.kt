@@ -175,7 +175,7 @@ constructor(
         }
     }
 
-    private fun finishCurrentTransition() {
+    private suspend fun finishCurrentTransition() {
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             1f,
@@ -285,7 +285,7 @@ constructor(
         currentTransitionId = internalTransitionInteractor.startTransition(transitionInfo)
     }
 
-    private fun updateProgress(progress: Float) {
+    private suspend fun updateProgress(progress: Float) {
         if (currentTransitionId == null) return
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,

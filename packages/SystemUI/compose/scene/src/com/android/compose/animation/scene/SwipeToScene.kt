@@ -31,6 +31,7 @@ import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.TraversableNode
 import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.unit.IntSize
+import com.android.compose.animation.scene.content.Scene
 
 /**
  * Configures the swipeable behavior of a [SceneTransitionLayout] depending on the current state.
@@ -66,6 +67,7 @@ private class SwipeToSceneNode(
                 enabled = ::enabled,
                 startDragImmediately = ::startDragImmediately,
                 onDragStarted = draggableHandler::onDragStarted,
+                onFirstPointerDown = ::onFirstPointerDown,
                 swipeDetector = swipeDetector,
                 dispatcher = dispatcher,
             )
@@ -98,6 +100,15 @@ private class SwipeToSceneNode(
     init {
         delegate(nestedScrollModifierNode(nestedScrollHandlerImpl.connection, dispatcher))
         delegate(ScrollBehaviorOwnerNode(draggableHandler.nestedScrollKey, nestedScrollHandlerImpl))
+    }
+
+    private fun onFirstPointerDown() {
+        // When we drag our finger across the screen, the NestedScrollConnection keeps track of all
+        // the scroll events until we lift our finger. However, in some cases, the connection might
+        // not receive the "up" event. This can lead to an incorrect initial state for the gesture.
+        // To prevent this issue, we can call the reset() method when the first finger touches the
+        // screen. This ensures that the NestedScrollConnection starts from a correct state.
+        nestedScrollHandlerImpl.connection.reset()
     }
 
     override fun onDetach() {

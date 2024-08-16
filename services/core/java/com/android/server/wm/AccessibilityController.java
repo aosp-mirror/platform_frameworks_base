@@ -1617,8 +1617,7 @@ final class AccessibilityController {
             // causing the notifying, or the recents/home window is removed, then we won't need the
             // delayed notification anymore.
             void onWMTransition(@TransitionType int type, @TransitionFlags int flags) {
-                if (Flags.delayNotificationToMagnificationWhenRecentsWindowToFrontTransition()
-                        && type == WindowManager.TRANSIT_TO_FRONT
+                if (type == WindowManager.TRANSIT_TO_FRONT
                         && (flags & TRANSIT_FLAG_IS_RECENTS) != 0) {
                     // Delay the recents to front transition notification then send after if needed.
                     mHasDelayedNotificationForRecentsToFrontTransition = true;
@@ -2451,7 +2450,7 @@ final class AccessibilityController {
 
                             long tokenInner = os.start(WINDOW_MANAGER_SERVICE);
                             synchronized (mService.mGlobalLock) {
-                                mService.dumpDebugLocked(os, WindowTraceLogLevel.ALL);
+                                mService.dumpDebugLocked(os, WindowTracingLogLevel.ALL);
                             }
                             os.end(tokenInner);
                             os.write(CPU_STATS, printCpuStats(reportedTimeStampNanos));

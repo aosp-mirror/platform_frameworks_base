@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -30,6 +31,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
@@ -37,10 +39,12 @@ import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.util.Size;
 import android.view.Choreographer;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
@@ -77,6 +81,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     CaptionWindowDecoration(
             Context context,
+            @NonNull Context userContext,
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
@@ -85,7 +90,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface);
+        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface);
         mHandler = handler;
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
@@ -194,7 +199,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             RelayoutParams relayoutParams,
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
-            boolean setTaskCropAndPosition) {
+            boolean setTaskCropAndPosition,
+            InsetsState displayInsetsState) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
@@ -222,6 +228,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         controlsElement.mWidthResId = R.dimen.caption_right_buttons_width;
         controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
         relayoutParams.mOccludingCaptionElements.add(controlsElement);
+        relayoutParams.mCaptionTopPadding = getTopPadding(relayoutParams,
+                taskInfo.getConfiguration().windowConfiguration.getBounds(), displayInsetsState);
     }
 
     @SuppressLint("MissingPermission")
@@ -237,7 +245,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
-                setTaskCropAndPosition);
+                setTaskCropAndPosition, mDisplayController.getInsetsState(taskInfo.displayId));
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
@@ -252,6 +260,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         if (oldRootView != mResult.mRootView) {
             setupRootView();
         }
+
+        bindData(mResult.mRootView, taskInfo);
 
         if (!isDragResizeable) {
             closeDragResizeListener();
@@ -278,8 +288,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
-                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
-                getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop);
+                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(mContext, res),
+                getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
+                getLargeResizeCornerSize(res)), touchSlop);
     }
 
     /**
@@ -296,6 +307,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         minimize.setOnClickListener(mOnCaptionButtonClickListener);
         final View maximize = caption.findViewById(R.id.maximize_window);
         maximize.setOnClickListener(mOnCaptionButtonClickListener);
+    }
+
+    private void bindData(View rootView, RunningTaskInfo taskInfo) {
+        final boolean isFullscreen =
+                taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        rootView.findViewById(R.id.maximize_window)
+                .setBackgroundResource(isFullscreen ? R.drawable.decor_restore_button_dark
+                        : R.drawable.decor_maximize_button_dark);
     }
 
     void setCaptionColor(int captionColor) {
@@ -341,6 +360,18 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         }
         mDragResizeListener.close();
         mDragResizeListener = null;
+    }
+
+    private static int getTopPadding(RelayoutParams params, Rect taskBounds,
+            InsetsState insetsState) {
+        if (!params.mRunningTaskInfo.isFreeform()) {
+            Insets systemDecor = insetsState.calculateInsets(taskBounds,
+                    WindowInsets.Type.systemBars() & ~WindowInsets.Type.captionBar(),
+                    false /* ignoreVisibility */);
+            return systemDecor.top;
+        } else {
+            return 0;
+        }
     }
 
     /**

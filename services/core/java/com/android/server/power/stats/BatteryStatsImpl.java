@@ -5431,8 +5431,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    int mSensorNesting;
-
     @GuardedBy("this")
     public void noteStartSensorLocked(int uid, int sensor) {
         noteStartSensorLocked(uid, sensor, mClock.elapsedRealtime(), mClock.uptimeMillis());
@@ -5441,11 +5439,8 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void noteStartSensorLocked(int uid, int sensor, long elapsedRealtimeMs, long uptimeMs) {
         uid = mapUid(uid);
-        if (mSensorNesting == 0) {
-            mHistory.recordStateStartEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE_SENSOR_ON_FLAG);
-        }
-        mSensorNesting++;
+        mHistory.recordStateStartEvent(elapsedRealtimeMs, uptimeMs,
+                HistoryItem.STATE_SENSOR_ON_FLAG, uid, "sensor:0x" + Integer.toHexString(sensor));
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteStartSensor(sensor, elapsedRealtimeMs);
     }
@@ -5458,11 +5453,8 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void noteStopSensorLocked(int uid, int sensor, long elapsedRealtimeMs, long uptimeMs) {
         uid = mapUid(uid);
-        mSensorNesting--;
-        if (mSensorNesting == 0) {
-            mHistory.recordStateStopEvent(elapsedRealtimeMs, uptimeMs,
-                    HistoryItem.STATE_SENSOR_ON_FLAG);
-        }
+        mHistory.recordStateStopEvent(elapsedRealtimeMs, uptimeMs,
+                HistoryItem.STATE_SENSOR_ON_FLAG, uid, "sensor:0x" + Integer.toHexString(sensor));
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteStopSensor(sensor, elapsedRealtimeMs);
     }
@@ -16401,6 +16393,10 @@ public class BatteryStatsImpl extends BatteryStats {
      * Callers will need to wait for the collection to complete on the handler thread.
      */
     public void schedulePowerStatsSampleCollection() {
+        if (!mSystemReady) {
+            return;
+        }
+
         mCpuPowerStatsCollector.forceSchedule();
         mScreenPowerStatsCollector.forceSchedule();
         mMobileRadioPowerStatsCollector.forceSchedule();
@@ -16408,6 +16404,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothPowerStatsCollector.forceSchedule();
         mCameraPowerStatsCollector.forceSchedule();
         mGnssPowerStatsCollector.forceSchedule();
+        mCustomEnergyConsumerPowerStatsCollector.forceSchedule();
     }
 
     /**

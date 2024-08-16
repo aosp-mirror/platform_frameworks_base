@@ -19,6 +19,7 @@ import com.android.internal.widget.remotecompose.core.operations.FloatExpression
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
 /**
  * Specify an abstract context used to playback RemoteCompose documents
@@ -35,10 +36,25 @@ public abstract class RemoteContext {
     ContextMode mMode = ContextMode.UNSET;
 
     boolean mDebug = false;
+
     private int mTheme = Theme.UNSPECIFIED;
 
     public float mWidth = 0f;
     public float mHeight = 0f;
+    private float mAnimationTime;
+
+    private boolean mAnimate = true;
+
+    public Component lastComponent;
+    public long currentTime = 0L;
+
+    public boolean isAnimationEnabled() {
+        return mAnimate;
+    }
+
+    public void setAnimationEnabled(boolean value) {
+        mAnimate = value;
+    }
 
     /**
      * Load a path under an id.
@@ -65,11 +81,20 @@ public abstract class RemoteContext {
     public abstract void loadColor(int id, int color);
 
     /**
+     * Set the animation time allowing the creator to control animation rates
+     * @param time
+     */
+    public void setAnimationTime(float time) {
+        mAnimationTime = time;
+    }
+
+    /**
      * gets the time animation clock as float in seconds
      * @return a monotonic time in seconds (arbitrary zero point)
      */
     public float getAnimationTime() {
-        return (System.nanoTime() - mStart) * 1E-9f;
+        mAnimationTime = (System.nanoTime() - mStart) * 1E-9f; // Eliminate
+        return mAnimationTime;
     }
 
     /**
@@ -213,6 +238,13 @@ public abstract class RemoteContext {
     public abstract void loadFloat(int id, float value);
 
     /**
+     * Load a float
+     * @param id
+     * @param value
+     */
+    public abstract void loadInteger(int id, int value);
+
+    /**
      * Load an animated float associated with an id
      * Todo: Remove?
      * @param id
@@ -233,6 +265,13 @@ public abstract class RemoteContext {
      * @return
      */
     public abstract float getFloat(int id);
+
+    /**
+     * Get a float given an id
+     * @param id
+     * @return
+     */
+    public abstract int getInteger(int id);
 
     /**
      * Get the color given and ID
@@ -309,9 +348,11 @@ public abstract class RemoteContext {
     public static final float FLOAT_COMPONENT_HEIGHT = Utils.asNan(ID_COMPONENT_HEIGHT);
     // ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f)
     public static final float FLOAT_OFFSET_TO_UTC = Utils.asNan(ID_OFFSET_TO_UTC);
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
+
     public abstract void addClickArea(
             int id,
             int contentDescription,

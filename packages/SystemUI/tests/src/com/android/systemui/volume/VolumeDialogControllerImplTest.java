@@ -229,6 +229,32 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testVolumeChangeW_inAudioSharing_doStateChanged() {
+        ArgumentCaptor<VolumeDialogController.State> stateCaptor =
+                ArgumentCaptor.forClass(VolumeDialogController.State.class);
+        mVolumeController.setDeviceInteractive(false);
+        when(mWakefullnessLifcycle.getWakefulness())
+                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
+        // For now, mAudioManager.getDevicesForStream returns DEVICE_NONE during audio sharing
+        when(mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC))
+                .thenReturn(AudioManager.DEVICE_NONE);
+
+        mVolumeController.mInAudioSharing = true;
+        mVolumeController.onVolumeChangedW(AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI);
+        verify(mCallback).onStateChanged(stateCaptor.capture());
+        assertThat(stateCaptor.getValue().states.contains(AudioManager.STREAM_MUSIC)).isTrue();
+        assertThat(stateCaptor.getValue().states.get(AudioManager.STREAM_MUSIC).routedToBluetooth)
+                .isTrue();
+
+        mVolumeController.mInAudioSharing = false;
+        mVolumeController.onVolumeChangedW(AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI);
+        verify(mCallback, times(2)).onStateChanged(stateCaptor.capture());
+        assertThat(stateCaptor.getValue().states.contains(AudioManager.STREAM_MUSIC)).isTrue();
+        assertThat(stateCaptor.getValue().states.get(AudioManager.STREAM_MUSIC).routedToBluetooth)
+                .isFalse();
+    }
+
+    @Test
     public void testOnRemoteVolumeChanged_newStream_noNullPointer() {
         MediaSession.Token token = new MediaSession.Token(Process.myUid(), null);
         mVolumeController.mMediaSessionsCallbacksW.onRemoteVolumeChanged(token, 0);

@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
 import android.view.View
@@ -105,10 +106,11 @@ abstract class BaseCommunalViewModel(
      */
     fun changeScene(
         scene: SceneKey,
+        loggingReason: String,
         transitionKey: TransitionKey? = null,
         keyguardState: KeyguardState? = null
     ) {
-        communalSceneInteractor.changeScene(scene, transitionKey, keyguardState)
+        communalSceneInteractor.changeScene(scene, loggingReason, transitionKey, keyguardState)
     }
 
     fun setEditModeState(state: EditModeState?) = communalSceneInteractor.setEditModeState(state)
@@ -196,6 +198,9 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the user request to show the customize widget button. */
     open fun onLongClick() {}
+
+    /** Called as the UI determines that a new widget has been added to the grid. */
+    open fun onNewWidgetAdded(provider: AppWidgetProviderInfo) {}
 
     /** Called when the grid scroll position has been updated. */
     open fun onScrollPositionUpdated(firstVisibleItemIndex: Int, firstVisibleItemScroll: Int) {

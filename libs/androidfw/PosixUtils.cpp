@@ -119,7 +119,7 @@ ProcResult ExecuteBinary(const std::vector<std::string>& argv) {
       auto err = ReadFile(stderr[0]);
       result.stderr_str = err ? std::move(*err) : "";
       close(stderr[0]);
-      return std::move(result);
+      return result;
   }
 }
 

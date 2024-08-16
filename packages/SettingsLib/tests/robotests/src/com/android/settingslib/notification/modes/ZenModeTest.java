@@ -19,6 +19,7 @@ package com.android.settingslib.notification.modes;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -67,6 +68,7 @@ public class ZenModeTest {
         assertThat(manualMode.canEditNameAndIcon()).isFalse();
         assertThat(manualMode.canBeDeleted()).isFalse();
         assertThat(manualMode.isActive()).isFalse();
+        assertThat(manualMode.getRule().getPackageName()).isEqualTo(PACKAGE_ANDROID);
     }
 
     @Test
@@ -93,7 +95,7 @@ public class ZenModeTest {
     public void constructor_disabledRuleByUser_statusDisabledByUser() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_USER;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_USER);
@@ -103,7 +105,7 @@ public class ZenModeTest {
     public void constructor_disabledRuleByOther_statusDisabledByOther() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_APP;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_APP;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_OTHER);

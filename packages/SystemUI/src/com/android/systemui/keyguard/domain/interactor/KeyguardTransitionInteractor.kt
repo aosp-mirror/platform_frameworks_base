@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 
 /** Encapsulates business-logic related to the keyguard transitions. */
@@ -73,6 +75,7 @@ constructor(
     private val fromAlternateBouncerTransitionInteractor:
         dagger.Lazy<FromAlternateBouncerTransitionInteractor>,
     private val fromDozingTransitionInteractor: dagger.Lazy<FromDozingTransitionInteractor>,
+    private val fromOccludedTransitionInteractor: dagger.Lazy<FromOccludedTransitionInteractor>,
     private val sceneInteractor: SceneInteractor,
 ) {
     private val transitionMap = mutableMapOf<Edge.StateToState, MutableSharedFlow<TransitionStep>>()
@@ -150,8 +153,33 @@ constructor(
                         startedStep.to != prevStep.from
                 ) {
                     getTransitionValueFlow(prevStep.from).emit(0f)
+                } else if (prevStep.transitionState == TransitionState.RUNNING) {
+                    Log.e(
+                        TAG,
+                        "STARTED step ($startedStep) was preceded by a RUNNING step " +
+                            "($prevStep), which should never happen. Things could go badly here."
+                    )
                 }
             }
+        }
+
+        // Safety: When any transition is FINISHED, ensure all other transitionValue flows other
+        // than the FINISHED state are reset to a value of 0f. There have been rare but severe
+        // bugs that get the device stuck in a bad state when these are not properly reset.
+        scope.launch {
+            repository.transitions
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect {
+                    for (state in KeyguardState.entries) {
+                        if (state != it.to) {
+                            val flow = getTransitionValueFlow(state)
+                            val replayCache = flow.replayCache
+                            if (!replayCache.isEmpty() && replayCache.last() != 0f) {
+                                flow.emit(0f)
+                            }
+                        }
+                    }
+                }
         }
     }
 
@@ -252,15 +280,12 @@ constructor(
     val startedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
 
-    /** The last [TransitionStep] with a [TransitionState] of FINISHED */
-    val finishedKeyguardTransitionStep: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
-
     /** The destination state of the last [TransitionState.STARTED] transition. */
     @SuppressLint("SharedFlowCreation")
     val startedKeyguardState: SharedFlow<KeyguardState> =
         startedKeyguardTransitionStep
             .map { step -> step.to }
+            .buffer(2, BufferOverflow.DROP_OLDEST)
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /** The from state of the last [TransitionState.STARTED] transition. */
@@ -269,6 +294,7 @@ constructor(
     val startedKeyguardFromState: SharedFlow<KeyguardState> =
         startedKeyguardTransitionStep
             .map { step -> step.from }
+            .buffer(2, BufferOverflow.DROP_OLDEST)
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /** Which keyguard state to use when the device goes to sleep. */
@@ -310,8 +336,13 @@ constructor(
      */
     @SuppressLint("SharedFlowCreation")
     val finishedKeyguardState: SharedFlow<KeyguardState> =
-        finishedKeyguardTransitionStep
-            .map { step -> step.to }
+        repository.transitions
+            .transform { step ->
+                if (step.transitionState == TransitionState.FINISHED) {
+                    emit(step.to)
+                }
+            }
+            .buffer(2, BufferOverflow.DROP_OLDEST)
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /**
@@ -407,6 +438,7 @@ constructor(
                 fromAlternateBouncerTransitionInteractor.get().dismissAlternateBouncer()
             AOD -> fromAodTransitionInteractor.get().dismissAod()
             DOZING -> fromDozingTransitionInteractor.get().dismissFromDozing()
+            KeyguardState.OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
             KeyguardState.GONE ->
                 Log.i(
                     TAG,

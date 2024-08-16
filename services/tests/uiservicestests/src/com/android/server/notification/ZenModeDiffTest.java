@@ -61,6 +61,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -80,19 +81,6 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                     ? Set.of("version", "manualRule", "automaticRules", "deletedRules")
                     : Set.of("version", "manualRule", "automaticRules");
 
-    // Differences for flagged fields are only generated if the flag is enabled.
-    // "Metadata" fields (userModifiedFields, deletionInstant, disabledOrigin) are not compared.
-    private static final Set<String> ZEN_RULE_EXEMPT_FIELDS =
-            android.app.Flags.modesApi()
-                    ? Set.of("userModifiedFields", "zenPolicyUserModifiedFields",
-                            "zenDeviceEffectsUserModifiedFields", "deletionInstant",
-                            "disabledOrigin")
-                    : Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
-                            RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
-                            RuleDiff.FIELD_ZEN_DEVICE_EFFECTS, "userModifiedFields",
-                            "zenPolicyUserModifiedFields", "zenDeviceEffectsUserModifiedFields",
-                            "deletionInstant", "disabledOrigin");
-
     // allowPriorityChannels is flagged by android.app.modes_api
     public static final Set<String> ZEN_MODE_CONFIG_FLAGGED_FIELDS =
             Set.of("allowPriorityChannels");
@@ -102,8 +90,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return FlagsParameterization.allCombinationsOf(
-                FLAG_MODES_UI);
+        return FlagsParameterization.progressionOf(FLAG_MODES_API, FLAG_MODES_UI);
     }
 
     public ZenModeDiffTest(FlagsParameterization flags) {
@@ -140,7 +127,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.ZenRule.class, ZEN_RULE_EXEMPT_FIELDS);
+                ZenModeConfig.ZenRule.class, getZenRuleExemptFields());
         generateFieldDiffs(r1, r2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.RuleDiff d = new ZenModeDiff.RuleDiff(r1, r2);
@@ -156,6 +143,28 @@ public class ZenModeDiffTest extends UiServiceTestCase {
             assertEquals(expectedFrom.get(name), d.getDiffForField(name).from());
             assertEquals(expectedTo.get(name), d.getDiffForField(name).to());
         }
+    }
+
+    private static Set<String> getZenRuleExemptFields() {
+        // "Metadata" fields are never compared.
+        Set<String> exemptFields = new LinkedHashSet<>(
+                Set.of("userModifiedFields", "zenPolicyUserModifiedFields",
+                        "zenDeviceEffectsUserModifiedFields", "deletionInstant", "disabledOrigin"));
+        // Flagged fields are only compared if their flag is on.
+        if (!Flags.modesApi()) {
+            exemptFields.addAll(
+                    Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
+                            RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
+                            RuleDiff.FIELD_ZEN_DEVICE_EFFECTS,
+                            RuleDiff.FIELD_LEGACY_SUPPRESSED_EFFECTS));
+        }
+        if (Flags.modesApi() && Flags.modesUi()) {
+            exemptFields.add(RuleDiff.FIELD_SNOOZING); // Obsolete.
+        } else {
+            exemptFields.add(RuleDiff.FIELD_CONDITION_OVERRIDE);
+            exemptFields.add(RuleDiff.FIELD_LEGACY_SUPPRESSED_EFFECTS);
+        }
+        return exemptFields;
     }
 
     @Test
@@ -333,7 +342,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         rule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         rule.modified = false;
         rule.name = "name";
-        rule.snoozing = true;
+        rule.setConditionOverride(ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE);
         rule.pkg = "a";
         if (android.app.Flags.modesApi()) {
             rule.allowManualInvocation = true;

@@ -22,6 +22,9 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowInsets.Type.systemBars;
 
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MAX_VALUE;
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MIN_VALUE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -61,12 +64,16 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
+
+import kotlin.Lazy;
 
 import org.junit.After;
 import org.junit.Before;
@@ -95,6 +102,8 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private WindowMagnificationSettingsCallback mWindowMagnificationSettingsCallback;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
     private TestableWindowManager mWindowManager;
     private WindowMagnificationSettings mWindowMagnificationSettings;
     private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
@@ -119,9 +128,11 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         when(mSecureSettings.getFloatForUser(anyString(), anyFloat(), anyInt())).then(
                 returnsSecondArg());
 
+        ViewCaptureAwareWindowManager vwm = new ViewCaptureAwareWindowManager(mWindowManager,
+                mLazyViewCapture, /* isViewCaptureEnabled= */ false);
         mWindowMagnificationSettings = new WindowMagnificationSettings(mContext,
                 mWindowMagnificationSettingsCallback, mSfVsyncFrameProvider,
-                mSecureSettings);
+                mSecureSettings, vwm);
 
         mSettingView = mWindowMagnificationSettings.getSettingView();
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
@@ -421,7 +432,7 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         mSettingView = mWindowMagnificationSettings.getSettingView();
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
         assertThat(mZoomSeekbar.getProgress()).isEqualTo(10);
-        assertThat(mZoomSeekbar.getMax()).isEqualTo(70);
+        assertThat(mZoomSeekbar.getMax()).isEqualTo(getSeekBarMax());
     }
 
     @Test
@@ -465,29 +476,26 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     @Test
     public void seekbarProgress_maxMagnificationBefore_seekbarProgressIsMax() {
-        mWindowMagnificationSettings.setMagnificationScale(8f);
+        mWindowMagnificationSettings.setMagnificationScale(SCALE_MAX_VALUE);
         setupMagnificationCapabilityAndMode(
                 /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
                 /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
         mWindowMagnificationSettings.showSettingPanel();
 
-        // 8.0f is max magnification {@link MagnificationScaleProvider#MAX_SCALE}.
-        // Max zoom seek bar is 70.
-        assertThat(mZoomSeekbar.getProgress()).isEqualTo(70);
+        assertThat(mZoomSeekbar.getProgress()).isEqualTo(getSeekBarMax());
     }
 
     @Test
     public void seekbarProgress_aboveMaxMagnificationBefore_seekbarProgressIsMax() {
-        mWindowMagnificationSettings.setMagnificationScale(9f);
+        mWindowMagnificationSettings.setMagnificationScale(SCALE_MAX_VALUE + 1f);
         setupMagnificationCapabilityAndMode(
                 /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
                 /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
         mWindowMagnificationSettings.showSettingPanel();
 
-        // Max zoom seek bar is 70.
-        assertThat(mZoomSeekbar.getProgress()).isEqualTo(70);
+        assertThat(mZoomSeekbar.getProgress()).isEqualTo(getSeekBarMax());
     }
 
     @Test
@@ -580,5 +588,12 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
                 eq(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE),
                 anyInt(),
                 eq(UserHandle.USER_CURRENT))).thenReturn(mode);
+    }
+
+    private int getSeekBarMax() {
+        // Calculates the maximum index (or positions) the seekbar can have.
+        // This is achieved by multiplying the range of possible scales with the magnitude of
+        // change per each movement on the seekbar.
+        return (int) ((SCALE_MAX_VALUE - SCALE_MIN_VALUE) * mZoomSeekbar.getChangeMagnitude());
     }
 }

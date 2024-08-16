@@ -272,6 +272,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         final boolean changed = onDisplayRotationChanged(mContext, outBounds, currentBounds,
                 mTmpInsetBounds, displayId, fromRotation, toRotation, t);
         if (changed) {
+            mMenuController.hideMenu();
             // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
             // movement bounds
             mTouchHandler.adjustBoundsForRotation(outBounds, mPipBoundsState.getBounds(),
@@ -631,6 +632,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void insetsChanged(InsetsState insetsState) {
                         DisplayLayout pendingLayout = mDisplayController
                                 .getDisplayLayout(mPipDisplayLayoutState.getDisplayId());
+                        if (pendingLayout == null) {
+                            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                    "insetsChanged: no display layout for displayId=%d",
+                                    mPipDisplayLayoutState.getDisplayId());
+                            return;
+                        }
                         if (mIsInFixedRotation
                                 || mIsKeyguardShowingOrAnimating
                                 || pendingLayout.rotation()

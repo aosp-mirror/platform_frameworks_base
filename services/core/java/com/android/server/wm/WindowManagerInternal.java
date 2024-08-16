@@ -41,7 +41,6 @@ import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
-import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
@@ -377,10 +376,10 @@ public abstract class WindowManagerInternal {
     public interface IDragDropCallback {
         default CompletableFuture<Boolean> registerInputChannel(
                 DragState state, Display display, InputManagerService service,
-                InputChannel source) {
+                IBinder sourceInputChannelToken) {
             return state.register(display)
                 .thenApply(unused ->
-                    service.startDragAndDrop(source.getToken(), state.getInputToken()));
+                    service.startDragAndDrop(sourceInputChannelToken, state.getInputToken()));
         }
 
         /**
@@ -691,15 +690,10 @@ public abstract class WindowManagerInternal {
      * <p>Only {@link com.android.server.inputmethod.InputMethodManagerService} is the expected and
      * tested caller of this method.</p>
      *
-     * @param imeToken token to track the active input method. Corresponding IME windows can be
-     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
-     *                 Note that there is no guarantee that the corresponding window is already
-     *                 created
      * @param imeTargetWindowToken token to identify the target window that the IME is associated
      *                             with
      */
-    public abstract void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
-            @NonNull IBinder imeTargetWindowToken);
+    public abstract void updateInputMethodTargetWindow(@NonNull IBinder imeTargetWindowToken);
 
     /**
       * Returns true when the hardware keyboard is available.
@@ -994,16 +988,6 @@ public abstract class WindowManagerInternal {
             this.imeSurfaceParentName = imeSurfaceParentName;
         }
     }
-
-    /**
-     * Sets by the {@link com.android.server.inputmethod.InputMethodManagerService} to monitor
-     * the visibility change of the IME targeted windows.
-     *
-     * @see ImeTargetChangeListener#onImeTargetOverlayVisibilityChanged
-     * @see ImeTargetChangeListener#onImeInputTargetVisibilityChanged
-     */
-    public abstract void setInputMethodTargetChangeListener(
-            @NonNull ImeTargetChangeListener listener);
 
     /**
      * Moves the {@link WindowToken} {@code binder} to the display specified by {@code displayId}.

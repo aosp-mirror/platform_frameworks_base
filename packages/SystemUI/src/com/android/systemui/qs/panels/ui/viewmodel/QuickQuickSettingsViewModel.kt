@@ -20,7 +20,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.domain.interactor.QuickQuickSettingsRowInteractor
 import com.android.systemui.qs.panels.shared.model.SizedTile
-import com.android.systemui.qs.panels.shared.model.TileRow
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
+import com.android.systemui.qs.panels.shared.model.splitInRowsSequence
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
@@ -59,7 +60,12 @@ constructor(
             .flatMapLatest { columns ->
                 tilesInteractor.currentTiles.combine(rows, ::Pair).mapLatest { (tiles, rows) ->
                     tiles
-                        .map { SizedTile(TileViewModel(it.tile, it.spec), it.spec.width) }
+                        .map {
+                            SizedTileImpl(
+                                TileViewModel(it.tile, it.spec),
+                                it.spec.width,
+                            )
+                        }
                         .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
                 }
             }
@@ -67,7 +73,12 @@ constructor(
                 applicationScope,
                 SharingStarted.WhileSubscribed(),
                 tilesInteractor.currentTiles.value
-                    .map { SizedTile(TileViewModel(it.tile, it.spec), it.spec.width) }
+                    .map {
+                        SizedTileImpl(
+                            TileViewModel(it.tile, it.spec),
+                            it.spec.width,
+                        )
+                    }
                     .let {
                         splitInRowsSequence(it, columns.value).take(rows.value).toList().flatten()
                     }
@@ -75,26 +86,4 @@ constructor(
 
     private val TileSpec.width: Int
         get() = if (iconTilesViewModel.isIconTile(this)) 1 else 2
-
-    companion object {
-        private fun splitInRowsSequence(
-            tiles: List<SizedTile<TileViewModel>>,
-            columns: Int,
-        ): Sequence<List<SizedTile<TileViewModel>>> = sequence {
-            val row = TileRow<TileViewModel>(columns)
-            for (tile in tiles) {
-                check(tile.width <= columns)
-                if (!row.maybeAddTile(tile)) {
-                    // Couldn't add tile to previous row, create a row with the current tiles
-                    // and start a new one
-                    yield(row.tiles)
-                    row.clear()
-                    row.maybeAddTile(tile)
-                }
-            }
-            if (row.tiles.isNotEmpty()) {
-                yield(row.tiles)
-            }
-        }
-    }
 }

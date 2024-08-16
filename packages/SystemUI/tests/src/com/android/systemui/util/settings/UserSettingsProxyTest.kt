@@ -17,7 +17,6 @@
 package com.android.systemui.util.settings
 
 import android.content.ContentResolver
-import android.content.pm.UserInfo
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
@@ -28,8 +27,6 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.settings.FakeUserTracker
-import com.android.systemui.settings.UserTracker
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,29 +49,21 @@ import org.mockito.kotlin.eq
 @TestableLooper.RunWithLooper
 class UserSettingsProxyTest : SysuiTestCase() {
 
-    private var mUserTracker = FakeUserTracker()
+    private var userId = MAIN_USER_ID
     private val testDispatcher = StandardTestDispatcher()
-    private var mSettings: UserSettingsProxy = FakeUserSettingsProxy(mUserTracker, testDispatcher)
+    private var mSettings: UserSettingsProxy = FakeUserSettingsProxy({ userId }, testDispatcher)
     private var mContentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {}
     private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
-        mUserTracker.set(
-            listOf(UserInfo(MAIN_USER_ID, "main", UserInfo.FLAG_MAIN)),
-            selectedUserIndex = 0
-        )
         testScope = TestScope(testDispatcher)
     }
 
     @Test
     fun registerContentObserverForUser_inputString_success() =
         testScope.runTest {
-            mSettings.registerContentObserverForUserSync(
-                TEST_SETTING,
-                mContentObserver,
-                mUserTracker.userId
-            )
+            mSettings.registerContentObserverForUserSync(TEST_SETTING, mContentObserver, userId)
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
@@ -87,11 +76,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
     @Test
     fun registerContentObserverForUserSuspend_inputString_success() =
         testScope.runTest {
-            mSettings.registerContentObserverForUser(
-                TEST_SETTING,
-                mContentObserver,
-                mUserTracker.userId
-            )
+            mSettings.registerContentObserverForUser(TEST_SETTING, mContentObserver, userId)
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
@@ -104,11 +89,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
     @Test
     fun registerContentObserverForUserAsync_inputString_success() =
         testScope.runTest {
-            mSettings.registerContentObserverForUserAsync(
-                TEST_SETTING,
-                mContentObserver,
-                mUserTracker.userId
-            )
+            mSettings.registerContentObserverForUserAsync(TEST_SETTING, mContentObserver, userId)
             testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
@@ -126,7 +107,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING,
                 notifyForDescendants = true,
                 mContentObserver,
-                mUserTracker.userId
+                userId
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
@@ -144,7 +125,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING,
                 notifyForDescendants = true,
                 mContentObserver,
-                mUserTracker.userId
+                userId
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
@@ -164,7 +145,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING,
                 notifyForDescendants = true,
                 mContentObserver,
-                mUserTracker.userId
+                userId
             )
             testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
@@ -179,11 +160,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
     @Test
     fun registerContentObserverForUser_inputUri_success() =
         testScope.runTest {
-            mSettings.registerContentObserverForUserSync(
-                TEST_SETTING_URI,
-                mContentObserver,
-                mUserTracker.userId
-            )
+            mSettings.registerContentObserverForUserSync(TEST_SETTING_URI, mContentObserver, userId)
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
@@ -196,11 +173,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
     @Test
     fun registerContentObserverForUserSuspend_inputUri_success() =
         testScope.runTest {
-            mSettings.registerContentObserverForUser(
-                TEST_SETTING_URI,
-                mContentObserver,
-                mUserTracker.userId
-            )
+            mSettings.registerContentObserverForUser(TEST_SETTING_URI, mContentObserver, userId)
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
@@ -216,7 +189,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverForUserAsync(
                 TEST_SETTING_URI,
                 mContentObserver,
-                mUserTracker.userId
+                userId
             )
             testScope.advanceUntilIdle()
 
@@ -239,7 +212,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
             mSettings.registerContentObserverForUserAsync(
                 TEST_SETTING_URI,
                 mContentObserver,
-                mUserTracker.userId,
+                userId,
                 runnable
             )
             testScope.advanceUntilIdle()
@@ -253,7 +226,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
                 mContentObserver,
-                mUserTracker.userId
+                userId
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
@@ -271,14 +244,12 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
                 mContentObserver,
-                mUserTracker.userId
+                userId
             )
             verify(mSettings.getContentResolver())
                 .registerContentObserver(
                     eq(TEST_SETTING_URI),
-                    eq(
-                        true,
-                    ),
+                    eq(true),
                     eq(mContentObserver),
                     eq(MAIN_USER_ID)
                 )
@@ -291,7 +262,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
                 TEST_SETTING_URI,
                 notifyForDescendants = true,
                 mContentObserver,
-                mUserTracker.userId
+                userId
             )
             testScope.advanceUntilIdle()
             verify(mSettings.getContentResolver())
@@ -585,12 +556,12 @@ class UserSettingsProxyTest : SysuiTestCase() {
      * This class uses a mock of [ContentResolver] to test the [ContentObserver] registration APIs.
      */
     private class FakeUserSettingsProxy(
-        override val userTracker: UserTracker,
+        override val currentUserProvider: SettingsProxy.CurrentUserIdProvider,
         val testDispatcher: CoroutineDispatcher
     ) : UserSettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
-        private val userIdToSettingsValueMap: MutableMap<Int, MutableMap<String, String>> =
+        private val userIdToSettingsValueMap: MutableMap<Int, MutableMap<String, String?>> =
             mutableMapOf()
 
         override fun getContentResolver() = mContentResolver
@@ -606,7 +577,7 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
         override fun putString(
             name: String,
-            value: String,
+            value: String?,
             overrideableByRestore: Boolean
         ): Boolean {
             userIdToSettingsValueMap[DEFAULT_USER_ID]?.put(name, value)
@@ -615,22 +586,22 @@ class UserSettingsProxyTest : SysuiTestCase() {
 
         override fun putString(
             name: String,
-            value: String,
-            tag: String,
+            value: String?,
+            tag: String?,
             makeDefault: Boolean
         ): Boolean {
             putStringForUser(name, value, DEFAULT_USER_ID)
             return true
         }
 
-        override fun putStringForUser(name: String, value: String, userHandle: Int): Boolean {
+        override fun putStringForUser(name: String, value: String?, userHandle: Int): Boolean {
             userIdToSettingsValueMap[userHandle] = mutableMapOf(Pair(name, value))
             return true
         }
 
         override fun putStringForUser(
             name: String,
-            value: String,
+            value: String?,
             tag: String?,
             makeDefault: Boolean,
             userHandle: Int,

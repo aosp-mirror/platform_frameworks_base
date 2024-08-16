@@ -33,12 +33,7 @@ import static android.app.ActivityOptions.ANIM_UNDEFINED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
-import static android.app.CameraCompatTaskInfo.cameraCompatControlStateToString;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
@@ -271,8 +266,6 @@ import android.annotation.Size;
 import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
-import android.app.ICompatCameraControlCallback;
 import android.app.IScreenCaptureObserver;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
@@ -371,6 +364,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
@@ -795,8 +789,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mWillCloseOrEnterPip;
 
-    final LetterboxUiController mLetterboxUiController;
-
     /**
      * App Compat Facade
      */
@@ -823,19 +815,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // requested orientation, even when it's letterbox for another reason (e.g., size compat mode)
     // and therefore #isLetterboxedForFixedOrientationAndAspectRatio returns false.
     private boolean mIsEligibleForFixedOrientationLetterbox;
-
-    // State of the Camera app compat control which is used to correct stretched viewfinder
-    // in apps that don't handle all possible configurations and changes between them correctly.
-    @CameraCompatControlState
-    private int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
-
-    // The callback that allows to ask the calling View to apply the treatment for stretched
-    // issues affecting camera viewfinders when the user clicks on the camera compat control.
-    @Nullable
-    private ICompatCameraControlCallback mCompatCameraControlCallback;
-
-    private final boolean mCameraCompatControlEnabled;
-    private boolean mCameraCompatControlClickedByUser;
 
     // activity is not displayed?
     // TODO: rename to mNoDisplay
@@ -941,6 +920,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private RemoteCallbackList<IScreenCaptureObserver> mCaptureCallbacks;
 
+    // Ensure the field is kept during optimization to preserve downstream weak refs.
+    @KeepForWeakReference
     private final ColorDisplayService.ColorTransformController mColorTransformController =
             (matrix, translation) -> mWmService.mH.post(() -> {
                 synchronized (mWmService.mGlobalLock) {
@@ -1341,11 +1322,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(prefix); pw.println("mWaitForEnteringPinnedMode=true");
         }
 
-        mLetterboxUiController.dump(pw, prefix);
-
-        pw.println(prefix + "mCameraCompatControlState="
-                + cameraCompatControlStateToString(mCameraCompatControlState));
-        pw.println(prefix + "mCameraCompatControlEnabled=" + mCameraCompatControlEnabled);
+        mAppCompatController.dump(pw, prefix);
     }
 
     static boolean dumpActivity(FileDescriptor fd, PrintWriter pw, int index, ActivityRecord r,
@@ -1855,127 +1832,36 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
-        mLetterboxUiController.onMovedToDisplay(mDisplayContent.getDisplayId());
+        mAppCompatController.getAppCompatLetterboxPolicy()
+                .onMovedToDisplay(mDisplayContent.getDisplayId());
     }
 
     void layoutLetterboxIfNeeded(WindowState winHint) {
-        mLetterboxUiController.layoutLetterboxIfNeeded(winHint);
+        mAppCompatController.getAppCompatLetterboxPolicy().start(winHint);
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
-        return mLetterboxUiController.hasWallpaperBackgroundForLetterbox();
+        return mAppCompatController.getAppCompatLetterboxOverrides()
+                .hasWallpaperBackgroundForLetterbox();
     }
 
     void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
-        mLetterboxUiController.updateLetterboxSurfaceIfNeeded(winHint, t, getPendingTransaction());
+        mAppCompatController.getAppCompatLetterboxPolicy()
+                .updateLetterboxSurfaceIfNeeded(winHint, t, getPendingTransaction());
     }
 
     void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
-        mLetterboxUiController.updateLetterboxSurfaceIfNeeded(winHint);
+        mAppCompatController.getAppCompatLetterboxPolicy().updateLetterboxSurfaceIfNeeded(winHint);
     }
 
     /** Gets the letterbox insets. The insets will be empty if there is no letterbox. */
     Rect getLetterboxInsets() {
-        return mLetterboxUiController.getLetterboxInsets();
+        return mAppCompatController.getAppCompatLetterboxPolicy().getLetterboxInsets();
     }
 
     /** Gets the inner bounds of letterbox. The bounds will be empty if there is no letterbox. */
     void getLetterboxInnerBounds(Rect outBounds) {
-        mLetterboxUiController.getLetterboxInnerBounds(outBounds);
-    }
-
-    void updateCameraCompatState(boolean showControl, boolean transformationApplied,
-            ICompatCameraControlCallback callback) {
-        if (!isCameraCompatControlEnabled()) {
-            // Feature is disabled by config_isCameraCompatControlForStretchedIssuesEnabled.
-            return;
-        }
-        if (mCameraCompatControlClickedByUser && (showControl
-                || mCameraCompatControlState == CAMERA_COMPAT_CONTROL_DISMISSED)) {
-            // The user already applied treatment on this activity or dismissed control.
-            // Respecting their choice.
-            return;
-        }
-        mCompatCameraControlCallback = callback;
-        int newCameraCompatControlState = !showControl
-                ? CAMERA_COMPAT_CONTROL_HIDDEN
-                : transformationApplied
-                        ? CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED
-                        : CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        boolean changed = setCameraCompatControlState(newCameraCompatControlState);
-        if (!changed) {
-            return;
-        }
-        mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlAppearedEventReported(
-                newCameraCompatControlState, info.applicationInfo.uid);
-        if (newCameraCompatControlState == CAMERA_COMPAT_CONTROL_HIDDEN) {
-            mCameraCompatControlClickedByUser = false;
-            mCompatCameraControlCallback = null;
-        }
-        // Trigger TaskInfoChanged to update the camera compat UI.
-        getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
-        // TaskOrganizerController#onTaskInfoChanged adds pending task events to the queue waiting
-        // for the surface placement to be ready. So need to trigger surface placement to dispatch
-        // events to avoid stale state for the camera compat control.
-        getDisplayContent().setLayoutNeeded();
-        mWmService.mWindowPlacerLocked.performSurfacePlacement();
-    }
-
-    void updateCameraCompatStateFromUser(@CameraCompatControlState int state) {
-        if (!isCameraCompatControlEnabled()) {
-            // Feature is disabled by config_isCameraCompatControlForStretchedIssuesEnabled.
-            return;
-        }
-        if (state == CAMERA_COMPAT_CONTROL_HIDDEN) {
-            Slog.w(TAG, "Unexpected hidden state in updateCameraCompatState");
-            return;
-        }
-        boolean changed = setCameraCompatControlState(state);
-        mCameraCompatControlClickedByUser = true;
-        if (!changed) {
-            return;
-        }
-        mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlClickedEventReported(
-                state, info.applicationInfo.uid);
-        if (state == CAMERA_COMPAT_CONTROL_DISMISSED) {
-            mCompatCameraControlCallback = null;
-            return;
-        }
-        if (mCompatCameraControlCallback == null) {
-            Slog.w(TAG, "Callback for a camera compat control is null");
-            return;
-        }
-        try {
-            if (state == CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED) {
-                mCompatCameraControlCallback.applyCameraCompatTreatment();
-            } else {
-                mCompatCameraControlCallback.revertCameraCompatTreatment();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to apply or revert camera compat treatment", e);
-        }
-    }
-
-    private boolean setCameraCompatControlState(@CameraCompatControlState int state) {
-        if (!isCameraCompatControlEnabled()) {
-            // Feature is disabled by config_isCameraCompatControlForStretchedIssuesEnabled.
-            return false;
-        }
-        if (mCameraCompatControlState != state) {
-            mCameraCompatControlState = state;
-            return true;
-        }
-        return false;
-    }
-
-    @CameraCompatControlState
-    int getCameraCompatControlState() {
-        return mCameraCompatControlState;
-    }
-
-    @VisibleForTesting
-    boolean isCameraCompatControlEnabled() {
-        return mCameraCompatControlEnabled;
+        mAppCompatController.getAppCompatLetterboxPolicy().getLetterboxInnerBounds(outBounds);
     }
 
     /**
@@ -1983,7 +1869,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *     when the current activity is displayed.
      */
     boolean isFullyTransparentBarAllowed(Rect rect) {
-        return mLetterboxUiController.isFullyTransparentBarAllowed(rect);
+        return mAppCompatController.getAppCompatLetterboxPolicy()
+                .isFullyTransparentBarAllowed(rect);
     }
 
     private static class Token extends Binder {
@@ -2099,14 +1986,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Don't move below setActivityType since it triggers onConfigurationChange ->
-        // resolveOverrideConfiguration that requires having mLetterboxUiController initialised.
+        // resolveOverrideConfiguration that requires having mAppCompatController initialised.
         // Don't move below setOrientation(info.screenOrientation) since it triggers
-        // getOverrideOrientation that requires having mLetterboxUiController
-        // initialised.
-        mLetterboxUiController = new LetterboxUiController(mWmService, this);
+        // getOverrideOrientation that requires having mAppCompatController initialised.
         mAppCompatController = new AppCompatController(mWmService, this);
-        mCameraCompatControlEnabled = mWmService.mContext.getResources()
-                .getBoolean(R.bool.config_isCameraCompatControlForStretchedIssuesEnabled);
         mResolveConfigHint = new TaskFragment.ConfigOverrideHint();
         if (mWmService.mFlags.mInsetsDecoupledConfiguration) {
             // When the stable configuration is the default behavior, override for the legacy apps
@@ -2129,7 +2012,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mIsUserAlwaysVisible =  properties != null && properties.getAlwaysVisible();
 
         mShowForAllUsers = (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0 || mIsUserAlwaysVisible;
-        setOrientation(info.screenOrientation);
+        setOverrideOrientation(info.screenOrientation);
         mRotationAnimationHint = info.rotationAnimation;
 
         mShowWhenLocked = (aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
@@ -2641,8 +2524,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // trampoline that will be always created and finished immediately. Then give a chance to
         // see if the snapshot is usable for the current running activity so the transition will
         // look smoother, instead of showing a splash screen on the second launch.
-        if (!newTask && taskSwitch && processRunning && !activityCreated && task.intent != null
-                && mActivityComponent.equals(task.intent.getComponent())) {
+        if (!newTask && taskSwitch && !activityCreated && task.intent != null
+                // Another case where snapshot is allowed to be used is if this activity has not yet
+                // been created && is translucent or floating.
+                // The component isn't necessary to be matched in this case.
+                && (!mOccludesParent || mActivityComponent.equals(task.intent.getComponent()))) {
             final ActivityRecord topAttached = task.getActivity(ActivityRecord::attachedToProcess);
             if (topAttached != null) {
                 if (topAttached.isSnapshotCompatible(snapshot)
@@ -3736,10 +3622,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final WindowContainer<?> trigger = endTask ? task : this;
             final Transition newTransition =
                     mTransitionController.requestCloseTransitionIfNeeded(trigger);
-            if (newTransition != null) {
-                newTransition.collectClose(trigger);
-            } else if (mTransitionController.isCollecting()) {
-                mTransitionController.getCollectingTransition().collectClose(trigger);
+            final Transition transition = newTransition != null
+                    ? newTransition : mTransitionController.getCollectingTransition();
+            if (transition != null) {
+                transition.collectClose(trigger);
             }
             if (isState(RESUMED)) {
                 if (endTask) {
@@ -4412,9 +4298,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // closing the task.
         final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
                 ? task : this;
-        final Transition newTransit = mTransitionController.requestCloseTransitionIfNeeded(trigger);
-        if (newTransit != null) {
-            newTransit.collectClose(trigger);
+        final Transition tr = mTransitionController.requestCloseTransitionIfNeeded(trigger);
+        if (tr != null) {
+            tr.collectClose(trigger);
         } else if (mTransitionController.isCollecting()) {
             mTransitionController.getCollectingTransition().collectClose(trigger);
         }
@@ -4482,7 +4368,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         mTaskSupervisor.mStoppingActivities.remove(this);
-        mLetterboxUiController.destroy();
+
+        mAppCompatController.getAppCompatLetterboxPolicy().stop();
         mAppCompatController.getTransparentPolicy().stop();
 
         // Defer removal of this activity when either a child is animating, or app transition is on
@@ -5429,12 +5316,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         task.lastDescription = description;
     }
 
-    void setDeferHidingClient(boolean deferHidingClient) {
-        if (mDeferHidingClient == deferHidingClient) {
-            return;
-        }
-        mDeferHidingClient = deferHidingClient;
-        if (!mDeferHidingClient && !mVisibleRequested) {
+    void setDeferHidingClient() {
+        mDeferHidingClient = true;
+    }
+
+    void clearDeferHidingClient() {
+        if (!mDeferHidingClient) return;
+        mDeferHidingClient = false;
+        if (!mVisibleRequested) {
             // Hiding the client is no longer deferred and the app isn't visible still, go ahead and
             // update the visibility.
             setVisibility(false);
@@ -5558,8 +5447,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         boolean isCollecting = false;
         boolean inFinishingTransition = false;
         if (mTransitionController.isShellTransitionsEnabled()) {
-            isCollecting = mTransitionController.isCollecting();
-            if (isCollecting) {
+            if (mTransitionController.isCollecting()) {
+                isCollecting = true;
                 mTransitionController.collect(this);
             } else {
                 // Failsafe to make sure that we show any activities that were incorrectly hidden
@@ -5580,6 +5469,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
+        mAtmService.mBackNavigationController.onAppVisibilityChanged(this, visible);
         onChildVisibilityRequested(visible);
 
         final DisplayContent displayContent = getDisplayContent();
@@ -6303,7 +6193,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // stopped or stopping. This gives it a chance to enter Pip in onPause().
             final boolean deferHidingClient = canEnterPictureInPicture
                     && !isState(STARTED, STOPPING, STOPPED, PAUSED);
-            setDeferHidingClient(deferHidingClient);
+            if (deferHidingClient) {
+                setDeferHidingClient();
+            } else {
+                clearDeferHidingClient();
+            }
             setVisibility(false);
 
             switch (getState()) {
@@ -6342,7 +6236,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_VISIBILITY, "Resume visible activity, " + this);
             }
             return getRootTask().resumeTopActivityUncheckedLocked(activeActivity /* prev */,
-                    null /* options */);
+                    null /* options */, false /* skipPause */);
         } else if (shouldPauseActivity(activeActivity)) {
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG_VISIBILITY, "Pause visible activity, " + this);
@@ -6632,9 +6526,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
         if (finishing) {
-            Slog.e(TAG, "Request to stop a finishing activity: " + this);
-            destroyIfPossible("stopIfPossible-finishing");
-            return;
+            throw new IllegalStateException("Request to stop a finishing activity: " + this);
         }
         if (isNoHistory()) {
             if (!task.shouldSleepActivities()) {
@@ -7646,6 +7538,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingWindow == win) {
             // This could only happen when the window is removed from hierarchy. So do not keep its
             // reference anymore.
+            if (mStartingSurface != null) {
+                // Ensure the reference in client side can be removed.
+                mStartingSurface.remove(false /* animate */, false /* hasImeSurface */);
+            }
             mStartingWindow = null;
             mStartingData = null;
             mStartingSurface = null;
@@ -7801,7 +7697,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             t.setLayer(mAnimationBoundsLayer, getLastLayer());
 
             if (mNeedsLetterboxedAnimation) {
-                final int cornerRadius = mLetterboxUiController
+                final int cornerRadius = mAppCompatController.getAppCompatLetterboxPolicy()
                         .getRoundedCornersRadius(findMainWindow());
 
                 final Rect letterboxInnerBounds = new Rect();
@@ -8687,7 +8583,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Returns whether activity bounds are letterboxed.
      *
      * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
-     * LetterboxUiController#shouldShowLetterboxUi} for more context.
+     * AppCompatLetterboxOverrides#shouldShowLetterboxUi} for more context.
      */
     boolean areBoundsLetterboxed() {
         return getAppCompatState(/* ignoreVisibility= */ true)
@@ -8750,8 +8646,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * Adjusts position of resolved bounds if they don't fill the parent using gravity
      * requested in the config or via an ADB command. For more context see {@link
-     * LetterboxUiController#getHorizontalPositionMultiplier(Configuration)} and
-     * {@link LetterboxUiController#getVerticalPositionMultiplier(Configuration)}
+     * AppCompatReachabilityOverrides#getHorizontalPositionMultiplier(Configuration)} and
+     * {@link AppCompatReachabilityOverrides#getVerticalPositionMultiplier(Configuration)}
      * <p>
      * Note that this is the final step that can change the resolved bounds. After this method
      * is called, the position of the bounds will be moved to app space as sandboxing if the
@@ -8780,11 +8676,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             navBarInsets = Insets.NONE;
         }
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mAppCompatController.getAppCompatReachabilityOverrides();
         // Horizontal position
         int offsetX = 0;
         if (parentBounds.width() != screenResolvedBoundsWidth) {
             if (screenResolvedBoundsWidth <= parentAppBoundsWidth) {
-                float positionMultiplier = mLetterboxUiController.getHorizontalPositionMultiplier(
+                float positionMultiplier = reachabilityOverrides.getHorizontalPositionMultiplier(
                         newParentConfiguration);
                 // If in immersive mode, always align to right and overlap right insets (task bar)
                 // as they are transient and hidden. This removes awkward right spacing.
@@ -8805,7 +8703,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int offsetY = 0;
         if (parentBoundsHeight != screenResolvedBoundsHeight) {
             if (screenResolvedBoundsHeight <= parentAppBoundsHeight) {
-                float positionMultiplier = mLetterboxUiController.getVerticalPositionMultiplier(
+                float positionMultiplier = reachabilityOverrides.getVerticalPositionMultiplier(
                         newParentConfiguration);
                 // If in immersive mode, always align to bottom and overlap bottom insets (nav bar,
                 // task bar) as they are transient and hidden. This removes awkward bottom spacing.
@@ -10434,7 +10332,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Write all fields to an {@code ActivityRecordProto}. This assumes the
      * {@code ActivityRecordProto} is the outer-most proto data.
      */
-    void dumpDebug(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
+    void dumpDebug(ProtoOutputStream proto, @WindowTracingLogLevel int logLevel) {
         writeNameToProto(proto, NAME);
         super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
@@ -10512,9 +10410,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 
@@ -10802,6 +10700,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // The sync is ready if a drawn starting window covered the task.
                 return true;
             }
+        }
+        if (mAtmService.mBackNavigationController.isStartingSurfaceShown(this)) {
+            return true;
         }
         if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController

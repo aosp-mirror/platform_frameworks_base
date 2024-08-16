@@ -225,7 +225,7 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
             kosmos.fakeKeyguardRepository.setDreaming(true)
             kosmos.fakeKeyguardRepository.setDreamingWithOverlay(true)
-            advanceTimeBy(100L)
+            advanceTimeBy(600L)
 
             sceneTransitions.value = hubToBlank
 

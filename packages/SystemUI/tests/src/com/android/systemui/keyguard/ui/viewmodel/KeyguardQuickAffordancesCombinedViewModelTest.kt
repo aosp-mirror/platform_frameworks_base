@@ -195,9 +195,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
         val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
-            }
+            FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         keyguardInteractor = withDeps.keyguardInteractor
@@ -289,6 +287,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
         underTest =
             KeyguardQuickAffordancesCombinedViewModel(
+                applicationScope = testScope.backgroundScope,
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,

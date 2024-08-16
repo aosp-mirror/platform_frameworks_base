@@ -57,6 +57,7 @@ constructor(
     private val activityStarter: ActivityStarter,
     // Using a provider to avoid a circular dependency.
     private val viewModel: Provider<ModesDialogViewModel>,
+    private val dialogEventLogger: ModesDialogEventLogger,
     @Main private val mainCoroutineContext: CoroutineContext,
 ) : SystemUIDialog.Delegate {
     // NOTE: This should only be accessed/written from the main thread.
@@ -102,7 +103,9 @@ constructor(
         )
     }
 
-    private fun openSettings(dialog: SystemUIDialog) {
+    @VisibleForTesting
+    fun openSettings(dialog: SystemUIDialog) {
+        dialogEventLogger.logDialogSettings()
         val animationController =
             dialogTransitionAnimator.createActivityTransitionController(dialog)
         if (animationController == null) {

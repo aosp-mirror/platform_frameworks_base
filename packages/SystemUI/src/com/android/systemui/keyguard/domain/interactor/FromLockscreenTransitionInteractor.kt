@@ -300,7 +300,9 @@ constructor(
                 swipeToDismissInteractor.dismissFling
                     .filterNotNull()
                     .filterRelevantKeyguardState()
-                    .collect { _ -> startTransitionTo(KeyguardState.GONE) }
+                    .collect { _ ->
+                        startTransitionTo(KeyguardState.GONE, ownerReason = "dismissFling != null")
+                    }
             }
         }
     }
@@ -393,7 +395,7 @@ constructor(
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
-        val TO_OCCLUDED_DURATION = 450.milliseconds
+        val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_AOD_FOLD_DURATION = 1100.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION

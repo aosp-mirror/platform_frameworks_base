@@ -80,9 +80,11 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEv
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.ui.view.WindowRootView;
+import com.android.systemui.shade.QSHeaderBoundsProvider;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -636,8 +638,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                         if (row.isPinned() && !canChildBeDismissed(row)
                                 && row.getEntry().getSbn().getNotification().fullScreenIntent
                                 == null) {
-                            mHeadsUpManager.removeNotification(row.getEntry().getSbn().getKey(),
-                                    true /* removeImmediately */);
+                            mHeadsUpManager.removeNotification(
+                                    row.getEntry().getSbn().getKey(),
+                                    /* removeImmediately= */ true ,
+                                    /* reason= */ "onChildSnappedBack"
+                            );
                         }
                     }
                 }
@@ -1075,6 +1080,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void setOnEmptySpaceClickListener(
             OnEmptySpaceClickListener listener) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setOnEmptySpaceClickListener(listener);
     }
 
@@ -1423,6 +1429,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setHeadsUpBoundaries(int height, int bottomBarHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setHeadsUpBoundaries(height, bottomBarHeight);
     }
 
@@ -1522,7 +1529,13 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Sets the QS header. Used to check if a touch is within its bounds.
      */
     public void setQsHeader(ViewGroup view) {
+        QSComposeFragment.assertInLegacyMode();
         mView.setQsHeader(view);
+    }
+
+    public void setQsHeaderBoundsProvider(QSHeaderBoundsProvider qsHeaderBoundsProvider) {
+        QSComposeFragment.isUnexpectedlyInLegacyMode();
+        mView.setQsHeaderBoundsProvider(qsHeaderBoundsProvider);
     }
 
     public void setAnimationsEnabled(boolean enabled) {
@@ -1630,6 +1643,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setMaxTopPadding(int padding) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setMaxTopPadding(padding);
     }
 

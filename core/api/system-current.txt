@@ -3448,7 +3448,7 @@ package android.companion.virtual {
   }
 
   public static interface VirtualDeviceManager.ActivityListener {
-    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public default void onActivityLaunchBlocked(int, @NonNull android.content.ComponentName, int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public default void onActivityLaunchBlocked(int, @NonNull android.content.ComponentName, int, @Nullable android.content.IntentSender);
     method public void onDisplayEmpty(int);
     method @Deprecated public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
     method public default void onTopActivityChanged(int, @NonNull android.content.ComponentName, int);
@@ -3465,6 +3465,7 @@ package android.companion.virtual {
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.content.ComponentName, int);
     method public void addSoundEffectListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
     method @NonNull public android.content.Context createContext();
@@ -3489,8 +3490,10 @@ package android.companion.virtual {
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName, int);
     method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int, int);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDisplayImePolicy(int, int);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
@@ -6716,14 +6719,6 @@ package android.hardware.soundtrigger {
     field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
     field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
     field public static final int STATUS_OK = 0; // 0x0
-  }
-
-  @FlaggedApi("android.media.soundtrigger.sound_trigger_generic_model_api") public static final class SoundTrigger.GenericSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
-    ctor public SoundTrigger.GenericSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], int);
-    ctor public SoundTrigger.GenericSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[]);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.GenericSoundModel> CREATOR;
   }
 
   public static final class SoundTrigger.Keyphrase implements android.os.Parcelable {
@@ -11986,6 +11981,7 @@ package android.provider {
     field public static final String ACTION_MANAGE_APP_OVERLAY_PERMISSION = "android.settings.MANAGE_APP_OVERLAY_PERMISSION";
     field public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
     field public static final String ACTION_MANAGE_MORE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
+    field @FlaggedApi("android.nfc.nfc_action_manage_services_settings") public static final String ACTION_MANAGE_OTHER_NFC_SERVICES_SETTINGS = "android.settings.MANAGE_OTHER_NFC_SERVICES_SETTINGS";
     field public static final String ACTION_NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS = "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";

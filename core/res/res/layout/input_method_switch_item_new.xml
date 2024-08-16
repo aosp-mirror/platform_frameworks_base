@@ -31,7 +31,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:importantForAccessibility="no"/>
 
     <TextView
         android:id="@+id/header_text"
@@ -81,7 +82,8 @@
             android:layout_marginStart="12dp"
             android:src="@drawable/ic_check_24dp"
             android:tint="?attr/materialColorOnSurface"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:importantForAccessibility="no"/>
 
     </LinearLayout>
 

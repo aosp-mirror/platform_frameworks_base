@@ -83,6 +83,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    private val alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
     private val alternateBouncerToLockscreenTransitionViewModel:
@@ -239,6 +240,7 @@ constructor(
                 merge(
                         alphaOnShadeExpansion,
                         keyguardInteractor.dismissAlpha,
+                        alternateBouncerToAodTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
@@ -268,7 +270,7 @@ constructor(
                         occludedToLockscreenTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToAodTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
-                        primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
+                        primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                     )
                     .onStart { emit(1f) }
             ) { hideKeyguard, alpha ->
@@ -320,19 +322,24 @@ constructor(
     val isNotifIconContainerVisible: StateFlow<AnimatedValue<Boolean>> =
         combine(
                 goneToAodTransitionRunning,
+                keyguardTransitionInteractor
+                    .transitionValue(LOCKSCREEN)
+                    .map { it > 0f }
+                    .onStart { emit(false) },
                 keyguardTransitionInteractor.finishedKeyguardState.map {
                     KeyguardState.lockscreenVisibleInState(it)
                 },
                 deviceEntryInteractor.isBypassEnabled,
                 areNotifsFullyHiddenAnimated(),
                 isPulseExpandingAnimated(),
-            ) {
-                goneToAodTransitionRunning: Boolean,
-                onKeyguard: Boolean,
-                isBypassEnabled: Boolean,
-                notifsFullyHidden: AnimatedValue<Boolean>,
-                pulseExpanding: AnimatedValue<Boolean>,
-                ->
+            ) { flows ->
+                val goneToAodTransitionRunning = flows[0] as Boolean
+                val isOnLockscreen = flows[1] as Boolean
+                val onKeyguard = flows[2] as Boolean
+                val isBypassEnabled = flows[3] as Boolean
+                val notifsFullyHidden = flows[4] as AnimatedValue<Boolean>
+                val pulseExpanding = flows[5] as AnimatedValue<Boolean>
+
                 when {
                     // Hide the AOD icons if we're not in the KEYGUARD state unless the screen off
                     // animation is playing, in which case we want them to be visible if we're
@@ -351,6 +358,8 @@ constructor(
                                 isBypassEnabled -> true
                                 // If we are pulsing (and not bypassing), then we are hidden
                                 isPulseExpanding -> false
+                                // Besides bypass above, they should not be visible on lockscreen
+                                isOnLockscreen -> false
                                 // If notifs are fully gone, then we're visible
                                 areNotifsFullyHidden -> true
                                 // Otherwise, we're hidden

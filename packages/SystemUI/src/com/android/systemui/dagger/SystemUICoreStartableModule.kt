@@ -30,6 +30,7 @@ import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
+import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewConfigurator

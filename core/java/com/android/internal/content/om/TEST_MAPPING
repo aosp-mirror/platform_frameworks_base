@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "com.android.internal.content."
-        }
-      ]
+      "name": "FrameworksCoreTests_internal_content"
     },
     {
       "name": "SelfTargetingOverlayDeviceTests"

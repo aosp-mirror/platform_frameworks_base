@@ -81,6 +81,7 @@ internal fun Modifier.multiPointerDraggable(
     enabled: () -> Boolean,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    onFirstPointerDown: () -> Unit = {},
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     dispatcher: NestedScrollDispatcher,
 ): Modifier =
@@ -90,6 +91,7 @@ internal fun Modifier.multiPointerDraggable(
             enabled,
             startDragImmediately,
             onDragStarted,
+            onFirstPointerDown,
             swipeDetector,
             dispatcher,
         )
@@ -101,6 +103,7 @@ private data class MultiPointerDraggableElement(
     private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    private val onFirstPointerDown: () -> Unit,
     private val swipeDetector: SwipeDetector,
     private val dispatcher: NestedScrollDispatcher,
 ) : ModifierNodeElement<MultiPointerDraggableNode>() {
@@ -110,6 +113,7 @@ private data class MultiPointerDraggableElement(
             enabled = enabled,
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
+            onFirstPointerDown = onFirstPointerDown,
             swipeDetector = swipeDetector,
             dispatcher = dispatcher,
         )
@@ -119,6 +123,7 @@ private data class MultiPointerDraggableElement(
         node.enabled = enabled
         node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
+        node.onFirstPointerDown = onFirstPointerDown
         node.swipeDetector = swipeDetector
     }
 }
@@ -129,6 +134,7 @@ internal class MultiPointerDraggableNode(
     var startDragImmediately: (startedPosition: Offset) -> Boolean,
     var onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    var onFirstPointerDown: () -> Unit,
     var swipeDetector: SwipeDetector = DefaultSwipeDetector,
     private val dispatcher: NestedScrollDispatcher,
 ) :
@@ -225,6 +231,7 @@ internal class MultiPointerDraggableNode(
                             startedPosition = null
                         } else if (startedPosition == null) {
                             startedPosition = pointers.first().position
+                            onFirstPointerDown()
                         }
                     }
                 }

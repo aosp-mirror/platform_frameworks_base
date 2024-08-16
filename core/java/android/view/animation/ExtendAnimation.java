@@ -51,8 +51,6 @@ public class ExtendAnimation extends Animation {
     private float mToRightValue;
     private float mToBottomValue;
 
-    private int mExtensionEdges = 0x0;
-
     /**
      * Constructor used when an ExtendAnimation is loaded from a resource.
      *
@@ -156,20 +154,10 @@ public class ExtendAnimation extends Animation {
     @Override
     @WindowInsets.Side.InsetsSide
     public int getExtensionEdges() {
-        mExtensionEdges = 0x0;
-        if (mFromLeftValue > 0 || mToLeftValue > 0) {
-            mExtensionEdges |= WindowInsets.Side.LEFT;
-        }
-        if (mFromRightValue > 0 || mToRightValue > 0) {
-            mExtensionEdges |= WindowInsets.Side.RIGHT;
-        }
-        if (mFromTopValue > 0 || mToTopValue > 0) {
-            mExtensionEdges |= WindowInsets.Side.TOP;
-        }
-        if (mFromBottomValue > 0 || mToBottomValue > 0) {
-            mExtensionEdges |= WindowInsets.Side.BOTTOM;
-        }
-        return mExtensionEdges;
+        return (mFromInsets.left < 0 || mToInsets.left < 0 ?  WindowInsets.Side.LEFT : 0)
+            | (mFromInsets.right < 0 || mToInsets.right < 0 ?  WindowInsets.Side.RIGHT : 0)
+            | (mFromInsets.top < 0 || mToInsets.top < 0 ?  WindowInsets.Side.TOP : 0)
+            | (mFromInsets.bottom < 0 || mToInsets.bottom < 0 ? WindowInsets.Side.BOTTOM : 0);
     }
 
     @Override

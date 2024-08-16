@@ -29,16 +29,16 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
-import android.hardware.input.InputManager;
+import android.hardware.input.KeyGestureEvent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
@@ -48,17 +48,19 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
-import com.android.server.input.KeyboardMetricsCollector;
-import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
+import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages quick launch shortcuts by:
@@ -121,6 +123,7 @@ public class ModifierShortcutManager {
 
     private final Context mContext;
     private final Handler mHandler;
+    private final InputManagerInternal mInputManagerInternal;
     private boolean mSearchKeyShortcutPending = false;
     private boolean mConsumeSearchKeyUp = true;
     private UserHandle mCurrentUser;
@@ -134,6 +137,7 @@ public class ModifierShortcutManager {
                     mRoleIntents.remove(roleName);
                 }, UserHandle.ALL);
         mCurrentUser = currentUser;
+        mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         loadShortcuts();
     }
 
@@ -471,7 +475,7 @@ public class ModifierShortcutManager {
                             + "keyCode=" + KeyEvent.keyCodeToString(keyCode) + ","
                             + " category=" + category + " role=" + role);
                 }
-                logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(intent));
+                notifyKeyGestureCompleted(keyEvent, getKeyGestureTypeFromIntent(intent));
                 return true;
             } else {
                 return false;
@@ -492,22 +496,19 @@ public class ModifierShortcutManager {
                         + "the activity to which it is registered was not found: "
                         + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode));
             }
-            logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(shortcutIntent));
+            notifyKeyGestureCompleted(keyEvent, getKeyGestureTypeFromIntent(shortcutIntent));
             return true;
         }
         return false;
     }
 
-    private void logKeyboardShortcut(KeyEvent event, KeyboardLogEvent logEvent) {
-        mHandler.post(() -> handleKeyboardLogging(event, logEvent));
-    }
-
-    private void handleKeyboardLogging(KeyEvent event, KeyboardLogEvent logEvent) {
-        final InputManager inputManager = mContext.getSystemService(InputManager.class);
-        final InputDevice inputDevice = inputManager != null
-                ? inputManager.getInputDevice(event.getDeviceId()) : null;
-        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(inputDevice,
-                logEvent, event.getMetaState(), event.getKeyCode());
+    private void notifyKeyGestureCompleted(KeyEvent event,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
+        if (gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
+            return;
+        }
+        mInputManagerInternal.notifyKeyGestureCompleted(event.getDeviceId(),
+                new int[]{event.getKeyCode()}, event.getMetaState(), gestureType);
     }
 
     /**
@@ -705,4 +706,151 @@ public class ModifierShortcutManager {
         }
         return context.getString(resid);
     };
+
+
+    /**
+     * Find Key gesture type corresponding to intent filter category. Returns
+     * {@code KEY_GESTURE_TYPE_UNSPECIFIED if no matching event found}
+     */
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromIntent(Intent intent) {
+        Intent selectorIntent = intent.getSelector();
+        if (selectorIntent != null) {
+            Set<String> selectorCategories = selectorIntent.getCategories();
+            if (selectorCategories != null && !selectorCategories.isEmpty()) {
+                for (String intentCategory : selectorCategories) {
+                    int keyGestureType = getKeyGestureTypeFromSelectorCategory(intentCategory);
+                    if (keyGestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
+                        continue;
+                    }
+                    return keyGestureType;
+                }
+            }
+        }
+
+        // The shortcut may be targeting a system role rather than using an intent selector,
+        // so check for that.
+        String role = intent.getStringExtra(ModifierShortcutManager.EXTRA_ROLE);
+        if (!TextUtils.isEmpty(role)) {
+            return getKeyGestureTypeFromRole(role);
+        }
+
+        Set<String> intentCategories = intent.getCategories();
+        if (intentCategories == null || intentCategories.isEmpty()
+                || !intentCategories.contains(Intent.CATEGORY_LAUNCHER)) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+        if (intent.getComponent() == null) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+
+        // TODO(b/280423320): Add new field package name associated in the
+        //  KeyboardShortcutEvent atom and log it accordingly.
+        return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME;
+    }
+
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromSelectorCategory(String category) {
+        switch (category) {
+            case Intent.CATEGORY_APP_BROWSER:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER;
+            case Intent.CATEGORY_APP_EMAIL:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL;
+            case Intent.CATEGORY_APP_CONTACTS:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS;
+            case Intent.CATEGORY_APP_CALENDAR:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR;
+            case Intent.CATEGORY_APP_CALCULATOR:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR;
+            case Intent.CATEGORY_APP_MUSIC:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC;
+            case Intent.CATEGORY_APP_MAPS:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS;
+            case Intent.CATEGORY_APP_MESSAGING:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING;
+            case Intent.CATEGORY_APP_GALLERY:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_GALLERY;
+            case Intent.CATEGORY_APP_FILES:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FILES;
+            case Intent.CATEGORY_APP_WEATHER:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_WEATHER;
+            case Intent.CATEGORY_APP_FITNESS:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS;
+            default:
+                return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+    }
+
+    /**
+     * Find KeyGestureType corresponding to the provide system role name.
+     * Returns {@code KEY_GESTURE_TYPE_UNSPECIFIED} if no matching event found.
+     */
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromRole(String role) {
+        if (RoleManager.ROLE_BROWSER.equals(role)) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER;
+        } else if (RoleManager.ROLE_SMS.equals(role)) {
+            return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING;
+        } else {
+            Log.w(TAG, "Keyboard gesture event to launch " + role + " not supported for logging");
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+        }
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw,  "  ", prefix);
+        ipw.println("ModifierShortcutManager shortcuts:");
+
+        ipw.increaseIndent();
+        ipw.println("Roles");
+        ipw.increaseIndent();
+        for (int i = 0; i <  mRoleShortcuts.size(); i++) {
+            String role = mRoleShortcuts.valueAt(i);
+            char shortcutChar = (char) mRoleShortcuts.keyAt(i);
+            Intent intent = getRoleLaunchIntent(role);
+            ipw.println(shortcutChar + " " + role + " " + intent);
+        }
+
+        for (int i = 0; i <  mShiftRoleShortcuts.size(); i++) {
+            String role = mShiftRoleShortcuts.valueAt(i);
+            char shortcutChar = (char) mShiftRoleShortcuts.keyAt(i);
+            Intent intent = getRoleLaunchIntent(role);
+            ipw.println("SHIFT+" + shortcutChar + " " + role + " " + intent);
+        }
+
+        ipw.decreaseIndent();
+        ipw.println("Selectors");
+        ipw.increaseIndent();
+        for (int i = 0; i <  mIntentShortcuts.size(); i++) {
+            char shortcutChar = (char) mIntentShortcuts.keyAt(i);
+            Intent intent = mIntentShortcuts.valueAt(i);
+            ipw.println(shortcutChar + " " + intent);
+        }
+
+        for (int i = 0; i <  mShiftShortcuts.size(); i++) {
+            char shortcutChar = (char) mShiftShortcuts.keyAt(i);
+            Intent intent = mShiftShortcuts.valueAt(i);
+            ipw.println("SHIFT+" + shortcutChar + " " + intent);
+
+        }
+
+        if (modifierShortcutManagerMultiuser()) {
+            ipw.decreaseIndent();
+            ipw.println("ComponentNames");
+            ipw.increaseIndent();
+            for (int i = 0; i < mComponentShortcuts.size(); i++) {
+                char shortcutChar = (char) mComponentShortcuts.keyAt(i);
+                ComponentName component = mComponentShortcuts.valueAt(i);
+                Intent intent = resolveComponentNameIntent(component);
+                ipw.println(shortcutChar + " " + component + " " + intent);
+            }
+
+            for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
+                char shortcutChar = (char) mShiftComponentShortcuts.keyAt(i);
+                ComponentName component = mShiftComponentShortcuts.valueAt(i);
+                Intent intent = resolveComponentNameIntent(component);
+                ipw.println("SHIFT+" + shortcutChar + " " + component + " " + intent);
+            }
+        }
+    }
 }

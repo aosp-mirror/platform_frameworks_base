@@ -155,6 +155,27 @@ public abstract class VibratorManager {
     }
 
     /**
+     * Performs a haptic feedback. Similar to {@link #performHapticFeedback} but also take input
+     * into consideration.
+     *
+     * @param constant      the ID of the requested haptic feedback. Should be one of the constants
+     *                      defined in {@link HapticFeedbackConstants}.
+     * @param inputDeviceId the integer id of the input device that customizes the haptic feedback
+     *                      corresponding to the {@code constant}.
+     * @param inputSource   the {@link InputDevice.Source} that customizes the haptic feedback
+     *                      corresponding to the {@code constant}.
+     * @param reason        the reason for this haptic feedback.
+     * @param flags         Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags     Additional private flags as per {@link HapticFeedbackConstants}.
+     * @hide
+     */
+    public void performHapticFeedbackForInputDevice(int constant, int inputDeviceId,
+            int inputSource, String reason, @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        Log.w(TAG, "performHapticFeedbackForInputDevice is not supported");
+    }
+
+    /**
      * Turn all the vibrators off.
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)

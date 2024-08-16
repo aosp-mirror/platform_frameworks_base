@@ -278,7 +278,7 @@ public class ViewFrameRateTest {
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
             FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
-    public void lowVelocity80() throws Throwable {
+    public void lowVelocity60() throws Throwable {
         if (!ViewProperties.vrr_enabled().orElse(true)) {
             return;
         }
@@ -291,6 +291,31 @@ public class ViewFrameRateTest {
         waitForFrameRateCategoryToSettle();
         mActivityRule.runOnUiThread(() -> {
             mMovingView.setFrameContentVelocity(1f);
+            mMovingView.invalidate();
+            runAfterDraw(() -> assertEquals(60f, mViewRoot.getLastPreferredFrameRate(), 0f));
+        });
+        waitForAfterDraw();
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
+    public void midVelocity80() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+        });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            float midSpeed =
+                    200f * mMovingView.getContext().getResources().getDisplayMetrics().density;
+            mMovingView.setFrameContentVelocity(midSpeed);
             mMovingView.invalidate();
             runAfterDraw(() -> assertEquals(80f, mViewRoot.getLastPreferredFrameRate(), 0f));
         });
@@ -321,7 +346,7 @@ public class ViewFrameRateTest {
             frameLayout.setFrameContentVelocity(1f);
             mMovingView.offsetTopAndBottom(100);
             frameLayout.invalidate();
-            runAfterDraw(() -> assertEquals(80f, mViewRoot.getLastPreferredFrameRate(), 0f));
+            runAfterDraw(() -> assertEquals(60f, mViewRoot.getLastPreferredFrameRate(), 0f));
         });
         waitForAfterDraw();
     }
@@ -590,7 +615,7 @@ public class ViewFrameRateTest {
             runAfterDraw(() -> {
                 assertEquals(FRAME_RATE_CATEGORY_LOW,
                         mViewRoot.getLastPreferredFrameRateCategory());
-                assertEquals(80f, mViewRoot.getLastPreferredFrameRate());
+                assertEquals(60f, mViewRoot.getLastPreferredFrameRate());
             });
         });
         waitForAfterDraw();

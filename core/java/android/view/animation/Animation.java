@@ -882,7 +882,7 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * @return the edges to which outsets can be applied to
+     * @return the edges to which outsets should be applied if run as a windoow animation.
      *
      * @hide
      */

@@ -112,7 +112,11 @@ constructor(
                         communalSceneInteractor.editModeState.value == EditModeState.STARTING ||
                             communalSceneInteractor.isLaunchingWidget.value
                     if (!delaySceneTransition) {
-                        communalSceneInteractor.changeScene(nextScene, nextTransition)
+                        communalSceneInteractor.changeScene(
+                            newScene = nextScene,
+                            loggingReason = "KTF syncing",
+                            transitionKey = nextTransition,
+                        )
                     }
                 }
                 .launchIn(applicationScope)
@@ -176,7 +180,10 @@ constructor(
                     if (scene == CommunalScenes.Communal && isDreaming && timeoutJob == null) {
                         // If dreaming starts after timeout has expired, ex. if dream restarts under
                         // the hub, just close the hub immediately.
-                        communalSceneInteractor.changeScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeScene(
+                            CommunalScenes.Blank,
+                            "dream started after timeout",
+                        )
                     }
                 }
         }
@@ -201,7 +208,10 @@ constructor(
                 bgScope.launch {
                     delay(screenTimeout.milliseconds)
                     if (isDreaming) {
-                        communalSceneInteractor.changeScene(CommunalScenes.Blank)
+                        communalSceneInteractor.changeScene(
+                            newScene = CommunalScenes.Blank,
+                            loggingReason = "hub timeout",
+                        )
                     }
                     timeoutJob = null
                 }

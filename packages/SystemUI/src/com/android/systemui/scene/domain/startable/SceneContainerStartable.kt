@@ -25,6 +25,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
@@ -132,6 +133,7 @@ constructor(
     private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     private val statusBarStateController: SysuiStatusBarStateController,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -172,12 +174,28 @@ constructor(
 
     private fun resetShadeSessions() {
         applicationScope.launch {
-            sceneBackInteractor.backStack
-                // We are in a session if either Shade or QuickSettings is on the back stack
-                .map { backStack ->
-                    backStack.asIterable().any { it == Scenes.Shade || it == Scenes.QuickSettings }
+            combine(
+                    sceneBackInteractor.backStack
+                        // We are in a session if either Shade or QuickSettings is on the back stack
+                        .map { backStack ->
+                            backStack.asIterable().any {
+                                it == Scenes.Shade || it == Scenes.QuickSettings
+                            }
+                        }
+                        .distinctUntilChanged(),
+                    sceneInteractor.transitionState
+                        .mapNotNull { state ->
+                            // We are also in a session if either Shade or QuickSettings is the
+                            // current scene
+                            when (state) {
+                                is ObservableTransitionState.Idle -> state.currentScene
+                                is ObservableTransitionState.Transition -> state.fromScene
+                            }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
+                        }
+                        .distinctUntilChanged()
+                ) { inBackStack, isCurrentScene ->
+                    inBackStack || isCurrentScene
                 }
-                .distinctUntilChanged()
                 // Once a session has ended, clear the session storage.
                 .filter { inSession -> !inSession }
                 .collect { shadeSessionStorage.clear() }
@@ -212,13 +230,16 @@ constructor(
                                 },
                                 headsUpInteractor.isHeadsUpOrAnimatingAway,
                                 occlusionInteractor.invisibleDueToOcclusion,
+                                alternateBouncerInteractor.isVisible,
                             ) {
                                 visibilityForTransitionState,
                                 isHeadsUpOrAnimatingAway,
                                 invisibleDueToOcclusion,
+                                isAlternateBouncerVisible,
                                 ->
                                 when {
                                     isHeadsUpOrAnimatingAway -> true to "showing a HUN"
+                                    isAlternateBouncerVisible -> true to "showing alternate bouncer"
                                     invisibleDueToOcclusion -> false to "invisible due to occlusion"
                                     else -> visibilityForTransitionState
                                 }
@@ -335,9 +356,10 @@ constructor(
                                 )
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
-                    val isOnBouncer = renderedScenes.contains(Scenes.Bouncer)
+                    val isAlternateBouncerVisible = alternateBouncerInteractor.isVisibleState()
+                    val isOnPrimaryBouncer = renderedScenes.contains(Scenes.Bouncer)
                     if (!deviceUnlockStatus.isUnlocked) {
-                        return@mapNotNull if (isOnLockscreen || isOnBouncer) {
+                        return@mapNotNull if (isOnLockscreen || isOnPrimaryBouncer) {
                             // Already on lockscreen or bouncer, no need to change scenes.
                             null
                         } else {
@@ -349,26 +371,44 @@ constructor(
                     }
 
                     if (
-                        isOnBouncer &&
+                        isOnPrimaryBouncer &&
                             deviceUnlockStatus.deviceUnlockSource == DeviceUnlockSource.TrustAgent
                     ) {
                         uiEventLogger.log(BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS)
                     }
                     when {
-                        isOnBouncer ->
-                            // When the device becomes unlocked in Bouncer, go to previous scene,
-                            // or Gone.
+                        isAlternateBouncerVisible -> {
+                            // When the device becomes unlocked when the alternate bouncer is
+                            // showing, always hide the alternate bouncer...
+                            alternateBouncerInteractor.hide()
+
+                            // ... and go to Gone or stay on the current scene
+                            if (
+                                isOnLockscreen ||
+                                    !statusBarStateController.leaveOpenOnKeyguardHide()
+                            ) {
+                                Scenes.Gone to
+                                    "device was unlocked with alternate bouncer showing" +
+                                        " and shade didn't need to be left open"
+                            } else {
+                                null
+                            }
+                        }
+                        isOnPrimaryBouncer ->
+                            // When the device becomes unlocked in primary Bouncer,
+                            // go to previous scene or Gone.
                             if (
                                 previousScene.value == Scenes.Lockscreen ||
                                     !statusBarStateController.leaveOpenOnKeyguardHide()
                             ) {
                                 Scenes.Gone to
-                                    "device was unlocked in Bouncer scene and shade" +
+                                    "device was unlocked with bouncer showing and shade" +
                                         " didn't need to be left open"
                             } else {
                                 val prevScene = previousScene.value
                                 (prevScene ?: Scenes.Gone) to
-                                    "device was unlocked in Bouncer scene, from sceneKey=$prevScene"
+                                    "device was unlocked with primary bouncer showing," +
+                                        " from sceneKey=$prevScene"
                             }
                         isOnLockscreen ->
                             // The lockscreen should be dismissed automatically in 2 scenarios:

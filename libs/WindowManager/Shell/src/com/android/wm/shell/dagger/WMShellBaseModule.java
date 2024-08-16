@@ -16,13 +16,18 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.provider.Settings.Secure.COMPAT_UI_EDUCATION_SHOWING;
+
+import static com.android.wm.shell.compatui.CompatUIStatusManager.COMPAT_UI_EDUCATION_HIDDEN;
 import static com.android.wm.shell.onehanded.OneHandedController.SUPPORT_ONE_HANDED_MODE;
 
+import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.window.SystemPerformanceHinter;
@@ -71,10 +76,14 @@ import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
+import com.android.wm.shell.compatui.CompatUIStatusManager;
+import com.android.wm.shell.compatui.api.CompatUIComponentIdGenerator;
 import com.android.wm.shell.compatui.api.CompatUIHandler;
 import com.android.wm.shell.compatui.api.CompatUIRepository;
+import com.android.wm.shell.compatui.api.CompatUIState;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIHandler;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIRepository;
+import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -248,12 +257,16 @@ public abstract class WMShellBaseModule {
             Lazy<CompatUIConfiguration> compatUIConfiguration,
             Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
             Lazy<AccessibilityManager> accessibilityManager,
-            CompatUIRepository compatUIRepository) {
+            CompatUIRepository compatUIRepository,
+            @NonNull CompatUIState compatUIState,
+            @NonNull CompatUIComponentIdGenerator componentIdGenerator,
+            CompatUIStatusManager compatUIStatusManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
         }
         if (Flags.appCompatUiFramework()) {
-            return Optional.of(new DefaultCompatUIHandler(compatUIRepository));
+            return Optional.of(new DefaultCompatUIHandler(compatUIRepository, compatUIState,
+                    componentIdGenerator));
         }
         return Optional.of(
                 new CompatUIController(
@@ -269,7 +282,34 @@ public abstract class WMShellBaseModule {
                         dockStateReader.get(),
                         compatUIConfiguration.get(),
                         compatUIShellCommandHandler.get(),
-                        accessibilityManager.get()));
+                        accessibilityManager.get(),
+                        compatUIStatusManager));
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIStatusManager provideCompatUIStatusManager(@NonNull Context context) {
+        if (Flags.enableCompatUiVisibilityStatus()) {
+            return new CompatUIStatusManager(
+                    newState -> Settings.Secure.putInt(context.getContentResolver(),
+                            COMPAT_UI_EDUCATION_SHOWING, newState),
+                    () -> Settings.Secure.getInt(context.getContentResolver(),
+                            COMPAT_UI_EDUCATION_SHOWING, COMPAT_UI_EDUCATION_HIDDEN));
+        } else {
+            return new CompatUIStatusManager();
+        }
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIState provideCompatUIState() {
+        return new CompatUIState();
+    }
+
+    @WMSingleton
+    @Provides
+    static CompatUIComponentIdGenerator provideCompatUIComponentIdGenerator() {
+        return new DefaultComponentIdGenerator();
     }
 
     @WMSingleton
@@ -375,7 +415,8 @@ public abstract class WMShellBaseModule {
             @ShellBackgroundThread Handler backgroundHandler,
             BackAnimationBackground backAnimationBackground,
             Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry,
-            ShellCommandHandler shellCommandHandler) {
+            ShellCommandHandler shellCommandHandler,
+            Transitions transitions) {
         if (BackAnimationController.IS_ENABLED) {
             return shellBackAnimationRegistry.map(
                     (animations) ->
@@ -387,7 +428,8 @@ public abstract class WMShellBaseModule {
                                     context,
                                     backAnimationBackground,
                                     animations,
-                                    shellCommandHandler));
+                                    shellCommandHandler,
+                                    transitions));
         }
         return Optional.empty();
     }

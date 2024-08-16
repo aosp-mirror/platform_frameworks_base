@@ -144,6 +144,7 @@ import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.ScreenPowerStatsProcessor;
+import com.android.server.power.stats.SensorPowerStatsProcessor;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.power.stats.VideoPowerStatsProcessor;
 import com.android.server.power.stats.WifiPowerStatsProcessor;
@@ -595,6 +596,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .setProcessor(
                         new GnssPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SENSORS)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessor(new SensorPowerStatsProcessor(
+                        () -> mContext.getSystemService(SensorManager.class)));
+
         config.trackCustomPowerComponents(CustomEnergyConsumerPowerStatsProcessor::new)
                 .trackDeviceStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
@@ -608,6 +620,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private void setPowerStatsThrottlePeriods(BatteryStatsImpl.BatteryStatsConfig.Builder builder,
             String configString) {
+        if (configString == null) {
+            return;
+        }
+
         Matcher matcher = Pattern.compile("([^:]+):(\\d+)\\s*").matcher(configString);
         while (matcher.find()) {
             String powerComponentName = matcher.group(1);
@@ -704,6 +720,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 Flags.streamlinedMiscBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_GNSS,
+                Flags.streamlinedMiscBatteryStats());
+
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_SENSORS,
                 Flags.streamlinedMiscBatteryStats());
 
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_CAMERA,
@@ -1240,7 +1260,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
                                     .build();
                     bus = getBatteryUsageStats(List.of(query)).get(0);
-                    return new StatsPerUidLogger(new FrameworkStatsLogger()).logStats(bus, data);
+                    final int pullResult =
+                            new StatsPerUidLogger(new FrameworkStatsLogger()).logStats(bus, data);
+                    try {
+                        bus.close();
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Failure close BatteryUsageStats", e);
+                    }
+                    return pullResult;
                 }
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);

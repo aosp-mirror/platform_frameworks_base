@@ -27,15 +27,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -61,7 +62,7 @@ import kotlin.time.DurationUnit
 
 object Communal {
     object Elements {
-        val Scrim = ElementKey("Scrim", scenePicker = LowestZIndexScenePicker)
+        val Scrim = ElementKey("Scrim", contentPicker = LowestZIndexContentPicker)
         val Grid = ElementKey("CommunalContent")
         val LockIcon = ElementKey("CommunalLockIcon")
         val IndicationArea = ElementKey("CommunalIndicationArea")
@@ -70,7 +71,7 @@ object Communal {
 }
 
 object AllElements : ElementMatcher {
-    override fun matches(key: ElementKey, scene: SceneKey) = true
+    override fun matches(key: ElementKey, content: ContentKey) = true
 }
 
 private object TransitionDuration {
@@ -133,7 +134,7 @@ val sceneTransitions = transitions {
     }
     // Disable horizontal overscroll. If the scene is overscrolled too soon after showing, this
     // can lead to inconsistent KeyguardState changes.
-    overscroll(CommunalScenes.Communal, Orientation.Horizontal) {}
+    overscrollDisabled(CommunalScenes.Communal, Orientation.Horizontal)
 }
 
 /**
@@ -242,7 +243,7 @@ private fun SceneScope.CommunalScene(
                     if (isFocusable) {
                         Modifier.focusable()
                     } else {
-                        Modifier.semantics { contentDescription = "" }.clearAndSetSemantics {}
+                        Modifier.semantics { disabled() }.clearAndSetSemantics {}
                     }
                 )
     ) {
@@ -258,7 +259,7 @@ private fun SceneScope.CommunalScene(
                 modifier =
                     modifier.focusable(isFocusable).semantics {
                         if (!isFocusable) {
-                            contentDescription = ""
+                            disabled()
                         }
                     }
             )

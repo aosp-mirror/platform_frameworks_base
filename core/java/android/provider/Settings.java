@@ -2287,6 +2287,26 @@ public final class Settings {
             "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
 
     /**
+     * Activity Action: Show Other NFC services settings.
+     * <p>
+     * If a Settings activity handles this intent action, an "Other NFC services" entry will be
+     * shown in the Default payment app settings, and clicking it will launch that activity.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_ACTION_MANAGE_SERVICES_SETTINGS)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_MANAGE_OTHER_NFC_SERVICES_SETTINGS =
+            "android.settings.MANAGE_OTHER_NFC_SERVICES_SETTINGS";
+
+    /**
      * Activity Action: Show app screen size list settings for user to override app aspect
      * ratio.
      * <p>
@@ -5910,6 +5930,14 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_KEY_PRESSES = "show_key_presses";
+
+        /**
+         * Show touchpad input visualization on screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String TOUCHPAD_VISUALIZER = "touchpad_visualizer";
 
         /**
          * Show rotary input dispatched to focused windows on the screen.
@@ -12535,6 +12563,19 @@ public final class Settings {
                 "launcher_taskbar_education_showing";
 
         /**
+         * Whether any Compat UI Education is currently showing.
+         *
+         * <p>1 if true, 0 or unset otherwise.
+         *
+         * <p>This setting is used to inform other components that the Compat UI Education is
+         * currently showing, which can prevent them from showing something else to the user.
+         *
+         * @hide
+         */
+        public static final String COMPAT_UI_EDUCATION_SHOWING =
+                "compat_ui_education_showing";
+
+        /**
          * Whether or not adaptive charging feature is enabled by user.
          * Type: int (0 for false, 1 for true)
          * Default: 1
@@ -12558,6 +12599,14 @@ public final class Settings {
          */
         public static final String CONTEXTUAL_SCREEN_TIMEOUT_ENABLED =
                 "contextual_screen_timeout_enabled";
+
+        /**
+         * Whether hinge angle lidevent is enabled.
+         *
+         * @hide
+         */
+        public static final String HINGE_ANGLE_LIDEVENT_ENABLED =
+                "hinge_angle_lidevent_enabled";
 
         /**
          * Whether lockscreen weather is enabled.
@@ -15812,7 +15861,7 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * screen_brightness_array         (int[])
+         * screen_brightness_array         (int[], values in range [1, 255])
          * dimming_scrim_array             (int[])
          * prox_screen_off_delay           (long)
          * prox_cooldown_trigger           (long)
@@ -20142,6 +20191,36 @@ public final class Settings {
              */
             public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS = 11;
 
+            /**
+             * Phone switching request source
+             * @hide
+             */
+            public static final String PHONE_SWITCHING_REQUEST_SOURCE =
+                    "phone_switching_request_source";
+
+            /**
+             * No phone switching request source
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_NONE = 0;
+
+            /**
+             * Phone switching triggered by watch
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_WATCH = 1;
+
+            /**
+             * Phone switching triggered by companion, user confirmation required
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_COMPANION_USER_CONFIRMATION = 2;
+
+            /**
+             * Phone switching triggered by companion, user confirmation not required
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_REQUEST_SOURCE_COMPANION = 3;
 
             /**
              * Whether the device has enabled the feature to reduce motion and animation
@@ -20187,14 +20266,6 @@ public final class Settings {
              * Device is set in restricted mode.
              */
             public static final int TETHERED_CONFIG_RESTRICTED = 3;
-
-            /**
-             * Whether phone switching is supported.
-             *
-             * (0 = false, 1 = true)
-             * @hide
-             */
-            public static final String PHONE_SWITCHING_SUPPORTED = "phone_switching_supported";
 
             /**
              * Setting indicating the name of the Wear OS package that hosts the Media Controls UI.

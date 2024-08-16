@@ -374,7 +374,6 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<CameraOverridesRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
         final CameraOverridesRobotTest robot = new CameraOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
     }
@@ -385,6 +384,12 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
                 @NonNull ActivityTaskManagerService atm,
                 @NonNull ActivityTaskSupervisor supervisor) {
             super(wm, atm, supervisor);
+        }
+
+        @Override
+        void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+            super.onPostDisplayContentCreation(displayContent);
+            spyOn(displayContent.mAppCompatCameraPolicy);
         }
 
         void checkShouldRefreshActivityForCameraCompat(boolean expected) {
