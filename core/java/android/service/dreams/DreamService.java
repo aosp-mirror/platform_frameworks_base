@@ -1363,6 +1363,9 @@ public class DreamService extends Service implements Window.Callback {
      * Tells the dream to come to the front (which in turn tells the overlay to come to the front).
      */
     private void comeToFront() {
+        if (mOverlayConnection == null) {
+            return;
+        }
         mOverlayConnection.addConsumer(overlay -> {
             try {
                 overlay.comeToFront();
