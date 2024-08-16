@@ -19,8 +19,8 @@ package com.android.wm.shell.bubbles;
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
 
-import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
-import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -50,7 +50,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.common.TriangleShape;
+import com.android.wm.shell.shared.TriangleShape;
 
 /**
  * Flyout view that appears as a 'chat bubble' alongside the bubble stack. The flyout can visually

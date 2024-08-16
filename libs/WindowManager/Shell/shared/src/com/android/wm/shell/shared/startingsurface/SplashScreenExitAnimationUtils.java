@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.wm.shell.startingsurface;
+package com.android.wm.shell.shared.startingsurface;
 
 import static android.view.Choreographer.CALLBACK_COMMIT;
 
@@ -45,8 +45,8 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.window.SplashScreenView;
 
-import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
+import com.android.wm.shell.shared.animation.Interpolators;
 
 /**
  * Utilities for creating the splash screen window animations.
@@ -88,7 +88,7 @@ public class SplashScreenExitAnimationUtils {
      * Creates and starts the animator to fade out the icon, reveal the app, and shift up main
      * window with rounded corner radius.
      */
-    static void startAnimations(@ExitAnimationType int animationType,
+    public static void startAnimations(@ExitAnimationType int animationType,
             ViewGroup splashScreenView, SurfaceControl firstWindowSurface,
             int mainWindowShiftLength, TransactionPool transactionPool, Rect firstWindowFrame,
             int animationDuration, int iconFadeOutDuration, float iconStartAlpha,
