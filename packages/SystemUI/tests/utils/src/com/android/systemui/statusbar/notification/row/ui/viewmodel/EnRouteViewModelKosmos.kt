@@ -16,23 +16,13 @@
 
 package com.android.systemui.statusbar.notification.row.ui.viewmodel
 
-// noinspection CleanArchitectureDependencyViolation
+import com.android.systemui.dump.dumpManager
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.notification.row.data.repository.NotificationRowRepository
-import dagger.BindsInstance
-import dagger.Subcomponent
+import com.android.systemui.statusbar.notification.row.domain.interactor.getNotificationRowInteractor
 
-@Subcomponent
-interface RichOngoingViewModelComponent {
-
-    @Subcomponent.Factory
-    interface Factory {
-        /** Creates an instance of [RichOngoingViewModelComponent]. */
-        fun create(
-            @BindsInstance repository: NotificationRowRepository
-        ): RichOngoingViewModelComponent
-    }
-
-    fun createTimerViewModel(): TimerViewModel
-
-    fun createEnRouteViewModel(): EnRouteViewModel
-}
+fun Kosmos.getEnRouteViewModel(repository: NotificationRowRepository) =
+    EnRouteViewModel(
+        dumpManager = dumpManager,
+        rowInteractor = getNotificationRowInteractor(repository),
+    )
