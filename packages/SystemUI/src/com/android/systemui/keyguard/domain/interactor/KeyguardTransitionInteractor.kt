@@ -22,7 +22,6 @@ import android.util.Log
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -69,7 +68,6 @@ class KeyguardTransitionInteractor
 @Inject
 constructor(
     @Application val scope: CoroutineScope,
-    private val keyguardRepository: KeyguardRepository,
     private val repository: KeyguardTransitionRepository,
     private val fromLockscreenTransitionInteractor: dagger.Lazy<FromLockscreenTransitionInteractor>,
     private val fromPrimaryBouncerTransitionInteractor:
@@ -307,12 +305,6 @@ constructor(
             .map { step -> step.from }
             .buffer(2, BufferOverflow.DROP_OLDEST)
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
-
-    /** Which keyguard state to use when the device goes to sleep. */
-    val asleepKeyguardState: StateFlow<KeyguardState> =
-        keyguardRepository.isAodAvailable
-            .map { aodAvailable -> if (aodAvailable) AOD else DOZING }
-            .stateIn(scope, SharingStarted.Eagerly, DOZING)
 
     /**
      * The last [KeyguardState] to which we [TransitionState.FINISHED] a transition.
