@@ -1031,7 +1031,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 final boolean shouldStartTransitionDrag =
                         relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)
-                        || Flags.enableAdditionalWindowsAboveStatusBar();
+                                || Flags.enableAdditionalWindowsAboveStatusBar();
                 if (dragFromStatusBarAllowed && shouldStartTransitionDrag) {
                     mTransitionDragActive = true;
                 }
@@ -1039,8 +1039,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
             case MotionEvent.ACTION_UP: {
                 if (mTransitionDragActive) {
+                    final DesktopModeVisualIndicator.DragStartState dragStartState =
+                            DesktopModeVisualIndicator.DragStartState
+                                    .getDragStartState(relevantDecor.mTaskInfo);
+                    if (dragStartState == null) return;
                     mDesktopTasksController.updateVisualIndicator(relevantDecor.mTaskInfo,
-                            relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY());
+                            relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY(),
+                            dragStartState);
                     mTransitionDragActive = false;
                     if (mMoveToDesktopAnimator != null) {
                         // Though this isn't a hover event, we need to update handle's hover state
@@ -1080,10 +1085,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             && mMoveToDesktopAnimator == null) {
                         return;
                     }
+                    final DesktopModeVisualIndicator.DragStartState dragStartState =
+                            DesktopModeVisualIndicator.DragStartState
+                                    .getDragStartState(relevantDecor.mTaskInfo);
+                    if (dragStartState == null) return;
                     final DesktopModeVisualIndicator.IndicatorType indicatorType =
                             mDesktopTasksController.updateVisualIndicator(
                                     relevantDecor.mTaskInfo,
-                                    relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY());
+                                    relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY(),
+                                    dragStartState);
                     if (indicatorType != TO_FULLSCREEN_INDICATOR) {
                         if (mMoveToDesktopAnimator == null) {
                             mMoveToDesktopAnimator = new MoveToDesktopAnimator(

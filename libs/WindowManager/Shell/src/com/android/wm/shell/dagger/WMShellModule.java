@@ -59,6 +59,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
+import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
@@ -558,6 +559,7 @@ public abstract class WMShellModule {
             ReturnToDragStartAnimator returnToDragStartAnimator,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
+            DesktopModeDragAndDropTransitionHandler desktopModeDragAndDropTransitionHandler,
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             DragToDesktopTransitionHandler dragToDesktopTransitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
@@ -573,7 +575,8 @@ public abstract class WMShellModule {
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, keyguardManager,
                 returnToDragStartAnimator, enterDesktopTransitionHandler,
-                exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
+                exitDesktopTransitionHandler, desktopModeDragAndDropTransitionHandler,
+                toggleResizeDesktopTaskTransitionHandler,
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
@@ -651,6 +654,14 @@ public abstract class WMShellModule {
             InteractionJankMonitor interactionJankMonitor) {
         return new ExitDesktopTaskTransitionHandler(
             transitions, context, interactionJankMonitor);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopModeDragAndDropTransitionHandler provideDesktopModeDragAndDropTransitionHandler(
+            Transitions transitions
+    ) {
+        return new DesktopModeDragAndDropTransitionHandler(transitions);
     }
 
     @WMSingleton
