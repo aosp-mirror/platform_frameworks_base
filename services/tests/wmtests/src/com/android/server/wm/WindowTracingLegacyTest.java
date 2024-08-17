@@ -125,7 +125,7 @@ public class WindowTracingLegacyTest {
     public void trace_dumpsWindowManagerState_whenTracing() throws Exception {
         mWindowTracing.startTrace(mock(PrintWriter.class));
         mWindowTracing.logState("where");
-        verify(mWmMock, times(2)).dumpDebugLocked(any(), eq(WindowTraceLogLevel.TRIM));
+        verify(mWmMock, times(2)).dumpDebugLocked(any(), eq(WindowTracingLogLevel.TRIM));
     }
 
     @Test

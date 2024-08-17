@@ -187,6 +187,8 @@ final class AppCompatUtils {
         appCompatTaskInfo.setTopActivityLetterboxed(top.areBoundsLetterboxed());
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top.mAppCompatController
                 .getAppCompatCameraOverrides().getFreeformCameraCompatMode();
+        appCompatTaskInfo.setHasMinAspectRatioOverride(top.mAppCompatController
+                .getDesktopAppCompatAspectRatioPolicy().hasMinAspectRatioOverride(task));
     }
 
     /**

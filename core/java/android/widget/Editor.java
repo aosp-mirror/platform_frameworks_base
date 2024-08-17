@@ -474,7 +474,11 @@ public class Editor {
     private final AccessibilitySmartActions mA11ySmartActions;
     private InsertModeController mInsertModeController;
 
-    Editor(TextView textView) {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
         mTextView.setFilters(mTextView.getFilters());
@@ -3206,16 +3210,6 @@ public class Editor {
             }
         }
 
-        final int menuItemOrderUndo = 2;
-        final int menuItemOrderRedo = 3;
-        final int menuItemOrderCut = 4;
-        final int menuItemOrderCopy = 5;
-        final int menuItemOrderPaste = 6;
-        final int menuItemOrderPasteAsPlainText = 7;
-        final int menuItemOrderSelectAll = 8;
-        final int menuItemOrderShare = 9;
-        final int menuItemOrderAutofill = 10;
-
         menu.setOptionalIconsVisible(true);
         menu.setGroupDividerEnabled(true);
 
@@ -3224,7 +3218,18 @@ public class Editor {
         final int keyboard = mTextView.getResources().getConfiguration().keyboard;
         menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
 
-        final TypedArray a = mTextView.getContext().obtainStyledAttributes(new int[] {
+        setTextContextMenuItems(menu);
+
+        mPreserveSelection = true;
+
+        // No-op for the old context menu because it doesn't have icons.
+        adjustIconSpacing(menu);
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public void setTextContextMenuItems(ContextMenu menu) {
+        final TypedArray a = mTextView.getContext().obtainStyledAttributes(new int[]{
                 // TODO: Make Undo/Redo be public attribute.
                 com.android.internal.R.attr.actionModeUndoDrawable,
                 com.android.internal.R.attr.actionModeRedoDrawable,
@@ -3234,6 +3239,16 @@ public class Editor {
                 android.R.attr.actionModeSelectAllDrawable,
                 android.R.attr.actionModeShareDrawable,
         });
+
+        final int menuItemOrderUndo = 2;
+        final int menuItemOrderRedo = 3;
+        final int menuItemOrderCut = 4;
+        final int menuItemOrderCopy = 5;
+        final int menuItemOrderPaste = 6;
+        final int menuItemOrderPasteAsPlainText = 7;
+        final int menuItemOrderSelectAll = 8;
+        final int menuItemOrderShare = 9;
+        final int menuItemOrderAutofill = 10;
 
         menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, menuItemOrderUndo,
                 com.android.internal.R.string.undo)
@@ -3291,12 +3306,7 @@ public class Editor {
                 .setEnabled(mTextView.canRequestAutofill()
                         && (selected == null || selected.isEmpty()))
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-
-        mPreserveSelection = true;
         a.recycle();
-
-        // No-op for the old context menu because it doesn't have icons.
-        adjustIconSpacing(menu);
     }
 
     /**

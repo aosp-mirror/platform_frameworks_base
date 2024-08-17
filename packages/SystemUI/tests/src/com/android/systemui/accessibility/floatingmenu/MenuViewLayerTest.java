@@ -83,7 +83,7 @@ import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.accessibility.utils.TestUtils;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import org.junit.After;
 import org.junit.Before;

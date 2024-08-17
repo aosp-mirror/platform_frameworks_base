@@ -276,7 +276,6 @@ constructor(
     }
 
     private fun listenForLockscreenToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) return
         scope.launch("$TAG#listenForLockscreenToGone") {
@@ -292,7 +291,6 @@ constructor(
     }
 
     private fun listenForLockscreenToGoneDragging() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // When the refactor is enabled, we no longer use isKeyguardGoingAway.

@@ -1399,7 +1399,29 @@ final class InstallPackageHelper {
                                 "Package " + pkgName + " is a persistent app. "
                                         + "Persistent apps are not updateable.");
                     }
+                    // When updating an sdk library, make sure that the versionMajor is
+                    // changed if the targetSdkVersion and minSdkVersion have changed
+                    if (parsedPackage.isSdkLibrary() && ps.getPkg() != null
+                            && ps.getPkg().isSdkLibrary()) {
+                        final int oldMinSdk = ps.getPkg().getMinSdkVersion();
+                        final int newMinSdk = parsedPackage.getMinSdkVersion();
+                        if (oldTargetSdk != newTargetSdk || oldMinSdk != newMinSdk) {
+                            final int oldVersionMajor = ps.getPkg().getSdkLibVersionMajor();
+                            final int newVersionMajor = parsedPackage.getSdkLibVersionMajor();
+                            if (oldVersionMajor == newVersionMajor) {
+                                throw new PrepareFailure(
+                                        PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                        "Failure updating " + pkgName + " as it updates"
+                                                + " an sdk library <"
+                                                + parsedPackage.getSdkLibraryName() + ">"
+                                                + " without changing the versionMajor, but the"
+                                                + " targetSdkVersion or minSdkVersion has changed."
+                                );
+                            }
+                        }
+                    }
                 }
+
             }
 
             PackageSetting signatureCheckPs = ps;

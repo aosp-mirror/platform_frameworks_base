@@ -25,8 +25,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.android.wm.shell.common.split.SplitLayout.BEHIND_APP_VEIL_LAYER;
 import static com.android.wm.shell.common.split.SplitLayout.FRONT_APP_VEIL_LAYER;
-import static com.android.wm.shell.common.split.SplitScreenConstants.FADE_DURATION;
-import static com.android.wm.shell.common.split.SplitScreenConstants.VEIL_DELAY_DURATION;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.FADE_DURATION;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.VEIL_DELAY_DURATION;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

@@ -27,6 +27,7 @@ import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.window.flags.Flags.FLAG_OFFLOAD_COLOR_EXTRACTION;
+import static com.android.window.flags.Flags.noDuplicateSurfaceDestroyedEvents;
 import static com.android.window.flags.Flags.noConsecutiveVisibilityEvents;
 import static com.android.window.flags.Flags.noVisibilityEventOnDisplayStateChange;
 import static com.android.window.flags.Flags.offloadColorExtraction;
@@ -255,6 +256,7 @@ public abstract class WallpaperService extends Service {
          */
         private boolean mIsScreenTurningOn;
         boolean mReportedVisible;
+        boolean mReportedSurfaceCreated;
         boolean mDestroyed;
         // Set to true after receiving WallpaperManager#COMMAND_FREEZE. It's reset back to false
         // after receiving WallpaperManager#COMMAND_UNFREEZE. COMMAND_FREEZE is fully applied once
@@ -1381,6 +1383,7 @@ public abstract class WallpaperService extends Service {
                         if (surfaceCreating) {
                             mIsCreating = true;
                             didSurface = true;
+                            mReportedSurfaceCreated = true;
                             if (DEBUG) Log.v(TAG, "onSurfaceCreated("
                                     + mSurfaceHolder + "): " + this);
                             Trace.beginSection("WPMS.Engine.onSurfaceCreated");
@@ -2264,8 +2267,10 @@ public abstract class WallpaperService extends Service {
         }
 
         void reportSurfaceDestroyed() {
-            if (mSurfaceCreated) {
+            if ((!noDuplicateSurfaceDestroyedEvents() && mSurfaceCreated)
+                    || (noDuplicateSurfaceDestroyedEvents() && mReportedSurfaceCreated)) {
                 mSurfaceCreated = false;
+                mReportedSurfaceCreated = false;
                 mSurfaceHolder.ungetCallbacks();
                 SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
                 if (callbacks != null) {

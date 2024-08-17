@@ -25,7 +25,7 @@ class FakeSysUiViewModel(
     var activationCount = 0
     var cancellationCount = 0
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         activationCount++
         onActivation()
         try {

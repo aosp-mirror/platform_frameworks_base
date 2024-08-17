@@ -170,7 +170,7 @@ abstract class FlowDumperImpl(
  * [Activatable.activate()][com.android.systemui.lifecycle.Activatable.activate].
  */
 interface ActivatableFlowDumper : FlowDumper {
-    suspend fun activateFlowDumper()
+    suspend fun activateFlowDumper(): Nothing
 }
 
 /**
@@ -190,7 +190,7 @@ class ActivatableFlowDumperImpl(
 
     private val registration =
         object : SafeActivatable() {
-            override suspend fun onActivated() {
+            override suspend fun onActivated(): Nothing {
                 try {
                     dumpManager.registerCriticalDumpable(
                         dumpManagerName,
@@ -205,7 +205,7 @@ class ActivatableFlowDumperImpl(
 
     private val dumpManagerName = "[$idString] $tag"
 
-    override suspend fun activateFlowDumper() {
+    override suspend fun activateFlowDumper(): Nothing {
         registration.activate()
     }
 }

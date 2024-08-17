@@ -914,7 +914,8 @@ public final class CardEmulation {
       * otherwise a call to this method will fail and throw {@link SecurityException}.
       * @param activity The Activity that requests NFC controller routing table to be changed.
       * @param protocol ISO-DEP route destination, which can be "DH" or "UICC" or "ESE".
-      * @param technology Tech-A, Tech-B route destination, which can be "DH" or "UICC" or "ESE".
+      * @param technology Tech-A, Tech-B and Tech-F route destination, which can be "DH" or "UICC"
+      * or "ESE".
       * @throws SecurityException if the caller is not the preferred NFC service
       * @throws IllegalArgumentException if the activity is not resumed or the caller is not in the
       * foreground, or both protocol route and technology route are null.

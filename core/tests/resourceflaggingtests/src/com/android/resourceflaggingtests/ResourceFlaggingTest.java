@@ -68,6 +68,16 @@ public class ResourceFlaggingTest {
         assertThat(getBoolean("res3")).isTrue();
     }
 
+    @Test
+    public void testFlagDisabledStringArrayElement() {
+        assertThat(getStringArray("strarr1")).isEqualTo(new String[]{"one", "two", "three"});
+    }
+
+    @Test
+    public void testFlagDisabledIntArrayElement() {
+        assertThat(getIntArray("intarr1")).isEqualTo(new int[]{1, 2, 3});
+    }
+
     private boolean getBoolean(String name) {
         int resId = mResources.getIdentifier(
                 name,
@@ -77,13 +87,22 @@ public class ResourceFlaggingTest {
         return mResources.getBoolean(resId);
     }
 
-    private String getString(String name) {
+    private String[] getStringArray(String name) {
         int resId = mResources.getIdentifier(
                 name,
-                "string",
+                "array",
                 "com.android.intenal.flaggedresources");
         assertThat(resId).isNotEqualTo(0);
-        return mResources.getString(resId);
+        return mResources.getStringArray(resId);
+    }
+
+    private int[] getIntArray(String name) {
+        int resId = mResources.getIdentifier(
+                name,
+                "array",
+                "com.android.intenal.flaggedresources");
+        assertThat(resId).isNotEqualTo(0);
+        return mResources.getIntArray(resId);
     }
 
     private String extractApkAndGetPath(int id) throws Exception {

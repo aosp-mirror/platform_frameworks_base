@@ -42,6 +42,42 @@ public class TinyFrameworkForTextPolicy {
         throw new RuntimeException();
     }
 
+    public String toBeIgnoredObj() {
+        throw new RuntimeException();
+    }
+
+    public void toBeIgnoredV() {
+        throw new RuntimeException();
+    }
+
+    public boolean toBeIgnoredZ() {
+        throw new RuntimeException();
+    }
+
+    public byte toBeIgnoredB() {
+        throw new RuntimeException();
+    }
+
+    public char toBeIgnoredC() {
+        throw new RuntimeException();
+    }
+
+    public short toBeIgnoredS() {
+        throw new RuntimeException();
+    }
+
+    public int toBeIgnoredI() {
+        throw new RuntimeException();
+    }
+
+    public float toBeIgnoredF() {
+        throw new RuntimeException();
+    }
+
+    public double toBeIgnoredD() {
+        throw new RuntimeException();
+    }
+
     public int addTwo(int value) {
         throw new RuntimeException("not supported on host side");
     }

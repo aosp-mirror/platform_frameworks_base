@@ -817,23 +817,23 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      */
     @CallSuper
     protected void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         final long token = proto.start(fieldId);
 
-        if (logLevel == WindowTraceLogLevel.ALL || mHasOverrideConfiguration) {
+        if (logLevel == WindowTracingLogLevel.ALL || mHasOverrideConfiguration) {
             mRequestedOverrideConfiguration.dumpDebug(proto, OVERRIDE_CONFIGURATION,
-                    logLevel == WindowTraceLogLevel.CRITICAL);
+                    logLevel == WindowTracingLogLevel.CRITICAL);
         }
 
         // Unless trace level is set to `WindowTraceLogLevel.ALL` don't dump anything that isn't
         // required to mitigate performance overhead
-        if (logLevel == WindowTraceLogLevel.ALL) {
+        if (logLevel == WindowTracingLogLevel.ALL) {
             mFullConfiguration.dumpDebug(proto, FULL_CONFIGURATION, false /* critical */);
             mMergedOverrideConfiguration.dumpDebug(proto, MERGED_OVERRIDE_CONFIGURATION,
                     false /* critical */);
         }
 
-        if (logLevel == WindowTraceLogLevel.TRIM) {
+        if (logLevel == WindowTracingLogLevel.TRIM) {
             // Required for Fass to automatically detect pip transitions in Winscope traces
             dumpDebugWindowingMode(proto);
         }

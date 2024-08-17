@@ -57,7 +57,7 @@ constructor(
     /** Whether the container is visible. */
     val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         try {
             // Sends a MotionEventHandler to the owner of the view-model so they can report
             // MotionEvents into the view-model.

@@ -134,7 +134,8 @@ final class VibrationScaler {
         return effect.resolve(mDefaultVibrationAmplitude)
                 .applyEffectStrength(newEffectStrength)
                 .scale(scaleFactor)
-                .scaleLinearly(adaptiveScale);
+                // Make sure this is the last one so it is applied on top of the settings scaling.
+                .applyAdaptiveScale(adaptiveScale);
     }
 
     /**

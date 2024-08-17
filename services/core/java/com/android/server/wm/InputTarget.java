@@ -65,6 +65,6 @@ interface InputTarget {
     InsetsControlTarget getImeControlTarget();
 
     void dumpProto(ProtoOutputStream proto, long fieldId,
-                   @WindowTraceLogLevel int logLevel);
+                   @WindowTracingLogLevel int logLevel);
 }
 
