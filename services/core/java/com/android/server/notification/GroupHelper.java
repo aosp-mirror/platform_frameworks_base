@@ -118,11 +118,32 @@ public class GroupHelper {
     private final ArrayMap<FullyQualifiedGroupKey, ArrayMap<String, NotificationAttributes>>
             mAggregatedNotifications = new ArrayMap<>();
 
-    private static final List<NotificationSectioner> NOTIFICATION_SHADE_SECTIONS = List.of(
-        new NotificationSectioner("AlertingSection", 0, (record) ->
-            record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT),
-        new NotificationSectioner("SilentSection", 1, (record) ->
-            record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT));
+    private static List<NotificationSectioner> NOTIFICATION_SHADE_SECTIONS =
+            getNotificationShadeSections();
+
+    private static List<NotificationSectioner> getNotificationShadeSections() {
+        if (android.service.notification.Flags.notificationClassification()) {
+            return List.of(
+                new NotificationSectioner("PromotionsSection", 0, (record) ->
+                    NotificationChannel.PROMOTIONS_ID.equals(record.getChannel().getId())),
+                new NotificationSectioner("SocialSection", 0, (record) ->
+                    NotificationChannel.SOCIAL_MEDIA_ID.equals(record.getChannel().getId())),
+                new NotificationSectioner("NewsSection", 0, (record) ->
+                    NotificationChannel.NEWS_ID.equals(record.getChannel().getId())),
+                new NotificationSectioner("RecsSection", 0, (record) ->
+                    NotificationChannel.RECS_ID.equals(record.getChannel().getId())),
+                new NotificationSectioner("AlertingSection", 0, (record) ->
+                    record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT),
+                new NotificationSectioner("SilentSection", 1, (record) ->
+                    record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT));
+        } else {
+            return List.of(
+                new NotificationSectioner("AlertingSection", 0, (record) ->
+                    record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT),
+                new NotificationSectioner("SilentSection", 1, (record) ->
+                    record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT));
+        }
+    }
 
     public GroupHelper(Context context, PackageManager packageManager, int autoGroupAtCount,
             int autoGroupSparseGroupsAtCount, Callback callback) {
@@ -131,6 +152,7 @@ public class GroupHelper {
         mContext = context;
         mPackageManager = packageManager;
         mAutogroupSparseGroupsAtCount = autoGroupSparseGroupsAtCount;
+        NOTIFICATION_SHADE_SECTIONS = getNotificationShadeSections();
     }
 
     private String generatePackageKey(int userId, String pkg) {
