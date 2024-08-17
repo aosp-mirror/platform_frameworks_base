@@ -1049,6 +1049,13 @@ flag {
 }
 
 flag {
+  name: "media_controls_button_media3"
+  namespace: "systemui"
+  description: "Enable media action buttons updates using media3"
+  bug: "360196209"
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."

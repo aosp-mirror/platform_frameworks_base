@@ -1053,4 +1053,15 @@
 
     <!-- List of packages for which we want to use activity info (instead of application info) for biometric prompt logo. Empty for AOSP. [DO NOT TRANSLATE] -->
     <string-array name="config_useActivityLogoForBiometricPrompt" translatable="false"/>
+
+    <!--
+    Whether to enable the desktop specific feature set.
+
+    Refrain from using this from code that needs to make decisions
+    regarding the size or density of the display.
+
+    Variant owners and OEMs should override this to true when they want to
+    enable the desktop specific features.
+    -->
+    <bool name="config_enableDesktopFeatureSet">false</bool>
 </resources>

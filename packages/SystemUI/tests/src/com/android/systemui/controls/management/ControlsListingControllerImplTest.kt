@@ -31,11 +31,11 @@ import android.service.controls.ControlsProviderService
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.applications.ServiceListing
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.ActivityTaskManagerProxy
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -45,6 +45,8 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -56,39 +58,33 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatcher
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ControlsListingControllerImplTest : SysuiTestCase() {
 
     companion object {
-        private const val FLAGS = PackageManager.MATCH_DIRECT_BOOT_AWARE.toLong() or
+        private const val FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE.toLong() or
                 PackageManager.MATCH_DIRECT_BOOT_UNAWARE.toLong()
     }
 
-    @Mock
-    private lateinit var mockSL: ServiceListing
-    @Mock
-    private lateinit var mockCallback: ControlsListingController.ControlsListingCallback
-    @Mock
-    private lateinit var mockCallbackOther: ControlsListingController.ControlsListingCallback
-    @Mock(stubOnly = true)
-    private lateinit var userTracker: UserTracker
-    @Mock(stubOnly = true)
-    private lateinit var dumpManager: DumpManager
-    @Mock
-    private lateinit var packageManager: PackageManager
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
-    @Mock
-    private lateinit var activityTaskManagerProxy: ActivityTaskManagerProxy
+    @Mock private lateinit var mockSL: ServiceListing
+    @Mock private lateinit var mockCallback: ControlsListingController.ControlsListingCallback
+    @Mock private lateinit var mockCallbackOther: ControlsListingController.ControlsListingCallback
+    @Mock(stubOnly = true) private lateinit var userTracker: UserTracker
+    @Mock(stubOnly = true) private lateinit var dumpManager: DumpManager
+    @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var featureFlags: FeatureFlags
+    @Mock private lateinit var activityTaskManagerProxy: ActivityTaskManagerProxy
 
     private var componentName = ComponentName("pkg", "class1")
     private var activityName = ComponentName("pkg", "activity")
@@ -98,7 +94,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     private lateinit var controller: ControlsListingControllerImpl
 
     private var serviceListingCallbackCaptor =
-            ArgumentCaptor.forClass(ServiceListing.Callback::class.java)
+        ArgumentCaptor.forClass(ServiceListing.Callback::class.java)
 
     private val user = mContext.userId
     private val otherUser = user + 1
@@ -112,23 +108,24 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         `when`(userTracker.userContext).thenReturn(context)
         // Return disabled by default
         `when`(packageManager.getComponentEnabledSetting(any()))
-                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+            .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
         `when`(activityTaskManagerProxy.supportsMultiWindow(any())).thenReturn(true)
         mContext.setMockPackageManager(packageManager)
 
-        mContext.orCreateTestableResources
-                .addOverride(
-                        R.array.config_controlsPreferredPackages,
-                        arrayOf(componentName.packageName)
-                )
+        mContext.orCreateTestableResources.addOverride(
+            R.array.config_controlsPreferredPackages,
+            arrayOf(componentName.packageName)
+        )
 
-        val wrapper = object : ContextWrapper(mContext) {
-            override fun createContextAsUser(user: UserHandle, flags: Int): Context {
-                return baseContext
+        val wrapper =
+            object : ContextWrapper(mContext) {
+                override fun createContextAsUser(user: UserHandle, flags: Int): Context {
+                    return baseContext
+                }
             }
-        }
 
-        controller = ControlsListingControllerImpl(
+        controller =
+            ControlsListingControllerImpl(
                 wrapper,
                 executor,
                 { mockSL },
@@ -136,7 +133,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
                 activityTaskManagerProxy,
                 dumpManager,
                 featureFlags
-        )
+            )
         verify(mockSL).addCallback(capture(serviceListingCallbackCaptor))
     }
 
@@ -165,13 +162,13 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
             callback?.onServicesReloaded(listOf(ServiceInfo(componentName)))
         }
         ControlsListingControllerImpl(
-                mContext,
-                exec,
-                { mockServiceListing },
-                userTracker,
-                activityTaskManagerProxy,
-                dumpManager,
-                featureFlags
+            mContext,
+            exec,
+            { mockServiceListing },
+            userTracker,
+            activityTaskManagerProxy,
+            dumpManager,
+            featureFlags
         )
     }
 
@@ -201,8 +198,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
         @Suppress("unchecked_cast")
         val captor: ArgumentCaptor<List<ControlsServiceInfo>> =
-                ArgumentCaptor.forClass(List::class.java)
-                        as ArgumentCaptor<List<ControlsServiceInfo>>
+            ArgumentCaptor.forClass(List::class.java) as ArgumentCaptor<List<ControlsServiceInfo>>
 
         executor.runAllReady()
         reset(mockCallback)
@@ -242,8 +238,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
         @Suppress("unchecked_cast")
         val captor: ArgumentCaptor<List<ControlsServiceInfo>> =
-                ArgumentCaptor.forClass(List::class.java)
-                        as ArgumentCaptor<List<ControlsServiceInfo>>
+            ArgumentCaptor.forClass(List::class.java) as ArgumentCaptor<List<ControlsServiceInfo>>
         executor.runAllReady()
         reset(mockCallback)
 
@@ -285,10 +280,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testNoActivity_nullPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -300,10 +292,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testActivityWithoutPermission_nullPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
         setUpQueryResult(listOf(ActivityInfo(activityName)))
 
@@ -317,14 +306,11 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testActivityPermissionNotExported_nullPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
-        setUpQueryResult(listOf(
-                ActivityInfo(activityName, permission = Manifest.permission.BIND_CONTROLS)
-        ))
+        setUpQueryResult(
+            listOf(ActivityInfo(activityName, permission = Manifest.permission.BIND_CONTROLS))
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -336,18 +322,17 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testActivityDisabled_nullPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
-        setUpQueryResult(listOf(
+        setUpQueryResult(
+            listOf(
                 ActivityInfo(
-                        activityName,
-                        exported = true,
-                        permission = Manifest.permission.BIND_CONTROLS
+                    activityName,
+                    exported = true,
+                    permission = Manifest.permission.BIND_CONTROLS
                 )
-        ))
+            )
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -359,21 +344,20 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testActivityEnabled_correctPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
         `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
-                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+            .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
 
-        setUpQueryResult(listOf(
+        setUpQueryResult(
+            listOf(
                 ActivityInfo(
-                        activityName,
-                        exported = true,
-                        permission = Manifest.permission.BIND_CONTROLS
+                    activityName,
+                    exported = true,
+                    permission = Manifest.permission.BIND_CONTROLS
                 )
-        ))
+            )
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -385,22 +369,21 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testActivityDefaultEnabled_correctPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
         `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
-                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+            .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
 
-        setUpQueryResult(listOf(
+        setUpQueryResult(
+            listOf(
                 ActivityInfo(
-                        activityName,
-                        enabled = true,
-                        exported = true,
-                        permission = Manifest.permission.BIND_CONTROLS
+                    activityName,
+                    enabled = true,
+                    exported = true,
+                    permission = Manifest.permission.BIND_CONTROLS
                 )
-        ))
+            )
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -412,22 +395,21 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testActivityDefaultDisabled_nullPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
         `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
-                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+            .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
 
-        setUpQueryResult(listOf(
+        setUpQueryResult(
+            listOf(
                 ActivityInfo(
-                        activityName,
-                        enabled = false,
-                        exported = true,
-                        permission = Manifest.permission.BIND_CONTROLS
+                    activityName,
+                    enabled = false,
+                    exported = true,
+                    permission = Manifest.permission.BIND_CONTROLS
                 )
-        ))
+            )
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -439,22 +421,21 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testActivityDifferentPackage_nullPanel() {
-        val serviceInfo = ServiceInfo(
-                componentName,
-                ComponentName("other_package", "cls")
-        )
+        val serviceInfo = ServiceInfo(componentName, ComponentName("other_package", "cls"))
 
         `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
-                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+            .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
 
-        setUpQueryResult(listOf(
+        setUpQueryResult(
+            listOf(
                 ActivityInfo(
-                        activityName,
-                        enabled = true,
-                        exported = true,
-                        permission = Manifest.permission.BIND_CONTROLS
+                    activityName,
+                    enabled = true,
+                    exported = true,
+                    permission = Manifest.permission.BIND_CONTROLS
                 )
-        ))
+            )
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -466,24 +447,25 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testPackageNotPreferred_correctPanel() {
-        mContext.orCreateTestableResources
-                .addOverride(R.array.config_controlsPreferredPackages, arrayOf<String>())
-
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName
+        mContext.orCreateTestableResources.addOverride(
+            R.array.config_controlsPreferredPackages,
+            arrayOf<String>()
         )
 
-        `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
-                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
-        setUpQueryResult(listOf(
+        `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
+            .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+
+        setUpQueryResult(
+            listOf(
                 ActivityInfo(
-                        activityName,
-                        exported = true,
-                        permission = Manifest.permission.BIND_CONTROLS
+                    activityName,
+                    exported = true,
+                    permission = Manifest.permission.BIND_CONTROLS
                 )
-        ))
+            )
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -512,16 +494,19 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         `when`(userTracker.userHandle).thenReturn(UserHandle.of(user))
 
         controller.forceReload()
-        verify(packageManager).queryIntentServicesAsUser(
+        verify(packageManager)
+            .queryIntentServicesAsUser(
                 argThat(IntentMatcherAction(ControlsProviderService.SERVICE_CONTROLS)),
-                argThat(FlagsMatcher(
+                argThat(
+                    FlagsMatcher(
                         PackageManager.GET_META_DATA.toLong() or
-                                PackageManager.GET_SERVICES.toLong() or
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE.toLong() or
-                                PackageManager.MATCH_DIRECT_BOOT_UNAWARE.toLong()
-                )),
+                            PackageManager.GET_SERVICES.toLong() or
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE.toLong() or
+                            PackageManager.MATCH_DIRECT_BOOT_UNAWARE.toLong()
+                    )
+                ),
                 eq(UserHandle.of(user))
-        )
+            )
     }
 
     @Test
@@ -529,16 +514,21 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         val resolveInfo = ResolveInfo()
         resolveInfo.serviceInfo = ServiceInfo(componentName)
 
-        `when`(packageManager.queryIntentServicesAsUser(
-                argThat(IntentMatcherAction(ControlsProviderService.SERVICE_CONTROLS)),
-                argThat(FlagsMatcher(
-                        PackageManager.GET_META_DATA.toLong() or
+        `when`(
+                packageManager.queryIntentServicesAsUser(
+                    argThat(IntentMatcherAction(ControlsProviderService.SERVICE_CONTROLS)),
+                    argThat(
+                        FlagsMatcher(
+                            PackageManager.GET_META_DATA.toLong() or
                                 PackageManager.GET_SERVICES.toLong() or
                                 PackageManager.MATCH_DIRECT_BOOT_AWARE.toLong() or
                                 PackageManager.MATCH_DIRECT_BOOT_UNAWARE.toLong()
-                )),
-                any<UserHandle>()
-        )).thenReturn(listOf(resolveInfo))
+                        )
+                    ),
+                    any<UserHandle>()
+                )
+            )
+            .thenReturn(listOf(resolveInfo))
 
         controller.forceReload()
 
@@ -554,17 +544,19 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
 
         @Suppress("unchecked_cast")
         val captor: ArgumentCaptor<List<ControlsServiceInfo>> =
-                ArgumentCaptor.forClass(List::class.java)
-                        as ArgumentCaptor<List<ControlsServiceInfo>>
+            ArgumentCaptor.forClass(List::class.java) as ArgumentCaptor<List<ControlsServiceInfo>>
 
         val resolveInfo = ResolveInfo()
         resolveInfo.serviceInfo = ServiceInfo(componentName)
 
-        `when`(packageManager.queryIntentServicesAsUser(
-                any(),
-                any<PackageManager.ResolveInfoFlags>(),
-                any<UserHandle>()
-        )).thenReturn(listOf(resolveInfo))
+        `when`(
+                packageManager.queryIntentServicesAsUser(
+                    any(),
+                    any<PackageManager.ResolveInfoFlags>(),
+                    any<UserHandle>()
+                )
+            )
+            .thenReturn(listOf(resolveInfo))
 
         reset(mockCallback)
         controller.forceReload()
@@ -581,22 +573,21 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     fun testNoPanelIfMultiWindowNotSupported() {
         `when`(activityTaskManagerProxy.supportsMultiWindow(any())).thenReturn(false)
 
-        val serviceInfo = ServiceInfo(
-            componentName,
-            activityName
-        )
+        val serviceInfo = ServiceInfo(componentName, activityName)
 
         `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
             .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
 
-        setUpQueryResult(listOf(
-            ActivityInfo(
-                activityName,
-                enabled = true,
-                exported = true,
-                permission = Manifest.permission.BIND_CONTROLS
+        setUpQueryResult(
+            listOf(
+                ActivityInfo(
+                    activityName,
+                    enabled = true,
+                    exported = true,
+                    permission = Manifest.permission.BIND_CONTROLS
+                )
             )
-        ))
+        )
 
         val list = listOf(serviceInfo)
         serviceListingCallbackCaptor.value.onServicesReloaded(list)
@@ -606,20 +597,77 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         assertNull(controller.getCurrentServices()[0].panelActivity)
     }
 
+    @Test
+    fun dumpAndAddRemoveCallback_willNotThrowConcurrentModificationException() {
+        val repeat = 100
+        controller.addCallback(mockCallback) // 1 extra callback increases the duration of iteration
+
+        // the goal of these two barriers is to make the modify and iterate run concurrently
+        val startSignal = CountDownLatch(2)
+        val doneSignal = CountDownLatch(2)
+        val modifyRunnable = Runnable {
+            for (i in 1..repeat) {
+                controller.addCallback(mockCallbackOther)
+                executor.runAllReady()
+                controller.removeCallback(mockCallbackOther)
+                executor.runAllReady()
+            }
+        }
+        val printWriter = mock<PrintWriter>()
+        val arr = arrayOf<String>()
+        val iterateRunnable = Runnable {
+            for (i in 1..repeat) {
+                controller.dump(printWriter, arr)
+            }
+        }
+
+        val workerThread = Thread(Worker(startSignal, doneSignal, modifyRunnable))
+        workerThread.start()
+        val workerThreadOther = Thread(Worker(startSignal, doneSignal, iterateRunnable))
+        workerThreadOther.start()
+        doneSignal.await()
+        workerThread.interrupt()
+        workerThreadOther.interrupt()
+    }
+
+    class Worker : Runnable {
+        private val startSignal: CountDownLatch
+        private val doneSignal: CountDownLatch
+        private val runnable: Runnable
+
+        constructor(start: CountDownLatch, done: CountDownLatch, run: Runnable) {
+            startSignal = start
+            doneSignal = done
+            runnable = run
+        }
+
+        override fun run() {
+            try {
+                startSignal.countDown()
+                startSignal.await()
+                runnable.run()
+                doneSignal.countDown()
+            } catch (ex: InterruptedException) {
+                return
+            }
+        }
+    }
+
     private fun ServiceInfo(
-            componentName: ComponentName,
-            panelActivityComponentName: ComponentName? = null
+        componentName: ComponentName,
+        panelActivityComponentName: ComponentName? = null
     ): ServiceInfo {
         return ServiceInfo().apply {
             packageName = componentName.packageName
             name = componentName.className
             panelActivityComponentName?.let {
-                metaData = Bundle().apply {
-                    putString(
+                metaData =
+                    Bundle().apply {
+                        putString(
                             ControlsProviderService.META_DATA_PANEL_ACTIVITY,
                             it.flattenToShortString()
-                    )
-                }
+                        )
+                    }
             }
         }
     }
@@ -642,34 +690,29 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     private fun setUpQueryResult(infos: List<ActivityInfo>) {
         `when`(
                 packageManager.queryIntentActivitiesAsUser(
-                        argThat(IntentMatcherComponent(activityName)),
-                        argThat(FlagsMatcher(FLAGS)),
-                        eq(UserHandle.of(user))
+                    argThat(IntentMatcherComponent(activityName)),
+                    argThat(FlagsMatcher(FLAGS)),
+                    eq(UserHandle.of(user))
                 )
-        ).thenReturn(infos.map {
-            ResolveInfo().apply { activityInfo = it }
-        })
+            )
+            .thenReturn(infos.map { ResolveInfo().apply { activityInfo = it } })
     }
 
-    private class IntentMatcherComponent(
-            private val componentName: ComponentName
-    ) : ArgumentMatcher<Intent> {
+    private class IntentMatcherComponent(private val componentName: ComponentName) :
+        ArgumentMatcher<Intent> {
         override fun matches(argument: Intent?): Boolean {
             return argument?.component == componentName
         }
     }
 
-    private class IntentMatcherAction(
-            private val action: String
-    ) : ArgumentMatcher<Intent> {
+    private class IntentMatcherAction(private val action: String) : ArgumentMatcher<Intent> {
         override fun matches(argument: Intent?): Boolean {
             return argument?.action == action
         }
     }
 
-    private class FlagsMatcher(
-            private val flags: Long
-    ) : ArgumentMatcher<PackageManager.ResolveInfoFlags> {
+    private class FlagsMatcher(private val flags: Long) :
+        ArgumentMatcher<PackageManager.ResolveInfoFlags> {
         override fun matches(argument: PackageManager.ResolveInfoFlags?): Boolean {
             return flags == argument?.value
         }

@@ -28,11 +28,13 @@ genrule {
     srcs: [
         "res/values/bools.xml",
         "res/values/bools2.xml",
+        "res/values/ints.xml",
         "res/values/strings.xml",
     ],
     out: [
         "values_bools.arsc.flat",
         "values_bools2.arsc.flat",
+        "values_ints.arsc.flat",
         "values_strings.arsc.flat",
     ],
     cmd: "$(location aapt2) compile $(in) -o $(genDir) " +

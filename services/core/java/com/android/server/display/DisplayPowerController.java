@@ -492,6 +492,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // Used to scale the brightness in doze mode
     private float mDozeScaleFactor;
 
+    // Used to keep track of the display state from the latest request to override the doze screen
+    // state.
+    @GuardedBy("mLock")
+    private int mPendingOverrideDozeScreenStateLocked;
+
     /**
      * Creates the display power controller.
      */
@@ -803,15 +808,28 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Override
     public void overrideDozeScreenState(int displayState, @Display.StateReason int reason) {
         Slog.i(TAG, "New offload doze override: " + Display.stateToString(displayState));
-        mHandler.postAtTime(() -> {
-            if (mDisplayOffloadSession == null
-                    || !(DisplayOffloadSession.isSupportedOffloadState(displayState)
-                            || displayState == Display.STATE_UNKNOWN)) {
-                return;
+        if (mDisplayOffloadSession != null
+                && (DisplayOffloadSession.isSupportedOffloadState(displayState)
+                || displayState == Display.STATE_UNKNOWN)) {
+            if (mFlags.isOffloadDozeOverrideHoldsWakelockEnabled()) {
+                mWakelockController.acquireWakelock(
+                        WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE);
             }
-            mDisplayStateController.overrideDozeScreenState(displayState, reason);
-            updatePowerState();
-        }, mClock.uptimeMillis());
+            synchronized (mLock) {
+                mPendingOverrideDozeScreenStateLocked = displayState;
+            }
+            mHandler.postAtTime(() -> {
+                synchronized (mLock) {
+                    mDisplayStateController
+                            .overrideDozeScreenState(mPendingOverrideDozeScreenStateLocked, reason);
+                }
+                updatePowerState();
+                if (mFlags.isOffloadDozeOverrideHoldsWakelockEnabled()) {
+                    mWakelockController.releaseWakelock(
+                            WakelockController.WAKE_LOCK_OVERRIDE_DOZE_SCREEN_STATE);
+                }
+            }, mClock.uptimeMillis());
+        }
     }
 
     @Override
@@ -1336,30 +1354,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Initialize things the first time the power state is changed.
         if (mustInitialize) {
             initialize(readyToUpdateDisplayState() ? state : Display.STATE_UNKNOWN);
-        }
-
-        if (mFlags.isOffloadDozeOverrideHoldsWakelockEnabled()) {
-            // Sometimes, a display-state change can come without an associated PowerRequest,
-            // as with DisplayOffload.  For those cases, we have to make sure to also mark the
-            // display as "not ready" so that we can inform power-manager when the state-change is
-            // complete.
-            if (mPowerState.getScreenState() != state) {
-                final boolean wasReady;
-                synchronized (mLock) {
-                    wasReady = mDisplayReadyLocked;
-                    mDisplayReadyLocked = false;
-                    mustNotify = true;
-                }
-
-                if (wasReady) {
-                    // If we went from ready to not-ready from the state-change (instead of a
-                    // PowerRequest) there's a good chance that nothing is keeping PowerManager
-                    // from suspending. Grab the unfinished business suspend blocker to keep the
-                    // device awake until the display-state change goes into effect.
-                    mWakelockController.acquireWakelock(
-                            WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
-                }
-            }
         }
 
         // Animate the screen state change unless already animating.

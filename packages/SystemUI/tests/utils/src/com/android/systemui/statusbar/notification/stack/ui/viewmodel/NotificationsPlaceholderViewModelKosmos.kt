@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -29,5 +30,6 @@ val Kosmos.notificationsPlaceholderViewModel by Fixture {
         shadeInteractor = shadeInteractor,
         headsUpNotificationInteractor = headsUpNotificationInteractor,
         featureFlags = featureFlagsClassic,
+        dumpManager = dumpManager,
     )
 }

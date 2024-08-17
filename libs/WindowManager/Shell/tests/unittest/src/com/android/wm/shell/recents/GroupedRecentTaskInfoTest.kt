@@ -17,7 +17,6 @@
 package com.android.wm.shell.recents
 
 import android.app.ActivityManager
-import android.app.ActivityManager.RecentTaskInfo
 import android.graphics.Rect
 import android.os.Parcel
 import android.testing.AndroidTestingRunner
@@ -25,7 +24,7 @@ import android.window.IWindowContainerToken
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50
+import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50
 import com.android.wm.shell.util.GroupedRecentTaskInfo
 import com.android.wm.shell.util.GroupedRecentTaskInfo.CREATOR
 import com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_FREEFORM

@@ -1622,7 +1622,12 @@ public class VibratorManagerServiceTest {
 
         vibrateAndWaitUntilFinished(service, vendorEffect, RINGTONE_ATTRS);
 
-        assertThat(fakeVibrator.getAllVendorEffects()).containsExactly(vendorEffect);
+        // Compare vendor data only, ignore scale applied by device settings in this test.
+        assertThat(fakeVibrator.getAllVendorEffects()).hasSize(1);
+        assertThat(fakeVibrator.getAllVendorEffects().get(0).getVendorData().keySet())
+                .containsExactly("key");
+        assertThat(fakeVibrator.getAllVendorEffects().get(0).getVendorData().getString("key"))
+                .isEqualTo("value");
     }
 
     @Test
@@ -1765,7 +1770,8 @@ public class VibratorManagerServiceTest {
         assertThat(fakeVibrator.getAllVendorEffects()).hasSize(1);
         VibrationEffect.VendorEffect scaled = fakeVibrator.getAllVendorEffects().get(0);
         assertThat(scaled.getEffectStrength()).isEqualTo(VibrationEffect.EFFECT_STRENGTH_LIGHT);
-        assertThat(scaled.getLinearScale()).isEqualTo(0.4f);
+        assertThat(scaled.getScale()).isAtMost(1); // Scale down or none if default is LOW
+        assertThat(scaled.getAdaptiveScale()).isEqualTo(0.4f);
     }
 
     @Test

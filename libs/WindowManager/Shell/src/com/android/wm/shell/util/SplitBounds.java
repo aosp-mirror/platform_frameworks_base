@@ -19,7 +19,7 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
+import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
 
 import java.util.Objects;
 

@@ -165,6 +165,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean mShowSafetyWarning;
     private long mLastToggledRingerOn;
     private boolean mDeviceInteractive = true;
+    boolean mInAudioSharing = false;
 
     private VolumePolicy mVolumePolicy;
     @GuardedBy("this")
@@ -295,6 +296,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             mJavaAdapter.alwaysCollectFlow(
                     mAudioSharingInteractor.getVolume(),
                     this::handleAudioSharingStreamVolumeChanges);
+            mJavaAdapter.alwaysCollectFlow(
+                    mAudioSharingInteractor.isInAudioSharing(),
+                    inSharing -> mInAudioSharing = inSharing);
         }
     }
 
@@ -510,11 +514,18 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             //       Since their values overlap with DEVICE_OUT_EARPIECE and DEVICE_OUT_SPEAKER.
             //       Anyway, we can check BLE devices by using just DEVICE_OUT_BLE_HEADSET.
             final boolean routedToBluetooth =
-                    (mAudio.getDevicesForStream(AudioManager.STREAM_MUSIC) &
-                            (AudioManager.DEVICE_OUT_BLUETOOTH_A2DP |
-                            AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                            AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
-                            AudioManager.DEVICE_OUT_BLE_HEADSET)) != 0;
+                    // TODO(b/359737651): Need audio support to return broadcast mask.
+                    // For now, mAudio.getDevicesForStream(AudioManager.STREAM_MUSIC) will return
+                    // AudioManager.DEVICE_NONE, so we also need to check if the device is in audio
+                    // sharing here.
+                    mInAudioSharing
+                            || (mAudio.getDevicesForStream(AudioManager.STREAM_MUSIC)
+                                            & (AudioManager.DEVICE_OUT_BLUETOOTH_A2DP
+                                                    | AudioManager
+                                                            .DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES
+                                                    | AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER
+                                                    | AudioManager.DEVICE_OUT_BLE_HEADSET))
+                                    != 0;
             changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
         } else if (stream == AudioManager.STREAM_VOICE_CALL) {
             final boolean routedToBluetooth =
@@ -813,6 +824,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 ss.dynamic = true;
                 ss.levelMin = mAudioSharingInteractor.getVolumeMin();
                 ss.levelMax = mAudioSharingInteractor.getVolumeMax();
+                ss.routedToBluetooth = true;
                 if (ss.level != volume) {
                     ss.level = volume;
                 }

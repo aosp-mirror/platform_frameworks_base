@@ -887,7 +887,7 @@ final class DefaultPermissionGrantPolicy {
             grantPermissionsToSystemPackage(pm,
                     getDefaultSystemHandlerActivityPackage(pm,
                             SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
-                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS);
+                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
         }
 
         // Print Spooler

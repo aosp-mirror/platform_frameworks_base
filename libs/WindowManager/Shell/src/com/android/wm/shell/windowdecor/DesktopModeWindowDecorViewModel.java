@@ -34,13 +34,13 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
@@ -74,6 +74,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.widget.Toast;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -96,7 +97,6 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
-import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
@@ -105,6 +105,7 @@ import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -469,7 +470,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         if (!decoration.mTaskInfo.isResizeable
                 && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(mContext)) {
-            //TODO(b/354658237) - show toast with relevant string
+            Toast.makeText(mContext,
+                    R.string.desktop_mode_non_resizable_snap_text, Toast.LENGTH_SHORT).show();
         } else {
             mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
                     decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
@@ -1029,7 +1031,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 final boolean shouldStartTransitionDrag =
                         relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)
-                        || Flags.enableAdditionalWindowsAboveStatusBar();
+                                || Flags.enableAdditionalWindowsAboveStatusBar();
                 if (dragFromStatusBarAllowed && shouldStartTransitionDrag) {
                     mTransitionDragActive = true;
                 }
@@ -1037,8 +1039,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
             case MotionEvent.ACTION_UP: {
                 if (mTransitionDragActive) {
+                    final DesktopModeVisualIndicator.DragStartState dragStartState =
+                            DesktopModeVisualIndicator.DragStartState
+                                    .getDragStartState(relevantDecor.mTaskInfo);
+                    if (dragStartState == null) return;
                     mDesktopTasksController.updateVisualIndicator(relevantDecor.mTaskInfo,
-                            relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY());
+                            relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY(),
+                            dragStartState);
                     mTransitionDragActive = false;
                     if (mMoveToDesktopAnimator != null) {
                         // Though this isn't a hover event, we need to update handle's hover state
@@ -1078,10 +1085,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             && mMoveToDesktopAnimator == null) {
                         return;
                     }
+                    final DesktopModeVisualIndicator.DragStartState dragStartState =
+                            DesktopModeVisualIndicator.DragStartState
+                                    .getDragStartState(relevantDecor.mTaskInfo);
+                    if (dragStartState == null) return;
                     final DesktopModeVisualIndicator.IndicatorType indicatorType =
                             mDesktopTasksController.updateVisualIndicator(
                                     relevantDecor.mTaskInfo,
-                                    relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY());
+                                    relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY(),
+                                    dragStartState);
                     if (indicatorType != TO_FULLSCREEN_INDICATOR) {
                         if (mMoveToDesktopAnimator == null) {
                             mMoveToDesktopAnimator = new MoveToDesktopAnimator(

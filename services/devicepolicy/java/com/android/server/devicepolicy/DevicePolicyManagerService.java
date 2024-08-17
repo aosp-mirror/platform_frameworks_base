@@ -12215,33 +12215,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * permittedList or are a system app.
      */
     private boolean checkPackagesInPermittedListOrSystem(List<String> enabledPackages,
-            List<String> permittedList, int userIdToCheck) {
+            List<String> permittedList, int userId) {
         long id = mInjector.binderClearCallingIdentity();
         try {
-            // If we have an enabled packages list for a managed profile the packages
-            // we should check are installed for the parent user.
-            UserInfo user = getUserInfo(userIdToCheck);
-            if (user.isManagedProfile()) {
-                userIdToCheck = user.profileGroupId;
-            }
-
             for (String enabledPackage : enabledPackages) {
-                boolean systemService = false;
+                if (permittedList.contains(enabledPackage)) {
+                    continue;
+                }
                 try {
                     ApplicationInfo applicationInfo = mIPackageManager.getApplicationInfo(
-                            enabledPackage, PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                            userIdToCheck);
+                            enabledPackage, PackageManager.MATCH_ANY_USER, userId);
 
                     if (applicationInfo == null) {
+                        Slogf.wtf(LOG_TAG, "Can't find ApplicationInfo for %s", enabledPackage);
                         return false;
                     }
 
-                    systemService = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                    if (!applicationInfo.isSystemApp()) {
+                        Slogf.w(LOG_TAG,
+                                "Enabled package neither permitted nor system: %s", enabledPackage);
+                        return false;
+                    }
                 } catch (RemoteException e) {
                     Slogf.i(LOG_TAG, "Can't talk to package managed", e);
-                }
-                if (!systemService && !permittedList.contains(enabledPackage)) {
-                    return false;
                 }
             }
         } finally {
