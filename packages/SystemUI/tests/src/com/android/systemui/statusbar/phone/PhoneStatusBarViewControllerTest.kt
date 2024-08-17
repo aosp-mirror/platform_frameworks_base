@@ -391,7 +391,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 configurationController,
                 mStatusOverlayHoverListenerFactory,
                 fakeDarkIconDispatcher,
-                mock(StatusBarContentInsetsProvider::class.java),
             )
             .create(view)
             .also { it.init() }

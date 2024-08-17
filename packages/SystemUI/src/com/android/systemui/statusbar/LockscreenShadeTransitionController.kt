@@ -20,7 +20,6 @@ import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -45,7 +44,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
-import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.animation.Interpolators
 import dagger.Lazy
 import java.io.PrintWriter
 import javax.inject.Inject

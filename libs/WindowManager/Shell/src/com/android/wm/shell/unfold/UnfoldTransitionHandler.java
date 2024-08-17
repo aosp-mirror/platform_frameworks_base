@@ -34,7 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.ProtoLog;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;

@@ -27,6 +27,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -81,7 +82,7 @@ constructor(
 
     private val requests = Channel<Request>(Channel.BUFFERED)
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { super.onActivated() }
             launch {
@@ -125,6 +126,7 @@ constructor(
                     }
                     .collectLatest { _isImeSwitcherButtonVisible.value = it }
             }
+            awaitCancellation()
         }
     }
 

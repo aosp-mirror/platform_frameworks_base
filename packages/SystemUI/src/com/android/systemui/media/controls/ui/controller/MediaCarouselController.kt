@@ -746,7 +746,6 @@ constructor(
                     falsingManager,
                     backgroundDispatcher,
                     mainDispatcher,
-                    mediaFlags
                 )
                 mediaContent.addView(viewHolder.player, position)
                 controllerById[commonViewModel.instanceId.toString()] = viewController

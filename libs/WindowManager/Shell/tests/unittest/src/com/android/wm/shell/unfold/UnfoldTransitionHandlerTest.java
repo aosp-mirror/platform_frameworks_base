@@ -40,7 +40,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;

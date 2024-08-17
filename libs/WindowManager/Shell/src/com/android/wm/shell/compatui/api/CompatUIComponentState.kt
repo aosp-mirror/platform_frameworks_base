@@ -18,7 +18,6 @@ package com.android.wm.shell.compatui.api
 
 /**
  * Abstraction of all the component specific state. Each
- * component can create its own state implementing this
- * tagging interface.
+ * component can create its own state implementing this interface.
  */
 interface CompatUIComponentState

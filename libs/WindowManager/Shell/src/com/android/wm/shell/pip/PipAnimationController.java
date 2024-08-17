@@ -40,9 +40,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.annotation.Retention;

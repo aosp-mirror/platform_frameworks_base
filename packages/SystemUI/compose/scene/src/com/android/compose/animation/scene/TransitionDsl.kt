@@ -245,9 +245,7 @@ interface OverscrollScope : Density {
 interface ElementContentPicker {
     /**
      * Return the content in which [element] should be drawn (when using `Modifier.element(key)`) or
-     * composed (when using `MovableElement(key)`) during the given [transition]. If this element
-     * should not be drawn or composed in neither [transition.fromContent] nor
-     * [transition.toContent], return `null`.
+     * composed (when using `MovableElement(key)`) during the given [transition].
      *
      * Important: For [MovableElements][ContentScope.MovableElement], this content picker will
      * *always* be used during transitions to decide whether we should compose that element in a

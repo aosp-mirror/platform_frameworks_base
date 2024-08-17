@@ -34,7 +34,7 @@ abstract class SafeActivatable : Activatable {
             _isActive.set(value)
         }
 
-    final override suspend fun activate() {
+    final override suspend fun activate(): Nothing {
         val allowed = _isActive.compareAndSet(false, true)
         check(allowed) { "Cannot activate an already active activatable!" }
 
@@ -57,7 +57,7 @@ abstract class SafeActivatable : Activatable {
      *
      * Implementations could follow this pattern:
      * ```kotlin
-     * override suspend fun onActivated() {
+     * override suspend fun onActivated(): Nothing {
      *     coroutineScope {
      *         launch { ... }
      *         launch { ... }
@@ -68,5 +68,5 @@ abstract class SafeActivatable : Activatable {
      *
      * @see activate
      */
-    protected abstract suspend fun onActivated()
+    protected abstract suspend fun onActivated(): Nothing
 }

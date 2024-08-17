@@ -31,7 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
-import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.shared.animation.Interpolators;
 
 /**
  * View to show a toast-like popup on the notification shade and quick settings.

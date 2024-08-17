@@ -487,25 +487,37 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     HalVibration performHapticFeedbackInternal(
             int uid, int deviceId, String opPkg, int constant, String reason,
             IBinder token, int flags, int privFlags) {
+
+        // Make sure we report the constant id in the requested haptic feedback reason.
+        reason = "performHapticFeedback(constant=" + constant + "): " + reason;
+
         HapticFeedbackVibrationProvider hapticVibrationProvider = getHapticVibrationProvider();
         if (hapticVibrationProvider == null) {
             Slog.e(TAG, "performHapticFeedback; haptic vibration provider not ready.");
+            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason,
+                    Vibration.Status.IGNORED_ERROR_SCHEDULING);
             return null;
         }
+
         if (hapticVibrationProvider.isRestrictedHapticFeedback(constant)
                 && !hasPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS)) {
             Slog.w(TAG, "performHapticFeedback; no permission for system constant " + constant);
+            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason,
+                    Vibration.Status.IGNORED_MISSING_PERMISSION);
             return null;
         }
+
         VibrationEffect effect = hapticVibrationProvider.getVibrationForHapticFeedback(constant);
         if (effect == null) {
             Slog.w(TAG, "performHapticFeedback; vibration absent for constant " + constant);
+            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason,
+                    Vibration.Status.IGNORED_UNSUPPORTED);
             return null;
         }
+
         CombinedVibration vib = CombinedVibration.createParallel(effect);
         VibrationAttributes attrs = hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
                 constant, flags, privFlags);
-        reason = "performHapticFeedback(constant=" + constant + "): " + reason;
         VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
         return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, vib, attrs, reason, token);
     }
@@ -563,22 +575,27 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private HalVibration vibrateInternal(int uid, int deviceId, String opPkg,
             @NonNull CombinedVibration effect, @NonNull VibrationAttributes attrs,
             String reason, IBinder token) {
+        Vibration.CallerInfo callerInfo =
+                new Vibration.CallerInfo(attrs, uid, deviceId, opPkg, reason);
         if (token == null) {
             Slog.e(TAG, "token must not be null");
+            logAndRecordVibrationAttempt(effect, callerInfo, Vibration.Status.IGNORED_ERROR_TOKEN);
             return null;
         }
         if (effect.hasVendorEffects()
                 && !hasPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS)) {
-            Slog.w(TAG, "vibrate; no permission for vendor effects");
+            Slog.e(TAG, "vibrate; no permission for vendor effects");
+            logAndRecordVibrationAttempt(effect, callerInfo,
+                    Vibration.Status.IGNORED_MISSING_PERMISSION);
             return null;
         }
         enforceUpdateAppOpsStatsPermission(uid);
         if (!isEffectValid(effect)) {
+            logAndRecordVibrationAttempt(effect, callerInfo, Vibration.Status.IGNORED_UNSUPPORTED);
             return null;
         }
         // Create Vibration.Stats as close to the received request as possible, for tracking.
-        HalVibration vib = new HalVibration(token, effect,
-                new Vibration.CallerInfo(attrs, uid, deviceId, opPkg, reason));
+        HalVibration vib = new HalVibration(token, effect, callerInfo);
         fillVibrationFallbacks(vib, effect);
 
         if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
@@ -971,6 +988,22 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mInputDeviceDelegate.vibrateIfAvailable(vib.callerInfo, vib.getEffectToPlay());
 
         return new Vibration.EndInfo(Vibration.Status.FORWARDED_TO_INPUT_DEVICES);
+    }
+
+    private void logAndRecordPerformHapticFeedbackAttempt(int uid, int deviceId, String opPkg,
+            String reason, Vibration.Status status) {
+        Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(
+                VibrationAttributes.createForUsage(VibrationAttributes.USAGE_UNKNOWN),
+                uid, deviceId, opPkg, reason);
+        logAndRecordVibrationAttempt(/* effect= */ null, callerInfo, status);
+    }
+
+    private void logAndRecordVibrationAttempt(@Nullable CombinedVibration effect,
+            Vibration.CallerInfo callerInfo, Vibration.Status status) {
+        logAndRecordVibration(
+                new Vibration.DebugInfo(status, new VibrationStats(),
+                        effect, /* originalEffect= */ null, VibrationScaler.SCALE_NONE,
+                        VibrationScaler.ADAPTIVE_SCALE_NONE, callerInfo));
     }
 
     private void logAndRecordVibration(Vibration.DebugInfo info) {

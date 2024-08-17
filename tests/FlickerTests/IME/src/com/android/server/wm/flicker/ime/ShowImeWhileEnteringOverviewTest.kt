@@ -28,6 +28,7 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.statusBarLayerIsVisibleAtStartAndEnd
+import com.android.server.wm.flicker.taskBarLayerIsVisibleAtStartAndEnd
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -114,28 +115,28 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
 
     /**
      * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
-     * this is fixed and the nav bar shows as invisible
+     * this is fixed and the status bar shows as invisible
      */
     @Presubmit
     @Test
     fun statusBarLayerIsInvisibleInLandscapePhone() {
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
-        Assume.assumeFalse(usesTaskbar)
+        Assume.assumeFalse(flicker.scenario.isTablet)
         flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
         flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
     /**
      * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
-     * this is fixed and the nav bar shows as invisible
+     * this is fixed and the status bar shows as invisible
      */
     @Presubmit
     @Test
     fun statusBarLayerIsInvisibleInLandscapeTablet() {
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
-        Assume.assumeTrue(usesTaskbar)
+        Assume.assumeTrue(flicker.scenario.isTablet)
         flicker.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
@@ -149,6 +150,10 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
     @Ignore("Visibility changes depending on orientation and navigation mode")
     override fun navBarLayerPositionAtStartAndEnd() {}
 
+    @Test
+    @Ignore("Visibility changes depending on orientation and navigation mode")
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
+
     /** {@inheritDoc} */
     @Test
     @Ignore("Visibility changes depending on orientation and navigation mode")
@@ -161,7 +166,10 @@ class ShowImeWhileEnteringOverviewTest(flicker: LegacyFlickerTest) : BaseTest(fl
 
     @Presubmit
     @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+    fun taskBarLayerIsVisibleAtStartAndEndForTablets() {
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        flicker.taskBarLayerIsVisibleAtStartAndEnd()
+    }
 
     @Presubmit
     @Test

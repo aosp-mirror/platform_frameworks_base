@@ -81,7 +81,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.common.bubbles.DismissView;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

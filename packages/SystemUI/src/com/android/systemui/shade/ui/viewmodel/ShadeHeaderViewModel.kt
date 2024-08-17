@@ -41,6 +41,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -104,7 +105,7 @@ constructor(
     private val _longerDateText: MutableStateFlow<String> = MutableStateFlow("")
     val longerDateText: StateFlow<String> = _longerDateText.asStateFlow()
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch {
                 broadcastDispatcher
@@ -137,6 +138,8 @@ constructor(
             launch {
                 shadeInteractor.isQsEnabled.map { !it }.collectLatest { _isDisabled.value = it }
             }
+
+            awaitCancellation()
         }
     }
 

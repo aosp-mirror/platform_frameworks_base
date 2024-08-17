@@ -109,7 +109,8 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     GestureEduModel(
                         signalCount = 1,
-                        usageSessionStartTime = secondSignalReceivedTime
+                        usageSessionStartTime = secondSignalReceivedTime,
+                        userId = 0
                     )
                 )
         }

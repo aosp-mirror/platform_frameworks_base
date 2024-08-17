@@ -50,6 +50,7 @@ import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -94,9 +95,9 @@ constructor(
     /** The user-facing message to show in the bouncer. */
     val message: MutableStateFlow<MessageViewModel?> = MutableStateFlow(null)
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         if (!flags.isComposeBouncerOrSceneContainerEnabled()) {
-            return
+            return awaitCancellation()
         }
 
         coroutineScope {
@@ -110,6 +111,7 @@ constructor(
             launch { listenForBouncerEvents() }
             launch { listenForFaceMessages() }
             launch { listenForFingerprintMessages() }
+            awaitCancellation()
         }
     }
 

@@ -480,6 +480,7 @@
 
         <activity android:name=".touchpad.tutorial.ui.view.TouchpadTutorialActivity"
             android:exported="true"
+            android:screenOrientation="userLandscape"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
@@ -489,6 +490,7 @@
 
         <activity android:name=".inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity"
             android:exported="true"
+            android:screenOrientation="userLandscape"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_KEYBOARD_TUTORIAL"/>

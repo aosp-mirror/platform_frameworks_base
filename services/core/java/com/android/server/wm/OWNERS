@@ -30,3 +30,4 @@ per-file ActivityCallerState.java = file:/core/java/android/app/COMPONENT_CALLER
 
 # Files related to tracing
 per-file *TransitionTracer.java = file:platform/development:/tools/winscope/OWNERS
+per-file *WindowTracing* = file:platform/development:/tools/winscope/OWNERS
