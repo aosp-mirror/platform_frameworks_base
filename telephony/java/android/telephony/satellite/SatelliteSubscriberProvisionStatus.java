@@ -90,7 +90,7 @@ public class SatelliteSubscriberProvisionStatus implements Parcelable {
     @Override
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        mSubscriberInfo.writeToParcel(out, flags);
+        out.writeParcelable(mSubscriberInfo, flags);
         out.writeBoolean(mProvisionStatus);
     }
 
