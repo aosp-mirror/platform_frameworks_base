@@ -71,7 +71,7 @@ constructor(
                 )
             } else {
                 if (SceneContainerFlag.isEnabled) {
-                    // TODO(b/336576536): Some part of the transition implemented for flag off is
+                    // TODO(b/360372242): Some part of the transition implemented for flag off is
                     //  missing here. There are two things achieved with this:
                     //  1. Keyguard is hidden when the setup wizard is shown. This part is already
                     //     implemented in scene container by disabling visibility instead of going

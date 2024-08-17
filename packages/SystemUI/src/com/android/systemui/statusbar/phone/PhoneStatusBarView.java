@@ -32,8 +32,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
-
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Flags;
@@ -49,6 +47,7 @@ import java.util.Objects;
 
 public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
+    private final StatusBarContentInsetsProvider mContentInsetsProvider;
     private final StatusBarWindowController mStatusBarWindowController;
 
     private int mRotationOrientation = -1;
@@ -61,10 +60,6 @@ public class PhoneStatusBarView extends FrameLayout {
     private int mStatusBarHeight;
     @Nullable
     private Gefingerpoken mTouchEventHandler;
-    @Nullable
-    private HasCornerCutoutFetcher mHasCornerCutoutFetcher;
-    @Nullable
-    private InsetsFetcher mInsetsFetcher;
     private int mDensity;
     private float mFontScale;
 
@@ -75,19 +70,12 @@ public class PhoneStatusBarView extends FrameLayout {
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
         mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
     }
 
     void setTouchEventHandler(Gefingerpoken handler) {
         mTouchEventHandler = handler;
-    }
-
-    void setHasCornerCutoutFetcher(@NonNull HasCornerCutoutFetcher cornerCutoutFetcher) {
-        mHasCornerCutoutFetcher = cornerCutoutFetcher;
-    }
-
-    void setInsetsFetcher(@NonNull InsetsFetcher insetsFetcher) {
-        mInsetsFetcher = insetsFetcher;
     }
 
     void init(StatusBarUserChipViewModel viewModel) {
@@ -282,14 +270,7 @@ public class PhoneStatusBarView extends FrameLayout {
             return;
         }
 
-        boolean hasCornerCutout;
-        if (mHasCornerCutoutFetcher != null) {
-            hasCornerCutout = mHasCornerCutoutFetcher.fetchHasCornerCutout();
-        } else {
-            Log.e(TAG, "mHasCornerCutoutFetcher unexpectedly null");
-            hasCornerCutout = true;
-        }
-
+        boolean hasCornerCutout = mContentInsetsProvider.currentRotationHasCornerCutout();
         if (mDisplayCutout == null || mDisplayCutout.isEmpty() || hasCornerCutout) {
             mCutoutSpace.setVisibility(View.GONE);
             return;
@@ -307,12 +288,8 @@ public class PhoneStatusBarView extends FrameLayout {
     }
 
     private void updateSafeInsets() {
-        if (mInsetsFetcher == null) {
-            Log.e(TAG, "mInsetsFetcher unexpectedly null");
-            return;
-        }
-
-        Insets insets  = mInsetsFetcher.fetchInsets();
+        Insets insets = mContentInsetsProvider
+                .getStatusBarContentInsetsForCurrentRotation();
         setPadding(
                 insets.left,
                 insets.top,
@@ -325,13 +302,5 @@ public class PhoneStatusBarView extends FrameLayout {
             return;
         }
         mStatusBarWindowController.refreshStatusBarHeight();
-    }
-
-    interface HasCornerCutoutFetcher {
-        boolean fetchHasCornerCutout();
-    }
-
-    interface InsetsFetcher {
-        Insets fetchInsets();
     }
 }

@@ -52,6 +52,7 @@ import android.view.inputmethod.InputMethodManagerGlobal;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;

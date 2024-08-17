@@ -19,12 +19,15 @@ package com.android.systemui.lifecycle
 import android.view.View
 import androidx.compose.runtime.Composable
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 
 /** Base class for all System UI view-models. */
 abstract class SysUiViewModel : SafeActivatable() {
 
-    override suspend fun onActivated() = Unit
+    override suspend fun onActivated(): Nothing {
+        awaitCancellation()
+    }
 }
 
 /**

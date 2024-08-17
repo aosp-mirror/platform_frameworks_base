@@ -73,7 +73,6 @@ private constructor(
     private val configurationController: ConfigurationController,
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
     private val darkIconDispatcher: DarkIconDispatcher,
-    private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
 ) : ViewController<PhoneStatusBarView>(view) {
 
     private lateinit var battery: BatteryMeterView
@@ -156,14 +155,7 @@ private constructor(
     }
 
     init {
-        // These should likely be done in `onInit`, not `init`.
         mView.setTouchEventHandler(PhoneStatusBarViewTouchHandler())
-        mView.setHasCornerCutoutFetcher {
-            statusBarContentInsetsProvider.currentRotationHasCornerCutout()
-        }
-        mView.setInsetsFetcher {
-            statusBarContentInsetsProvider.getStatusBarContentInsetsForCurrentRotation()
-        }
         mView.init(userChipViewModel)
     }
 
@@ -318,7 +310,6 @@ private constructor(
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
         private val darkIconDispatcher: DarkIconDispatcher,
-        private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -344,7 +335,6 @@ private constructor(
                 configurationController,
                 statusOverlayHoverListenerFactory,
                 darkIconDispatcher,
-                statusBarContentInsetsProvider,
             )
         }
     }

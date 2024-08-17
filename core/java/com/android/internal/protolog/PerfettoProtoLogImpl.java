@@ -401,7 +401,9 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             Log.e(LOG_TAG, "Failed to wait for tracing to finish", e);
         }
 
-        dumpViewerConfig();
+        if (!android.tracing.Flags.clientSideProtoLogging()) {
+            dumpViewerConfig();
+        }
 
         Log.d(LOG_TAG, "Finished onTracingFlush");
     }
@@ -497,7 +499,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                     os.write(GROUP_ID, pis.readInt(GROUP_ID));
                     break;
                 case (int) LOCATION:
-                    os.write(LOCATION, pis.readInt(LOCATION));
+                    os.write(LOCATION, pis.readString(LOCATION));
+                    break;
                 default:
                     throw new RuntimeException(
                             "Unexpected field id " + pis.getFieldNumber());

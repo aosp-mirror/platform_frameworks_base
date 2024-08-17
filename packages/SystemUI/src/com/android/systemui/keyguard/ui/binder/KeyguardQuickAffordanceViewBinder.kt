@@ -94,7 +94,7 @@ constructor(
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    launch("$TAG#viewModel") {
+                    launch {
                         viewModel.collect { buttonModel ->
                             updateButton(
                                 view = button,
@@ -104,7 +104,7 @@ constructor(
                         }
                     }
 
-                    launch("$TAG#updateButtonAlpha") {
+                    launch {
                         updateButtonAlpha(
                             view = button,
                             viewModel = viewModel,
@@ -112,7 +112,7 @@ constructor(
                         )
                     }
 
-                    launch("$TAG#configurationBasedDimensions") {
+                    launch {
                         configurationBasedDimensions.collect { dimensions ->
                             button.updateLayoutParams<ViewGroup.LayoutParams> {
                                 width = dimensions.buttonSizePx.width

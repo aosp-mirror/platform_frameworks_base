@@ -119,7 +119,8 @@ public class PipTransition extends PipTransitionController implements
             PipMenuController pipMenuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipScheduler pipScheduler,
-            PipTransitionState pipTransitionState) {
+            PipTransitionState pipTransitionState,
+            PipUiStateChangeController pipUiStateChangeController) {
         super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
                 pipBoundsAlgorithm);
 

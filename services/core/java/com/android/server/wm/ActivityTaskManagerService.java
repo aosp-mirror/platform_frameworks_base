@@ -6785,7 +6785,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 // The output proto of "activity --proto activities"
                 mRootWindowContainer.dumpDebug(
-                        proto, ROOT_WINDOW_CONTAINER, WindowTraceLogLevel.ALL);
+                        proto, ROOT_WINDOW_CONTAINER, WindowTracingLogLevel.ALL);
             }
         }
 

@@ -838,14 +838,6 @@ android_app {
     ],
     manifest: "tests/AndroidManifest-base.xml",
 
-    srcs: [
-        "src/**/*.kt",
-        "src/**/*.java",
-        "src/**/I*.aidl",
-        ":ReleaseJavaFiles",
-        "compose/features/src/**/*.kt",
-        "compose/facade/enabled/src/**/*.kt",
-    ],
     static_libs: [
         "//frameworks/libs/systemui:compilelib",
         "SystemUI-tests-base",

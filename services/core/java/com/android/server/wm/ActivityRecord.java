@@ -3292,12 +3292,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Check if this activity is the top activity of its task - this prevents any trampolines
-        // followed by enterPictureInPictureMode() calls by an activity from below in its stack.
-        if (getTask().getTopMostActivity() != this) {
-            return false;
-        }
-
         // Check to see if PiP is supported for the display this container is on.
         if (mDisplayContent != null && !mDisplayContent.mDwpcHelper.isEnteringPipAllowed(
                 getUid())) {
@@ -7544,6 +7538,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingWindow == win) {
             // This could only happen when the window is removed from hierarchy. So do not keep its
             // reference anymore.
+            if (mStartingSurface != null) {
+                // Ensure the reference in client side can be removed.
+                mStartingSurface.remove(false /* animate */, false /* hasImeSurface */);
+            }
             mStartingWindow = null;
             mStartingData = null;
             mStartingSurface = null;
@@ -10334,7 +10332,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Write all fields to an {@code ActivityRecordProto}. This assumes the
      * {@code ActivityRecordProto} is the outer-most proto data.
      */
-    void dumpDebug(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
+    void dumpDebug(ProtoOutputStream proto, @WindowTracingLogLevel int logLevel) {
         writeNameToProto(proto, NAME);
         super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
@@ -10412,9 +10410,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 

@@ -107,7 +107,7 @@ AssetManager2::AssetManager2(ApkAssetsList apk_assets, const ResTable_config& co
 }
 
 AssetManager2::AssetManager2() {
-  configurations_.resize(1);
+  configurations_.emplace_back();
 }
 
 bool AssetManager2::SetApkAssets(ApkAssetsList apk_assets, bool invalidate_caches) {
@@ -438,8 +438,8 @@ bool AssetManager2::ContainsAllocatedTable() const {
   return false;
 }
 
-void AssetManager2::SetConfigurations(std::vector<ResTable_config> configurations,
-    bool force_refresh) {
+void AssetManager2::SetConfigurations(std::span<const ResTable_config> configurations,
+                                      bool force_refresh) {
   int diff = 0;
   if (force_refresh) {
     diff = -1;
@@ -452,8 +452,10 @@ void AssetManager2::SetConfigurations(std::vector<ResTable_config> configuration
       }
     }
   }
-  configurations_ = std::move(configurations);
-
+  configurations_.clear();
+  for (auto&& config : configurations) {
+    configurations_.emplace_back(config);
+  }
   if (diff) {
     RebuildFilterList();
     InvalidateCaches(static_cast<uint32_t>(diff));

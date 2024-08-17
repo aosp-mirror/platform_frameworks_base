@@ -17,7 +17,6 @@
 package com.android.wm.shell.compatui.impl
 
 import com.android.wm.shell.compatui.api.CompatUIComponentState
-import com.android.wm.shell.compatui.api.CompatUISpec
 import com.android.wm.shell.compatui.api.CompatUIState
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
