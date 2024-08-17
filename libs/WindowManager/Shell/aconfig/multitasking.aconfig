@@ -128,3 +128,13 @@ flag {
     description: "Enable bubble bar to be shown in the persistent task bar"
     bug: "346391377"
 }
+
+flag {
+    name: "bubble_view_info_executors"
+    namespace: "multitasking"
+    description: "Use executors to inflate bubble views"
+    bug: "353894869"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

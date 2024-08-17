@@ -29,8 +29,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
-import android.hardware.input.InputManager;
-import android.hardware.input.KeyboardSystemShortcut;
+import android.hardware.input.KeyGestureEvent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -476,7 +475,7 @@ public class ModifierShortcutManager {
                             + "keyCode=" + KeyEvent.keyCodeToString(keyCode) + ","
                             + " category=" + category + " role=" + role);
                 }
-                notifyKeyboardShortcutTriggered(keyEvent, getSystemShortcutFromIntent(intent));
+                notifyKeyGestureCompleted(keyEvent, getKeyGestureTypeFromIntent(intent));
                 return true;
             } else {
                 return false;
@@ -497,19 +496,19 @@ public class ModifierShortcutManager {
                         + "the activity to which it is registered was not found: "
                         + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode));
             }
-            notifyKeyboardShortcutTriggered(keyEvent, getSystemShortcutFromIntent(shortcutIntent));
+            notifyKeyGestureCompleted(keyEvent, getKeyGestureTypeFromIntent(shortcutIntent));
             return true;
         }
         return false;
     }
 
-    private void notifyKeyboardShortcutTriggered(KeyEvent event,
-            @KeyboardSystemShortcut.SystemShortcut int systemShortcut) {
-        if (systemShortcut == KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED) {
+    private void notifyKeyGestureCompleted(KeyEvent event,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
+        if (gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
             return;
         }
-        mInputManagerInternal.notifyKeyboardShortcutTriggered(event.getDeviceId(),
-                new int[]{event.getKeyCode()}, event.getMetaState(), systemShortcut);
+        mInputManagerInternal.notifyKeyGestureCompleted(event.getDeviceId(),
+                new int[]{event.getKeyCode()}, event.getMetaState(), gestureType);
     }
 
     /**
@@ -710,21 +709,21 @@ public class ModifierShortcutManager {
 
 
     /**
-     * Find Keyboard shortcut event corresponding to intent filter category. Returns
-     * {@code SYSTEM_SHORTCUT_UNSPECIFIED if no matching event found}
+     * Find Key gesture type corresponding to intent filter category. Returns
+     * {@code KEY_GESTURE_TYPE_UNSPECIFIED if no matching event found}
      */
-    @KeyboardSystemShortcut.SystemShortcut
-    private static int getSystemShortcutFromIntent(Intent intent) {
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromIntent(Intent intent) {
         Intent selectorIntent = intent.getSelector();
         if (selectorIntent != null) {
             Set<String> selectorCategories = selectorIntent.getCategories();
             if (selectorCategories != null && !selectorCategories.isEmpty()) {
                 for (String intentCategory : selectorCategories) {
-                    int systemShortcut = getEventFromSelectorCategory(intentCategory);
-                    if (systemShortcut == KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED) {
+                    int keyGestureType = getKeyGestureTypeFromSelectorCategory(intentCategory);
+                    if (keyGestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
                         continue;
                     }
-                    return systemShortcut;
+                    return keyGestureType;
                 }
             }
         }
@@ -733,69 +732,68 @@ public class ModifierShortcutManager {
         // so check for that.
         String role = intent.getStringExtra(ModifierShortcutManager.EXTRA_ROLE);
         if (!TextUtils.isEmpty(role)) {
-            return getLogEventFromRole(role);
+            return getKeyGestureTypeFromRole(role);
         }
 
         Set<String> intentCategories = intent.getCategories();
         if (intentCategories == null || intentCategories.isEmpty()
                 || !intentCategories.contains(Intent.CATEGORY_LAUNCHER)) {
-            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
         }
         if (intent.getComponent() == null) {
-            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
         }
 
         // TODO(b/280423320): Add new field package name associated in the
         //  KeyboardShortcutEvent atom and log it accordingly.
-        return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_APPLICATION_BY_PACKAGE_NAME;
+        return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME;
     }
 
-    @KeyboardSystemShortcut.SystemShortcut
-    private static int getEventFromSelectorCategory(String category) {
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromSelectorCategory(String category) {
         switch (category) {
             case Intent.CATEGORY_APP_BROWSER:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_BROWSER;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER;
             case Intent.CATEGORY_APP_EMAIL:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_EMAIL;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL;
             case Intent.CATEGORY_APP_CONTACTS:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_CONTACTS;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS;
             case Intent.CATEGORY_APP_CALENDAR:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_CALENDAR;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR;
             case Intent.CATEGORY_APP_CALCULATOR:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_CALCULATOR;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR;
             case Intent.CATEGORY_APP_MUSIC:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MUSIC;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC;
             case Intent.CATEGORY_APP_MAPS:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MAPS;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS;
             case Intent.CATEGORY_APP_MESSAGING:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MESSAGING;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING;
             case Intent.CATEGORY_APP_GALLERY:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_GALLERY;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_GALLERY;
             case Intent.CATEGORY_APP_FILES:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_FILES;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FILES;
             case Intent.CATEGORY_APP_WEATHER:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_WEATHER;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_WEATHER;
             case Intent.CATEGORY_APP_FITNESS:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_FITNESS;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS;
             default:
-                return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+                return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
         }
     }
 
     /**
-     * Find KeyboardLogEvent corresponding to the provide system role name.
-     * Returns {@code null} if no matching event found.
+     * Find KeyGestureType corresponding to the provide system role name.
+     * Returns {@code KEY_GESTURE_TYPE_UNSPECIFIED} if no matching event found.
      */
-    @KeyboardSystemShortcut.SystemShortcut
-    private static int getLogEventFromRole(String role) {
+    @KeyGestureEvent.KeyGestureType
+    private static int getKeyGestureTypeFromRole(String role) {
         if (RoleManager.ROLE_BROWSER.equals(role)) {
-            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_BROWSER;
+            return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER;
         } else if (RoleManager.ROLE_SMS.equals(role)) {
-            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_LAUNCH_DEFAULT_MESSAGING;
+            return KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING;
         } else {
-            Log.w(TAG, "Keyboard shortcut to launch "
-                    + role + " not supported for logging");
-            return KeyboardSystemShortcut.SYSTEM_SHORTCUT_UNSPECIFIED;
+            Log.w(TAG, "Keyboard gesture event to launch " + role + " not supported for logging");
+            return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
         }
     }
 

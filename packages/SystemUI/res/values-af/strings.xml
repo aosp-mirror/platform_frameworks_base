@@ -107,10 +107,20 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Skermopnemer"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Verwerk tans skermopname"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Deurlopende kennisgewing vir \'n skermopnamesessie"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Begin opneem?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Terwyl jy opneem, het Android toegang tot enigiets wat op jou skerm sigbaar is of op jou toestel gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Terwyl jy ’n app opneem, het Android toegang tot enigiets wat in daardie app gewys of gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Begin opneem"</string>
+    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
+    <skip />
+    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
+    <skip />
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Neem oudio op"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Toesteloudio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Klank vanaf jou toestel, soos musiek, oproepe en luitone"</string>
@@ -176,8 +186,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Stuur"</string>
     <string name="cancel" msgid="1089011503403416730">"Kanselleer"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"Applogo"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Bevestig"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Probeer weer"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Tik om stawing te kanselleer"</string>
@@ -400,7 +408,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klik om nuwe toestel saam te bind"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Kon nie voorafstelling opdateer nie"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Voorafstelling"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"Intydse Onderskrifte"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Intydse Onderskrifte"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokkeer toestelmikrofoon?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Deblokkeer toestelkamera?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Deblokkeer toestelkamera en mikrofoon?"</string>
@@ -434,12 +442,9 @@
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Instellings"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Aan"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Af"</string>
-    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
-    <skip />
-    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
-    <skip />
-    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Stel op"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Bestuur in instellings"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Geen aktiewe modusse nie}=1{{mode} is aktief}other{# modusse is aktief}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers, herinneringe, geleenthede en bellers wat jy spesifiseer. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Pasmaak"</string>
@@ -478,8 +483,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans stadig • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Legstukke op sluitskerm"</string>
-    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
-    <skip />
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g>-legstuk is by sluitskerm gevoeg"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Swiep links om die gemeenskaplike tutoriaal te begin"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Pasmaak"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Maak toe"</string>
@@ -531,22 +535,30 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sal toegang hê tot al die inligting wat op jou skerm sigbaar is of op jou toestel gespeel word terwyl dit opneem of uitsaai. Dit sluit in inligting soos wagwoorde, betalingbesonderhede, foto’s, boodskappe en oudio wat jy speel."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Begin opneem of uitsaai?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Die diens wat hierdie funksie verskaf, sal toegang hê tot al die inligting wat op jou skerm sigbaar is of op jou toestel gespeel word terwyl dit opneem of uitsaai. Dit sluit in inligting soos wagwoorde, betalingbesonderhede, foto’s, boodskappe en oudio wat jy speel."</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Hele skerm"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"’n Enkele app"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Deel of neem ’n app op"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Begin opneem of uitsaai met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Wanneer jy deel, opneem of uitsaai, het <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot enigiets wat op jou skerm sigbaar is of op jou toestel gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Wanneer jy ’n app deel, opneem of uitsaai, het <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot enigiets wat in daardie app gewys of gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Begin"</string>
+    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
+    <skip />
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Deel jou skerm met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Deel een app"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Deel hele skerm"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Wanneer jy jou hele skerm deel, is enigiets op jou skerm sigbaar aan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Wanneer jy ’n app deel, is enigiets wat in die app wys of speel, sigbaar aan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Deel skerm"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> het hierdie opsie gedeaktiveer"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Begin uitsaai?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Wanneer jy uitsaai, het Android toegang tot enigiets wat op jou skerm sigbaar is of op jou toestel gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Wanneer jy ’n app uitsaai, het Android toegang tot enigiets wat in daardie app gewys of gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Begin uitsaai"</string>
+    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
+    <skip />
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Saai jou skerm uit?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Saai een app uit"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Saai hele skerm uit"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Wanneer jy jou hele skerm uitsaai, is enigiets op jou skerm sigbaar. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Wanneer jy ’n app uitsaai, is enigiets wat in die app wys of speel, sigbaar. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Saai skerm uit"</string>
+    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
+    <skip />
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Begin deel?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Wanneer jy deel, opneem of uitsaai, het Android toegang tot enigiets wat op jou skerm sigbaar is of op jou toestel gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Wanneer jy ’n app deel, opneem of uitsaai, het Android toegang tot enigiets wat in daardie app gewys of gespeel word. Wees dus versigtig met dinge soos wagwoorde, betalingbesonderhede, boodskappe, foto’s, en oudio en video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Begin"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"Volgende"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Deling word onderbreek wanneer jy apps wissel"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Deel eerder hierdie app"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Skakel terug"</string>
@@ -1376,6 +1388,7 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Toeganklikheid"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Kortpadsleutels"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Soekkortpaaie"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Geen soekresultate nie"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Vou ikoon in"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Vou ikoon uit"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"of"</string>
@@ -1383,14 +1396,26 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Tuisgebaar"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Handelingsleutel"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Klaar"</string>
-    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Uitstekende werk!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gaan terug"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Swiep enige plek op die raakpaneel links of regs met drie vingers om terug te gaan.\n\nJy kan ook die kortpadsleutelhandeling + Esc hiervoor gebruik."</string>
+    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
     <skip />
-    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
+    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
     <skip />
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Raakpaneel wat drie vingers wat regs en links beweeg wys"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Toestelskerm wat animasie vir teruggebaar wys"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Gaan na tuisskerm"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Swiep enige tyd van die onderkant van jou skerm af op met drie vingers om na jou tuisskerm toe te gaan."</string>
+    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Sleutelbordlig"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Vlak %1$d van %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Huiskontroles"</string>
@@ -1400,6 +1425,8 @@
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Swiep op met drie vingers op die raakpaneel om terug na die tuisskerm te gaan"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Swiep op en hou met drie vingers op die raakpaneel om onlangse apps te bekyk"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Druk die handelingsleutel op jou sleutelbord om al jou apps te bekyk"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Gewysig"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Ontsluit om te kyk"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Gebruik jou raakpaneel om terug te gaan"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Swiep links of regs met drie vingers. Tik om meer gebare te leer."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Gebruik jou raakpaneel om na die tuisskerm toe te gaan"</string>
@@ -1408,4 +1435,8 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Swiep op en hou met drie vingers. Tik om meer gebare te leer."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Gebruik jou sleutelbord om alle apps te bekyk"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Druk enige tyd die handelingsleutel. Tik om meer gebare te leer."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"Ekstra donker is nou deel van die helderheidbalk"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Jy kan nou die skerm ekstra donker maak deur die helderheidvlak vanaf die bokant van jou skerm nog laer te maak.\n\nDit werk die beste wanneer jy in ’n donker omgewing is."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Verwyder kortpad vir ekstra donker"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Kortpad vir ekstra donker is verwyder. Gebruik die gewone helderheidbalk om jou helderheid te verlaag."</string>
 </resources>

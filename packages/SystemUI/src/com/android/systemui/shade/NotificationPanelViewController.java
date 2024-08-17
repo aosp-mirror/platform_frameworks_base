@@ -1339,6 +1339,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 "NotificationPanelViewController.updateResources");
 
         if (splitShadeChanged) {
+            if (isPanelVisibleBecauseOfHeadsUp()) {
+                // workaround for b/324642496, because HUNs set state to OPENING
+                onPanelStateChanged(STATE_CLOSED);
+            }
             onSplitShadeEnabledChanged();
         }
 

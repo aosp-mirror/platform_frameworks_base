@@ -54,6 +54,8 @@ import com.android.wm.shell.Flags;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.common.bubbles.BubbleInfo;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -79,6 +81,7 @@ public class Bubble implements BubbleViewProvider {
     private final LocusId mLocusId;
 
     private final Executor mMainExecutor;
+    private final Executor mBgExecutor;
 
     private long mLastUpdated;
     private long mLastAccessed;
@@ -111,7 +114,10 @@ public class Bubble implements BubbleViewProvider {
     @Nullable
     private BubbleTaskView mBubbleTaskView;
 
+    @Nullable
     private BubbleViewInfoTask mInflationTask;
+    @Nullable
+    private BubbleViewInfoTaskLegacy mInflationTaskLegacy;
     private boolean mInflateSynchronously;
     private boolean mPendingIntentCanceled;
     private boolean mIsImportantConversation;
@@ -203,7 +209,9 @@ public class Bubble implements BubbleViewProvider {
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
-            int taskId, @Nullable final String locus, boolean isDismissable, Executor mainExecutor,
+            int taskId, @Nullable final String locus, boolean isDismissable,
+            @ShellMainThread Executor mainExecutor,
+            @ShellBackgroundThread Executor bgExecutor,
             final Bubbles.BubbleMetadataFlagListener listener) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
@@ -222,6 +230,7 @@ public class Bubble implements BubbleViewProvider {
         mTitle = title;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mTaskId = taskId;
         mBubbleMetadataFlagListener = listener;
         mIsAppBubble = false;
@@ -233,7 +242,8 @@ public class Bubble implements BubbleViewProvider {
             @Nullable Icon icon,
             boolean isAppBubble,
             String key,
-            Executor mainExecutor) {
+            @ShellMainThread Executor mainExecutor,
+            @ShellBackgroundThread Executor bgExecutor) {
         mGroupKey = null;
         mLocusId = null;
         mFlags = 0;
@@ -243,13 +253,15 @@ public class Bubble implements BubbleViewProvider {
         mKey = key;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mTaskId = INVALID_TASK_ID;
         mAppIntent = intent;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = intent.getPackage();
     }
 
-    private Bubble(ShortcutInfo info, Executor mainExecutor) {
+    private Bubble(ShortcutInfo info, @ShellMainThread Executor mainExecutor,
+            @ShellBackgroundThread Executor bgExecutor) {
         mGroupKey = null;
         mLocusId = null;
         mFlags = 0;
@@ -259,6 +271,7 @@ public class Bubble implements BubbleViewProvider {
         mKey = getBubbleKeyForShortcut(info);
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mTaskId = INVALID_TASK_ID;
         mAppIntent = null;
         mDesiredHeight = Integer.MAX_VALUE;
@@ -267,24 +280,21 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /** Creates an app bubble. */
-    public static Bubble createAppBubble(
-            Intent intent,
-            UserHandle user,
-            @Nullable Icon icon,
-            Executor mainExecutor) {
+    public static Bubble createAppBubble(Intent intent, UserHandle user, @Nullable Icon icon,
+            @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
         return new Bubble(intent,
                 user,
                 icon,
                 /* isAppBubble= */ true,
                 /* key= */ getAppBubbleKeyForApp(intent.getPackage(), user),
-                mainExecutor);
+                mainExecutor, bgExecutor);
     }
 
     /** Creates a shortcut bubble. */
     public static Bubble createShortcutBubble(
             ShortcutInfo info,
-            Executor mainExecutor) {
-        return new Bubble(info, mainExecutor);
+            @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
+        return new Bubble(info, mainExecutor, bgExecutor);
     }
 
     /**
@@ -309,7 +319,7 @@ public class Bubble implements BubbleViewProvider {
     public Bubble(@NonNull final BubbleEntry entry,
             final Bubbles.BubbleMetadataFlagListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
-            Executor mainExecutor) {
+            @ShellMainThread Executor mainExecutor, @ShellBackgroundThread Executor bgExecutor) {
         mIsAppBubble = false;
         mKey = entry.getKey();
         mGroupKey = entry.getGroupKey();
@@ -324,6 +334,7 @@ public class Bubble implements BubbleViewProvider {
             });
         };
         mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mTaskId = INVALID_TASK_ID;
         setEntry(entry);
     }
@@ -557,29 +568,52 @@ public class Bubble implements BubbleViewProvider {
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
             boolean skipInflation) {
-        if (isBubbleLoading()) {
-            mInflationTask.cancel(true /* mayInterruptIfRunning */);
-        }
-        mInflationTask = new BubbleViewInfoTask(this,
-                context,
-                expandedViewManager,
-                taskViewFactory,
-                positioner,
-                stackView,
-                layerView,
-                iconFactory,
-                skipInflation,
-                callback,
-                mMainExecutor);
-        if (mInflateSynchronously) {
-            mInflationTask.onPostExecute(mInflationTask.doInBackground());
+        if (Flags.bubbleViewInfoExecutors()) {
+            if (mInflationTask != null && mInflationTask.getStatus() != FINISHED) {
+                mInflationTask.cancel(true /* mayInterruptIfRunning */);
+            }
+            // TODO(b/353894869): switch to executors
+            mInflationTask = new BubbleViewInfoTask(this,
+                    context,
+                    expandedViewManager,
+                    taskViewFactory,
+                    positioner,
+                    stackView,
+                    layerView,
+                    iconFactory,
+                    skipInflation,
+                    callback,
+                    mMainExecutor);
+            if (mInflateSynchronously) {
+                mInflationTask.onPostExecute(mInflationTask.doInBackground());
+            } else {
+                mInflationTask.execute();
+            }
         } else {
-            mInflationTask.execute();
+            if (mInflationTaskLegacy != null && mInflationTaskLegacy.getStatus() != FINISHED) {
+                mInflationTaskLegacy.cancel(true /* mayInterruptIfRunning */);
+            }
+            mInflationTaskLegacy = new BubbleViewInfoTaskLegacy(this,
+                    context,
+                    expandedViewManager,
+                    taskViewFactory,
+                    positioner,
+                    stackView,
+                    layerView,
+                    iconFactory,
+                    skipInflation,
+                    bubble -> {
+                        if (callback != null) {
+                            callback.onBubbleViewsReady(bubble);
+                        }
+                    },
+                    mMainExecutor);
+            if (mInflateSynchronously) {
+                mInflationTaskLegacy.onPostExecute(mInflationTaskLegacy.doInBackground());
+            } else {
+                mInflationTaskLegacy.execute();
+            }
         }
-    }
-
-    private boolean isBubbleLoading() {
-        return mInflationTask != null && mInflationTask.getStatus() != FINISHED;
     }
 
     boolean isInflated() {
@@ -587,13 +621,56 @@ public class Bubble implements BubbleViewProvider {
     }
 
     void stopInflation() {
-        if (mInflationTask == null) {
-            return;
+        if (Flags.bubbleViewInfoExecutors()) {
+            if (mInflationTask == null) {
+                return;
+            }
+            mInflationTask.cancel(true /* mayInterruptIfRunning */);
+        } else {
+            if (mInflationTaskLegacy == null) {
+                return;
+            }
+            mInflationTaskLegacy.cancel(true /* mayInterruptIfRunning */);
         }
-        mInflationTask.cancel(true /* mayInterruptIfRunning */);
     }
 
     void setViewInfo(BubbleViewInfoTask.BubbleViewInfo info) {
+        if (!isInflated()) {
+            mIconView = info.imageView;
+            mExpandedView = info.expandedView;
+            mBubbleBarExpandedView = info.bubbleBarExpandedView;
+        }
+
+        mShortcutInfo = info.shortcutInfo;
+        mAppName = info.appName;
+        if (mTitle == null) {
+            mTitle = mAppName;
+        }
+        mFlyoutMessage = info.flyoutMessage;
+
+        mBadgeBitmap = info.badgeBitmap;
+        mRawBadgeBitmap = info.rawBadgeBitmap;
+        mBubbleBitmap = info.bubbleBitmap;
+
+        mDotColor = info.dotColor;
+        mDotPath = info.dotPath;
+
+        if (mExpandedView != null) {
+            mExpandedView.update(this /* bubble */);
+        }
+        if (mBubbleBarExpandedView != null) {
+            mBubbleBarExpandedView.update(this /* bubble */);
+        }
+        if (mIconView != null) {
+            mIconView.setRenderedBubble(this /* bubble */);
+        }
+    }
+
+    /**
+     * @deprecated {@link BubbleViewInfoTaskLegacy} is deprecated.
+     */
+    @Deprecated
+    void setViewInfoLegacy(BubbleViewInfoTaskLegacy.BubbleViewInfo info) {
         if (!isInflated()) {
             mIconView = info.imageView;
             mExpandedView = info.expandedView;

@@ -28,6 +28,7 @@ abstract class OpenAppFromIconTransition(flicker: LegacyFlickerTest) :
         get() = {
             super.transition(this)
             setup {
+                // By default, launcher doesn't rotate on phones, but rotates on tablets
                 if (flicker.scenario.isTablet) {
                     tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 } else {

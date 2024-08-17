@@ -3413,19 +3413,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void requestProvisionSubscriberIds(in ResultReceiver result);
-
-    /**
-     * Request to get provisioned status for given a satellite subscriber id.
-     *
-     * @param satelliteSubscriberId Satellite subscriber id requiring provisioned status check.
-     * @param result The result receiver, which returns the provisioned status of the token if the
-     * request is successful or an error code if the request failed.
-     * @hide
-     */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
-            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void requestIsProvisioned(in String satelliteSubscriberId, in ResultReceiver result);
+    void requestSatelliteSubscriberProvisionStatus(in ResultReceiver result);
 
     /**
      * Deliver the list of provisioned satellite subscriber infos.

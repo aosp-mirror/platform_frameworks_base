@@ -24,6 +24,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,10 +45,11 @@ constructor(private val sceneInteractor: SceneInteractor, shadeInteractor: Shade
     /** Dictates the alignment of the overlay shade panel on the screen. */
     val panelAlignment = shadeInteractor.shadeAlignment
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         sceneInteractor.resolveSceneFamily(SceneFamilies.Home).collectLatest { sceneKey ->
             _backgroundScene.value = sceneKey
         }
+        awaitCancellation()
     }
 
     /** Notifies that the user has clicked the semi-transparent background scrim. */

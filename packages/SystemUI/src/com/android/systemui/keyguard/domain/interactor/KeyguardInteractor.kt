@@ -216,14 +216,14 @@ constructor(
 
     /** Whether the keyguard is showing or not. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState")
-    val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+    val isKeyguardShowing: StateFlow<Boolean> = repository.isKeyguardShowing
 
     /** Whether the keyguard is dismissible or not. */
     val isKeyguardDismissible: StateFlow<Boolean> = repository.isKeyguardDismissible
 
     /** Whether the keyguard is occluded (covered by an activity). */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
-    val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
+    val isKeyguardOccluded: StateFlow<Boolean> = repository.isKeyguardOccluded
 
     /** Whether the keyguard is going away. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.GONE")
@@ -253,7 +253,7 @@ constructor(
     val ambientIndicationVisible: Flow<Boolean> = repository.ambientIndicationVisible.asStateFlow()
 
     /** Whether the primary bouncer is showing or not. */
-    @JvmField val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
+    @JvmField val primaryBouncerShowing: StateFlow<Boolean> = bouncerRepository.primaryBouncerShow
 
     /** Whether the alternate bouncer is showing or not. */
     val alternateBouncerShowing: Flow<Boolean> =
@@ -274,7 +274,7 @@ constructor(
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
 
     /** Observable for [BiometricUnlockModel] when biometrics are used to unlock the device. */
-    val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
+    val biometricUnlockState: StateFlow<BiometricUnlockModel> = repository.biometricUnlockState
 
     /** Keyguard is present and is not occluded. */
     val isKeyguardVisible: Flow<Boolean> =

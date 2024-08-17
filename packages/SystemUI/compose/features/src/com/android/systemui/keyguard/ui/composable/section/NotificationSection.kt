@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
@@ -48,7 +49,7 @@ class NotificationSection
 @Inject
 constructor(
     private val stackScrollView: Lazy<NotificationScrollView>,
-    private val viewModel: NotificationsPlaceholderViewModel,
+    private val viewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val aodBurnInViewModel: AodBurnInViewModel,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
@@ -98,7 +99,7 @@ constructor(
 
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
-            viewModel = viewModel,
+            viewModel = rememberViewModel { viewModelFactory.create() },
             modifier =
                 modifier
                     .fillMaxWidth()

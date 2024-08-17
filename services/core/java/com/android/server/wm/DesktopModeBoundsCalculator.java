@@ -16,31 +16,28 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.isFixedOrientation;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.server.wm.AppCompatConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
-import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
-import static com.android.server.wm.AppCompatUtils.computeAspectRatio;
 import static com.android.server.wm.LaunchParamsUtil.applyLayoutGravity;
 import static com.android.server.wm.LaunchParamsUtil.calculateLayoutBounds;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
-import android.app.AppCompatTaskInfo;
 import android.app.TaskInfo;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
+import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.pm.ActivityInfo.WindowLayout;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.Size;
 import android.view.Gravity;
 
-import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.DesktopModeFlagsUtil;
 
 import java.util.function.Consumer;
@@ -60,7 +57,7 @@ public final class DesktopModeBoundsCalculator {
      * Updates launch bounds for an activity with respect to its activity options, window layout,
      * android manifest and task configuration.
      */
-    static void updateInitialBounds(@NonNull Task task, @Nullable ActivityInfo.WindowLayout layout,
+    static void updateInitialBounds(@NonNull Task task, @Nullable WindowLayout layout,
             @Nullable ActivityRecord activity, @Nullable ActivityOptions options,
             @NonNull Rect outBounds, @NonNull Consumer<String> logger) {
         // Use stable frame instead of raw frame to avoid launching freeform windows on top of
@@ -98,7 +95,8 @@ public final class DesktopModeBoundsCalculator {
      * fullscreen size, aspect ratio, orientation and resizability to calculate an area this is
      * compatible with the applications previous configuration.
      */
-    private static @NonNull Rect calculateInitialBounds(@NonNull Task task,
+    @NonNull
+    private static Rect calculateInitialBounds(@NonNull Task task,
             @NonNull ActivityRecord activity, @NonNull Rect stableBounds
     ) {
         final TaskInfo taskInfo = task.getTaskInfo();
@@ -116,18 +114,19 @@ public final class DesktopModeBoundsCalculator {
             // applied.
             return centerInScreen(idealSize, screenBounds);
         }
-        // TODO(b/353457301): Replace with app compat aspect ratio method when refactoring complete.
-        float appAspectRatio = calculateAspectRatio(task, activity);
+        final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
+                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+        float appAspectRatio = desktopAppCompatAspectRatioPolicy.calculateAspectRatio(task);
         final float tdaWidth = stableBounds.width();
         final float tdaHeight = stableBounds.height();
-        final int activityOrientation = activity.getOverrideOrientation();
+        final int activityOrientation = getActivityOrientation(activity, task);
         final Size initialSize = switch (taskInfo.configuration.orientation) {
             case ORIENTATION_LANDSCAPE -> {
                 // Device in landscape orientation.
                 if (appAspectRatio == 0) {
                     appAspectRatio = 1;
                 }
-                if (taskInfo.isResizeable) {
+                if (canChangeAspectRatio(desktopAppCompatAspectRatioPolicy, taskInfo, task)) {
                     if (isFixedOrientationPortrait(activityOrientation)) {
                         // For portrait resizeable activities, respect apps fullscreen width but
                         // apply ideal size height.
@@ -139,14 +138,13 @@ public final class DesktopModeBoundsCalculator {
                 }
                 // If activity is unresizeable, regardless of orientation, calculate maximum size
                 // (within the ideal size) maintaining original aspect ratio.
-                yield maximizeSizeGivenAspectRatio(
-                        activity.getOverrideOrientation(), idealSize, appAspectRatio);
+                yield maximizeSizeGivenAspectRatio(activityOrientation, idealSize, appAspectRatio);
             }
             case ORIENTATION_PORTRAIT -> {
                 // Device in portrait orientation.
                 final int customPortraitWidthForLandscapeApp = screenBounds.width()
                         - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2);
-                if (taskInfo.isResizeable) {
+                if (canChangeAspectRatio(desktopAppCompatAspectRatioPolicy, taskInfo, task)) {
                     if (isFixedOrientationLandscape(activityOrientation)) {
                         if (appAspectRatio == 0) {
                             appAspectRatio = tdaWidth / (tdaWidth - 1);
@@ -180,11 +178,38 @@ public final class DesktopModeBoundsCalculator {
     }
 
     /**
+     * Whether the activity's aspect ratio can be changed or if it should be maintained as if it was
+     * unresizeable.
+     */
+    private static boolean canChangeAspectRatio(
+            @NonNull DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy,
+            @NonNull TaskInfo taskInfo, @NonNull Task task) {
+        return taskInfo.isResizeable
+                && !desktopAppCompatAspectRatioPolicy.hasMinAspectRatioOverride(task);
+    }
+
+    private static @ScreenOrientation int getActivityOrientation(
+            @NonNull ActivityRecord activity, @NonNull Task task) {
+        final int activityOrientation = activity.getOverrideOrientation();
+        final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
+                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+        if (desktopAppCompatAspectRatioPolicy.shouldApplyUserMinAspectRatioOverride(task)
+                && (!isFixedOrientation(activityOrientation)
+                    || activityOrientation == SCREEN_ORIENTATION_LOCKED)) {
+            // If a user aspect ratio override should be applied, treat the activity as portrait if
+            // it has not specified a fix orientation.
+            return SCREEN_ORIENTATION_PORTRAIT;
+        }
+        return activityOrientation;
+    }
+
+    /**
      * Calculates the largest size that can fit in a given area while maintaining a specific aspect
      * ratio.
      */
-    private static @NonNull Size maximizeSizeGivenAspectRatio(
-            @ActivityInfo.ScreenOrientation int orientation,
+    @NonNull
+    private static Size maximizeSizeGivenAspectRatio(
+            @ScreenOrientation int orientation,
             @NonNull Size targetArea,
             float aspectRatio
     ) {
@@ -229,68 +254,11 @@ public final class DesktopModeBoundsCalculator {
     }
 
     /**
-     * Calculates the aspect ratio of an activity from its fullscreen bounds.
-     */
-    @VisibleForTesting
-    static float calculateAspectRatio(@NonNull Task task, @NonNull ActivityRecord activity) {
-        final TaskInfo taskInfo = task.getTaskInfo();
-        final float fullscreenWidth = task.getDisplayArea().getBounds().width();
-        final float fullscreenHeight = task.getDisplayArea().getBounds().height();
-        final float maxAspectRatio = activity.getMaxAspectRatio();
-        final float minAspectRatio = activity.getMinAspectRatio();
-        float desiredAspectRatio = 0;
-        if (taskInfo.isRunning) {
-            final AppCompatTaskInfo appCompatTaskInfo =  taskInfo.appCompatTaskInfo;
-            final int appLetterboxWidth =
-                    taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth;
-            final int appLetterboxHeight =
-                    taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight;
-            if (appCompatTaskInfo.isTopActivityLetterboxed()) {
-                desiredAspectRatio = (float) Math.max(appLetterboxWidth, appLetterboxHeight)
-                        / Math.min(appLetterboxWidth, appLetterboxHeight);
-            } else {
-                desiredAspectRatio = Math.max(fullscreenHeight, fullscreenWidth)
-                        / Math.min(fullscreenHeight, fullscreenWidth);
-            }
-        } else {
-            final float letterboxAspectRatioOverride =
-                    getFixedOrientationLetterboxAspectRatio(activity, task);
-            if (!task.mDisplayContent.getIgnoreOrientationRequest()) {
-                desiredAspectRatio = DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
-            } else if (letterboxAspectRatioOverride
-                    > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO) {
-                desiredAspectRatio = letterboxAspectRatioOverride;
-            }
-        }
-        // If the activity matches display orientation, the display aspect ratio should be used
-        if (activityMatchesDisplayOrientation(
-                taskInfo.configuration.orientation,
-                activity.getOverrideOrientation())) {
-            desiredAspectRatio = Math.max(fullscreenWidth, fullscreenHeight)
-                    / Math.min(fullscreenWidth, fullscreenHeight);
-        }
-        if (maxAspectRatio >= 1 && desiredAspectRatio > maxAspectRatio) {
-            desiredAspectRatio = maxAspectRatio;
-        } else if (minAspectRatio >= 1 && desiredAspectRatio < minAspectRatio) {
-            desiredAspectRatio = minAspectRatio;
-        }
-        return desiredAspectRatio;
-    }
-
-    private static boolean activityMatchesDisplayOrientation(
-            @Configuration.Orientation int deviceOrientation,
-            @ActivityInfo.ScreenOrientation int activityOrientation) {
-        if (deviceOrientation == ORIENTATION_PORTRAIT) {
-            return isFixedOrientationPortrait(activityOrientation);
-        }
-        return isFixedOrientationLandscape(activityOrientation);
-    }
-
-    /**
      * Calculates the desired initial bounds for applications in desktop windowing. This is done as
      * a scale of the screen bounds.
      */
-    private static @NonNull Size calculateIdealSize(@NonNull Rect screenBounds, float scale) {
+    @NonNull
+    private static Size calculateIdealSize(@NonNull Rect screenBounds, float scale) {
         final int width = (int) (screenBounds.width() * scale);
         final int height = (int) (screenBounds.height() * scale);
         return new Size(width, height);
@@ -299,7 +267,8 @@ public final class DesktopModeBoundsCalculator {
     /**
      * Adjusts bounds to be positioned in the middle of the screen.
      */
-    private static @NonNull Rect centerInScreen(@NonNull Size desiredSize,
+    @NonNull
+    private static Rect centerInScreen(@NonNull Size desiredSize,
             @NonNull Rect screenBounds) {
         // TODO(b/325240051): Position apps with bottom heavy offset
         final int heightOffset = (screenBounds.height() - desiredSize.getHeight()) / 2;
@@ -308,58 +277,5 @@ public final class DesktopModeBoundsCalculator {
                 desiredSize.getWidth(), desiredSize.getHeight());
         resultBounds.offset(screenBounds.left + widthOffset, screenBounds.top + heightOffset);
         return resultBounds;
-    }
-
-    private static float getFixedOrientationLetterboxAspectRatio(@NonNull ActivityRecord activity,
-            @NonNull Task task) {
-        return activity.shouldCreateCompatDisplayInsets()
-                ? getDefaultMinAspectRatioForUnresizableApps(activity, task)
-                : activity.mAppCompatController.getAppCompatAspectRatioOverrides()
-                        .getDefaultMinAspectRatio();
-    }
-
-    private static float getDefaultMinAspectRatioForUnresizableApps(
-            @NonNull ActivityRecord activity,
-            @NonNull Task task) {
-        final AppCompatAspectRatioOverrides appCompatAspectRatioOverrides =
-                activity.mAppCompatController.getAppCompatAspectRatioOverrides();
-        if (appCompatAspectRatioOverrides.isSplitScreenAspectRatioForUnresizableAppsEnabled()) {
-            // Default letterbox aspect ratio for unresizable apps.
-            return getSplitScreenAspectRatio(activity, task);
-        }
-
-        if (appCompatAspectRatioOverrides.getDefaultMinAspectRatioForUnresizableAppsFromConfig()
-                > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO) {
-            return appCompatAspectRatioOverrides
-                    .getDefaultMinAspectRatioForUnresizableAppsFromConfig();
-        }
-
-        return appCompatAspectRatioOverrides.getDefaultMinAspectRatio();
-    }
-
-    /**
-     * Calculates the aspect ratio of the available display area when an app enters split-screen on
-     * a given device, taking into account any dividers and insets.
-     */
-    private static float getSplitScreenAspectRatio(@NonNull ActivityRecord activity,
-            @NonNull Task task) {
-        final int dividerWindowWidth =
-                activity.mWmService.mContext.getResources().getDimensionPixelSize(
-                        R.dimen.docked_stack_divider_thickness);
-        final int dividerInsets =
-                activity.mWmService.mContext.getResources().getDimensionPixelSize(
-                        R.dimen.docked_stack_divider_insets);
-        final int dividerSize = dividerWindowWidth - dividerInsets * 2;
-        final Rect bounds = new Rect(0, 0,
-                task.mDisplayContent.getDisplayInfo().appWidth,
-                task.mDisplayContent.getDisplayInfo().appHeight);
-        if (bounds.width() >= bounds.height()) {
-            bounds.inset(/* dx */ dividerSize / 2, /* dy */ 0);
-            bounds.right = bounds.centerX();
-        } else {
-            bounds.inset(/* dx */ 0, /* dy */ dividerSize / 2);
-            bounds.bottom = bounds.centerY();
-        }
-        return computeAspectRatio(bounds);
     }
 }

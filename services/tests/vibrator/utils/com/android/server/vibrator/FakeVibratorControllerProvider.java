@@ -140,13 +140,13 @@ public final class FakeVibratorControllerProvider {
 
         @Override
         public long performVendorEffect(Parcel vendorData, long strength, float scale,
-                long vibrationId) {
+                float adaptiveScale, long vibrationId) {
             if ((mCapabilities & IVibrator.CAP_PERFORM_VENDOR_EFFECTS) == 0) {
                 return 0;
             }
             PersistableBundle bundle = PersistableBundle.CREATOR.createFromParcel(vendorData);
             recordVendorEffect(vibrationId,
-                    new VibrationEffect.VendorEffect(bundle, (int) strength, scale));
+                    new VibrationEffect.VendorEffect(bundle, (int) strength, scale, adaptiveScale));
             applyLatency(mOnLatency);
             scheduleListener(mVendorEffectDuration, vibrationId);
             // HAL has unknown duration for vendor effects.

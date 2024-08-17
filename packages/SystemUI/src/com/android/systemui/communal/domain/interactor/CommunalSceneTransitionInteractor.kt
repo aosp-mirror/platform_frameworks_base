@@ -41,6 +41,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -85,25 +87,29 @@ constructor(
      */
     private val nextKeyguardStateInternal =
         combine(
-            keyguardInteractor.isAbleToDream,
-            keyguardInteractor.isKeyguardOccluded,
-            keyguardInteractor.isKeyguardGoingAway,
-        ) { dreaming, occluded, keyguardGoingAway ->
-            if (keyguardGoingAway) {
-                KeyguardState.GONE
-            } else if (occluded && !dreaming) {
-                KeyguardState.OCCLUDED
-            } else if (dreaming) {
-                KeyguardState.DREAMING
-            } else {
-                KeyguardState.LOCKSCREEN
+                keyguardInteractor.isAbleToDream,
+                keyguardInteractor.isKeyguardOccluded,
+                keyguardInteractor.isKeyguardGoingAway,
+                keyguardInteractor.isKeyguardShowing,
+            ) { dreaming, occluded, keyguardGoingAway, keyguardShowing ->
+                if (keyguardGoingAway) {
+                    KeyguardState.GONE
+                } else if (occluded && !dreaming) {
+                    KeyguardState.OCCLUDED
+                } else if (dreaming) {
+                    KeyguardState.DREAMING
+                } else if (keyguardShowing) {
+                    KeyguardState.LOCKSCREEN
+                } else {
+                    null
+                }
             }
-        }
+            .filterNotNull()
 
     private val nextKeyguardState: StateFlow<KeyguardState> =
         combine(
                 repository.nextLockscreenTargetState,
-                nextKeyguardStateInternal,
+                nextKeyguardStateInternal.onStart { emit(KeyguardState.LOCKSCREEN) },
             ) { override, nextState ->
                 override ?: nextState
             }

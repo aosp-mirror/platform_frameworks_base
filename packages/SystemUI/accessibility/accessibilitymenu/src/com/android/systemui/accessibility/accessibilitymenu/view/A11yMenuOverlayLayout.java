@@ -145,13 +145,14 @@ public class A11yMenuOverlayLayout {
         final Display display = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
         final Context context = mService.createDisplayContext(display).createWindowContext(
                 TYPE_ACCESSIBILITY_OVERLAY, null);
-        mLayout = new FrameLayout(context);
+        mLayout = new A11yMenuFrameLayout(context);
         updateLayoutPosition();
         inflateLayoutAndSetOnTouchListener(mLayout, context);
         mA11yMenuViewPager = new A11yMenuViewPager(mService, context);
         mA11yMenuViewPager.configureViewPagerAndFooter(mLayout, createShortcutList(), pageIndex);
         mWindowManager.addView(mLayout, mLayoutParameter);
         mLayout.setVisibility(lastVisibilityState);
+        mA11yMenuViewPager.updateFooterState();
 
         return mLayout;
     }
@@ -392,5 +393,17 @@ public class A11yMenuOverlayLayout {
                             snackbar.setVisibility(View.GONE);
                         }
                     }), timeoutDurationMs);
+    }
+
+    private class A11yMenuFrameLayout extends FrameLayout {
+        A11yMenuFrameLayout(@NonNull Context context) {
+            super(context);
+        }
+
+        @Override
+        public void dispatchConfigurationChanged(Configuration newConfig) {
+            super.dispatchConfigurationChanged(newConfig);
+            mA11yMenuViewPager.mA11yMenuFooter.updateRightToLeftDirection(newConfig);
+        }
     }
 }

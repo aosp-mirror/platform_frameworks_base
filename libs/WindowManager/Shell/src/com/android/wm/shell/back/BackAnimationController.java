@@ -29,7 +29,7 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BA
 import static com.android.window.flags.Flags.migratePredictiveBackTransition;
 import static com.android.window.flags.Flags.predictiveBackSystemAnims;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -95,6 +95,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 /**
  * Controls the window animation run when a user initiates a back gesture.
@@ -145,7 +146,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final Handler mBgHandler;
     private final WindowManager mWindowManager;
     private final Transitions mTransitions;
-    private final BackTransitionHandler mBackTransitionHandler;
+    @VisibleForTesting
+    final BackTransitionHandler mBackTransitionHandler;
     @VisibleForTesting
     final Rect mTouchableArea = new Rect();
 
@@ -173,7 +175,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @Nullable
     private IOnBackInvokedCallback mActiveCallback;
     @Nullable
-    private RemoteAnimationTarget[] mApps;
+    @VisibleForTesting
+    RemoteAnimationTarget[] mApps;
 
     @VisibleForTesting
     final RemoteCallback mNavigationObserver = new RemoteCallback(
@@ -1209,7 +1212,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             if (info.getType() != WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION
-                    && !isGestureBackTransition(info)) {
+                    && isNotGestureBackTransition(info)) {
                 return false;
             }
 
@@ -1364,7 +1367,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             // try to handle unexpected transition
             mergePendingTransitions(info);
 
-            if (!isGestureBackTransition(info) || shouldCancelAnimation(info)
+            if (isNotGestureBackTransition(info) || shouldCancelAnimation(info)
                     || !mCloseTransitionRequested) {
                 if (mPrepareOpenTransition != null) {
                     applyFinishOpenTransition();
@@ -1395,8 +1398,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
         // Cancel close animation if something happen unexpected, let another handler to handle
         private boolean shouldCancelAnimation(@NonNull TransitionInfo info) {
-            final boolean noCloseAllowed =
-                    info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
+            final boolean noCloseAllowed = !mCloseTransitionRequested
+                    && info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
             boolean unableToHandle = false;
             boolean filterTargets = false;
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
@@ -1447,7 +1450,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
          * Check whether this transition is prepare for predictive back animation, which could
          * happen when core make an activity become visible.
          */
-        private boolean handlePrepareTransition(
+        @VisibleForTesting
+        boolean handlePrepareTransition(
                 @NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
@@ -1455,7 +1459,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (info.getType() != WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION) {
                 return false;
             }
-
+            // Must have open target, must not have close target.
+            if (hasAnimationInMode(info, TransitionUtil::isClosingMode)
+                    || !hasAnimationInMode(info, TransitionUtil::isOpeningMode)) {
+                return false;
+            }
             SurfaceControl openingLeash = null;
             if (mApps != null) {
                 for (int i = mApps.length - 1; i >= 0; --i) {
@@ -1482,28 +1490,26 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return true;
         }
 
-        private boolean isGestureBackTransition(@NonNull TransitionInfo info) {
-            for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-                final TransitionInfo.Change c = info.getChanges().get(i);
-                if (c.hasFlags(FLAG_BACK_GESTURE_ANIMATED)
-                        && (TransitionUtil.isOpeningMode(c.getMode())
-                        || TransitionUtil.isClosingMode(c.getMode()))) {
-                    return true;
-                }
-            }
-            return false;
-        }
         /**
          * Check whether this transition is triggered from back gesture commitment.
          * Reparent the transition targets to animation leashes, so the animation won't be broken.
          */
-        private boolean handleCloseTransition(@NonNull TransitionInfo info,
+        @VisibleForTesting
+        boolean handleCloseTransition(@NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            if (info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION
-                    || !mCloseTransitionRequested) {
+            if (!mCloseTransitionRequested) {
                 return false;
+            }
+            // must have close target
+            if (!hasAnimationInMode(info, TransitionUtil::isClosingMode)) {
+                return false;
+            }
+            if (mApps == null) {
+                // animation is done
+                applyAndFinish(st, ft, finishCallback);
+                return true;
             }
             SurfaceControl openingLeash = null;
             SurfaceControl closingLeash = null;
@@ -1522,6 +1528,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         final Point offset = c.getEndRelOffset();
                         st.setPosition(c.getLeash(), offset.x, offset.y);
                         st.reparent(c.getLeash(), openingLeash);
+                        st.setAlpha(c.getLeash(), 1.0f);
                     } else if (TransitionUtil.isClosingMode(c.getMode())) {
                         st.reparent(c.getLeash(), closingLeash);
                     }
@@ -1590,6 +1597,21 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 handleCloseTransition(mInfo, mSt, mFt, mFinishCallback);
             }
         }
+    }
+
+    private static boolean isNotGestureBackTransition(@NonNull TransitionInfo info) {
+        return !hasAnimationInMode(info, TransitionUtil::isOpenOrCloseMode);
+    }
+
+    private static boolean hasAnimationInMode(@NonNull TransitionInfo info,
+            Predicate<Integer> mode) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change c = info.getChanges().get(i);
+            if (c.hasFlags(FLAG_BACK_GESTURE_ANIMATED) && mode.test(c.getMode())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static ComponentName findComponentName(TransitionInfo.Change change) {

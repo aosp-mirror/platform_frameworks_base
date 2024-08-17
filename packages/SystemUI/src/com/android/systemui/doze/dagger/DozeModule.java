@@ -19,7 +19,6 @@ package com.android.systemui.doze.dagger;
 import android.content.Context;
 import android.hardware.Sensor;
 
-import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.doze.DozeAuthRemover;
 import com.android.systemui.doze.DozeBrightnessHostForwarder;
 import com.android.systemui.doze.DozeDockHandler;
@@ -51,7 +50,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 /** Dagger module for use with {@link com.android.systemui.doze.dagger.DozeComponent}. */
 @Module
@@ -60,13 +58,13 @@ public abstract class DozeModule {
     @DozeScope
     @WrappedService
     static DozeMachine.Service providesWrappedService(DozeMachine.Service dozeMachineService,
-            DozeHost dozeHost, DozeParameters dozeParameters, @UiBackground Executor bgExecutor) {
+            DozeHost dozeHost, DozeParameters dozeParameters) {
         DozeMachine.Service wrappedService = dozeMachineService;
-        wrappedService = new DozeBrightnessHostForwarder(wrappedService, dozeHost, bgExecutor);
+        wrappedService = new DozeBrightnessHostForwarder(wrappedService, dozeHost);
         wrappedService = DozeScreenStatePreventingAdapter.wrapIfNeeded(
-                wrappedService, dozeParameters, bgExecutor);
+                wrappedService, dozeParameters);
         wrappedService = DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(
-                wrappedService, dozeParameters, bgExecutor);
+                wrappedService, dozeParameters);
 
         return wrappedService;
     }

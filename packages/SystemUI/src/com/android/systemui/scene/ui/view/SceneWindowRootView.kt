@@ -26,13 +26,12 @@ class SceneWindowRootView(
         attrs,
     ) {
 
-    private lateinit var viewModel: SceneContainerViewModel
-
+    private var motionEventHandler: SceneContainerViewModel.MotionEventHandler? = null
     // TODO(b/298525212): remove once Compose exposes window inset bounds.
     private val windowInsets: MutableStateFlow<WindowInsets?> = MutableStateFlow(null)
 
     fun init(
-        viewModel: SceneContainerViewModel,
+        viewModelFactory: SceneContainerViewModel.Factory,
         containerConfig: SceneContainerConfig,
         sharedNotificationContainer: SharedNotificationContainer,
         scenes: Set<Scene>,
@@ -40,11 +39,13 @@ class SceneWindowRootView(
         sceneDataSourceDelegator: SceneDataSourceDelegator,
         alternateBouncerDependencies: AlternateBouncerDependencies,
     ) {
-        this.viewModel = viewModel
         setLayoutInsetsController(layoutInsetController)
         SceneWindowRootViewBinder.bind(
             view = this@SceneWindowRootView,
-            viewModel = viewModel,
+            viewModelFactory = viewModelFactory,
+            motionEventHandlerReceiver = { motionEventHandler ->
+                this.motionEventHandler = motionEventHandler
+            },
             windowInsets = windowInsets,
             containerConfig = containerConfig,
             sharedNotificationContainer = sharedNotificationContainer,
@@ -69,10 +70,10 @@ class SceneWindowRootView(
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        viewModel.onMotionEvent(ev)
+        motionEventHandler?.onMotionEvent(ev)
         return super.dispatchTouchEvent(ev).also {
             TouchLogger.logDispatchTouch(TAG, ev, it)
-            viewModel.onMotionEventComplete()
+            motionEventHandler?.onMotionEventComplete()
         }
     }
 

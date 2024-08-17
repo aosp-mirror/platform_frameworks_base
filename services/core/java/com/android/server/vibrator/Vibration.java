@@ -282,12 +282,6 @@ abstract class Vibration {
                     VibrationScaler.scaleLevelToString(mScaleLevel), mAdaptiveScale,
                     Long.toBinaryString(mCallerInfo.attrs.getFlags()),
                     mCallerInfo.attrs.usageToString());
-            // Optional, most vibrations have category unknown so skip them to simplify the logs
-            String categoryStr =
-                    mCallerInfo.attrs.getCategory() != VibrationAttributes.CATEGORY_UNKNOWN
-                            ? " | category=" + VibrationAttributes.categoryToString(
-                            mCallerInfo.attrs.getCategory())
-                            : "";
             // Optional, most vibrations should not be defined via AudioAttributes
             // so skip them to simplify the logs
             String audioUsageStr =
@@ -302,7 +296,7 @@ abstract class Vibration {
                     " | played: %s | original: %s",
                     mPlayedEffect == null ? null : mPlayedEffect.toDebugString(),
                     mOriginalEffect == null ? null : mOriginalEffect.toDebugString());
-            pw.println(timingsStr + paramStr + categoryStr + audioUsageStr + callerStr + effectStr);
+            pw.println(timingsStr + paramStr + audioUsageStr + callerStr + effectStr);
         }
 
         /** Write this info into given {@link PrintWriter}. */
@@ -335,7 +329,6 @@ abstract class Vibration {
             final VibrationAttributes attrs = mCallerInfo.attrs;
             proto.write(VibrationAttributesProto.USAGE, attrs.getUsage());
             proto.write(VibrationAttributesProto.AUDIO_USAGE, attrs.getAudioUsage());
-            proto.write(VibrationAttributesProto.CATEGORY, attrs.getCategory());
             proto.write(VibrationAttributesProto.FLAGS, attrs.getFlags());
             proto.end(attrsToken);
 

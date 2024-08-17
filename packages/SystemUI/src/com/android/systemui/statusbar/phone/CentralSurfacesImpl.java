@@ -30,6 +30,7 @@ import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.keyboardShortcutHelperRewrite;
 import static com.android.systemui.Flags.lightRevealMigration;
 import static com.android.systemui.Flags.newAodTransition;
+import static com.android.systemui.Flags.relockWithPowerButtonImmediately;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -159,6 +160,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.qs.composefragment.QSFragmentCompose;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -1431,9 +1434,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected QS createDefaultQSFragment() {
+        Class<? extends QS> klass;
+        if (QSComposeFragment.isEnabled()) {
+            klass = QSFragmentCompose.class;
+        } else {
+            klass = QSFragmentLegacy.class;
+        }
         return mFragmentService
                 .getFragmentHostManager(getNotificationShadeWindowView())
-                .create(QSFragmentLegacy.class);
+                .create(klass);
     }
 
     private void setUpPresenter() {
@@ -2352,11 +2361,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             } else if (mState == StatusBarState.KEYGUARD
                     && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                     && mStatusBarKeyguardViewManager.isSecure()) {
-                Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
-                if (SceneContainerFlag.isEnabled()) {
-                    mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
-                } else {
-                    mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                if (!relockWithPowerButtonImmediately()) {
+                    Log.d(TAG, "showBouncerOrLockScreenIfKeyguard, showingBouncer");
+                    if (SceneContainerFlag.isEnabled()) {
+                        mStatusBarKeyguardViewManager.showPrimaryBouncer(true /* scrimmed */);
+                    } else {
+                        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
+                    }
                 }
             }
         }

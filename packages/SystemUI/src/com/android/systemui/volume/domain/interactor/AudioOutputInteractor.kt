@@ -26,7 +26,6 @@ import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.MediaDevice.MediaDeviceType
 import com.android.settingslib.media.PhoneMediaDevice
 import com.android.settingslib.volume.data.repository.AudioRepository
-import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -37,7 +36,6 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -60,7 +58,6 @@ constructor(
     private val bluetoothAdapter: BluetoothAdapter?,
     private val deviceIconInteractor: DeviceIconInteractor,
     private val mediaOutputInteractor: MediaOutputInteractor,
-    audioSharingRepository: AudioSharingRepository,
 ) {
 
     val currentAudioDevice: StateFlow<AudioOutputDevice> =
@@ -79,9 +76,6 @@ constructor(
             .map { it ?: AudioOutputDevice.Unknown }
             .flowOn(backgroundCoroutineContext)
             .stateIn(scope, SharingStarted.Eagerly, AudioOutputDevice.Unknown)
-
-    /** Whether the device is in audio sharing */
-    val isInAudioSharing: Flow<Boolean> = audioSharingRepository.inAudioSharing
 
     private fun AudioDeviceInfo.toAudioOutputDevice(): AudioOutputDevice {
         if (

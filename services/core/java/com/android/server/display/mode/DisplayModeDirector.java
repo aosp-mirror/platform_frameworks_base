@@ -1592,6 +1592,12 @@ public class DisplayModeDirector {
                                 - SYNCHRONIZED_REFRESH_RATE_TOLERANCE,
                             SYNCHRONIZED_REFRESH_RATE_TARGET
                                 + SYNCHRONIZED_REFRESH_RATE_TOLERANCE));
+            mVotesStorage.updateGlobalVote(Vote.PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE,
+                    Vote.forRenderFrameRates(
+                            SYNCHRONIZED_REFRESH_RATE_TARGET
+                                    - SYNCHRONIZED_REFRESH_RATE_TOLERANCE,
+                            SYNCHRONIZED_REFRESH_RATE_TARGET
+                                    + SYNCHRONIZED_REFRESH_RATE_TOLERANCE));
         }
 
         private void removeDisplaysSynchronizedPeakRefreshRate(final int displayId) {
@@ -1603,11 +1609,12 @@ public class DisplayModeDirector {
                     return;
                 }
                 mExternalDisplaysConnected.remove(displayId);
-                if (mExternalDisplaysConnected.size() != 0) {
+                if (!mExternalDisplaysConnected.isEmpty()) {
                     return;
                 }
             }
             mVotesStorage.updateGlobalVote(Vote.PRIORITY_SYNCHRONIZED_REFRESH_RATE, null);
+            mVotesStorage.updateGlobalVote(Vote.PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE, null);
         }
 
         private void updateDisplayDeviceConfig(int displayId) {

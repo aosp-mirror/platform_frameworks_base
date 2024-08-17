@@ -68,7 +68,6 @@ import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -87,6 +86,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.spy
@@ -669,7 +669,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             runCurrent()
             verify(mDreamOverlayCallback).onRedirectWake(true)
             client.onWakeRequested()
-            verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), isNull())
+            verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), any(), isNull())
             verify(mUiEventLogger).log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START)
         }
 

@@ -52,6 +52,7 @@ import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthentication
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -87,6 +88,7 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
             intArrayOf(ignoreHelpMessageId)
         )
         underTest = kosmos.bouncerMessageViewModel
+        underTest.activateIn(testScope)
         overrideResource(R.string.kg_trust_agent_disabled, "Trust agent is unavailable")
         kosmos.fakeSystemPropertiesHelper.set(
             DeviceUnlockedInteractor.SYS_BOOT_REASON_PROP,

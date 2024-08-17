@@ -1587,6 +1587,16 @@ public class ActivityOptions extends ComponentOptions {
         }
     }
 
+    /** @hide */
+    public static boolean hasLaunchTargetContainer(ActivityOptions options) {
+        return options.getLaunchDisplayId() != INVALID_DISPLAY
+                || options.getLaunchTaskDisplayArea() != null
+                || options.getLaunchTaskDisplayAreaFeatureId() != FEATURE_UNDEFINED
+                || options.getLaunchRootTask() != null
+                || options.getLaunchTaskId() != -1
+                || options.getLaunchTaskFragmentToken() != null;
+    }
+
     /**
      * Gets whether the activity is to be launched into LockTask mode.
      * @return {@code true} if the activity is to be launched into LockTask mode.

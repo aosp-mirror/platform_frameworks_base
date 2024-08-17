@@ -62,7 +62,9 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.CoordinateOnClickListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
@@ -80,8 +82,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.wmshell.BubblesManager
-import com.google.common.util.concurrent.MoreExecutors
-import com.google.common.util.concurrent.SettableFuture
 import java.util.Optional
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -309,7 +309,7 @@ class ExpandableNotificationRowBuilder(
             entry.ranking = rb.build()
         }
 
-        return generateRow(entry, FLAG_CONTENT_VIEW_ALL)
+        return generateRow(entry, INFLATION_FLAGS)
     }
 
     private fun generateRow(
@@ -374,7 +374,8 @@ class ExpandableNotificationRowBuilder(
         private const val PKG = "com.android.systemui"
         private const val UID = 1000
         private val USER_HANDLE = UserHandle.of(ActivityManager.getCurrentUser())
-
+        private val INFLATION_FLAGS =
+            FLAG_CONTENT_VIEW_CONTRACTED or FLAG_CONTENT_VIEW_EXPANDED or FLAG_CONTENT_VIEW_HEADS_UP
         private const val IS_CONVERSATION_FLAG = "test.isConversation"
 
         private val Notification.isConversationStyleNotification

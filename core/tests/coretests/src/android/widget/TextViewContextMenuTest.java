@@ -23,7 +23,9 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyChar;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -251,8 +253,9 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
                 .thenReturn(mockAutofillMenuItem);
 
-        EditText et = mActivity.findViewById(R.id.editText);
-        et.setText("Test");
+        EditText et = spy(mActivity.findViewById(R.id.editText));
+        doReturn(true).when(et).canRequestAutofill();
+        doReturn(null).when(et).getSelectedText();
 
         Editor editor = et.getEditorForTesting();
         editor.onCreateContextMenu(menu);
@@ -271,11 +274,11 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
                 .thenReturn(mockAutofillMenuItem);
 
-        EditText et = mActivity.findViewById(R.id.editText);
-        et.setText("Test");
-        et.selectAll();
-        Editor editor = et.getEditorForTesting();
-        editor.onCreateContextMenu(menu);
+        EditText et = spy(mActivity.findViewById(R.id.editText));
+        doReturn(true).when(et).canRequestAutofill();
+        doReturn("test").when(et).getSelectedText();
+        Editor editor = new Editor(et);
+        editor.setTextContextMenuItems(menu);
 
         verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
         verify(mockAutofillMenuItem).setEnabled(false);

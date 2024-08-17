@@ -25,7 +25,7 @@ import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IKeyboardBacklightState;
-import android.hardware.input.IKeyboardSystemShortcutListener;
+import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.KeyboardLayoutSelectionResult;
@@ -241,13 +241,13 @@ interface IInputManager {
 
     KeyGlyphMap getKeyGlyphMap(int deviceId);
 
-    @EnforcePermission("MONITOR_KEYBOARD_SYSTEM_SHORTCUTS")
+    @EnforcePermission("MANAGE_KEY_GESTURES")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)")
-    void registerKeyboardSystemShortcutListener(IKeyboardSystemShortcutListener listener);
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void registerKeyGestureEventListener(IKeyGestureEventListener listener);
 
-    @EnforcePermission("MONITOR_KEYBOARD_SYSTEM_SHORTCUTS")
+    @EnforcePermission("MANAGE_KEY_GESTURES")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)")
-    void unregisterKeyboardSystemShortcutListener(IKeyboardSystemShortcutListener listener);
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void unregisterKeyGestureEventListener(IKeyGestureEventListener listener);
 }

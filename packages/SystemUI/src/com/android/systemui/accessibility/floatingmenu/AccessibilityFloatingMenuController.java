@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.MainThread;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -36,6 +37,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver.AccessibilityButtonMode;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -54,11 +56,13 @@ public class AccessibilityFloatingMenuController implements
 
     private Context mContext;
     private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final DisplayManager mDisplayManager;
     private final AccessibilityManager mAccessibilityManager;
 
     private final SecureSettings mSecureSettings;
     private final DisplayTracker mDisplayTracker;
+    private final NavigationModeController mNavigationModeController;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
     private int mBtnMode;
@@ -97,15 +101,18 @@ public class AccessibilityFloatingMenuController implements
     @Inject
     public AccessibilityFloatingMenuController(Context context,
             WindowManager windowManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             DisplayManager displayManager,
             AccessibilityManager accessibilityManager,
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecureSettings secureSettings,
-            DisplayTracker displayTracker) {
+            DisplayTracker displayTracker,
+            NavigationModeController navigationModeController) {
         mContext = context;
         mWindowManager = windowManager;
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         mDisplayManager = displayManager;
         mAccessibilityManager = accessibilityManager;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
@@ -113,6 +120,7 @@ public class AccessibilityFloatingMenuController implements
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
+        mNavigationModeController = navigationModeController;
 
         mIsKeyguardVisible = false;
     }
@@ -187,7 +195,8 @@ public class AccessibilityFloatingMenuController implements
             final Context windowContext = mContext.createWindowContext(defaultDisplay,
                     TYPE_NAVIGATION_BAR_PANEL, /* options= */ null);
             mFloatingMenu = new MenuViewLayerController(windowContext, mWindowManager,
-                    mAccessibilityManager, mSecureSettings);
+                    mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                    mNavigationModeController);
         }
 
         mFloatingMenu.show();

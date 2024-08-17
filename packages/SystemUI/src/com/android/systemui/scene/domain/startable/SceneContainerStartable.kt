@@ -154,7 +154,6 @@ constructor(
             handleKeyguardEnabledness()
             notifyKeyguardDismissCallbacks()
             refreshLockscreenEnabled()
-            handleHideAlternateBouncerOnTransitionToGone()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -357,11 +356,10 @@ constructor(
                                 )
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
-                    val isOnBouncer =
-                        renderedScenes.contains(Scenes.Bouncer) ||
-                            alternateBouncerInteractor.isVisibleState()
+                    val isAlternateBouncerVisible = alternateBouncerInteractor.isVisibleState()
+                    val isOnPrimaryBouncer = renderedScenes.contains(Scenes.Bouncer)
                     if (!deviceUnlockStatus.isUnlocked) {
-                        return@mapNotNull if (isOnLockscreen || isOnBouncer) {
+                        return@mapNotNull if (isOnLockscreen || isOnPrimaryBouncer) {
                             // Already on lockscreen or bouncer, no need to change scenes.
                             null
                         } else {
@@ -373,15 +371,32 @@ constructor(
                     }
 
                     if (
-                        isOnBouncer &&
+                        isOnPrimaryBouncer &&
                             deviceUnlockStatus.deviceUnlockSource == DeviceUnlockSource.TrustAgent
                     ) {
                         uiEventLogger.log(BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS)
                     }
                     when {
-                        isOnBouncer ->
-                            // When the device becomes unlocked in Bouncer, go to previous scene,
-                            // or Gone.
+                        isAlternateBouncerVisible -> {
+                            // When the device becomes unlocked when the alternate bouncer is
+                            // showing, always hide the alternate bouncer...
+                            alternateBouncerInteractor.hide()
+
+                            // ... and go to Gone or stay on the current scene
+                            if (
+                                isOnLockscreen ||
+                                    !statusBarStateController.leaveOpenOnKeyguardHide()
+                            ) {
+                                Scenes.Gone to
+                                    "device was unlocked with alternate bouncer showing" +
+                                        " and shade didn't need to be left open"
+                            } else {
+                                null
+                            }
+                        }
+                        isOnPrimaryBouncer ->
+                            // When the device becomes unlocked in primary Bouncer,
+                            // go to previous scene or Gone.
                             if (
                                 previousScene.value == Scenes.Lockscreen ||
                                     !statusBarStateController.leaveOpenOnKeyguardHide()
@@ -392,7 +407,7 @@ constructor(
                             } else {
                                 val prevScene = previousScene.value
                                 (prevScene ?: Scenes.Gone) to
-                                    "device was unlocked with bouncer showing," +
+                                    "device was unlocked with primary bouncer showing," +
                                         " from sceneKey=$prevScene"
                             }
                         isOnLockscreen ->
@@ -783,16 +798,6 @@ constructor(
                 .distinctUntilChanged()
                 .filter { it }
                 .collectLatest { deviceEntryInteractor.refreshLockscreenEnabled() }
-        }
-    }
-
-    private fun handleHideAlternateBouncerOnTransitionToGone() {
-        applicationScope.launch {
-            sceneInteractor.transitionState
-                .map { it.isIdle(Scenes.Gone) }
-                .distinctUntilChanged()
-                .filter { it }
-                .collectLatest { alternateBouncerInteractor.hide() }
         }
     }
 }

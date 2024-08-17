@@ -496,7 +496,11 @@ constructor(
                 if (posted?.shouldHeadsUpEver == false) {
                     if (posted.isHeadsUpEntry) {
                         // We don't want this to be interrupting anymore, let's remove it
-                        mHeadsUpManager.removeNotification(posted.key, false /*removeImmediately*/)
+                        mHeadsUpManager.removeNotification(
+                            posted.key,
+                            /* removeImmediately= */ false,
+                            "onEntryUpdated"
+                        )
                     } else if (posted.isBinding) {
                         // Don't let the bind finish
                         cancelHeadsUpBind(posted.entry)
@@ -520,7 +524,11 @@ constructor(
                     val removeImmediatelyForRemoteInput =
                         (mRemoteInputManager.isSpinning(entryKey) &&
                             !NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY)
-                    mHeadsUpManager.removeNotification(entry.key, removeImmediatelyForRemoteInput)
+                    mHeadsUpManager.removeNotification(
+                        entry.key,
+                        removeImmediatelyForRemoteInput,
+                        "onEntryRemoved, reason: $reason"
+                    )
                 }
             }
 
@@ -721,7 +729,9 @@ constructor(
                             {
                                 mHeadsUpManager.removeNotification(
                                     entry.key, /* releaseImmediately */
-                                    true
+                                    true,
+                                    "cancel lifetime extension - extended for reason: " +
+                                        "$reason, isSticky: true"
                                 )
                             },
                             removeAfterMillis
@@ -730,7 +740,9 @@ constructor(
                     mExecutor.execute {
                         mHeadsUpManager.removeNotification(
                             entry.key, /* releaseImmediately */
-                            false
+                            false,
+                            "lifetime extension - extended for reason: $reason" +
+                                ", isSticky: false"
                         )
                     }
                     mNotifsExtendingLifetime[entry] = null
@@ -902,7 +914,7 @@ private class HunMutatorImpl(private val headsUpManager: HeadsUpManager) : HunMu
 
     fun commitModifications() {
         deferred.forEach { (key, releaseImmediately) ->
-            headsUpManager.removeNotification(key, releaseImmediately)
+            headsUpManager.removeNotification(key, releaseImmediately, "commitModifications")
         }
         deferred.clear()
     }

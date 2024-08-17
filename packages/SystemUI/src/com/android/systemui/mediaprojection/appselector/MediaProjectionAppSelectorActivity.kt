@@ -32,6 +32,10 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
+import android.widget.ImageView
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -52,6 +56,7 @@ import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRece
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.AsyncActivityLauncher
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 
 class MediaProjectionAppSelectorActivity(
@@ -116,6 +121,7 @@ class MediaProjectionAppSelectorActivity(
 
         super.onCreate(savedInstanceState)
         controller.init()
+        setIcon()
         // we override AppList's AccessibilityDelegate set in ResolverActivity.onCreate because in
         // our case this delegate must extend RecyclerViewAccessibilityDelegate, otherwise
         // RecyclerView scrolling is broken
@@ -298,6 +304,29 @@ class MediaProjectionAppSelectorActivity(
     override fun createContentPreviewView(parent: ViewGroup): ViewGroup =
         recentsViewController.createView(parent)
 
+    /** Set up intent for the [ChooserActivity] */
+    private fun Intent.configureChooserIntent(
+        resources: Resources,
+        hostUserHandle: UserHandle,
+        personalProfileUserHandle: UserHandle,
+    ) {
+        // Specify the query intent to show icons for all apps on the chooser screen
+        val queryIntent = Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
+        putExtra(Intent.EXTRA_INTENT, queryIntent)
+
+        // Update the title of the chooser
+        putExtra(Intent.EXTRA_TITLE, resources.getString(titleResId))
+
+        // Select host app's profile tab by default
+        val selectedProfile =
+            if (hostUserHandle == personalProfileUserHandle) {
+                PROFILE_PERSONAL
+            } else {
+                PROFILE_WORK
+            }
+        putExtra(EXTRA_SELECTED_PROFILE, selectedProfile)
+    }
+
     private val hostUserHandle: UserHandle
         get() {
             val extras =
@@ -321,6 +350,54 @@ class MediaProjectionAppSelectorActivity(
             return intent.getIntExtra(EXTRA_HOST_APP_UID, /* defaultValue= */ -1)
         }
 
+    /**
+     * The type of screen sharing being performed. Used to show the right text and icon in the
+     * activity.
+     */
+    private val screenShareType: ScreenShareType?
+        get() {
+            if (!intent.hasExtra(EXTRA_SCREEN_SHARE_TYPE)) {
+                return null
+            } else {
+                val type = intent.getStringExtra(EXTRA_SCREEN_SHARE_TYPE) ?: return null
+                return try {
+                    enumValueOf<ScreenShareType>(type)
+                } catch (e: IllegalArgumentException) {
+                    null
+                }
+            }
+        }
+
+    @get:StringRes
+    private val titleResId: Int
+        get() =
+            when (screenShareType) {
+                ScreenShareType.ShareToApp ->
+                    R.string.media_projection_entry_share_app_selector_title
+                ScreenShareType.SystemCast ->
+                    R.string.media_projection_entry_cast_app_selector_title
+                ScreenShareType.ScreenRecord -> R.string.screenrecord_app_selector_title
+                null -> R.string.screen_share_generic_app_selector_title
+            }
+
+    @get:DrawableRes
+    private val iconResId: Int
+        get() =
+            when (screenShareType) {
+                ScreenShareType.ShareToApp -> R.drawable.ic_present_to_all
+                ScreenShareType.SystemCast -> R.drawable.ic_cast_connected
+                ScreenShareType.ScreenRecord -> R.drawable.ic_screenrecord
+                null -> R.drawable.ic_present_to_all
+            }
+
+    @get:ColorRes
+    private val iconTintResId: Int?
+        get() =
+            when (screenShareType) {
+                ScreenShareType.ScreenRecord -> R.color.screenrecord_icon_color
+                else -> null
+            }
+
     companion object {
         const val TAG = "MediaProjectionAppSelectorActivity"
 
@@ -343,30 +420,18 @@ class MediaProjectionAppSelectorActivity(
         const val EXTRA_HOST_APP_UID = "launched_from_host_uid"
         const val KEY_CAPTURE_TARGET = "capture_region"
 
-        /** Set up intent for the [ChooserActivity] */
-        private fun Intent.configureChooserIntent(
-            resources: Resources,
-            hostUserHandle: UserHandle,
-            personalProfileUserHandle: UserHandle
-        ) {
-            // Specify the query intent to show icons for all apps on the chooser screen
-            val queryIntent =
-                Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
-            putExtra(Intent.EXTRA_INTENT, queryIntent)
+        /**
+         * The type of screen sharing being performed.
+         *
+         * The value set for this extra should match the name of a [ScreenShareType].
+         */
+        const val EXTRA_SCREEN_SHARE_TYPE = "screen_share_type"
+    }
 
-            // Update the title of the chooser
-            val title = resources.getString(R.string.screen_share_permission_app_selector_title)
-            putExtra(Intent.EXTRA_TITLE, title)
-
-            // Select host app's profile tab by default
-            val selectedProfile =
-                if (hostUserHandle == personalProfileUserHandle) {
-                    PROFILE_PERSONAL
-                } else {
-                    PROFILE_WORK
-                }
-            putExtra(EXTRA_SELECTED_PROFILE, selectedProfile)
-        }
+    private fun setIcon() {
+        val iconView = findViewById<ImageView>(R.id.media_projection_app_selector_icon) ?: return
+        iconView.setImageResource(iconResId)
+        iconTintResId?.let { iconView.setColorFilter(this.resources.getColor(it, this.theme)) }
     }
 
     private fun setAppListAccessibilityDelegate() {
@@ -405,5 +470,15 @@ class MediaProjectionAppSelectorActivity(
             super.onRequestSendAccessibilityEvent(host, child, event)
             return delegate.onRequestSendAccessibilityEvent(host, child, event)
         }
+    }
+
+    /** Enum describing what type of app screen sharing is being performed. */
+    enum class ScreenShareType {
+        /** The selected app will be cast to another device. */
+        SystemCast,
+        /** The selected app will be shared to another app on the device. */
+        ShareToApp,
+        /** The selected app will be recorded. */
+        ScreenRecord,
     }
 }

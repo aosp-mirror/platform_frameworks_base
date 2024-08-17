@@ -104,8 +104,6 @@ class ResourceConfigValue {
   // The actual Value.
   std::unique_ptr<Value> value;
 
-  FlagStatus flag_status = FlagStatus::NoFlag;
-
   ResourceConfigValue(const android::ConfigDescription& config, android::StringPiece product)
       : config(config), product(product) {
   }

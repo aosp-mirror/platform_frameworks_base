@@ -29,9 +29,6 @@ import dagger.assisted.AssistedInject
 
 /**
  * Models the UI state for the user actions that the user can perform to navigate to other scenes.
- *
- * Different from the [NotificationsShadeSceneContentViewModel] which models the _content_ of the
- * scene.
  */
 class NotificationsShadeSceneActionsViewModel
 @AssistedInject

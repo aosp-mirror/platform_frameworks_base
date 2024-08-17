@@ -1617,10 +1617,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @NonNull
     public WorkSource deriveWorkSource(int sourceUid, @Nullable String sourcePackageName) {
-        if (WorkSource.isChainedBatteryAttributionEnabled(getContext())) {
+        if (Flags.createWorkChainByDefault()
+                || WorkSource.isChainedBatteryAttributionEnabled(getContext())) {
             WorkSource ws = new WorkSource();
             ws.createWorkChain()
-                    .addNode(sourceUid, sourcePackageName)
+                    .addNode(sourceUid, null)
                     .addNode(Process.SYSTEM_UID, "JobScheduler");
             return ws;
         } else {
@@ -1664,6 +1665,20 @@ public class JobSchedulerService extends com.android.server.SystemService
             // onUserStarting: direct-boot-aware jobs can safely run
             // onUserUnlocked: direct-boot-UNaware jobs can safely run.
             mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+        }
+    }
+
+    @Override
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        if (!Flags.removeUserDuringUserSwitch()
+                || from == null
+                || !mActivityManagerInternal.isEarlyPackageKillEnabledForUserSwitch(
+                                                                from.getUserIdentifier(),
+                                                                to.getUserIdentifier())) {
+            return;
+        }
+        synchronized (mLock) {
+            mStartedUsers = ArrayUtils.removeInt(mStartedUsers, from.getUserIdentifier());
         }
     }
 

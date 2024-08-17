@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"reloj"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Elige un dispositivo para que lo gestione &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Elige el <xliff:g id="PROFILE_NAME">%1$s</xliff:g> que quieras configurar"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"Esta aplicación podrá sincronizar información, como el nombre de la persona que llama, y acceder a estos permisos de tu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"Esta aplicación podrá sincronizar información, como el nombre de la persona que llama, y acceder a estos permisos de tu <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"¿Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; gestione &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"dispositivo"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"Esta aplicación podrá acceder a estos permisos de tu <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acceda a esta información de tu teléfono"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"¿Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; emita las aplicaciones de tu dispositivo?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s tendrá acceso a todo lo que sea visible o se reproduzca en el teléfono, incluidos audio, fotos, contraseñas y mensajes.&lt;br/&gt;&lt;br/&gt;%1$s podrá emitir aplicaciones hasta que quites el acceso a este permiso."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Servicios multidispositivo"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pidiendo permiso en nombre de tu <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> para emitir aplicaciones en otros dispositivos tuyos"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pidiendo permiso en nombre de tu <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> para mostrar y emitir aplicaciones en otros dispositivos tuyos"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"Esta aplicación podrá acceder a estos permisos de tu <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"¿Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; emita las aplicaciones de tu <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> en &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> tendrá acceso a todo lo que se vea o se reproduzca en tu <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>, incluidos audio, fotos, contraseñas y mensajes.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> podrá emitir aplicaciones en <xliff:g id="DEVICE_NAME">%3$s</xliff:g> hasta que quites el acceso a este permiso."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pidiendo permiso en nombre de tu <xliff:g id="DEVICE_NAME">%2$s</xliff:g> para mostrar y emitir aplicaciones en otros dispositivos tuyos"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acceda a esta información de tu teléfono"</string>
+    <string name="title_computer" msgid="4782923323932440751">"Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acceda a esta información de tu <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Servicios de Google Play"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pidiendo permiso en nombre de tu <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> para acceder a las fotos, los archivos multimedia y las notificaciones de tu teléfono"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"¿Permitir que &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; realice esta acción?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"¿Permitir que &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; emita las aplicaciones y funciones del sistema de tu dispositivo?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s tendrá acceso a todo lo que sea visible o se reproduzca en el teléfono, incluidos audio, fotos, información para pagos, contraseñas y mensajes.&lt;br/&gt;&lt;br/&gt;%1$s podrá emitir aplicaciones y funciones del sistema hasta que quites el acceso a este permiso."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pidiendo permiso en nombre de tu <xliff:g id="DEVICE_NAME">%2$s</xliff:g> para emitir aplicaciones y otras funciones del sistema en dispositivos cercanos"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pidiendo permiso en nombre de tu <xliff:g id="DEVICE_NAME">%2$s</xliff:g> para acceder a las fotos, los archivos multimedia y las notificaciones de tu <xliff:g id="DEVICE_TYPE">%3$s</xliff:g>"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"¿Permitir que &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; emita las aplicaciones y funciones del sistema de tu<xliff:g id="DEVICE_TYPE">%2$s</xliff:g> en &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> tendrá acceso a todo lo que se vea o se reproduzca en tu <xliff:g id="DEVICE_TYPE">%2$s</xliff:g>, incluidos audio, fotos, información para pagos, contraseñas y mensajes.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_1">%1$s</xliff:g> podrá emitir aplicaciones y funciones del sistema en <xliff:g id="DEVICE_NAME">%3$s</xliff:g> hasta que quites el acceso a este permiso."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pidiendo permiso en nombre de tu <xliff:g id="DEVICE_NAME">%2$s</xliff:g> para emitir aplicaciones y otras funciones del sistema en otros dispositivos tuyos"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"dispositivo"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Esta aplicación podrá sincronizar información (por ejemplo, el nombre de la persona que te llama) entre tu teléfono y el dispositivo que elijas"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Permitir"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Cambiar salida multimedia"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos y elementos multimedia"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Notificaciones"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"Aplicaciones"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Emitir"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Hacer y gestionar llamadas telefónicas"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Leer y escribir en el registro de llamadas del teléfono"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"Enviar y ver mensajes SMS"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Buscar, conectarse y determinar la posición relativa de dispositivos cercanos"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Leer todas las notificaciones, incluida información como contactos, mensajes y fotos"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• Leer todas las notificaciones, incluida información como contactos, mensajes y fotos&lt;br/&gt;• Enviar notificaciones&lt;br/&gt;&lt;br/&gt;Puedes gestionar los permisos de esta aplicación para leer y enviar notificaciones cuando quieras en Ajustes &gt; Notificaciones."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Muestra en streaming las aplicaciones de tu teléfono"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Emite aplicaciones y otras funciones del sistema desde tu teléfono"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Accede a una lista de dispositivos disponibles y controla cuál transmite o envía audio o vídeo desde otras aplicaciones"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"teléfono"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"televisión"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"dispositivo"</string>
 </resources>

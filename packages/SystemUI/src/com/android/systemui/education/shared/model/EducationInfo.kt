@@ -22,7 +22,11 @@ import com.android.systemui.contextualeducation.GestureType
  * Model for education triggered. [gestureType] indicates what gesture it is trying to educate about
  * and [educationUiType] is how we educate user in the UI
  */
-data class EducationInfo(val gestureType: GestureType, val educationUiType: EducationUiType)
+data class EducationInfo(
+    val gestureType: GestureType,
+    val educationUiType: EducationUiType,
+    val userId: Int
+)
 
 enum class EducationUiType {
     Toast,

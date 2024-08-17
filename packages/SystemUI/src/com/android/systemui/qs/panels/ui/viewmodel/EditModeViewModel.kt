@@ -179,6 +179,10 @@ constructor(
         currentTilesInteractor.removeTiles(listOf(tileSpec))
     }
 
+    fun setTiles(tileSpecs: List<TileSpec>) {
+        currentTilesInteractor.setTiles(tileSpecs)
+    }
+
     /** Immediately resets the current tiles to the default list. */
     fun resetCurrentTilesToDefault() {
         throw NotImplementedError("This is not supported yet")

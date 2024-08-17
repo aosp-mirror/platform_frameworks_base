@@ -1892,8 +1892,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                                 .equals(ss.remoteLabel)) {
                     addRow(
                             stream,
-                            R.drawable.ic_volume_media,
-                            R.drawable.ic_volume_media_mute,
+                            R.drawable.ic_volume_media_bt,
+                            R.drawable.ic_volume_media_bt_mute,
                             true,
                             false,
                             true);
