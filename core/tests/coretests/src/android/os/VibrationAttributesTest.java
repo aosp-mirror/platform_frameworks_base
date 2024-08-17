@@ -28,11 +28,9 @@ public class VibrationAttributesTest {
     @Test
     public void testSimple() throws Exception {
         final VibrationAttributes attr = new VibrationAttributes.Builder()
-                .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
                 .setUsage(VibrationAttributes.USAGE_ALARM)
                 .build();
 
-        assertEquals(VibrationAttributes.CATEGORY_KEYBOARD, attr.getCategory());
         assertEquals(VibrationAttributes.USAGE_ALARM, attr.getUsage());
     }
 }

@@ -43,6 +43,8 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubbles.DismissReason;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.common.bubbles.RemovedBubble;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -201,6 +203,7 @@ public class BubbleData {
     private final BubblePositioner mPositioner;
     private final BubbleEducationController mEducationController;
     private final Executor mMainExecutor;
+    private final Executor mBgExecutor;
     /** Bubbles that are actively in the stack. */
     private final List<Bubble> mBubbles;
     /** Bubbles that aged out to overflow. */
@@ -246,12 +249,14 @@ public class BubbleData {
     private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
 
     public BubbleData(Context context, BubbleLogger bubbleLogger, BubblePositioner positioner,
-            BubbleEducationController educationController, Executor mainExecutor) {
+            BubbleEducationController educationController, @ShellMainThread Executor mainExecutor,
+            @ShellBackgroundThread Executor bgExecutor) {
         mContext = context;
         mLogger = bubbleLogger;
         mPositioner = positioner;
         mEducationController = educationController;
         mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mOverflow = new BubbleOverflow(context, positioner);
         mBubbles = new ArrayList<>();
         mOverflowBubbles = new ArrayList<>();
@@ -431,7 +436,8 @@ public class BubbleData {
                     bubbleToReturn = new Bubble(entry,
                             mBubbleMetadataFlagListener,
                             mCancelledListener,
-                            mMainExecutor);
+                            mMainExecutor,
+                            mBgExecutor);
                 } else {
                     // If there's no entry it must be a persisted bubble
                     bubbleToReturn = persistedBubble;
@@ -450,7 +456,7 @@ public class BubbleData {
         String bubbleKey = Bubble.getBubbleKeyForShortcut(info);
         Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
         if (bubbleToReturn == null) {
-            bubbleToReturn = Bubble.createShortcutBubble(info, mMainExecutor);
+            bubbleToReturn = Bubble.createShortcutBubble(info, mMainExecutor, mBgExecutor);
         }
         return bubbleToReturn;
     }
@@ -461,7 +467,7 @@ public class BubbleData {
                 user);
         Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
         if (bubbleToReturn == null) {
-            bubbleToReturn = Bubble.createAppBubble(intent, user, null, mMainExecutor);
+            bubbleToReturn = Bubble.createAppBubble(intent, user, null, mMainExecutor, mBgExecutor);
         }
         return bubbleToReturn;
     }

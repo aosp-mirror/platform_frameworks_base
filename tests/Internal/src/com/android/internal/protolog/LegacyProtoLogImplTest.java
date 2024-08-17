@@ -214,6 +214,13 @@ public class LegacyProtoLogImplTest {
         verify(mReader, never()).getViewerString(anyLong());
     }
 
+    @Test
+    public void loadViewerConfigOnLogcatGroupRegistration() {
+        TestProtoLogGroup.TEST_GROUP.setLogToLogcat(true);
+        mProtoLog.registerGroups(TestProtoLogGroup.TEST_GROUP);
+        verify(mReader).loadViewerConfig(any(), any());
+    }
+
     private static class ProtoLogData {
         Long mMessageHash = null;
         Long mElapsedTime = null;

@@ -92,9 +92,9 @@ constructor(
         val button = view as ImageView
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
         val disposableHandle =
-            view.repeatWhenAttached(mainImmediateDispatcher) {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch("$TAG#viewModel") {
+            view.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    launch {
                         viewModel.collect { buttonModel ->
                             updateButton(
                                 view = button,
@@ -104,7 +104,7 @@ constructor(
                         }
                     }
 
-                    launch("$TAG#updateButtonAlpha") {
+                    launch {
                         updateButtonAlpha(
                             view = button,
                             viewModel = viewModel,
@@ -112,7 +112,7 @@ constructor(
                         )
                     }
 
-                    launch("$TAG#configurationBasedDimensions") {
+                    launch {
                         configurationBasedDimensions.collect { dimensions ->
                             button.updateLayoutParams<ViewGroup.LayoutParams> {
                                 width = dimensions.buttonSizePx.width

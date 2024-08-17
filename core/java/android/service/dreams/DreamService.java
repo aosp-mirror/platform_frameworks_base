@@ -17,8 +17,8 @@
 package android.service.dreams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.service.dreams.Flags.dreamHandlesBeingObscured;
+import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.service.dreams.Flags.startAndStopDozingInBackground;
 
 import android.annotation.FlaggedApi;
@@ -267,10 +267,13 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private boolean mPreviewMode;
-    private volatile int mDozeScreenState = Display.STATE_UNKNOWN;
-    private volatile @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
-    private volatile int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
-    private volatile float mDozeScreenBrightnessFloat = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+    private int mDozeScreenState = Display.STATE_UNKNOWN;
+    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
+    private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private float mDozeScreenBrightnessFloat = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+
+    // This variable being true means dozing device expecting normal(non-doze) brightness.
+    private boolean mUseNormalBrightnessForDoze;
 
     private boolean mDebug = false;
 
@@ -913,13 +916,15 @@ public class DreamService extends Service implements Window.Callback {
      */
     @UnsupportedAppUsage
     public void startDozing() {
-        if (mCanDoze && !mDozing) {
-            mDozing = true;
-            updateDoze();
+        synchronized (this) {
+            if (mCanDoze && !mDozing) {
+                mDozing = true;
+                updateDoze();
+            }
         }
     }
 
-    private void updateDoze() {
+    private synchronized void updateDoze() {
         if (mDreamToken == null) {
             Slog.w(mTag, "Updating doze without a dream token.");
             return;
@@ -927,16 +932,20 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
+                Slog.v(mTag, "UpdateDoze mDozeScreenState=" + mDozeScreenState
+                        + " mDozeScreenBrightness=" + mDozeScreenBrightness
+                        + " mDozeScreenBrightnessFloat=" + mDozeScreenBrightnessFloat);
                 if (startAndStopDozingInBackground()) {
                     mDreamManager.startDozingOneway(
                             mDreamToken, mDozeScreenState, mDozeScreenStateReason,
-                            mDozeScreenBrightnessFloat, mDozeScreenBrightness);
+                            mDozeScreenBrightnessFloat, mDozeScreenBrightness,
+                            mUseNormalBrightnessForDoze);
                 } else {
                     mDreamManager.startDozing(
                             mDreamToken, mDozeScreenState, mDozeScreenStateReason,
-                            mDozeScreenBrightnessFloat, mDozeScreenBrightness);
+                            mDozeScreenBrightnessFloat, mDozeScreenBrightness,
+                            mUseNormalBrightnessForDoze);
                 }
-
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -1005,7 +1014,8 @@ public class DreamService extends Service implements Window.Callback {
      */
     @UnsupportedAppUsage
     public void setDozeScreenState(int state) {
-        setDozeScreenState(state, Display.STATE_REASON_UNKNOWN);
+        setDozeScreenState(state, Display.STATE_REASON_UNKNOWN,
+                /* useNormalBrightnessForDoze= */ false);
     }
 
     /**
@@ -1043,16 +1053,40 @@ public class DreamService extends Service implements Window.Callback {
      * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
      * for the default behavior.
      * @param reason the reason for setting the specified screen state.
-     *
-     * @hide For use by system UI components only.
+     * @param useNormalBrightnessForDoze False means the default case where doze brightness is
+     * expected when device is dozing. True means display expects normal brightness for next doze
+     * request. Noted: unlike {@link #setDozeScreenBrightness} that sets a real brightness value for
+     * doze screen, this parameter only indicates whether the doze brightness is intended on next
+     * doze screen. The actual brightness value will be computed by {@link DisplayManager}
+     * internally.
+     * @hide For use by System UI components only.
      */
     @UnsupportedAppUsage
-    public void setDozeScreenState(int state, @Display.StateReason int reason) {
-        if (mDozeScreenState != state) {
-            mDozeScreenState = state;
-            mDozeScreenStateReason = reason;
-            updateDoze();
+    public void setDozeScreenState(int state, @Display.StateReason int reason,
+            boolean useNormalBrightnessForDoze) {
+        synchronized (this) {
+            if (mDozeScreenState != state
+                    || mUseNormalBrightnessForDoze != useNormalBrightnessForDoze) {
+                mDozeScreenState = state;
+                mDozeScreenStateReason = reason;
+                mUseNormalBrightnessForDoze = useNormalBrightnessForDoze;
+                updateDoze();
+            }
         }
+    }
+
+    /**
+     * Returns whether we want to use the normal brightness setting while in doze. This is useful
+     * on devices like Wear; when we allow the user to interact with a device that remains in
+     * doze (looking at time).
+     *
+     * @return a boolean that informs {@link DisplayManager} whether to adjust the display for the
+     * interacting user e.g. brightening the display.
+     * @hide For use by System UI components only.
+     */
+    @UnsupportedAppUsage
+    public boolean getUseNormalBrightnessForDoze() {
+        return mUseNormalBrightnessForDoze;
     }
 
     /**
@@ -1103,9 +1137,11 @@ public class DreamService extends Service implements Window.Callback {
         if (brightness != PowerManager.BRIGHTNESS_DEFAULT) {
             brightness = clampAbsoluteBrightness(brightness);
         }
-        if (mDozeScreenBrightness != brightness) {
-            mDozeScreenBrightness = brightness;
-            updateDoze();
+        synchronized (this) {
+            if (mDozeScreenBrightness != brightness) {
+                mDozeScreenBrightness = brightness;
+                updateDoze();
+            }
         }
     }
 
@@ -1141,9 +1177,12 @@ public class DreamService extends Service implements Window.Callback {
         if (!Float.isNaN(brightness)) {
             brightness = clampAbsoluteBrightnessFloat(brightness);
         }
-        if (!BrightnessSynchronizer.floatEquals(mDozeScreenBrightnessFloat, brightness)) {
-            mDozeScreenBrightnessFloat = brightness;
-            updateDoze();
+
+        synchronized (this) {
+            if (!BrightnessSynchronizer.floatEquals(mDozeScreenBrightnessFloat, brightness)) {
+                mDozeScreenBrightnessFloat = brightness;
+                updateDoze();
+            }
         }
     }
 
@@ -1324,6 +1363,9 @@ public class DreamService extends Service implements Window.Callback {
      * Tells the dream to come to the front (which in turn tells the overlay to come to the front).
      */
     private void comeToFront() {
+        if (mOverlayConnection == null) {
+            return;
+        }
         mOverlayConnection.addConsumer(overlay -> {
             try {
                 overlay.comeToFront();

@@ -258,7 +258,7 @@
 
             <Button
                 android:id="@+id/audio_sharing_button"
-                style="@style/Widget.Dialog.Button.BorderButton"
+                style="@style/BluetoothTileDialog.AudioSharingButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="9dp"
@@ -270,7 +270,6 @@
                 android:text="@string/quick_settings_bluetooth_audio_sharing_button"
                 android:drawableStart="@drawable/ic_bt_le_audio_sharing_18dp"
                 android:drawablePadding="10dp"
-                android:drawableTint="?android:attr/textColorPrimary"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintEnd_toStartOf="@+id/done_button"

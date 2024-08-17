@@ -25,8 +25,8 @@ import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.hardware.input.InputManager.KeyGestureEventListener;
 import android.hardware.input.InputManager.KeyboardBacklightListener;
-import android.hardware.input.InputManager.KeyboardSystemShortcutListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.hardware.input.InputManager.StickyModifierStateListener;
 import android.hardware.lights.Light;
@@ -111,13 +111,13 @@ public final class InputManagerGlobal {
     @Nullable
     private IStickyModifierStateListener mStickyModifierStateListener;
 
-    private final Object mKeyboardSystemShortcutListenerLock = new Object();
-    @GuardedBy("mKeyboardSystemShortcutListenerLock")
+    private final Object mKeyGestureEventListenerLock = new Object();
+    @GuardedBy("mKeyGestureEventListenerLock")
     @Nullable
-    private ArrayList<KeyboardSystemShortcutListenerDelegate> mKeyboardSystemShortcutListeners;
-    @GuardedBy("mKeyboardSystemShortcutListenerLock")
+    private ArrayList<KeyGestureEventListenerDelegate> mKeyGestureEventListeners;
+    @GuardedBy("mKeyGestureEventListenerLock")
     @Nullable
-    private IKeyboardSystemShortcutListener mKeyboardSystemShortcutListener;
+    private IKeyGestureEventListener mKeyGestureEventListener;
 
     // InputDeviceSensorManager gets notified synchronously from the binder thread when input
     // devices change, so it must be synchronized with the input device listeners.
@@ -1064,94 +1064,92 @@ public final class InputManagerGlobal {
         }
     }
 
-    private static final class KeyboardSystemShortcutListenerDelegate {
-        final KeyboardSystemShortcutListener mListener;
+    private static final class KeyGestureEventListenerDelegate {
+        final KeyGestureEventListener mListener;
         final Executor mExecutor;
 
-        KeyboardSystemShortcutListenerDelegate(KeyboardSystemShortcutListener listener,
+        KeyGestureEventListenerDelegate(KeyGestureEventListener listener,
                 Executor executor) {
             mListener = listener;
             mExecutor = executor;
         }
 
-        void onKeyboardSystemShortcutTriggered(int deviceId,
-                KeyboardSystemShortcut systemShortcut) {
-            mExecutor.execute(() ->
-                    mListener.onKeyboardSystemShortcutTriggered(deviceId, systemShortcut));
+        void onKeyGestureEvent(KeyGestureEvent event) {
+            mExecutor.execute(() -> mListener.onKeyGestureEvent(event));
         }
     }
 
-    private class LocalKeyboardSystemShortcutListener extends IKeyboardSystemShortcutListener.Stub {
+    private class LocalKeyGestureEventListener extends IKeyGestureEventListener.Stub {
 
         @Override
-        public void onKeyboardSystemShortcutTriggered(int deviceId, int[] keycodes,
-                int modifierState, int shortcut) {
-            synchronized (mKeyboardSystemShortcutListenerLock) {
-                if (mKeyboardSystemShortcutListeners == null) return;
-                final int numListeners = mKeyboardSystemShortcutListeners.size();
+        public void onKeyGestureEvent(int deviceId, int[] keycodes, int modifierState,
+                int gestureType) {
+            synchronized (mKeyGestureEventListenerLock) {
+                if (mKeyGestureEventListeners == null) return;
+                final int numListeners = mKeyGestureEventListeners.size();
                 for (int i = 0; i < numListeners; i++) {
-                    mKeyboardSystemShortcutListeners.get(i)
-                            .onKeyboardSystemShortcutTriggered(deviceId,
-                                    new KeyboardSystemShortcut(keycodes, modifierState, shortcut));
+                    mKeyGestureEventListeners.get(i)
+                            .onKeyGestureEvent(
+                                    new KeyGestureEvent(deviceId, keycodes, modifierState,
+                                            gestureType));
                 }
             }
         }
     }
 
     /**
-     * @see InputManager#registerKeyboardSystemShortcutListener(Executor,
-     * KeyboardSystemShortcutListener)
+     * @see InputManager#registerKeyGestureEventListener(Executor,
+     * KeyGestureEventListener)
      */
-    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
-    void registerKeyboardSystemShortcutListener(@NonNull Executor executor,
-            @NonNull KeyboardSystemShortcutListener listener) throws IllegalArgumentException {
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    void registerKeyGestureEventListener(@NonNull Executor executor,
+            @NonNull KeyGestureEventListener listener) throws IllegalArgumentException {
         Objects.requireNonNull(executor, "executor should not be null");
         Objects.requireNonNull(listener, "listener should not be null");
 
-        synchronized (mKeyboardSystemShortcutListenerLock) {
-            if (mKeyboardSystemShortcutListener == null) {
-                mKeyboardSystemShortcutListeners = new ArrayList<>();
-                mKeyboardSystemShortcutListener = new LocalKeyboardSystemShortcutListener();
+        synchronized (mKeyGestureEventListenerLock) {
+            if (mKeyGestureEventListener == null) {
+                mKeyGestureEventListeners = new ArrayList<>();
+                mKeyGestureEventListener = new LocalKeyGestureEventListener();
 
                 try {
-                    mIm.registerKeyboardSystemShortcutListener(mKeyboardSystemShortcutListener);
+                    mIm.registerKeyGestureEventListener(mKeyGestureEventListener);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
             }
-            final int numListeners = mKeyboardSystemShortcutListeners.size();
+            final int numListeners = mKeyGestureEventListeners.size();
             for (int i = 0; i < numListeners; i++) {
-                if (mKeyboardSystemShortcutListeners.get(i).mListener == listener) {
+                if (mKeyGestureEventListeners.get(i).mListener == listener) {
                     throw new IllegalArgumentException("Listener has already been registered!");
                 }
             }
-            KeyboardSystemShortcutListenerDelegate delegate =
-                    new KeyboardSystemShortcutListenerDelegate(listener, executor);
-            mKeyboardSystemShortcutListeners.add(delegate);
+            KeyGestureEventListenerDelegate delegate =
+                    new KeyGestureEventListenerDelegate(listener, executor);
+            mKeyGestureEventListeners.add(delegate);
         }
     }
 
     /**
-     * @see InputManager#unregisterKeyboardSystemShortcutListener(KeyboardSystemShortcutListener)
+     * @see InputManager#unregisterKeyGestureEventListener(KeyGestureEventListener)
      */
-    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_SYSTEM_SHORTCUTS)
-    void unregisterKeyboardSystemShortcutListener(
-            @NonNull KeyboardSystemShortcutListener listener) {
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    void unregisterKeyGestureEventListener(@NonNull KeyGestureEventListener listener) {
         Objects.requireNonNull(listener, "listener should not be null");
 
-        synchronized (mKeyboardSystemShortcutListenerLock) {
-            if (mKeyboardSystemShortcutListeners == null) {
+        synchronized (mKeyGestureEventListenerLock) {
+            if (mKeyGestureEventListeners == null) {
                 return;
             }
-            mKeyboardSystemShortcutListeners.removeIf((delegate) -> delegate.mListener == listener);
-            if (mKeyboardSystemShortcutListeners.isEmpty()) {
+            mKeyGestureEventListeners.removeIf((delegate) -> delegate.mListener == listener);
+            if (mKeyGestureEventListeners.isEmpty()) {
                 try {
-                    mIm.unregisterKeyboardSystemShortcutListener(mKeyboardSystemShortcutListener);
+                    mIm.unregisterKeyGestureEventListener(mKeyGestureEventListener);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
-                mKeyboardSystemShortcutListeners = null;
-                mKeyboardSystemShortcutListener = null;
+                mKeyGestureEventListeners = null;
+                mKeyGestureEventListener = null;
             }
         }
     }

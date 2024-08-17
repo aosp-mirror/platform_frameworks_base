@@ -70,7 +70,6 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
-import android.hardware.input.KeyboardSystemShortcut;
 import android.media.AudioManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -804,11 +803,11 @@ class TestPhoneWindowManager {
         Assert.assertEquals(targetActivity, intentCaptor.getValue().getComponent());
     }
 
-    void assertKeyboardShortcutTriggered(int[] keycodes, int modifierState, int systemShortcut,
+    void assertKeyGestureCompleted(int[] keycodes, int modifierState, int gestureType,
             String errorMsg) {
         mTestLooper.dispatchAll();
-        verify(mInputManagerInternal, description(errorMsg)).notifyKeyboardShortcutTriggered(
-                anyInt(), eq(keycodes), eq(modifierState), eq(systemShortcut));
+        verify(mInputManagerInternal, description(errorMsg)).notifyKeyGestureCompleted(
+                anyInt(), eq(keycodes), eq(modifierState), eq(gestureType));
     }
 
     void assertSwitchToTask(int persistentId) throws RemoteException {

@@ -19,7 +19,7 @@ package com.android.wm.shell.pip2.phone;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;

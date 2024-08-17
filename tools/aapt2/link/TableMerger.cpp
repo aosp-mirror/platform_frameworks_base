@@ -212,8 +212,8 @@ static ResourceTable::CollisionResult MergeConfigValue(
     collision_result =
         ResolveMergeCollision(override_styles_instead_of_overlaying, dst_value, src_value, pool);
   } else {
-    collision_result = ResourceTable::ResolveFlagCollision(dst_config_value->flag_status,
-                                                           src_config_value->flag_status);
+    collision_result =
+        ResourceTable::ResolveFlagCollision(dst_value->GetFlagStatus(), src_value->GetFlagStatus());
     if (collision_result == CollisionResult::kConflict) {
       collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
     }
@@ -295,7 +295,6 @@ bool TableMerger::DoMerge(const android::Source& src, ResourceTablePackage* src_
         } else {
           dst_config_value =
               dst_entry->FindOrCreateValue(src_config_value->config, src_config_value->product);
-          dst_config_value->flag_status = src_config_value->flag_status;
         }
 
         // Continue if we're taking the new resource.

@@ -74,6 +74,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
          * @param locale    the locale picked.
          */
         void onLocaleSelected(LocaleStore.LocaleInfo locale);
+        default void onParentLocaleSelected(LocaleStore.LocaleInfo locale) {}
     }
 
     /**
@@ -292,7 +293,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
                         mListener, locale, mTranslatedOnly /* translate only */,
                         mOnActionExpandListener, this.mLocalePickerCollector);
             }
-
+            mListener.onParentLocaleSelected(locale);
             if (selector != null) {
                 getFragmentManager().beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)

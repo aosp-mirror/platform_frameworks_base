@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
@@ -53,8 +52,8 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.server.FgThread;
 import com.android.window.flags.Flags;
 
@@ -1311,23 +1310,6 @@ class TransitionController {
     void setTransientLaunch(@NonNull ActivityRecord activity, @Nullable Task restoreBelowTask) {
         if (mCollectingTransition == null) return;
         mCollectingTransition.setTransientLaunch(activity, restoreBelowTask);
-
-        // TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
-        // Also interpret HOME transient launch as recents
-        if (activity.isActivityTypeHomeOrRecents()) {
-            mCollectingTransition.addFlag(TRANSIT_FLAG_IS_RECENTS);
-            // When starting recents animation, we assume the recents activity is behind the app
-            // task and should not affect system bar appearance,
-            // until WMS#setRecentsAppBehindSystemBars be called from launcher when passing
-            // the gesture threshold.
-            activity.getTask().setCanAffectSystemUiFlags(false);
-        }
-    }
-
-    /** @see Transition#setCanPipOnFinish */
-    void setCanPipOnFinish(boolean canPipOnFinish) {
-        if (mCollectingTransition == null) return;
-        mCollectingTransition.setCanPipOnFinish(canPipOnFinish);
     }
 
     void legacyDetachNavigationBarFromApp(@NonNull IBinder token) {
@@ -1459,7 +1441,7 @@ class TransitionController {
      *
      * WARNING: ONLY use this if the transition absolutely cannot be deferred!
      */
-    @NonNull
+    @Nullable
     Transition createAndStartCollecting(int type) {
         if (mTransitionPlayers.isEmpty()) {
             return null;

@@ -51,6 +51,7 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
     }
 
     private val testUserId = 1111
+    private val secondTestUserId = 1112
 
     // For deleting any test files created after the test
     @get:Rule val tmpFolder: TemporaryFolder = TemporaryFolder.builder().assureDeletion().build()
@@ -73,9 +74,18 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
             assertThat(model?.signalCount).isEqualTo(1)
 
             // User is changed.
-            underTest.setUser(1112)
+            underTest.setUser(secondTestUserId)
             // Assert count is 0 after user is changed.
             assertThat(model?.signalCount).isEqualTo(0)
+        }
+
+    @Test
+    fun changeUserIdForNewUser() =
+        testScope.runTest {
+            val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
+            assertThat(model?.userId).isEqualTo(testUserId)
+            underTest.setUser(secondTestUserId)
+            assertThat(model?.userId).isEqualTo(secondTestUserId)
         }
 
     @Test
@@ -88,6 +98,7 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
                     lastShortcutTriggeredTime = kosmos.fakeEduClock.instant(),
                     lastEducationTime = kosmos.fakeEduClock.instant(),
                     usageSessionStartTime = kosmos.fakeEduClock.instant(),
+                    userId = testUserId
                 )
             underTest.updateGestureEduModel(BACK) { newModel }
             val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))

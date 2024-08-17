@@ -74,7 +74,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 
 import org.junit.Before;
 import org.junit.Test;

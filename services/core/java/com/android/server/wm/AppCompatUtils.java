@@ -37,7 +37,7 @@ import java.util.function.BooleanSupplier;
 /**
  * Utilities for App Compat policies and overrides.
  */
-class AppCompatUtils {
+final class AppCompatUtils {
 
     /**
      * Lazy version of a {@link BooleanSupplier} which access an existing BooleanSupplier and
@@ -138,8 +138,8 @@ class AppCompatUtils {
         // Whether the direct top activity is eligible for letterbox education.
         appCompatTaskInfo.setEligibleForLetterboxEducation(
                 isTopActivityResumed && top.isEligibleForLetterboxEducation());
-        appCompatTaskInfo.setLetterboxEducationEnabled(top.mLetterboxUiController
-                .isLetterboxEducationEnabled());
+        appCompatTaskInfo.setLetterboxEducationEnabled(top.mAppCompatController
+                .getAppCompatLetterboxOverrides().isLetterboxEducationEnabled());
 
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
                 top.mAppCompatController.getAppCompatAspectRatioOverrides();
@@ -187,6 +187,8 @@ class AppCompatUtils {
         appCompatTaskInfo.setTopActivityLetterboxed(top.areBoundsLetterboxed());
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top.mAppCompatController
                 .getAppCompatCameraOverrides().getFreeformCameraCompatMode();
+        appCompatTaskInfo.setHasMinAspectRatioOverride(top.mAppCompatController
+                .getDesktopAppCompatAspectRatioPolicy().hasMinAspectRatioOverride(task));
     }
 
     /**
@@ -230,6 +232,23 @@ class AppCompatUtils {
             }
         }
         return null;
+    }
+
+    static void adjustBoundsForTaskbar(@NonNull final WindowState mainWindow,
+            @NonNull final Rect bounds) {
+        // Rounded corners should be displayed above the taskbar. When taskbar is hidden,
+        // an insets frame is equal to a navigation bar which shouldn't affect position of
+        // rounded corners since apps are expected to handle navigation bar inset.
+        // This condition checks whether the taskbar is visible.
+        // Do not crop the taskbar inset if the window is in immersive mode - the user can
+        // swipe to show/hide the taskbar as an overlay.
+        // Adjust the bounds only in case there is an expanded taskbar,
+        // otherwise the rounded corners will be shown behind the navbar.
+        final InsetsSource expandedTaskbarOrNull = getExpandedTaskbarOrNull(mainWindow);
+        if (expandedTaskbarOrNull != null) {
+            // Rounded corners should be displayed above the expanded taskbar.
+            bounds.bottom = Math.min(bounds.bottom, expandedTaskbarOrNull.getFrame().top);
+        }
     }
 
     private static void clearAppCompatTaskInfo(@NonNull AppCompatTaskInfo info) {

@@ -2007,6 +2007,25 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCanInterruptNonRingtoneInsistentBuzzWithOtherBuzzyNotification() {
+        NotificationRecord r = getInsistentBuzzyNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyVibrateLooped();
+        assertTrue(r.isInterruptive());
+        assertNotEquals(-1, r.getLastAudiblyAlertedMs());
+        Mockito.reset(mVibrator);
+
+        // New buzzy notification stops previous looping vibration
+        NotificationRecord interrupter = getBuzzyOtherNotification();
+        mAttentionHelper.buzzBeepBlinkLocked(interrupter, DEFAULT_SIGNALS);
+        verifyStopVibrate();
+        // And then vibrates itself
+        verifyVibrate(1);
+        assertTrue(interrupter.isInterruptive());
+        assertNotEquals(-1, interrupter.getLastAudiblyAlertedMs());
+    }
+
+    @Test
     public void testRingtoneInsistentBeep_doesNotBlockFutureSoundsOnceStopped() throws Exception {
         NotificationChannel ringtoneChannel =
             new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);

@@ -350,12 +350,13 @@ public class HandwritingInitiator {
             return;
         }
 
+        final View focusedView = getFocusedView();
+
         if (!view.isAutoHandwritingEnabled()) {
-            clearFocusedView(view);
+            clearFocusedView(focusedView);
             return;
         }
 
-        final View focusedView = getFocusedView();
         if (focusedView == view) {
             return;
         }

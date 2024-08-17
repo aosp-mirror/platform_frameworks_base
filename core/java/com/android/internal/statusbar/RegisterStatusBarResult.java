@@ -16,6 +16,8 @@
 
 package com.android.internal.statusbar;
 
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -30,7 +32,9 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final int mDisabledFlags1;                   // switch[0]
     public final int mAppearance;                       // switch[1]
     public final AppearanceRegion[] mAppearanceRegions; // switch[2]
+    @ImeWindowVisibility
     public final int mImeWindowVis;                     // switch[3]
+    @BackDispositionMode
     public final int mImeBackDisposition;               // switch[4]
     public final boolean mShowImeSwitcher;              // switch[5]
     public final int mDisabledFlags2;                   // switch[6]
@@ -42,10 +46,11 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final LetterboxDetails[] mLetterboxDetails;
 
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
-            int appearance, AppearanceRegion[] appearanceRegions, int imeWindowVis,
-            int imeBackDisposition, boolean showImeSwitcher, int disabledFlags2,
-            boolean navbarColorManagedByIme, int behavior, int requestedVisibleTypes,
-            String packageName, int transientBarTypes, LetterboxDetails[] letterboxDetails) {
+            int appearance, AppearanceRegion[] appearanceRegions,
+            @ImeWindowVisibility int imeWindowVis, @BackDispositionMode int imeBackDisposition,
+            boolean showImeSwitcher, int disabledFlags2, boolean navbarColorManagedByIme,
+            int behavior, int requestedVisibleTypes, String packageName, int transientBarTypes,
+            LetterboxDetails[] letterboxDetails) {
         mIcons = new ArrayMap<>(icons);
         mDisabledFlags1 = disabledFlags1;
         mAppearance = appearance;

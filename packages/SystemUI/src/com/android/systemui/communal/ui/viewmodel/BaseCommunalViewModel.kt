@@ -106,10 +106,11 @@ abstract class BaseCommunalViewModel(
      */
     fun changeScene(
         scene: SceneKey,
+        loggingReason: String,
         transitionKey: TransitionKey? = null,
         keyguardState: KeyguardState? = null
     ) {
-        communalSceneInteractor.changeScene(scene, transitionKey, keyguardState)
+        communalSceneInteractor.changeScene(scene, loggingReason, transitionKey, keyguardState)
     }
 
     fun setEditModeState(state: EditModeState?) = communalSceneInteractor.setEditModeState(state)

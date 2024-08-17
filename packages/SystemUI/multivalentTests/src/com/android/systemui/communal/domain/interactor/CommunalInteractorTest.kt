@@ -482,7 +482,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val targetScene = CommunalScenes.Communal
 
-            underTest.changeScene(targetScene)
+            underTest.changeScene(targetScene, "test")
 
             val desiredScene = collectLastValue(communalRepository.currentScene)
             runCurrent()
@@ -635,7 +635,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             runCurrent()
             assertThat(isCommunalShowing()).isEqualTo(false)
 
-            underTest.changeScene(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal, "test")
 
             isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
             runCurrent()
@@ -659,12 +659,12 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes (without the flag) to communal sets the value to true
-            underTest.changeScene(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             assertThat(isCommunalShowing).isTrue()
 
             // Verify scene changes (without the flag) to blank sets the value back to false
-            underTest.changeScene(CommunalScenes.Blank)
+            underTest.changeScene(CommunalScenes.Blank, "test")
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
         }
@@ -679,7 +679,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes without the flag doesn't have any impact
-            underTest.changeScene(CommunalScenes.Communal)
+            underTest.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
 
@@ -1033,6 +1033,22 @@ class CommunalInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.PRIMARY_BOUNCER,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isTrue()
+        }
+
+    @Test
+    fun showCommunalFromOccluded_enteredOccludedFromDreaming() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.OCCLUDED,
                 testScope
             )
 

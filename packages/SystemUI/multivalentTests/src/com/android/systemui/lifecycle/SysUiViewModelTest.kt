@@ -154,7 +154,7 @@ class SysUiViewModelTest : SysuiTestCase() {
 private class FakeViewModel : SysUiViewModel() {
     var isActivated = false
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         isActivated = true
         try {
             awaitCancellation()

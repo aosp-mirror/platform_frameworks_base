@@ -372,7 +372,6 @@ import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
-import android.sysprop.InitProperties;
 import android.system.Os;
 import android.system.OsConstants;
 import android.telephony.TelephonyManager;
@@ -451,7 +450,6 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
-import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
 import com.android.server.am.ComponentAliasResolver.Resolution;
 import com.android.server.am.LowMemDetector.MemFactor;
@@ -2358,20 +2356,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ActivityManagerService getService() {
             return mService;
         }
-    }
-
-    private void maybeLogUserspaceRebootEvent() {
-        if (!UserspaceRebootLogger.shouldLogUserspaceRebootEvent()) {
-            return;
-        }
-        final int userId = mUserController.getCurrentUserId();
-        if (userId != UserHandle.USER_SYSTEM) {
-            // Only log for user0.
-            return;
-        }
-        // TODO(b/148767783): should we check all profiles under user0?
-        UserspaceRebootLogger.logEventAsync(StorageManager.isCeStorageUnlocked(userId),
-                BackgroundThread.getExecutor());
     }
 
     /**
@@ -5323,12 +5307,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Start looking for apps that are abusing wake locks.
             Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
             mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
-            // Check if we are performing userspace reboot before setting sys.boot_completed to
-            // avoid race with init reseting sys.init.userspace_reboot.in_progress once sys
-            // .boot_completed is 1.
-            if (InitProperties.userspace_reboot_in_progress().orElse(false)) {
-                UserspaceRebootLogger.noteUserspaceRebootSuccess();
-            }
             // Tell anyone interested that we are done booting!
             SystemProperties.set("sys.boot_completed", "1");
             SystemProperties.set("dev.bootcomplete", "1");
@@ -5352,7 +5330,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                             }, mConstants.FULL_PSS_MIN_INTERVAL);
                         }
                     });
-            maybeLogUserspaceRebootEvent();
             mUserController.scheduleStartProfiles();
         }
         // UART is on if init's console service is running, send a warning notification.
@@ -15335,12 +15312,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int cookie = traceBroadcastIntentBegin(intent, resultTo, ordered, sticky,
                 callingUid, realCallingUid, userId);
         try {
+            final BroadcastSentEventRecord broadcastSentEventRecord =
+                    new BroadcastSentEventRecord();
             final int res = broadcastIntentLockedTraced(callerApp, callerPackage, callerFeatureId,
                     intent, resolvedType, resultToApp, resultTo, resultCode, resultData,
                     resultExtras, requiredPermissions, excludedPermissions, excludedPackages,
                     appOp, BroadcastOptions.fromBundleNullable(bOptions), ordered, sticky,
                     callingPid, callingUid, realCallingUid, realCallingPid, userId,
-                    backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver);
+                    backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver,
+                    broadcastSentEventRecord);
+            broadcastSentEventRecord.setResult(res);
+            broadcastSentEventRecord.logToStatsd();
             return res;
         } finally {
             traceBroadcastIntentEnd(cookie);
@@ -15388,7 +15370,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             int callingUid, int realCallingUid, int realCallingPid, int userId,
             BackgroundStartPrivileges backgroundStartPrivileges,
             @Nullable int[] broadcastAllowList,
-            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @NonNull BroadcastSentEventRecord broadcastSentEventRecord) {
         // Ensure all internal loopers are registered for idle checks
         BroadcastLoopers.addMyLooper();
 
@@ -15421,6 +15404,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         intent = new Intent(intent);
+        broadcastSentEventRecord.setIntent(intent);
+        broadcastSentEventRecord.setOriginalIntentFlags(intent.getFlags());
+        broadcastSentEventRecord.setSenderUid(callingUid);
+        broadcastSentEventRecord.setRealSenderUid(realCallingUid);
+        broadcastSentEventRecord.setSticky(sticky);
+        broadcastSentEventRecord.setOrdered(ordered);
+        broadcastSentEventRecord.setResultRequested(resultTo != null);
+        final int callerAppProcessState = getRealProcessStateLocked(callerApp, realCallingPid);
+        broadcastSentEventRecord.setSenderProcState(callerAppProcessState);
+        broadcastSentEventRecord.setSenderUidState(getRealUidStateLocked(callerApp,
+                realCallingPid));
 
         final boolean callerInstantApp = isInstantApp(callerApp, callerPackage, callingUid);
         // Instant Apps cannot use FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS
@@ -15914,7 +15908,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        final int callerAppProcessState = getRealProcessStateLocked(callerApp, realCallingPid);
         // Add to the sticky list if requested.
         if (sticky) {
             if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,
@@ -16154,6 +16147,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ordered, sticky, false, userId,
                     backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
                     callerAppProcessState);
+            broadcastSentEventRecord.setBroadcastRecord(r);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
             queue.enqueueBroadcastLocked(r);
@@ -16206,6 +16200,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (app != null && app.getThread() != null && !app.isKilled()) {
             return app.mState.getCurProcState();
+        }
+        return PROCESS_STATE_NONEXISTENT;
+    }
+
+    @GuardedBy("this")
+    private int getRealUidStateLocked(ProcessRecord app, int pid) {
+        if (app == null) {
+            synchronized (mPidsSelfLocked) {
+                app = mPidsSelfLocked.get(pid);
+            }
+        }
+        if (app != null && app.getThread() != null && !app.isKilled()) {
+            final UidRecord uidRecord = app.getUidRecord();
+            if (uidRecord != null) {
+                return uidRecord.getCurProcState();
+            }
         }
         return PROCESS_STATE_NONEXISTENT;
     }

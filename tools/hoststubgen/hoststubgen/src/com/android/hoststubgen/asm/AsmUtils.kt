@@ -117,6 +117,14 @@ fun resolveClassNameWithDefaultPackage(className: String, defaultPackageName: St
     return "$defaultPackageName.$className"
 }
 
+fun splitWithLastPeriod(name: String): Pair<String, String>? {
+    val pos = name.lastIndexOf('.')
+    if (pos < 0) {
+        return null
+    }
+    return Pair(name.substring(0, pos), name.substring(pos + 1))
+}
+
 fun String.toJvmClassName(): String {
     return this.replace('.', '/')
 }
@@ -198,11 +206,11 @@ fun writeByteCodeToReturn(methodDescriptor: String, writer: MethodVisitor) {
 /**
  * Given a method descriptor, insert an [argType] as the first argument to it.
  */
-fun prependArgTypeToMethodDescriptor(methodDescriptor: String, argType: Type): String {
+fun prependArgTypeToMethodDescriptor(methodDescriptor: String, classInternalName: String): String {
     val returnType = Type.getReturnType(methodDescriptor)
     val argTypes = Type.getArgumentTypes(methodDescriptor).toMutableList()
 
-    argTypes.add(0, argType)
+    argTypes.add(0, Type.getType("L" + classInternalName + ";"))
 
     return Type.getMethodDescriptor(returnType, *argTypes.toTypedArray())
 }

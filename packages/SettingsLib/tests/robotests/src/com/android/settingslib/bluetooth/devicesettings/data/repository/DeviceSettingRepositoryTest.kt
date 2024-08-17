@@ -40,6 +40,7 @@ import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreferenceSta
 import com.android.settingslib.bluetooth.devicesettings.ToggleInfo
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingIcon
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingStateModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.ToggleModel
@@ -352,7 +353,7 @@ class DeviceSettingRepositoryTest {
                 val pref = serviceResponse.preference as ActionSwitchPreference
                 assertThat(actual.title).isEqualTo(pref.title)
                 assertThat(actual.summary).isEqualTo(pref.summary)
-                assertThat(actual.icon).isEqualTo(pref.icon)
+                assertThat(actual.icon).isEqualTo(DeviceSettingIcon.BitmapIcon(pref.icon!!))
                 assertThat(actual.isAllowedChangingState).isEqualTo(pref.isAllowedChangingState)
                 if (pref.hasSwitch()) {
                     assertThat(actual.switchState!!.checked).isEqualTo(pref.checked)

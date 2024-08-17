@@ -1,15 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.util.CharsetUtilsTest"
-        },
-        {
-          "include-filter": "com.android.internal.util.FastDataTest"
-        }
-      ],
+      "name": "FrameworksCoreTests_util_data_charset",
       "file_patterns": ["CharsetUtils|FastData"]
     },
     {

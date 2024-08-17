@@ -145,10 +145,11 @@ public abstract class PowerManagerInternal {
      * @param screenBrightnessInt The overridden screen brightness between 1 and 255, or
      * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override. Not used if
      *                            screenBrightnessFloat is provided (is not NaN).
+     * @param useNormalBrightnessForDoze Whether use normal brightness while device is dozing.
      */
     public abstract void setDozeOverrideFromDreamManager(
             int screenState, @Display.StateReason int reason, float screenBrightnessFloat,
-            int screenBrightnessInt);
+            int screenBrightnessInt, boolean useNormalBrightnessForDoze);
 
     /**
      * Used by sidekick manager to tell the power manager if it shouldn't change the display state

@@ -34,6 +34,7 @@ import com.android.settingslib.bluetooth.onServiceStateChanged
 import com.android.settingslib.bluetooth.onSourceConnectedOrRemoved
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MAX
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MIN
+import com.android.settingslib.volume.shared.AudioSharingLogger
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
@@ -61,7 +63,7 @@ typealias GroupIdToVolumes = Map<Int, Int>
 /** Provides audio sharing functionality. */
 interface AudioSharingRepository {
     /** Whether the device is in audio sharing. */
-    val inAudioSharing: Flow<Boolean>
+    val inAudioSharing: StateFlow<Boolean>
 
     /** The primary headset groupId in audio sharing. */
     val primaryGroupId: StateFlow<Int>
@@ -90,6 +92,7 @@ class AudioSharingRepositoryImpl(
     private val btManager: LocalBluetoothManager,
     private val coroutineScope: CoroutineScope,
     private val backgroundCoroutineContext: CoroutineContext,
+    private val logger: AudioSharingLogger
 ) : AudioSharingRepository {
     private val isAudioSharingProfilesReady: StateFlow<Boolean> =
         btManager.profileManager.onServiceStateChanged
@@ -98,17 +101,19 @@ class AudioSharingRepositoryImpl(
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), false)
 
-    override val inAudioSharing: Flow<Boolean> =
+    override val inAudioSharing: StateFlow<Boolean> =
         isAudioSharingProfilesReady.flatMapLatest { ready ->
             if (ready) {
                 btManager.profileManager.leAudioBroadcastProfile.onBroadcastStartedOrStopped
                     .map { isBroadcasting() }
                     .onStart { emit(isBroadcasting()) }
+                    .onEach { logger.onAudioSharingStateChanged(it) }
                     .flowOn(backgroundCoroutineContext)
             } else {
                 flowOf(false)
             }
         }
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), false)
 
     private val primaryChange: Flow<Unit> = callbackFlow {
         val callback =
@@ -156,6 +161,7 @@ class AudioSharingRepositoryImpl(
                 .map { getSecondaryGroupId() },
             primaryGroupId.map { getSecondaryGroupId() })
             .onStart { emit(getSecondaryGroupId()) }
+            .onEach { logger.onSecondaryGroupIdChanged(it) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(
                 coroutineScope,
@@ -202,6 +208,7 @@ class AudioSharingRepositoryImpl(
                             acc
                         }
                     }
+                    .onEach { logger.onVolumeMapChanged(it) }
                     .flowOn(backgroundCoroutineContext)
             } else {
                 emptyFlow()
@@ -220,6 +227,7 @@ class AudioSharingRepositoryImpl(
                     BluetoothUtils.getSecondaryDeviceForBroadcast(contentResolver, btManager)
                 if (cachedDevice != null) {
                     it.setDeviceVolume(cachedDevice.device, volume, /* isGroupOp= */ true)
+                    logger.onSetDeviceVolumeRequested(volume)
                 }
             }
         }
@@ -247,7 +255,7 @@ class AudioSharingRepositoryImpl(
 }
 
 class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
-    override val inAudioSharing: Flow<Boolean> = flowOf(false)
+    override val inAudioSharing: StateFlow<Boolean> = MutableStateFlow(false)
     override val primaryGroupId: StateFlow<Int> =
         MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
     override val secondaryGroupId: StateFlow<Int> =

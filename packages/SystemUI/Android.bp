@@ -748,6 +748,7 @@ android_library {
         "//frameworks/libs/systemui:motion_tool_lib",
         "//frameworks/libs/systemui:contextualeducationlib",
         "androidx.core_core-animation-testing",
+        "androidx.lifecycle_lifecycle-runtime-testing",
         "androidx.compose.ui_ui",
         "flag-junit",
         "ravenwood-junit",
@@ -789,6 +790,7 @@ android_library {
         "SystemUI-tests-base",
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",
+        "androidx.lifecycle_lifecycle-runtime-testing",
         "mockito-target-extended-minus-junit4",
         "mockito-kotlin-nodeps",
         "androidx.test.ext.junit",
@@ -836,14 +838,6 @@ android_app {
     ],
     manifest: "tests/AndroidManifest-base.xml",
 
-    srcs: [
-        "src/**/*.kt",
-        "src/**/*.java",
-        "src/**/I*.aidl",
-        ":ReleaseJavaFiles",
-        "compose/features/src/**/*.kt",
-        "compose/facade/enabled/src/**/*.kt",
-    ],
     static_libs: [
         "//frameworks/libs/systemui:compilelib",
         "SystemUI-tests-base",

@@ -67,7 +67,10 @@ constructor(
      * transition.
      */
     fun snapToCommunal() {
-        communalSceneInteractor.snapToScene(CommunalScenes.Communal)
+        communalSceneInteractor.snapToScene(
+            newScene = CommunalScenes.Communal,
+            loggingReason = "transition view model",
+        )
     }
 
     // Show UMO on glanceable hub immediately on transition into glanceable hub

@@ -34,7 +34,6 @@ import com.android.settingslib.R;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -92,10 +91,7 @@ public class ZenModesBackend {
             }
         }
 
-        // Manual DND first, then alphabetically.
-        modes.sort(Comparator.comparing(ZenMode::isManualDnd).reversed()
-                .thenComparing(ZenMode::getName));
-
+        modes.sort(ZenMode.PRIORITIZING_COMPARATOR);
         return modes;
     }
 
