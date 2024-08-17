@@ -37,6 +37,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver.AccessibilityButtonMode;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -61,6 +62,7 @@ public class AccessibilityFloatingMenuController implements
 
     private final SecureSettings mSecureSettings;
     private final DisplayTracker mDisplayTracker;
+    private final NavigationModeController mNavigationModeController;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
     private int mBtnMode;
@@ -106,7 +108,8 @@ public class AccessibilityFloatingMenuController implements
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecureSettings secureSettings,
-            DisplayTracker displayTracker) {
+            DisplayTracker displayTracker,
+            NavigationModeController navigationModeController) {
         mContext = context;
         mWindowManager = windowManager;
         mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
@@ -117,6 +120,7 @@ public class AccessibilityFloatingMenuController implements
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
+        mNavigationModeController = navigationModeController;
 
         mIsKeyguardVisible = false;
     }
@@ -191,7 +195,8 @@ public class AccessibilityFloatingMenuController implements
             final Context windowContext = mContext.createWindowContext(defaultDisplay,
                     TYPE_NAVIGATION_BAR_PANEL, /* options= */ null);
             mFloatingMenu = new MenuViewLayerController(windowContext, mWindowManager,
-                    mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings);
+                    mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                    mNavigationModeController);
         }
 
         mFloatingMenu.show();
