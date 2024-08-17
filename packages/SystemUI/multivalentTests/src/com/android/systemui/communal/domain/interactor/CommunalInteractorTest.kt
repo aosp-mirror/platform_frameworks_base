@@ -791,14 +791,6 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun showWidgetEditor_withPreselectedKey_startsActivity() =
-        testScope.runTest {
-            val widgetKey = CommunalContentModel.KEY.widget(123)
-            underTest.showWidgetEditor(preselectedKey = widgetKey)
-            verify(editWidgetsActivityStarter).startActivity(widgetKey)
-        }
-
-    @Test
     fun showWidgetEditor_openWidgetPickerOnStart_startsActivity() =
         testScope.runTest {
             underTest.showWidgetEditor(shouldOpenWidgetPickerOnStart = true)
@@ -1081,6 +1073,16 @@ class CommunalInteractorTest : SysuiTestCase() {
             advanceTimeBy(CommunalInteractor.DISCLAIMER_RESET_MILLIS)
             assertThat(disclaimerDismissed).isFalse()
         }
+
+    @Test
+    fun settingSelectedKey_flowUpdated() {
+        testScope.runTest {
+            val key = "test"
+            val selectedKey by collectLastValue(underTest.selectedKey)
+            underTest.setSelectedKey(key)
+            assertThat(selectedKey).isEqualTo(key)
+        }
+    }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
         whenever(kosmos.devicePolicyManager.getKeyguardDisabledFeatures(nullable(), eq(user.id)))

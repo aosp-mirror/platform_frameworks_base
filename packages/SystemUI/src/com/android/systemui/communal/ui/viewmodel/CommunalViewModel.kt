@@ -262,7 +262,7 @@ constructor(
         shouldOpenWidgetPickerOnStart: Boolean,
     ) {
         persistScrollPosition()
-        communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
+        communalInteractor.showWidgetEditor(shouldOpenWidgetPickerOnStart)
     }
 
     override fun onDismissCtaTile() {

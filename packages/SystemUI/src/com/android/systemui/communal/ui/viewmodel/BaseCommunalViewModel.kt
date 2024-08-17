@@ -55,11 +55,8 @@ abstract class BaseCommunalViewModel(
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
 
-    private val _selectedKey: MutableStateFlow<String?> = MutableStateFlow(null)
-
     /** The key of the currently selected item, or null if no item selected. */
-    val selectedKey: StateFlow<String?>
-        get() = _selectedKey
+    val selectedKey: StateFlow<String?> = communalInteractor.selectedKey
 
     private val _isTouchConsumed: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -226,7 +223,7 @@ abstract class BaseCommunalViewModel(
 
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {
-        _selectedKey.value = key
+        communalInteractor.setSelectedKey(key)
     }
 
     /** Invoked once touches inside the lazy grid are consumed */
