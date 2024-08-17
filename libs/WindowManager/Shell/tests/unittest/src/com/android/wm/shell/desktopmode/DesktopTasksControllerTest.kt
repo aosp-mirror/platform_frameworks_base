@@ -2264,27 +2264,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun desktopTasksVisibilityChange_visible_setLaunchAdjacentDisabled() {
-    val task = setUpFreeformTask()
-    clearInvocations(launchAdjacentController)
-
-    markTaskVisible(task)
-    shellExecutor.flushAll()
-    verify(launchAdjacentController).launchAdjacentEnabled = false
-  }
-
-  @Test
-  fun desktopTasksVisibilityChange_invisible_setLaunchAdjacentEnabled() {
-    val task = setUpFreeformTask()
-    markTaskVisible(task)
-    clearInvocations(launchAdjacentController)
-
-    markTaskHidden(task)
-    shellExecutor.flushAll()
-    verify(launchAdjacentController).launchAdjacentEnabled = true
-  }
-
-  @Test
   fun moveFocusedTaskToDesktop_fullscreenTaskIsMovedToDesktop() {
     val task1 = setUpFullscreenTask()
     val task2 = setUpFullscreenTask()

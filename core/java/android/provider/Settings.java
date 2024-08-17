@@ -14953,6 +14953,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String MUTE_ALARM_STREAM_WITH_RINGER_MODE =
                 "mute_alarm_stream_with_ringer_mode";
 

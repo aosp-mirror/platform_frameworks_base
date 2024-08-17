@@ -16,6 +16,12 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.AutomaticZenRule.TYPE_BEDTIME;
+import static android.app.AutomaticZenRule.TYPE_DRIVING;
+import static android.app.AutomaticZenRule.TYPE_IMMERSIVE;
+import static android.app.AutomaticZenRule.TYPE_OTHER;
+import static android.app.AutomaticZenRule.TYPE_THEATER;
+import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
@@ -38,6 +44,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RunWith(RobolectricTestRunner.class)
 public class ZenModeTest {
 
@@ -46,7 +55,7 @@ public class ZenModeTest {
     private static final AutomaticZenRule ZEN_RULE =
             new AutomaticZenRule.Builder("Driving", Uri.parse("drive"))
                     .setPackage("com.some.driving.thing")
-                    .setType(AutomaticZenRule.TYPE_DRIVING)
+                    .setType(TYPE_DRIVING)
                     .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                     .setZenPolicy(ZEN_POLICY)
                     .build();
@@ -223,6 +232,28 @@ public class ZenModeTest {
                 INTERRUPTION_FILTER_PRIORITY);
         assertThat(zenMode.getPolicy()).isEqualTo(ZEN_POLICY);
         assertThat(zenMode.getRule().getZenPolicy()).isEqualTo(ZEN_POLICY);
+    }
+
+    @Test
+    public void comparator_prioritizes() {
+        ZenMode manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE;
+        ZenMode driving1 = new TestModeBuilder().setName("b1").setType(TYPE_DRIVING).build();
+        ZenMode driving2 = new TestModeBuilder().setName("b2").setType(TYPE_DRIVING).build();
+        ZenMode bedtime1 = new TestModeBuilder().setName("c1").setType(TYPE_BEDTIME).build();
+        ZenMode bedtime2 = new TestModeBuilder().setName("c2").setType(TYPE_BEDTIME).build();
+        ZenMode other = new TestModeBuilder().setName("a1").setType(TYPE_OTHER).build();
+        ZenMode immersive = new TestModeBuilder().setName("a2").setType(TYPE_IMMERSIVE).build();
+        ZenMode unknown = new TestModeBuilder().setName("a3").setType(TYPE_UNKNOWN).build();
+        ZenMode theater = new TestModeBuilder().setName("a4").setType(TYPE_THEATER).build();
+
+        ArrayList<ZenMode> list = new ArrayList<>(List.of(other, theater, bedtime1, unknown,
+                driving2, manualDnd, driving1, bedtime2, immersive));
+        list.sort(ZenMode.PRIORITIZING_COMPARATOR);
+
+        assertThat(list)
+                .containsExactly(manualDnd, bedtime1, bedtime2, driving1, driving2, other,
+                        immersive, unknown, theater)
+                .inOrder();
     }
 
     @Test
