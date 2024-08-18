@@ -50,6 +50,10 @@ per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
 # Sensor
 per-file android_hardware_SensorManager* = arthuri@google.com, bduddie@google.com, stange@google.com
 
+# Security
+per-file android_os_SELinux.cpp = file:/core/java/android/security/OWNERS
+per-file android_security_* = file:/core/java/android/security/OWNERS
+
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file core_jni_helpers.* = file:/ZYGOTE_OWNERS
 per-file fd_utils.* = file:/ZYGOTE_OWNERS
@@ -66,7 +70,6 @@ per-file android_opengl_* = file:/opengl/java/android/opengl/OWNERS
 per-file android_os_storage_* = file:/core/java/android/os/storage/OWNERS
 per-file android_os_Trace* = file:/TRACE_OWNERS
 per-file android_se_* = file:/omapi/java/android/se/OWNERS
-per-file android_security_* = file:/core/java/android/security/OWNERS
 per-file android_view_* = file:/core/java/android/view/OWNERS
 per-file com_android_internal_net_* = file:/services/core/java/com/android/server/net/OWNERS
 
