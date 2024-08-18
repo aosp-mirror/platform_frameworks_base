@@ -102,6 +102,7 @@ class BubbleStackViewTest {
                 BubbleLogger(UiEventLoggerFake()),
                 positioner,
                 BubbleEducationController(context),
+                shellExecutor,
                 shellExecutor
             )
         bubbleStackViewManager = FakeBubbleStackViewManager()
@@ -364,6 +365,7 @@ class BubbleStackViewTest {
                 /* taskId= */ 0,
                 "locus",
                 /* isDismissable= */ true,
+                directExecutor(),
                 directExecutor()
             ) {}
         inflateBubble(bubble)
@@ -373,7 +375,8 @@ class BubbleStackViewTest {
     private fun createAndInflateBubble(): Bubble {
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
         val icon = Icon.createWithResource(context.resources, R.drawable.bubble_ic_overflow_button)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), icon, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), icon, directExecutor(), directExecutor())
         inflateBubble(bubble)
         return bubble
     }

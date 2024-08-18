@@ -31,6 +31,7 @@ import android.view.Window
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.window.WindowContext
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.policy.PhoneWindow
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -41,6 +42,7 @@ class ScreenshotWindow
 @AssistedInject
 constructor(
     private val windowManager: WindowManager,
+    private val viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
     private val context: Context,
     @Assisted private val display: Display,
 ) {
@@ -95,7 +97,7 @@ constructor(
             Log.d(TAG, "attachWindow")
         }
         attachRequested = true
-        windowManager.addView(decorView, params)
+        viewCaptureAwareWindowManager.addView(decorView, params)
 
         decorView.requestApplyInsets()
         decorView.requireViewById<ViewGroup>(R.id.content).apply {
@@ -133,7 +135,7 @@ constructor(
             if (LogConfig.DEBUG_WINDOW) {
                 Log.d(TAG, "Removing screenshot window")
             }
-            windowManager.removeViewImmediate(decorView)
+            viewCaptureAwareWindowManager.removeViewImmediate(decorView)
             detachRequested = false
         }
         if (attachRequested && !detachRequested) {

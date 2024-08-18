@@ -47,7 +47,7 @@
     <string name="wifi_security_sae" msgid="3644520541721422843">"WPA3-Хувийн"</string>
     <string name="wifi_security_psk_sae" msgid="8135104122179904684">"WPA2/WPA3-Хувийн"</string>
     <string name="wifi_security_none_owe" msgid="5241745828327404101">"Хоосон/Сайжруулсан нээлт"</string>
-    <string name="wifi_security_owe" msgid="3343421403561657809">"Сайжруулсан нээлт"</string>
+    <string name="wifi_security_owe" msgid="3343421403561657809">"Сайжруулсан нээлттэй"</string>
     <string name="wifi_security_eap_suiteb" msgid="415842785991698142">"WPA3-Байгууллага 192-бит"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Хадгалагдсан"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Салсан"</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Товшилтын визуал хариу үйлдлийг харуулах"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Түлхүүрийн даралт харуул"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Биет түлхүүрийн даралтын визуал хариу үйлдлийг харуул"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Мэдрэгч самбарын оролтыг харуулах"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Дэлгэцэд давхарлах нь мэдрэгч самбарын оролтын өгөгдөл болон танигдсан зангааг үзүүлж байна"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Гадаргын шинэчлэлтүүдийг харуулах"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Шинэчлэгдэх үед цонхны гадаргыг бүхэлд нь анивчуулах"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Шинэчлэлт харахыг харуулах"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Дүүрэх хүртэл <xliff:g id="TIME">%1$s</xliff:g> үлдсэн"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - дүүрэх хүртэл <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - Батарейг хамгаалахын тулд цэнэглэхийг хүлээлгэсэн"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Цэнэглэж байна"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> гэхэд дүүрнэ"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> гэхэд бүрэн цэнэглэгдэнэ"</string>

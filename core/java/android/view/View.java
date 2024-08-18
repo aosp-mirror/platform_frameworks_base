@@ -16444,7 +16444,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED) {
             try {
-                Trace.traceBegin(TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
+                if (Trace.isTagEnabled(TRACE_TAG_VIEW)) {
+                    Trace.traceBegin(TRACE_TAG_VIEW,
+                            "View.onTouchListener#onTouch - " + getClass().getSimpleName()
+                                    + ", eventId - " + event.getId());
+                }
                 handled = li.mOnTouchListener.onTouch(this, event);
             } finally {
                 Trace.traceEnd(TRACE_TAG_VIEW);
@@ -33985,7 +33989,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 || mLastFrameTop != mTop)
                 && viewRootImpl.shouldCheckFrameRateCategory()
                 && parent instanceof View
-                && ((View) parent).mFrameContentVelocity <= 0
+                && ((View) parent).getFrameContentVelocity() <= 0
                 && !isInputMethodWindowType) {
 
             return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;

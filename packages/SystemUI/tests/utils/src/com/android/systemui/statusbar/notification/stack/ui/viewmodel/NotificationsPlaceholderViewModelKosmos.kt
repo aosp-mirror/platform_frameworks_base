@@ -26,10 +26,10 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.notif
 
 val Kosmos.notificationsPlaceholderViewModel by Fixture {
     NotificationsPlaceholderViewModel(
-        dumpManager = dumpManager,
         interactor = notificationStackAppearanceInteractor,
         shadeInteractor = shadeInteractor,
         headsUpNotificationInteractor = headsUpNotificationInteractor,
         featureFlags = featureFlagsClassic,
+        dumpManager = dumpManager,
     )
 }

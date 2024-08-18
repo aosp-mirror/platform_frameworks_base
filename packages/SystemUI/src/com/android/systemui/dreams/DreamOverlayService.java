@@ -442,7 +442,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     @Override
     public void onWakeRequested() {
         mUiEventLogger.log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START);
-        mCommunalInteractor.changeScene(CommunalScenes.Communal, null);
+        mCommunalInteractor.changeScene(CommunalScenes.Communal,
+                "dream wake requested",
+                null);
     }
 
     private Lifecycle.State getLifecycleStateLocked() {
@@ -493,7 +495,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mSystemDialogsCloser.closeSystemDialogs();
 
         // Hide glanceable hub (this is a nop if glanceable hub is not open).
-        mCommunalInteractor.changeScene(CommunalScenes.Blank, null);
+        mCommunalInteractor.changeScene(CommunalScenes.Blank, "dream come to front", null);
     }
 
     /**

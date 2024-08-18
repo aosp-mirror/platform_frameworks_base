@@ -638,8 +638,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                         if (row.isPinned() && !canChildBeDismissed(row)
                                 && row.getEntry().getSbn().getNotification().fullScreenIntent
                                 == null) {
-                            mHeadsUpManager.removeNotification(row.getEntry().getSbn().getKey(),
-                                    true /* removeImmediately */);
+                            mHeadsUpManager.removeNotification(
+                                    row.getEntry().getSbn().getKey(),
+                                    /* removeImmediately= */ true ,
+                                    /* reason= */ "onChildSnappedBack"
+                            );
                         }
                     }
                 }

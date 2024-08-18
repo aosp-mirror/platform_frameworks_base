@@ -33,6 +33,7 @@ import com.android.systemui.education.data.model.GestureEduModel
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.properties.Delegates.notNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -79,6 +80,8 @@ constructor(
         const val DATASTORE_DIR = "education/USER%s_ContextualEducation"
     }
 
+    private var userId by notNull<Int>()
+
     private var dataStoreScope: CoroutineScope? = null
 
     private val datastore = MutableStateFlow<DataStore<Preferences>?>(null)
@@ -89,6 +92,7 @@ constructor(
     override fun setUser(userId: Int) {
         dataStoreScope?.cancel()
         val newDsScope = dataStoreScopeProvider.get()
+        this.userId = userId
         datastore.value =
             PreferenceDataStoreFactory.create(
                 produceFile = {
@@ -123,6 +127,7 @@ constructor(
                 preferences[getLastEducationTimeKey(gestureType)]?.let {
                     Instant.ofEpochSecond(it)
                 },
+            userId = userId
         )
     }
 

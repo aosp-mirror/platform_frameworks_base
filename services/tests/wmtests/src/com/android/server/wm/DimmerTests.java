@@ -59,6 +59,7 @@ public class DimmerTests extends WindowTestsBase {
 
         TestWindowContainer(WindowManagerService wm) {
             super(wm);
+            setVisibleRequested(true);
         }
 
         @Override

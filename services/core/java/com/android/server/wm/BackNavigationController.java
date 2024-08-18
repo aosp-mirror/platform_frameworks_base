@@ -273,8 +273,9 @@ class BackNavigationController {
                                     customAppTransition.mBackgroundColor);
                         }
                     }
-                    infoBuilder.setLetterboxColor(currentActivity.mLetterboxUiController
-                            .getLetterboxBackgroundColor().toArgb());
+                    infoBuilder.setLetterboxColor(currentActivity.mAppCompatController
+                            .getAppCompatLetterboxOverrides()
+                                .getLetterboxBackgroundColor().toArgb());
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivities.get(0).getTask();
                     backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
@@ -366,7 +367,7 @@ class BackNavigationController {
                         // client process to prevent the unexpected relayout when handling the back
                         // animation.
                         for (int i = prevActivities.size() - 1; i >= 0; --i) {
-                            prevActivities.get(i).setDeferHidingClient(true);
+                            prevActivities.get(i).setDeferHidingClient();
                         }
                     } else {
                         scheduleAnimation(builder);

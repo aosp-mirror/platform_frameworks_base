@@ -34,13 +34,15 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
-import android.content.Context;
+import android.content.ContentResolver;
+import android.content.ContextWrapper;
 import android.content.pm.PackageManagerInternal;
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
@@ -52,6 +54,7 @@ import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -66,11 +69,14 @@ import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.provider.Settings;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
 
 import org.junit.After;
@@ -105,10 +111,12 @@ public class VibrationThreadTest {
     private static final int TEST_DEFAULT_AMPLITUDE = 255;
     private static final float TEST_DEFAULT_SCALE_LEVEL_GAIN = 1.4f;
 
-    @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule
+    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private VibrationThread.VibratorManagerHooks mManagerHooks;
@@ -117,6 +125,7 @@ public class VibrationThreadTest {
     @Mock private VibrationConfig mVibrationConfigMock;
     @Mock private VibratorFrameworkStatsLogger mStatsLoggerMock;
 
+    private ContextWrapper mContextSpy;
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
     private VibrationSettings mVibrationSettings;
     private VibrationScaler mVibrationScaler;
@@ -149,14 +158,16 @@ public class VibrationThreadTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternalMock);
 
-        Context context = InstrumentationRegistry.getContext();
-        mVibrationSettings = new VibrationSettings(context, new Handler(mTestLooper.getLooper()),
-                mVibrationConfigMock);
+        mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
+        ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
+        when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
+        mVibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
         mVibrationScaler = new VibrationScaler(mVibrationConfigMock, mVibrationSettings);
 
         mockVibrators(VIBRATOR_ID);
 
-        PowerManager.WakeLock wakeLock = context.getSystemService(
+        PowerManager.WakeLock wakeLock = mContextSpy.getSystemService(
                 PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
         mThread = new VibrationThread(wakeLock, mManagerHooks);
         mThread.start();
@@ -254,6 +265,9 @@ public class VibrationThreadTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void vibrate_singleWaveformWithAdaptiveHapticsScaling_scalesAmplitudesProperly() {
+        // No user settings scale.
+        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_MEDIUM);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         VibrationEffect effect = VibrationEffect.createWaveform(
@@ -277,6 +291,9 @@ public class VibrationThreadTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
     public void vibrate_withVibrationParamsRequestStalling_timeoutRequestAndApplyNoScaling() {
+        // No user settings scale.
+        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_MEDIUM);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         VibrationEffect effect = VibrationEffect.createWaveform(
                 new long[]{5, 5, 5}, new int[]{1, 1, 1}, -1);
@@ -1862,6 +1879,13 @@ public class VibrationThreadTest {
             mVibratorProviders.put(vibratorId,
                     new FakeVibratorControllerProvider(mTestLooper.getLooper()));
         }
+    }
+
+    private void setUserSetting(String settingName, int value) {
+        Settings.System.putIntForUser(
+                mContextSpy.getContentResolver(), settingName, value, UserHandle.USER_CURRENT);
+        // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
+        mVibrationSettings.mSettingObserver.onChange(false);
     }
 
     private long startThreadAndDispatcher(VibrationEffect effect) {

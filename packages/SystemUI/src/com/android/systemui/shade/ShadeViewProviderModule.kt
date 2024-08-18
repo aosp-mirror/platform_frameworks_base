@@ -79,7 +79,7 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesWindowRootView(
             layoutInflater: LayoutInflater,
-            viewModelProvider: Provider<SceneContainerViewModel>,
+            viewModelFactory: SceneContainerViewModel.Factory,
             containerConfigProvider: Provider<SceneContainerConfig>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             layoutInsetController: NotificationInsetsController,
@@ -91,7 +91,7 @@ abstract class ShadeViewProviderModule {
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
                 sceneWindowRootView.init(
-                    viewModel = viewModelProvider.get(),
+                    viewModelFactory = viewModelFactory,
                     containerConfig = containerConfigProvider.get(),
                     sharedNotificationContainer =
                         sceneWindowRootView.requireViewById(R.id.shared_notification_container),

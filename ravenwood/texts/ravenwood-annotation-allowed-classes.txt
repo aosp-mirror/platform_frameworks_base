@@ -311,6 +311,7 @@ com.android.internal.util.ProcFileReader
 com.android.internal.util.QuickSelect
 com.android.internal.util.RingBuffer
 com.android.internal.util.SizedInputStream
+com.android.internal.util.RateLimitingCache
 com.android.internal.util.StringPool
 com.android.internal.util.TokenBucket
 com.android.internal.util.XmlPullParserWrapper

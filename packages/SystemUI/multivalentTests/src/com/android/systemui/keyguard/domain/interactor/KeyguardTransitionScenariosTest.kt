@@ -845,7 +845,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
 
             // WHEN the glanceable hub is shown
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
 
             assertThat(transitionRepository)
@@ -1004,7 +1004,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun alternateBouncerToGlanceableHub() =
         testScope.runTest {
             // GIVEN the device is idle on the glanceable hub
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             clearInvocations(transitionRepository)
 
@@ -1123,7 +1123,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun primaryBouncerToGlanceableHub() =
         testScope.runTest {
             // GIVEN the device is idle on the glanceable hub
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
 
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1157,7 +1157,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             advanceTimeBy(600L)
 
             // GIVEN the device is idle on the glanceable hub
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
 
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
@@ -1971,7 +1971,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun glanceableHubToLockscreen_communalKtfRefactor() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             clearInvocations(transitionRepository)
 
@@ -2035,7 +2035,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun glanceableHubToDozing_communalKtfRefactor() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             clearInvocations(transitionRepository)
 
@@ -2136,7 +2136,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun glanceableHubToOccluded_communalKtfRefactor() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             clearInvocations(transitionRepository)
 
@@ -2184,7 +2184,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun glanceableHubToGone_communalKtfRefactor() =
         testScope.runTest {
             // GIVEN a prior transition has run to GLANCEABLE_HUB
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             clearInvocations(transitionRepository)
 
@@ -2265,7 +2265,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             advanceTimeBy(600L)
 
             // GIVEN a prior transition has run to GLANCEABLE_HUB
-            communalSceneInteractor.changeScene(CommunalScenes.Communal)
+            communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
             runCurrent()
             clearInvocations(transitionRepository)
 

@@ -76,6 +76,7 @@ constructor(
         modifier: Modifier,
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit,
+        onSetTiles: (List<TileSpec>) -> Unit,
     ) {
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
         val largeTiles by iconTilesViewModel.largeTiles.collectAsStateWithLifecycle()
@@ -91,12 +92,16 @@ constructor(
                 }
             }
 
+        val (currentTiles, otherTiles) = sizedTiles.partition { it.tile.isCurrent }
+        val currentListState = rememberEditListState(currentTiles, columns)
         DefaultEditTileGrid(
-            sizedTiles = sizedTiles,
+            currentListState = currentListState,
+            otherTiles = otherTiles,
             columns = columns,
             modifier = modifier,
             onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
+            onSetTiles = onSetTiles,
             onResize = iconTilesViewModel::resize,
         )
     }

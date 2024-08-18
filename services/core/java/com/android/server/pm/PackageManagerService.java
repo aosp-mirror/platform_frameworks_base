@@ -2034,6 +2034,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         // CHECKSTYLE:ON IndentationCheck
         t.traceEnd();
 
+        t.traceBegin("get system config");
+        SystemConfig systemConfig = injector.getSystemConfig();
+        t.traceEnd();
+
         t.traceBegin("addSharedUsers");
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
@@ -2053,6 +2057,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.uwb", UWB_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        final ArrayMap<String, Integer> oemDefinedUids = systemConfig.getOemDefinedUids();
+        final int numOemDefinedUids = oemDefinedUids.size();
+        for (int i = 0; i < numOemDefinedUids; i++) {
+            mSettings.addOemSharedUserLPw(oemDefinedUids.keyAt(i), oemDefinedUids.valueAt(i),
+                    ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        }
+
         t.traceEnd();
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
@@ -2084,10 +2095,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mContext.getSystemService(DisplayManager.class)
                 .getDisplay(Display.DEFAULT_DISPLAY).getMetrics(mMetrics);
 
-        t.traceBegin("get system config");
-        SystemConfig systemConfig = injector.getSystemConfig();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
-        t.traceEnd();
 
         mProtectedPackages = new ProtectedPackages(mContext);
 

@@ -67,10 +67,10 @@ import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
+import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;

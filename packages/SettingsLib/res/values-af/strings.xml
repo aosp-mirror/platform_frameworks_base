@@ -37,7 +37,7 @@
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-persoonlik"</string>
     <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-persoonlik"</string>
-    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-persoonlik"</string>
     <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-onderneming"</string>
     <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-onderneming"</string>
     <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-onderneming"</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Wys visuele terugvoer vir tikke"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Wys sleuteldrukke"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Wys visuele terugvoer vir fisieke sleuteldrukke"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Wys raakpaneelinvoer"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Skermoorlegger wat raakpaneelinvoerdata en herkende gebare vertoon"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Wys oppervlakopdaterings"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Flits totale vensteroppervlakke wanneer dit opdateer"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Wys aansigopdaterings"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> oor tot vol"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> oor tot vol"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laaiproses is onderbreek om battery te beskerm"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laai tans"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Volgelaai teen <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Volgelaai teen <xliff:g id="TIME">%2$s</xliff:g>"</string>

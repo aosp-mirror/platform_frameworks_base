@@ -184,7 +184,11 @@ constructor(
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .filter { step -> step.to == KeyguardState.OCCLUDED }
             .combine(isCommunalAvailable, ::Pair)
-            .map { (step, available) -> available && step.from == KeyguardState.GLANCEABLE_HUB }
+            .map { (step, available) ->
+                available &&
+                    (step.from == KeyguardState.GLANCEABLE_HUB ||
+                        step.from == KeyguardState.DREAMING)
+            }
             .flowOn(bgDispatcher)
             .stateIn(
                 scope = applicationScope,
@@ -325,8 +329,11 @@ constructor(
     @Deprecated(
         "Use com.android.systemui.communal.domain.interactor.CommunalSceneInteractor instead"
     )
-    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) =
-        communalSceneInteractor.changeScene(newScene, transitionKey)
+    fun changeScene(
+        newScene: SceneKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null
+    ) = communalSceneInteractor.changeScene(newScene, loggingReason, transitionKey)
 
     fun setEditModeOpen(isOpen: Boolean) {
         _editModeOpen.value = isOpen
@@ -509,7 +516,7 @@ constructor(
                 )
 
                 // Add UMO
-                if (mediaHostVisible && media.hasActiveMediaOrRecommendation) {
+                if (mediaHostVisible && media.hasAnyMediaOrRecommendation) {
                     ongoingContent.add(
                         CommunalContentModel.Umo(
                             createdTimestampMillis = media.createdTimestampMillis,

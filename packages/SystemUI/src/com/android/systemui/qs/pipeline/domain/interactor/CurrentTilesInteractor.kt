@@ -116,6 +116,8 @@ interface CurrentTilesInteractor : ProtoDumpable {
      */
     fun setTiles(specs: List<TileSpec>)
 
+    fun createTileSync(spec: TileSpec): QSTile?
+
     companion object {
         val POSITION_AT_END: Int = TileSpecRepository.POSITION_AT_END
     }
@@ -190,9 +192,7 @@ constructor(
             }
 
     init {
-        if (featureFlags.pipelineEnabled) {
-            startTileCollection()
-        }
+        startTileCollection()
     }
 
     private fun startTileCollection() {
@@ -342,15 +342,16 @@ constructor(
         lifecycleManager.flushMessagesAndUnbind()
     }
 
+    override fun createTileSync(spec: TileSpec): QSTile? {
+        return if (featureFlags.tilesEnabled) {
+            newQSTileFactory.get().createTile(spec.spec)
+        } else {
+            null
+        } ?: tileFactory.createTile(spec.spec)
+    }
+
     private suspend fun createTile(spec: TileSpec): QSTile? {
-        val tile =
-            withContext(mainDispatcher) {
-                if (featureFlags.tilesEnabled) {
-                    newQSTileFactory.get().createTile(spec.spec)
-                } else {
-                    null
-                } ?: tileFactory.createTile(spec.spec)
-            }
+        val tile = withContext(mainDispatcher) { createTileSync(spec) }
         if (tile == null) {
             logger.logTileNotFoundInFactory(spec)
             return null

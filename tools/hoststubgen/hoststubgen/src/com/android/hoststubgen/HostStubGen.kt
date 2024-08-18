@@ -22,6 +22,7 @@ import com.android.hoststubgen.filters.ClassWidePolicyPropagatingFilter
 import com.android.hoststubgen.filters.ConstantFilter
 import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.FilterPolicy
+import com.android.hoststubgen.filters.FilterRemapper
 import com.android.hoststubgen.filters.ImplicitOutputFilter
 import com.android.hoststubgen.filters.OutputFilter
 import com.android.hoststubgen.filters.StubIntersectingFilter
@@ -37,6 +38,7 @@ import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.util.CheckClassAdapter
 import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -74,7 +76,9 @@ class HostStubGen(val options: HostStubGenOptions) {
         }
 
         // Build the filters.
-        val (filter, policyFileRemapper) = buildFilter(errors, allClasses, options)
+        val filter = buildFilter(errors, allClasses, options)
+
+        val filterRemapper = FilterRemapper(filter)
 
         // Transform the jar.
         convert(
@@ -86,7 +90,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                 allClasses,
                 errors,
                 stats,
-                policyFileRemapper,
+                filterRemapper,
                 options.numShards.get,
                 options.shard.get,
         )
@@ -116,7 +120,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             errors: HostStubGenErrors,
             allClasses: ClassNodes,
             options: HostStubGenOptions,
-            ): Pair<OutputFilter, Remapper?> {
+            ): OutputFilter {
         // We build a "chain" of multiple filters here.
         //
         // The filters are build in from "inside", meaning the first filter created here is
@@ -169,14 +173,10 @@ class HostStubGen(val options: HostStubGenOptions) {
             filter,
         )
 
-        var policyFileRemapper: Remapper? = null
-
         // Next, "text based" filter, which allows to override polices without touching
         // the target code.
         options.policyOverrideFile.ifSet {
-            val (f, p) = createFilterFromTextPolicyFile(it, allClasses, filter)
-            filter = f
-            policyFileRemapper = p
+            filter = createFilterFromTextPolicyFile(it, allClasses, filter)
         }
 
         // If `--intersect-stub-jar` is provided, load from these jar files too.
@@ -191,7 +191,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         // Apply the implicit filter.
         filter = ImplicitOutputFilter(errors, allClasses, filter)
 
-        return Pair(filter, policyFileRemapper)
+        return filter
     }
 
     /**
@@ -273,7 +273,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         if (filename == null) {
             return block(null)
         }
-        return ZipOutputStream(FileOutputStream(filename)).use(block)
+        return ZipOutputStream(BufferedOutputStream(FileOutputStream(filename))).use(block)
     }
 
     /**
@@ -334,13 +334,14 @@ class HostStubGen(val options: HostStubGenOptions) {
             entry: ZipEntry,
             out: ZipOutputStream,
             ) {
-        BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
+        // TODO: It seems like copying entries this way is _very_ slow,
+        // even with out.setLevel(0). Look for other ways to do it.
+
+        inZip.getInputStream(entry).use { ins ->
             // Copy unknown entries as is to the impl out. (but not to the stub out.)
             val outEntry = ZipEntry(entry.name)
             out.putNextEntry(outEntry)
-            while (bis.available() > 0) {
-                out.write(bis.read())
-            }
+            ins.transferTo(out)
             out.closeEntry()
         }
     }

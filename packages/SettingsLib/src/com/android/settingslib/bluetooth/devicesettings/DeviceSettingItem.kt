@@ -27,6 +27,7 @@ import android.os.Parcelable
  * @property packageName The package name for service binding.
  * @property className The class name for service binding.
  * @property intentAction The intent action for service binding.
+ * @property preferenceKey The preference key if it's a built-in preference.
  * @property extras Extra bundle
  */
 data class DeviceSettingItem(
@@ -34,6 +35,7 @@ data class DeviceSettingItem(
     val packageName: String,
     val className: String,
     val intentAction: String,
+    val preferenceKey: String? = null,
     val extras: Bundle = Bundle.EMPTY,
 ) : Parcelable {
 
@@ -45,6 +47,7 @@ data class DeviceSettingItem(
             writeString(packageName)
             writeString(className)
             writeString(intentAction)
+            writeString(preferenceKey)
             writeBundle(extras)
         }
     }
@@ -60,6 +63,7 @@ data class DeviceSettingItem(
                             packageName = readString() ?: "",
                             className = readString() ?: "",
                             intentAction = readString() ?: "",
+                            preferenceKey = readString() ?: "",
                             extras = readBundle((Bundle::class.java.classLoader)) ?: Bundle.EMPTY,
                         )
                     }

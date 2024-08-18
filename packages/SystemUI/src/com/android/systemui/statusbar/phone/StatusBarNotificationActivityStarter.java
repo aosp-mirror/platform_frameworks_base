@@ -230,7 +230,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         Runnable action = () -> {
             mBubblesManagerOptional.ifPresent(bubblesManager ->
                     bubblesManager.onUserChangedBubble(entry, !entry.isBubble()));
-            mHeadsUpManager.removeNotification(entry.getKey(), /* releaseImmediately= */ true);
+            mHeadsUpManager.removeNotification(entry.getKey(), /* releaseImmediately= */ true,
+                    /* reason= */ "onNotificationBubbleIconClicked");
         };
         if (entry.isBubble()) {
             // entry is being un-bubbled, no need to unlock
@@ -621,7 +622,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
             // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
             // become canceled shortly by NoMan, but we can't assume that.
-            mHeadsUpManager.removeNotification(key, true /* releaseImmediately */);
+            mHeadsUpManager.removeNotification(key, /* releaseImmediately= */ true,
+                    "removeHunAfterClick");
         }
     }
 

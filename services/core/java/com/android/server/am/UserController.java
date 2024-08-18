@@ -131,6 +131,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.FactoryResetter;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -245,6 +246,12 @@ class UserController implements Handler.Callback {
      */
     // TODO(b/197344658): Increase to 10s or 15s once we have a switch-UX-is-done invocation too.
     private static final int USER_COMPLETED_EVENT_DELAY_MS = 5 * 1000;
+
+    /**
+     * If a user has an alarm in the next this many milliseconds, avoid stopping it due to
+     * scheduled background stopping.
+     */
+    private static final long TIME_BEFORE_USERS_ALARM_TO_AVOID_STOPPING_MS = 60 * 60_000; // 60 mins
 
     /**
      * Maximum number of users we allow to be running at a time, including system user.
@@ -2418,6 +2425,12 @@ class UserController implements Handler.Callback {
     void processScheduledStopOfBackgroundUser(Integer userIdInteger) {
         final int userId = userIdInteger;
         Slogf.d(TAG, "Considering stopping background user %d due to inactivity", userId);
+
+        if (avoidStoppingUserDueToUpcomingAlarm(userId)) {
+            // We want this user running soon for alarm-purposes, so don't stop it now. Reschedule.
+            scheduleStopOfBackgroundUser(userId);
+            return;
+        }
         synchronized (mLock) {
             if (getCurrentOrTargetUserIdLU() == userId) {
                 return;
@@ -2435,6 +2448,18 @@ class UserController implements Handler.Callback {
             Slogf.i(TAG, "Stopping background user %d due to inactivity", userId);
             stopUsersLU(userId, /* allowDelayedLocking= */ true, null, null);
         }
+    }
+
+    /**
+     * Returns whether we should avoid stopping the user now due to it having an alarm set to fire
+     * soon.
+     */
+    private boolean avoidStoppingUserDueToUpcomingAlarm(@UserIdInt int userId) {
+        final long alarmWallclockMs
+                = mInjector.getAlarmManagerInternal().getNextAlarmTriggerTimeForUser(userId);
+        return System.currentTimeMillis() <  alarmWallclockMs
+                && (alarmWallclockMs
+                    < System.currentTimeMillis() + TIME_BEFORE_USERS_ALARM_TO_AVOID_STOPPING_MS);
     }
 
     private void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
@@ -3906,6 +3931,10 @@ class UserController implements Handler.Callback {
                 mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
             }
             return mPowerManagerInternal;
+        }
+
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return LocalServices.getService(AlarmManagerInternal.class);
         }
 
         KeyguardManager getKeyguardManager() {

@@ -43,6 +43,7 @@ import android.view.inputmethod.ImeTracker;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;

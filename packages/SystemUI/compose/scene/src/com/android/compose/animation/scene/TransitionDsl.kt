@@ -17,6 +17,8 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
@@ -140,6 +142,7 @@ interface BaseTransitionBuilder : PropertyTransformationBuilder {
     fun fractionRange(
         start: Float? = null,
         end: Float? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 }
@@ -182,6 +185,7 @@ interface TransitionBuilder : BaseTransitionBuilder {
     fun timestampRange(
         startMillis: Int? = null,
         endMillis: Int? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 
@@ -241,9 +245,7 @@ interface OverscrollScope : Density {
 interface ElementContentPicker {
     /**
      * Return the content in which [element] should be drawn (when using `Modifier.element(key)`) or
-     * composed (when using `MovableElement(key)`) during the given [transition]. If this element
-     * should not be drawn or composed in neither [transition.fromContent] nor
-     * [transition.toContent], return `null`.
+     * composed (when using `MovableElement(key)`) during the given [transition].
      *
      * Important: For [MovableElements][ContentScope.MovableElement], this content picker will
      * *always* be used during transitions to decide whether we should compose that element in a

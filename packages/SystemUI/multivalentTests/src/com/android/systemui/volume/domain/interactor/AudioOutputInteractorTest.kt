@@ -32,7 +32,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.data.repository.TestAudioDevicesFactory
 import com.android.systemui.volume.data.repository.audioRepository
-import com.android.systemui.volume.data.repository.audioSharingRepository
 import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.localMediaController
 import com.android.systemui.volume.localMediaRepository
@@ -221,33 +220,5 @@ class AudioOutputInteractorTest : SysuiTestCase() {
     private companion object {
 
         val testIcon = TestStubDrawable()
-    }
-
-    @Test
-    fun inAudioSharing_returnTrue() {
-        with(kosmos) {
-            testScope.runTest {
-                audioSharingRepository.setInAudioSharing(true)
-
-                val inAudioSharing by collectLastValue(underTest.isInAudioSharing)
-                runCurrent()
-
-                assertThat(inAudioSharing).isTrue()
-            }
-        }
-    }
-
-    @Test
-    fun notInAudioSharing_returnFalse() {
-        with(kosmos) {
-            testScope.runTest {
-                audioSharingRepository.setInAudioSharing(false)
-
-                val inAudioSharing by collectLastValue(underTest.isInAudioSharing)
-                runCurrent()
-
-                assertThat(inAudioSharing).isFalse()
-            }
-        }
     }
 }

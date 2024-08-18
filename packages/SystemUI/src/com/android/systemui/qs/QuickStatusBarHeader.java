@@ -123,4 +123,11 @@ public class QuickStatusBarHeader extends FrameLayout {
         lp.setMarginEnd(marginEnd);
         view.setLayoutParams(lp);
     }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedHeight() {
+        return mHeaderQsPanel.getSquishedHeight();
+    }
 }

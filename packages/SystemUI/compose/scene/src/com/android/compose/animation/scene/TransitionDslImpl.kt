@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.DurationBasedAnimationSpec
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.VectorConverter
@@ -163,9 +164,10 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
     override fun fractionRange(
         start: Float?,
         end: Float?,
+        easing: Easing,
         builder: PropertyTransformationBuilder.() -> Unit
     ) {
-        range = TransformationRange(start, end)
+        range = TransformationRange(start, end, easing)
         builder()
         range = null
     }
@@ -251,6 +253,7 @@ internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBu
     override fun timestampRange(
         startMillis: Int?,
         endMillis: Int?,
+        easing: Easing,
         builder: PropertyTransformationBuilder.() -> Unit
     ) {
         if (startMillis != null && (startMillis < 0 || startMillis > durationMillis)) {
@@ -263,7 +266,7 @@ internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBu
 
         val start = startMillis?.let { it.toFloat() / durationMillis }
         val end = endMillis?.let { it.toFloat() / durationMillis }
-        fractionRange(start, end, builder)
+        fractionRange(start, end, easing, builder)
     }
 }
 

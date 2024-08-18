@@ -60,11 +60,6 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
-import kotlinx.coroutines.flow.Flow;
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
-import kotlinx.coroutines.flow.StateFlowKt;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,6 +69,11 @@ import java.util.Set;
 import java.util.Stack;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
 
 /** A implementation of HeadsUpManager for phone. */
 @SysUISingleton
@@ -365,12 +365,14 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Override
     public boolean removeNotification(@NonNull String key, boolean releaseImmediately,
-            boolean animate) {
+            boolean animate, @NonNull String reason) {
         if (animate) {
-            return removeNotification(key, releaseImmediately);
+            return removeNotification(key, releaseImmediately,
+                    "removeNotification(animate: true), reason: " + reason);
         } else {
             mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
-            boolean removed = removeNotification(key, releaseImmediately);
+            final boolean removed = removeNotification(key, releaseImmediately,
+                    "removeNotification(animate: false), reason: " + reason);
             mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(true);
             return removed;
         }

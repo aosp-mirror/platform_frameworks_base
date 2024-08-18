@@ -205,6 +205,38 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun transitionValue_badTransitionResetsTransitionValue() =
+        testScope.runTest {
+            resetTransitionValueReplayCache(setOf(AOD, DOZING, LOCKSCREEN))
+            val transitionValues by collectValues(underTest.transitionValue(state = DOZING))
+
+            val toSteps =
+                listOf(
+                    TransitionStep(AOD, DOZING, 0f, STARTED),
+                    TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                )
+            toSteps.forEach {
+                repository.sendTransitionStep(it)
+                runCurrent()
+            }
+
+            // This is an intentionally bad sequence that will leave the transitionValue for
+            // DOZING in a bad place, since no CANCELED will be issued for DOZING
+            val fromSteps =
+                listOf(
+                    TransitionStep(AOD, LOCKSCREEN, 0f, STARTED),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING),
+                    TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED),
+                )
+            fromSteps.forEach {
+                repository.sendTransitionStep(it)
+                runCurrent()
+            }
+
+            assertThat(transitionValues).isEqualTo(listOf(0f, 0.5f, 0f))
+        }
+
+    @Test
     fun transitionValue_canceled_toAnotherState() =
         testScope.runTest {
             resetTransitionValueReplayCache(setOf(AOD, GONE, LOCKSCREEN))
