@@ -379,6 +379,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     /** Count down latch to wait while boot user is not set.*/
     private final CountDownLatch mBootUserLatch = new CountDownLatch(1);
+
+    /** Current boot phase. */
+    private @SystemService.BootPhase int mCurrentBootPhase;
+
     /**
      * Internal non-parcelable wrapper for UserInfo that is not exposed to other system apps.
      */
@@ -968,6 +972,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public void onBootPhase(int phase) {
+            mUms.mCurrentBootPhase = phase;
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mUms.cleanupPartialUsers();
 
@@ -6202,6 +6207,11 @@ public class UserManagerService extends IUserManager.Stub {
         final String restriction = getUserRemovalRestriction(userId);
         if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
             Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+            return false;
+        }
+        if (mCurrentBootPhase < SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            Slog.w(LOG_TAG, "Cannot remove user, removeUser is called too early during boot. "
+                + "ActivityManager is not ready yet.");
             return false;
         }
         return removeUserWithProfilesUnchecked(userId);

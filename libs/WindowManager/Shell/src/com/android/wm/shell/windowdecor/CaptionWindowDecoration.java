@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -260,6 +261,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             setupRootView();
         }
 
+        bindData(mResult.mRootView, taskInfo);
+
         if (!isDragResizeable) {
             closeDragResizeListener();
             return;
@@ -286,7 +289,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
                 new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(mContext, res),
-                getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop);
+                getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
+                getLargeResizeCornerSize(res)), touchSlop);
     }
 
     /**
@@ -303,6 +307,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         minimize.setOnClickListener(mOnCaptionButtonClickListener);
         final View maximize = caption.findViewById(R.id.maximize_window);
         maximize.setOnClickListener(mOnCaptionButtonClickListener);
+    }
+
+    private void bindData(View rootView, RunningTaskInfo taskInfo) {
+        final boolean isFullscreen =
+                taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        rootView.findViewById(R.id.maximize_window)
+                .setBackgroundResource(isFullscreen ? R.drawable.decor_restore_button_dark
+                        : R.drawable.decor_maximize_button_dark);
     }
 
     void setCaptionColor(int captionColor) {

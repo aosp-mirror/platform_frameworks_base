@@ -33,6 +33,9 @@ import com.android.hoststubgen.log
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Opcodes.INVOKEINTERFACE
+import org.objectweb.asm.Opcodes.INVOKESTATIC
+import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
 import org.objectweb.asm.Type
 
 /**
@@ -211,17 +214,14 @@ class ImplGeneratingAdapter(
             }
 
             if (policy.policy == FilterPolicy.Ignore) {
-                when (Type.getReturnType(descriptor)) {
-                    Type.VOID_TYPE -> {
-                        log.v("Making method ignored...")
-                        return IgnoreMethodAdapter(
-                                access, name, descriptor, signature, exceptions, innerVisitor)
-                            .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
-                    }
-                    else -> {
-                        throw RuntimeException("Ignored policy only allowed for void methods")
-                    }
-                }
+                log.v("Making method ignored...")
+                return IgnoreMethodAdapter(
+                    access, name, descriptor, signature, exceptions, innerVisitor)
+                    .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
+            }
+            if (filter.hasAnyMethodCallReplace()) {
+                innerVisitor = MethodCallReplacingAdapter(
+                    access, name, descriptor, signature, exceptions, innerVisitor)
             }
         }
         if (substituted) {
@@ -290,14 +290,37 @@ class ImplGeneratingAdapter(
      */
     private inner class IgnoreMethodAdapter(
             access: Int,
-            val name: String,
-            descriptor: String,
+            name: String,
+            val descriptor: String,
             signature: String?,
             exceptions: Array<String>?,
             next: MethodVisitor?
     ) : BodyReplacingMethodVisitor(access, name, descriptor, signature, exceptions, next) {
         override fun emitNewCode() {
-            visitInsn(Opcodes.RETURN)
+            when (Type.getReturnType(descriptor)) {
+                Type.VOID_TYPE -> visitInsn(Opcodes.RETURN)
+                Type.BOOLEAN_TYPE, Type.BYTE_TYPE, Type.CHAR_TYPE, Type.SHORT_TYPE,
+                Type.INT_TYPE -> {
+                    visitInsn(Opcodes.ICONST_0)
+                    visitInsn(Opcodes.IRETURN)
+                }
+                Type.LONG_TYPE -> {
+                    visitInsn(Opcodes.LCONST_0)
+                    visitInsn(Opcodes.LRETURN)
+                }
+                Type.FLOAT_TYPE -> {
+                    visitInsn(Opcodes.FCONST_0)
+                    visitInsn(Opcodes.FRETURN)
+                }
+                Type.DOUBLE_TYPE -> {
+                    visitInsn(Opcodes.DCONST_0)
+                    visitInsn(Opcodes.DRETURN)
+                }
+                else -> {
+                    visitInsn(Opcodes.ACONST_NULL)
+                    visitInsn(Opcodes.ARETURN)
+                }
+            }
             visitMaxs(0, 0) // We let ASM figure them out.
         }
     }
@@ -332,11 +355,9 @@ class ImplGeneratingAdapter(
 
                 // Update the descriptor -- add this class's type as the first argument
                 // to the method descriptor.
-                val thisType = Type.getType("L" + currentClassName + ";")
-
                 targetDescriptor = prependArgTypeToMethodDescriptor(
-                        descriptor,
-                        thisType,
+                    descriptor,
+                    currentClassName,
                 )
 
                 // Shift the original arguments by one.
@@ -449,6 +470,63 @@ class ImplGeneratingAdapter(
                     "onNonStubMethodCalled",
                     "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)V",
                     false)
+        }
+    }
+
+    private inner class MethodCallReplacingAdapter(
+        access: Int,
+        val callerMethodName: String,
+        val descriptor: String,
+        signature: String?,
+        exceptions: Array<String>?,
+        next: MethodVisitor?,
+    ) : MethodVisitor(OPCODE_VERSION, next) {
+        override fun visitMethodInsn(
+            opcode: Int,
+            owner: String?,
+            name: String?,
+            descriptor: String?,
+            isInterface: Boolean,
+        ) {
+            when (opcode) {
+                INVOKESTATIC, INVOKEVIRTUAL, INVOKEINTERFACE -> {}
+                else -> {
+                    // Don't touch other opcodes.
+                    super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+                    return
+                }
+            }
+            val to = filter.getMethodCallReplaceTo(
+                currentClassName, callerMethodName, owner!!, name!!, descriptor!!)
+
+            if (to == null
+                // Don't replace if the target is the callsite.
+                || (to.className == currentClassName && to.methodName == callerMethodName)
+            ) {
+                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+                return
+            }
+
+            // Replace the method call with a (static) call to the target method.
+            // If it's a non-static call, the target method's first argument will receive "this".
+            // (Because of that, we don't need to manipulate the stack. Just replace the
+            // method call.)
+
+            val toDesc = if (opcode == INVOKESTATIC) {
+                // Static call to static call, no need to change the desc.
+                descriptor
+            } else {
+                // Need to prepend the "this" type to the descriptor.
+                prependArgTypeToMethodDescriptor(descriptor, owner)
+            }
+
+            mv.visitMethodInsn(
+                INVOKESTATIC,
+                to.className,
+                to.methodName,
+                toDesc,
+                false
+            )
         }
     }
 }

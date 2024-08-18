@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 import com.android.systemui.res.R
 
@@ -44,7 +45,10 @@ fun QuickQuickSettings(
     }
     val columns by viewModel.columns.collectAsStateWithLifecycle()
 
-    TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
+    TileLazyGrid(
+        modifier = modifier.sysuiResTag("qqs_tile_layout"),
+        columns = GridCells.Fixed(columns)
+    ) {
         items(
             tiles.size,
             key = { index -> sizedTiles[index].tile.spec.spec },

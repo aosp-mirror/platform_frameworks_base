@@ -59,7 +59,7 @@ constructor(
     ActivatableFlowDumper by ActivatableFlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
     SysUiViewModel() {
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         activateFlowDumper()
     }
 

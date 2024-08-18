@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,6 +40,7 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.lifecycle.rememberViewModel
@@ -114,7 +113,7 @@ constructor(
 }
 
 @Composable
-private fun ShadeBody(
+fun ShadeBody(
     viewModel: QuickSettingsContainerViewModel,
 ) {
     val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
@@ -131,6 +130,7 @@ private fun ShadeBody(
         } else {
             QuickSettingsLayout(
                 viewModel = viewModel,
+                modifier = Modifier.sysuiResTag("quick_settings_panel")
             )
         }
     }
@@ -158,11 +158,6 @@ private fun QuickSettingsLayout(
                 Modifier.fillMaxWidth().heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
             viewModel.editModeViewModel::startEditing,
         )
-        Button(
-            onClick = { viewModel.editModeViewModel.startEditing() },
-        ) {
-            Text("Edit mode")
-        }
     }
 }
 

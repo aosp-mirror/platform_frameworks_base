@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
@@ -43,6 +44,8 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
@@ -148,6 +151,21 @@ public final class CardEmulation {
      *    that service will be invoked directly.
      */
     public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2;
+    /**
+     * Route to Device Host (DH).
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
+    public static final String DH = "DH";
+    /**
+     * Route to eSE.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
+    public static final String ESE = "ESE";
+    /**
+     * Route to UICC.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
+    public static final String UICC = "UICC";
 
     static boolean sIsInitialized = false;
     static HashMap<Context, CardEmulation> sCardEmus = new HashMap<Context, CardEmulation>();
@@ -865,11 +883,22 @@ public final class CardEmulation {
                 sService.setServiceEnabledForCategoryOther(userId, service, status), false);
     }
 
+    /** @hide */
+    @StringDef({
+        DH,
+        ESE,
+        UICC
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProtocolAndTechnologyRoute {}
+
      /**
       * Setting NFC controller routing table, which includes Protocol Route and Technology Route,
       * while this Activity is in the foreground.
       *
-      * The parameter set to null can be used to keep current values for that entry.
+      * The parameter set to null can be used to keep current values for that entry. Either
+      * Protocol Route or Technology Route should be override when calling this API, otherwise
+      * throw {@link IllegalArgumentException}.
       * <p>
       * Example usage in an Activity that requires to set proto route to "ESE" and keep tech route:
       * <pre>
@@ -877,26 +906,40 @@ public final class CardEmulation {
       *     mNfcAdapter.overrideRoutingTable(this , "ESE" , null);
       * }</pre>
       * </p>
-      * Also activities must call this method when it goes to the background,
-      * with all parameters set to null.
+      * Also activities must call {@link #recoverRoutingTable(Activity)}
+      * when it goes to the background. Only the package of the
+      * currently preferred service (the service set as preferred by the current foreground
+      * application via {@link CardEmulation#setPreferredService(Activity, ComponentName)} or the
+      * current Default Wallet Role Holder {@link android.app.role.RoleManager#ROLE_WALLET}),
+      * otherwise a call to this method will fail and throw {@link SecurityException}.
       * @param activity The Activity that requests NFC controller routing table to be changed.
       * @param protocol ISO-DEP route destination, which can be "DH" or "UICC" or "ESE".
-      * @param technology Tech-A, Tech-B route destination, which can be "DH" or "UICC" or "ESE".
-      * @return true if operation is successful and false otherwise
-      *
+      * @param technology Tech-A, Tech-B and Tech-F route destination, which can be "DH" or "UICC"
+      * or "ESE".
+      * @throws SecurityException if the caller is not the preferred NFC service
+      * @throws IllegalArgumentException if the activity is not resumed or the caller is not in the
+      * foreground, or both protocol route and technology route are null.
+      * <p>
       * This is a high risk API and only included to support mainline effort
       * @hide
       */
-    public boolean overrideRoutingTable(Activity activity, String protocol, String technology) {
-        if (activity == null) {
-            throw new NullPointerException("activity or service or category is null");
-        }
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
+    public void overrideRoutingTable(
+            @NonNull Activity activity, @ProtocolAndTechnologyRoute @Nullable String protocol,
+            @ProtocolAndTechnologyRoute @Nullable String technology) {
         if (!activity.isResumed()) {
             throw new IllegalArgumentException("Activity must be resumed.");
         }
-        return callServiceReturn(() ->
+        if (protocol == null && technology == null) {
+            throw new IllegalArgumentException(("Both Protocol and Technology are null."));
+        }
+        callService(() ->
                 sService.overrideRoutingTable(
-                    mContext.getUser().getIdentifier(), protocol, technology), false);
+                    mContext.getUser().getIdentifier(),
+                    protocol,
+                    technology,
+                    mContext.getPackageName()));
     }
 
     /**
@@ -904,20 +947,19 @@ public final class CardEmulation {
      * which was changed by {@link #overrideRoutingTable(Activity, String, String)}
      *
      * @param activity The Activity that requested NFC controller routing table to be changed.
-     * @return true if operation is successful and false otherwise
+     * @throws IllegalArgumentException if the caller is not in the foreground.
      *
      * @hide
      */
-    public boolean recoverRoutingTable(Activity activity) {
-        if (activity == null) {
-            throw new NullPointerException("activity is null");
-        }
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
+    public void recoverRoutingTable(@NonNull Activity activity) {
         if (!activity.isResumed()) {
             throw new IllegalArgumentException("Activity must be resumed.");
         }
-        return callServiceReturn(() ->
+        callService(() ->
                 sService.recoverRoutingTable(
-                    mContext.getUser().getIdentifier()), false);
+                    mContext.getUser().getIdentifier()));
     }
 
     /**

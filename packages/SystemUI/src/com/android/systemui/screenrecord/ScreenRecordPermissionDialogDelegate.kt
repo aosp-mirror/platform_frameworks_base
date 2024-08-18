@@ -146,6 +146,10 @@ class ScreenRecordPermissionDialogDelegate(
                     hostUserHandle
                 )
                 intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID, hostUid)
+                intent.putExtra(
+                    MediaProjectionAppSelectorActivity.EXTRA_SCREEN_SHARE_TYPE,
+                    MediaProjectionAppSelectorActivity.ScreenShareType.ScreenRecord.name,
+                )
                 activityStarter.startActivity(intent, /* dismissShade= */ true)
             }
             dialog.dismiss()

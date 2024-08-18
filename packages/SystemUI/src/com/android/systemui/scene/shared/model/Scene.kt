@@ -20,6 +20,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.lifecycle.Activatable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -35,7 +36,9 @@ interface Scene : Activatable {
     /** Uniquely-identifying key for this scene. The key must be unique within its container. */
     val key: SceneKey
 
-    override suspend fun activate() = Unit
+    override suspend fun activate(): Nothing {
+        awaitCancellation()
+    }
 
     /**
      * The mapping between [UserAction] and destination [UserActionResult]s.

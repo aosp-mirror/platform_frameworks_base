@@ -198,7 +198,8 @@ static Aidl::CompositeEffect effectFromJavaPrimitive(JNIEnv* env, jobject primit
 }
 
 static Aidl::VendorEffect vendorEffectFromJavaParcel(JNIEnv* env, jobject vendorData,
-                                                     jlong strength, jfloat scale) {
+                                                     jlong strength, jfloat scale,
+                                                     jfloat adaptiveScale) {
     PersistableBundle bundle;
     if (AParcel* parcel = AParcel_fromJavaParcel(env, vendorData); parcel != nullptr) {
         if (binder_status_t status = bundle.readFromParcel(parcel); status == STATUS_OK) {
@@ -217,6 +218,7 @@ static Aidl::VendorEffect vendorEffectFromJavaParcel(JNIEnv* env, jobject vendor
     effect.vendorData = bundle;
     effect.strength = static_cast<Aidl::EffectStrength>(strength);
     effect.scale = static_cast<float>(scale);
+    effect.vendorScale = static_cast<float>(adaptiveScale);
     return effect;
 }
 
@@ -319,13 +321,14 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass /* clazz */, jlong ptr, j
 
 static jlong vibratorPerformVendorEffect(JNIEnv* env, jclass /* clazz */, jlong ptr,
                                          jobject vendorData, jlong strength, jfloat scale,
-                                         jlong vibrationId) {
+                                         jfloat adaptiveScale, jlong vibrationId) {
     VibratorControllerWrapper* wrapper = reinterpret_cast<VibratorControllerWrapper*>(ptr);
     if (wrapper == nullptr) {
         ALOGE("vibratorPerformVendorEffect failed because native wrapper was not initialized");
         return -1;
     }
-    Aidl::VendorEffect effect = vendorEffectFromJavaParcel(env, vendorData, strength, scale);
+    Aidl::VendorEffect effect =
+            vendorEffectFromJavaParcel(env, vendorData, strength, scale, adaptiveScale);
     auto callback = wrapper->createCallback(vibrationId);
     auto performVendorEffectFn = [&effect, &callback](vibrator::HalWrapper* hal) {
         return hal->performVendorEffect(effect, callback);
@@ -511,7 +514,7 @@ static const JNINativeMethod method_table[] = {
         {"off", "(J)V", (void*)vibratorOff},
         {"setAmplitude", "(JF)V", (void*)vibratorSetAmplitude},
         {"performEffect", "(JJJJ)J", (void*)vibratorPerformEffect},
-        {"performVendorEffect", "(JLandroid/os/Parcel;JFJ)J", (void*)vibratorPerformVendorEffect},
+        {"performVendorEffect", "(JLandroid/os/Parcel;JFFJ)J", (void*)vibratorPerformVendorEffect},
         {"performComposedEffect", "(J[Landroid/os/vibrator/PrimitiveSegment;J)J",
          (void*)vibratorPerformComposedEffect},
         {"performPwleEffect", "(J[Landroid/os/vibrator/RampSegment;IJ)J",

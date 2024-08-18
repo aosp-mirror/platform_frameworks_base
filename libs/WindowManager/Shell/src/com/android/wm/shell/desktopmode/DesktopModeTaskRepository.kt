@@ -194,6 +194,11 @@ class DesktopModeTaskRepository {
     fun getActiveNonMinimizedOrderedTasks(displayId: Int): List<Int> =
         getFreeformTasksInZOrder(displayId).filter { !isMinimizedTask(it) }
 
+    /** Returns the count of active non-minimized tasks for [displayId]. */
+    fun getActiveNonMinimizedTaskCount(displayId: Int): Int {
+        return getActiveTasks(displayId).count { !isMinimizedTask(it) }
+    }
+
     /** Returns a list of freeform tasks, ordered from top-bottom (top at index 0). */
     fun getFreeformTasksInZOrder(displayId: Int): ArrayList<Int> =
         ArrayList(desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder ?: emptyList())

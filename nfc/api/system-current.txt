@@ -57,6 +57,7 @@ package android.nfc {
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public final class NfcOemExtension {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearPreference();
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public java.util.List<java.lang.String> getActiveNfceeList();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void maybeTriggerFirmwareUpdate();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcOemExtension.Callback);
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void synchronizeScreenState();
@@ -74,6 +75,8 @@ package android.nfc.cardemulation {
   public final class CardEmulation {
     method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static android.content.ComponentName getPreferredPaymentService(@NonNull android.content.Context);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
+    method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void overrideRoutingTable(@NonNull android.app.Activity, @Nullable String, @Nullable String);
+    method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void recoverRoutingTable(@NonNull android.app.Activity);
   }
 
 }

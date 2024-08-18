@@ -333,6 +333,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
+        public void updateContextualEduStats(boolean isTrackpadGesture, String gestureType) {
+            verifyCallerAndClearCallingIdentityPostMain("updateContextualEduStats",
+                    () -> mHandler.post(() -> OverviewProxyService.this.updateContextualEduStats(
+                            isTrackpadGesture, GestureType.valueOf(gestureType))));
+        }
+
+        @Override
         public void setHomeRotationEnabled(boolean enabled) {
             verifyCallerAndClearCallingIdentityPostMain("setHomeRotationEnabled", () ->
                     mHandler.post(() -> notifyHomeRotationEnabled(enabled)));

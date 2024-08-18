@@ -187,7 +187,7 @@ public final class DisplayBrightnessStrategySelectorTest {
     }
 
     @Test
-    public void selectStrategySelectsDozeStrategyWhenValid() {
+    public void selectStrategyWhenValid_useNormalBrightnessForDozeFalse_SelectsDozeStrategy() {
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
@@ -195,6 +195,22 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
                 DISALLOW_AUTO_BRIGHTNESS_WHILE_DOZING);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
+                        new StrategySelectionRequest(displayPowerRequest, Display.STATE_DOZE,
+                                0.1f, false, mDisplayOffloadSession)),
+                mDozeBrightnessModeStrategy);
+    }
+
+    @Test
+    public void selectStrategyWhenValid_useNormalBrightnessForDozeTrue_doNotSelectsDozeStrategy() {
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+        displayPowerRequest.dozeScreenBrightness = 0.2f;
+        displayPowerRequest.useNormalBrightnessForDoze = true;
+        when(mResources.getBoolean(R.bool.config_allowAutoBrightnessWhileDozing)).thenReturn(
+                DISALLOW_AUTO_BRIGHTNESS_WHILE_DOZING);
+        assertNotEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_DOZE,
                                 0.1f, false, mDisplayOffloadSession)),
                 mDozeBrightnessModeStrategy);
@@ -353,7 +369,8 @@ public final class DisplayBrightnessStrategySelectorTest {
                 mAutomaticBrightnessStrategy);
         verify(mAutomaticBrightnessStrategy).setAutoBrightnessState(Display.STATE_ON,
                 true, BrightnessReason.REASON_UNKNOWN,
-                DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT, 0.1f, false);
+                DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT,
+                /* useNormalBrightnessForDoze= */ false, 0.1f, false);
     }
 
     @Test

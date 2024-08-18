@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth.devicesettings.data.repository
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.text.TextUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreference
 import com.android.settingslib.bluetooth.devicesettings.DeviceSetting
@@ -28,6 +29,7 @@ import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreference
 import com.android.settingslib.bluetooth.devicesettings.ToggleInfo
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingIcon
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingStateModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.ToggleModel
@@ -76,8 +78,7 @@ class DeviceSettingRepositoryImpl(
                             coroutineScope,
                             backgroundCoroutineContext,
                         )
-                }
-            )
+                })
 
     override suspend fun getDeviceSettingsConfig(
         cachedDevice: CachedBluetoothDevice
@@ -96,11 +97,15 @@ class DeviceSettingRepositoryImpl(
         DeviceSettingConfigModel(
             mainItems = mainContentItems.map { it.toModel() },
             moreSettingsItems = moreSettingsItems.map { it.toModel() },
-            moreSettingsPageFooter = moreSettingsFooter
-        )
+            moreSettingsPageFooter = moreSettingsFooter)
 
-    private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel =
-        DeviceSettingConfigItemModel(settingId)
+    private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel {
+        return if (!TextUtils.isEmpty(preferenceKey)) {
+            DeviceSettingConfigItemModel.BuiltinItem(settingId, preferenceKey!!)
+        } else {
+            DeviceSettingConfigItemModel.AppProvidedItem(settingId)
+        }
+    }
 
     private fun DeviceSetting.toModel(
         cachedDevice: CachedBluetoothDevice,
@@ -113,7 +118,7 @@ class DeviceSettingRepositoryImpl(
                     id = settingId,
                     title = pref.title,
                     summary = pref.summary,
-                    icon = pref.icon,
+                    icon = pref.icon?.let { DeviceSettingIcon.BitmapIcon(it) },
                     isAllowedChangingState = pref.isAllowedChangingState,
                     intent = pref.intent,
                     switchState =
@@ -149,5 +154,6 @@ class DeviceSettingRepositoryImpl(
             else -> DeviceSettingModel.Unknown(cachedDevice, settingId)
         }
 
-    private fun ToggleInfo.toModel(): ToggleModel = ToggleModel(label, icon)
+    private fun ToggleInfo.toModel(): ToggleModel =
+        ToggleModel(label, DeviceSettingIcon.BitmapIcon(icon))
 }

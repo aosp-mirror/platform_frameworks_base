@@ -257,7 +257,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final Function<ActivityRecord, Rect> innerBoundsOf =
                 (ActivityRecord a) -> {
                     final Rect bounds = new Rect();
-                    a.mLetterboxUiController.getLetterboxInnerBounds(bounds);
+                    a.getLetterboxInnerBounds(bounds);
                     return bounds;
                 };
         final Runnable checkLetterboxPositions = () -> assertEquals(innerBoundsOf.apply(mActivity),
@@ -369,7 +369,7 @@ public class SizeCompatTests extends WindowTestsBase {
         final Function<ActivityRecord, Rect> innerBoundsOf =
                 (ActivityRecord a) -> {
                     final Rect bounds = new Rect();
-                    a.mLetterboxUiController.getLetterboxInnerBounds(bounds);
+                    a.getLetterboxInnerBounds(bounds);
                     return bounds;
                 };
 
@@ -632,16 +632,15 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertEquals(window, mActivity.findMainWindow());
 
-        spyOn(mActivity.mLetterboxUiController);
         doReturn(true).when(mActivity).isVisibleRequested();
 
-        assertTrue(mActivity.mLetterboxUiController.shouldShowLetterboxUi(
-                mActivity.findMainWindow()));
+        assertTrue(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .shouldShowLetterboxUi(mActivity.findMainWindow()));
 
         window.mAttrs.flags |= FLAG_SHOW_WALLPAPER;
 
-        assertFalse(mActivity.mLetterboxUiController.shouldShowLetterboxUi(
-                mActivity.findMainWindow()));
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .shouldShowLetterboxUi(mActivity.findMainWindow()));
     }
 
     @Test
@@ -1757,7 +1756,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
         mActivity.mRootWindowContainer.performSurfacePlacement();
 
-        LetterboxDetails letterboxDetails = mActivity.mLetterboxUiController.getLetterboxDetails();
+        LetterboxDetails letterboxDetails = mActivity.mAppCompatController
+                .getAppCompatLetterboxPolicy().getLetterboxDetails();
 
         assertEquals(dh / scale, letterboxDetails.getLetterboxInnerBounds().width());
         assertEquals(dw / scale, letterboxDetails.getLetterboxInnerBounds().height());
@@ -2394,7 +2394,13 @@ public class SizeCompatTests extends WindowTestsBase {
     private void testUserOverrideAspectRatio(boolean isUnresizable, int screenOrientation,
             float expectedAspectRatio, @PackageManager.UserMinAspectRatio int aspectRatio,
             boolean enabled) {
-        final ActivityRecord activity = getActivityBuilderOnSameTask().build();
+        final ActivityRecord activity = getActivityBuilderWithoutTask().build();
+        final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
+                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+        spyOn(desktopAppCompatAspectRatioPolicy);
+        doReturn(enabled).when(desktopAppCompatAspectRatioPolicy)
+                .hasMinAspectRatioOverride(any());
+        mTask.addChild(activity);
         activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         spyOn(activity.mWmService.mAppCompatConfiguration);
         doReturn(enabled).when(activity.mWmService.mAppCompatConfiguration)
@@ -3017,6 +3023,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @SuppressWarnings("GuardedBy")
     public void testDisplayIgnoreOrientationRequest_pausedAppNotLostSizeCompat() {
         // Set up a display in landscape and ignoring orientation request.
         setUpDisplaySizeWithApp(2800, 1400);
@@ -3043,7 +3050,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertActivityMaxBoundsSandboxed();
 
         final Rect activityBounds = new Rect(mActivity.getBounds());
-        mTask.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */);
+        mTask.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */,
+                false /* deferPause */);
 
         // App still in size compat, and the bounds don't change.
         verify(mActivity, never()).clearSizeCompatMode();
@@ -3825,7 +3833,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         mActivity.mRootWindowContainer.performSurfacePlacement();
 
-        LetterboxDetails letterboxDetails = mActivity.mLetterboxUiController.getLetterboxDetails();
+        LetterboxDetails letterboxDetails = mActivity.mAppCompatController
+                .getAppCompatLetterboxPolicy().getLetterboxDetails();
 
         // Letterboxed activity at bottom
         assertEquals(new Rect(0, 2100, 1400, 2800), mActivity.getBounds());
@@ -4941,8 +4950,11 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     private ActivityBuilder getActivityBuilderOnSameTask() {
+        return getActivityBuilderWithoutTask().setTask(mTask);
+    }
+
+    private ActivityBuilder getActivityBuilderWithoutTask() {
         return new ActivityBuilder(mAtm)
-                .setTask(mTask)
                 .setComponent(ComponentName.createRelative(mContext,
                         SizeCompatTests.class.getName()))
                 .setUid(android.os.Process.myUid());

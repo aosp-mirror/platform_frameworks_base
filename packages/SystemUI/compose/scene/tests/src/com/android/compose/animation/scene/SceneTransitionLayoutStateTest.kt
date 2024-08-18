@@ -18,7 +18,9 @@ package com.android.compose.animation.scene
 
 import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
@@ -110,16 +112,6 @@ class SceneTransitionLayoutStateTest {
     }
 
     @Test
-    fun setTargetScene_transitionToOriginalScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
-        assertThat(state.setTargetScene(SceneB, coroutineScope = this)).isNotNull()
-
-        // Progress is 0f, so we don't animate at all and directly snap back to A.
-        assertThat(state.setTargetScene(SceneA, coroutineScope = this)).isNull()
-        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA))
-    }
-
-    @Test
     fun setTargetScene_coroutineScopeCancelled() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutState(SceneA)
 
@@ -180,7 +172,7 @@ class SceneTransitionLayoutStateTest {
         assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
         assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
 
-        childState.finishTransition(childTransition, SceneB)
+        childState.finishTransition(childTransition)
         assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
         assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
     }
@@ -217,7 +209,7 @@ class SceneTransitionLayoutStateTest {
         assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
         assertThat(parentParentState.isTransitioning(SceneB, SceneC)).isTrue()
 
-        childState.finishTransition(childTransition, SceneB)
+        childState.finishTransition(childTransition)
         assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
         assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
         assertThat(parentParentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
@@ -241,13 +233,13 @@ class SceneTransitionLayoutStateTest {
     fun linkedTransition_reverseTransitionIsNotLinked() {
         val (parentState, childState) = setupLinkedStates()
 
-        val childTransition = transition(SceneB, SceneA)
+        val childTransition = transition(SceneB, SceneA, current = { SceneB })
 
         childState.startTransition(childTransition)
         assertThat(childState.isTransitioning(SceneB, SceneA)).isTrue()
         assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
 
-        childState.finishTransition(childTransition, SceneB)
+        childState.finishTransition(childTransition)
         assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
         assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
     }
@@ -256,23 +248,11 @@ class SceneTransitionLayoutStateTest {
     fun linkedTransition_startsLinkAndFinishesLinkInFromState() {
         val (parentState, childState) = setupLinkedStates()
 
-        val childTransition = transition(SceneA, SceneB)
+        val childTransition = transition(SceneA, SceneB, current = { SceneA })
         childState.startTransition(childTransition)
 
-        childState.finishTransition(childTransition, SceneA)
+        childState.finishTransition(childTransition)
         assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneA))
-        assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
-    }
-
-    @Test
-    fun linkedTransition_startsLinkAndFinishesLinkInUnknownState() {
-        val (parentState, childState) = setupLinkedStates()
-
-        val childTransition = transition(SceneA, SceneB)
-        childState.startTransition(childTransition)
-
-        childState.finishTransition(childTransition, SceneD)
-        assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
         assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
     }
 
@@ -295,7 +275,7 @@ class SceneTransitionLayoutStateTest {
         childState.startTransition(childTransition)
         parentState.startTransition(parentTransition)
 
-        childState.finishTransition(childTransition, SceneB)
+        childState.finishTransition(childTransition)
         assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
         assertThat(parentState.transitionState).isEqualTo(parentTransition)
     }
@@ -341,7 +321,9 @@ class SceneTransitionLayoutStateTest {
     @Test
     fun snapToIdleIfClose_snapToStart() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
-        state.startTransition(transition(from = SceneA, to = SceneB, progress = { 0.2f }))
+        state.startTransition(
+            transition(from = SceneA, to = SceneB, current = { SceneA }, progress = { 0.2f })
+        )
         assertThat(state.isTransitioning()).isTrue()
 
         // Ignore the request if the progress is not close to 0 or 1, using the threshold.
@@ -399,6 +381,31 @@ class SceneTransitionLayoutStateTest {
     }
 
     @Test
+    fun snapToIdleIfClose_closeButNotCurrentScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
+        var progress by mutableStateOf(0f)
+        var currentScene by mutableStateOf(SceneB)
+        state.startTransition(
+            transition(
+                from = SceneA,
+                to = SceneB,
+                current = { currentScene },
+                progress = { progress }
+            )
+        )
+        assertThat(state.isTransitioning()).isTrue()
+
+        // Ignore the request if we are close to a scene that is not the current scene
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+
+        progress = 1f
+        currentScene = SceneA
+        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
+        assertThat(state.isTransitioning()).isTrue()
+    }
+
+    @Test
     fun linkedTransition_fuzzyLinksAreMatchedAndStarted() {
         val (parentState, childState) = setupLinkedStates(SceneC, SceneA, null, null, null, SceneD)
         val childTransition = transition(SceneA, SceneB)
@@ -407,7 +414,7 @@ class SceneTransitionLayoutStateTest {
         assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
         assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
 
-        childState.finishTransition(childTransition, SceneB)
+        childState.finishTransition(childTransition)
         assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneB))
         assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneD))
     }
@@ -417,13 +424,13 @@ class SceneTransitionLayoutStateTest {
         val (parentState, childState) =
             setupLinkedStates(SceneC, SceneA, SceneA, null, null, SceneD)
 
-        val childTransition = transition(SceneA, SceneB)
+        val childTransition = transition(SceneA, SceneB, current = { SceneA })
 
         childState.startTransition(childTransition)
         assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
         assertThat(parentState.isTransitioning(SceneC, SceneD)).isTrue()
 
-        childState.finishTransition(childTransition, SceneA)
+        childState.finishTransition(childTransition)
         assertThat(childState.transitionState).isEqualTo(TransitionState.Idle(SceneA))
         assertThat(parentState.transitionState).isEqualTo(TransitionState.Idle(SceneC))
     }
@@ -595,12 +602,12 @@ class SceneTransitionLayoutStateTest {
 
         // Mark bToC as finished. The list of current transitions does not change because aToB is
         // still not marked as finished.
-        state.finishTransition(bToC, idleScene = bToC.currentScene)
-        assertThat(state.finishedTransitions).containsExactly(bToC, bToC.currentScene)
+        state.finishTransition(bToC)
+        assertThat(state.finishedTransitions).containsExactly(bToC)
         assertThat(state.currentTransitions).containsExactly(aToB, bToC, cToA).inOrder()
 
         // Mark aToB as finished. This will remove both aToB and bToC from the list of transitions.
-        state.finishTransition(aToB, idleScene = aToB.currentScene)
+        state.finishTransition(aToB)
         assertThat(state.finishedTransitions).isEmpty()
         assertThat(state.currentTransitions).containsExactly(cToA).inOrder()
     }

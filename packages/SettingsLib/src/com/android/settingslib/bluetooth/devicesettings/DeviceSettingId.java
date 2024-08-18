@@ -108,6 +108,12 @@ public @interface DeviceSettingId {
     /** Device setting ID for device details footer. */
     int DEVICE_SETTING_ID_DEVICE_DETAILS_FOOTER = 19;
 
+    /** Device setting ID for spatial audio group. */
+    int DEVICE_SETTING_ID_SPATIAL_AUDIO_MULTI_TOGGLE = 20;
+
+    /** Device setting ID for "More Settings" page. */
+    int DEVICE_SETTING_ID_MORE_SETTINGS = 21;
+
     /** Device setting ID for ANC. */
     int DEVICE_SETTING_ID_ANC = 1001;
 }

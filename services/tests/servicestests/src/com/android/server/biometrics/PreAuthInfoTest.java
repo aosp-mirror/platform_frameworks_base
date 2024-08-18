@@ -231,7 +231,7 @@ public class PreAuthInfoTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
-    public void testMandatoryBiometricsStatus_whenRequirementsNotSatisfiedAndSensorAvailable()
+    public void testMandatoryBiometricsAndStrongBiometricsStatus_whenRequirementsNotSatisfied()
             throws Exception {
         when(mTrustManager.isInSignificantPlace()).thenReturn(true);
 
@@ -244,6 +244,24 @@ public class PreAuthInfoTest {
                 false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(1);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testMandatoryBiometricsStatus_whenRequirementsNotSatisfiedAndSensorAvailable()
+            throws Exception {
+        when(mTrustManager.isInSignificantPlace()).thenReturn(true);
+
+        final BiometricSensor sensor = getFaceSensor();
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+
+        assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
+                BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE);
+        assertThat(preAuthInfo.eligibleSensors).hasSize(0);
     }
 
     private BiometricSensor getFingerprintSensor() {

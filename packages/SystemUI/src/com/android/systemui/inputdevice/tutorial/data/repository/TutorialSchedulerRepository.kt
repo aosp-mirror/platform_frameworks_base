@@ -17,9 +17,9 @@
 package com.android.systemui.inputdevice.tutorial.data.repository
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -27,39 +27,47 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.inputdevice.tutorial.data.model.DeviceSchedulerInfo
+import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 @SysUISingleton
-class TutorialSchedulerRepository
-@Inject
-constructor(
-    @Application private val applicationContext: Context,
-    @Background private val backgroundScope: CoroutineScope
+class TutorialSchedulerRepository(
+    private val applicationContext: Context,
+    backgroundScope: CoroutineScope,
+    dataStoreName: String
 ) {
+    @Inject
+    constructor(
+        @Application applicationContext: Context,
+        @Background backgroundScope: CoroutineScope
+    ) : this(applicationContext, backgroundScope, dataStoreName = DATASTORE_NAME)
 
     private val Context.dataStore: DataStore<Preferences> by
-        preferencesDataStore(name = DATASTORE_NAME, scope = backgroundScope)
+        preferencesDataStore(name = dataStoreName, scope = backgroundScope)
 
     suspend fun isLaunched(deviceType: DeviceType): Boolean = loadData()[deviceType]!!.isLaunched
+
+    suspend fun launchTime(deviceType: DeviceType): Instant? = loadData()[deviceType]!!.launchTime
 
     suspend fun wasEverConnected(deviceType: DeviceType): Boolean =
         loadData()[deviceType]!!.wasEverConnected
 
-    suspend fun connectTime(deviceType: DeviceType): Long = loadData()[deviceType]!!.connectTime!!
+    suspend fun firstConnectionTime(deviceType: DeviceType): Instant? =
+        loadData()[deviceType]!!.firstConnectionTime
 
     private suspend fun loadData(): Map<DeviceType, DeviceSchedulerInfo> {
         return applicationContext.dataStore.data.map { pref -> getSchedulerInfo(pref) }.first()
     }
 
-    suspend fun updateConnectTime(device: DeviceType, time: Long) {
-        applicationContext.dataStore.edit { pref -> pref[getConnectKey(device)] = time }
+    suspend fun updateFirstConnectionTime(device: DeviceType, time: Instant) {
+        applicationContext.dataStore.edit { pref -> pref[getConnectKey(device)] = time.epochSecond }
     }
 
-    suspend fun updateLaunch(device: DeviceType) {
-        applicationContext.dataStore.edit { pref -> pref[getLaunchedKey(device)] = true }
+    suspend fun updateLaunchTime(device: DeviceType, time: Instant) {
+        applicationContext.dataStore.edit { pref -> pref[getLaunchKey(device)] = time.epochSecond }
     }
 
     private fun getSchedulerInfo(pref: Preferences): Map<DeviceType, DeviceSchedulerInfo> {
@@ -70,21 +78,26 @@ constructor(
     }
 
     private fun getDeviceSchedulerInfo(pref: Preferences, device: DeviceType): DeviceSchedulerInfo {
-        val isLaunched = pref[getLaunchedKey(device)] ?: false
-        val connectionTime = pref[getConnectKey(device)] ?: null
-        return DeviceSchedulerInfo(isLaunched, connectionTime)
+        val launchTime = pref[getLaunchKey(device)]
+        val connectionTime = pref[getConnectKey(device)]
+        return DeviceSchedulerInfo(launchTime, connectionTime)
     }
 
-    private fun getLaunchedKey(device: DeviceType) =
-        booleanPreferencesKey(device.name + IS_LAUNCHED_SUFFIX)
+    private fun getLaunchKey(device: DeviceType) =
+        longPreferencesKey(device.name + LAUNCH_TIME_SUFFIX)
 
     private fun getConnectKey(device: DeviceType) =
         longPreferencesKey(device.name + CONNECT_TIME_SUFFIX)
 
+    @VisibleForTesting
+    suspend fun clearDataStore() {
+        applicationContext.dataStore.edit { it.clear() }
+    }
+
     companion object {
         const val DATASTORE_NAME = "TutorialScheduler"
-        const val IS_LAUNCHED_SUFFIX = "_IS_LAUNCHED"
-        const val CONNECT_TIME_SUFFIX = "_CONNECTED_TIME"
+        const val LAUNCH_TIME_SUFFIX = "_LAUNCH_TIME"
+        const val CONNECT_TIME_SUFFIX = "_CONNECT_TIME"
     }
 }
 
