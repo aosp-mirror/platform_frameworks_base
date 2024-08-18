@@ -15312,12 +15312,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int cookie = traceBroadcastIntentBegin(intent, resultTo, ordered, sticky,
                 callingUid, realCallingUid, userId);
         try {
+            final BroadcastSentEventRecord broadcastSentEventRecord =
+                    new BroadcastSentEventRecord();
             final int res = broadcastIntentLockedTraced(callerApp, callerPackage, callerFeatureId,
                     intent, resolvedType, resultToApp, resultTo, resultCode, resultData,
                     resultExtras, requiredPermissions, excludedPermissions, excludedPackages,
                     appOp, BroadcastOptions.fromBundleNullable(bOptions), ordered, sticky,
                     callingPid, callingUid, realCallingUid, realCallingPid, userId,
-                    backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver);
+                    backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver,
+                    broadcastSentEventRecord);
+            broadcastSentEventRecord.setResult(res);
+            broadcastSentEventRecord.logToStatsd();
             return res;
         } finally {
             traceBroadcastIntentEnd(cookie);
@@ -15365,7 +15370,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             int callingUid, int realCallingUid, int realCallingPid, int userId,
             BackgroundStartPrivileges backgroundStartPrivileges,
             @Nullable int[] broadcastAllowList,
-            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @NonNull BroadcastSentEventRecord broadcastSentEventRecord) {
         // Ensure all internal loopers are registered for idle checks
         BroadcastLoopers.addMyLooper();
 
@@ -15398,6 +15404,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         intent = new Intent(intent);
+        broadcastSentEventRecord.setIntent(intent);
+        broadcastSentEventRecord.setOriginalIntentFlags(intent.getFlags());
+        broadcastSentEventRecord.setSenderUid(callingUid);
+        broadcastSentEventRecord.setRealSenderUid(realCallingUid);
+        broadcastSentEventRecord.setSticky(sticky);
+        broadcastSentEventRecord.setOrdered(ordered);
+        broadcastSentEventRecord.setResultRequested(resultTo != null);
+        final int callerAppProcessState = getRealProcessStateLocked(callerApp, realCallingPid);
+        broadcastSentEventRecord.setSenderProcState(callerAppProcessState);
+        broadcastSentEventRecord.setSenderUidState(getRealUidStateLocked(callerApp,
+                realCallingPid));
 
         final boolean callerInstantApp = isInstantApp(callerApp, callerPackage, callingUid);
         // Instant Apps cannot use FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS
@@ -15891,7 +15908,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        final int callerAppProcessState = getRealProcessStateLocked(callerApp, realCallingPid);
         // Add to the sticky list if requested.
         if (sticky) {
             if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,
@@ -16131,6 +16147,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ordered, sticky, false, userId,
                     backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
                     callerAppProcessState);
+            broadcastSentEventRecord.setBroadcastRecord(r);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
             queue.enqueueBroadcastLocked(r);
@@ -16183,6 +16200,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (app != null && app.getThread() != null && !app.isKilled()) {
             return app.mState.getCurProcState();
+        }
+        return PROCESS_STATE_NONEXISTENT;
+    }
+
+    @GuardedBy("this")
+    private int getRealUidStateLocked(ProcessRecord app, int pid) {
+        if (app == null) {
+            synchronized (mPidsSelfLocked) {
+                app = mPidsSelfLocked.get(pid);
+            }
+        }
+        if (app != null && app.getThread() != null && !app.isKilled()) {
+            final UidRecord uidRecord = app.getUidRecord();
+            if (uidRecord != null) {
+                return uidRecord.getCurProcState();
+            }
         }
         return PROCESS_STATE_NONEXISTENT;
     }

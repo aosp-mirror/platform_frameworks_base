@@ -45,6 +45,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -90,6 +91,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private Lazy<ViewCapture> mLazyViewCapture;
+    @Mock
+    private NavigationModeController mNavigationModeController;
 
     @Before
     public void setUp() throws Exception {
@@ -163,7 +166,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
         mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
-                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings);
+                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                mNavigationModeController);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
 
@@ -190,7 +194,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
         mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
-                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings);
+                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                mNavigationModeController);
         captureKeyguardUpdateMonitorCallback();
 
         mKeyguardCallback.onUserSwitching(fakeUserId);
@@ -204,7 +209,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
         mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
-                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings);
+                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                mNavigationModeController);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
         mKeyguardCallback.onKeyguardVisibilityChanged(true);
@@ -340,7 +346,7 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
                 new AccessibilityFloatingMenuController(mContextWrapper, windowManager,
                         viewCaptureAwareWindowManager, displayManager, mAccessibilityManager,
                         mTargetsObserver, mModeObserver, mKeyguardUpdateMonitor, mSecureSettings,
-                        displayTracker);
+                        displayTracker, mNavigationModeController);
         controller.init();
 
         return controller;

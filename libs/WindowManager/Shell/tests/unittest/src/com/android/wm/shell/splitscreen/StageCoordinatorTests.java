@@ -25,7 +25,6 @@ import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
-import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 
 import static com.google.common.truth.Truth.assertThat;
