@@ -228,7 +228,6 @@ public class AppCompatReachabilityPolicyTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<ReachabilityPolicyRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
         final ReachabilityPolicyRobotTest robot =
                 new ReachabilityPolicyRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);

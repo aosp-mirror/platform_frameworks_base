@@ -36,11 +36,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 interface AudioSharingInteractor {
+    /** Audio sharing state on the device. */
+    val isInAudioSharing: Flow<Boolean>
+
     /** Audio sharing secondary headset volume changes. */
     val volume: Flow<Int?>
 
@@ -76,6 +80,7 @@ constructor(
     private val audioVolumeInteractor: AudioVolumeInteractor,
     private val audioSharingRepository: AudioSharingRepository
 ) : AudioSharingInteractor {
+    override val isInAudioSharing: Flow<Boolean> = audioSharingRepository.inAudioSharing
 
     override val volume: Flow<Int?> =
         combine(audioSharingRepository.secondaryGroupId, audioSharingRepository.volumeMap) {
@@ -125,13 +130,13 @@ constructor(
     }
 
     private companion object {
-        const val TAG = "AudioSharingInteractor"
         const val DEFAULT_VOLUME = 20
     }
 }
 
 @SysUISingleton
 class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingInteractor {
+    override val isInAudioSharing: Flow<Boolean> = flowOf(false)
     override val volume: Flow<Int?> = emptyFlow()
     override val volumeMin: Int = EMPTY_VOLUME
     override val volumeMax: Int = EMPTY_VOLUME

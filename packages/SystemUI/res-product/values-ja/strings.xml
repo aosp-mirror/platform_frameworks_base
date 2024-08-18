@@ -58,9 +58,9 @@
     <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"スマートフォンは自動的にクールダウンを行います。その間もスマートフォンを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
     <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"デバイスは自動的にクールダウンを行います。その間もデバイスを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
     <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"タブレットは自動的にクールダウンを行います。その間もタブレットを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"指紋認証センサーは電源ボタンに内蔵されています。タブレット側面のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"指紋認証センサーは電源ボタンに内蔵されています。デバイス側面のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指紋認証センサーは電源ボタンに内蔵されています。スマートフォン側面のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"指紋認証センサーは電源ボタンに内蔵されています。タブレット縁のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"指紋認証センサーは電源ボタンに内蔵されています。デバイス縁のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指紋認証センサーは電源ボタンに内蔵されています。スマートフォン縁のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"スマートフォンのロックを解除してその他のオプションを表示する"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"タブレットのロックを解除してその他のオプションを表示する"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"デバイスのロックを解除してその他のオプションを表示する"</string>

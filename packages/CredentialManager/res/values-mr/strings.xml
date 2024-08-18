@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"दुसऱ्या डिव्हाइसवर पासकी तयार करायची आहे का?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"दुसऱ्या डिव्हाइसवर पासवर्ड सेव्ह करायचा आहे का?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"दुसऱ्या डिव्हाइसवर साइन-इन सेव्ह करायचे आहे का?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"तुमच्या सर्व साइन-इन साठी <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>वापरायचे का?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"तुमच्या सर्व साइन-इन साठी <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> वापरायचे का?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"तुम्हाला सहजरीत्या साइन इन करण्यात मदत करण्यासाठी हा <xliff:g id="USERNAME">%1$s</xliff:g> चा पासवर्ड व्यवस्थापक तुमचे पासवर्ड आणि पासकी स्टोअर करेल"</string>
     <string name="set_as_default" msgid="4415328591568654603">"डिफॉल्ट म्हणून सेट करा"</string>
     <string name="settings" msgid="6536394145760913145">"सेटिंग्ज"</string>

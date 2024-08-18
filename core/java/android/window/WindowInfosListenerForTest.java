@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.IBinder;
 import android.os.InputConfig;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -35,7 +36,7 @@ import android.view.InputWindowHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * Wrapper class to provide access to WindowInfosListener within tests.
@@ -83,7 +84,7 @@ public class WindowInfosListenerForTest {
         public final boolean isVisible;
 
         /**
-         * Return the transform to get the bounds from display space into window space.
+         * The transform from display space to window space.
          */
         @NonNull
         public final Matrix transform;
@@ -150,9 +151,41 @@ public class WindowInfosListenerForTest {
         }
     }
 
+    /**
+     * Display properties passed to {@code @WindowInfosListenerForTest#onWindowInfosChanged}.
+     */
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    public static class DisplayInfo {
+
+        /**
+         * The display's id.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final int displayId;
+
+        /**
+         * The display's transform from physical display space to logical display space.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        @NonNull
+        public final Matrix transform;
+
+        DisplayInfo(int displayId, @NonNull Matrix transform) {
+            this.displayId = displayId;
+            this.transform = transform;
+        }
+
+        @Override
+        public String toString() {
+            return TextUtils.formatSimple(
+                    "DisplayInfo{displayId=%s, transform=%s}", displayId, transform);
+        }
+    }
+
     private static final String TAG = "WindowInfosListenerForTest";
 
-    private ArrayMap<Consumer<List<WindowInfo>>, WindowInfosListener> mListeners;
+    private ArrayMap<BiConsumer<List<WindowInfo>, List<DisplayInfo>>, WindowInfosListener>
+            mListeners;
 
     public WindowInfosListenerForTest() {
         mListeners = new ArrayMap<>();
@@ -165,9 +198,10 @@ public class WindowInfosListenerForTest {
      * @param consumer Consumer that is called with reverse Z ordered lists of WindowInfo instances
      *                 where the first value is the topmost window.
      */
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
     @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
     public void addWindowInfosListener(
-            @NonNull Consumer<List<WindowInfo>> consumer) {
+            @NonNull BiConsumer<List<WindowInfo>, List<DisplayInfo>> consumer) {
         var calledWithInitialState = new CountDownLatch(1);
         var listener = new WindowInfosListener() {
             @Override
@@ -180,20 +214,24 @@ public class WindowInfosListenerForTest {
                             "Exception thrown while waiting for listener to be called with "
                                     + "initial state");
                 }
-                consumer.accept(buildWindowInfos(windowHandles, displayInfos));
+                var params = buildParams(windowHandles, displayInfos);
+                consumer.accept(params.first, params.second);
             }
         };
         mListeners.put(consumer, listener);
         Pair<InputWindowHandle[], WindowInfosListener.DisplayInfo[]> initialState =
                 listener.register();
-        consumer.accept(buildWindowInfos(initialState.first, initialState.second));
+        Pair<List<WindowInfo>, List<DisplayInfo>> params =
+                buildParams(initialState.first, initialState.second);
+
+        consumer.accept(params.first, params.second);
         calledWithInitialState.countDown();
     }
 
-    /**
-     * Unregisters the listener.
-     */
-    public void removeWindowInfosListener(@NonNull Consumer<List<WindowInfo>> consumer) {
+    /** Unregisters the listener. */
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    public void removeWindowInfosListener(
+            @NonNull BiConsumer<List<WindowInfo>, List<DisplayInfo>> consumer) {
         WindowInfosListener listener = mListeners.remove(consumer);
         if (listener == null) {
             return;
@@ -201,13 +239,18 @@ public class WindowInfosListenerForTest {
         listener.unregister();
     }
 
-    private static List<WindowInfo> buildWindowInfos(
+    private static Pair<List<WindowInfo>, List<DisplayInfo>> buildParams(
             InputWindowHandle[] windowHandles, WindowInfosListener.DisplayInfo[] displayInfos) {
-        var windowInfos = new ArrayList<WindowInfo>(windowHandles.length);
+        var outWindowInfos = new ArrayList<WindowInfo>(windowHandles.length);
+        var outDisplayInfos = new ArrayList<DisplayInfo>(displayInfos.length);
 
         var displayInfoById = new SparseArray<WindowInfosListener.DisplayInfo>(displayInfos.length);
         for (var displayInfo : displayInfos) {
             displayInfoById.put(displayInfo.mDisplayId, displayInfo);
+        }
+
+        for (var displayInfo : displayInfos) {
+            outDisplayInfos.add(new DisplayInfo(displayInfo.mDisplayId, displayInfo.mTransform));
         }
 
         var tmp = new RectF();
@@ -222,9 +265,10 @@ public class WindowInfosListenerForTest {
                 tmp.round(bounds);
             }
 
-            windowInfos.add(new WindowInfo(handle.getWindowToken(), handle.name, handle.displayId,
-                    bounds, handle.inputConfig, handle.transform));
+            outWindowInfos.add(new WindowInfo(handle.getWindowToken(), handle.name,
+                    handle.displayId, bounds, handle.inputConfig, handle.transform));
         }
-        return windowInfos;
+
+        return new Pair(outWindowInfos, outDisplayInfos);
     }
 }

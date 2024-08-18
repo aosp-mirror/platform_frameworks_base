@@ -543,12 +543,14 @@ public final class DreamManagerService extends SystemService {
     }
 
     private void startDozingInternal(IBinder token, int screenState,
-            @Display.StateReason int reason, float screenBrightnessFloat, int screenBrightnessInt) {
+            @Display.StateReason int reason, float screenBrightnessFloat, int screenBrightnessInt,
+            boolean useNormalBrightnessForDoze) {
         Slog.d(TAG, "Dream requested to start dozing: " + token
                 + ", screenState=" + Display.stateToString(screenState)
                 + ", reason=" + Display.stateReasonToString(reason)
                 + ", screenBrightnessFloat=" + screenBrightnessFloat
-                + ", screenBrightnessInt=" + screenBrightnessInt);
+                + ", screenBrightnessInt=" + screenBrightnessInt
+                + ", useNormalBrightnessForDoze=" + useNormalBrightnessForDoze);
 
         synchronized (mLock) {
             if (mCurrentDream != null && mCurrentDream.token == token && mCurrentDream.canDoze) {
@@ -556,7 +558,8 @@ public final class DreamManagerService extends SystemService {
                 mCurrentDream.dozeScreenBrightness = screenBrightnessInt;
                 mCurrentDream.dozeScreenBrightnessFloat = screenBrightnessFloat;
                 mPowerManagerInternal.setDozeOverrideFromDreamManager(
-                        screenState, reason, screenBrightnessFloat, screenBrightnessInt);
+                        screenState, reason, screenBrightnessFloat, screenBrightnessInt,
+                        useNormalBrightnessForDoze);
                 if (!mCurrentDream.isDozing) {
                     mCurrentDream.isDozing = true;
                     mDozeWakeLock.acquire();
@@ -578,7 +581,8 @@ public final class DreamManagerService extends SystemService {
                         Display.STATE_UNKNOWN,
                         Display.STATE_REASON_DREAM_MANAGER,
                         PowerManager.BRIGHTNESS_INVALID_FLOAT,
-                        PowerManager.BRIGHTNESS_DEFAULT);
+                        PowerManager.BRIGHTNESS_DEFAULT,
+                        /* useNormalBrightnessForDoze= */ false);
             }
         }
     }
@@ -1098,7 +1102,8 @@ public final class DreamManagerService extends SystemService {
         @Override // Binder call
         public void startDozing(
                 IBinder token, int screenState, @Display.StateReason int reason,
-                float screenBrightnessFloat, int screeBrightnessInt) {
+                float screenBrightnessFloat, int screeBrightnessInt,
+                boolean useNormalBrightnessForDoze) {
             // Requires no permission, called by Dream from an arbitrary process.
             if (token == null) {
                 throw new IllegalArgumentException("token must not be null");
@@ -1107,7 +1112,7 @@ public final class DreamManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 startDozingInternal(token, screenState, reason, screenBrightnessFloat,
-                        screeBrightnessInt);
+                        screeBrightnessInt, useNormalBrightnessForDoze);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1116,7 +1121,8 @@ public final class DreamManagerService extends SystemService {
         @Override // Binder call
         public void startDozingOneway(
                 IBinder token, int screenState, @Display.StateReason int reason,
-                float screenBrightnessFloat, int screeBrightnessInt) {
+                float screenBrightnessFloat, int screeBrightnessInt,
+                boolean useNormalBrightnessForDoze) {
             // Requires no permission, called by Dream from an arbitrary process.
             if (token == null) {
                 throw new IllegalArgumentException("token must not be null");
@@ -1125,7 +1131,7 @@ public final class DreamManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 startDozingInternal(token, screenState, reason, screenBrightnessFloat,
-                        screeBrightnessInt);
+                        screeBrightnessInt, useNormalBrightnessForDoze);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

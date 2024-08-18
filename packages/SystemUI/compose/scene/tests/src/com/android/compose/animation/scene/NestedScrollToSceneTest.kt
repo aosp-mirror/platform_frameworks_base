@@ -23,6 +23,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -265,5 +268,39 @@ class NestedScrollToSceneTest {
         // EdgeAlways always consume the remaining scroll, DuringTransitionBetweenScenes does not.
         val transition = assertThat(state.transitionState).isTransition()
         assertThat(transition).hasProgress(0.5f)
+    }
+
+    @Test
+    fun resetScrollTracking_afterMissingPointerUpEvent() {
+        var canScroll = true
+        var hasScrollable by mutableStateOf(true)
+        val state = setup2ScenesAndScrollTouchSlop {
+            if (hasScrollable) {
+                Modifier.scrollable(rememberScrollableState { if (canScroll) it else 0f }, Vertical)
+            } else {
+                Modifier
+            }
+        }
+
+        // The gesture is consumed by the component in the scene.
+        scrollUp(percent = 0.2f)
+
+        // STL keeps track of the scroll consumed. The scene remains in Idle.
+        assertThat(state.transitionState).isIdle()
+
+        // The scrollable component disappears, and does not send the signal (pointer up) to reset
+        // the consumed amount.
+        hasScrollable = false
+        pointerUp()
+
+        // A new scrollable component appears and allows the scene to consume the scroll.
+        hasScrollable = true
+        canScroll = false
+        pointerDownAndScrollTouchSlop()
+        scrollUp(percent = 0.2f)
+
+        // STL can only start the transition if it has reset the amount of scroll consumed.
+        val transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasProgress(0.2f)
     }
 }

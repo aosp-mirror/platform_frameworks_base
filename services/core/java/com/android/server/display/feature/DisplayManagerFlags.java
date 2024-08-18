@@ -193,6 +193,11 @@ public class DisplayManagerFlags {
                     Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
                     Flags::newHdrBrightnessModifier);
 
+    private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
+            Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
+            Flags::normalBrightnessForDozeParameter
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -393,6 +398,13 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return Whether the useDozeBrightness parameter should be used
+     */
+    public boolean isNormalBrightnessForDozeParameterEnabled() {
+        return mNormalBrightnessForDozeParameter.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -431,6 +443,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
         pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mNormalBrightnessForDozeParameter);
     }
 
     private static class FlagState {

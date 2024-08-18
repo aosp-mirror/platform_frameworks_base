@@ -29,8 +29,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.policy.ScreenDecorationsUtils
@@ -39,7 +37,9 @@ import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
 import com.android.systemui.keyguard.ui.composable.AlternateBouncer
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
+import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scene
@@ -51,6 +51,7 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -63,7 +64,8 @@ object SceneWindowRootViewBinder {
     /** Binds between the view and view-model pertaining to a specific scene container. */
     fun bind(
         view: ViewGroup,
-        viewModel: SceneContainerViewModel,
+        viewModelFactory: SceneContainerViewModel.Factory,
+        motionEventHandlerReceiver: (SceneContainerViewModel.MotionEventHandler?) -> Unit,
         windowInsets: StateFlow<WindowInsets?>,
         containerConfig: SceneContainerConfig,
         sharedNotificationContainer: SharedNotificationContainer,
@@ -85,8 +87,11 @@ object SceneWindowRootViewBinder {
         }
 
         view.repeatWhenAttached {
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
+            view.viewModel(
+                minWindowLifecycleState = WindowLifecycleState.ATTACHED,
+                factory = { viewModelFactory.create(motionEventHandlerReceiver) },
+            ) { viewModel ->
+                try {
                     view.setViewTreeOnBackPressedDispatcherOwner(
                         object : OnBackPressedDispatcherOwner {
                             override val onBackPressedDispatcher =
@@ -140,10 +145,11 @@ object SceneWindowRootViewBinder {
                             onVisibilityChangedInternal(isVisible)
                         }
                     }
+                    awaitCancellation()
+                } finally {
+                    // Here when destroyed.
+                    view.removeAllViews()
                 }
-
-                // Here when destroyed.
-                view.removeAllViews()
             }
         }
     }

@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
+import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -47,6 +48,24 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
     val biometricSettingsRepository = kosmos.biometricSettingsRepository
 
     val underTest = kosmos.primaryBouncerToLockscreenTransitionViewModel
+
+    @Test
+    fun lockscreenAlphaStartsFromViewStateAccessorAlpha() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor(alpha = { 0.5f })
+            val alpha by collectLastValue(underTest.lockscreenAlpha(viewState))
+
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+
+            keyguardTransitionRepository.sendTransitionStep(step(0f))
+            assertThat(alpha).isEqualTo(0.5f)
+
+            keyguardTransitionRepository.sendTransitionStep(step(0.5f))
+            assertThat(alpha).isIn(Range.open(0.5f, 1f))
+
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
+            assertThat(alpha).isEqualTo(1f)
+        }
 
     @Test
     fun deviceEntryParentViewAlpha() =

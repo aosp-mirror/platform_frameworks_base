@@ -40,9 +40,9 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.animation.FlingAnimationUtils;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.bubbles.BubbleExpandedView;
 import com.android.wm.shell.bubbles.BubblePositioner;
+import com.android.wm.shell.shared.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.List;

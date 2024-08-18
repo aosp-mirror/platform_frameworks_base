@@ -33,6 +33,7 @@ var Kosmos.modesDialogDelegate: ModesDialogDelegate by
             dialogTransitionAnimator,
             activityStarter,
             { modesDialogViewModel },
+            modesDialogEventLogger,
             mainCoroutineContext,
         )
     }

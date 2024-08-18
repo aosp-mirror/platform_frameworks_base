@@ -85,7 +85,7 @@ final class DialogFillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onDismissed();
         void onCanceled();
-        void onShown();
+        void onShown(int datasetsShown);
         void startIntentSender(IntentSender intentSender);
     }
 
@@ -155,7 +155,8 @@ final class DialogFillUi {
         mDialog.setContentView(decor);
         setDialogParamsAsBottomSheet();
         mDialog.setOnCancelListener((d) -> mCallback.onCanceled());
-        mDialog.setOnShowListener((d) -> mCallback.onShown());
+        int datasetsShown = (mAdapter != null) ? mAdapter.getCount() : 0;
+        mDialog.setOnShowListener((d) -> mCallback.onShown(datasetsShown));
         show();
     }
 

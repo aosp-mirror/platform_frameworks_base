@@ -2656,6 +2656,7 @@ public class DisplayContentTests extends WindowTestsBase {
      * display.
      */
     @Test
+    @SuppressWarnings("GuardedBy")
     public void testNotResumeHomeRootTaskOnRemovingDisplay() {
         // Create a display which supports system decoration and allows reparenting root tasks to
         // another display when the display is removed.
@@ -2678,7 +2679,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // The removed display should have no focused root task and its home root task should never
         // resume.
         assertNull(display.getFocusedRootTask());
-        verify(homeRootTask, never()).resumeTopActivityUncheckedLocked(any(), any());
+        verify(homeRootTask, never()).resumeTopActivityUncheckedLocked(
+                any(), any(), anyBoolean());
     }
 
     /**

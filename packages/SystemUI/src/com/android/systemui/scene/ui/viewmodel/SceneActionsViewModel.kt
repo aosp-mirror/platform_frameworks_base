@@ -41,7 +41,7 @@ abstract class SceneActionsViewModel : SysUiViewModel() {
      */
     val actions: StateFlow<Map<UserAction, UserActionResult>> = _actions.asStateFlow()
 
-    final override suspend fun onActivated() {
+    final override suspend fun onActivated(): Nothing {
         try {
             hydrateActions { state -> _actions.value = state }
             awaitCancellation()

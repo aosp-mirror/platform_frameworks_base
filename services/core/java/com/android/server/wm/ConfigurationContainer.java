@@ -255,8 +255,18 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             inOutConfig.windowConfiguration.setAppBounds(
                     newParentConfiguration.windowConfiguration.getBounds());
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
-            outAppBounds.inset(displayContent.getDisplayPolicy()
-                    .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorInsets);
+            if (inOutConfig.windowConfiguration.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                final DisplayPolicy.DecorInsets.Info decor =
+                        displayContent.getDisplayPolicy().getDecorInsetsInfo(rotation, dw, dh);
+                if (outAppBounds.contains(decor.mOverrideNonDecorFrame)) {
+                    outAppBounds.intersect(decor.mOverrideNonDecorFrame);
+                }
+            } else {
+                // TODO(b/358509380): Handle other windowing mode like split screen and freeform
+                //  cases correctly.
+                outAppBounds.inset(displayContent.getDisplayPolicy()
+                        .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorInsets);
+            }
         }
         float density = inOutConfig.densityDpi;
         if (density == Configuration.DENSITY_DPI_UNDEFINED) {
@@ -807,23 +817,23 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      */
     @CallSuper
     protected void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         final long token = proto.start(fieldId);
 
-        if (logLevel == WindowTraceLogLevel.ALL || mHasOverrideConfiguration) {
+        if (logLevel == WindowTracingLogLevel.ALL || mHasOverrideConfiguration) {
             mRequestedOverrideConfiguration.dumpDebug(proto, OVERRIDE_CONFIGURATION,
-                    logLevel == WindowTraceLogLevel.CRITICAL);
+                    logLevel == WindowTracingLogLevel.CRITICAL);
         }
 
         // Unless trace level is set to `WindowTraceLogLevel.ALL` don't dump anything that isn't
         // required to mitigate performance overhead
-        if (logLevel == WindowTraceLogLevel.ALL) {
+        if (logLevel == WindowTracingLogLevel.ALL) {
             mFullConfiguration.dumpDebug(proto, FULL_CONFIGURATION, false /* critical */);
             mMergedOverrideConfiguration.dumpDebug(proto, MERGED_OVERRIDE_CONFIGURATION,
                     false /* critical */);
         }
 
-        if (logLevel == WindowTraceLogLevel.TRIM) {
+        if (logLevel == WindowTracingLogLevel.TRIM) {
             // Required for Fass to automatically detect pip transitions in Winscope traces
             dumpDebugWindowingMode(proto);
         }

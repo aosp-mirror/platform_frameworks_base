@@ -53,7 +53,7 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ವರ್ಡ್ ಉಳಿಸಬೇಕೆ?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"ಮತ್ತೊಂದು ಸಾಧನದಲ್ಲಿ ಸೈನ್-ಇನ್ ಅನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ನಿಮ್ಮ ಎಲ್ಲಾ ಸೈನ್-ಇನ್‌ಗಳಿಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಅನ್ನು ಬಳಸಬೇಕೇ?"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಈ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವು ನಿಮಗೆ ಸುಲಭವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡುವುದಕ್ಕೆ ಸಹಾಯ ಮಾಡಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಾಸ್‌ಕೀಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಈ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವು ನಿಮಗೆ ಸುಲಭವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡುವುದಕ್ಕೆ ಸಹಾಯ ಮಾಡಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಾಸ್‌ಕೀಗಳನ್ನು ಸ್ಟೋರ್ ಮಾಡುತ್ತದೆ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ಡೀಫಾಲ್ಟ್ ಆಗಿ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="settings" msgid="6536394145760913145">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="use_once" msgid="9027366575315399714">"ಒಂದು ಬಾರಿ ಬಳಸಿ"</string>

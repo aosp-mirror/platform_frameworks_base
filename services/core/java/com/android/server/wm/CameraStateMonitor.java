@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 
 import java.util.ArrayList;
@@ -73,6 +74,12 @@ class CameraStateMonitor {
 
     private final ArrayList<CameraCompatStateListener> mCameraStateListeners = new ArrayList<>();
 
+    /**
+     * Value toggled on {@link #startListeningToCameraState()} to {@code true} and on {@link
+     * #dispose()} to {@code false}.
+     */
+    private boolean mIsRunning;
+
     private final CameraManager.AvailabilityCallback mAvailabilityCallback =
             new  CameraManager.AvailabilityCallback() {
                 @Override
@@ -101,6 +108,7 @@ class CameraStateMonitor {
     void startListeningToCameraState() {
         mCameraManager.registerAvailabilityCallback(
                 mWmService.mContext.getMainExecutor(), mAvailabilityCallback);
+        mIsRunning = true;
     }
 
     /** Releases camera callback listener. */
@@ -108,6 +116,12 @@ class CameraStateMonitor {
         if (mCameraManager != null) {
             mCameraManager.unregisterAvailabilityCallback(mAvailabilityCallback);
         }
+        mIsRunning = false;
+    }
+
+    @VisibleForTesting
+    boolean isRunning() {
+        return mIsRunning;
     }
 
     void addCameraStateListener(CameraCompatStateListener listener) {

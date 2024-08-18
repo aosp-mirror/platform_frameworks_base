@@ -162,6 +162,25 @@ constructor(
                 }
             }
         }
+
+        // Safety: When any transition is FINISHED, ensure all other transitionValue flows other
+        // than the FINISHED state are reset to a value of 0f. There have been rare but severe
+        // bugs that get the device stuck in a bad state when these are not properly reset.
+        scope.launch {
+            repository.transitions
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect {
+                    for (state in KeyguardState.entries) {
+                        if (state != it.to) {
+                            val flow = getTransitionValueFlow(state)
+                            val replayCache = flow.replayCache
+                            if (!replayCache.isEmpty() && replayCache.last() != 0f) {
+                                flow.emit(0f)
+                            }
+                        }
+                    }
+                }
+        }
     }
 
     fun transition(edge: Edge, edgeWithoutSceneContainer: Edge): Flow<TransitionStep> {

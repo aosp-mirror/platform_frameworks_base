@@ -161,6 +161,16 @@ flag {
 }
 
 flag {
+    name: "fix_avatar_picker_not_responding_for_new_user"
+    namespace: "multiuser"
+    description: "Avatar picker is not responding after selecting photo for new user."
+    bug: "358407488"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "fix_get_user_property_cache"
     namespace: "multiuser"
     description: "Cache is not optimised for getUserProperty for values below 0, eg. UserHandler.USER_NULL or UserHandle.USER_ALL"

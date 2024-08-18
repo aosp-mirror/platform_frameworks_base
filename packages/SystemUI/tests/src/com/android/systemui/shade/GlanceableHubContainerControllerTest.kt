@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
 import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_BACK_GESTURE
+import com.android.systemui.Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
 import com.android.systemui.ambient.touch.TouchMonitor
@@ -435,7 +436,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit() =
         with(kosmos) {
             testScope.runTest {
@@ -462,6 +463,27 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    @EnableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun gestureExclusionZone_setAfterInit_fullSwipe() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ 0,
+                            /* right= */ 0,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit_rtl() =
         with(kosmos) {
             testScope.runTest {
@@ -486,8 +508,29 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    @EnableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun gestureExclusionZone_setAfterInit_rtl_fullSwipe() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ 0,
+                            /* right= */ CONTAINER_WIDTH,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
     @Test
     @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit_backGestureEnabled() =
         with(kosmos) {
             testScope.runTest {
@@ -513,7 +556,28 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun gestureExclusionZone_setAfterInit_backGestureEnabled_fullSwipe() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left= */ 0,
+                            /* top= */ 0,
+                            /* right= */ FAKE_INSETS.right,
+                            /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
     @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
+    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit_backGestureEnabled_rtl() =
         with(kosmos) {
             testScope.runTest {
@@ -533,6 +597,28 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                             /* top= */ 0,
                             /* right= */ CONTAINER_WIDTH,
                             /* bottom= */ CONTAINER_HEIGHT
+                        )
+                    )
+            }
+        }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    fun gestureExclusionZone_setAfterInit_backGestureEnabled_rtl_fullSwipe() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            Rect(
+                                /* left= */ FAKE_INSETS.left,
+                                /* top= */ 0,
+                                /* right= */ CONTAINER_WIDTH,
+                                /* bottom= */ CONTAINER_HEIGHT
+                            )
                         )
                     )
             }

@@ -21,6 +21,8 @@ import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
 
+import java.io.PrintWriter;
+
 /**
  * Allows the interaction with all the app compat policies and configurations
  */
@@ -36,6 +38,8 @@ class AppCompatController {
     private final AppCompatAspectRatioPolicy mAppCompatAspectRatioPolicy;
     @NonNull
     private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
+    @NonNull
+    private final DesktopAppCompatAspectRatioPolicy mDesktopAppCompatAspectRatioPolicy;
     @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
     @NonNull
@@ -59,7 +63,10 @@ class AppCompatController {
                 mTransparentPolicy, mAppCompatOverrides);
         mAppCompatReachabilityPolicy = new AppCompatReachabilityPolicy(mActivityRecord,
                 wmService.mAppCompatConfiguration);
-        mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(mActivityRecord);
+        mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(mActivityRecord,
+                wmService.mAppCompatConfiguration);
+        mDesktopAppCompatAspectRatioPolicy = new DesktopAppCompatAspectRatioPolicy(activityRecord,
+                mAppCompatOverrides, mTransparentPolicy, wmService.mAppCompatConfiguration);
     }
 
     @NonNull
@@ -75,6 +82,11 @@ class AppCompatController {
     @NonNull
     AppCompatAspectRatioPolicy getAppCompatAspectRatioPolicy() {
         return mAppCompatAspectRatioPolicy;
+    }
+
+    @NonNull
+    DesktopAppCompatAspectRatioPolicy getDesktopAppCompatAspectRatioPolicy() {
+        return mDesktopAppCompatAspectRatioPolicy;
     }
 
     @NonNull
@@ -138,6 +150,11 @@ class AppCompatController {
     @NonNull
     AppCompatLetterboxOverrides getAppCompatLetterboxOverrides() {
         return mAppCompatOverrides.getAppCompatLetterboxOverrides();
+    }
+
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        getTransparentPolicy().dump(pw, prefix);
+        getAppCompatLetterboxPolicy().dump(pw, prefix);
     }
 
 }

@@ -268,7 +268,8 @@ class BubblePositionerTest {
             )
         positioner.update(deviceConfig)
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
 
         assertThat(positioner.getExpandedViewHeight(bubble)).isEqualTo(MAX_HEIGHT)
     }
@@ -294,6 +295,7 @@ class BubblePositionerTest {
                 0 /* taskId */,
                 null /* locus */,
                 true /* isDismissable */,
+                directExecutor(),
                 directExecutor()
             ) {}
 
@@ -322,6 +324,7 @@ class BubblePositionerTest {
                 0 /* taskId */,
                 null /* locus */,
                 true /* isDismissable */,
+                directExecutor(),
                 directExecutor()
             ) {}
 
@@ -416,7 +419,8 @@ class BubblePositionerTest {
         positioner.update(deviceConfig)
 
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
 
         // This bubble will have max height so it'll always be top aligned
         assertThat(positioner.getExpandedViewY(bubble, 0f /* bubblePosition */))
@@ -433,7 +437,8 @@ class BubblePositionerTest {
         positioner.update(deviceConfig)
 
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
 
         // Always top aligned in phone portrait
         assertThat(positioner.getExpandedViewY(bubble, 0f /* bubblePosition */))
@@ -452,7 +457,8 @@ class BubblePositionerTest {
         positioner.update(deviceConfig)
 
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
 
         // This bubble will have max height which is always top aligned on small tablets
         assertThat(positioner.getExpandedViewY(bubble, 0f /* bubblePosition */))
@@ -470,7 +476,8 @@ class BubblePositionerTest {
         positioner.update(deviceConfig)
 
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
 
         // This bubble will have max height which is always top aligned on small tablets
         assertThat(positioner.getExpandedViewY(bubble, 0f /* bubblePosition */))
@@ -489,7 +496,8 @@ class BubblePositionerTest {
         positioner.update(deviceConfig)
 
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
 
         // This bubble will have max height which is always top aligned on landscape, large tablet
         assertThat(positioner.getExpandedViewY(bubble, 0f /* bubblePosition */))
@@ -507,7 +515,8 @@ class BubblePositionerTest {
         positioner.update(deviceConfig)
 
         val intent = Intent(Intent.ACTION_VIEW).setPackage(context.packageName)
-        val bubble = Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        val bubble =
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor(), directExecutor())
 
         val manageButtonHeight =
             context.resources.getDimensionPixelSize(R.dimen.bubble_manage_button_height)

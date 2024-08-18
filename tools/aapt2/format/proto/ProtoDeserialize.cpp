@@ -534,8 +534,6 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
           return false;
         }
 
-        config_value->flag_status = (FlagStatus)pb_config_value.flag_status();
-
         config_value->value = DeserializeValueFromPb(pb_config_value.value(), src_pool, config,
                                                      &out_table->string_pool, files, out_error);
         if (config_value->value == nullptr) {
@@ -877,11 +875,12 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
   return value;
 }
 
-std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
-                                            const android::ResStringPool& src_pool,
-                                            const ConfigDescription& config,
-                                            android::StringPool* value_pool,
-                                            io::IFileCollection* files, std::string* out_error) {
+std::unique_ptr<Item> DeserializeItemFromPbInternal(const pb::Item& pb_item,
+                                                    const android::ResStringPool& src_pool,
+                                                    const ConfigDescription& config,
+                                                    android::StringPool* value_pool,
+                                                    io::IFileCollection* files,
+                                                    std::string* out_error) {
   switch (pb_item.value_case()) {
     case pb::Item::kRef: {
       const pb::Reference& pb_ref = pb_item.ref();
@@ -1008,6 +1007,19 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
       break;
   }
   return {};
+}
+
+std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
+                                            const android::ResStringPool& src_pool,
+                                            const ConfigDescription& config,
+                                            android::StringPool* value_pool,
+                                            io::IFileCollection* files, std::string* out_error) {
+  auto item =
+      DeserializeItemFromPbInternal(pb_item, src_pool, config, value_pool, files, out_error);
+  if (item) {
+    item->SetFlagStatus((FlagStatus)pb_item.flag_status());
+  }
+  return item;
 }
 
 std::unique_ptr<xml::XmlResource> DeserializeXmlResourceFromPb(const pb::XmlNode& pb_node,

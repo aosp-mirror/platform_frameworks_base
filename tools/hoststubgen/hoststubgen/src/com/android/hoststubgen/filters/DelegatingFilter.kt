@@ -87,4 +87,23 @@ abstract class DelegatingFilter(
     ): List<String> {
         return fallback.getMethodCallHooks(className, methodName, descriptor)
     }
+
+    override fun remapType(className: String): String? {
+        return fallback.remapType(className)
+    }
+
+    override fun hasAnyMethodCallReplace(): Boolean {
+        return fallback.hasAnyMethodCallReplace()
+    }
+
+    override fun getMethodCallReplaceTo(
+        callerClassName: String,
+        callerMethodName: String,
+        className: String,
+        methodName: String,
+        descriptor: String,
+    ): MethodReplaceTarget? {
+        return fallback.getMethodCallReplaceTo(
+            callerClassName, callerMethodName, className, methodName, descriptor)
+    }
 }

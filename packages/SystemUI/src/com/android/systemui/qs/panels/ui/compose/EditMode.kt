@@ -43,6 +43,7 @@ fun EditMode(
             Modifier,
             viewModel::addTile,
             viewModel::removeTile,
+            viewModel::setTiles,
         )
     }
 }

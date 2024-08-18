@@ -24,7 +24,6 @@ import android.os.UserHandle
 import android.service.quicksettings.Tile
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE
 import com.android.systemui.Flags.FLAG_QS_NEW_TILES
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -107,7 +106,6 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        mSetFlagsRule.enableFlags(FLAG_QS_NEW_PIPELINE)
         mSetFlagsRule.enableFlags(FLAG_QS_NEW_TILES)
 
         userRepository.setUserInfos(listOf(USER_INFO_0, USER_INFO_1))
