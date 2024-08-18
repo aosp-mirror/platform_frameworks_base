@@ -19,6 +19,8 @@ package android.security.net.config;
 import android.os.Environment;
 import android.os.UserHandle;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.File;
 
 /**
@@ -45,7 +47,7 @@ public final class SystemCertificateSource extends DirectoryCertificateSource {
         }
         File updatable_dir = new File("/apex/com.android.conscrypt/cacerts");
         if (updatable_dir.exists()
-                && !(updatable_dir.list().length == 0)) {
+                && !(ArrayUtils.isEmpty(updatable_dir.list()))) {
             return updatable_dir;
         }
         return new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts");

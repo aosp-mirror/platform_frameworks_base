@@ -1,0 +1,63 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library_host {
+    name: "systemfeatures-gen-lib",
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+    static_libs: [
+        "guava",
+        "javapoet",
+    ],
+}
+
+java_binary_host {
+    name: "systemfeatures-gen-tool",
+    main_class: "com.android.systemfeatures.SystemFeaturesGenerator",
+    static_libs: ["systemfeatures-gen-lib"],
+}
+
+// TODO(b/203143243): Add golden diff test for generated sources.
+// Functional runtime behavior is covered in systemfeatures-gen-tests.
+genrule {
+    name: "systemfeatures-gen-tests-srcs",
+    cmd: "$(location systemfeatures-gen-tool) com.android.systemfeatures.RwNoFeatures --readonly=false > $(location RwNoFeatures.java) && " +
+        "$(location systemfeatures-gen-tool) com.android.systemfeatures.RoNoFeatures --readonly=true > $(location RoNoFeatures.java) && " +
+        "$(location systemfeatures-gen-tool) com.android.systemfeatures.RwFeatures --readonly=false --feature=WATCH:1 --feature=WIFI:0 --feature=VULKAN:-1 --feature=AUTO: > $(location RwFeatures.java) && " +
+        "$(location systemfeatures-gen-tool) com.android.systemfeatures.RoFeatures --readonly=true --feature=WATCH:1 --feature=WIFI:0 --feature=VULKAN:-1 --feature=AUTO: > $(location RoFeatures.java)",
+    out: [
+        "RwNoFeatures.java",
+        "RoNoFeatures.java",
+        "RwFeatures.java",
+        "RoFeatures.java",
+    ],
+    tools: ["systemfeatures-gen-tool"],
+}
+
+java_test_host {
+    name: "systemfeatures-gen-tests",
+    test_suites: ["general-tests"],
+    srcs: [
+        "tests/**/*.java",
+        ":systemfeatures-gen-tests-srcs",
+    ],
+    test_options: {
+        unit_test: true,
+    },
+    static_libs: [
+        "aconfig-annotations-lib",
+        "framework-annotations-lib",
+        "junit",
+        "objenesis",
+        "mockito",
+        "truth",
+    ],
+}

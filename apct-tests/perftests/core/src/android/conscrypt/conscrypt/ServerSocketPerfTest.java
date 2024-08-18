@@ -43,7 +43,6 @@ import androidx.test.filters.LargeTest;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,8 +130,7 @@ public final class ServerSocketPerfTest {
 
         final ChannelType channelType = config.channelType();
 
-        server = config.serverFactory().newServer(
-            channelType, config.messageSize(),
+        server = config.serverFactory().newServer(config.messageSize(),
             new String[] {"TLSv1.3", "TLSv1.2"}, ciphers(config));
         server.setMessageProcessor(new MessageProcessor() {
             @Override
@@ -202,7 +200,6 @@ public final class ServerSocketPerfTest {
 
     @Test
     @Parameters(method = "getParams")
-    @Ignore("b/351034205")
     public void throughput(Config config) throws Exception {
         setup(config);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();

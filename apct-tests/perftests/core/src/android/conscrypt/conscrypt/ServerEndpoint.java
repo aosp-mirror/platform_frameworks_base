@@ -34,8 +34,6 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.conscrypt.ChannelType;
-
 /**
  * A simple socket-based test server.
  */
@@ -63,7 +61,6 @@ final class ServerEndpoint {
     }
 
     private final ServerSocket serverSocket;
-    private final ChannelType channelType;
     private final SSLSocketFactory socketFactory;
     private final int messageSize;
     private final String[] protocols;
@@ -78,11 +75,10 @@ final class ServerEndpoint {
     private volatile Future<?> processFuture;
 
     ServerEndpoint(SSLSocketFactory socketFactory, SSLServerSocketFactory serverSocketFactory,
-            ChannelType channelType, int messageSize, String[] protocols,
+            int messageSize, String[] protocols,
             String[] cipherSuites) throws IOException {
-        this.serverSocket = channelType.newServerSocket(serverSocketFactory);
+        this.serverSocket = serverSocketFactory.createServerSocket();
         this.socketFactory = socketFactory;
-        this.channelType = channelType;
         this.messageSize = messageSize;
         this.protocols = protocols;
         this.cipherSuites = cipherSuites;
@@ -134,7 +130,7 @@ final class ServerEndpoint {
                 if (stopping) {
                     return;
                 }
-                socket = channelType.accept(serverSocket, socketFactory);
+                socket = (SSLSocket) serverSocket.accept();
                 socket.setEnabledProtocols(protocols);
                 socket.setEnabledCipherSuites(cipherSuites);
 

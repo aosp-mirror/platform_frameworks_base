@@ -5,3 +5,12 @@ set noparent
 caitlinshk@google.com
 evanlaird@google.com
 pixel@google.com
+
+per-file *Biometrics* = set noparent
+per-file *Biometrics* = file:../keyguard/OWNERS
+per-file *Doze* = set noparent
+per-file *Doze* = file:../keyguard/OWNERS
+per-file *Keyboard* = set noparent
+per-file *Keyboard* = file:../keyguard/OWNERS
+per-file *Keyguard* = set noparent
+per-file *Keyguard* = file:../keyguard/OWNERS

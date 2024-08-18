@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -143,7 +142,7 @@ public final class ClientSocketPerfTest {
 
         // Always use the same server for consistency across the benchmarks.
         server = config.serverFactory().newServer(
-                ChannelType.CHANNEL, config.messageSize(), config.protocol().getProtocols(),
+                config.messageSize(), config.protocol().getProtocols(),
                 ciphers(config));
 
         server.setMessageProcessor(new ServerEndpoint.MessageProcessor() {
@@ -197,7 +196,6 @@ public final class ClientSocketPerfTest {
      */
     @Test
     @Parameters(method = "getParams")
-    @Ignore("b/351034205")
     public void time(Config config) throws Exception {
         reset();
         setup(config);
