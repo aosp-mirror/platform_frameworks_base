@@ -113,3 +113,14 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "normalized_pwle_effects"
+    is_exported: true
+    description: "Enables functionality to create PWLE effects using advanced and simple APIs"
+    bug: "341052318"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}

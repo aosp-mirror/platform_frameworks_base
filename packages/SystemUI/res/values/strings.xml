@@ -291,6 +291,8 @@
     <string name="screenrecord_permission_dialog_warning_single_app">When you’re recording an app, anything shown or played in that app is recorded. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Button to start a screen recording of the entire screen in the updated screen record dialog that allows to select an app to record [CHAR LIMIT=50]-->
     <string name="screenrecord_permission_dialog_continue_entire_screen">Record screen</string>
+    <!-- Title of the activity that allows to select an app to screen record [CHAR LIMIT=70] -->
+    <string name="screenrecord_app_selector_title">Choose app to record</string>
 
     <!-- Label for a switch to enable recording audio [CHAR LIMIT=NONE]-->
     <string name="screenrecord_audio_label">Record audio</string>
@@ -1362,8 +1364,8 @@
     <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
     <string name="media_projection_sys_service_dialog_warning">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
-    <!-- Title of the dialog that allows to select an app to share or record [CHAR LIMIT=NONE] -->
-    <string name="screen_share_permission_app_selector_title">Share or record an app</string>
+    <!-- Title of the activity that allows users to select an app to share or record [CHAR LIMIT=NONE] -->
+    <string name="screen_share_generic_app_selector_title">Share or record an app</string>
 
     <!-- Media projection that launched from 1P/3P apps -->
     <!-- 1P/3P app media projection permission dialog title. [CHAR LIMIT=NONE] -->
@@ -1381,6 +1383,8 @@
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen">Share screen</string>
     <!-- 1P/3P apps disabled the single app projection option. [CHAR LIMIT=NONE] -->
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled"><xliff:g id="app_name" example="Meet">%1$s</xliff:g> has disabled this option</string>
+    <!-- Title of the activity that allows users to select an app to share to a 1P/3P app [CHAR LIMIT=70] -->
+    <string name="media_projection_entry_share_app_selector_title">Choose app to share</string>
 
     <!-- Casting that launched by SysUI (i.e. when there is no app name) -->
     <!-- System casting media projection permission dialog title. [CHAR LIMIT=100] -->
@@ -1395,6 +1399,8 @@
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, anything shown or played in that app is visible. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- System casting media projection permission button to continue for SysUI casting. [CHAR LIMIT=60] -->
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen">Cast screen</string>
+    <!-- Title of the activity that allows users to select an app to cast [CHAR LIMIT=70] -->
+    <string name="media_projection_entry_cast_app_selector_title">Choose app to cast</string>
 
     <!-- Other sharing (not recording nor casting) that launched by SysUI (currently not in use) -->
     <!-- System sharing media projection permission dialog title. [CHAR LIMIT=100] -->

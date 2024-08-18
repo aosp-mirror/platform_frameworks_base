@@ -22,14 +22,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -39,17 +39,16 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
-    private val underTest by lazy {
-        PinBouncerViewModel(
-            applicationContext = context,
-            viewModelScope = testScope.backgroundScope,
-            interactor = bouncerInteractor,
+    private val underTest =
+        kosmos.pinBouncerViewModelFactory.create(
             isInputEnabled = MutableStateFlow(true),
-            simBouncerInteractor = kosmos.simBouncerInteractor,
-            authenticationMethod = AuthenticationMethodModel.Pin,
             onIntentionalUserInput = {},
+            authenticationMethod = AuthenticationMethodModel.Pin,
         )
+
+    @Before
+    fun setUp() {
+        underTest.activateIn(testScope)
     }
 
     @Test

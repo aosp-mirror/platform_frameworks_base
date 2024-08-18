@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -36,12 +34,10 @@ import android.widget.LinearLayout;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Flags;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.plugins.DarkIconDispatcher;
-import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
@@ -54,8 +50,6 @@ public class PhoneStatusBarView extends FrameLayout {
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
     private final StatusBarWindowController mStatusBarWindowController;
 
-    private DarkReceiver mBattery;
-    private Clock mClock;
     private int mRotationOrientation = -1;
     @Nullable
     private View mCutoutSpace;
@@ -92,8 +86,6 @@ public class PhoneStatusBarView extends FrameLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        mBattery = findViewById(R.id.battery);
-        mClock = findViewById(R.id.clock);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
 
         updateResources();
@@ -102,9 +94,6 @@ public class PhoneStatusBarView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        // Always have Battery meters in the status bar observe the dark/light modes.
-        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
-        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
         if (updateDisplayParameters()) {
             updateLayoutForCutout();
             updateWindowHeight();
@@ -114,8 +103,6 @@ public class PhoneStatusBarView extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mBattery);
-        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mClock);
         mDisplayCutout = null;
     }
 
@@ -133,10 +120,6 @@ public class PhoneStatusBarView extends FrameLayout {
             requestLayout();
         }
         updateWindowHeight();
-    }
-
-    void onDensityOrFontScaleChanged() {
-        mClock.onDensityOrFontScaleChanged();
     }
 
     @Override
@@ -217,8 +200,12 @@ public class PhoneStatusBarView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        mTouchEventHandler.onInterceptTouchEvent(event);
-        return super.onInterceptTouchEvent(event);
+        if (Flags.statusBarSwipeOverChip()) {
+            return mTouchEventHandler.onInterceptTouchEvent(event);
+        } else {
+            mTouchEventHandler.onInterceptTouchEvent(event);
+            return super.onInterceptTouchEvent(event);
+        }
     }
 
     public void updateResources() {
@@ -311,6 +298,9 @@ public class PhoneStatusBarView extends FrameLayout {
     }
 
     private void updateWindowHeight() {
+        if (Flags.statusBarStopUpdatingWindowHeight()) {
+            return;
+        }
         mStatusBarWindowController.refreshStatusBarHeight();
     }
 }

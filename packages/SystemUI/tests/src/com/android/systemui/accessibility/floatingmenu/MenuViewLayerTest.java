@@ -81,9 +81,10 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.accessibility.utils.TestUtils;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import org.junit.After;
 import org.junit.Before;
@@ -169,7 +170,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
         mMenuViewLayer = spy(new MenuViewLayer(mSpyContext, mStubWindowManager,
                 mStubAccessibilityManager, mMenuViewModel, menuViewAppearance, mMenuView,
-                mFloatingMenu, mSecureSettings));
+                mFloatingMenu, mSecureSettings, mock(NavigationModeController.class)));
         mMenuAnimationController = mMenuView.getMenuAnimationController();
 
         doNothing().when(mSpyContext).startActivity(any());

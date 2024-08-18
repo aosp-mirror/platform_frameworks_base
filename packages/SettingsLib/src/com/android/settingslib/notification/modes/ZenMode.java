@@ -22,6 +22,7 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.ZenModeConfig.tryParseCountdownConditionId;
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
@@ -52,9 +53,11 @@ import androidx.annotation.Nullable;
 import com.android.settingslib.R;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -86,6 +89,33 @@ public class ZenMode implements Parcelable {
                     .hideAllVisualEffects()
                     .allowPriorityChannels(false)
                     .build();
+
+    private static final Comparator<Integer> PRIORITIZED_TYPE_COMPARATOR = new Comparator<>() {
+
+        private static final ImmutableList</* @AutomaticZenRule.Type */ Integer>
+                PRIORITIZED_TYPES = ImmutableList.of(
+                        AutomaticZenRule.TYPE_BEDTIME,
+                        AutomaticZenRule.TYPE_DRIVING);
+
+        @Override
+        public int compare(Integer first, Integer second) {
+            if (PRIORITIZED_TYPES.contains(first) && PRIORITIZED_TYPES.contains(second)) {
+                return PRIORITIZED_TYPES.indexOf(first) - PRIORITIZED_TYPES.indexOf(second);
+            } else if (PRIORITIZED_TYPES.contains(first)) {
+                return -1;
+            } else if (PRIORITIZED_TYPES.contains(second)) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    };
+
+    // Manual DND first, Bedtime/Driving, then alphabetically.
+    static final Comparator<ZenMode> PRIORITIZING_COMPARATOR = Comparator
+            .comparing(ZenMode::isManualDnd).reversed()
+            .thenComparing(ZenMode::getType, PRIORITIZED_TYPE_COMPARATOR)
+            .thenComparing(ZenMode::getName);
 
     public enum Status {
         ENABLED,
@@ -129,7 +159,11 @@ public class ZenMode implements Parcelable {
     }
 
     public static ZenMode manualDndMode(AutomaticZenRule manualRule, boolean isActive) {
-        return new ZenMode(MANUAL_DND_MODE_ID, manualRule,
+        // Manual rule is owned by the system, so we set it here
+        AutomaticZenRule manualRuleWithPkg = new AutomaticZenRule.Builder(manualRule)
+                .setPackage(PACKAGE_ANDROID)
+                .build();
+        return new ZenMode(MANUAL_DND_MODE_ID, manualRuleWithPkg,
                 isActive ? Status.ENABLED_AND_ACTIVE : Status.ENABLED, true);
     }
 
@@ -218,6 +252,16 @@ public class ZenMode implements Parcelable {
         //   for these modes as well.
 
         return getTriggerDescription();
+    }
+
+    /**
+     * Returns an icon "key" that is guaranteed to be different if the icon is different. Note that
+     * the inverse is not true, i.e. two keys can be different and the icon still be visually the
+     * same.
+     */
+    @NonNull
+    public String getIconKey() {
+        return mRule.getType() + ":" + mRule.getPackageName() + ":" + mRule.getIconResId();
     }
 
     @NonNull

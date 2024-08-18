@@ -16,39 +16,50 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
-import com.android.systemui.util.kotlin.FlowDumperImpl
-import javax.inject.Inject
+import com.android.systemui.util.kotlin.ActivatableFlowDumper
+import com.android.systemui.util.kotlin.ActivatableFlowDumperImpl
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
  * [NotificationStackAppearanceInteractor], and by extension control the NSSL.
  */
-@SysUISingleton
 class NotificationsPlaceholderViewModel
-@Inject
+@AssistedInject
 constructor(
-    dumpManager: DumpManager,
     private val interactor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     featureFlags: FeatureFlagsClassic,
-) : FlowDumperImpl(dumpManager) {
+    dumpManager: DumpManager,
+) :
+    SysUiViewModel(),
+    ActivatableFlowDumper by ActivatableFlowDumperImpl(
+        dumpManager = dumpManager,
+        tag = "NotificationsPlaceholderViewModel",
+    ) {
+
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */
     val isVisualDebuggingEnabled: Boolean = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES)
 
     /** DEBUG: whether the debug logging should be output. */
     val isDebugLoggingEnabled: Boolean = SceneContainerFlag.isEnabled
+
+    override suspend fun onActivated(): Nothing {
+        activateFlowDumper()
+    }
 
     /** Notifies that the bounds of the notification scrim have changed. */
     fun onScrimBoundsChanged(bounds: ShadeScrimBounds?) {
@@ -113,6 +124,11 @@ constructor(
     /** Snooze the currently pinned HUN. */
     fun snoozeHun() {
         headsUpNotificationInteractor.snooze()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): NotificationsPlaceholderViewModel
     }
 }
 

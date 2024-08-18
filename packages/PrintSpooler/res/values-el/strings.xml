@@ -99,7 +99,7 @@
     <item msgid="79513688117503758">"Μικρή πλευρά"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"Πορτραίτο"</item>
+    <item msgid="4061931020926489228">"Πορτρέτο"</item>
     <item msgid="3199660090246166812">"Οριζόντια"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Δεν ήταν δυνατή η εγγραφή στο αρχείο"</string>

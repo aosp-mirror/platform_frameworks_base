@@ -20,6 +20,7 @@ import android.app.Flags
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.service.quicksettings.Tile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -94,7 +95,13 @@ constructor(
 
     override fun getTileLabel(): CharSequence = tileState.label
 
-    override fun newTileState() = QSTile.State()
+    override fun newTileState(): QSTile.State {
+        return QSTile.State().apply {
+            label = mContext.getString(R.string.quick_settings_modes_label)
+            icon = ResourceIcon.get(R.drawable.qs_dnd_icon_off)
+            state = Tile.STATE_INACTIVE
+        }
+    }
 
     override fun handleClick(expandable: Expandable?) = runBlocking {
         userActionInteractor.handleClick(expandable)

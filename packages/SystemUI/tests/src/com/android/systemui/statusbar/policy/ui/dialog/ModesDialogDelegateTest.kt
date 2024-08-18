@@ -57,6 +57,7 @@ class ModesDialogDelegateTest : SysuiTestCase() {
     private val activityStarter = kosmos.activityStarter
     private val mockDialogTransitionAnimator = kosmos.mockDialogTransitionAnimator
     private val mockAnimationController = kosmos.mockActivityTransitionAnimatorController
+    private val mockDialogEventLogger = kosmos.mockModesDialogEventLogger
     private lateinit var underTest: ModesDialogDelegate
 
     @Before
@@ -75,6 +76,7 @@ class ModesDialogDelegateTest : SysuiTestCase() {
                 mockDialogTransitionAnimator,
                 activityStarter,
                 { kosmos.modesDialogViewModel },
+                mockDialogEventLogger,
                 kosmos.mainCoroutineContext,
             )
     }
@@ -121,4 +123,12 @@ class ModesDialogDelegateTest : SysuiTestCase() {
 
         assertThat(underTest.currentDialog).isNull()
     }
+
+    @Test
+    fun openSettings_logsEvent() =
+        testScope.runTest {
+            val dialog: SystemUIDialog = mock()
+            underTest.openSettings(dialog)
+            verify(mockDialogEventLogger).logDialogSettings()
+        }
 }

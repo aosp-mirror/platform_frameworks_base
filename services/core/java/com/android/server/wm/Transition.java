@@ -420,6 +420,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 updateTransientFlags(mChanges.valueAt(i));
             }
         }
+
+        // TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
+        // Also interpret HOME transient launch as recents
+        if (activity.isActivityTypeHomeOrRecents()) {
+            addFlag(TRANSIT_FLAG_IS_RECENTS);
+            // When starting recents animation, we assume the recents activity is behind the app
+            // task and should not affect system bar appearance,
+            // until WMS#setRecentsAppBehindSystemBars be called from launcher when passing
+            // the gesture threshold.
+            activity.getTask().setCanAffectSystemUiFlags(false);
+        }
+
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
                 + "transient-launch", mSyncId, activity);
     }
@@ -1721,6 +1733,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 transaction.addTransactionCompletedListener(Runnable::run,
                         (stats) -> listener.run());
             }
+            mTransactionCompletedListeners = null;
         }
 
         // Fall-back to the default display if there isn't one participating.
@@ -1763,6 +1776,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mPriorVisibilityMightBeDirty) {
             updatePriorVisibility();
         }
+
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
 
@@ -1840,8 +1854,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // already been reset by the original hiding-transition's finishTransaction (we can't
             // show in the finishTransaction because by then the activity doesn't hide until
             // surface placement).
-            for (WindowContainer p = ar.getParent(); p != null && !containsChangeFor(p, mTargets);
-                    p = p.getParent()) {
+            for (WindowContainer p = ar.getParent();
+                 p != null && !containsChangeFor(p, mTargets) && !p.isOrganized();
+                 p = p.getParent()) {
                 if (p.getSurfaceControl() != null) {
                     transaction.show(p.getSurfaceControl());
                 }

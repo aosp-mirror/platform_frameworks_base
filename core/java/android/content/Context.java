@@ -16,6 +16,7 @@
 
 package android.content;
 
+import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
 
 import android.annotation.AttrRes;
@@ -51,6 +52,7 @@ import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
 import android.app.ambientcontext.AmbientContextManager;
+import android.app.appfunctions.AppFunctionManager;
 import android.app.people.PeopleManager;
 import android.app.time.TimeManager;
 import android.companion.virtual.VirtualDeviceManager;
@@ -6307,6 +6309,16 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String APP_SEARCH_SERVICE = "app_search";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link AppFunctionManager} for
+     * executing app functions.
+     *
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final String APP_FUNCTION_SERVICE = "app_function";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an

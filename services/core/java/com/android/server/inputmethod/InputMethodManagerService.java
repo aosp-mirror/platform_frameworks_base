@@ -86,6 +86,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.media.AudioManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
@@ -2618,7 +2620,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private boolean shouldShowImeSwitcherLocked(int visibility, @UserIdInt int userId) {
+    private boolean shouldShowImeSwitcherLocked(@ImeWindowVisibility int visibility,
+            @UserIdInt int userId) {
         if (!mShowOngoingImeSwitcherForPhones) return false;
         // When the IME switcher dialog is shown, the IME switcher button should be hidden.
         // TODO(b/305849394): Make mMenuController multi-user aware.
@@ -2722,8 +2725,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @BinderThread
     @GuardedBy("ImfLock.class")
     @SuppressWarnings("deprecation")
-    private void setImeWindowStatusLocked(int vis, int backDisposition,
-            @NonNull UserData userData) {
+    private void setImeWindowStatusLocked(@ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition, @NonNull UserData userData) {
         final int topFocusedDisplayId = mWindowManagerInternal.getTopFocusedDisplayId();
 
         final int userId = userData.mUserId;
@@ -2772,7 +2775,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final int userId = resolveImeUserIdFromDisplayIdLocked(displayId);
         if (disableImeIcon) {
             final var bindingController = getInputMethodBindingController(userId);
-            updateSystemUiLocked(0, bindingController.getBackDisposition(), userId);
+            updateSystemUiLocked(0 /* vis */, bindingController.getBackDisposition(), userId);
         } else {
             updateSystemUiLocked(userId);
         }
@@ -2787,7 +2790,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     @GuardedBy("ImfLock.class")
-    private void updateSystemUiLocked(int vis, int backDisposition, @UserIdInt int userId) {
+    private void updateSystemUiLocked(@ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition, @UserIdInt int userId) {
         // To minimize app compat risk, ignore background users' request for single-user mode.
         // TODO(b/357178609): generalize the logic and remove this special rule.
         if (!mConcurrentMultiUserModeEnabled && userId != mCurrentImeUserId) {
@@ -6812,7 +6816,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @BinderThread
         @Override
-        public void setImeWindowStatusAsync(int vis, int backDisposition) {
+        public void setImeWindowStatusAsync(@ImeWindowVisibility int vis,
+                @BackDispositionMode int backDisposition) {
             synchronized (ImfLock.class) {
                 if (!calledWithValidTokenLocked(mToken, mUserData)) {
                     return;

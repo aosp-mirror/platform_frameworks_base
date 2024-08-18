@@ -128,6 +128,24 @@ constructor(
             { "removeTransientRow from row: childKey: $str1 -- containerKey: $str2" }
         )
     }
+
+    fun logResetAllContentAlphas(entry: NotificationEntry) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.INFO,
+            { str1 = entry.logKey },
+            { "resetAllContentAlphas: $str1" }
+        )
+    }
+
+    fun logSkipResetAllContentAlphas(entry: NotificationEntry) {
+        notificationRenderBuffer.log(
+            TAG,
+            LogLevel.INFO,
+            { str1 = entry.logKey },
+            { "Skip resetAllContentAlphas: $str1" }
+        )
+    }
 }
 
 private const val TAG = "NotifRow"

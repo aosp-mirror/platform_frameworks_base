@@ -2579,9 +2579,10 @@ package android.os {
 
   @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final class VibrationEffect.VendorEffect extends android.os.VibrationEffect {
     method @Nullable public long[] computeCreateWaveformOffOnTimingsOrNull();
+    method public float getAdaptiveScale();
     method public long getDuration();
     method public int getEffectStrength();
-    method public float getLinearScale();
+    method public float getScale();
     method @NonNull public android.os.PersistableBundle getVendorData();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.VendorEffect> CREATOR;
@@ -4425,8 +4426,13 @@ package android.window {
 
   public class WindowInfosListenerForTest {
     ctor public WindowInfosListenerForTest();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
-    method public void removeWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+    method public void removeWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+  }
+
+  public static class WindowInfosListenerForTest.DisplayInfo {
+    field public final int displayId;
+    field @NonNull public final android.graphics.Matrix transform;
   }
 
   public static class WindowInfosListenerForTest.WindowInfo {

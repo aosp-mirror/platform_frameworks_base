@@ -37,6 +37,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Binder;
@@ -257,10 +258,10 @@ public class CommandQueue extends IStatusBar.Stub implements
          *
          * @param displayId The id of the display to notify.
          * @param vis IME visibility.
-         * @param backDisposition Disposition mode of back button. It should be one of below flags:
+         * @param backDisposition Disposition mode of back button.
          * @param showImeSwitcher {@code true} to show IME switch button.
          */
-        default void setImeWindowStatus(int displayId, int vis,
+        default void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
                 @BackDispositionMode int backDisposition, boolean showImeSwitcher) { }
         default void showRecentApps(boolean triggeredFromAltTab) { }
         default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) { }
@@ -743,8 +744,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void setImeWindowStatus(int displayId, int vis, int backDisposition,
-            boolean showImeSwitcher) {
+    public void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_IME_BUTTON);
             SomeArgs args = SomeArgs.obtain();
@@ -1205,8 +1206,8 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
 
-    private void handleShowImeButton(int displayId, int vis, int backDisposition,
-            boolean showImeSwitcher) {
+    private void handleShowImeButton(int displayId, @ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
         if (displayId == INVALID_DISPLAY) return;
 
         boolean isConcurrentMultiUserModeEnabled = UserManager.isVisibleBackgroundUsersEnabled()

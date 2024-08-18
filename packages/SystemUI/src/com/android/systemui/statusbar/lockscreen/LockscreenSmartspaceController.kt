@@ -26,6 +26,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.database.ContentObserver
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
@@ -570,6 +571,20 @@ constructor(
         plugin?.unregisterListener(listener)
     }
 
+    fun isWithinSmartspaceBounds(x: Int, y: Int): Boolean {
+        smartspaceViews.forEach {
+            val bounds = Rect()
+            with(it as View) {
+                this.getBoundsOnScreen(bounds)
+                if (bounds.contains(x, y)) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
         if (isDateWeatherDecoupled && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
             return false
@@ -587,7 +602,7 @@ constructor(
                 // Only the primary user can have an associated managed profile, so only show
                 // content for the managed profile if the primary user is active
                 userTracker.userHandle.identifier == UserHandle.USER_SYSTEM &&
-                        (!t.isSensitive || showSensitiveContentForManagedUser)
+                    (!t.isSensitive || showSensitiveContentForManagedUser)
             }
             else -> {
                 false
@@ -705,4 +720,3 @@ constructor(
         }
     }
 }
-

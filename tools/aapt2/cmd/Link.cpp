@@ -1878,7 +1878,7 @@ class Linker {
       for (auto& type : package->types) {
         for (auto& entry : type->entries) {
           for (auto& config_value : entry->values) {
-            if (config_value->flag_status == FlagStatus::Disabled) {
+            if (config_value->value->GetFlagStatus() == FlagStatus::Disabled) {
               config_value->value->Accept(&visitor);
             }
           }

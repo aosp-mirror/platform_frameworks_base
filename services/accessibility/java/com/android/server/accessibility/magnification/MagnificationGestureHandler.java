@@ -127,49 +127,41 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
         if (DEBUG_EVENT_STREAM) {
             storeEventInto(mDebugInputEventHistory, event);
         }
-        if (shouldDispatchTransformedEvent(event)) {
-            dispatchTransformedEvent(event, rawEvent, policyFlags);
-        } else {
-            onMotionEventInternal(event, rawEvent, policyFlags);
+        switch (event.getSource()) {
+            case SOURCE_TOUCHSCREEN: {
+                if (magnificationShortcutExists()) {
+                    // Observe touchscreen events while magnification activation is detected.
+                    onMotionEventInternal(event, rawEvent, policyFlags);
 
-            final int action = event.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                mCallback.onTouchInteractionStart(mDisplayId, getMode());
-            } else if (action == ACTION_UP || action == ACTION_CANCEL) {
-                mCallback.onTouchInteractionEnd(mDisplayId, getMode());
+                    final int action = event.getAction();
+                    if (action == MotionEvent.ACTION_DOWN) {
+                        mCallback.onTouchInteractionStart(mDisplayId, getMode());
+                    } else if (action == ACTION_UP || action == ACTION_CANCEL) {
+                        mCallback.onTouchInteractionEnd(mDisplayId, getMode());
+                    }
+                    // Return early: Do not dispatch event through normal eventing
+                    // flow, it has been fully consumed by the magnifier.
+                    return;
+                }
+            } break;
+            case SOURCE_MOUSE:
+            case SOURCE_STYLUS: {
+                if (magnificationShortcutExists() && Flags.enableMagnificationFollowsMouse()) {
+                    handleMouseOrStylusEvent(event, rawEvent, policyFlags);
+                }
             }
+                break;
+            default:
+                break;
         }
+        // Dispatch event through normal eventing flow.
+        dispatchTransformedEvent(event, rawEvent, policyFlags);
     }
 
-    /**
-     * Some touchscreen, mouse and stylus events may modify magnifier state. Checks for whether the
-     * event should not be dispatched to the magnifier.
-     *
-     * @param event The event to check.
-     * @return `true` if the event should be sent through the normal event flow or `false` if it
-     *     should be observed by magnifier.
-     */
-    private boolean shouldDispatchTransformedEvent(MotionEvent event) {
-        if (event.getSource() == SOURCE_TOUCHSCREEN) {
-            if (mDetectSingleFingerTripleTap
-                    || mDetectTwoFingerTripleTap
-                    || mDetectShortcutTrigger) {
-                // Observe touchscreen events while magnification activation is detected.
-                return false;
-            }
-        }
-        if (Flags.enableMagnificationFollowsMouse()) {
-            if (event.isFromSource(SOURCE_MOUSE) || event.isFromSource(SOURCE_STYLUS)) {
-                // Note that mouse events include other mouse-like pointing devices
-                // such as touchpads and pointing sticks.
-                // Observe any mouse or stylus movement.
-                // We observe all movement to ensure that events continue to come in order,
-                // even though only some movement types actually move the viewport.
-                return false;
-            }
-        }
-        // Magnification dispatches (ignores) all other events
-        return true;
+    private boolean magnificationShortcutExists() {
+        return (mDetectSingleFingerTripleTap
+                || mDetectTwoFingerTripleTap
+                || mDetectShortcutTrigger);
     }
 
     final void dispatchTransformedEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
@@ -200,6 +192,13 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
      * Called when this MagnificationGestureHandler handles the motion event.
      */
     abstract void onMotionEventInternal(MotionEvent event, MotionEvent rawEvent, int policyFlags);
+
+    /**
+     * Called when this MagnificationGestureHandler should handle a mouse or stylus motion event,
+     * but not re-dispatch it when completed.
+     */
+    abstract void handleMouseOrStylusEvent(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags);
 
     /**
      * Called when the shortcut target is magnification.

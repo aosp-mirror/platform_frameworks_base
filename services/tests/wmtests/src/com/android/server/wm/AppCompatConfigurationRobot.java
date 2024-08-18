@@ -52,6 +52,11 @@ class AppCompatConfigurationRobot {
         doReturn(enabled).when(mAppCompatConfiguration).isCameraCompatTreatmentEnabled();
     }
 
+    void enableSplitScreenAspectRatioForUnresizableApps(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration)
+                .getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+    }
+
     void enableCameraCompatTreatmentAtBuildTime(boolean enabled) {
         doReturn(enabled).when(mAppCompatConfiguration)
                 .isCameraCompatTreatmentEnabledAtBuildTime();

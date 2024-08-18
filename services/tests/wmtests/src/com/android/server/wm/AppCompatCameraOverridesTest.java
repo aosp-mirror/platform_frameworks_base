@@ -374,7 +374,6 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<CameraOverridesRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
         final CameraOverridesRobotTest robot = new CameraOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
     }

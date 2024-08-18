@@ -223,7 +223,10 @@ public class ImageWallpaperTest extends SysuiTestCase {
     }
 
     private void setBitmapDimensions(int bitmapWidth, int bitmapHeight) {
+        // TODO(b/281648899) remove the when(mWallpaperManager.peekBitmapDimensions(...))
         when(mWallpaperManager.peekBitmapDimensions(anyInt(), anyBoolean()))
+                .thenReturn(new Rect(0, 0, bitmapWidth, bitmapHeight));
+        when(mWallpaperManager.peekBitmapDimensionsAsUser(anyInt(), anyBoolean(), anyInt()))
                 .thenReturn(new Rect(0, 0, bitmapWidth, bitmapHeight));
         when(mWallpaperBitmap.getWidth()).thenReturn(bitmapWidth);
         when(mWallpaperBitmap.getHeight()).thenReturn(bitmapHeight);

@@ -1611,8 +1611,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *
      * @param orientation the specified orientation.
      */
-    void setOrientation(@ScreenOrientation int orientation) {
-        setOrientation(orientation, null /* requestingContainer */);
+    protected void setOrientation(@ScreenOrientation int orientation) {
+        setOrientation(orientation, null /* requesting */);
     }
 
     /**
@@ -2784,9 +2784,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @CallSuper
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         boolean isVisible = isVisible();
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible) {
             return;
         }
 

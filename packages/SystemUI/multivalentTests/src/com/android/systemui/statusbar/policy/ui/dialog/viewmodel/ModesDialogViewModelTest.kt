@@ -23,6 +23,7 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
@@ -30,6 +31,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +42,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
 @SmallTest
@@ -50,9 +53,16 @@ class ModesDialogViewModelTest : SysuiTestCase() {
     private val repository = kosmos.fakeZenModeRepository
     private val interactor = kosmos.zenModeInteractor
     private val mockDialogDelegate = kosmos.mockModesDialogDelegate
+    private val mockDialogEventLogger = kosmos.mockModesDialogEventLogger
 
     private val underTest =
-        ModesDialogViewModel(context, interactor, kosmos.testDispatcher, mockDialogDelegate)
+        ModesDialogViewModel(
+            context,
+            interactor,
+            kosmos.testDispatcher,
+            mockDialogDelegate,
+            mockDialogEventLogger
+        )
 
     @Test
     fun tiles_filtersOutUserDisabledModes() =
@@ -431,5 +441,85 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             assertThat(intent.action).isEqualTo(Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
             assertThat(intent.extras?.getString(Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID))
                 .isEqualTo("B")
+        }
+
+    @Test
+    fun onClick_logsOnOffEvents() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
+                    TestModeBuilder()
+                        .setId("id1")
+                        .setName("Inactive Mode One")
+                        .setActive(false)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setId("id2")
+                        .setName("Active Non-Invokable Mode Two") // but can be turned off by tile
+                        .setActive(true)
+                        .setManualInvocationAllowed(false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(3)
+
+            // Trigger onClick for each tile in sequence
+            tiles?.forEach { it.onClick.invoke() }
+            runCurrent()
+
+            val onModeCaptor = argumentCaptor<ZenMode>()
+            val offModeCaptor = argumentCaptor<ZenMode>()
+
+            // manual mode and mode 2 should have turned off
+            verify(mockDialogEventLogger, times(2)).logModeOff(offModeCaptor.capture())
+            val off0 = offModeCaptor.firstValue
+            assertThat(off0.isManualDnd).isTrue()
+
+            val off1 = offModeCaptor.secondValue
+            assertThat(off1.id).isEqualTo("id2")
+
+            // should also have logged turning mode 1 on
+            verify(mockDialogEventLogger).logModeOn(onModeCaptor.capture())
+            val on = onModeCaptor.lastValue
+            assertThat(on.id).isEqualTo("id1")
+        }
+
+    @Test
+    fun onLongClick_logsSettingsEvents() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
+                    TestModeBuilder()
+                        .setId("id1")
+                        .setName("Inactive Mode One")
+                        .setActive(false)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(2)
+            val modeCaptor = argumentCaptor<ZenMode>()
+
+            // long click manual DND and then automatic mode
+            tiles?.forEach { it.onLongClick.invoke() }
+            runCurrent()
+
+            verify(mockDialogEventLogger, times(2)).logModeSettings(modeCaptor.capture())
+            val manualMode = modeCaptor.firstValue
+            assertThat(manualMode.isManualDnd).isTrue()
+
+            val automaticMode = modeCaptor.lastValue
+            assertThat(automaticMode.id).isEqualTo("id1")
         }
 }
