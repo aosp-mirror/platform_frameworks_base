@@ -68,10 +68,4 @@ public interface IProtoLog {
      * @return If we need to log this group and level to either ProtoLog or Logcat.
      */
     boolean isEnabled(IProtoLogGroup group, LogLevel level);
-
-    /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
-     */
-    void registerGroups(IProtoLogGroup... protoLogGroups);
 }

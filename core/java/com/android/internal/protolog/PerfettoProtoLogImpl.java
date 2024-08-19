@@ -89,6 +89,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 /**
  * A service for the ProtoLog logging system.
@@ -125,17 +126,18 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl() {
-        this(null, null, null, () -> {});
+    public PerfettoProtoLogImpl(@NonNull IProtoLogGroup[] groups) {
+        this(null, null, null, () -> {}, groups);
     }
 
-    public PerfettoProtoLogImpl(@NonNull Runnable cacheUpdater) {
-        this(null, null, null, cacheUpdater);
+    public PerfettoProtoLogImpl(@NonNull Runnable cacheUpdater, @NonNull IProtoLogGroup[] groups) {
+        this(null, null, null, cacheUpdater, groups);
     }
 
     public PerfettoProtoLogImpl(
             @NonNull String viewerConfigFilePath,
-            @NonNull Runnable cacheUpdater) {
+            @NonNull Runnable cacheUpdater,
+            @NonNull IProtoLogGroup[] groups) {
         this(viewerConfigFilePath,
                 null,
                 new ProtoLogViewerConfigReader(() -> {
@@ -146,22 +148,24 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                                 "Failed to load viewer config file " + viewerConfigFilePath, e);
                     }
                 }),
-                cacheUpdater);
+                cacheUpdater, groups);
     }
 
     @VisibleForTesting
     public PerfettoProtoLogImpl(
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater) {
-        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater);
+            @NonNull Runnable cacheUpdater,
+            @NonNull IProtoLogGroup[] groups) {
+        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater, groups);
     }
 
     private PerfettoProtoLogImpl(
             @Nullable String viewerConfigFilePath,
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater) {
+            @NonNull Runnable cacheUpdater,
+            @NonNull IProtoLogGroup[] groups) {
         if (viewerConfigFilePath != null && viewerConfigInputStreamProvider != null) {
             throw new RuntimeException("Only one of viewerConfigFilePath and "
                     + "viewerConfigInputStreamProvider can be set");
@@ -179,6 +183,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         this.mViewerConfigReader = viewerConfigReader;
         this.mCacheUpdater = cacheUpdater;
 
+        registerGroupsLocally(groups);
+
         if (android.tracing.Flags.clientSideProtoLogging()) {
             mProtoLogService =
                     IProtoLogService.Stub.asInterface(ServiceManager.getService(PROTOLOG_SERVICE));
@@ -191,6 +197,12 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 if (viewerConfigFilePath != null) {
                     args.setViewerConfigFile(viewerConfigFilePath);
                 }
+
+                final var groupArgs = Stream.of(groups)
+                        .map(group -> new ProtoLogService.RegisterClientArgs.GroupConfig(
+                                group.name(), group.isLogToLogcat()))
+                        .toArray(ProtoLogService.RegisterClientArgs.GroupConfig[]::new);
+                args.setGroups(groupArgs);
 
                 mProtoLogService.registerClient(this, args);
             } catch (RemoteException e) {
@@ -294,19 +306,22 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 || group.isLogToLogcat();
     }
 
-    @Override
-    public void registerGroups(IProtoLogGroup... protoLogGroups) {
+    private void registerGroupsLocally(@NonNull IProtoLogGroup[] protoLogGroups) {
+        final var groupsLoggingToLogcat = new ArrayList<String>();
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
             mLogGroups.put(protoLogGroup.name(), protoLogGroup);
+
+            if (protoLogGroup.isLogToLogcat()) {
+                groupsLoggingToLogcat.add(protoLogGroup.name());
+            }
         }
 
-        final String[] groupsLoggingToLogcat = Arrays.stream(protoLogGroups)
-                .filter(IProtoLogGroup::isLogToLogcat)
-                .map(IProtoLogGroup::name)
-                .toArray(String[]::new);
-
         if (mViewerConfigReader != null) {
-            mViewerConfigReader.loadViewerConfig(groupsLoggingToLogcat);
+            // Load in background to avoid delay in boot process.
+            // The caveat is that any log message that is also logged to logcat will not be
+            // successfully decoded until this completes.
+            mBackgroundLoggingService.execute(() -> mViewerConfigReader
+                    .loadViewerConfig(groupsLoggingToLogcat.toArray(new String[0])));
         }
     }
 

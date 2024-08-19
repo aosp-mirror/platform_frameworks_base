@@ -16,6 +16,8 @@
 
 package com.android.server.rollback;
 
+import static android.content.pm.Flags.provideInfoOfApkInApex;
+
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,6 +25,7 @@ import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -230,7 +233,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
 
     @Override
-    public String getName() {
+    public String getUniqueIdentifier() {
         return NAME;
     }
 
@@ -486,19 +489,40 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
      */
     @AnyThread
     private boolean isModule(String packageName) {
-        // Check if the package is an APK inside an APEX. If it is, use the parent APEX package when
-        // querying PackageManager.
-        String apexPackageName = mApexManager.getActiveApexPackageNameContainingPackage(
-                packageName);
-        if (apexPackageName != null) {
-            packageName = apexPackageName;
-        }
-
         PackageManager pm = mContext.getPackageManager();
-        try {
-            return pm.getModuleInfo(packageName, 0) != null;
-        } catch (PackageManager.NameNotFoundException ignore) {
-            return false;
+
+        if (Flags.refactorCrashrecovery() && provideInfoOfApkInApex()) {
+            // Check if the package is listed among the system modules.
+            boolean isApex = false;
+            try {
+                isApex = (pm.getModuleInfo(packageName, 0 /* flags */) != null);
+            } catch (PackageManager.NameNotFoundException e) {
+                //pass
+            }
+
+            // Check if the package is an APK inside an APEX.
+            boolean isApkInApex = false;
+            try {
+                final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
+                isApkInApex = (pkg.getApexPackageName() != null);
+            } catch (PackageManager.NameNotFoundException e) {
+                // pass
+            }
+            return isApex || isApkInApex;
+        } else {
+            // Check if the package is an APK inside an APEX. If it is, use the parent APEX package
+            // when querying PackageManager.
+            String apexPackageName = mApexManager.getActiveApexPackageNameContainingPackage(
+                    packageName);
+            if (apexPackageName != null) {
+                packageName = apexPackageName;
+            }
+
+            try {
+                return pm.getModuleInfo(packageName, 0) != null;
+            } catch (PackageManager.NameNotFoundException ignore) {
+                return false;
+            }
         }
     }
 

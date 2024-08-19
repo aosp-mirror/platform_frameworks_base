@@ -43,7 +43,6 @@ import android.tools.traces.protolog.ProtoLogTrace;
 import android.tracing.perfetto.DataSource;
 import android.util.proto.ProtoInputStream;
 
-import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
@@ -73,7 +72,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test class for {@link ProtoLogImpl}.
  */
 @SuppressWarnings("ConstantConditions")
-@SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
 public class PerfettoProtoLogImplTest {
@@ -166,8 +164,7 @@ public class PerfettoProtoLogImplTest {
         mReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
         mProtoLog = new PerfettoProtoLogImpl(
                 viewerConfigInputStreamProvider, mReader,
-                () -> mCacheUpdater.run());
-        mProtoLog.registerGroups(TestProtoLogGroup.values());
+                () -> mCacheUpdater.run(), TestProtoLogGroup.values());
     }
 
     @After

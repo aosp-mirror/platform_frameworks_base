@@ -408,6 +408,10 @@ class TransitionController {
      */
     @Nullable
     Transition getCollectingTransition() {
+        if (mCollectingTransition != null && !mCollectingTransition.isCollecting()) {
+            Slog.wtfStack(TAG, "Collecting Transition (#" + mCollectingTransition.getSyncId()
+                    + ") is not collecting. state=" + mCollectingTransition.getState());
+        }
         return mCollectingTransition;
     }
 

@@ -38,7 +38,7 @@ private val actionAccessibilityLabelDisconnect =
     R.string.accessibility_quick_settings_bluetooth_device_tap_to_disconnect
 
 /** Factories to create different types of Bluetooth device items from CachedBluetoothDevice. */
-internal abstract class DeviceItemFactory {
+abstract class DeviceItemFactory {
     abstract fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
@@ -136,7 +136,7 @@ internal class ActiveHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
     }
 }
 
-internal open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
+open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,

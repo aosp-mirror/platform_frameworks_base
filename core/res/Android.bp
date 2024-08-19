@@ -165,6 +165,7 @@ android_app {
         "com.android.window.flags.window-aconfig",
         "android.permission.flags-aconfig",
         "android.os.flags-aconfig",
+        "android.os.vibrator.flags-aconfig",
         "android.media.tv.flags-aconfig",
     ],
 }
