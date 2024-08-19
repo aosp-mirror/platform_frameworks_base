@@ -695,11 +695,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             addRow(AudioManager.STREAM_MUSIC,
                     R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true, true);
             if (!AudioSystem.isSingleVolume(mContext)) {
-
                 addRow(AudioManager.STREAM_RING, R.drawable.ic_ring_volume,
                         R.drawable.ic_ring_volume_off, true, false);
-
-
+                addRow(AudioManager.STREAM_NOTIFICATION, R.drawable.ic_volume_ringer,
+                        R.drawable.ic_volume_off, true, false);
                 addRow(STREAM_ALARM,
                         R.drawable.ic_alarm, R.drawable.ic_volume_alarm_mute, true, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
@@ -1994,7 +1993,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                                             : R.drawable.ic_volume_media_bt;
             }
         } else if (isStreamMuted(ss)) {
-            iconRes = ss.muted ? R.drawable.ic_volume_media_off : row.iconMuteRes;
+            iconRes = (ss.muted && isTv()) ? R.drawable.ic_volume_media_off : row.iconMuteRes;
         } else {
             iconRes = mShowLowMediaVolumeIcon && ss.level * 2 < (ss.levelMax + ss.levelMin)
                       ? R.drawable.ic_volume_media_low : row.iconRes;
