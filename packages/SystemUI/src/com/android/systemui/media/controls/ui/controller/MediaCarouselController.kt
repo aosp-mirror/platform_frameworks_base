@@ -49,7 +49,6 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -105,12 +104,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -331,6 +332,11 @@ constructor(
 
     private val controllerById = mutableMapOf<String, MediaViewController>()
     private val commonViewModels = mutableListOf<MediaCommonViewModel>()
+
+    private val isOnGone =
+        keyguardTransitionInteractor
+            .isFinishedIn(Scenes.Gone, GONE)
+            .stateIn(applicationScope, SharingStarted.Eagerly, true)
 
     init {
         dumpManager.registerDumpable(TAG, this)
@@ -913,9 +919,7 @@ constructor(
             if (SceneContainerFlag.isEnabled) {
                 !deviceEntryInteractor.isDeviceEntered.value
             } else {
-                KeyguardState.lockscreenVisibleInState(
-                    keyguardTransitionInteractor.getFinishedState()
-                )
+                !isOnGone.value
             }
         return !allowMediaPlayerOnLockScreen && isOnLockscreen
     }

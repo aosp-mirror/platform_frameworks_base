@@ -134,16 +134,12 @@ constructor(
                 .filterRelevantKeyguardState()
                 .sampleCombine(
                     internalTransitionInteractor.currentTransitionInfoInternal,
-                    transitionInteractor.finishedKeyguardState,
+                    transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
                     keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
                 .collect {
-                    (
-                        isAbleToDream,
-                        transitionInfo,
-                        finishedKeyguardState,
-                        isActiveDreamLockscreenHosted) ->
-                    val isOnLockscreen = finishedKeyguardState == KeyguardState.LOCKSCREEN
+                    (isAbleToDream, transitionInfo, isOnLockscreen, isActiveDreamLockscreenHosted)
+                    ->
                     val isTransitionInterruptible =
                         transitionInfo.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(transitionInfo.from)

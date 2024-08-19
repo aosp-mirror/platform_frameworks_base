@@ -90,29 +90,6 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun finishedKeyguardStateTests() =
-        testScope.runTest {
-            val finishedSteps by collectValues(underTest.finishedKeyguardState)
-            runCurrent()
-            val steps = mutableListOf<TransitionStep>()
-
-            steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0f, STARTED))
-            steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 0.5f, RUNNING))
-            steps.add(TransitionStep(AOD, PRIMARY_BOUNCER, 1f, FINISHED))
-            steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0f, STARTED))
-            steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 0.9f, RUNNING))
-            steps.add(TransitionStep(PRIMARY_BOUNCER, AOD, 1f, FINISHED))
-            steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
-
-            steps.forEach {
-                repository.sendTransitionStep(it)
-                runCurrent()
-            }
-
-            assertThat(finishedSteps).isEqualTo(listOf(LOCKSCREEN, PRIMARY_BOUNCER, AOD))
-        }
-
-    @Test
     fun startedKeyguardTransitionStepTests() =
         testScope.runTest {
             val startedSteps by collectValues(underTest.startedKeyguardTransitionStep)
@@ -1180,95 +1157,6 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                         true,
                     )
                 )
-        }
-
-    @Test
-    fun finishedKeyguardState_emitsAgainIfCancelledAndReversed() =
-        testScope.runTest {
-            val finishedStates by collectValues(underTest.finishedKeyguardState)
-
-            // We default FINISHED in LOCKSCREEN.
-            assertEquals(listOf(LOCKSCREEN), finishedStates)
-
-            sendSteps(
-                TransitionStep(LOCKSCREEN, AOD, 0f, STARTED),
-                TransitionStep(LOCKSCREEN, AOD, 0.5f, RUNNING),
-                TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED),
-            )
-
-            // We're FINISHED in AOD.
-            assertEquals(
-                listOf(
-                    LOCKSCREEN,
-                    AOD,
-                ),
-                finishedStates
-            )
-
-            // Transition back to LOCKSCREEN.
-            sendSteps(
-                TransitionStep(AOD, LOCKSCREEN, 0f, STARTED),
-                TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING),
-                TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED),
-            )
-
-            // We're FINISHED in LOCKSCREEN.
-            assertEquals(
-                listOf(
-                    LOCKSCREEN,
-                    AOD,
-                    LOCKSCREEN,
-                ),
-                finishedStates
-            )
-
-            sendSteps(
-                TransitionStep(LOCKSCREEN, GONE, 0f, STARTED),
-                TransitionStep(LOCKSCREEN, GONE, 0.5f, RUNNING),
-            )
-
-            // We've STARTED a transition to GONE but not yet finished it so we're still FINISHED in
-            // LOCKSCREEN.
-            assertEquals(
-                listOf(
-                    LOCKSCREEN,
-                    AOD,
-                    LOCKSCREEN,
-                ),
-                finishedStates
-            )
-
-            sendSteps(
-                TransitionStep(LOCKSCREEN, GONE, 0.6f, CANCELED),
-            )
-
-            // We've CANCELED a transition to GONE, we're still FINISHED in LOCKSCREEN.
-            assertEquals(
-                listOf(
-                    LOCKSCREEN,
-                    AOD,
-                    LOCKSCREEN,
-                ),
-                finishedStates
-            )
-
-            sendSteps(
-                TransitionStep(GONE, LOCKSCREEN, 0.6f, STARTED),
-                TransitionStep(GONE, LOCKSCREEN, 0.9f, RUNNING),
-                TransitionStep(GONE, LOCKSCREEN, 1f, FINISHED),
-            )
-
-            // Expect another emission of LOCKSCREEN, as we have FINISHED a second transition to
-            // LOCKSCREEN after the cancellation.
-            assertEquals(
-                listOf(
-                    LOCKSCREEN,
-                    AOD,
-                    LOCKSCREEN,
-                    LOCKSCREEN,
-                ),
-                finishedStates
-            )
         }
 
     @Test

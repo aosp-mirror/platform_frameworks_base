@@ -80,17 +80,6 @@ sealed class TransitionInteractor(
                     " $fromState. This should never happen - check currentTransitionInfoInternal" +
                     " or use filterRelevantKeyguardState before starting transitions."
             )
-
-            if (fromState == transitionInteractor.finishedKeyguardState.replayCache.last()) {
-                Log.e(
-                    name,
-                    "This transition would not have been ignored prior to ag/26681239, since we " +
-                        "are FINISHED in $fromState (but have since started another transition). " +
-                        "If ignoring this transition has caused a regression, fix it by ensuring " +
-                        "that transitions are exclusively started from the most recently started " +
-                        "state."
-                )
-            }
             return null
         }
 
