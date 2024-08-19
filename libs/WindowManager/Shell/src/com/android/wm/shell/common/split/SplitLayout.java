@@ -27,6 +27,8 @@ import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
 import static com.android.wm.shell.shared.animation.Interpolators.DIM_INTERPOLATOR;
+import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
+import static com.android.wm.shell.shared.animation.Interpolators.LINEAR;
 import static com.android.wm.shell.shared.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
@@ -813,7 +815,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         float growPortion = 1 - shrinkPortion;
 
         ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
-        animator.setInterpolator(Interpolators.EMPHASIZED);
+        // Set the base animation to proceed linearly. Each component of the animation (movement,
+        // shrinking, growing) overrides it with a different interpolator later.
+        animator.setInterpolator(LINEAR);
         animator.addUpdateListener(animation -> {
             if (leash == null) return;
             if (roundCorners) {
@@ -822,10 +826,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             }
 
             final float progress = (float) animation.getAnimatedValue();
-            float instantaneousX = tempStart.left + progress * diffX;
-            float instantaneousY = tempStart.top + progress * diffY;
-            int width = (int) (tempStart.width() + progress * diffWidth);
-            int height = (int) (tempStart.height() + progress * diffHeight);
+            final float moveProgress = EMPHASIZED.getInterpolation(progress);
+            float instantaneousX = tempStart.left + moveProgress * diffX;
+            float instantaneousY = tempStart.top + moveProgress * diffY;
+            int width = (int) (tempStart.width() + moveProgress * diffWidth);
+            int height = (int) (tempStart.height() + moveProgress * diffHeight);
 
             if (isGoingBehind) {
                 float shrinkDiffX; // the position adjustments needed for this frame
@@ -897,8 +902,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                             taskInfo, mTempRect, t, isGoingBehind, leash, 0, 0);
                 }
             } else {
-                final int diffOffsetX = (int) (progress * offsetX);
-                final int diffOffsetY = (int) (progress * offsetY);
+                final int diffOffsetX = (int) (moveProgress * offsetX);
+                final int diffOffsetY = (int) (moveProgress * offsetY);
                 t.setPosition(leash, instantaneousX + diffOffsetX, instantaneousY + diffOffsetY);
                 mTempRect.set(0, 0, width, height);
                 mTempRect.offsetTo(-diffOffsetX, -diffOffsetY);
