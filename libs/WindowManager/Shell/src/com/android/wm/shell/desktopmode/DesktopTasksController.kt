@@ -150,12 +150,6 @@ class DesktopTasksController(
             visualIndicator?.releaseVisualIndicator(t)
             visualIndicator = null
         }
-    private val taskVisibilityListener =
-        object : VisibleTasksListener {
-            override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
-                launchAdjacentController.launchAdjacentEnabled = visibleTasksCount == 0
-            }
-        }
     private val dragToDesktopStateListener =
         object : DragToDesktopStateListener {
             override fun onCommitToDesktopAnimationStart(tx: SurfaceControl.Transaction) {
@@ -201,7 +195,6 @@ class DesktopTasksController(
             this
         )
         transitions.addHandler(this)
-        taskRepository.addVisibleTasksListener(taskVisibilityListener, mainExecutor)
         dragToDesktopTransitionHandler.dragToDesktopStateListener = dragToDesktopStateListener
         recentsTransitionHandler.addTransitionStateListener(
             object : RecentsTransitionStateListener {
