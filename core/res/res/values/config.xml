@@ -3081,6 +3081,11 @@
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
+    <!-- Whether to boot system with the headless system user, i.e. user 0. If set to true,
+         system will be booted with the headless system user, or user 0. It has no effect if device
+         is not in Headless System User Mode (HSUM). -->
+    <bool name="config_bootToHeadlessSystemUser">false</bool>
+
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
          with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
