@@ -64,7 +64,6 @@ import android.app.AppOpsManager;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
-import android.companion.virtual.flags.Flags;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
@@ -1633,8 +1632,7 @@ public final class DisplayManagerService extends SystemService {
                 && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
             // Only a valid media projection or a virtual device can create a mirror virtual
             // display.
-            if (!canProjectVideo(projection)
-                    && !isMirroringSupportedByVirtualDevice(virtualDevice)) {
+            if (!canProjectVideo(projection) && virtualDevice == null) {
                 throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
                         + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
                         + "MediaProjection token in order to create a screen sharing virtual "
@@ -1894,10 +1892,6 @@ public final class DisplayManagerService extends SystemService {
         mDisplayDeviceRepo.onDisplayDeviceEvent(device,
                 DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
         return -1;
-    }
-
-    private static boolean isMirroringSupportedByVirtualDevice(IVirtualDevice virtualDevice) {
-        return Flags.interactiveScreenMirror() && virtualDevice != null;
     }
 
     private void resizeVirtualDisplayInternal(IBinder appToken,
