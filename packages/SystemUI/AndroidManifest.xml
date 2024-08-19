@@ -376,6 +376,10 @@
     <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
     <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
 
+    <!-- To be able to intercept meta key events, might need to be removed once b/358569822
+         is ready -->
+    <uses-permission android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
