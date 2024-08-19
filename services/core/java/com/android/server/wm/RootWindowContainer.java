@@ -1003,6 +1003,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // complete configuration.
                 continue;
             }
+            win.updateSurfacePositionIfNeeded();
             win.reportResized();
             mWmService.mResizingWindows.remove(i);
         }
