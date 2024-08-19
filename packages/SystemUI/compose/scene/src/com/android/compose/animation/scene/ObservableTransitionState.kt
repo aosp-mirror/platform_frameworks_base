@@ -74,6 +74,12 @@ sealed interface ObservableTransitionState {
          * the transition completes/settles.
          */
         val isUserInputOngoing: Flow<Boolean>,
+
+        /** Current progress of the preview part of the transition */
+        val previewProgress: Flow<Float> = flowOf(0f),
+
+        /** Whether the transition is currently in the preview stage or not */
+        val isInPreviewStage: Flow<Boolean> = flowOf(false),
     ) : ObservableTransitionState {
         override fun toString(): String =
             """Transition
@@ -113,6 +119,8 @@ fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTrans
                         progress = snapshotFlow { state.progress },
                         isInitiatedByUserInput = state.isInitiatedByUserInput,
                         isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },
+                        previewProgress = snapshotFlow { state.previewProgress },
+                        isInPreviewStage = snapshotFlow { state.isInPreviewStage }
                     )
                 }
             }
