@@ -541,6 +541,16 @@ flag {
 }
 
 flag {
+    name: "clipboard_image_timeout"
+    namespace: "systemui"
+    description: "Wait for clipboard image to load before showing UI"
+    bug: "359864629"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "screenshot_action_dismiss_system_windows"
     namespace: "systemui"
     description: "Dismiss existing system windows when starting action from screenshot UI"
