@@ -20,7 +20,7 @@ import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.zipEntryNameToClassName
 import com.android.hoststubgen.executableName
 import com.android.hoststubgen.log
-import com.android.platform.test.ravenwood.ravenizer.adapter.TestRunnerRewritingAdapter
+import com.android.platform.test.ravenwood.ravenizer.adapter.RunnerRewritingAdapter
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -177,7 +177,8 @@ class Ravenizer(val options: RavenizerOptions) {
      * Whether a class needs to be processed. This must be kept in sync with [processSingleClass].
      */
     private fun shouldProcessClass(classes: ClassNodes, classInternalName: String): Boolean {
-        return TestRunnerRewritingAdapter.shouldProcess(classes, classInternalName)
+        return !classInternalName.shouldByBypassed()
+                && RunnerRewritingAdapter.shouldProcess(classes, classInternalName)
     }
 
     private fun processSingleClass(
@@ -191,6 +192,9 @@ class Ravenizer(val options: RavenizerOptions) {
 
         lateinit var data: ByteArray
         stats.totalConversionTime += log.vTime("Modify ${entry.name}") {
+
+            val classInternalName = zipEntryNameToClassName(entry.name)
+                ?: throw RavenizerInternalException("Unexpected zip entry name: ${entry.name}")
             val flags = ClassWriter.COMPUTE_MAXS
             val cw = ClassWriter(flags)
             var outVisitor: ClassVisitor = cw
@@ -201,7 +205,8 @@ class Ravenizer(val options: RavenizerOptions) {
             }
 
             // This must be kept in sync with shouldProcessClass.
-            outVisitor = TestRunnerRewritingAdapter(allClasses, outVisitor)
+            outVisitor = RunnerRewritingAdapter.maybeApply(
+                classInternalName, allClasses, outVisitor)
 
             cr.accept(outVisitor, ClassReader.EXPAND_FRAMES)
 

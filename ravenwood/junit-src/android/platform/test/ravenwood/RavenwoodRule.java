@@ -60,10 +60,12 @@ public class RavenwoodRule implements TestRule {
 
     /**
      * When probing is enabled, all tests will be unconditionally run on Ravenwood to detect
-     * cases where a test is able to pass despite being marked as {@code IgnoreUnderRavenwood}.
+     * cases where a test is able to pass despite being marked as {@link DisabledOnRavenwood}.
      *
      * This is typically helpful for internal maintainers discovering tests that had previously
      * been ignored, but now have enough Ravenwood-supported functionality to be enabled.
+     *
+     * TODO: Rename it to a more descriptive name.
      */
     static final boolean ENABLE_PROBE_IGNORED = "1".equals(
             System.getenv("RAVENWOOD_RUN_DISABLED_TESTS"));
@@ -281,7 +283,7 @@ public class RavenwoodRule implements TestRule {
      * annotation, and an {@link EnabledOnRavenwood} annotation always takes precedence over
      * an {@link DisabledOnRavenwood} annotation.
      */
-    static boolean shouldEnableOnRavenwood(Description description) {
+    public static boolean shouldEnableOnRavenwood(Description description) {
         // First, consult any method-level annotations
         if (description.isTest()) {
             // Stopgap for http://g/ravenwood/EPAD-N5ntxM
@@ -300,20 +302,21 @@ public class RavenwoodRule implements TestRule {
         }
 
         // Otherwise, consult any class-level annotations
-        final var clazz = description.getTestClass();
+        return shouldRunCassOnRavenwood(description.getTestClass());
+    }
+
+    public static boolean shouldRunCassOnRavenwood(Class<?> clazz) {
         if (clazz != null) {
-            if (description.getTestClass().getAnnotation(EnabledOnRavenwood.class) != null) {
+            if (clazz.getAnnotation(EnabledOnRavenwood.class) != null) {
                 return true;
             }
-            if (description.getTestClass().getAnnotation(DisabledOnRavenwood.class) != null) {
+            if (clazz.getAnnotation(DisabledOnRavenwood.class) != null) {
                 return false;
             }
-            if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
+            if (clazz.getAnnotation(IgnoreUnderRavenwood.class) != null) {
                 return false;
             }
         }
-
-        // When no annotations have been requested, assume test should be included
         return true;
     }
 
@@ -364,6 +367,7 @@ public class RavenwoodRule implements TestRule {
                 commonPrologue(base, description);
                 try {
                     base.evaluate();
+
                     RavenwoodRuleImpl.logTestRunner("finished", description);
                 } catch (Throwable t) {
                     RavenwoodRuleImpl.logTestRunner("failed", description);
