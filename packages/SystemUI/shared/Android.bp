@@ -48,6 +48,7 @@ android_library {
         "src/**/*.kt",
         "src/**/*.aidl",
         ":wm_shell-aidls",
+        ":wm_shell-shared-aidls",
         ":wm_shell_util-sources",
     ],
     static_libs: [
