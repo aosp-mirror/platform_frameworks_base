@@ -1701,7 +1701,7 @@ class SyntheticPasswordManager {
                     .setGatekeeperHAT(response.getPayload()).build();
             if (response.getShouldReEnroll()) {
                 try {
-                    response = gatekeeper.enroll(userId, spHandle, spHandle,
+                    response = gatekeeper.enroll(userId, spHandle, gatekeeperPassword,
                             gatekeeperPassword);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to invoke gatekeeper.enroll", e);
