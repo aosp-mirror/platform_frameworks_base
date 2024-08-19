@@ -89,8 +89,9 @@ constructor(
                     ModeTileViewModel(
                         id = mode.id,
                         icon = zenModeInteractor.getModeIcon(mode, context),
-                        text = mode.rule.name,
+                        text = mode.name,
                         subtext = getTileSubtext(mode),
+                        contentDescription = getTileContentDescription(mode),
                         enabled = mode.isActive,
                         onClick = {
                             if (!mode.rule.isEnabled) {
@@ -145,6 +146,25 @@ constructor(
         } else {
             modeSubtext ?: context.getString(R.string.zen_mode_off)
         }
+    }
+
+    private fun getTileContentDescription(mode: ZenMode): String {
+        return buildList {
+                add(mode.name)
+                if (!mode.rule.isEnabled) {
+                    add(context.getString(R.string.zen_mode_set_up))
+                } else if (!mode.rule.isManualInvocationAllowed && !mode.isActive) {
+                    add(context.getString(R.string.zen_mode_no_manual_invocation))
+                } else {
+                    add(
+                        context.getString(
+                            if (mode.isActive) R.string.zen_mode_on else R.string.zen_mode_off
+                        )
+                    )
+                    mode.getDynamicDescription(context)?.let { add(it) }
+                }
+            }
+            .joinToString(separator = "\n")
     }
 
     private fun makeZenModeDialog(): Dialog {
