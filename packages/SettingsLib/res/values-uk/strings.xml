@@ -559,7 +559,7 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Не вдається підключитися. Перезавантажте пристрій."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Дротовий аудіопристрій"</string>
     <string name="help_label" msgid="3528360748637781274">"Довідка й відгуки"</string>
-    <string name="storage_category" msgid="2287342585424631813">"Пам\'ять"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Сховище"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Спільні дані"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Переглянути й змінити спільні дані"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Немає спільних даних для цього користувача."</string>
