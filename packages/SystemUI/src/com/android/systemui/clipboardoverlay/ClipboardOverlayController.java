@@ -575,6 +575,10 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                // check again after animation to see if we should still be minimized
+                if (mIsMinimized && !shouldShowMinimized(mWindow.getWindowInsets())) {
+                    animateFromMinimized();
+                }
                 if (mOnUiUpdate != null) {
                     mOnUiUpdate.run();
                 }
