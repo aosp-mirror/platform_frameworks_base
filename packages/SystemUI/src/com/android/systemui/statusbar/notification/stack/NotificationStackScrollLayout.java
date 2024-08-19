@@ -1244,6 +1244,7 @@ public class NotificationStackScrollLayout
     @Override
     public void setHeadsUpTop(float headsUpTop) {
         mAmbientState.setHeadsUpTop(headsUpTop);
+        requestChildrenUpdate();
     }
 
     @Override
@@ -2531,6 +2532,11 @@ public class NotificationStackScrollLayout
     @Override
     public int getTopHeadsUpHeight() {
         return getTopHeadsUpIntrinsicHeight();
+    }
+
+    @Override
+    public int getHeadsUpInset() {
+        return mHeadsUpInset;
     }
 
     /**
