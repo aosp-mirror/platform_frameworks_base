@@ -21,14 +21,28 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /** The edge of a [SceneTransitionLayout]. */
-enum class Edge : SwipeSource {
-    Left,
-    Right,
-    Top,
-    Bottom,
+enum class Edge(private val resolveEdge: (LayoutDirection) -> Resolved) : SwipeSource {
+    Top(resolveEdge = { Resolved.Top }),
+    Bottom(resolveEdge = { Resolved.Bottom }),
+    Left(resolveEdge = { Resolved.Left }),
+    Right(resolveEdge = { Resolved.Right }),
+    Start(resolveEdge = { if (it == LayoutDirection.Ltr) Resolved.Left else Resolved.Right }),
+    End(resolveEdge = { if (it == LayoutDirection.Ltr) Resolved.Right else Resolved.Left });
+
+    override fun resolve(layoutDirection: LayoutDirection): Resolved {
+        return resolveEdge(layoutDirection)
+    }
+
+    enum class Resolved : SwipeSource.Resolved {
+        Left,
+        Right,
+        Top,
+        Bottom,
+    }
 }
 
 val DefaultEdgeDetector = FixedSizeEdgeDetector(40.dp)

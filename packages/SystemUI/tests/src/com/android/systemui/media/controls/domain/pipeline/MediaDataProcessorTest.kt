@@ -242,7 +242,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
         mediaCarouselInteractor =
             MediaCarouselInteractor(
                 applicationScope = testScope.backgroundScope,
-                mediaDataRepository = mediaDataRepository,
                 mediaDataProcessor = mediaDataProcessor,
                 mediaTimeoutListener = mediaTimeoutListener,
                 mediaResumeListener = mediaResumeListener,

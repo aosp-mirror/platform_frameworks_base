@@ -31,6 +31,7 @@ import com.android.systemui.inputmethod.data.model.InputMethodModel
 import com.android.systemui.inputmethod.data.repository.fakeInputMethodRepository
 import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -44,7 +45,6 @@ import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -68,12 +68,8 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     private val isInputEnabled = MutableStateFlow(true)
 
     private val underTest =
-        PasswordBouncerViewModel(
-            viewModelScope = testScope.backgroundScope,
-            isInputEnabled = isInputEnabled.asStateFlow(),
-            interactor = bouncerInteractor,
-            inputMethodInteractor = inputMethodInteractor,
-            selectedUserInteractor = selectedUserInteractor,
+        kosmos.passwordBouncerViewModelFactory.create(
+            isInputEnabled = isInputEnabled,
             onIntentionalUserInput = {},
         )
 
@@ -81,6 +77,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     fun setUp() {
         overrideResource(R.string.keyguard_enter_your_password, ENTER_YOUR_PASSWORD)
         overrideResource(R.string.kg_wrong_password, WRONG_PASSWORD)
+        underTest.activateIn(testScope)
     }
 
     @Test
@@ -372,6 +369,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         nonAuxiliarySubtypes: Int,
     ): InputMethodModel {
         return InputMethodModel(
+            userId = UUID.randomUUID().mostSignificantBits.toInt(),
             imeId = UUID.randomUUID().toString(),
             subtypes =
                 List(auxiliarySubtypes + nonAuxiliarySubtypes) {

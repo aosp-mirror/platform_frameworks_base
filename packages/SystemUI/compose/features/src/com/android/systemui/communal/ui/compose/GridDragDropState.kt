@@ -16,10 +16,9 @@
 
 package com.android.systemui.communal.ui.compose
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
@@ -34,14 +33,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
@@ -50,6 +48,9 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+
+private fun Float.directional(origin: LayoutDirection, current: LayoutDirection): Float =
+    if (origin == current) this else -this
 
 @Composable
 fun rememberGridDragDropState(
@@ -107,23 +108,40 @@ internal constructor(
         get() =
             draggingItemLayoutInfo?.let { item ->
                 draggingItemInitialOffset + draggingItemDraggedDelta - item.offset.toOffset()
-            }
-                ?: Offset.Zero
+            } ?: Offset.Zero
 
     private val draggingItemLayoutInfo: LazyGridItemInfo?
         get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == draggingItemIndex }
 
-    internal fun onDragStart(offset: Offset, contentOffset: Offset) {
+    /**
+     * Called when dragging is initiated.
+     *
+     * @return {@code True} if dragging a grid item, {@code False} otherwise.
+     */
+    internal fun onDragStart(
+        offset: Offset,
+        screenWidth: Int,
+        layoutDirection: LayoutDirection,
+        contentOffset: Offset
+    ): Boolean {
+        val normalizedOffset =
+            Offset(
+                if (layoutDirection == LayoutDirection.Ltr) offset.x else screenWidth - offset.x,
+                offset.y
+            )
         state.layoutInfo.visibleItemsInfo
             .filter { item -> contentListState.isItemEditable(item.index) }
             // grid item offset is based off grid content container so we need to deduct
             // before content padding from the initial pointer position
-            .firstItemAtOffset(offset - contentOffset)
+            .firstItemAtOffset(normalizedOffset - contentOffset)
             ?.apply {
-                dragStartPointerOffset = offset - this.offset.toOffset()
+                dragStartPointerOffset = normalizedOffset - this.offset.toOffset()
                 draggingItemIndex = index
                 draggingItemInitialOffset = this.offset.toOffset()
+                return true
             }
+
+        return false
     }
 
     internal fun onDragInterrupted() {
@@ -142,8 +160,10 @@ internal constructor(
         dragStartPointerOffset = Offset.Zero
     }
 
-    internal fun onDrag(offset: Offset) {
-        draggingItemDraggedDelta += offset
+    internal fun onDrag(offset: Offset, layoutDirection: LayoutDirection) {
+        // Adjust offset to match the layout direction
+        draggingItemDraggedDelta +=
+            Offset(offset.x.directional(LayoutDirection.Ltr, layoutDirection), offset.y)
 
         val draggingItem = draggingItemLayoutInfo ?: return
         val startOffset = draggingItem.offset.toOffset() + draggingItemOffset
@@ -210,6 +230,8 @@ internal constructor(
 
 fun Modifier.dragContainer(
     dragDropState: GridDragDropState,
+    layoutDirection: LayoutDirection,
+    screenWidth: Int,
     contentOffset: Offset,
     viewModel: BaseCommunalViewModel,
 ): Modifier {
@@ -218,11 +240,19 @@ fun Modifier.dragContainer(
             detectDragGesturesAfterLongPress(
                 onDrag = { change, offset ->
                     change.consume()
-                    dragDropState.onDrag(offset = offset)
+                    dragDropState.onDrag(offset, layoutDirection)
                 },
                 onDragStart = { offset ->
-                    dragDropState.onDragStart(offset, contentOffset)
-                    viewModel.onReorderWidgetStart()
+                    if (
+                        dragDropState.onDragStart(
+                            offset,
+                            screenWidth,
+                            layoutDirection,
+                            contentOffset
+                        )
+                    ) {
+                        viewModel.onReorderWidgetStart()
+                    }
                 },
                 onDragEnd = {
                     dragDropState.onDragInterrupted()
@@ -238,7 +268,6 @@ fun Modifier.dragContainer(
 }
 
 /** Wrap LazyGrid item with additional modifier needed for drag and drop. */
-@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalFoundationApi
 @Composable
 fun LazyGridItemScope.DraggableItem(
@@ -259,33 +288,31 @@ fun LazyGridItemScope.DraggableItem(
             targetValue = if (dragDropState.isDraggingToRemove) 0.5f else 1f,
             label = "DraggableItemAlpha"
         )
+    val direction = LocalLayoutDirection.current
     val draggingModifier =
         if (dragging) {
             Modifier.graphicsLayer {
-                translationX = dragDropState.draggingItemOffset.x
+                translationX =
+                    dragDropState.draggingItemOffset.x.directional(LayoutDirection.Ltr, direction)
                 translationY = dragDropState.draggingItemOffset.y
                 alpha = itemAlpha
             }
         } else {
-            Modifier.animateItemPlacement()
+            Modifier.animateItem()
         }
 
+    // Animate the highlight alpha manually as alpha modifier (and AnimatedVisibility) clips the
+    // widget to bounds, which cuts off the highlight as we are drawing outside the widget bounds.
+    val alpha by
+        animateFloatAsState(
+            targetValue =
+                if ((dragging || selected) && !dragDropState.isDraggingToRemove) 1f else 0f,
+            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            label = "Widget outline alpha"
+        )
+
     Box(modifier) {
+        HighlightedItem(Modifier.matchParentSize(), alpha = alpha)
         Box(draggingModifier) { content(dragging) }
-        AnimatedVisibility(
-            modifier =
-                Modifier.matchParentSize()
-                    // Avoid taking focus away from the content when using explore-by-touch with
-                    // accessibility tools.
-                    .clearAndSetSemantics {}
-                    // Do not consume motion events in the highlighted item and pass them down to
-                    // the content.
-                    .pointerInteropFilter { false },
-            visible = (dragging || selected) && !dragDropState.isDraggingToRemove,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            HighlightedItem(Modifier.matchParentSize())
-        }
     }
 }

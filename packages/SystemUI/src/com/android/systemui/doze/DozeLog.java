@@ -253,9 +253,11 @@ public class DozeLog implements Dumpable {
     /**
      * Appends display state changed event to the logs
      * @param displayState new DozeMachine state
+     * @param afterRequest whether the request has successfully been sent else false for it's
+     *                        about to be requested
      */
-    public void traceDisplayState(int displayState) {
-        mLogger.logDisplayStateChanged(displayState);
+    public void traceDisplayState(int displayState, boolean afterRequest) {
+        mLogger.logDisplayStateChanged(displayState, afterRequest);
     }
 
     /**
@@ -401,10 +403,23 @@ public class DozeLog implements Dumpable {
 
     /**
      * Appends new AOD screen brightness to logs
-     * @param brightness display brightness setting
+     * @param brightness display brightness setting between 1 and 255
+     * @param afterRequest whether the request has successfully been sent else false for it's
+     *                        about to be requested
      */
-    public void traceDozeScreenBrightness(int brightness) {
-        mLogger.logDozeScreenBrightness(brightness);
+    public void traceDozeScreenBrightness(int brightness, boolean afterRequest) {
+        mLogger.logDozeScreenBrightness(brightness, afterRequest);
+    }
+
+    /**
+     * Appends new AOD screen brightness to logs
+     * @param brightness display brightness setting between {@link PowerManager#BRIGHTNESS_MIN} and
+     *                   {@link PowerManager#BRIGHTNESS_MAX}
+     * @param afterRequest whether the request has successfully been sent else false for it's
+     *                        about to be requested
+     */
+    public void traceDozeScreenBrightnessFloat(float brightness, boolean afterRequest) {
+        mLogger.logDozeScreenBrightnessFloat(brightness, afterRequest);
     }
 
     /**

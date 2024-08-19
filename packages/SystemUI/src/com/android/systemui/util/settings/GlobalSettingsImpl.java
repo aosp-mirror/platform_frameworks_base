@@ -23,35 +23,50 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
+import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import javax.inject.Inject;
 
 // use UserHandle.USER_SYSTEM everywhere
 @SuppressLint("StaticSettingsProvider")
 class GlobalSettingsImpl implements GlobalSettings {
     private final ContentResolver mContentResolver;
+    private final CoroutineDispatcher mBgDispatcher;
 
     @Inject
-    GlobalSettingsImpl(ContentResolver contentResolver) {
+    GlobalSettingsImpl(ContentResolver contentResolver,
+            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
+        mBgDispatcher = bgDispatcher;
     }
 
+    @NonNull
     @Override
     public ContentResolver getContentResolver() {
         return mContentResolver;
     }
 
+    @NonNull
     @Override
-    public Uri getUriFor(String name) {
+    public Uri getUriFor(@NonNull String name) {
         return Settings.Global.getUriFor(name);
     }
 
+    @NonNull
     @Override
-    public String getString(String name) {
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mBgDispatcher;
+    }
+
+    @Override
+    public String getString(@NonNull String name) {
         return Settings.Global.getString(mContentResolver, name);
     }
 
     @Override
-    public boolean putString(String name, String value) {
+    public boolean putString(@NonNull String name, String value) {
         return Settings.Global.putString(mContentResolver, name, value);
     }
 

@@ -101,6 +101,11 @@ public class VirtualDeviceManagerService extends SystemService {
             AssociationRequest.DEVICE_PROFILE_APP_STREAMING,
             AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING);
 
+    /**
+     * A virtual device association id corresponding to no CDM association.
+     */
+    static final int CDM_ASSOCIATION_ID_NONE = 0;
+
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
     private final VirtualDeviceManagerNativeImpl mNativeImpl;
@@ -316,7 +321,9 @@ public class VirtualDeviceManagerService extends SystemService {
 
             for (int i = 0; i < mVirtualDevices.size(); i++) {
                 VirtualDeviceImpl virtualDevice = mVirtualDevices.valueAt(i);
-                if (!activeAssociationIds.contains(virtualDevice.getAssociationId())) {
+                int deviceAssociationId = virtualDevice.getAssociationId();
+                if (deviceAssociationId != CDM_ASSOCIATION_ID_NONE
+                        && !activeAssociationIds.contains(deviceAssociationId)) {
                     virtualDevicesToRemove.add(virtualDevice);
                 }
             }
@@ -422,28 +429,39 @@ public class VirtualDeviceManagerService extends SystemService {
                 @NonNull IVirtualDeviceActivityListener activityListener,
                 @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
             createVirtualDevice_enforcePermission();
-            attributionSource.enforceCallingUid();
-
-            final int callingUid = getCallingUid();
+            Objects.requireNonNull(activityListener);
+            Objects.requireNonNull(soundEffectListener);
             final String packageName = attributionSource.getPackageName();
-            if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
-                throw new SecurityException(
-                        "Package name " + packageName + " does not belong to calling uid "
-                                + callingUid);
-            }
             AssociationInfo associationInfo = getAssociationInfo(packageName, associationId);
             if (associationInfo == null) {
                 throw new IllegalArgumentException("No association with ID " + associationId);
-            }
-            if (!VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES
+            } else if (!VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES
                     .contains(associationInfo.getDeviceProfile())
                     && Flags.persistentDeviceIdApi()) {
                 throw new IllegalArgumentException("Unsupported CDM Association device profile "
                         + associationInfo.getDeviceProfile() + " for virtual device creation.");
             }
+            return createVirtualDevice(token, attributionSource, associationInfo, params,
+                    activityListener, soundEffectListener);
+        }
+
+        private IVirtualDevice createVirtualDevice(
+                IBinder token,
+                AttributionSource attributionSource,
+                AssociationInfo associationInfo,
+                @NonNull VirtualDeviceParams params,
+                @Nullable IVirtualDeviceActivityListener activityListener,
+                @Nullable IVirtualDeviceSoundEffectListener soundEffectListener) {
+            createVirtualDevice_enforcePermission();
+            attributionSource.enforceCallingUid();
+
+            final String packageName = attributionSource.getPackageName();
+            if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
+                throw new SecurityException(
+                        "Package name " + packageName + " does not belong to calling uid "
+                                + getCallingUid());
+            }
             Objects.requireNonNull(params);
-            Objects.requireNonNull(activityListener);
-            Objects.requireNonNull(soundEffectListener);
 
             final UserHandle userHandle = getCallingUserHandle();
             final CameraAccessController cameraAccessController =
@@ -456,9 +474,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     deviceId,
                     cameraAccessController, mPendingTrampolineCallback, activityListener,
                     soundEffectListener, runningAppsChangedCallback, params);
-            if (Flags.expressMetrics()) {
-                Counter.logIncrement("virtual_devices.value_virtual_devices_created_count");
-            }
+            Counter.logIncrement("virtual_devices.value_virtual_devices_created_count");
 
             synchronized (mVirtualDeviceManagerLock) {
                 if (!Flags.persistentDeviceIdApi() && mVirtualDevices.size() == 0) {
@@ -482,11 +498,9 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 });
             }
-            if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-                Counter.logIncrementWithUid(
-                        "virtual_devices.value_virtual_devices_created_with_uid_count",
-                        attributionSource.getUid());
-            }
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_devices_created_with_uid_count",
+                    attributionSource.getUid());
             return virtualDevice;
         }
 
@@ -722,6 +736,21 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @GuardedBy("mVirtualDeviceManagerLock")
         private final ArraySet<Integer> mAllUidsOnVirtualDevice = new ArraySet<>();
+
+        @Override
+        public @NonNull VirtualDeviceManager.VirtualDevice createVirtualDevice(
+                @NonNull VirtualDeviceParams params) {
+            Objects.requireNonNull(params, "params must not be null");
+            Objects.requireNonNull(params.getName(), "virtual device name must not be null");
+            IVirtualDevice virtualDevice = mImpl.createVirtualDevice(
+                    new Binder(),
+                    getContext().getAttributionSource(),
+                    /* associationInfo= */ null,
+                    params,
+                    /* activityListener= */ null,
+                    /* soundEffectListener= */ null);
+            return new VirtualDeviceManager.VirtualDevice(mImpl, getContext(), virtualDevice);
+        }
 
         @Override
         public int getDeviceOwnerUid(int deviceId) {

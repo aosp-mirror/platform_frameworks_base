@@ -73,7 +73,6 @@ import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.statusbar.policy.bluetooth.BluetoothRepository;
 import com.android.systemui.statusbar.policy.bluetooth.BluetoothRepositoryImpl;
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepositoryModule;
-import com.android.systemui.statusbar.policy.data.repository.ZenModeRepositoryModule;
 
 import dagger.Binds;
 import dagger.Module;
@@ -84,7 +83,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Named;
 
 /** Dagger Module for code in the statusbar.policy package. */
-@Module(includes = { DeviceProvisioningRepositoryModule.class, ZenModeRepositoryModule.class })
+@Module(includes = {DeviceProvisioningRepositoryModule.class})
 public interface StatusBarPolicyModule {
 
     String DEVICE_STATE_ROTATION_LOCK_DEFAULTS = "DEVICE_STATE_ROTATION_LOCK_DEFAULTS";
@@ -228,5 +227,13 @@ public interface StatusBarPolicyModule {
     @BatteryControllerLog
     static LogBuffer provideBatteryControllerLog(LogBufferFactory factory) {
         return factory.create(BatteryControllerLogger.TAG, 30);
+    }
+
+    /** Provides a log buffer for CastControllerImpl */
+    @Provides
+    @SysUISingleton
+    @CastControllerLog
+    static LogBuffer provideCastControllerLog(LogBufferFactory factory) {
+        return factory.create("CastControllerLog", 50);
     }
 }

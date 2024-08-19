@@ -21,6 +21,7 @@ import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
 import static com.android.systemui.Flags.updateUserSwitcherBackground;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -46,6 +47,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.battery.BatteryMeterViewController;
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.core.LogLevel;
@@ -83,6 +85,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -128,6 +131,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final Executor mBackgroundExecutor;
     private final Object mLock = new Object();
     private final KeyguardLogger mLogger;
+    private final CommunalSceneInteractor mCommunalSceneInteractor;
 
     private View mSystemIconsContainer;
     private final StatusOverlayHoverListenerFactory mStatusOverlayHoverListenerFactory;
@@ -241,6 +245,12 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 }
             };
 
+    private boolean mCommunalShowing;
+
+    private final Consumer<Boolean> mCommunalConsumer = (communalShowing) -> {
+        mCommunalShowing = communalShowing;
+        updateViewState();
+    };
 
     private final DisableStateTracker mDisableStateTracker;
 
@@ -298,7 +308,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             @Main Executor mainExecutor,
             @Background Executor backgroundExecutor,
             KeyguardLogger logger,
-            StatusOverlayHoverListenerFactory statusOverlayHoverListenerFactory
+            StatusOverlayHoverListenerFactory statusOverlayHoverListenerFactory,
+            CommunalSceneInteractor communalSceneInteractor
     ) {
         super(view);
         mCarrierTextController = carrierTextController;
@@ -324,6 +335,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mLogger = logger;
+        mCommunalSceneInteractor = communalSceneInteractor;
 
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
         mKeyguardStateController.addCallback(
@@ -405,6 +417,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 UserHandle.USER_ALL);
         updateUserSwitcher();
         onThemeChanged();
+        collectFlow(mView, mCommunalSceneInteractor.isCommunalVisible(), mCommunalConsumer);
     }
 
     @Override
@@ -559,6 +572,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                         && !mDozing
                         && !hideForBypass
                         && !mDisableStateTracker.isDisabled()
+                        && !mCommunalShowing
                         ? View.VISIBLE : View.INVISIBLE;
 
         updateViewState(newAlpha, newVisibility);

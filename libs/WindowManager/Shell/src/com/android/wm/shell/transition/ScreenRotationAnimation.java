@@ -47,7 +47,7 @@ import android.window.TransitionInfo;
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 
 import java.util.ArrayList;
 
@@ -325,21 +325,21 @@ class ScreenRotationAnimation {
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */);
+                null /* clipRect */, false /* isActivity */);
     }
 
     private void startScreenshotRotationAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */);
+                null /* clipRect */, false /* isActivity */);
     }
 
     private void buildScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */);
+                null /* clipRect */, false /* isActivity */);
     }
 
     private void startColorAnimation(float animationScale, @NonNull ShellExecutor animExecutor) {

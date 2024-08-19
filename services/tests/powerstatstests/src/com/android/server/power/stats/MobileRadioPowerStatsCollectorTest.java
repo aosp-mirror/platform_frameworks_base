@@ -39,6 +39,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.OutcomeReceiver;
+import android.os.connectivity.CellularBatteryStats;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.ActivityStatsTechSpecificInfo;
@@ -167,6 +168,7 @@ public class MobileRadioPowerStatsCollectorTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephony);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
         when(mPowerStatsUidResolver.mapUid(anyInt())).thenAnswer(invocation -> {
             int uid = invocation.getArgument(0);
@@ -352,8 +354,48 @@ public class MobileRadioPowerStatsCollectorTest {
                 "UID 42: rx-pkts: 100 rx-B: 1000 tx-pkts: 200 tx-B: 2000");
     }
 
+    @Test
+    public void getCellularBatteryStats() throws Throwable {
+        mBatteryStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                true);
+
+        mockModemActivityInfo(1000, 2000, 3000, 600, new int[]{100, 200, 300, 400, 500});
+        mockNetworkStats(1100,
+                5321, 421, 3234, 223,
+                8000, 80, 4000, 40);
+
+        // This should trigger a baseline sample collection
+        mBatteryStats.onSystemReady(mContext);
+        mStatsRule.waitForBackgroundThread();
+
+        mockModemActivityInfo(20000, 2222, 3333, 666, new int[]{111, 222, 333, 444, 555});
+        mockNetworkStats(21000,
+                6321, 521, 7234, 423,
+                8888, 88, 4444, 44);
+
+        mStatsRule.setTime(30000, 30000);
+        mBatteryStats.getPowerStatsCollector(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
+                .schedule();
+        mStatsRule.waitForBackgroundThread();
+
+        CellularBatteryStats stats = mBatteryStats.getCellularBatteryStats();
+        assertThat(stats.getSleepTimeMillis()).isEqualTo(222);
+        assertThat(stats.getIdleTimeMillis()).isEqualTo(333);
+        assertThat(stats.getRxTimeMillis()).isEqualTo(66);
+        assertThat(stats.getTxTimeMillis(ModemActivityInfo.TX_POWER_LEVEL_0)).isEqualTo(11);
+        assertThat(stats.getTxTimeMillis(ModemActivityInfo.TX_POWER_LEVEL_1)).isEqualTo(22);
+        assertThat(stats.getTxTimeMillis(ModemActivityInfo.TX_POWER_LEVEL_2)).isEqualTo(33);
+        assertThat(stats.getTxTimeMillis(ModemActivityInfo.TX_POWER_LEVEL_3)).isEqualTo(44);
+        assertThat(stats.getTxTimeMillis(ModemActivityInfo.TX_POWER_LEVEL_4)).isEqualTo(55);
+        assertThat(stats.getNumPacketsRx()).isEqualTo(934);
+        assertThat(stats.getNumBytesRx()).isEqualTo(19967);
+        assertThat(stats.getNumPacketsTx()).isEqualTo(770);
+        assertThat(stats.getNumBytesTx()).isEqualTo(14214);
+    }
+
     private PowerStats collectPowerStats(boolean perNetworkTypeData) throws Throwable {
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
+        MobileRadioPowerStatsCollector collector =
+                new MobileRadioPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
 
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(
@@ -462,6 +504,7 @@ public class MobileRadioPowerStatsCollectorTest {
                     .addEntry(new NetworkStats.Entry("mobile", APP_UID3, 0, 0, METERED_NO,
                             ROAMING_NO, DEFAULT_NETWORK_NO, 314, 281, 314, 281, 111));
         }
+        mBatteryStats.setNetworkStats(stats);
         when(mNetworkStatsSupplier.get()).thenReturn(stats);
     }
 

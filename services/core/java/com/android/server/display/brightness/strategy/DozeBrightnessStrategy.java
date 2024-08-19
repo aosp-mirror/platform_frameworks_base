@@ -36,7 +36,6 @@ public class DozeBrightnessStrategy implements DisplayBrightnessStrategy {
         // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_DOZE,
                 strategyExecutionRequest.getDisplayPowerRequest().dozeScreenBrightness,
-                strategyExecutionRequest.getDisplayPowerRequest().dozeScreenBrightness,
                 getName());
     }
 

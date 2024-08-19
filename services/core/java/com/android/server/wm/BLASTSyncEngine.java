@@ -30,7 +30,7 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.ArrayList;
 
@@ -348,6 +348,11 @@ class BLASTSyncEngine {
                 wc.setSyncGroup(this);
             }
             wc.prepareSync();
+            if (wc.mSyncState == WindowContainer.SYNC_STATE_NONE && wc.mSyncGroup != null) {
+                Slog.w(TAG, "addToSync: unset SyncGroup " + wc.mSyncGroup.mSyncId
+                        + " for non-sync " + wc);
+                wc.mSyncGroup = null;
+            }
             if (mReady) {
                 mWm.mWindowPlacerLocked.requestTraversal();
             }

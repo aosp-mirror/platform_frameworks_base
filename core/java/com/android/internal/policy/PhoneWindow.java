@@ -418,6 +418,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mElevation = preservedWindow.getElevation();
             mLoadElevation = false;
             mForceDecorInstall = true;
+            mDecorFitsSystemWindows = preservedWindow.decorFitsSystemWindows();
             setSystemBarAppearance(preservedWindow.getSystemBarAppearance());
             // If we're preserving window, carry over the app token from the preserved
             // window, as we'll be skipping the addView in handleResumeActivity(), and
@@ -537,8 +538,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mContentParent.requestApplyInsets();
         final Callback cb = getCallback();
-        if (cb != null && !isDestroyed()) {
-            cb.onContentChanged();
+        if (!isDestroyed()) {
+            if (cb != null) {
+                cb.onContentChanged();
+            }
+            if (mDecorContentParent != null) {
+                mDecorContentParent.notifyContentChanged();
+            }
         }
         mContentParentExplicitlySet = true;
     }
@@ -568,8 +574,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mContentParent.requestApplyInsets();
         final Callback cb = getCallback();
-        if (cb != null && !isDestroyed()) {
-            cb.onContentChanged();
+        if (!isDestroyed()) {
+            if (cb != null) {
+                cb.onContentChanged();
+            }
+            if (mDecorContentParent != null) {
+                mDecorContentParent.notifyContentChanged();
+            }
         }
         mContentParentExplicitlySet = true;
     }
@@ -586,8 +597,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mContentParent.addView(view, params);
         mContentParent.requestApplyInsets();
         final Callback cb = getCallback();
-        if (cb != null && !isDestroyed()) {
-            cb.onContentChanged();
+        if (!isDestroyed()) {
+            if (cb != null) {
+                cb.onContentChanged();
+            }
+            if (mDecorContentParent != null) {
+                mDecorContentParent.notifyContentChanged();
+            }
         }
     }
 
@@ -2486,6 +2502,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mEdgeToEdgeEnforced) {
             getAttributes().privateFlags |= PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
             mDecorFitsSystemWindows = false;
+            mStatusBarColor = Color.TRANSPARENT;
+            mNavigationBarDividerColor = Color.TRANSPARENT;
+            // mNavigationBarColor is not reset here because it might be used to draw the scrim.
         }
         if (CompatChanges.isChangeEnabled(OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)
                 && !a.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement,
@@ -4054,10 +4073,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setResizingCaptionDrawable(Drawable drawable) {
-        // TODO(b/333724879): Deprecate this public API. The new caption in WM shell allows the app
-        // content to draw behind it directly if requested.
-    }
+    public void setResizingCaptionDrawable(Drawable drawable) {}
 
     @Override
     public void setDecorCaptionShade(int decorCaptionShade) {

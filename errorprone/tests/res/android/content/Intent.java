@@ -24,4 +24,8 @@ public class Intent {
     public Intent setAction(String action) {
         throw new UnsupportedOperationException();
     }
+
+    public Intent putExtra(String extra, int value) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Callable;
 
 /**
  * @hide
@@ -432,9 +434,15 @@ public abstract class IContextHubWrapper {
 
         // Use this thread in case where the execution requires to be on a service thread.
         // For instance, AppOpsManager.noteOp requires the UPDATE_APP_OPS_STATS permission.
-        private HandlerThread mHandlerThread =
+        private final HandlerThread mHandlerThread =
                 new HandlerThread("Context Hub AIDL callback", Process.THREAD_PRIORITY_BACKGROUND);
         private Handler mHandler;
+
+        // True if test mode is enabled for the Context Hub
+        private final AtomicBoolean mIsTestModeEnabled = new AtomicBoolean(false);
+
+        // The test mode manager that manages behaviors during test mode
+        private final ContextHubTestModeManager mTestModeManager = new ContextHubTestModeManager();
 
         private class ContextHubAidlCallback extends
                 android.hardware.contexthub.IContextHubCallback.Stub {
@@ -549,6 +557,8 @@ public abstract class IContextHubWrapper {
             } else {
                 Log.e(TAG, "mHandleServiceRestartCallback is not set");
             }
+
+            mIsTestModeEnabled.set(false);
         }
 
         public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
@@ -650,22 +660,40 @@ public abstract class IContextHubWrapper {
 
         @ContextHubTransaction.Result
         public int sendMessageToContextHub(short hostEndpointId, int contextHubId,
-                NanoAppMessage message) throws RemoteException {
+                NanoAppMessage message) {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
                 return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
 
-            try {
-                var msg = ContextHubServiceUtil.createAidlContextHubMessage(
-                        hostEndpointId, message);
-                hub.sendMessageToHub(contextHubId, msg);
-                return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException | ServiceSpecificException e) {
-                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
-            } catch (IllegalArgumentException e) {
-                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+            Callable<Integer> sendMessage = () -> {
+                try {
+                    var msg = ContextHubServiceUtil.createAidlContextHubMessage(
+                            hostEndpointId, message);
+                    hub.sendMessageToHub(contextHubId, msg);
+                    return ContextHubTransaction.RESULT_SUCCESS;
+                } catch (RemoteException | ServiceSpecificException e) {
+                    return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                } catch (IllegalArgumentException e) {
+                    return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
+                }
+            };
+
+            // Only process the message normally if not using test mode manager or if
+            // the test mode manager call returned false as this indicates it did not
+            // process the message.
+            boolean useTestModeManager = Flags.reliableMessageImplementation()
+                    && Flags.reliableMessageTestModeBehavior()
+                    && mIsTestModeEnabled.get();
+            if (!useTestModeManager || !mTestModeManager.sendMessageToContextHub(
+                    sendMessage, message)) {
+                try {
+                    return sendMessage.call();
+                } catch (Exception e) {
+                    return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                }
             }
+            return ContextHubTransaction.RESULT_SUCCESS;
         }
 
         @ContextHubTransaction.Result
@@ -828,6 +856,7 @@ public abstract class IContextHubWrapper {
                 return false;
             }
 
+            mIsTestModeEnabled.set(enable);
             try {
                 hub.setTestMode(enable);
                 return true;

@@ -14,7 +14,7 @@
  */
 package com.android.systemui.unfold.config
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
  * Internal Android resource constants are not available in public APIs,
  * so we can't use them there directly.
  */
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ResourceUnfoldTransitionConfigTest : SysuiTestCase() {
 

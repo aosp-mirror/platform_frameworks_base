@@ -43,7 +43,7 @@ const val CRAFT_SPEED_LIMIT = 5_000f
 const val MAIN_ENGINE_ACCEL = 1000f // thrust effect, pixels per second squared
 const val LAUNCH_MECO = 2f // how long to suspend gravity when launching
 
-const val LANDING_REMOVAL_TIME = 3600f // one hour of simulation time
+const val LANDING_REMOVAL_TIME = 60 * 15f // 15 min of simulation time
 
 const val SCALED_THRUST = true
 

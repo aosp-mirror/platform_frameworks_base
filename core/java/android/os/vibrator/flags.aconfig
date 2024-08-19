@@ -3,13 +3,6 @@ container: "system"
 
 flag {
     namespace: "haptics"
-    name: "use_vibrator_haptic_feedback"
-    description: "Enables performHapticFeedback to directly use the vibrator service instead of going through the window session"
-    bug: "295459081"
-}
-
-flag {
-    namespace: "haptics"
     name: "haptic_feedback_vibration_oem_customization_enabled"
     description: "Enables OEMs/devices to customize vibrations for haptic feedback"
     # Make read only. This is because the flag is used only once, and this could happen before
@@ -20,14 +13,114 @@ flag {
 
 flag {
     namespace: "haptics"
-    name: "keyboard_category_enabled"
-    description: "Enables the independent keyboard vibration settings feature"
-    bug: "289107579"
+    name: "adaptive_haptics_enabled"
+    description: "Enables the adaptive haptics feature"
+    bug: "305961689"
 }
 
 flag {
     namespace: "haptics"
-    name: "adaptive_haptics_enabled"
-    description: "Enables the adaptive haptics feature"
-    bug: "305961689"
+    name: "cancel_by_appops"
+    description: "Cancels ongoing vibrations when the appops mode changes to disallow them"
+    bug: "230745615"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vibration_xml_apis"
+    is_exported: true
+    description: "Enabled System APIs for vibration effect XML parser and serializer"
+    bug: "347273158"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vendor_vibration_effects"
+    is_exported: true
+    description: "Enabled System APIs for vendor-defined vibration effects"
+    bug: "345454923"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "throttle_vibration_params_requests"
+    description: "Control the frequency of vibration params requests to prevent overloading the vendor service"
+    bug: "355320860"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "vibration_attribute_ime_usage_api"
+    is_exported: true
+    description: "A public API for IME usage vibration attribute"
+    bug: "332661766"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "fix_audio_coupled_haptics_scaling"
+    description: "Fix the audio-coupled haptics scaling to use same function as VibrationEffect"
+    bug: "356144312"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "load_haptic_feedback_vibration_customization_from_resources"
+    description: "Load haptic feedback vibrations customization from resources."
+    is_fixed_read_only: true
+    bug: "295142743"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "haptic_feedback_input_source_customization_enabled"
+    description: "Enabled the extended haptic feedback customization by input source."
+    bug: "331819348"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "haptics_scale_v2_enabled"
+    description: "Enables new haptics scaling function across all usages"
+    bug: "345186129"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    namespace: "haptics"
+    name: "normalized_pwle_effects"
+    is_exported: true
+    description: "Enables functionality to create PWLE effects using advanced and simple APIs"
+    bug: "341052318"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
 }

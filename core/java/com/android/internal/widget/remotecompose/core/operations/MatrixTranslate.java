@@ -15,65 +15,28 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
-import com.android.internal.widget.remotecompose.core.PaintOperation;
-import com.android.internal.widget.remotecompose.core.WireBuffer;
 
-import java.util.List;
-
-public class MatrixTranslate extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
-    float mTranslateX, mTranslateY;
+public class MatrixTranslate extends DrawBase2 {
+    public static final Companion COMPANION =
+            new Companion(Operations.MATRIX_TRANSLATE) {
+                @Override
+                public Operation construct(float x1,
+                                           float y1
+                ) {
+                    return new MatrixTranslate(x1, y1);
+                }
+            };
 
     public MatrixTranslate(float translateX, float translateY) {
-        mTranslateX = translateX;
-        mTranslateY = translateY;
-    }
-
-    @Override
-    public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mTranslateX, mTranslateY);
-    }
-
-    @Override
-    public String toString() {
-        return "DrawArc " + mTranslateY + ", " + mTranslateY + ";";
-    }
-
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            float translateX = buffer.readFloat();
-            float translateY = buffer.readFloat();
-            MatrixTranslate op = new MatrixTranslate(translateX, translateY);
-            operations.add(op);
-        }
-
-        @Override
-        public String name() {
-            return "Matrix";
-        }
-
-        @Override
-        public int id() {
-            return Operations.MATRIX_TRANSLATE;
-        }
-
-        public void apply(WireBuffer buffer, float translateX, float translateY) {
-            buffer.start(Operations.MATRIX_TRANSLATE);
-            buffer.writeFloat(translateX);
-            buffer.writeFloat(translateY);
-        }
+        super(translateX, translateY);
+        mName = "MatrixTranslate";
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.matrixTranslate(mTranslateX, mTranslateY);
+        context.matrixTranslate(mV1, mV2);
     }
 }

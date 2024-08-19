@@ -32,6 +32,7 @@ android_test {
     ],
 
     static_libs: [
+        "TestParameterInjector",
         "androidx.window.extensions",
         "androidx.window.extensions.core_core",
         "junit",

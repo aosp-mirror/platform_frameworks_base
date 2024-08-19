@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -72,6 +74,7 @@ import android.os.LocaleList;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -81,7 +84,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
@@ -110,6 +113,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowProcessController" : TAG_ATM;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
+
+    /**
+     * The max number of processes which can be top scheduling group if there are non-top visible
+     * freeform activities run in the process.
+     */
+    private static final int MAX_NUM_PERCEPTIBLE_FREEFORM =
+            SystemProperties.getInt("persist.wm.max_num_perceptible_freeform", 1);
 
     private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 200;
     private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
@@ -309,14 +319,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mWasStoppedLogged;
 
     // The bits used for mActivityStateFlags.
-    private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
-    private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 1 << 18;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
-    private static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
-    private static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
-    private static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
-    private static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
+    public static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
+    public static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
+    public static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 1 << 18;
+    public static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
+    public static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
+    public static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
+    public static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
+    public static final int ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN = 1 << 23;
+    public static final int ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM = 1 << 24;
+    public static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
      * The state for oom-adjustment calculation. The higher 16 bits are the activity states, and the
@@ -425,7 +437,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             final ConfigurationChangeItem configurationChangeItem;
             synchronized (mLastReportedConfiguration) {
                 onConfigurationChangePreScheduled(mLastReportedConfiguration);
-                configurationChangeItem = ConfigurationChangeItem.obtain(
+                configurationChangeItem = new ConfigurationChangeItem(
                         mLastReportedConfiguration, mLastTopActivityDeviceId);
             }
             // Schedule immediately to make sure the app component (e.g. receiver, service) can get
@@ -1211,31 +1223,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    public interface ComputeOomAdjCallback {
-        void onVisibleActivity();
-        void onPausedActivity();
-        void onStoppingActivity(boolean finishing);
-        void onOtherActivity();
-    }
-
     /**
-     * Returns the minimum task layer rank. It should only be called if {@link #hasActivities}
-     * returns {@code true}.
+     * Returns the current ACTIVITY_STATE_FLAG_* of this process. It should only be called if
+     * {@link #hasActivities} returns {@code true}.
      */
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-    public int computeOomAdjFromActivities(ComputeOomAdjCallback callback) {
-        final int flags = mActivityStateFlags;
-        if ((flags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0) {
-            callback.onVisibleActivity();
-        } else if ((flags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
-            callback.onPausedActivity();
-        } else if ((flags & ACTIVITY_STATE_FLAG_IS_STOPPING) != 0) {
-            callback.onStoppingActivity(
-                    (flags & ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING) != 0);
-        } else {
-            callback.onOtherActivity();
-        }
-        return flags & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
+    public int getActivityStateFlags() {
+        return mActivityStateFlags;
     }
 
     void computeProcessActivityState() {
@@ -1245,6 +1239,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         ActivityRecord.State bestInvisibleState = DESTROYED;
         boolean allStoppingFinishing = true;
         boolean visible = false;
+        boolean hasResumedFreeform = false;
         int minTaskLayer = Integer.MAX_VALUE;
         int stateFlags = 0;
         final boolean wasResumed = hasResumedActivity();
@@ -1256,14 +1251,27 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 stateFlags |= ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE;
             }
             final Task task = r.getTask();
-            if (task != null && task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
+            if (task == null) {
+                Slog.e(TAG, "Unexpected detached " + r + " in " + this);
+                continue;
+            }
+            if (task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
                 stateFlags |= ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK;
             }
             if (r.isVisibleRequested()) {
                 if (r.isState(RESUMED)) {
                     stateFlags |= ACTIVITY_STATE_FLAG_HAS_RESUMED;
+                    final int windowingMode = r.getWindowingMode();
+                    if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
+                            && com.android.window.flags.Flags
+                                    .processPriorityPolicyForMultiWindowMode()
+                            && task.getAdjacentTask() != null) {
+                        stateFlags |= ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN;
+                    } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
+                        hasResumedFreeform = true;
+                    }
                 }
-                if (task != null && minTaskLayer > 0) {
+                if (minTaskLayer > 0) {
                     final int layer = task.mLayerRank;
                     if (layer >= 0 && minTaskLayer > layer) {
                         minTaskLayer = layer;
@@ -1294,6 +1302,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
+        if (hasResumedFreeform
+                && com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()
+                // Exclude task layer 1 because it is already the top most.
+                && minTaskLayer > 1 && minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
+            stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
+        }
         stateFlags |= minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
         if (visible) {
             stateFlags |= ACTIVITY_STATE_FLAG_IS_VISIBLE;
@@ -1660,6 +1674,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // Otherwise if other places send wpc.getConfiguration() to client, the configuration may
         // be ignored due to the seq is older.
         resolvedConfig.seq = newParentConfig.seq;
+
+        if (mConfigActivityRecord != null) {
+            // Let the activity decide whether to apply the size override.
+            return;
+        }
+        final DisplayContent displayContent = mAtm.mWindowManager != null
+                ? mAtm.mWindowManager.getDefaultDisplayContentLocked()
+                : null;
+        applySizeOverrideIfNeeded(
+                displayContent,
+                mInfo,
+                newParentConfig,
+                resolvedConfig,
+                false /* optsOutEdgeToEdge */,
+                false /* hasFixedRotationTransform */,
+                false /* hasCompatDisplayInsets */);
     }
 
     void dispatchConfiguration(@NonNull Configuration config) {
@@ -1691,8 +1721,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         onConfigurationChangePreScheduled(config);
-        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
-                config, mLastTopActivityDeviceId));
+        scheduleClientTransactionItem(
+                thread, new ConfigurationChangeItem(config, mLastTopActivityDeviceId));
     }
 
     private void onConfigurationChangePreScheduled(@NonNull Configuration config) {
@@ -2107,6 +2137,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 pw.print("V|");
                 if ((stateFlags & ACTIVITY_STATE_FLAG_HAS_RESUMED) != 0) {
                     pw.print("R|");
+                    if ((stateFlags & ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN) != 0) {
+                        pw.print("RS|");
+                    }
+                    if ((stateFlags & ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0) {
+                        pw.print("PF|");
+                    }
                 }
             } else if ((stateFlags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
                 pw.print("P|");

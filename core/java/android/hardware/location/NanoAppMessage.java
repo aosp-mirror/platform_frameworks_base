@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import libcore.util.HexEncoding;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A class describing messages send to or from nanoapps through the Context Hub Service.
@@ -229,27 +230,38 @@ public final class NanoAppMessage implements Parcelable {
     public String toString() {
         int length = mMessageBody.length;
 
-        String ret = "NanoAppMessage[type = " + mMessageType + ", length = " + mMessageBody.length
-                + " bytes, " + (mIsBroadcasted ? "broadcast" : "unicast") + ", nanoapp = 0x"
-                + Long.toHexString(mNanoAppId) + ", isReliable = "
-                + (mIsReliable ? "true" : "false") + ", messageSequenceNumber = "
-                + mMessageSequenceNumber + "](";
+        StringBuilder out = new StringBuilder();
+        out.append( "NanoAppMessage[type = ");
+        out.append(mMessageType);
+        out.append(", length = ");
+        out.append(mMessageBody.length);
+        out.append(" bytes, ");
+        out.append(mIsBroadcasted ? "broadcast" : "unicast");
+        out.append(", nanoapp = 0x");
+        out.append(Long.toHexString(mNanoAppId));
+        out.append(", isReliable = ");
+        out.append(mIsReliable ? "true" : "false");
+        out.append(", messageSequenceNumber = ");
+        out.append(mMessageSequenceNumber);
+        out.append("](");
+
         if (length > 0) {
-            ret += "data = 0x";
+            out.append("data = 0x");
         }
         for (int i = 0; i < Math.min(length, DEBUG_LOG_NUM_BYTES); i++) {
-            ret += HexEncoding.encodeToString(mMessageBody[i], true /* upperCase */);
+            out.append(HexEncoding.encodeToString(mMessageBody[i],
+                                                  true /* upperCase */));
 
             if ((i + 1) % 4 == 0) {
-                ret += " ";
+                out.append(" ");
             }
         }
         if (length > DEBUG_LOG_NUM_BYTES) {
-            ret += "...";
+            out.append("...");
         }
-        ret += ")";
+        out.append(")");
 
-        return ret;
+        return out.toString();
     }
 
     @Override
@@ -272,5 +284,16 @@ public final class NanoAppMessage implements Parcelable {
         }
 
         return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        if (!Flags.fixApiCheck()) {
+            return super.hashCode();
+        }
+
+        return Objects.hash(mNanoAppId, mMessageType, mIsBroadcasted,
+                Arrays.hashCode(mMessageBody), mIsReliable,
+                mMessageSequenceNumber);
     }
 }

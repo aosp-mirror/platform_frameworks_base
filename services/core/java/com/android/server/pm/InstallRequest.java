@@ -174,13 +174,13 @@ final class InstallRequest {
         mUserId = params.getUser().getIdentifier();
         mInstallArgs = new InstallArgs(params.mOriginInfo, params.mMoveInfo, params.mObserver,
                 params.mInstallFlags, params.mDevelopmentInstallFlags, params.mInstallSource,
-                params.mVolumeUuid,  params.getUser(), null /*instructionSets*/,
+                params.mVolumeUuid, params.getUser(), null /*instructionSets*/,
                 params.mPackageAbiOverride, params.mPermissionStates,
                 params.mAllowlistedRestrictedPermissions, params.mAutoRevokePermissionsMode,
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
-                params.mApplicationEnabledSettingPersistent);
+                params.mApplicationEnabledSettingPersistent, params.mDexoptCompilerFilter);
         mPackageLite = params.mPackageLite;
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
@@ -707,6 +707,11 @@ final class InstallRequest {
     @NonNull
     public ArrayList<String> getWarnings() {
         return mWarnings;
+    }
+
+    @Nullable
+    public String getDexoptCompilerFilter() {
+        return mInstallArgs != null ? mInstallArgs.mDexoptCompilerFilter : null;
     }
 
     public void setScanFlags(int scanFlags) {

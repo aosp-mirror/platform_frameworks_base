@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.data.repository
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.shared.model.VolumePanelGlobalState
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -27,10 +28,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-private const val TAG = "VolumePanelGlobalState"
+private const val TAG = "VolumePanelGlobalStateRepository"
 
 @SysUISingleton
-class VolumePanelGlobalStateRepository @Inject constructor(dumpManager: DumpManager) : Dumpable {
+class VolumePanelGlobalStateRepository
+@Inject
+constructor(
+    dumpManager: DumpManager,
+    private val logger: VolumePanelLogger,
+) : Dumpable {
 
     private val mutableGlobalState =
         MutableStateFlow(
@@ -48,6 +54,7 @@ class VolumePanelGlobalStateRepository @Inject constructor(dumpManager: DumpMana
         update: (currentState: VolumePanelGlobalState) -> VolumePanelGlobalState
     ) {
         mutableGlobalState.update(update)
+        logger.onVolumePanelGlobalStateChanged(mutableGlobalState.value)
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

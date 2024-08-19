@@ -430,10 +430,11 @@ public class PowerGroup {
         return mDisplayPowerRequest.policy;
     }
 
-    boolean updateLocked(float screenBrightnessOverride, boolean useProximitySensor,
-            boolean boostScreenBrightness, int dozeScreenState,
+    boolean updateLocked(float screenBrightnessOverride, CharSequence overrideTag,
+            boolean useProximitySensor, boolean boostScreenBrightness, int dozeScreenState,
             @Display.StateReason int dozeScreenStateReason,
-            float dozeScreenBrightness, boolean overrideDrawWakeLock,
+            float dozeScreenBrightness, boolean useNormalBrightnessForDoze,
+            boolean overrideDrawWakeLock,
             PowerSaveState powerSaverState, boolean quiescent,
             boolean dozeAfterScreenOff, boolean bootCompleted,
             boolean screenBrightnessBoostInProgress, boolean waitForNegativeProximity,
@@ -441,6 +442,7 @@ public class PowerGroup {
         mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
                 bootCompleted, screenBrightnessBoostInProgress, brightWhenDozing);
         mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
+        mDisplayPowerRequest.screenBrightnessOverrideTag = overrideTag;
         mDisplayPowerRequest.useProximitySensor = useProximitySensor;
         mDisplayPowerRequest.boostScreenBrightness = boostScreenBrightness;
 
@@ -460,11 +462,13 @@ public class PowerGroup {
                 }
             }
             mDisplayPowerRequest.dozeScreenBrightness = dozeScreenBrightness;
+            mDisplayPowerRequest.useNormalBrightnessForDoze = useNormalBrightnessForDoze;
         } else {
             mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
             mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mDisplayPowerRequest.dozeScreenStateReason =
                     Display.STATE_REASON_DEFAULT_POLICY;
+            mDisplayPowerRequest.useNormalBrightnessForDoze = false;
         }
         mDisplayPowerRequest.lowPowerMode = powerSaverState.batterySaverEnabled;
         mDisplayPowerRequest.screenLowPowerBrightnessFactor = powerSaverState.brightnessFactor;

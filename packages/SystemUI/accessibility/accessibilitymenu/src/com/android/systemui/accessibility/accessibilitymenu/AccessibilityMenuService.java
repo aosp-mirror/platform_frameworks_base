@@ -91,25 +91,29 @@ public class AccessibilityMenuService extends AccessibilityService
 
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
-        int mRotation;
+                int mRotation;
 
-        @Override
-        public void onDisplayAdded(int displayId) {}
+                @Override
+                public void onDisplayAdded(int displayId) {
+                }
 
-        @Override
-        public void onDisplayRemoved(int displayId) {
-            // TODO(b/136716947): Need to reset A11yMenuOverlayLayout by display id.
-        }
+                @Override
+                public void onDisplayRemoved(int displayId) {
+                    // TODO(b/136716947): Need to reset A11yMenuOverlayLayout by display id.
+                }
 
-        @Override
-        public void onDisplayChanged(int displayId) {
-            Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
-            if (mRotation != display.getRotation()) {
-                mRotation = display.getRotation();
-                mA11yMenuLayout.updateViewLayout();
-            }
-        }
-    };
+                @Override
+                public void onDisplayChanged(int displayId) {
+                    if (mA11yMenuLayout == null) {
+                        return;
+                    }
+                    Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
+                    if (mRotation != display.getRotation()) {
+                        mRotation = display.getRotation();
+                        mA11yMenuLayout.updateViewLayout();
+                    }
+                }
+            };
 
     private final BroadcastReceiver mHideMenuReceiver = new BroadcastReceiver() {
         @Override
@@ -373,6 +377,7 @@ public class AccessibilityMenuService extends AccessibilityService
     public boolean onUnbind(Intent intent) {
         unregisterReceiver(mHideMenuReceiver);
         unregisterReceiver(mToggleMenuReceiver);
+        mDisplayManager.unregisterDisplayListener(mDisplayListener);
         mPrefs.unregisterOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
         sInitialized = false;
         if (mA11yMenuLayout != null) {

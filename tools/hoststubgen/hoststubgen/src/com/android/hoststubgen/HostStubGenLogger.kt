@@ -121,7 +121,7 @@ class HostStubGenLogger {
         return level.ordinal <= maxLogLevel.ordinal
     }
 
-    private fun println(level: LogLevel, message: String) {
+    fun println(level: LogLevel, message: String) {
         printers.forEach {
             if (it.logLevel.ordinal >= level.ordinal) {
                 it.println(level, indent, message)
@@ -129,7 +129,7 @@ class HostStubGenLogger {
         }
     }
 
-    private fun println(level: LogLevel, format: String, vararg args: Any?) {
+    fun println(level: LogLevel, format: String, vararg args: Any?) {
         if (isEnabled(level)) {
             println(level, String.format(format, *args))
         }
@@ -183,6 +183,31 @@ class HostStubGenLogger {
     /** Log a debug message. */
     fun d(format: String, vararg args: Any?) {
         println(LogLevel.Debug, format, *args)
+    }
+
+    inline fun <T> logTime(level: LogLevel, message: String, block: () -> T): T {
+        val start = System.currentTimeMillis()
+        try {
+            return block()
+        } finally {
+            val end = System.currentTimeMillis()
+            if (isEnabled(level)) {
+                println(level,
+                    String.format("%s: took %.1f second(s).", message, (end - start) / 1000.0))
+            }
+        }
+    }
+
+    inline fun <T> iTime(message: String, block: () -> T): T {
+        return logTime(LogLevel.Info, message, block)
+    }
+
+    inline fun <T> vTime(message: String, block: () -> T): T {
+        return logTime(LogLevel.Verbose, message, block)
+    }
+
+    inline fun <T> dTime(message: String, block: () -> T): T {
+        return logTime(LogLevel.Debug, message, block)
     }
 
     inline fun forVerbose(block: () -> Unit) {

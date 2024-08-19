@@ -20,6 +20,7 @@ import android.platform.test.annotations.EnableFlags
 import android.telephony.CellSignalStrength
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileIconCarrierIdOverrides
 import com.android.settingslib.mobile.MobileIconCarrierIdOverridesImpl
@@ -52,11 +53,13 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
@@ -191,6 +194,50 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
             // when INFLATE_SIGNAL_STRENGTH is true, we add 1 to the reported signal level
             assertThat(latest!!.level).isEqualTo(5)
+        }
+
+    @Test
+    fun networkSlice_configOn_hasPrioritizedCaps_showsSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = true
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = true
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun networkSlice_configOn_noPrioritizedCaps_noSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = true
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = false
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun networkSlice_configOff_hasPrioritizedCaps_noSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = false
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = true
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun networkSlice_configOff_noPrioritizedCaps_noSlice() =
+        testScope.runTest {
+            connectionRepository.allowNetworkSliceIndicator.value = false
+            val latest by collectLastValue(underTest.showSliceAttribution)
+
+            connectionRepository.hasPrioritizedNetworkCapabilities.value = false
+
+            assertThat(latest).isFalse()
         }
 
     @Test
@@ -689,6 +736,28 @@ class MobileIconInteractorTest : SysuiTestCase() {
             connectionRepository.isNonTerrestrial.value = true
 
             assertThat(latest).isInstanceOf(SignalIconModel.Satellite::class.java)
+        }
+
+    @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @Test
+    // See b/346904529 for more context
+    fun satBasedIcon_doesNotInflateSignalStrength() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.signalLevelIcon)
+
+            // GIVEN a satellite connection
+            connectionRepository.isNonTerrestrial.value = true
+            // GIVEN this carrier has set INFLATE_SIGNAL_STRENGTH
+            connectionRepository.inflateSignalStrength.value = true
+
+            connectionRepository.primaryLevel.value = 4
+            assertThat(latest!!.level).isEqualTo(4)
+
+            connectionRepository.inflateSignalStrength.value = true
+            connectionRepository.primaryLevel.value = 4
+
+            // Icon level is unaffected
+            assertThat(latest!!.level).isEqualTo(4)
         }
 
     private fun createInteractor(

@@ -17,7 +17,6 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printCollection
 import dagger.Binds
@@ -40,7 +39,6 @@ class StatusBarIconViewBindingFailureTracker @Inject constructor() : CoreStartab
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        if (!NotificationIconContainerRefactor.isEnabled) return
         pw.asIndenting().run {
             printCollection("AOD Icon binding failures:", aodFailures)
             printCollection("Status Bar Icon binding failures:", statusBarFailures)

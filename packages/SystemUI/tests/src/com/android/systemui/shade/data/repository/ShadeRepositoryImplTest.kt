@@ -19,8 +19,8 @@ package com.android.systemui.shade.data.repository
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -28,7 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ShadeRepositoryImplTest : SysuiTestCase() {
@@ -40,7 +39,7 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = ShadeRepositoryImpl()
+        underTest = ShadeRepositoryImpl(getContext())
     }
 
     @Test
@@ -91,37 +90,37 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
     @Test
     fun updateLegacyShadeTracking() =
         testScope.runTest {
-            assertThat(underTest.legacyShadeTracking.value).isEqualTo(false)
+            assertThat(underTest.legacyShadeTracking.value).isFalse()
 
             underTest.setLegacyShadeTracking(true)
-            assertThat(underTest.legacyShadeTracking.value).isEqualTo(true)
+            assertThat(underTest.legacyShadeTracking.value).isTrue()
         }
 
     @Test
     fun updateLegacyLockscreenShadeTracking() =
         testScope.runTest {
-            assertThat(underTest.legacyLockscreenShadeTracking.value).isEqualTo(false)
+            assertThat(underTest.legacyLockscreenShadeTracking.value).isFalse()
 
             underTest.setLegacyLockscreenShadeTracking(true)
-            assertThat(underTest.legacyLockscreenShadeTracking.value).isEqualTo(true)
+            assertThat(underTest.legacyLockscreenShadeTracking.value).isTrue()
         }
 
     @Test
     fun updateLegacyQsTracking() =
         testScope.runTest {
-            assertThat(underTest.legacyQsTracking.value).isEqualTo(false)
+            assertThat(underTest.legacyQsTracking.value).isFalse()
 
             underTest.setLegacyQsTracking(true)
-            assertThat(underTest.legacyQsTracking.value).isEqualTo(true)
+            assertThat(underTest.legacyQsTracking.value).isTrue()
         }
 
     @Test
     fun updateLegacyExpandedOrAwaitingInputTransfer() =
         testScope.runTest {
-            assertThat(underTest.legacyExpandedOrAwaitingInputTransfer.value).isEqualTo(false)
+            assertThat(underTest.legacyExpandedOrAwaitingInputTransfer.value).isFalse()
 
             underTest.setLegacyExpandedOrAwaitingInputTransfer(true)
-            assertThat(underTest.legacyExpandedOrAwaitingInputTransfer.value).isEqualTo(true)
+            assertThat(underTest.legacyExpandedOrAwaitingInputTransfer.value).isTrue()
         }
 
     @Test
@@ -142,36 +141,46 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
     @Test
     fun updateLegacyIsQsExpanded() =
         testScope.runTest {
-            assertThat(underTest.legacyIsQsExpanded.value).isEqualTo(false)
+            assertThat(underTest.legacyIsQsExpanded.value).isFalse()
 
             underTest.setLegacyIsQsExpanded(true)
-            assertThat(underTest.legacyIsQsExpanded.value).isEqualTo(true)
+            assertThat(underTest.legacyIsQsExpanded.value).isTrue()
         }
 
     @Test
     fun updateLegacyExpandImmediate() =
         testScope.runTest {
-            assertThat(underTest.legacyExpandImmediate.value).isEqualTo(false)
+            assertThat(underTest.legacyExpandImmediate.value).isFalse()
 
             underTest.setLegacyExpandImmediate(true)
-            assertThat(underTest.legacyExpandImmediate.value).isEqualTo(true)
+            assertThat(underTest.legacyExpandImmediate.value).isTrue()
         }
 
     @Test
     fun updateLegacyQsFullscreen() =
         testScope.runTest {
-            assertThat(underTest.legacyQsFullscreen.value).isEqualTo(false)
+            assertThat(underTest.legacyQsFullscreen.value).isFalse()
 
             underTest.setLegacyQsFullscreen(true)
-            assertThat(underTest.legacyQsFullscreen.value).isEqualTo(true)
+            assertThat(underTest.legacyQsFullscreen.value).isTrue()
         }
 
     @Test
     fun updateLegacyIsClosing() =
         testScope.runTest {
-            assertThat(underTest.legacyIsClosing.value).isEqualTo(false)
+            assertThat(underTest.legacyIsClosing.value).isFalse()
 
             underTest.setLegacyIsClosing(true)
-            assertThat(underTest.legacyIsClosing.value).isEqualTo(true)
+            assertThat(underTest.legacyIsClosing.value).isTrue()
+        }
+
+    @Test
+    fun isShadeLayoutWide() =
+        testScope.runTest {
+            val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
+            assertThat(isShadeLayoutWide).isFalse()
+
+            underTest.setShadeLayoutWide(true)
+            assertThat(isShadeLayoutWide).isTrue()
         }
 }

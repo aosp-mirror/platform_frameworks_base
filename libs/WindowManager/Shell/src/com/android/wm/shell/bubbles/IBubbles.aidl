@@ -18,6 +18,7 @@ package com.android.wm.shell.bubbles;
 
 import android.content.Intent;
 import android.graphics.Rect;
+import android.content.pm.ShortcutInfo;
 import com.android.wm.shell.bubbles.IBubblesListener;
 import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 
@@ -33,7 +34,7 @@ interface IBubbles {
 
     oneway void showBubble(in String key, in int topOnScreen) = 3;
 
-    oneway void dragBubbleToDismiss(in String key) = 4;
+    oneway void dragBubbleToDismiss(in String key, in long timestamp) = 4;
 
     oneway void removeAllBubbles() = 5;
 
@@ -48,4 +49,8 @@ interface IBubbles {
     oneway void updateBubbleBarTopOnScreen(in int topOnScreen) = 10;
 
     oneway void stopBubbleDrag(in BubbleBarLocation location, in int topOnScreen) = 11;
+
+    oneway void showShortcutBubble(in ShortcutInfo info) = 12;
+
+    oneway void showAppBubble(in Intent intent) = 13;
 }

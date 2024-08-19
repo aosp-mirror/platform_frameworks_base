@@ -239,19 +239,21 @@ TEST(RenderNode, releasedCallback) {
     TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
         TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     });
-    auto& counts = TestUtils::countsForFunctor(functor);
+    auto counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(1, counts.sync);
     EXPECT_EQ(0, counts.destroyed);
 
     TestUtils::recordNode(*node, [&](Canvas& canvas) {
         canvas.drawWebViewFunctor(functor);
     });
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(1, counts.sync);
     EXPECT_EQ(0, counts.destroyed);
 
     TestUtils::runOnRenderThreadUnmanaged([&] (RenderThread&) {
         TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     });
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(2, counts.sync);
     EXPECT_EQ(0, counts.destroyed);
 
@@ -265,6 +267,7 @@ TEST(RenderNode, releasedCallback) {
     });
     // Fence on any remaining post'd work
     TestUtils::runOnRenderThreadUnmanaged([] (RenderThread&) {});
+    counts = TestUtils::copyCountsForFunctor(functor);
     EXPECT_EQ(2, counts.sync);
     EXPECT_EQ(1, counts.destroyed);
 }

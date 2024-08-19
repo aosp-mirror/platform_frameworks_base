@@ -156,7 +156,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
             UserManager.DISALLOW_SIM_GLOBALLY,
             UserManager.DISALLOW_ASSIST_CONTENT,
-            UserManager.DISALLOW_THREAD_NETWORK
+            UserManager.DISALLOW_THREAD_NETWORK,
+            UserManager.DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -208,7 +209,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_CELLULAR_2G,
             UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
             UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
-            UserManager.DISALLOW_THREAD_NETWORK
+            UserManager.DISALLOW_THREAD_NETWORK,
+            UserManager.DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO
     );
 
     /**
@@ -254,7 +256,8 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_CELLULAR_2G,
                     UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
                     UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
-                    UserManager.DISALLOW_THREAD_NETWORK
+                    UserManager.DISALLOW_THREAD_NETWORK,
+                    UserManager.DISALLOW_CHANGE_NEAR_FIELD_COMMUNICATION_RADIO
             );
 
     /**

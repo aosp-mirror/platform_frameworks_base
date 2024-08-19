@@ -169,6 +169,17 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     static final String KEY_ENABLE_NEW_OOMADJ = "enable_new_oom_adj";
 
+    /**
+     * Whether or not to enable the batching of OOM adjuster calls to LMKD
+     */
+    static final String KEY_ENABLE_BATCHING_OOM_ADJ = "enable_batching_oom_adj";
+
+    /**
+     * How long to wait before scheduling another follow-up oomAdjuster update for time based state.
+     */
+    static final String KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION =
+            "follow_up_oomadj_update_wait_duration";
+
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 1024;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
@@ -231,7 +242,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60 * 1000;
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
-    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
+    static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = false;
 
     static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
 
@@ -242,6 +253,16 @@ final class ActivityManagerConstants extends ContentObserver {
      * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
      */
     private static final boolean DEFAULT_ENABLE_NEW_OOM_ADJ = Flags.oomadjusterCorrectnessRewrite();
+
+    /**
+     * The default value to {@link #KEY_ENABLE_BATCHING_OOM_ADJ}.
+     */
+    private static final boolean DEFAULT_ENABLE_BATCHING_OOM_ADJ = Flags.batchingOomAdj();
+
+    /**
+     * The default value to {@link #KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION}.
+     */
+    private static final long DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION = 1000L;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
@@ -1136,6 +1157,13 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_ENABLE_NEW_OOMADJ */
     public boolean ENABLE_NEW_OOMADJ = DEFAULT_ENABLE_NEW_OOM_ADJ;
 
+    /** @see #KEY_ENABLE_BATCHING_OOM_ADJ */
+    public boolean ENABLE_BATCHING_OOM_ADJ = DEFAULT_ENABLE_BATCHING_OOM_ADJ;
+
+    /** @see #KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION */
+    public long FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION =
+            DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION;
+
     /**
      * Indicates whether PSS profiling in AppProfiler is disabled or not.
      */
@@ -1346,6 +1374,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_PROC_STATE_DEBUG_UIDS:
                                 updateProcStateDebugUids();
                                 break;
+                            case KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION:
+                                updateFollowUpOomAdjUpdateWaitDuration();
+                                break;
                             default:
                                 updateFGSPermissionEnforcementFlagsIfNecessary(name);
                                 break;
@@ -1479,6 +1510,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private void loadNativeBootDeviceConfigConstants() {
         ENABLE_NEW_OOMADJ = getDeviceConfigBoolean(KEY_ENABLE_NEW_OOMADJ,
                 DEFAULT_ENABLE_NEW_OOM_ADJ);
+        ENABLE_BATCHING_OOM_ADJ = getDeviceConfigBoolean(KEY_ENABLE_BATCHING_OOM_ADJ,
+                DEFAULT_ENABLE_BATCHING_OOM_ADJ);
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -2231,6 +2264,13 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_ENABLE_NEW_OOM_ADJ);
     }
 
+    private void updateFollowUpOomAdjUpdateWaitDuration() {
+        FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION,
+                DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
+    }
+
     private void updateFGSPermissionEnforcementFlagsIfNecessary(@NonNull String name) {
         ForegroundServiceTypePolicy.getDefaultPolicy()
             .updatePermissionEnforcementFlagIfNecessary(name);
@@ -2246,6 +2286,13 @@ final class ActivityManagerConstants extends ContentObserver {
         PSS_TO_RSS_THRESHOLD_MODIFIER = DeviceConfig.getFloat(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_PSS_TO_RSS_THRESHOLD_MODIFIER,
                 mDefaultPssToRssThresholdModifier);
+    }
+
+    private void updateEnableBatchingOomAdj() {
+        ENABLE_BATCHING_OOM_ADJ = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                KEY_ENABLE_BATCHING_OOM_ADJ,
+                DEFAULT_ENABLE_BATCHING_OOM_ADJ);
     }
 
     boolean shouldDebugUidForProcState(int uid) {
@@ -2476,6 +2523,9 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  "); pw.print(KEY_MAX_PREVIOUS_TIME);
         pw.print("="); pw.println(MAX_PREVIOUS_TIME);
 
+        pw.print("  "); pw.print(KEY_ENABLE_BATCHING_OOM_ADJ);
+        pw.print("="); pw.println(ENABLE_BATCHING_OOM_ADJ);
+
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
             pw.print("  mOverrideMaxCachedProcesses="); pw.println(mOverrideMaxCachedProcesses);
@@ -2488,6 +2538,9 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
         pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
         pw.println(mEnableWaitForFinishAttachApplication);
+
+        pw.print("  "); pw.print(KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
+        pw.print("="); pw.println(FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION);
 
         synchronized (mProcStateDebugUids) {
             pw.print("  "); pw.print(KEY_PROC_STATE_DEBUG_UIDS);

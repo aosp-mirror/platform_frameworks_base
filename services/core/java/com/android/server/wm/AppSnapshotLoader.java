@@ -203,7 +203,7 @@ class AppSnapshotLoader {
                     new Rect(proto.letterboxInsetLeft, proto.letterboxInsetTop,
                             proto.letterboxInsetRight, proto.letterboxInsetBottom),
                     loadLowResolutionBitmap, proto.isRealSnapshot, proto.windowingMode,
-                    proto.appearance, proto.isTranslucent, false /* hasImeSurface */);
+                    proto.appearance, proto.isTranslucent, false /* hasImeSurface */, proto.uiMode);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for Id=" + id);
             return null;

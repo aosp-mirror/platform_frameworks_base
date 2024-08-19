@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -33,18 +33,20 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_DELAYED_STACK_FADE_IN
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
-import com.android.systemui.util.kotlin.FlowDumperImpl
+import com.android.systemui.util.kotlin.ActivatableFlowDumper
+import com.android.systemui.util.kotlin.ActivatableFlowDumperImpl
 import dagger.Lazy
-import javax.inject.Inject
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
-@SysUISingleton
 class NotificationScrollViewModel
-@Inject
+@AssistedInject
 constructor(
     dumpManager: DumpManager,
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
@@ -53,7 +55,14 @@ constructor(
     // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
     // while the flag is off, creating this object too early results in a crash
     keyguardInteractor: Lazy<KeyguardInteractor>,
-) : FlowDumperImpl(dumpManager) {
+) :
+    ActivatableFlowDumper by ActivatableFlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
+    SysUiViewModel() {
+
+    override suspend fun onActivated(): Nothing {
+        activateFlowDumper()
+    }
+
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
      * from Gone to Shade scenes, and remain at 1 when in Lockscreen or Shade scenes and while
@@ -69,10 +78,10 @@ constructor(
             ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
                 when (transitionState) {
                     is ObservableTransitionState.Idle -> {
-                        if (transitionState.currentScene == Scenes.Lockscreen) {
-                            1f
-                        } else {
-                            shadeExpansion
+                        when (transitionState.currentScene) {
+                            Scenes.Lockscreen,
+                            Scenes.QuickSettings -> 1f
+                            else -> shadeExpansion
                         }
                     }
                     is ObservableTransitionState.Transition -> {
@@ -80,13 +89,19 @@ constructor(
                             (transitionState.fromScene in SceneFamilies.NotifShade &&
                                 transitionState.toScene == quickSettingsScene) ||
                                 (transitionState.fromScene in quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.NotifShade)
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene == Scenes.Lockscreen &&
+                                    transitionState.toScene in SceneFamilies.NotifShade) ||
+                                (transitionState.fromScene in SceneFamilies.NotifShade &&
+                                    transitionState.toScene == Scenes.Lockscreen)
                         ) {
                             1f
                         } else if (
                             shadeMode != ShadeMode.Split &&
-                                transitionState.fromScene in SceneFamilies.Home &&
-                                transitionState.toScene in quickSettingsScene
+                                (transitionState.fromScene in SceneFamilies.Home &&
+                                    transitionState.toScene == quickSettingsScene) ||
+                                (transitionState.fromScene == quickSettingsScene &&
+                                    transitionState.toScene in SceneFamilies.Home)
                         ) {
                             // during QS expansion, increase fraction at same rate as scrim alpha,
                             // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
@@ -105,14 +120,22 @@ constructor(
     private operator fun SceneKey.contains(scene: SceneKey) =
         sceneInteractor.isSceneInFamily(scene, this)
 
+    private val qsAllowsClipping: Flow<Boolean> =
+        combine(shadeInteractor.shadeMode, shadeInteractor.qsExpansion) { shadeMode, qsExpansion ->
+                qsExpansion < 0.5f || shadeMode != ShadeMode.Single
+            }
+            .distinctUntilChanged()
+
     /** The bounds of the notification stack in the current scene. */
     private val shadeScrimClipping: Flow<ShadeScrimClipping?> =
         combine(
+                qsAllowsClipping,
                 stackAppearanceInteractor.shadeScrimBounds,
                 stackAppearanceInteractor.shadeScrimRounding,
-            ) { bounds, rounding ->
-                bounds?.let { ShadeScrimClipping(it, rounding) }
+            ) { qsAllowsClipping, bounds, rounding ->
+                bounds?.takeIf { qsAllowsClipping }?.let { ShadeScrimClipping(it, rounding) }
             }
+            .distinctUntilChanged()
             .dumpWhileCollecting("stackClipping")
 
     fun shadeScrimShape(
@@ -146,6 +169,7 @@ constructor(
 
     /** Receives the amount (px) that the stack should scroll due to internal expansion. */
     val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
+
     /**
      * Receives whether the current touch gesture is overscroll as it has already been consumed by
      * the stack.
@@ -155,8 +179,11 @@ constructor(
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =
-        sceneInteractor
-            .isCurrentSceneInFamily(SceneFamilies.NotifShade)
+        sceneInteractor.currentScene
+            .map {
+                sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) ||
+                    it == Scenes.Lockscreen
+            }
             .dumpWhileCollecting("isScrollable")
 
     /** Whether the notification stack is displayed in doze mode. */
@@ -166,5 +193,10 @@ constructor(
         } else {
             keyguardInteractor.get().isDozing.dumpWhileCollecting("isDozing")
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): NotificationScrollViewModel
     }
 }

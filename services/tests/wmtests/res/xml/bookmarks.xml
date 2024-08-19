@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2024 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<bookmarks>
+    <!-- the key combinations for the following shortcuts must be in sync
+         with the key combinations sent by the test in ModifierShortcutTests.java -->
+    <bookmark
+        role="android.app.role.BROWSER"
+        shortcut="b" />
+    <bookmark
+        category="android.intent.category.APP_CONTACTS"
+        shortcut="c" />
+    <bookmark
+        category="android.intent.category.APP_EMAIL"
+        shortcut="e" />
+    <bookmark
+        category="android.intent.category.APP_CALENDAR"
+        shortcut="k" />
+    <bookmark
+        category="android.intent.category.APP_MAPS"
+        shortcut="m" />
+    <bookmark
+        category="android.intent.category.APP_MUSIC"
+        shortcut="p" />
+    <bookmark
+        role="android.app.role.SMS"
+        shortcut="s" />
+    <bookmark
+        category="android.intent.category.APP_CALCULATOR"
+        shortcut="u" />
+
+    <bookmark
+        role="android.app.role.BROWSER"
+        shortcut="b"
+        shift="true" />
+
+    <bookmark
+        category="android.intent.category.APP_CONTACTS"
+        shortcut="c"
+        shift="true" />
+
+    <bookmark
+        package="com.test"
+        class="com.test.BookmarkTest"
+        shortcut="j"
+        shift="true" />
+
+    <!-- The following shortcuts will not be invoked by tests but are here to
+         provide test coverage of parsing the different types of shortcut. -->
+    <bookmark
+        package="com.test"
+        class="com.test.BookmarkTest"
+        shortcut="j" />
+    <bookmark
+        package="com.test2"
+        class="com.test.BookmarkTest"
+        shortcut="d" />
+
+
+    <!-- It's intended that this package/class will NOT resolve so we test the resolution
+         failure case. -->
+    <bookmark
+        package="com.test3"
+        class="com.test.BookmarkTest"
+        shortcut="f" />
+
+</bookmarks>

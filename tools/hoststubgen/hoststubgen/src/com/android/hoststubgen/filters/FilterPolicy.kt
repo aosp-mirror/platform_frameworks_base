@@ -70,7 +70,7 @@ enum class FilterPolicy {
         get() = this == SubstituteAndStub || this == SubstituteAndKeep
 
     val needsInStub: Boolean
-        get() = this == Stub || this == StubClass || this == SubstituteAndStub
+        get() = this == Stub || this == StubClass || this == SubstituteAndStub || this == Ignore
 
     val needsInImpl: Boolean
         get() = this != Remove

@@ -41,8 +41,8 @@ import android.os.RemoteException;
 import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.widget.IRemoteViewsFactory;
@@ -355,7 +355,8 @@ public class RemoteViewsAdapterTest {
         }
 
         @Override
-        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize) {
+        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize,
+                int capBitmapSize) {
             RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
                     new RemoteViews.RemoteCollectionItems.Builder();
             itemsBuilder.setHasStableIds(hasStableIds())

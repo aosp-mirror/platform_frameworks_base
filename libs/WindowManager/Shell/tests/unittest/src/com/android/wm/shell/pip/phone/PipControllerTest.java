@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 import static java.lang.Integer.MAX_VALUE;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -68,10 +67,10 @@ import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
+import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -183,7 +182,7 @@ public class PipControllerTest extends ShellTestCase {
 
     @Test
     public void instantiatePipController_registersPipTransitionCallback() {
-        verify(mMockPipTransitionController).registerPipTransitionCallback(any());
+        verify(mMockPipTransitionController).registerPipTransitionCallback(any(), any());
     }
 
     @Test
@@ -232,27 +231,6 @@ public class PipControllerTest extends ShellTestCase {
                 mMockTaskStackListener, mMockPipParamsChangedForwarder,
                 mMockDisplayInsetsController, mMockTabletopModeController,
                 mMockOneHandedController, mMockExecutor));
-    }
-
-    @Test
-    public void onActivityHidden_isLastPipComponentName_clearLastPipComponent() {
-        final ComponentName component1 = new ComponentName(mContext, "component1");
-        when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
-
-        mPipController.mPinnedTaskListener.onActivityHidden(component1);
-
-        verify(mMockPipBoundsState).setLastPipComponentName(null);
-    }
-
-    @Test
-    public void onActivityHidden_isNotLastPipComponentName_lastPipComponentNotCleared() {
-        final ComponentName component1 = new ComponentName(mContext, "component1");
-        final ComponentName component2 = new ComponentName(mContext, "component2");
-        when(mMockPipBoundsState.getLastPipComponentName()).thenReturn(component1);
-
-        mPipController.mPinnedTaskListener.onActivityHidden(component2);
-
-        verify(mMockPipBoundsState, never()).setLastPipComponentName(null);
     }
 
     @Test

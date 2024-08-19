@@ -1127,7 +1127,7 @@ public class SubscriptionManager {
      * <P>Type: INTEGER (int)</P>
      * @hide
      */
-    public static final String IS_NTN = SimInfo.COLUMN_IS_NTN;
+    public static final String IS_ONLY_NTN = SimInfo.COLUMN_IS_ONLY_NTN;
 
     /**
      * TelephonyProvider column name to identify service capabilities.
@@ -1166,6 +1166,26 @@ public class SubscriptionManager {
      */
     public static final String SATELLITE_ENTITLEMENT_PLMNS =
             SimInfo.COLUMN_SATELLITE_ENTITLEMENT_PLMNS;
+
+    /**
+     * TelephonyProvider column name to indicate the satellite ESOS supported. The value of this
+     * column is set based on {@link CarrierConfigManager#KEY_SATELLITE_ESOS_SUPPORTED_BOOL}.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     *
+     * @hide
+     */
+    public static final String SATELLITE_ESOS_SUPPORTED = SimInfo.COLUMN_SATELLITE_ESOS_SUPPORTED;
+
+    /**
+     * TelephonyProvider column name for satellite provisioned status. The value of this
+     * column is set based on whether carrier roaming NB-IOT satellite service is provisioned or
+     * not. By default, it's disabled.
+     *
+     * @hide
+     */
+    public static final String IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM =
+            SimInfo.COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -2783,17 +2803,17 @@ public class SubscriptionManager {
         return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getActiveModemCount();
     }
 
-    /** @hide */
+    /**
+     * Puts phone ID and subscription ID into the {@code intent}.
+     *
+     * <p>If the subscription ID is not valid, only puts phone ID into the {@code intent}.
+     *
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
         int subId = SubscriptionManager.getSubscriptionId(phoneId);
-        if (isValidSubscriptionId(subId)) {
-            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
-        } else {
-            logd("putPhoneIdAndSubIdExtra: no valid subs");
-            intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-            intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
-        }
+        putPhoneIdAndMaybeSubIdExtra(intent, phoneId, subId);
     }
 
     /** @hide */
@@ -2803,6 +2823,23 @@ public class SubscriptionManager {
         intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
         putSubscriptionIdExtra(intent, subId);
+    }
+
+    /**
+     * Puts phone ID and subscription ID into the {@code intent}.
+     *
+     * <p>If the subscription ID is not valid, only puts phone ID into the {@code intent}.
+     *
+     * @hide
+     */
+    public static void putPhoneIdAndMaybeSubIdExtra(Intent intent, int phoneId, int subId) {
+        if (isValidSubscriptionId(subId)) {
+            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
+        } else {
+            if (VDBG) logd("putPhoneIdAndMaybeSubIdExtra: invalid subId");
+            intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
+            intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
+        }
     }
 
     /**

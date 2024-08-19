@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.bubbles;
 
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -67,11 +67,11 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.AlphaOptimizedButton;
-import com.android.wm.shell.common.TriangleShape;
+import com.android.wm.shell.shared.TriangleShape;
 import com.android.wm.shell.taskview.TaskView;
 
 import java.io.PrintWriter;
@@ -225,13 +225,15 @@ public class BubbleExpandedView extends LinearLayout {
                     options.setTaskAlwaysOnTop(true);
                     options.setLaunchedFromBubble(true);
                     options.setPendingIntentBackgroundActivityStartMode(
-                            MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                    options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+                            MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
                     Intent fillInIntent = new Intent();
                     // Apply flags to make behaviour match documentLaunchMode=always.
                     fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                     fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+
+                    final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
+                            || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
 
                     if (mBubble.isAppBubble()) {
                         Context context =
@@ -247,7 +249,8 @@ public class BubbleExpandedView extends LinearLayout {
                                 /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
                                 launchBounds);
-                    } else if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
+                    } else if (!mIsOverflow && isShortcutBubble) {
+                        ProtoLog.v(WM_SHELL_BUBBLES, "startingShortcutBubble=%s", getBubbleKey());
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
                                 options, launchBounds);
@@ -373,6 +376,7 @@ public class BubbleExpandedView extends LinearLayout {
         //   ==> activity view
         //   ==> manage button
         bringChildToFront(mManageButton);
+        setManageClickListener();
 
         applyThemeAttrs();
 
@@ -503,6 +507,7 @@ public class BubbleExpandedView extends LinearLayout {
                 R.layout.bubble_manage_button, this /* parent */, false /* attach */);
         addView(mManageButton);
         mManageButton.setVisibility(visibility);
+        setManageClickListener();
         post(() -> {
             int touchAreaHeight =
                     getResources().getDimensionPixelSize(
@@ -647,9 +652,8 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
-    // TODO: Could listener be passed when we pass StackView / can we avoid setting this like this
-    void setManageClickListener(OnClickListener manageClickListener) {
-        mManageButton.setOnClickListener(manageClickListener);
+    private void setManageClickListener() {
+        mManageButton.setOnClickListener(v -> mStackView.onManageBubbleClicked());
     }
 
     /**
@@ -917,7 +921,11 @@ public class BubbleExpandedView extends LinearLayout {
             return;
         }
         boolean isNew = mBubble == null || didBackingContentChange(bubble);
-        if (isNew || bubble.getKey().equals(mBubble.getKey())) {
+        boolean isUpdate = bubble != null && mBubble != null
+                && bubble.getKey().equals(mBubble.getKey());
+        ProtoLog.d(WM_SHELL_BUBBLES, "BubbleExpandedView - update bubble=%s; isNew=%b; isUpdate=%b",
+                bubble.getKey(), isNew, isUpdate);
+        if (isNew || isUpdate) {
             mBubble = bubble;
             mManageButton.setContentDescription(getResources().getString(
                     R.string.bubbles_settings_button_description, bubble.getAppName()));
@@ -1148,5 +1156,7 @@ public class BubbleExpandedView extends LinearLayout {
         pw.print(prefix); pw.println("BubbleExpandedView:");
         pw.print(prefix); pw.print("  taskId: "); pw.println(mTaskId);
         pw.print(prefix); pw.print("  stackView: "); pw.println(mStackView);
+        pw.print(prefix); pw.print("  contentVisibility: "); pw.println(mIsContentVisible);
+        pw.print(prefix); pw.print("  isAnimating: "); pw.println(mIsAnimating);
     }
 }

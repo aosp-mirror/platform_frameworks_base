@@ -40,6 +40,8 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -224,6 +226,45 @@ public class CountQuotaTrackerTest {
         }
     }
 
+    private LongArrayQueue getEvents(int userId, String packageName, String tag) {
+        synchronized (mQuotaTracker.mLock) {
+            return mQuotaTracker.getEvents(userId, packageName, tag);
+        }
+    }
+
+    private void updateExecutionStats(final int userId, @NonNull final String packageName,
+            @Nullable final String tag, @NonNull ExecutionStats stats) {
+        synchronized (mQuotaTracker.mLock) {
+            mQuotaTracker.updateExecutionStatsLocked(userId, packageName, tag, stats);
+        }
+    }
+
+    private ExecutionStats getExecutionStats(final int userId, @NonNull final String packageName,
+            @Nullable final String tag) {
+        synchronized (mQuotaTracker.mLock) {
+            return mQuotaTracker.getExecutionStatsLocked(userId, packageName, tag);
+        }
+    }
+
+    private void maybeScheduleStartAlarm(final int userId, @NonNull final String packageName,
+            @Nullable final String tag) {
+        synchronized (mQuotaTracker.mLock) {
+            mQuotaTracker.maybeScheduleStartAlarmLocked(userId, packageName, tag);
+        }
+    }
+
+    private void maybeScheduleCleanupAlarm() {
+        synchronized (mQuotaTracker.mLock) {
+            mQuotaTracker.maybeScheduleCleanupAlarmLocked();
+        }
+    }
+
+    private void deleteObsoleteEvents() {
+        synchronized (mQuotaTracker.mLock) {
+            mQuotaTracker.deleteObsoleteEventsLocked();
+        }
+    }
+
     @Test
     public void testDeleteObsoleteEventsLocked() {
         // Count window size should only apply to event list.
@@ -243,9 +284,9 @@ public class CountQuotaTrackerTest {
         expectedEvents.addLast(now - HOUR_IN_MILLIS);
         expectedEvents.addLast(now - 1);
 
-        mQuotaTracker.deleteObsoleteEventsLocked();
+        deleteObsoleteEvents();
 
-        LongArrayQueue remainingEvents = mQuotaTracker.getEvents(TEST_USER_ID, TEST_PACKAGE,
+        LongArrayQueue remainingEvents = getEvents(TEST_USER_ID, TEST_PACKAGE,
                 TEST_TAG);
         assertTrue(longArrayQueueEquals(expectedEvents, remainingEvents));
     }
@@ -270,15 +311,15 @@ public class CountQuotaTrackerTest {
         removal.putExtra(Intent.EXTRA_UID, TEST_UID);
         mReceiver.onReceive(mContext, removal);
         assertNull(
-                mQuotaTracker.getEvents(TEST_USER_ID, "com.android.test.remove", "tag1"));
+                getEvents(TEST_USER_ID, "com.android.test.remove", "tag1"));
         assertNull(
-                mQuotaTracker.getEvents(TEST_USER_ID, "com.android.test.remove", "tag2"));
+                getEvents(TEST_USER_ID, "com.android.test.remove", "tag2"));
         assertNull(
-                mQuotaTracker.getEvents(TEST_USER_ID, "com.android.test.remove", "tag3"));
+                getEvents(TEST_USER_ID, "com.android.test.remove", "tag3"));
         assertTrue(longArrayQueueEquals(expected1,
-                mQuotaTracker.getEvents(TEST_USER_ID, "com.android.test.stay", "tag1")));
+                getEvents(TEST_USER_ID, "com.android.test.stay", "tag1")));
         assertTrue(longArrayQueueEquals(expected2,
-                mQuotaTracker.getEvents(TEST_USER_ID, "com.android.test.stay", "tag2")));
+                getEvents(TEST_USER_ID, "com.android.test.stay", "tag2")));
     }
 
     @Test
@@ -298,10 +339,10 @@ public class CountQuotaTrackerTest {
         Intent removal = new Intent(Intent.ACTION_USER_REMOVED);
         removal.putExtra(Intent.EXTRA_USER_HANDLE, TEST_USER_ID);
         mReceiver.onReceive(mContext, removal);
-        assertNull(mQuotaTracker.getEvents(TEST_USER_ID, TEST_PACKAGE, "tag1"));
-        assertNull(mQuotaTracker.getEvents(TEST_USER_ID, TEST_PACKAGE, "tag2"));
-        assertNull(mQuotaTracker.getEvents(TEST_USER_ID, TEST_PACKAGE, "tag3"));
-        longArrayQueueEquals(expected, mQuotaTracker.getEvents(10, TEST_PACKAGE, "tag4"));
+        assertNull(getEvents(TEST_USER_ID, TEST_PACKAGE, "tag1"));
+        assertNull(getEvents(TEST_USER_ID, TEST_PACKAGE, "tag2"));
+        assertNull(getEvents(TEST_USER_ID, TEST_PACKAGE, "tag3"));
+        longArrayQueueEquals(expected, getEvents(10, TEST_PACKAGE, "tag4"));
     }
 
     @Test
@@ -323,7 +364,7 @@ public class CountQuotaTrackerTest {
         inputStats.countLimit = expectedStats.countLimit = 3;
         // Invalid time is now +24 hours since there are no sessions at all for the app.
         expectedStats.expirationTimeElapsed = now + 24 * HOUR_IN_MILLIS;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, "com.android.test.not.run", TEST_TAG,
+        updateExecutionStats(TEST_USER_ID, "com.android.test.not.run", TEST_TAG,
                 inputStats);
         assertEquals(expectedStats, inputStats);
 
@@ -333,19 +374,19 @@ public class CountQuotaTrackerTest {
         // Invalid time is now since there was an event exactly windowSizeMs ago.
         expectedStats.expirationTimeElapsed = now;
         expectedStats.countInWindow = 1;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = 3 * MINUTE_IN_MILLIS;
         expectedStats.expirationTimeElapsed = now + 2 * MINUTE_IN_MILLIS;
         expectedStats.countInWindow = 1;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = 4 * MINUTE_IN_MILLIS;
         expectedStats.expirationTimeElapsed = now + 3 * MINUTE_IN_MILLIS;
         expectedStats.countInWindow = 1;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = 49 * MINUTE_IN_MILLIS;
@@ -353,13 +394,13 @@ public class CountQuotaTrackerTest {
         // minutes.
         expectedStats.expirationTimeElapsed = now + 44 * MINUTE_IN_MILLIS;
         expectedStats.countInWindow = 2;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = 50 * MINUTE_IN_MILLIS;
         expectedStats.expirationTimeElapsed = now + 45 * MINUTE_IN_MILLIS;
         expectedStats.countInWindow = 2;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = HOUR_IN_MILLIS;
@@ -370,28 +411,28 @@ public class CountQuotaTrackerTest {
         // App is at event count limit but the oldest session is at the edge of the window, so
         // in quota time is now.
         expectedStats.inQuotaTimeElapsed = now;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = 2 * HOUR_IN_MILLIS;
         expectedStats.expirationTimeElapsed = now + HOUR_IN_MILLIS;
         expectedStats.countInWindow = 3;
         expectedStats.inQuotaTimeElapsed = now + HOUR_IN_MILLIS;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = 5 * HOUR_IN_MILLIS;
         expectedStats.expirationTimeElapsed = now + HOUR_IN_MILLIS;
         expectedStats.countInWindow = 4;
         expectedStats.inQuotaTimeElapsed = now + 4 * HOUR_IN_MILLIS;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
 
         inputStats.windowSizeMs = expectedStats.windowSizeMs = 6 * HOUR_IN_MILLIS;
         expectedStats.expirationTimeElapsed = now + 2 * HOUR_IN_MILLIS;
         expectedStats.countInWindow = 4;
         expectedStats.inQuotaTimeElapsed = now + 5 * HOUR_IN_MILLIS;
-        mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
+        updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, inputStats);
         assertEquals(expectedStats, inputStats);
     }
 
@@ -428,7 +469,7 @@ public class CountQuotaTrackerTest {
         expectedStats.countInWindow = 1;
         mCategorizer.mCategoryToUse = ACTIVE_BUCKET_CATEGORY;
         assertEquals(expectedStats,
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
 
         // Working
         expectedStats.expirationTimeElapsed = now;
@@ -437,7 +478,7 @@ public class CountQuotaTrackerTest {
         expectedStats.countInWindow = 2;
         mCategorizer.mCategoryToUse = WORKING_SET_BUCKET_CATEGORY;
         assertEquals(expectedStats,
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
 
         // Frequent
         expectedStats.expirationTimeElapsed = now + HOUR_IN_MILLIS;
@@ -447,7 +488,7 @@ public class CountQuotaTrackerTest {
         expectedStats.inQuotaTimeElapsed = now + HOUR_IN_MILLIS;
         mCategorizer.mCategoryToUse = FREQUENT_BUCKET_CATEGORY;
         assertEquals(expectedStats,
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
 
         // Rare
         expectedStats.expirationTimeElapsed = now + HOUR_IN_MILLIS;
@@ -457,7 +498,7 @@ public class CountQuotaTrackerTest {
         expectedStats.inQuotaTimeElapsed = now + 19 * HOUR_IN_MILLIS;
         mCategorizer.mCategoryToUse = RARE_BUCKET_CATEGORY;
         assertEquals(expectedStats,
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
     }
 
     /**
@@ -481,7 +522,7 @@ public class CountQuotaTrackerTest {
         expectedStats.countInWindow = 3;
         expectedStats.expirationTimeElapsed = 2 * HOUR_IN_MILLIS + 30_000;
         assertEquals(expectedStats,
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG));
     }
 
     @Test
@@ -556,20 +597,20 @@ public class CountQuotaTrackerTest {
         mQuotaTracker.setCountLimit(SINGLE_CATEGORY, 5, 24 * HOUR_IN_MILLIS);
 
         // No sessions saved yet.
-        mQuotaTracker.maybeScheduleCleanupAlarmLocked();
+        maybeScheduleCleanupAlarm();
         verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_CLEANUP), any(), any());
 
         // Test with only one timing session saved.
         final long now = mInjector.getElapsedRealtime();
         logEventAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - 6 * HOUR_IN_MILLIS);
-        mQuotaTracker.maybeScheduleCleanupAlarmLocked();
+        maybeScheduleCleanupAlarm();
         verify(mAlarmManager, timeout(1000).times(1))
                 .set(anyInt(), eq(now + 18 * HOUR_IN_MILLIS), eq(TAG_CLEANUP), any(), any());
 
         // Test with new (more recent) timing sessions saved. AlarmManger shouldn't be called again.
         logEventAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - 3 * HOUR_IN_MILLIS);
         logEventAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - HOUR_IN_MILLIS);
-        mQuotaTracker.maybeScheduleCleanupAlarmLocked();
+        maybeScheduleCleanupAlarm();
         verify(mAlarmManager, times(1))
                 .set(anyInt(), eq(now + 18 * HOUR_IN_MILLIS), eq(TAG_CLEANUP), any(), any());
     }
@@ -587,14 +628,14 @@ public class CountQuotaTrackerTest {
         mQuotaTracker.setCountLimit(SINGLE_CATEGORY, 10, 8 * HOUR_IN_MILLIS);
 
         // No sessions saved yet.
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         verify(mAlarmManager, never()).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test with timing sessions out of window.
         final long now = mInjector.getElapsedRealtime();
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - 10 * HOUR_IN_MILLIS, 20);
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         verify(mAlarmManager, never()).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
@@ -602,26 +643,26 @@ public class CountQuotaTrackerTest {
         final long start = now - (6 * HOUR_IN_MILLIS);
         final long expectedAlarmTime = start + 8 * HOUR_IN_MILLIS;
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, start, 5);
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         verify(mAlarmManager, never()).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Add some more sessions, but still in quota.
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - 3 * HOUR_IN_MILLIS, 1);
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - HOUR_IN_MILLIS, 3);
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         verify(mAlarmManager, never()).setWindow(
                 anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // Test when out of quota.
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - HOUR_IN_MILLIS, 1);
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         verify(mAlarmManager, timeout(1000).times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
                 any(Handler.class));
 
         // Alarm already scheduled, so make sure it's not scheduled again.
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         verify(mAlarmManager, times(1)).setWindow(
                 anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(),
                 any(Handler.class));
@@ -656,7 +697,7 @@ public class CountQuotaTrackerTest {
 
         // Start in ACTIVE bucket.
         mCategorizer.mCategoryToUse = ACTIVE_BUCKET_CATEGORY;
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, never())
                 .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(),
                         any(Handler.class));
@@ -665,40 +706,40 @@ public class CountQuotaTrackerTest {
         // And down from there.
         final long expectedWorkingAlarmTime = outOfQuotaTime + (2 * HOUR_IN_MILLIS);
         mCategorizer.mCategoryToUse = WORKING_SET_BUCKET_CATEGORY;
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .setWindow(anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
                         eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         final long expectedFrequentAlarmTime = outOfQuotaTime + (8 * HOUR_IN_MILLIS);
         mCategorizer.mCategoryToUse = FREQUENT_BUCKET_CATEGORY;
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .setWindow(anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
                         eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         final long expectedRareAlarmTime = outOfQuotaTime + (24 * HOUR_IN_MILLIS);
         mCategorizer.mCategoryToUse = RARE_BUCKET_CATEGORY;
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .setWindow(anyInt(), eq(expectedRareAlarmTime), anyLong(),
                         eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         // And back up again.
         mCategorizer.mCategoryToUse = FREQUENT_BUCKET_CATEGORY;
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .setWindow(anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
                         eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         mCategorizer.mCategoryToUse = WORKING_SET_BUCKET_CATEGORY;
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .setWindow(anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
                         eq(TAG_QUOTA_CHECK), any(), any(Handler.class));
 
         mCategorizer.mCategoryToUse = ACTIVE_BUCKET_CATEGORY;
-        mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+        maybeScheduleStartAlarm(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .cancel(any(AlarmManager.OnAlarmListener.class));
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
@@ -745,14 +786,14 @@ public class CountQuotaTrackerTest {
         mQuotaTracker.setCountLimit(SINGLE_CATEGORY, 10, 2 * HOUR_IN_MILLIS);
 
         ExecutionStats stats =
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         assertEquals(0, stats.countInWindow);
 
         for (int i = 0; i < 10; ++i) {
             mQuotaTracker.noteEvent(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
             advanceElapsedClock(10 * SECOND_IN_MILLIS);
 
-            mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
+            updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
             assertEquals(0, stats.countInWindow);
         }
     }
@@ -766,14 +807,14 @@ public class CountQuotaTrackerTest {
         mQuotaTracker.setCountLimit(SINGLE_CATEGORY, 10, 2 * HOUR_IN_MILLIS);
 
         ExecutionStats stats =
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         assertEquals(0, stats.countInWindow);
 
         for (int i = 0; i < 10; ++i) {
             mQuotaTracker.noteEvent(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
             advanceElapsedClock(10 * SECOND_IN_MILLIS);
 
-            mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
+            updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
             assertEquals(i + 1, stats.countInWindow);
         }
     }
@@ -785,14 +826,14 @@ public class CountQuotaTrackerTest {
         mQuotaTracker.setCountLimit(SINGLE_CATEGORY, 10, 2 * HOUR_IN_MILLIS);
 
         ExecutionStats stats =
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         assertEquals(0, stats.countInWindow);
 
         for (int i = 0; i < 10; ++i) {
             mQuotaTracker.noteEvent(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
             advanceElapsedClock(10 * SECOND_IN_MILLIS);
 
-            mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
+            updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
             assertEquals(0, stats.countInWindow);
         }
     }
@@ -806,14 +847,14 @@ public class CountQuotaTrackerTest {
         mQuotaTracker.setCountLimit(SINGLE_CATEGORY, 10, 2 * HOUR_IN_MILLIS);
 
         ExecutionStats stats =
-                mQuotaTracker.getExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
+                getExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         assertEquals(0, stats.countInWindow);
 
         for (int i = 0; i < 10; ++i) {
             mQuotaTracker.noteEvent(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
             advanceElapsedClock(10 * SECOND_IN_MILLIS);
 
-            mQuotaTracker.updateExecutionStatsLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
+            updateExecutionStats(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, stats);
             assertEquals(i + 1, stats.countInWindow);
         }
     }

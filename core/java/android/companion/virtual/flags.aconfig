@@ -35,13 +35,6 @@ flag {
 }
 
 flag {
-  name: "consistent_display_flags"
-  namespace: "virtual_devices"
-  description: "Make virtual display flags consistent with display manager"
-  bug: "300905478"
-}
-
-flag {
   name: "vdm_custom_ime"
   is_exported: true
   namespace: "virtual_devices"
@@ -81,13 +74,6 @@ flag {
 }
 
 flag {
-  name: "stream_permissions"
-  namespace: "virtual_devices"
-  description: "Enable streaming permission dialogs to Virtual Devices"
-  bug: "291737919"
-}
-
-flag {
   name: "persistent_device_id_api"
   is_exported: true
   namespace: "virtual_devices"
@@ -96,37 +82,11 @@ flag {
 }
 
 flag {
-  name: "express_metrics"
-  namespace: "virtual_devices"
-  description: "Enable express metrics in VDM"
-  bug: "307297730"
-}
-
-flag {
-  name: "interactive_screen_mirror"
-  is_exported: true
-  namespace: "virtual_devices"
-  description: "Enable interactive screen mirroring using Virtual Devices"
-  bug: "292212199"
-}
-
-flag {
   name: "virtual_stylus"
   is_exported: true
   namespace: "virtual_devices"
   description: "Enable virtual stylus input"
   bug: "304829446"
-}
-
-flag {
-  name: "intercept_intents_before_applying_policy"
-  is_exported: true
-  namespace: "virtual_devices"
-  description: "Apply intent interception before applying activity policy"
-  bug: "333444131"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {

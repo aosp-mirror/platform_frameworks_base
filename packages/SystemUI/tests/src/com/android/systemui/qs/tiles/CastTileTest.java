@@ -39,7 +39,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -54,13 +53,10 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository;
-import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-
-import kotlinx.coroutines.test.TestScope;
 
 import org.junit.After;
 import org.junit.Before;
@@ -105,12 +101,10 @@ public class CastTileTest extends SysuiTestCase {
     @Mock
     private QsEventLogger mUiEventLogger;
 
-    private WifiInteractor mWifiInteractor;
     private final TileJavaAdapter mJavaAdapter = new TileJavaAdapter();
     private final FakeConnectivityRepository mConnectivityRepository =
             new FakeConnectivityRepository();
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
-    private final TestScope mTestScope = TestScopeProvider.getTestScope();
 
     private TestableLooper mTestableLooper;
     private CastTile mCastTile;
@@ -172,8 +166,7 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testStateActive_wifiEnabledAndCasting() {
         createAndStartTileOldImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastController.CastDevice.STATE_CONNECTED;
+        CastDevice device = createConnectedCastDevice();
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -232,8 +225,7 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void stateActive_wifiConnectedAndCasting_newPipeline() {
         createAndStartTileNewImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastDevice.STATE_CONNECTED;
+        CastDevice device = createConnectedCastDevice();
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -248,8 +240,7 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void stateActive_ethernetConnectedAndCasting_newPipeline() {
         createAndStartTileNewImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastDevice.STATE_CONNECTED;
+        CastDevice device = createConnectedCastDevice();
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -286,8 +277,7 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testStateActive_hotspotEnabledAndConnectedAndCasting() {
         createAndStartTileOldImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastController.CastDevice.STATE_CONNECTED;
+        CastDevice device = createConnectedCastDevice();
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -309,9 +299,13 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testHandleClick_castDevicePresent() {
         createAndStartTileOldImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastDevice.STATE_CONNECTED;
-        device.tag = mock(MediaRouter.RouteInfo.class);
+        CastDevice device = new CastDevice(
+                "id",
+                /* name= */ null,
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaRouter,
+                /* tag= */ mock(MediaRouter.RouteInfo.class));
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -327,9 +321,13 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testHandleClick_projectionOnly() {
         createAndStartTileOldImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastDevice.STATE_CONNECTED;
-        device.tag = mock(MediaProjectionInfo.class);
+        CastDevice device = new CastDevice(
+                "id",
+                /* name= */ null,
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaProjection,
+                /* tag= */ mock(MediaProjectionInfo.class));
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -344,31 +342,40 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testUpdateState_projectionOnly() {
         createAndStartTileOldImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastDevice.STATE_CONNECTED;
-        device.tag = mock(MediaProjectionInfo.class);
-        device.name = "Test Projection Device";
+        CastDevice device = new CastDevice(
+                "id",
+                /* name= */ "Test Projection Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaProjection,
+                /* tag= */ mock(MediaProjectionInfo.class));
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
 
         enableWifiAndProcessMessages();
         assertEquals(Tile.STATE_ACTIVE, mCastTile.getState().state);
-        assertTrue(mCastTile.getState().secondaryLabel.toString().startsWith(device.name));
+        assertTrue(mCastTile.getState().secondaryLabel.toString()
+                .startsWith("Test Projection Device"));
     }
 
     @Test
     public void testUpdateState_castingAndProjection() {
         createAndStartTileOldImpl();
-        CastController.CastDevice casting = new CastController.CastDevice();
-        casting.state = CastDevice.STATE_CONNECTED;
-        casting.tag = mock(RouteInfo.class);
-        casting.name = "Test Casting Device";
-
-        CastController.CastDevice projection = new CastController.CastDevice();
-        projection.state = CastDevice.STATE_CONNECTED;
-        projection.tag = mock(MediaProjectionInfo.class);
-        projection.name = "Test Projection Device";
+        CastDevice casting = new CastDevice(
+                "id1",
+                /* name= */ "Test Casting Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaRouter,
+                /* tag= */ mock(RouteInfo.class));
+        CastDevice projection = new CastDevice(
+                "id2",
+                /* name= */ "Test Projection Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaProjection,
+                /* tag= */ mock(MediaProjectionInfo.class));
 
         List<CastDevice> devices = new ArrayList<>();
         devices.add(casting);
@@ -379,22 +386,27 @@ public class CastTileTest extends SysuiTestCase {
 
         // Note here that the tile should be active, and should choose casting over projection.
         assertEquals(Tile.STATE_ACTIVE, mCastTile.getState().state);
-        assertTrue(mCastTile.getState().secondaryLabel.toString().startsWith(casting.name));
+        assertTrue(mCastTile.getState().secondaryLabel.toString()
+                .startsWith("Test Casting Device"));
     }
 
     @Test
     public void testUpdateState_connectedAndConnecting() {
         createAndStartTileOldImpl();
-        CastController.CastDevice connecting = new CastController.CastDevice();
-        connecting.state = CastDevice.STATE_CONNECTING;
-        connecting.tag = mock(RouteInfo.class);
-        connecting.name = "Test Casting Device";
-
-        CastController.CastDevice connected = new CastController.CastDevice();
-        connected.state = CastDevice.STATE_CONNECTED;
-        connected.tag = mock(RouteInfo.class);
-        connected.name = "Test Casting Device";
-
+        CastDevice connecting = new CastDevice(
+                "id",
+                /* name= */ "Test Connecting Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connecting,
+                /* origin= */ CastDevice.CastOrigin.MediaRouter,
+                /* tag= */ mock(RouteInfo.class));
+        CastDevice connected = new CastDevice(
+                "id",
+                /* name= */ "Test Connected Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaRouter,
+                /* tag= */ mock(RouteInfo.class));
         List<CastDevice> devices = new ArrayList<>();
         devices.add(connecting);
         devices.add(connected);
@@ -404,7 +416,8 @@ public class CastTileTest extends SysuiTestCase {
 
         // Tile should be connected and always prefer the connected device.
         assertEquals(Tile.STATE_ACTIVE, mCastTile.getState().state);
-        assertTrue(mCastTile.getState().secondaryLabel.toString().startsWith(connected.name));
+        assertTrue(mCastTile.getState().secondaryLabel.toString()
+                .startsWith("Test Connected Device"));
     }
 
     @Test
@@ -427,8 +440,7 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testExpandView_casting_projection() {
         createAndStartTileOldImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastController.CastDevice.STATE_CONNECTED;
+        CastDevice device = createConnectedCastDevice();
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -441,9 +453,14 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testExpandView_connecting_projection() {
         createAndStartTileOldImpl();
-        CastController.CastDevice connecting = new CastController.CastDevice();
-        connecting.state = CastDevice.STATE_CONNECTING;
-        connecting.name = "Test Casting Device";
+        CastDevice connecting = new CastDevice(
+                "id",
+                /* name= */
+                "Test Projection Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaProjection,
+                /* tag= */ mock(MediaProjectionInfo.class));
 
         List<CastDevice> devices = new ArrayList<>();
         devices.add(connecting);
@@ -457,9 +474,14 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testExpandView_casting_mediaRoute() {
         createAndStartTileOldImpl();
-        CastController.CastDevice device = new CastController.CastDevice();
-        device.state = CastDevice.STATE_CONNECTED;
-        device.tag = mock(MediaRouter.RouteInfo.class);
+        CastDevice device = new CastDevice(
+                "id",
+                /* name= */ "Test Router Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaRouter,
+                /* tag= */ mock(RouteInfo.class));
+
         List<CastDevice> devices = new ArrayList<>();
         devices.add(device);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -472,11 +494,13 @@ public class CastTileTest extends SysuiTestCase {
     @Test
     public void testExpandView_connecting_mediaRoute() {
         createAndStartTileOldImpl();
-        CastController.CastDevice connecting = new CastController.CastDevice();
-        connecting.state = CastDevice.STATE_CONNECTING;
-        connecting.tag = mock(RouteInfo.class);
-        connecting.name = "Test Casting Device";
-
+        CastDevice connecting = new CastDevice(
+                "id",
+                /* name= */ "Test Router Device",
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connecting,
+                /* origin= */ CastDevice.CastOrigin.MediaRouter,
+                /* tag= */ mock(RouteInfo.class));
         List<CastDevice> devices = new ArrayList<>();
         devices.add(connecting);
         when(mController.getCastDevices()).thenReturn(devices);
@@ -566,5 +590,15 @@ public class CastTileTest extends SysuiTestCase {
         verify(mHotspotController).observe(any(LifecycleOwner.class),
                 hotspotCallbackArgumentCaptor.capture());
         mHotspotCallback = hotspotCallbackArgumentCaptor.getValue();
+    }
+
+    private CastDevice createConnectedCastDevice() {
+        return new CastDevice(
+                "id",
+                /* name= */ null,
+                /* description= */ null,
+                /* state= */ CastDevice.CastState.Connected,
+                /* origin= */ CastDevice.CastOrigin.MediaProjection,
+                /* tag= */ null);
     }
 }

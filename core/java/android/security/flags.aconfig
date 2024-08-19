@@ -27,14 +27,6 @@ flag {
 }
 
 flag {
-    name: "fix_unlocked_device_required_keys_v2"
-    namespace: "hardware_backed_security"
-    description: "Fix bugs in behavior of UnlockedDeviceRequired keystore keys"
-    bug: "296464083"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "keyinfo_unlocked_device_required"
     is_exported: true
     namespace: "hardware_backed_security"
@@ -99,4 +91,11 @@ flag {
     namespace: "hardware_backed_security"
     description: "Add a dump capability for attestation_verification service"
     bug: "335498868"
+}
+
+flag {
+  name: "should_trust_manager_listen_for_primary_auth"
+  namespace: "biometrics"
+  description: "Causes TrustManagerService to listen for credential attempts and ignore reports from upstream"
+  bug: "323086607"
 }

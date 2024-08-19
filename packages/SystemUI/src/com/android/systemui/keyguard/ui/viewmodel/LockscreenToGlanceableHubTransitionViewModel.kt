@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.LayoutDirection
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -71,7 +72,10 @@ constructor(
 
     val keyguardTranslationX: Flow<StateToValue> =
         configurationInteractor
-            .dimensionPixelSize(R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x)
+            .directionalDimensionPixelSize(
+                LayoutDirection.LTR,
+                R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x
+            )
             .flatMapLatest { translatePx: Int ->
                 transitionAnimation.sharedFlowWithState(
                     duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,

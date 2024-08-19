@@ -43,6 +43,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
@@ -56,6 +57,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualRotaryEncoder;
+import android.hardware.input.VirtualRotaryEncoderConfig;
 import android.hardware.input.VirtualStylus;
 import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
@@ -528,7 +531,6 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR)
     @TestApi
     public boolean isVirtualDeviceOwnedMirrorDisplay(int displayId) {
         if (mService == null) {
@@ -571,6 +573,12 @@ public final class VirtualDeviceManager {
                 VirtualDeviceParams params) throws RemoteException {
             mVirtualDeviceInternal =
                     new VirtualDeviceInternal(service, context, associationId, params);
+        }
+
+        /** @hide */
+        public VirtualDevice(IVirtualDeviceManager service, Context context,
+                IVirtualDevice virtualDevice) {
+            mVirtualDeviceInternal = new VirtualDeviceInternal(service, context, virtualDevice);
         }
 
         /**
@@ -731,6 +739,7 @@ public final class VirtualDeviceManager {
          *
          * @param policyType the type of policy, i.e. which behavior to specify a policy for.
          * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.
+         * @throws IllegalArgumentException if the policy cannot be changed at runtime.
          *
          * @see VirtualDeviceParams#POLICY_TYPE_RECENTS
          * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
@@ -786,6 +795,95 @@ public final class VirtualDeviceManager {
         public void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
             mVirtualDeviceInternal.removeActivityPolicyExemption(
                     Objects.requireNonNull(componentName));
+        }
+
+        /**
+         * Specifies a policy for this virtual device to be applied on the given virtual display.
+         * <p>
+         * Any policy specified for a particular display takes precedence over the policy specified
+         * for the device itself.
+         * </p>
+         *
+         * @param policyType the type of policy, i.e. which behavior to specify a policy for.
+         * @param devicePolicy the value of the policy, i.e. how to interpret the device behavior.
+         * @param displayId the ID of the display, for which to apply the policy.
+         * @throws IllegalArgumentException if the specified policy cannot be changed per
+         *   display or if the specified display does not belong to the virtual device.
+         *
+         * @see #setDevicePolicy(int, int)
+         * @see VirtualDeviceParams#POLICY_TYPE_RECENTS
+         * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void setDevicePolicy(
+                @VirtualDeviceParams.DynamicDisplayPolicyType int policyType,
+                @VirtualDeviceParams.DevicePolicy int devicePolicy,
+                int displayId) {
+            mVirtualDeviceInternal.setDevicePolicyForDisplay(displayId, policyType, devicePolicy);
+        }
+
+        /**
+         * Specifies a component name to be exempt from the given display's activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then the specified component will be blocked from launching.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
+         * specified component will be allowed to launch.</p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * components.</p>
+         * <p>Any change to the exemptions will only be applied for new activity launches.</p>
+         *
+         * @param componentName the component name to be exempt from the activity launch policy.
+         * @param displayId the ID of the display, for which to apply the exemption. The display
+         *   must belong to the virtual device.
+         * @throws IllegalArgumentException if the specified display does not belong to the virtual
+         *   device.
+         *
+         * @see #removeActivityPolicyExemption
+         * @see #setDevicePolicy
+         * @see Display#getDisplayId
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void addActivityPolicyExemption(
+                @NonNull ComponentName componentName, int displayId) {
+            mVirtualDeviceInternal.addActivityPolicyExemptionForDisplay(
+                    displayId, Objects.requireNonNull(componentName));
+        }
+
+        /**
+         * Makes the specified component name adhere to the given display's activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then the specified component will be allowed to launch.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
+         * specified component will be blocked from launching.</p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * components.</p>
+         *
+         * @param componentName the component name to be removed from the exemption list.
+         * @param displayId the ID of the display, for which to apply the exemption. The display
+         *   must belong to the virtual device.
+         * @throws IllegalArgumentException if the specified display does not belong to the virtual
+         *   device.
+         *
+         * @see #addActivityPolicyExemption
+         * @see #setDevicePolicy
+         * @see Display#getDisplayId
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void removeActivityPolicyExemption(
+                @NonNull ComponentName componentName, int displayId) {
+            mVirtualDeviceInternal.removeActivityPolicyExemptionForDisplay(
+                    displayId, Objects.requireNonNull(componentName));
         }
 
         /**
@@ -947,6 +1045,23 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Creates a virtual rotary encoder.
+         *
+         * @param config the configuration for the virtual rotary encoder.
+         * @see android.view.InputDevice#SOURCE_ROTARY_ENCODER
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_VIRTUAL_ROTARY)
+        public VirtualRotaryEncoder createVirtualRotaryEncoder(
+                @NonNull VirtualRotaryEncoderConfig config) {
+            if (!android.companion.virtualdevice.flags.Flags.virtualRotary()) {
+                throw new UnsupportedOperationException("Virtual rotary support not enabled");
+            }
+            return mVirtualDeviceInternal.createVirtualRotaryEncoder(config);
+        }
+
+        /**
          * Creates a VirtualAudioDevice, capable of recording audio emanating from this device,
          * or injecting audio from another device.
          *
@@ -1101,7 +1216,7 @@ public final class VirtualDeviceManager {
     }
 
     /**
-     * Listener for activity changes in this virtual device.
+     * Listener for activity changes and other activity events on a virtual device.
      *
      * @hide
      */
@@ -1142,6 +1257,25 @@ public final class VirtualDeviceManager {
          * @param displayId The display ID that became empty.
          */
         void onDisplayEmpty(int displayId);
+
+        /**
+         * Called when an activity launch was blocked due to a policy violation.
+         *
+         * @param displayId The display ID on which the activity tried to launch.
+         * @param componentName The component name of the blocked activity.
+         * @param userId The user ID associated with the blocked activity.
+         * @param intentSender The original sender of the intent. May be {@code null} if the sender
+         *   expects an activity result to be reported. In that case
+         *   {@link android.app.Activity#RESULT_CANCELED} was already reported back because the
+         *   launch was blocked. This {@link IntentSender} can be used to relaunch the blocked
+         *   activity to a different display.
+         *
+         * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
+         * @see VirtualDevice#addActivityPolicyExemption(ComponentName)
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        default void onActivityLaunchBlocked(int displayId, @NonNull ComponentName componentName,
+                @UserIdInt int userId, @Nullable IntentSender intentSender) {}
     }
 
     /**

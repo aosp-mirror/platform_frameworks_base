@@ -82,9 +82,7 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         void onFillRequestSuccess(int requestId, @Nullable FillResponse response,
                 @NonNull String servicePackageName, int requestFlags);
 
-        void onFillRequestFailure(int requestId, @Nullable CharSequence message);
-
-        void onFillRequestTimeout(int requestId);
+        void onFillRequestFailure(int requestId, Throwable t);
 
         void onSaveRequestSuccess(@NonNull String servicePackageName,
                 @Nullable IntentSender intentSender);
@@ -345,11 +343,12 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 Slog.e(TAG, "Error calling on fill request", err);
                 if (err instanceof TimeoutException) {
                     dispatchCancellationSignal(cancellationSink.get());
-                    mCallbacks.onFillRequestTimeout(request.getId());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 } else if (err instanceof CancellationException) {
+                    // Cancellation is a part of the user flow - don't mark as failure
                     dispatchCancellationSignal(cancellationSink.get());
                 } else {
-                    mCallbacks.onFillRequestFailure(request.getId(), err.getMessage());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 }
             }
         }));
@@ -413,11 +412,12 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 Slog.e(TAG, "Error calling on fill request", err);
                 if (err instanceof TimeoutException) {
                     dispatchCancellationSignal(cancellationSink.get());
-                    mCallbacks.onFillRequestTimeout(request.getId());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 } else if (err instanceof CancellationException) {
+                    // Cancellation is a part of the user flow - don't mark as failure
                     dispatchCancellationSignal(cancellationSink.get());
                 } else {
-                    mCallbacks.onFillRequestFailure(request.getId(), err.getMessage());
+                    mCallbacks.onFillRequestFailure(request.getId(), err);
                 }
             }
         }));

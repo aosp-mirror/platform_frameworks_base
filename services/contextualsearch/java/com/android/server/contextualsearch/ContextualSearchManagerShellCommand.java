@@ -52,6 +52,19 @@ public class ContextualSearchManagerShellCommand extends ShellCommand {
                                 + packageName + " for " + duration + "ms");
                         break;
                     }
+                    case "token-duration": {
+                        String durationStr = getNextArg();
+                        if (durationStr == null) {
+                            mService.resetTokenValidDurationMs();
+                            pw.println("ContextualSearchManagerService token duration reset.");
+                            return 0;
+                        }
+                        final int durationMs = Integer.parseInt(durationStr);
+                        mService.setTokenValidDurationMs(durationMs);
+                        pw.println("ContextualSearchManagerService temporarily set token duration"
+                                + " to " + durationMs + "ms");
+                        break;
+                    }
                 }
             }
             break;
@@ -71,6 +84,9 @@ public class ContextualSearchManagerShellCommand extends ShellCommand {
             pw.println("  set temporary-package [PACKAGE_NAME DURATION]");
             pw.println("    Temporarily (for DURATION ms) changes the Contextual Search "
                     + "implementation.");
+            pw.println("    To reset, call without any arguments.");
+            pw.println("  set token-duration [DURATION]");
+            pw.println("    Changes the Contextual Search token duration to DURATION ms.");
             pw.println("    To reset, call without any arguments.");
             pw.println("");
         }

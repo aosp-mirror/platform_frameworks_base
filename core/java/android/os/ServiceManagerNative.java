@@ -50,20 +50,26 @@ public final class ServiceManagerNative {
 class ServiceManagerProxy implements IServiceManager {
     public ServiceManagerProxy(IBinder remote) {
         mRemote = remote;
-        mServiceManager = IServiceManager.Stub.asInterface(remote);
+        mServiceManager = IServiceManager.Stub.asInterface(this.getNativeServiceManager());
     }
 
     public IBinder asBinder() {
         return mRemote;
     }
 
+    // TODO(b/355394904): This function has been deprecated, please use getService2 instead.
     @UnsupportedAppUsage
     public IBinder getService(String name) throws RemoteException {
         // Same as checkService (old versions of servicemanager had both methods).
-        return mServiceManager.checkService(name);
+        return checkService(name).getBinder();
     }
 
-    public IBinder checkService(String name) throws RemoteException {
+    public Service getService2(String name) throws RemoteException {
+        // Same as checkService (old versions of servicemanager had both methods).
+        return checkService(name);
+    }
+
+    public Service checkService(String name) throws RemoteException {
         return mServiceManager.checkService(name);
     }
 
@@ -128,4 +134,6 @@ class ServiceManagerProxy implements IServiceManager {
     private IBinder mRemote;
 
     private IServiceManager mServiceManager;
+
+    private native IBinder getNativeServiceManager();
 }

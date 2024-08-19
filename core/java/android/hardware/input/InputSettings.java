@@ -17,12 +17,15 @@
 package android.hardware.input;
 
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 
 import android.Manifest;
@@ -321,6 +324,48 @@ public class InputSettings {
      */
     public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
         return touchpadTapDragging();
+    }
+
+    /**
+     * Returns true if the feature flag for touchpad visualizer is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadVisualizerFeatureFlagEnabled() {
+        return touchpadVisualizer();
+    }
+
+    /**
+     * Returns true if the touchpad visualizer is allowed to appear.
+     *
+     * @param context The application context.
+     * @return Whether it is allowed to show touchpad visualizer or not.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadVisualizer(@NonNull Context context) {
+        if (!isTouchpadVisualizerFeatureFlagEnabled()) {
+            return false;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_VISUALIZER, 0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets the touchpad visualizer behaviour.
+     *
+     * @param context The application context.
+     * @param enabled Will enable touchpad visualizer if true, disable it if false
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadVisualizer(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadVisualizerFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_VISUALIZER, enabled ? 1 : 0, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -662,4 +707,64 @@ public class InputSettings {
                 UserHandle.USER_CURRENT);
     }
 
+    /**
+     * Whether Accessibility mouse keys feature flag is enabled.
+     *
+     * <p>
+     * ‘Mouse keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to use the keys on the keyboard to control the mouse pointer and
+     * other perform other mouse functionality.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityMouseKeysFeatureFlagEnabled() {
+        return keyboardA11yMouseKeys();
+    }
+
+    /**
+     * Whether Accessibility mouse keys is enabled.
+     *
+     * <p>
+     * ‘Mouse keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to use the keys on the keyboard to control the mouse pointer and
+     * other perform other mouse functionality.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_MOUSE_KEYS)
+    public static boolean isAccessibilityMouseKeysEnabled(@NonNull Context context) {
+        if (!isAccessibilityMouseKeysFeatureFlagEnabled()) {
+            return false;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Set Accessibility mouse keys feature enabled/disabled.
+     *
+     *  <p>
+     * ‘Mouse keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to use the keys on the keyboard to control the mouse pointer and
+     * other perform other mouse functionality.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_MOUSE_KEYS)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilityMouseKeysEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isAccessibilityMouseKeysFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
 }

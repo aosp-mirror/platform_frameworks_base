@@ -22,9 +22,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
@@ -45,7 +45,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -69,7 +69,7 @@ import java.util.function.Predicate;
  *
  * @see StageCoordinator
  */
-class StageTaskListener implements ShellTaskOrganizer.TaskListener {
+public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = StageTaskListener.class.getSimpleName();
 
     /** Callback interface for listening to changes in a split-screen stage. */
@@ -160,6 +160,18 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
 
         return getChildTaskInfo(predicate) != null;
+    }
+
+    public SurfaceControl getRootLeash() {
+        return mRootLeash;
+    }
+
+    public ActivityManager.RunningTaskInfo getRunningTaskInfo() {
+        return mRootTaskInfo;
+    }
+
+    public SplitDecorManager getDecorManager() {
+        return mSplitDecorManager;
     }
 
     @Nullable
@@ -314,10 +326,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     void onResizing(Rect newBounds, Rect sideBounds, SurfaceControl.Transaction t, int offsetX,
-            int offsetY, boolean immediately, float[] veilColor) {
+            int offsetY, boolean immediately) {
         if (mSplitDecorManager != null && mRootTaskInfo != null) {
             mSplitDecorManager.onResizing(mRootTaskInfo, newBounds, sideBounds, t, offsetX,
-                    offsetY, immediately, veilColor);
+                    offsetY, immediately);
         }
     }
 
@@ -335,7 +347,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     void fadeOutDecor(Runnable finishedCallback) {
         if (mSplitDecorManager != null) {
-            mSplitDecorManager.fadeOutDecor(finishedCallback);
+            mSplitDecorManager.fadeOutDecor(finishedCallback, false /* addDelay */);
         } else {
             finishedCallback.run();
         }

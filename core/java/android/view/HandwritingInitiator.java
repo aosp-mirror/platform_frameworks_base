@@ -350,12 +350,13 @@ public class HandwritingInitiator {
             return;
         }
 
+        final View focusedView = getFocusedView();
+
         if (!view.isAutoHandwritingEnabled()) {
-            clearFocusedView(view);
+            clearFocusedView(focusedView);
             return;
         }
 
-        final View focusedView = getFocusedView();
         if (focusedView == view) {
             return;
         }
@@ -496,9 +497,10 @@ public class HandwritingInitiator {
         if (delegatorPackageName == null) {
             delegatorPackageName = view.getContext().getOpPackageName();
         }
+        WeakReference<View> viewRef = new WeakReference<>(view);
         Consumer<Boolean> consumer = delegationAccepted -> {
             if (delegationAccepted) {
-                onDelegationAccepted(view);
+                onDelegationAccepted(viewRef.get());
             }
         };
         mImm.acceptStylusHandwritingDelegation(view, delegatorPackageName, view::post, consumer);
@@ -508,6 +510,10 @@ public class HandwritingInitiator {
         if (mState != null) {
             mState.mHandled = true;
             mState.mShouldInitHandwriting = false;
+        }
+        if (view == null) {
+            // can be null if view was detached and was GCed.
+            return;
         }
         if (view instanceof TextView) {
             ((TextView) view).hideHint();

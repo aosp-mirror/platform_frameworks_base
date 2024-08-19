@@ -37,9 +37,12 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.compose.CommunalHub
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -55,6 +58,7 @@ constructor(
     private var windowManagerService: IWindowManager? = null,
     private val uiEventLogger: UiEventLogger,
     private val widgetConfiguratorFactory: WidgetConfigurationController.Factory,
+    private val widgetSection: CommunalAppWidgetSection,
     @CommunalLog logBuffer: LogBuffer,
 ) : ComponentActivity() {
     companion object {
@@ -69,8 +73,6 @@ constructor(
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
 
     private var shouldOpenWidgetPickerOnStart = false
-
-    private var lockOnDestroy = false
 
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -97,8 +99,7 @@ constructor(
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
                             }
                         }
-                    }
-                        ?: run { Log.w(TAG, "No data in result.") }
+                    } ?: run { Log.w(TAG, "No data in result.") }
                 }
                 else ->
                     Log.w(
@@ -110,6 +111,7 @@ constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        listenForTransitionAndChangeScene()
 
         communalViewModel.setEditModeOpen(true)
 
@@ -128,14 +130,40 @@ constructor(
                 Box(
                     modifier =
                         Modifier.fillMaxSize()
-                            .background(LocalAndroidColorScheme.current.outlineVariant),
+                            .background(LocalAndroidColorScheme.current.surfaceDim),
                 ) {
                     CommunalHub(
                         viewModel = communalViewModel,
                         onOpenWidgetPicker = ::onOpenWidgetPicker,
                         widgetConfigurator = widgetConfigurator,
                         onEditDone = ::onEditDone,
+                        widgetSection = widgetSection,
                     )
+                }
+            }
+        }
+    }
+
+    // Handle scene change to show the activity and animate in its content
+    private fun listenForTransitionAndChangeScene() {
+        lifecycleScope.launch {
+            communalViewModel.canShowEditMode.collect {
+                communalViewModel.changeScene(
+                    scene = CommunalScenes.Blank,
+                    loggingReason = "edit mode opening",
+                    transitionKey = CommunalTransitionKeys.ToEditMode,
+                    keyguardState = KeyguardState.GONE,
+                )
+                // wait till transitioned to Blank scene, then animate in communal content in
+                // edit mode
+                communalViewModel.currentScene.first { it == CommunalScenes.Blank }
+                communalViewModel.setEditModeState(EditModeState.SHOWING)
+
+                // Show the widget picker, if necessary, after the edit activity has animated in.
+                // Waiting until after the activity has appeared avoids transitions issues.
+                if (shouldOpenWidgetPickerOnStart) {
+                    onOpenWidgetPicker()
+                    shouldOpenWidgetPickerOnStart = false
                 }
             }
         }
@@ -153,16 +181,19 @@ constructor(
 
     private fun onEditDone() {
         lifecycleScope.launch {
+            communalViewModel.cleanupEditModeState()
+
             communalViewModel.changeScene(
-                CommunalScenes.Communal,
-                CommunalTransitionKeys.SimpleFade
+                scene = CommunalScenes.Communal,
+                loggingReason = "edit mode closing",
+                transitionKey = CommunalTransitionKeys.FromEditMode
             )
 
             // Wait for the current scene to be idle on communal.
             communalViewModel.isIdleOnCommunal.first { it }
-            // Then finish the activity (this helps to avoid a flash of lockscreen when locking
-            // in onDestroy()).
-            lockOnDestroy = true
+
+            // Lock to go back to the hub after exiting.
+            lockNow()
             finish()
         }
     }
@@ -177,10 +208,7 @@ constructor(
     override fun onStart() {
         super.onStart()
 
-        if (shouldOpenWidgetPickerOnStart) {
-            onOpenWidgetPicker()
-            shouldOpenWidgetPickerOnStart = false
-        }
+        communalViewModel.setEditActivityShowing(true)
 
         logger.i("Starting the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
@@ -188,6 +216,7 @@ constructor(
 
     override fun onStop() {
         super.onStop()
+        communalViewModel.setEditActivityShowing(false)
 
         logger.i("Stopping the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_GONE)
@@ -195,9 +224,8 @@ constructor(
 
     override fun onDestroy() {
         super.onDestroy()
+        communalViewModel.cleanupEditModeState()
         communalViewModel.setEditModeOpen(false)
-
-        if (lockOnDestroy) lockNow()
     }
 
     private fun lockNow() {

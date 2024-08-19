@@ -47,14 +47,16 @@ java_sdk_library {
     compile_dex: true,
     default_to_stubs: true,
     dist_group: "android",
+
+    // This module cannot generate stubs from the api signature files as stubs depends on the
+    // private APIs, which are not visible in the api signature files.
+    build_from_text_stub: false,
 }
 
 java_library {
     name: "android.test.mock.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: [":android-test-mock-sources"],
-    visibility: [
-        "//frameworks/base",
-    ],
 }
 
 android_ravenwood_test {

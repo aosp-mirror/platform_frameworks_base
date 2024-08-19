@@ -88,7 +88,7 @@ interface INfcAdapter
     boolean isReaderOptionEnabled();
     boolean isReaderOptionSupported();
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
-    boolean enableReaderOption(boolean enable);
+    boolean enableReaderOption(boolean enable, in String pkg);
     boolean isObserveModeSupported();
     boolean isObserveModeEnabled();
     boolean setObserveMode(boolean enabled, String pkg);
@@ -104,10 +104,14 @@ interface INfcAdapter
 
     void notifyPollingLoop(in PollingFrame frame);
     void notifyHceDeactivated();
+    void notifyTestHceData(in int technology, in byte[] data);
     int sendVendorNciMessage(int mt, int gid, int oid, in byte[] payload);
     void registerVendorExtensionCallback(in INfcVendorNciCallback callbacks);
     void unregisterVendorExtensionCallback(in INfcVendorNciCallback callbacks);
     void registerOemExtensionCallback(INfcOemExtensionCallback callbacks);
     void unregisterOemExtensionCallback(INfcOemExtensionCallback callbacks);
     void clearPreference();
+    void setScreenState();
+    void checkFirmware();
+    List<String> fetchActiveNfceeList();
 }

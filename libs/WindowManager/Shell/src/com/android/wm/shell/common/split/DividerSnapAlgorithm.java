@@ -16,26 +16,20 @@
 
 package com.android.wm.shell.common.split;
 
-import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_30_70;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_70_30;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_MINIMIZE;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_NONE;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_30_70;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_70_30;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_MINIMIZE;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_NONE;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SnapPosition;
 
-import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManager;
-import android.view.Display;
-import android.view.DisplayInfo;
 
 import androidx.annotation.Nullable;
 
@@ -86,7 +80,7 @@ public class DividerSnapAlgorithm {
     private final float mFixedRatio;
     /** Allows split ratios to calculated dynamically instead of using {@link #mFixedRatio}. */
     private final boolean mAllowFlexibleSplitRatios;
-    private boolean mIsHorizontalDivision;
+    private final boolean mIsHorizontalDivision;
 
     /** The first target which is still splitting the screen */
     private final SnapTarget mFirstSplitTarget;
@@ -98,27 +92,6 @@ public class DividerSnapAlgorithm {
     private final SnapTarget mDismissEndTarget;
     private final SnapTarget mMiddleTarget;
 
-    public static DividerSnapAlgorithm create(Context ctx, Rect insets) {
-        DisplayInfo displayInfo = new DisplayInfo();
-        ctx.getSystemService(DisplayManager.class).getDisplay(
-                Display.DEFAULT_DISPLAY).getDisplayInfo(displayInfo);
-        int dividerWindowWidth = ctx.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.docked_stack_divider_thickness);
-        int dividerInsets = ctx.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.docked_stack_divider_insets);
-        return new DividerSnapAlgorithm(ctx.getResources(),
-                displayInfo.logicalWidth, displayInfo.logicalHeight,
-                dividerWindowWidth - 2 * dividerInsets,
-                ctx.getApplicationContext().getResources().getConfiguration().orientation
-                        == Configuration.ORIENTATION_PORTRAIT,
-                insets);
-    }
-
-    public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
-            boolean isHorizontalDivision, Rect insets) {
-        this(res, displayWidth, displayHeight, dividerSize, isHorizontalDivision, insets,
-                DOCKED_INVALID, false /* minimized */, true /* resizable */);
-    }
 
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
         boolean isHorizontalDivision, Rect insets, int dockSide) {
@@ -160,29 +133,11 @@ public class DividerSnapAlgorithm {
     }
 
     /**
-     * @return whether it's feasible to enable split screen in the current configuration, i.e. when
-     *         snapping in the middle both tasks are larger than the minimal task size.
-     */
-    public boolean isSplitScreenFeasible() {
-        int statusBarSize = mInsets.top;
-        int navBarSize = mIsHorizontalDivision ? mInsets.bottom : mInsets.right;
-        int size = mIsHorizontalDivision
-                ? mDisplayHeight
-                : mDisplayWidth;
-        int availableSpace = size - navBarSize - statusBarSize - mDividerSize;
-        return availableSpace / 2 >= mMinimalSizeResizableTask;
-    }
-
-    public SnapTarget calculateSnapTarget(int position, float velocity) {
-        return calculateSnapTarget(position, velocity, true /* hardDismiss */);
-    }
-
-    /**
      * @param position the top/left position of the divider
      * @param velocity current dragging velocity
-     * @param hardDismiss if set, make it a bit harder to get reach the dismiss targets
+     * @param hardToDismiss if set, make it a bit harder to get reach the dismiss targets
      */
-    public SnapTarget calculateSnapTarget(int position, float velocity, boolean hardDismiss) {
+    public SnapTarget calculateSnapTarget(int position, float velocity, boolean hardToDismiss) {
         if (position < mFirstSplitTarget.position && velocity < -mMinDismissVelocityPxPerSecond) {
             return mDismissStartTarget;
         }
@@ -190,7 +145,7 @@ public class DividerSnapAlgorithm {
             return mDismissEndTarget;
         }
         if (Math.abs(velocity) < mMinFlingVelocityPxPerSecond) {
-            return snap(position, hardDismiss);
+            return snap(position, hardToDismiss);
         }
         if (velocity < 0) {
             return mFirstSplitTarget;
@@ -234,19 +189,6 @@ public class DividerSnapAlgorithm {
                     / (mDismissEndTarget.position - mLastSplitTarget.position - mDividerSize);
         }
         return 0f;
-    }
-
-    public SnapTarget getClosestDismissTarget(int position) {
-        if (position < mFirstSplitTarget.position) {
-            return mDismissStartTarget;
-        } else if (position > mLastSplitTarget.position) {
-            return mDismissEndTarget;
-        } else if (position - mDismissStartTarget.position
-                < mDismissEndTarget.position - position) {
-            return mDismissStartTarget;
-        } else {
-            return mDismissEndTarget;
-        }
     }
 
     public SnapTarget getFirstSplitTarget() {
@@ -411,22 +353,6 @@ public class DividerSnapAlgorithm {
         return mMiddleTarget;
     }
 
-    public SnapTarget getNextTarget(SnapTarget snapTarget) {
-        int index = mTargets.indexOf(snapTarget);
-        if (index != -1 && index < mTargets.size() - 1) {
-            return mTargets.get(index + 1);
-        }
-        return snapTarget;
-    }
-
-    public SnapTarget getPreviousTarget(SnapTarget snapTarget) {
-        int index = mTargets.indexOf(snapTarget);
-        if (index != -1 && index > 0) {
-            return mTargets.get(index - 1);
-        }
-        return snapTarget;
-    }
-
     /**
      * @return whether or not there are more than 1 split targets that do not include the two
      * dismiss targets, used in deciding to display the middle target for accessibility
@@ -448,26 +374,6 @@ public class DividerSnapAlgorithm {
      */
     public int calculateNearestSnapPosition(int currentPosition) {
         return snap(currentPosition, /* hardDismiss */ true).snapPosition;
-    }
-
-    /**
-     * Cycles through all non-dismiss targets with a stepping of {@param increment}. It moves left
-     * if {@param increment} is negative and moves right otherwise.
-     */
-    public SnapTarget cycleNonDismissTarget(SnapTarget snapTarget, int increment) {
-        int index = mTargets.indexOf(snapTarget);
-        if (index != -1) {
-            SnapTarget newTarget = mTargets.get((index + mTargets.size() + increment)
-                    % mTargets.size());
-            if (newTarget == mDismissStartTarget) {
-                return mLastSplitTarget;
-            } else if (newTarget == mDismissEndTarget) {
-                return mFirstSplitTarget;
-            } else {
-                return newTarget;
-            }
-        }
-        return snapTarget;
     }
 
     /**

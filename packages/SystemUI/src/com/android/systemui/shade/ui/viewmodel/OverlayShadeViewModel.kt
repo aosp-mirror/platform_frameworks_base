@@ -17,37 +17,40 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import com.android.compose.animation.scene.SceneKey
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Models UI state and handles user input for the overlay shade UI, which shows a shade as an
  * overlay on top of another scene UI.
  */
-@SysUISingleton
 class OverlayShadeViewModel
-@Inject
-constructor(
-    @Application applicationScope: CoroutineScope,
-    private val sceneInteractor: SceneInteractor,
-) {
+@AssistedInject
+constructor(private val sceneInteractor: SceneInteractor, shadeInteractor: ShadeInteractor) :
+    SysUiViewModel() {
+    private val _backgroundScene = MutableStateFlow(Scenes.Lockscreen)
     /** The scene to show in the background when the overlay shade is open. */
-    val backgroundScene: StateFlow<SceneKey> =
-        sceneInteractor
-            .resolveSceneFamily(SceneFamilies.Home)
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = Scenes.Lockscreen,
-            )
+    val backgroundScene: StateFlow<SceneKey> = _backgroundScene.asStateFlow()
+
+    /** Dictates the alignment of the overlay shade panel on the screen. */
+    val panelAlignment = shadeInteractor.shadeAlignment
+
+    override suspend fun onActivated(): Nothing {
+        sceneInteractor.resolveSceneFamily(SceneFamilies.Home).collectLatest { sceneKey ->
+            _backgroundScene.value = sceneKey
+        }
+        awaitCancellation()
+    }
 
     /** Notifies that the user has clicked the semi-transparent background scrim. */
     fun onScrimClicked() {
@@ -55,5 +58,10 @@ constructor(
             toScene = SceneFamilies.Home,
             loggingReason = "Shade scrim clicked",
         )
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): OverlayShadeViewModel
     }
 }

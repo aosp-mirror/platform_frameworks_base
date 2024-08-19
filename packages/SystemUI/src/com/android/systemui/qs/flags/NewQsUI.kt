@@ -20,7 +20,7 @@ import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
-/** Helper for reading or using the notification avalanche suppression flag state. */
+/** Helper for reading or using the new QS UI flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object NewQsUI {
     /** The aconfig flag name */

@@ -33,7 +33,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
@@ -153,12 +153,55 @@ public class PipScheduler {
      * Animates resizing of the pinned stack given the duration.
      */
     public void scheduleAnimateResizePip(Rect toBounds) {
+        scheduleAnimateResizePip(toBounds, false /* configAtEnd */);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     *
+     * @param configAtEnd true if we are delaying config updates until the transition ends.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd) {
+        scheduleAnimateResizePip(toBounds, configAtEnd,
+                PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     *
+     * @param configAtEnd true if we are delaying config updates until the transition ends.
+     * @param duration    the suggested duration to run the animation; the component responsible
+     *                    for running the animator will get this as an extra.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd, int duration) {
         if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
-        mPipTransitionController.startResizeTransition(wct);
+        if (configAtEnd) {
+            wct.deferConfigToTransitionEnd(mPipTransitionState.mPipTaskToken);
+        }
+        mPipTransitionController.startResizeTransition(wct, duration);
+    }
+
+    /**
+     * Signals to Core to finish the PiP resize transition.
+     * Note that we do not allow any actual WM Core changes at this point.
+     *
+     * @param configAtEnd true if we are waiting for config updates at the end of the transition.
+     */
+    public void scheduleFinishResizePip(boolean configAtEnd) {
+        SurfaceControl.Transaction tx = null;
+        if (configAtEnd) {
+            tx = new SurfaceControl.Transaction();
+            tx.addTransactionCommittedListener(mMainExecutor, () -> {
+                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+            });
+        } else {
+            mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+        }
+        mPipTransitionController.finishTransition(tx);
     }
 
     /**

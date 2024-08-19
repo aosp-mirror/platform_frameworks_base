@@ -58,7 +58,7 @@ constructor(
             // opening the app selector in split screen mode, the foreground task will be the second
             // task in index 0.
             val foregroundGroup =
-                if (groupedTasks.first().splitBounds != null) groupedTasks.first()
+                if (groupedTasks.firstOrNull()?.splitBounds != null) groupedTasks.first()
                 else groupedTasks.elementAtOrNull(1)
             val foregroundTaskId1 = foregroundGroup?.taskInfo1?.taskId
             val foregroundTaskId2 = foregroundGroup?.taskInfo2?.taskId

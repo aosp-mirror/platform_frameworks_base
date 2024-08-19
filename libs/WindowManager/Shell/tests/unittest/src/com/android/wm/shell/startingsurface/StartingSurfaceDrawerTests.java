@@ -74,7 +74,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -370,6 +370,6 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
                 Surface.ROTATION_0, taskSize, contentInsets, new Rect() /* letterboxInsets */,
                 false, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
                 0 /* systemUiVisibility */, false /* isTranslucent */,
-                hasImeSurface /* hasImeSurface */);
+                hasImeSurface /* hasImeSurface */, 0 /* uiMode */);
     }
 }

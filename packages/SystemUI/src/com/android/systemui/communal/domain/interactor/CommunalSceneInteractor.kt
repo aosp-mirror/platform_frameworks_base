@@ -16,24 +16,35 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.communal.data.repository.CommunalSceneRepository
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
+import com.android.systemui.communal.shared.log.CommunalSceneLogger
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.pairwiseBy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,29 +53,128 @@ class CommunalSceneInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val communalSceneRepository: CommunalSceneRepository,
+    private val repository: CommunalSceneRepository,
+    private val logger: CommunalSceneLogger,
 ) {
+    private val _isLaunchingWidget = MutableStateFlow(false)
+
+    /** Whether a widget launch is currently in progress. */
+    val isLaunchingWidget: StateFlow<Boolean> = _isLaunchingWidget.asStateFlow()
+
+    fun setIsLaunchingWidget(launching: Boolean) {
+        _isLaunchingWidget.value = launching
+    }
+
+    fun interface OnSceneAboutToChangeListener {
+        /** Notifies that the scene is about to change to [toScene]. */
+        fun onSceneAboutToChange(toScene: SceneKey, keyguardState: KeyguardState?)
+    }
+
+    private val onSceneAboutToChangeListener = mutableSetOf<OnSceneAboutToChangeListener>()
+
+    /** Registers a listener which is called when the scene is about to change. */
+    fun registerSceneStateProcessor(processor: OnSceneAboutToChangeListener) {
+        onSceneAboutToChangeListener.add(processor)
+    }
+
     /**
      * Asks for an asynchronous scene witch to [newScene], which will use the corresponding
      * installed transition or the one specified by [transitionKey], if provided.
      */
-    fun changeScene(newScene: SceneKey, transitionKey: TransitionKey? = null) {
-        communalSceneRepository.changeScene(newScene, transitionKey)
+    fun changeScene(
+        newScene: SceneKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+        keyguardState: KeyguardState? = null,
+    ) {
+        applicationScope.launch("$TAG#changeScene") {
+            logger.logSceneChangeRequested(
+                from = currentScene.value,
+                to = newScene,
+                reason = loggingReason,
+                isInstant = false,
+            )
+            notifyListeners(newScene, keyguardState)
+            repository.changeScene(newScene, transitionKey)
+        }
     }
 
     /** Immediately snaps to the new scene. */
-    fun snapToScene(newScene: SceneKey, delayMillis: Long = 0) {
-        communalSceneRepository.snapToScene(newScene, delayMillis)
+    fun snapToScene(
+        newScene: SceneKey,
+        loggingReason: String,
+        delayMillis: Long = 0,
+        keyguardState: KeyguardState? = null
+    ) {
+        applicationScope.launch("$TAG#snapToScene") {
+            delay(delayMillis)
+            logger.logSceneChangeRequested(
+                from = currentScene.value,
+                to = newScene,
+                reason = loggingReason,
+                isInstant = true,
+            )
+            notifyListeners(newScene, keyguardState)
+            repository.snapToScene(newScene)
+        }
+    }
+
+    private fun notifyListeners(newScene: SceneKey, keyguardState: KeyguardState?) {
+        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(newScene, keyguardState) }
+    }
+
+    /** Changes to Blank scene when starting an activity after dismissing keyguard. */
+    fun changeSceneForActivityStartOnDismissKeyguard() {
+        // skip if we're starting edit mode activity, as it will be handled later by changeScene
+        // with transition key [CommunalTransitionKeys.ToEditMode].
+        if (_editModeState.value == EditModeState.STARTING) {
+            return
+        }
+        changeScene(
+            CommunalScenes.Blank,
+            "activity start dismissing keyguard",
+            CommunalTransitionKeys.SimpleFade,
+        )
     }
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].
      */
-    val currentScene: Flow<SceneKey> = communalSceneRepository.currentScene
+    val currentScene: StateFlow<SceneKey> =
+        repository.currentScene
+            .pairwiseBy(initialValue = repository.currentScene.value) { from, to ->
+                logger.logSceneChangeCommitted(
+                    from = from,
+                    to = to,
+                )
+                to
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = repository.currentScene.value,
+            )
+
+    private val _editModeState = MutableStateFlow<EditModeState?>(null)
+    /**
+     * Current state for glanceable hub edit mode, used to chain the animations when transitioning
+     * between communal scene and the edit mode activity.
+     */
+    val editModeState = _editModeState.asStateFlow()
+
+    fun setEditModeState(value: EditModeState?) {
+        _editModeState.value = value
+    }
 
     /** Transition state of the hub mode. */
     val transitionState: StateFlow<ObservableTransitionState> =
-        communalSceneRepository.transitionState
+        repository.transitionState
+            .onEach { logger.logSceneTransition(it) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = repository.transitionState.value,
+            )
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
@@ -72,7 +182,7 @@ constructor(
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
-        communalSceneRepository.setTransitionState(transitionState)
+        repository.setTransitionState(transitionState)
     }
 
     /** Returns a flow that tracks the progress of transitions to the given scene from 0-1. */
@@ -115,13 +225,27 @@ constructor(
                 initialValue = false,
             )
 
+    /** This flow will be true when idle on the hub and not transitioning to edit mode. */
+    val isIdleOnCommunalNotEditMode: Flow<Boolean> =
+        allOf(isIdleOnCommunal, editModeState.map { it == null })
+
     /**
      * Flow that emits a boolean if any portion of the communal UI is visible at all.
      *
      * This flow will be true during any transition and when idle on the communal scene.
      */
-    val isCommunalVisible: Flow<Boolean> =
-        transitionState.map {
-            !(it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Blank)
-        }
+    val isCommunalVisible: StateFlow<Boolean> =
+        transitionState
+            .map {
+                !(it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Blank)
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
+    private companion object {
+        const val TAG = "CommunalSceneInteractor"
+    }
 }

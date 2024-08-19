@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
@@ -31,8 +32,7 @@ final class RampOffVibratorStep extends AbstractVibratorStep {
     RampOffVibratorStep(VibrationStepConductor conductor, long startTime, float amplitudeTarget,
             float amplitudeDelta, VibratorController controller,
             long pendingVibratorOffDeadline) {
-        super(conductor, startTime, controller, /* effect= */ null, /* index= */ -1,
-                pendingVibratorOffDeadline);
+        super(conductor, startTime, controller, pendingVibratorOffDeadline);
         mAmplitudeTarget = amplitudeTarget;
         mAmplitudeDelta = amplitudeDelta;
     }
@@ -42,12 +42,14 @@ final class RampOffVibratorStep extends AbstractVibratorStep {
         return true;
     }
 
+    @NonNull
     @Override
     public List<Step> cancel() {
         return Arrays.asList(new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(),
                 controller, /* isCleanUp= */ true));
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "RampOffVibratorStep");

@@ -1,7 +1,7 @@
 per-file Android.bp = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
 
 # art-team@ manages the system server profile
-per-file art-profile* = calin@google.com, ngeoffray@google.com, vmarko@google.com
+per-file art-profile* = file:platform/art:main:/OWNERS_boot_profile
 
 per-file java/com/android/server/HsumBootUserInitializer.java = file:/MULTIUSER_OWNERS
 

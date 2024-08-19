@@ -231,6 +231,47 @@ bool ResourceEntry::HasDefaultValue() const {
   return false;
 }
 
+ResourceTable::CollisionResult ResourceTable::ResolveFlagCollision(FlagStatus existing,
+                                                                   FlagStatus incoming) {
+  switch (existing) {
+    case FlagStatus::NoFlag:
+      switch (incoming) {
+        case FlagStatus::NoFlag:
+          return CollisionResult::kConflict;
+        case FlagStatus::Disabled:
+          return CollisionResult::kKeepOriginal;
+        case FlagStatus::Enabled:
+          return CollisionResult::kTakeNew;
+        default:
+          return CollisionResult::kConflict;
+      }
+    case FlagStatus::Disabled:
+      switch (incoming) {
+        case FlagStatus::NoFlag:
+          return CollisionResult::kTakeNew;
+        case FlagStatus::Disabled:
+          return CollisionResult::kKeepOriginal;
+        case FlagStatus::Enabled:
+          return CollisionResult::kTakeNew;
+        default:
+          return CollisionResult::kConflict;
+      }
+    case FlagStatus::Enabled:
+      switch (incoming) {
+        case FlagStatus::NoFlag:
+          return CollisionResult::kKeepOriginal;
+        case FlagStatus::Disabled:
+          return CollisionResult::kKeepOriginal;
+        case FlagStatus::Enabled:
+          return CollisionResult::kConflict;
+        default:
+          return CollisionResult::kConflict;
+      }
+    default:
+      return CollisionResult::kConflict;
+  }
+}
+
 // The default handler for collisions.
 //
 // Typically, a weak value will be overridden by a strong value. An existing weak
@@ -566,9 +607,13 @@ bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) 
       config_value->value = std::move(res.value);
     } else {
       // When validation is enabled, ensure that a resource cannot have multiple values defined for
-      // the same configuration.
-      auto result = validate ? ResolveValueCollision(config_value->value.get(), res.value.get())
-                             : CollisionResult::kKeepBoth;
+      // the same configuration unless protected by flags.
+      auto result =
+          validate ? ResolveFlagCollision(config_value->value->GetFlagStatus(), res.flag_status)
+                   : CollisionResult::kKeepBoth;
+      if (result == CollisionResult::kConflict) {
+        result = ResolveValueCollision(config_value->value.get(), res.value.get());
+      }
       switch (result) {
         case CollisionResult::kKeepBoth:
           // Insert the value ignoring for duplicate configurations
@@ -732,6 +777,11 @@ NewResourceBuilder& NewResourceBuilder::SetStagedId(StagedId staged_alias) {
 
 NewResourceBuilder& NewResourceBuilder::SetAllowMangled(bool allow_mangled) {
   res_.allow_mangled = allow_mangled;
+  return *this;
+}
+
+NewResourceBuilder& NewResourceBuilder::SetFlagStatus(FlagStatus flag_status) {
+  res_.flag_status = flag_status;
   return *this;
 }
 

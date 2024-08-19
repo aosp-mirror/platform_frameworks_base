@@ -66,7 +66,6 @@ public class OffloadBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(brightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(brightness)
                         .setDisplayBrightnessStrategyName(mOffloadBrightnessStrategy.getName())
                         .setShouldUpdateScreenBrightnessSetting(true)
                         .build();

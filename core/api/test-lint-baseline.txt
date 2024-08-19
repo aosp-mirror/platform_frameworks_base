@@ -1973,6 +1973,8 @@ Todo: android.window.WindowContainerTransaction#setActivityWindowingMode(android
 
 UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
+UnflaggedApi: android.Manifest.permission#RESERVED_FOR_TESTING_SIGNATURE:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.RESERVED_FOR_TESTING_SIGNATURE
 UnflaggedApi: android.Manifest.permission#START_ACTIVITIES_FROM_SDK_SANDBOX:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.START_ACTIVITIES_FROM_SDK_SANDBOX
 UnflaggedApi: android.Manifest.permission#USE_REMOTE_AUTH:

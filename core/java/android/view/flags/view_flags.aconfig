@@ -90,3 +90,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "disable_draw_wake_lock"
+    namespace: "wear_frameworks"
+    description: "Disable Draw Wakelock starting U."
+    bug: "331698645"
+    is_fixed_read_only: true
+}

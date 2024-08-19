@@ -234,6 +234,8 @@ enum DebugLevel {
  */
 #define PROPERTY_INITIALIZE_GL_ALWAYS "debug.hwui.initialize_gl_always"
 
+#define PROPERTY_SKIP_EGLMANAGER_TELEMETRY "debug.hwui.skip_eglmanager_telemetry"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -342,6 +344,10 @@ public:
 
     static bool clipSurfaceViews;
     static bool hdr10bitPlus;
+    static bool skipTelemetry;
+    static bool resampleGainmapRegions;
+
+    static int timeoutMultiplier;
 
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;

@@ -35,7 +35,7 @@
     <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"Праграма не ўсталявана, таму што яна несумяшчальная з вашым планшэтам."</string>
     <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Гэта праграма несумяшчальная з вашым тэлевізарам."</string>
     <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"Праграма не ўсталявана, таму што яна несумяшчальная з вашым тэлефонам."</string>
-    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Праграма не ўсталявана, таму што пакет, магчыма, з\'яўляецца несапраўдным."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Праграма не ўсталявана, таму што пакет, магчыма, з’яўляецца несапраўдным."</string>
     <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"На вашым планшэце не ўдалося ўсталяваць праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"На вашым тэлевізары не ўдалося ўсталяваць праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"На вашым тэлефоне не ўдалося ўсталяваць праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
@@ -57,7 +57,7 @@
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Не ўдалося выдаліць праграму."</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"Выдаліць праграму"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Выдаліць абнаўленне"</string>
-    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> з\'яўляецца часткай наступнай праграмы:"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> з’яўляецца часткай наступнай праграмы:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Выдаліць гэту праграму?"</string>
     <string name="archive_application_text" msgid="8482325710714386348">"Вашы асабістыя даныя будуць захаваны"</string>
     <string name="archive_application_text_all_users" msgid="3151229641681672580">"Архіваваць гэту праграму для ўсіх карыстальнікаў? Вашы асабістыя даныя будуць захаваны."</string>
@@ -117,7 +117,7 @@
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Адбылася памылка"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Пры аднаўленні праграмы ўзнікла праблема"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Не хапае месца ў сховішчы"</string>
-    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Каб аднавіць гэту праграму, вызваліце месца на прыладзе. Неабходны аб\'ём месца ў сховішчы: <xliff:g id="BYTES">%1$s</xliff:g>."</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Каб аднавіць гэту праграму, вызваліце месца на прыладзе. Неабходны аб’ём месца ў сховішчы: <xliff:g id="BYTES">%1$s</xliff:g>."</string>
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Патрабуецца дзеянне"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Каб аднавіць гэту праграму, выканайце далейшыя інструкцыі"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Усталёўшчык \"<xliff:g id="INSTALLERNAME">%1$s</xliff:g>\" адключаны"</string>

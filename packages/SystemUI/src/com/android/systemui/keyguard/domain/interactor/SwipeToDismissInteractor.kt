@@ -19,14 +19,15 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 /**
  * Handles logic around the swipe to dismiss gesture, where the user swipes up on the dismissable
@@ -53,12 +54,14 @@ constructor(
         shadeRepository.currentFling
             .sample(
                 transitionInteractor.startedKeyguardState,
-                keyguardInteractor.isKeyguardDismissible
+                keyguardInteractor.isKeyguardDismissible,
+                keyguardInteractor.statusBarState,
             )
-            .filter { (flingInfo, startedState, keyguardDismissable) ->
+            .filter { (flingInfo, startedState, keyguardDismissable, statusBarState) ->
                 flingInfo != null &&
-                    !flingInfo.expand &&
-                    startedState == KeyguardState.LOCKSCREEN &&
+                        !flingInfo.expand &&
+                        statusBarState != StatusBarState.SHADE_LOCKED &&
+                        startedState == KeyguardState.LOCKSCREEN &&
                     keyguardDismissable
             }
             .map { (flingInfo, _) -> flingInfo }

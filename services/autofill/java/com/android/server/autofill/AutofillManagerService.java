@@ -1985,12 +1985,13 @@ public final class AutofillManagerService
         }
 
         @Override
-        public void setAutofillFailure(int sessionId, @NonNull List<AutofillId> ids, int userId) {
+        public void setAutofillFailure(
+                int sessionId, @NonNull List<AutofillId> ids, boolean isRefill, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service =
                         peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
-                    service.setAutofillFailureLocked(sessionId, getCallingUid(), ids);
+                    service.setAutofillFailureLocked(sessionId, getCallingUid(), ids, isRefill);
                 } else if (sVerbose) {
                     Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
                 }
@@ -2003,9 +2004,49 @@ public final class AutofillManagerService
                 final AutofillManagerServiceImpl service =
                         peekServiceForUserWithLocalBinderIdentityLocked(userId);
                 if (service != null) {
-                    service.setViewAutofilled(sessionId, getCallingUid(), id);
+                    service.setViewAutofilledLocked(sessionId, getCallingUid(), id);
                 } else if (sVerbose) {
                     Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
+        public void notifyNotExpiringResponseDuringAuth(int sessionId, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.notifyNotExpiringResponseDuringAuth(sessionId, getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "notifyNotExpiringResponseDuringAuth(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
+        public void notifyViewEnteredIgnoredDuringAuthCount(int sessionId, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.notifyViewEnteredIgnoredDuringAuthCount(sessionId, getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "notifyNotExpiringResponseDuringAuth(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
+        public void setAutofillIdsAttemptedForRefill(
+                int sessionId, @NonNull List<AutofillId> ids, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.setAutofillIdsAttemptedForRefill(sessionId, ids, getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "setAutofillIdsAttemptedForRefill(): no service for " + userId);
                 }
             }
         }

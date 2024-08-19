@@ -54,7 +54,6 @@ import com.android.systemui.media.controls.ui.viewmodel.MediaControlViewModel.Co
 import com.android.systemui.media.controls.ui.viewmodel.MediaOutputSwitcherViewModel
 import com.android.systemui.media.controls.ui.viewmodel.MediaPlayerViewModel
 import com.android.systemui.media.controls.util.MediaDataUtils
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -76,7 +75,6 @@ object MediaControlViewBinder {
         falsingManager: FalsingManager,
         @Background backgroundDispatcher: CoroutineDispatcher,
         @Main mainDispatcher: CoroutineDispatcher,
-        mediaFlags: MediaFlags,
     ) {
         val mediaCard = viewHolder.player
         mediaCard.repeatWhenAttached {
@@ -91,7 +89,6 @@ object MediaControlViewBinder {
                                 falsingManager,
                                 backgroundDispatcher,
                                 mainDispatcher,
-                                mediaFlags
                             )
                         }
                     }
@@ -107,8 +104,11 @@ object MediaControlViewBinder {
         falsingManager: FalsingManager,
         backgroundDispatcher: CoroutineDispatcher,
         mainDispatcher: CoroutineDispatcher,
-        mediaFlags: MediaFlags,
     ) {
+        // Set up media control location and its listener.
+        viewModel.onLocationChanged(viewController.currentEndLocation)
+        viewController.locationChangeListener = viewModel.onLocationChanged
+
         with(viewHolder) {
             // AlbumView uses a hardware layer so that clipping of the foreground is handled with
             // clipping the album art. Otherwise album art shows through at the edges.
@@ -160,18 +160,6 @@ object MediaControlViewBinder {
             isSongUpdated
         )
 
-        // TODO: We don't need to refresh this state constantly, only if the
-        // state actually changed to something which might impact the
-        // measurement. State refresh interferes with the translation
-        // animation, only run it if it's not running.
-        if (!viewController.metadataAnimationHandler.isRunning) {
-            // Don't refresh in scene framework, because it will calculate
-            // with invalid layout sizes
-            if (!mediaFlags.isSceneContainerEnabled()) {
-                viewController.refreshState()
-            }
-        }
-
         if (viewModel.playTurbulenceNoise) {
             viewController.setUpTurbulenceNoise()
         }
@@ -221,7 +209,7 @@ object MediaControlViewBinder {
             dismiss.isEnabled = model.isDismissEnabled
             dismiss.setOnClickListener {
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                    model.onDismissClicked.invoke()
+                    model.onDismissClicked()
                 }
             }
             cancelText.background = model.cancelTextBackground
@@ -349,7 +337,7 @@ object MediaControlViewBinder {
         if (actionViewModel.isEnabled) {
             button.setOnClickListener {
                 if (!falsingManager.isFalseTap(FalsingManager.MODERATE_PENALTY)) {
-                    actionViewModel.onClicked.invoke(it.id)
+                    actionViewModel.onClicked(it.id)
 
                     viewController.multiRippleController.play(
                         createTouchRippleAnimation(
@@ -469,8 +457,7 @@ object MediaControlViewBinder {
                         transitionDrawable.startTransition(
                             if (viewModel.shouldAddGradient) 333 else 80
                         )
-                    }
-                        ?: albumView.setImageDrawable(artwork)
+                    } ?: albumView.setImageDrawable(artwork)
                 }
                 viewController.isArtworkBound = viewModel.shouldAddGradient
                 viewController.prevArtwork = artwork

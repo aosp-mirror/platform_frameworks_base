@@ -16,7 +16,9 @@
 
 package com.android.server.input;
 
+import static android.view.PointerIcon.DEFAULT_POINTER_SCALE;
 import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
+import static android.view.PointerIcon.POINTER_ICON_VECTOR_STYLE_STROKE_WHITE;
 import static android.view.flags.Flags.enableVectorCursorA11ySettings;
 
 import static com.android.input.flags.Flags.rateLimitUserActivityPokeInDispatcher;
@@ -69,6 +71,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadTapToClickEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_DRAGGING),
                         (reason) -> updateTouchpadTapDraggingEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_VISUALIZER),
+                        (reason) -> updateTouchpadHardwareStateNotificationsEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
@@ -101,7 +105,11 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.STYLUS_POINTER_ICON_ENABLED),
                         (reason) -> updateStylusPointerIconEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_FILL_STYLE),
-                        (reason) -> updatePointerFillStyleFromSettings()));
+                        (reason) -> updatePointerFillStyleFromSettings()),
+                Map.entry(Settings.System.getUriFor(Settings.System.POINTER_STROKE_STYLE),
+                        (reason) -> updatePointerStrokeStyleFromSettings()),
+                Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SCALE),
+                        (reason) -> updatePointerScaleFromSettings()));
     }
 
     /**
@@ -169,6 +177,10 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateTouchpadTapDraggingEnabled() {
         mNative.setTouchpadTapDraggingEnabled(InputSettings.useTouchpadTapDragging(mContext));
+    }
+
+    private void updateTouchpadHardwareStateNotificationsEnabled() {
+        mNative.setShouldNotifyTouchpadHardwareState(InputSettings.useTouchpadVisualizer(mContext));
     }
 
     private void updateTouchpadRightClickZoneEnabled() {
@@ -276,5 +288,26 @@ class InputSettingsObserver extends ContentObserver {
                 POINTER_ICON_VECTOR_STYLE_FILL_BLACK,
                 UserHandle.USER_CURRENT);
         mService.setPointerFillStyle(pointerFillStyle);
+    }
+
+    private void updatePointerStrokeStyleFromSettings() {
+        if (!enableVectorCursorA11ySettings()) {
+            return;
+        }
+        final int pointerStrokeStyle = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.POINTER_STROKE_STYLE,
+                POINTER_ICON_VECTOR_STYLE_STROKE_WHITE,
+                UserHandle.USER_CURRENT);
+        mService.setPointerStrokeStyle(pointerStrokeStyle);
+    }
+
+    private void updatePointerScaleFromSettings() {
+        if (!enableVectorCursorA11ySettings()) {
+            return;
+        }
+        final float pointerScale = Settings.System.getFloatForUser(mContext.getContentResolver(),
+                Settings.System.POINTER_SCALE, DEFAULT_POINTER_SCALE,
+                UserHandle.USER_CURRENT);
+        mService.setPointerScale(pointerScale);
     }
 }

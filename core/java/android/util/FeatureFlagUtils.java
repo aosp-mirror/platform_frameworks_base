@@ -138,12 +138,6 @@ public class FeatureFlagUtils {
             "settings_show_stylus_preferences";
 
     /**
-     * Flag to enable/disable biometrics enrollment v2
-     * @hide
-     */
-    public static final String SETTINGS_BIOMETRICS2_ENROLLMENT = "settings_biometrics2_enrollment";
-
-    /**
      * Flag to enable/disable FingerprintSettings v2
      * @hide
      */
@@ -220,10 +214,9 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_PHASE2, "false");
-        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_METRICS, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_METRICS, "true");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
-        DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
         DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
         DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
         DEFAULT_FLAGS.put(SETTINGS_FLASH_NOTIFICATIONS, "true");

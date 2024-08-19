@@ -44,7 +44,6 @@ val Kosmos.shadeInteractorSceneContainerImpl by
         ShadeInteractorSceneContainerImpl(
             scope = applicationCoroutineScope,
             sceneInteractor = sceneInteractor,
-            sharedNotificationContainerInteractor = sharedNotificationContainerInteractor,
             shadeRepository = shadeRepository,
         )
     }
@@ -71,5 +70,6 @@ val Kosmos.shadeInteractorImpl by
             userSetupRepository = userSetupRepository,
             userSwitcherInteractor = userSwitcherInteractor,
             baseShadeInteractor = baseShadeInteractor,
+            shadeRepository = shadeRepository,
         )
     }

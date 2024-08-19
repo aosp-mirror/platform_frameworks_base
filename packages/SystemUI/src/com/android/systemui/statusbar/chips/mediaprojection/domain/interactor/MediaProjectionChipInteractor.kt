@@ -16,64 +16,77 @@
 
 package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 
-import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.common.shared.model.Icon
+import android.content.pm.PackageManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.mediaprojection.MediaProjectionUtils.packageHasCastingCapabilities
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
-import com.android.systemui.res.R
-import com.android.systemui.statusbar.chips.domain.interactor.OngoingActivityChipInteractor
-import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
- * Interactor for media-projection-related chips in the status bar.
- *
- * There are two kinds of media projection events that will show chips in the status bar:
- * 1) Share-to-app: Sharing your phone screen content to another app on the same device. (Triggered
- *    from within each individual app.)
- * 2) Cast-to-other-device: Sharing your phone screen content to a different device. (Triggered from
- *    the Quick Settings Cast tile or from the Settings app.) This interactor handles both of those
- *    event types (though maybe not audio-only casting -- see b/342169876).
+ * Interactor for media projection events, used to show chips in the status bar for share-to-app and
+ * cast-to-other-device events. See
+ * [com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel] and
+ * [com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel]
+ * for more details on what those events are.
  */
 @SysUISingleton
 class MediaProjectionChipInteractor
 @Inject
 constructor(
-    @Application scope: CoroutineScope,
-    mediaProjectionRepository: MediaProjectionRepository,
-    val systemClock: SystemClock,
-) : OngoingActivityChipInteractor {
-    override val chip: StateFlow<OngoingActivityChipModel> =
+    @Application private val scope: CoroutineScope,
+    private val mediaProjectionRepository: MediaProjectionRepository,
+    private val packageManager: PackageManager,
+    @StatusBarChipsLog private val logger: LogBuffer,
+) {
+    val projection: StateFlow<ProjectionChipModel> =
         mediaProjectionRepository.mediaProjectionState
             .map { state ->
                 when (state) {
-                    is MediaProjectionState.NotProjecting -> OngoingActivityChipModel.Hidden
-                    is MediaProjectionState.EntireScreen,
-                    is MediaProjectionState.SingleTask -> {
-                        // TODO(b/332662551): Distinguish between cast-to-other-device and
-                        // share-to-app.
-                        OngoingActivityChipModel.Shown(
-                            icon =
-                                Icon.Resource(
-                                    R.drawable.ic_cast_connected,
-                                    ContentDescription.Resource(R.string.accessibility_casting)
-                                ),
-                            // TODO(b/332662551): See if we can use a MediaProjection API to fetch
-                            // this time.
-                            startTimeMs = systemClock.elapsedRealtime()
-                        ) {
-                            // TODO(b/332662551): Implement the pause dialog.
-                        }
+                    is MediaProjectionState.NotProjecting -> {
+                        logger.log(TAG, LogLevel.INFO, {}, { "State: NotProjecting" })
+                        ProjectionChipModel.NotProjecting
+                    }
+                    is MediaProjectionState.Projecting -> {
+                        val type =
+                            if (packageHasCastingCapabilities(packageManager, state.hostPackage)) {
+                                ProjectionChipModel.Type.CAST_TO_OTHER_DEVICE
+                            } else {
+                                ProjectionChipModel.Type.SHARE_TO_APP
+                            }
+                        logger.log(
+                            TAG,
+                            LogLevel.INFO,
+                            {
+                                str1 = type.name
+                                str2 = state.hostPackage
+                                str3 = state.hostDeviceName
+                            },
+                            { "State: Projecting(type=$str1 hostPackage=$str2 hostDevice=$str3)" }
+                        )
+                        ProjectionChipModel.Projecting(type, state)
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), ProjectionChipModel.NotProjecting)
+
+    /** Stops the currently active projection. */
+    fun stopProjecting() {
+        scope.launch { mediaProjectionRepository.stopProjecting() }
+    }
+
+    companion object {
+        private const val TAG = "MediaProjection"
+    }
 }

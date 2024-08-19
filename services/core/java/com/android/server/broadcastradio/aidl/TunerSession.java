@@ -29,6 +29,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.broadcastradio.RadioEventLogger;
@@ -434,7 +435,7 @@ final class TunerSession extends ITuner.Stub {
         }
     }
 
-    void dumpInfo(android.util.IndentingPrintWriter pw) {
+    void dumpInfo(IndentingPrintWriter pw) {
         pw.printf("TunerSession\n");
 
         pw.increaseIndent();

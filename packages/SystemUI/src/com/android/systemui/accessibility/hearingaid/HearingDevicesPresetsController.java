@@ -113,7 +113,7 @@ public class HearingDevicesPresetsController implements
 
     @Override
     public void onPresetSelectionForGroupFailed(int hapGroupId, int reason) {
-        if (mActiveHearingDevice == null) {
+        if (mActiveHearingDevice == null || mHapClientProfile == null) {
             return;
         }
         if (hapGroupId == mHapClientProfile.getHapGroup(mActiveHearingDevice.getDevice())) {
@@ -137,7 +137,7 @@ public class HearingDevicesPresetsController implements
 
     @Override
     public void onSetPresetNameForGroupFailed(int hapGroupId, int reason) {
-        if (mActiveHearingDevice == null) {
+        if (mActiveHearingDevice == null || mHapClientProfile == null) {
             return;
         }
         if (hapGroupId == mHapClientProfile.getHapGroup(mActiveHearingDevice.getDevice())) {
@@ -177,22 +177,33 @@ public class HearingDevicesPresetsController implements
     }
 
     /**
-     * Sets the hearing device for this controller to control the preset.
+     * Sets the hearing device for this controller to control the preset if it supports
+     * {@link HapClientProfile}.
      *
      * @param activeHearingDevice the {@link CachedBluetoothDevice} need to be hearing aid device
+     *                            and support {@link HapClientProfile}.
      */
-    public void setActiveHearingDevice(CachedBluetoothDevice activeHearingDevice) {
-        mActiveHearingDevice = activeHearingDevice;
+    public void setHearingDeviceIfSupportHap(CachedBluetoothDevice activeHearingDevice) {
+        if (mHapClientProfile == null || activeHearingDevice == null) {
+            mActiveHearingDevice = null;
+            return;
+        }
+        if (activeHearingDevice.getProfiles().stream().anyMatch(
+                profile -> profile instanceof HapClientProfile)) {
+            mActiveHearingDevice = activeHearingDevice;
+        } else {
+            mActiveHearingDevice = null;
+        }
     }
 
     /**
      * Selects the currently active preset for {@code mActiveHearingDevice} individual device or
-     * the device group accoridng to whether it supports synchronized presets or not.
+     * the device group according to whether it supports synchronized presets or not.
      *
      * @param presetIndex an index of one of the available presets
      */
     public void selectPreset(int presetIndex) {
-        if (mActiveHearingDevice == null) {
+        if (mActiveHearingDevice == null || mHapClientProfile == null) {
             return;
         }
         mSelectedPresetIndex = presetIndex;
@@ -217,10 +228,11 @@ public class HearingDevicesPresetsController implements
      * @return a list of all known preset info
      */
     public List<BluetoothHapPresetInfo> getAllPresetInfo() {
-        if (mActiveHearingDevice == null) {
+        if (mActiveHearingDevice == null || mHapClientProfile == null) {
             return emptyList();
         }
-        return mHapClientProfile.getAllPresetInfo(mActiveHearingDevice.getDevice());
+        return mHapClientProfile.getAllPresetInfo(mActiveHearingDevice.getDevice()).stream().filter(
+                BluetoothHapPresetInfo::isAvailable).toList();
     }
 
     /**
@@ -229,14 +241,14 @@ public class HearingDevicesPresetsController implements
      * @return active preset index
      */
     public int getActivePresetIndex() {
-        if (mActiveHearingDevice == null) {
+        if (mActiveHearingDevice == null || mHapClientProfile == null) {
             return BluetoothHapClient.PRESET_INDEX_UNAVAILABLE;
         }
         return mHapClientProfile.getActivePresetIndex(mActiveHearingDevice.getDevice());
     }
 
     private void selectPresetSynchronously(int groupId, int presetIndex) {
-        if (mActiveHearingDevice == null) {
+        if (mActiveHearingDevice == null || mHapClientProfile == null) {
             return;
         }
         if (DEBUG) {
@@ -249,7 +261,7 @@ public class HearingDevicesPresetsController implements
     }
 
     private void selectPresetIndependently(int presetIndex) {
-        if (mActiveHearingDevice == null) {
+        if (mActiveHearingDevice == null || mHapClientProfile == null) {
             return;
         }
         if (DEBUG) {

@@ -23,6 +23,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -90,17 +91,22 @@ constructor(
 
     /** Occlusion state to apply whenever a keyguard transition is FINISHED. */
     private val occlusionStateFromFinishedStep =
-        keyguardTransitionInteractor.finishedKeyguardTransitionStep
-            .sample(keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop, ::Pair)
-            .map { (finishedStep, showWhenLockedOnTop) ->
+        combine(
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
+                ),
+                keyguardTransitionInteractor.isFinishedIn(KeyguardState.OCCLUDED),
+                keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop,
+                ::Triple
+            )
+            .map { (isOnGone, isOnOccluded, showWhenLockedOnTop) ->
                 // If we're FINISHED in OCCLUDED, we want to render as occluded. We also need to
                 // remain occluded if a SHOW_WHEN_LOCKED activity is on the top of the task stack,
                 // and we're in any state other than GONE. This is necessary, for example, when we
                 // transition from OCCLUDED to a bouncer state. Otherwise, we should not be
                 // occluded.
-                val occluded =
-                    finishedStep.to == KeyguardState.OCCLUDED ||
-                        (showWhenLockedOnTop && finishedStep.to != KeyguardState.GONE)
+                val occluded = isOnOccluded || (showWhenLockedOnTop && !isOnGone)
                 OccludedState(occluded = occluded, animate = false)
             }
 

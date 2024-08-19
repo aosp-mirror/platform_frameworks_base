@@ -94,7 +94,6 @@ public class RootContentBehavior implements RemoteComposeOperation {
     public static final int SCALE_CROP = 5;
     public static final int SCALE_FILL_BOUNDS = 6;
 
-
     public static final Companion COMPANION = new Companion();
 
     /**

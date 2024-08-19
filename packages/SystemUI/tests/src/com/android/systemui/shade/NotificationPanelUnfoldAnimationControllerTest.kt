@@ -16,9 +16,9 @@
 
 package com.android.systemui.shade
 
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.ViewGroup
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -46,7 +46,7 @@ import org.mockito.MockitoAnnotations
  * the set of ids, which also dictact which direction to move and when, via a filter fn.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationPanelUnfoldAnimationControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var progressProvider: NaturalRotationUnfoldProgressProvider

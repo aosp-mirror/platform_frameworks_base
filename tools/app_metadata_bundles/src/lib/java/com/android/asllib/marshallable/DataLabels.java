@@ -22,33 +22,22 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Data label representation with data shared and data collected maps containing zero or more {@link
  * DataCategory}
  */
 public class DataLabels implements AslMarshallable {
-    private final Map<String, DataCategory> mDataAccessed;
     private final Map<String, DataCategory> mDataCollected;
     private final Map<String, DataCategory> mDataShared;
 
     public DataLabels(
-            Map<String, DataCategory> dataAccessed,
             Map<String, DataCategory> dataCollected,
             Map<String, DataCategory> dataShared) {
-        mDataAccessed = dataAccessed;
         mDataCollected = dataCollected;
         mDataShared = dataShared;
-    }
-
-    /**
-     * Returns the data accessed {@link Map} of {@link DataCategoryConstants} to {@link
-     * DataCategory}
-     */
-    public Map<String, DataCategory> getDataAccessed() {
-        return mDataAccessed;
     }
 
     /**
@@ -67,26 +56,26 @@ public class DataLabels implements AslMarshallable {
     }
 
     /** Gets the on-device DOM element for the {@link DataLabels}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element dataLabelsEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_DATA_LABELS);
 
-        maybeAppendDataUsages(doc, dataLabelsEle, mDataAccessed, XmlUtils.OD_NAME_DATA_ACCESSED);
         maybeAppendDataUsages(doc, dataLabelsEle, mDataCollected, XmlUtils.OD_NAME_DATA_COLLECTED);
         maybeAppendDataUsages(doc, dataLabelsEle, mDataShared, XmlUtils.OD_NAME_DATA_SHARED);
 
-        return XmlUtils.listOf(dataLabelsEle);
+        return dataLabelsEle;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element dataLabelsEle = doc.createElement(XmlUtils.HR_TAG_DATA_LABELS);
-        maybeAppendHrDataUsages(doc, dataLabelsEle, mDataAccessed, XmlUtils.HR_TAG_DATA_ACCESSED);
-        maybeAppendHrDataUsages(doc, dataLabelsEle, mDataCollected, XmlUtils.HR_TAG_DATA_COLLECTED);
-        maybeAppendHrDataUsages(doc, dataLabelsEle, mDataShared, XmlUtils.HR_TAG_DATA_SHARED);
-        return XmlUtils.listOf(dataLabelsEle);
+        maybeAppendHrDataUsages(
+                doc, dataLabelsEle, mDataCollected, XmlUtils.HR_TAG_DATA_COLLECTED, false);
+        maybeAppendHrDataUsages(
+                doc, dataLabelsEle, mDataCollected, XmlUtils.HR_TAG_DATA_COLLECTED_EPHEMERAL, true);
+        maybeAppendHrDataUsages(
+                doc, dataLabelsEle, mDataShared, XmlUtils.HR_TAG_DATA_SHARED, false);
+        return dataLabelsEle;
     }
 
     private void maybeAppendDataUsages(
@@ -104,7 +93,7 @@ public class DataLabels implements AslMarshallable {
             DataCategory dataCategory = dataCategoriesMap.get(dataCategoryName);
             for (String dataTypeName : dataCategory.getDataTypes().keySet()) {
                 DataType dataType = dataCategory.getDataTypes().get(dataTypeName);
-                XmlUtils.appendChildren(dataCategoryEle, dataType.toOdDomElements(doc));
+                dataCategoryEle.appendChild(dataType.toOdDomElement(doc));
             }
             dataUsageEle.appendChild(dataCategoryEle);
         }
@@ -115,7 +104,8 @@ public class DataLabels implements AslMarshallable {
             Document doc,
             Element dataLabelsEle,
             Map<String, DataCategory> dataCategoriesMap,
-            String dataUsageTypeName) {
+            String dataUsageTypeName,
+            boolean ephemeral) {
         if (dataCategoriesMap.isEmpty()) {
             return;
         }
@@ -123,10 +113,15 @@ public class DataLabels implements AslMarshallable {
             DataCategory dataCategory = dataCategoriesMap.get(dataCategoryName);
             for (String dataTypeName : dataCategory.getDataTypes().keySet()) {
                 DataType dataType = dataCategory.getDataTypes().get(dataTypeName);
-                // XmlUtils.appendChildren(dataLabelsEle, dataType.toHrDomElements(doc));
+                if (ephemeral
+                        != (dataType.getEphemeral() != null ? dataType.getEphemeral() : false)) {
+                    continue;
+                }
+
                 Element hrDataTypeEle = doc.createElement(dataUsageTypeName);
-                hrDataTypeEle.setAttribute(XmlUtils.HR_ATTR_DATA_CATEGORY, dataCategoryName);
-                hrDataTypeEle.setAttribute(XmlUtils.HR_ATTR_DATA_TYPE, dataTypeName);
+                hrDataTypeEle.setAttribute(
+                        XmlUtils.HR_ATTR_DATA_TYPE,
+                        dataCategoryName + XmlUtils.DATA_TYPE_SEPARATOR + dataTypeName);
                 XmlUtils.maybeSetHrBoolAttr(
                         hrDataTypeEle,
                         XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL,
@@ -135,15 +130,13 @@ public class DataLabels implements AslMarshallable {
                         hrDataTypeEle,
                         XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL,
                         dataType.getIsSharingOptional());
-                XmlUtils.maybeSetHrBoolAttr(
-                        hrDataTypeEle, XmlUtils.HR_ATTR_EPHEMERAL, dataType.getEphemeral());
                 hrDataTypeEle.setAttribute(
                         XmlUtils.HR_ATTR_PURPOSES,
                         String.join(
                                 "|",
                                 dataType.getPurposes().stream()
                                         .map(DataType.Purpose::toString)
-                                        .toList()));
+                                        .collect(Collectors.toList())));
                 dataLabelsEle.appendChild(hrDataTypeEle);
             }
         }

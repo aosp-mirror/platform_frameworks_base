@@ -20,7 +20,33 @@ import android.app.ActivityManager.RunningTaskInfo
 
 /** Represents the state of media projection. */
 sealed interface MediaProjectionState {
-    object NotProjecting : MediaProjectionState
-    object EntireScreen : MediaProjectionState
-    data class SingleTask(val task: RunningTaskInfo) : MediaProjectionState
+    /** There is no media being projected. */
+    data object NotProjecting : MediaProjectionState
+
+    /**
+     * Media is currently being projected.
+     *
+     * @property hostPackage the package name of the app that is receiving the content of the media
+     *   projection (aka which app the phone screen contents are being sent to).
+     * @property hostDeviceName the name of the other device that's receiving the content of the
+     *   media projection. Null if the media projection is going to this same device (e.g. another
+     *   app is recording the screen).
+     */
+    sealed class Projecting(
+        open val hostPackage: String,
+        open val hostDeviceName: String?,
+    ) : MediaProjectionState {
+        /** The entire screen is being projected. */
+        data class EntireScreen(
+            override val hostPackage: String,
+            override val hostDeviceName: String? = null,
+        ) : Projecting(hostPackage, hostDeviceName)
+
+        /** Only a single task is being projected. */
+        data class SingleTask(
+            override val hostPackage: String,
+            override val hostDeviceName: String?,
+            val task: RunningTaskInfo,
+        ) : Projecting(hostPackage, hostDeviceName)
+    }
 }

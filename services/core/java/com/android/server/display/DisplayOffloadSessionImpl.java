@@ -84,6 +84,14 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
     }
 
     @Override
+    public void cancelBlockScreenOn() {
+        if (mDisplayOffloader == null) {
+            return;
+        }
+        mDisplayOffloader.cancelBlockScreenOn();
+    }
+
+    @Override
     public float[] getAutoBrightnessLevels(int mode) {
         if (mode < 0 || mode > AUTO_BRIGHTNESS_MODE_MAX) {
             throw new IllegalArgumentException("Unknown auto-brightness mode: " + mode);

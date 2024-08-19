@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromDozingTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
@@ -50,12 +49,10 @@ constructor(
             )
 
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
-        var startAlpha = 1f
         return transitionAnimation.sharedFlow(
             duration = 200.milliseconds,
-            onStart = { startAlpha = viewState.alpha() },
-            onStep = { MathUtils.lerp(startAlpha, 0f, it) },
-            onFinish = { 0f },
+            onStart = { 0f },
+            onStep = { 0f },
         )
     }
 

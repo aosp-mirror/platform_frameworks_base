@@ -24,26 +24,34 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneActionsViewModel
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 /** The lock screen scene shows when the device is locked. */
 @SysUISingleton
 class LockscreenScene
 @Inject
 constructor(
-    viewModel: LockscreenSceneViewModel,
+    actionsViewModelFactory: LockscreenSceneActionsViewModel.Factory,
     private val lockscreenContent: Lazy<LockscreenContent>,
 ) : ComposableScene {
     override val key = Scenes.Lockscreen
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+    private val actionsViewModel: LockscreenSceneActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
+    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
+        actionsViewModel.actions
+
+    override suspend fun activate(): Nothing {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(

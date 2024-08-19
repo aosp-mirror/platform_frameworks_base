@@ -18,6 +18,7 @@ package com.android.systemui.clipboardoverlay
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.whenever
@@ -29,6 +30,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
@@ -37,6 +39,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class ClipboardImageLoaderTest : SysuiTestCase() {
     @Mock private lateinit var mockContext: Context
 

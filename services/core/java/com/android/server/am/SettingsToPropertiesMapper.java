@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 /**
  * Maps system settings to system properties.
@@ -136,12 +137,14 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigAconfigScopes = new String[] {
         "accessibility",
         "android_core_networking",
+        "android_sdk",
         "android_stylus",
         "aoc",
         "app_widgets",
         "arc_next",
         "art_mainline",
         "art_performance",
+        "attack_tools",
         "avic",
         "biometrics",
         "biometrics_framework",
@@ -172,6 +175,7 @@ public class SettingsToPropertiesMapper {
         "haptics",
         "hardware_backed_security_mainline",
         "input",
+        "incremental",
         "llvm_and_toolchains",
         "lse_desktop_experience",
         "machine_learning",
@@ -208,6 +212,7 @@ public class SettingsToPropertiesMapper {
         "safety_center",
         "sensors",
         "spoon",
+        "stability",
         "statsd",
         "system_performance",
         "system_sw_touch",
@@ -341,7 +346,7 @@ public class SettingsToPropertiesMapper {
         // add sys prop sync callback for staged flag values
         DeviceConfig.addOnPropertiesChangedListener(
             NAMESPACE_REBOOT_STAGING,
-            AsyncTask.THREAD_POOL_EXECUTOR,
+            newSingleThreadScheduledExecutor(),
             (DeviceConfig.Properties properties) -> {
 
               for (String flagName : properties.getKeyset()) {

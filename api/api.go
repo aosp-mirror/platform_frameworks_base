@@ -15,9 +15,7 @@
 package api
 
 import (
-	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/google/blueprint/proptools"
 
@@ -54,16 +52,15 @@ var non_updatable_modules = []string{virtualization, location}
 // The properties of the combined_apis module type.
 type CombinedApisProperties struct {
 	// Module libraries in the bootclasspath
-	Bootclasspath []string
+	Bootclasspath proptools.Configurable[[]string]
 	// Module libraries on the bootclasspath if include_nonpublic_framework_api is true.
 	Conditional_bootclasspath []string
 	// Module libraries in system server
-	System_server_classpath []string
+	System_server_classpath proptools.Configurable[[]string]
 }
 
 type CombinedApis struct {
 	android.ModuleBase
-	android.DefaultableModuleBase
 
 	properties CombinedApisProperties
 }
@@ -74,34 +71,41 @@ func init() {
 
 func registerBuildComponents(ctx android.RegistrationContext) {
 	ctx.RegisterModuleType("combined_apis", combinedApisModuleFactory)
-	ctx.RegisterModuleType("combined_apis_defaults", CombinedApisModuleDefaultsFactory)
 }
 
 var PrepareForCombinedApisTest = android.FixtureRegisterWithContext(registerBuildComponents)
 
-func (a *CombinedApis) apiFingerprintStubDeps() []string {
+func (a *CombinedApis) bootclasspath(ctx android.ConfigAndErrorContext) []string {
+	return a.properties.Bootclasspath.GetOrDefault(a.ConfigurableEvaluator(ctx), nil)
+}
+
+func (a *CombinedApis) systemServerClasspath(ctx android.ConfigAndErrorContext) []string {
+	return a.properties.System_server_classpath.GetOrDefault(a.ConfigurableEvaluator(ctx), nil)
+}
+
+func (a *CombinedApis) apiFingerprintStubDeps(ctx android.BottomUpMutatorContext) []string {
 	ret := []string{}
 	ret = append(
 		ret,
-		transformArray(a.properties.Bootclasspath, "", ".stubs")...,
+		transformArray(a.bootclasspath(ctx), "", ".stubs")...,
 	)
 	ret = append(
 		ret,
-		transformArray(a.properties.Bootclasspath, "", ".stubs.system")...,
+		transformArray(a.bootclasspath(ctx), "", ".stubs.system")...,
 	)
 	ret = append(
 		ret,
-		transformArray(a.properties.Bootclasspath, "", ".stubs.module_lib")...,
+		transformArray(a.bootclasspath(ctx), "", ".stubs.module_lib")...,
 	)
 	ret = append(
 		ret,
-		transformArray(a.properties.System_server_classpath, "", ".stubs.system_server")...,
+		transformArray(a.systemServerClasspath(ctx), "", ".stubs.system_server")...,
 	)
 	return ret
 }
 
 func (a *CombinedApis) DepsMutator(ctx android.BottomUpMutatorContext) {
-	ctx.AddDependency(ctx.Module(), nil, a.apiFingerprintStubDeps()...)
+	ctx.AddDependency(ctx.Module(), nil, a.apiFingerprintStubDeps(ctx)...)
 }
 
 func (a *CombinedApis) GenerateAndroidBuildActions(ctx android.ModuleContext) {
@@ -458,82 +462,9 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 	}
 }
 
-func createApiContributionDefaults(ctx android.LoadHookContext, modules []string) {
-	defaultsSdkKinds := []android.SdkKind{
-		android.SdkPublic, android.SdkSystem, android.SdkModule,
-	}
-	for _, sdkKind := range defaultsSdkKinds {
-		props := defaultsProps{}
-		props.Name = proptools.StringPtr(
-			sdkKind.DefaultJavaLibraryName() + "_contributions")
-		if sdkKind == android.SdkModule {
-			props.Name = proptools.StringPtr(
-				sdkKind.DefaultJavaLibraryName() + "_contributions_full")
-		}
-		props.Api_surface = proptools.StringPtr(sdkKind.String())
-		apiSuffix := ""
-		if sdkKind != android.SdkPublic {
-			apiSuffix = "." + strings.ReplaceAll(sdkKind.String(), "-", "_")
-		}
-		props.Api_contributions = transformArray(
-			modules, "", fmt.Sprintf(".stubs.source%s.api.contribution", apiSuffix))
-		props.Defaults_visibility = []string{"//visibility:public"}
-		props.Previous_api = proptools.StringPtr(":android.api.public.latest")
-		ctx.CreateModule(java.DefaultsFactory, &props)
-	}
-}
-
-func createFullApiLibraries(ctx android.LoadHookContext) {
-	javaLibraryNames := []string{
-		"android_stubs_current",
-		"android_system_stubs_current",
-		"android_test_stubs_current",
-		"android_test_frameworks_core_stubs_current",
-		"android_module_lib_stubs_current",
-		"android_system_server_stubs_current",
-	}
-
-	for _, libraryName := range javaLibraryNames {
-		props := libraryProps{}
-		props.Name = proptools.StringPtr(libraryName)
-		staticLib := libraryName + ".from-source"
-		if ctx.Config().BuildFromTextStub() {
-			staticLib = libraryName + ".from-text"
-		}
-		props.Static_libs = []string{staticLib}
-		props.Defaults = []string{"android.jar_defaults"}
-		props.Visibility = []string{"//visibility:public"}
-		props.Is_stubs_module = proptools.BoolPtr(true)
-
-		ctx.CreateModule(java.LibraryFactory, &props)
-	}
-}
-
-func createFullExportableApiLibraries(ctx android.LoadHookContext) {
-	javaLibraryNames := []string{
-		"android_stubs_current_exportable",
-		"android_system_stubs_current_exportable",
-		"android_test_stubs_current_exportable",
-		"android_module_lib_stubs_current_exportable",
-		"android_system_server_stubs_current_exportable",
-	}
-
-	for _, libraryName := range javaLibraryNames {
-		props := libraryProps{}
-		props.Name = proptools.StringPtr(libraryName)
-		staticLib := libraryName + ".from-source"
-		props.Static_libs = []string{staticLib}
-		props.Defaults = []string{"android.jar_defaults"}
-		props.Visibility = []string{"//visibility:public"}
-		props.Is_stubs_module = proptools.BoolPtr(true)
-
-		ctx.CreateModule(java.LibraryFactory, &props)
-	}
-}
-
 func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
-	bootclasspath := a.properties.Bootclasspath
-	system_server_classpath := a.properties.System_server_classpath
+	bootclasspath := a.bootclasspath(ctx)
+	system_server_classpath := a.systemServerClasspath(ctx)
 	if ctx.Config().VendorConfig("ANDROID").Bool("include_nonpublic_framework_api") {
 		bootclasspath = append(bootclasspath, a.properties.Conditional_bootclasspath...)
 		sort.Strings(bootclasspath)
@@ -556,19 +487,12 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedAnnotationsFilegroups(ctx, bootclasspath, system_server_classpath)
 
 	createPublicStubsSourceFilegroup(ctx, bootclasspath)
-
-	createApiContributionDefaults(ctx, bootclasspath)
-
-	createFullApiLibraries(ctx)
-
-	createFullExportableApiLibraries(ctx)
 }
 
 func combinedApisModuleFactory() android.Module {
 	module := &CombinedApis{}
 	module.AddProperties(&module.properties)
 	android.InitAndroidModule(module)
-	android.InitDefaultableModule(module)
 	android.AddLoadHook(module, func(ctx android.LoadHookContext) { module.createInternalModules(ctx) })
 	return module
 }
@@ -604,17 +528,4 @@ func remove(s []string, v string) []string {
 		}
 	}
 	return s2
-}
-
-// Defaults
-type CombinedApisModuleDefaults struct {
-	android.ModuleBase
-	android.DefaultsModuleBase
-}
-
-func CombinedApisModuleDefaultsFactory() android.Module {
-	module := &CombinedApisModuleDefaults{}
-	module.AddProperties(&CombinedApisProperties{})
-	android.InitDefaultsModule(module)
-	return module
 }

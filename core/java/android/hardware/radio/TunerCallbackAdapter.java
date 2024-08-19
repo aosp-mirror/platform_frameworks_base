@@ -63,48 +63,53 @@ final class TunerCallbackAdapter extends ITunerCallback.Stub {
     }
 
     void close() {
+        ProgramList programList;
         synchronized (mLock) {
-            if (mProgramList != null) {
-                mProgramList.close();
+            if (mProgramList == null) {
+                return;
             }
+            programList = mProgramList;
         }
+        programList.close();
     }
 
     void setProgramListObserver(@Nullable ProgramList programList,
             ProgramList.OnCloseListener closeListener) {
         Objects.requireNonNull(closeListener, "CloseListener cannot be null");
+        ProgramList prevProgramList;
         synchronized (mLock) {
-            if (mProgramList != null) {
-                Log.w(TAG, "Previous program list observer wasn't properly closed, closing it...");
-                mProgramList.close();
-            }
+            prevProgramList = mProgramList;
             mProgramList = programList;
-            if (programList == null) {
-                return;
-            }
-            programList.setOnCloseListener(() -> {
-                synchronized (mLock) {
-                    if (mProgramList != programList) {
-                        return;
-                    }
-                    mProgramList = null;
-                    mLastCompleteList = null;
-                }
-                closeListener.onClose();
-            });
-            programList.addOnCompleteListener(() -> {
-                synchronized (mLock) {
-                    if (mProgramList != programList) {
-                        return;
-                    }
-                    mLastCompleteList = programList.toList();
-                    if (mDelayedCompleteCallback) {
-                        Log.d(TAG, "Sending delayed onBackgroundScanComplete callback");
-                        sendBackgroundScanCompleteLocked();
-                    }
-                }
-            });
         }
+        if (prevProgramList != null) {
+            Log.w(TAG, "Previous program list observer wasn't properly closed, closing it...");
+            prevProgramList.close();
+        }
+        if (programList == null) {
+            return;
+        }
+        programList.setOnCloseListener(() -> {
+            synchronized (mLock) {
+                if (mProgramList != programList) {
+                    return;
+                }
+                mProgramList = null;
+                mLastCompleteList = null;
+            }
+            closeListener.onClose();
+        });
+        programList.addOnCompleteListener(() -> {
+            synchronized (mLock) {
+                if (mProgramList != programList) {
+                    return;
+                }
+                mLastCompleteList = programList.toList();
+                if (mDelayedCompleteCallback) {
+                    Log.d(TAG, "Sending delayed onBackgroundScanComplete callback");
+                    sendBackgroundScanCompleteLocked();
+                }
+            }
+        });
     }
 
     @Nullable List<RadioManager.ProgramInfo> getLastCompleteList() {
@@ -245,12 +250,14 @@ final class TunerCallbackAdapter extends ITunerCallback.Stub {
     @Override
     public void onProgramListUpdated(ProgramList.Chunk chunk) {
         mHandler.post(() -> {
+            ProgramList programList;
             synchronized (mLock) {
                 if (mProgramList == null) {
                     return;
                 }
-                mProgramList.apply(Objects.requireNonNull(chunk, "Chunk cannot be null"));
+                programList = mProgramList;
             }
+            programList.apply(Objects.requireNonNull(chunk, "Chunk cannot be null"));
         });
     }
 

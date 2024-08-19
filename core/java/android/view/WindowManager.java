@@ -132,6 +132,7 @@ import android.window.InputTransferToken;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 
+import com.android.internal.R;
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.ElementType;
@@ -478,6 +479,17 @@ public interface WindowManager extends ViewManager {
      */
     int TRANSIT_SLEEP = 12;
     /**
+     * An Activity was going to be visible from back navigation.
+     * @hide
+     */
+    int TRANSIT_PREPARE_BACK_NAVIGATION = 13;
+    /**
+     * An Activity was going to be invisible from back navigation.
+     * @hide
+     */
+    int TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION = 14;
+
+    /**
      * The first slot for custom transition types. Callers (like Shell) can make use of custom
      * transition types for dealing with special cases. These types are effectively ignored by
      * Core and will just be passed along as part of TransitionInfo objects. An example is
@@ -505,6 +517,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_PIP,
             TRANSIT_WAKE,
             TRANSIT_SLEEP,
+            TRANSIT_PREPARE_BACK_NAVIGATION,
+            TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION,
             TRANSIT_FIRST_CUSTOM
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -963,7 +977,7 @@ public interface WindowManager extends ViewManager {
      * true:
      * <ul>
      *     <li>Activity has requested orientation more than two times within one-second timer
-     *     <li>Activity is not letterboxed for fixed orientation
+     *     <li>Activity is not letterboxed for fixed-orientation apps
      * </ul>
      *
      * <p>Setting this property to {@code false} informs the system that the app must be
@@ -1055,22 +1069,22 @@ public interface WindowManager extends ViewManager {
      * for an app to inform the system that the app should be excluded from the camera compatibility
      * force rotation treatment.
      *
-     * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
-     * orientation of the device and set opposite to natural orientation for a landscape app
-     * window. Mismatch between them can lead to camera issues like sideways or stretched
+     * <p>The camera compatibility treatment aligns portrait app windows with the natural
+     * orientation of the device and landscape app windows opposite the device natural orientation.
+     * Mismatch between the orientations can lead to camera issues like a sideways or stretched
      * viewfinder since this is one of the strongest assumptions that apps make when they implement
-     * camera previews. Since app and natural display orientations aren't guaranteed to match, the
-     * rotation can cause letterboxing. The forced rotation is triggered as soon as app opens to
+     * camera previews. Since app and device natural orientations aren't guaranteed to match, the
+     * rotation can cause letterboxing. The forced rotation is triggered as soon as an app opens the
      * camera and is removed once camera is closed.
      *
-     * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
-     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
-     * orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * <p>Camera compatibility can be enabled by device manufacturers on displays that have the
+     * ignore requested orientation display setting enabled, which enables compatibility mode for
+     * fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>With this property set to {@code true} or unset, the system may apply the force rotation
-     * treatment to fixed orientation activities. Device manufacturers can exclude packages from the
+     * treatment to fixed-orientation activities. Device manufacturers can exclude packages from the
      * treatment using their discretion to improve display compatibility.
      *
      * <p>With this property set to {@code false}, the system will not apply the force rotation
@@ -1093,12 +1107,12 @@ public interface WindowManager extends ViewManager {
      * for an app to inform the system that the app should be excluded from the activity "refresh"
      * after the camera compatibility force rotation treatment.
      *
-     * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
-     * orientation of the device and set opposite to natural orientation for a landscape app
-     * window. Mismatch between them can lead to camera issues like sideways or stretched
+     * <p>The camera compatibility treatment aligns portrait app windows with the natural
+     * orientation of the device and landscape app windows opposite the device natural orientation.
+     * Mismatch between the orientations can lead to camera issues like a sideways or stretched
      * viewfinder since this is one of the strongest assumptions that apps make when they implement
-     * camera previews. Since app and natural display orientations aren't guaranteed to match, the
-     * rotation can cause letterboxing. The forced rotation is triggered as soon as app opens to
+     * camera previews. Since app and device natural orientations aren't guaranteed to match, the
+     * rotation can cause letterboxing. The forced rotation is triggered as soon as an app opens the
      * camera and is removed once camera is closed.
      *
      * <p>Force rotation is followed by the "Refresh" of the activity by going through "resumed ->
@@ -1109,10 +1123,10 @@ public interface WindowManager extends ViewManager {
      * rotation.
      *
      * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
-     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
-     * orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * ignore requested orientation display setting enabled, which enables compatibility mode for
+     * fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>With this property set to {@code true} or unset, the system may "refresh" activity after
      * the force rotation treatment. Device manufacturers can exclude packages from the "refresh"
@@ -1140,12 +1154,11 @@ public interface WindowManager extends ViewManager {
      * "stopped -> resumed".
      *
      * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
-     * orientation of the device and set opposite to natural orientation for a landscape app
-     * window. Mismatch between them can lead to camera issues like sideways or stretched
-     * viewfinder since this is one of the strongest assumptions that apps make when they implement
-     * camera previews. Since app and natural display orientations aren't guaranteed to match, the
-     * rotation can cause letterboxing. The forced rotation is triggered as soon as app opens to
-     * camera and is removed once camera is closed.
+     * orientation of the device. Mismatch between the orientations can lead to camera issues like a
+     * sideways or stretched viewfinder since this is one of the strongest assumptions that apps
+     * make when they implement camera previews. Since app and natural display orientations aren't
+     * guaranteed to match, the rotation can cause letterboxing. The forced rotation is triggered as
+     * soon as app opens the camera and is removed once camera is closed.
      *
      * <p>Force rotation is followed by the "Refresh" of the activity by going through "resumed ->
      * ... -> stopped -> ... -> resumed" cycle (by default) or "resumed -> paused -> resumed" cycle
@@ -1154,10 +1167,10 @@ public interface WindowManager extends ViewManager {
      * to sideways or stretching issues persisting even after force rotation.
      *
      * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
-     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
-     * orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * ignore requested orientation display setting enabled, which enables compatibility mode for
+     * fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>Device manufacturers can override packages to "refresh" via "resumed -> paused -> resumed"
      * cycle using their discretion to improve display compatibility.
@@ -1203,7 +1216,7 @@ public interface WindowManager extends ViewManager {
      * <p>With this property set to {@code true} or unset, device manufacturers can override
      * orientation for the app using their discretion to improve display compatibility.
      *
-     * <p>With this property set to {@code false}, device manufactured per-app override for
+     * <p>With this property set to {@code false}, device manufacturer per-app override for
      * orientation won't be applied.
      *
      * <p><b>Syntax:</b>
@@ -1227,15 +1240,15 @@ public interface WindowManager extends ViewManager {
      * <p>When this compat override is enabled and while display is fixed to the landscape natural
      * orientation, the orientation requested by the activity will be still respected by bounds
      * resolution logic. For instance, if an activity requests portrait orientation, then activity
-     * will appear in the letterbox mode for fixed orientation with the display rotated to the
-     * lanscape natural orientation.
+     * appears in letterbox mode for fixed-orientation apps with the display rotated to the lanscape
+     * natural orientation.
      *
      * <p>The treatment is disabled by default but device manufacturers can enable the treatment
      * using their discretion to improve display compatibility on displays that have the ignore
-     * orientation request display setting enabled by OEMs on the device (enables compatibility mode
-     * for fixed orientation on Android 12 (API level 31) or higher; see
-     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
-     * letterboxing</a> for more details).
+     * orientation request display setting enabled by OEMs on the device, which enables
+     * compatibility mode for fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>With this property set to {@code true} or unset, the system wiil use landscape display
      * orientation when the following conditions are met:
@@ -1246,7 +1259,7 @@ public interface WindowManager extends ViewManager {
      *     <li>Device manufacturer enabled the treatment.
      * </ul>
      *
-     * <p>With this property set to {@code false}, device manufactured per-app override for
+     * <p>With this property set to {@code false}, device manufacturer per-app override for
      * display orientation won't be applied.
      *
      * <p><b>Syntax:</b>
@@ -1344,13 +1357,11 @@ public interface WindowManager extends ViewManager {
      * see {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE} to
      * disable the full-screen option only.
      *
-     * <p>The user override is intended to improve the app experience on devices
-     * that have the ignore orientation request display setting enabled by OEMs
-     * (enables compatibility mode for fixed orientation on Android 12 (API
-     * level 31) or higher; see
-     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-compatibility-mode">
-     * Large screen compatibility mode</a>
-     * for more details).
+     * <p>The user override is intended to improve the app experience on devices that have the
+     * ignore orientation request display setting enabled by OEMs, which enables compatibility mode
+     * for fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>To opt out of the user aspect ratio compatibility override, add this property
      * to your app manifest and set the value to {@code false}. Your app will be excluded
@@ -1383,13 +1394,11 @@ public interface WindowManager extends ViewManager {
      * <p>When users apply the full-screen compatibility override, the orientation
      * of the activity is forced to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER}.
      *
-     * <p>The user override is intended to improve the app experience on devices
-     * that have the ignore orientation request display setting enabled by OEMs
-     * (enables compatibility mode for fixed orientation on Android 12 (API
-     * level 31) or higher; see
-     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-compatibility-mode">
-     * Large screen compatibility mode</a>
-     * for more details).
+     * <p>The user override is intended to improve the app experience on devices that have the
+     * ignore orientation request display setting enabled by OEMs, which enables compatibility mode
+     * for fixed-orientation apps on Android 12 (API level 31) or higher. See
+     * <a href="{@docRoot}guide/practices/device-compatibility-mode">Device compatibility mode</a>
+     * for more details.
      *
      * <p>To opt out of the full-screen option of the user aspect ratio compatibility
      * override, add this property to your app manifest and set the value to {@code false}.
@@ -1673,6 +1682,15 @@ public interface WindowManager extends ViewManager {
     public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver, int deviceId);
 
     /**
+     * Request the application launch keyboard shortcuts the system has defined.
+     *
+     * @param deviceId The id of the {@link InputDevice} that will handle the shortcut.
+     *
+     * @hide
+     */
+    KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
+
+    /**
      * Request for ime's keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.
@@ -1914,6 +1932,8 @@ public interface WindowManager extends ViewManager {
             case TRANSIT_PIP: return "PIP";
             case TRANSIT_WAKE: return "WAKE";
             case TRANSIT_SLEEP: return "SLEEP";
+            case TRANSIT_PREPARE_BACK_NAVIGATION: return "PREDICTIVE_BACK";
+            case TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION: return "CLOSE_PREDICTIVE_BACK";
             case TRANSIT_FIRST_CUSTOM: return "FIRST_CUSTOM";
             default:
                 if (type > TRANSIT_FIRST_CUSTOM) {
@@ -3312,6 +3332,11 @@ public interface WindowManager extends ViewManager {
         @UnsupportedAppUsage
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 1 << 6;
 
+        /** Window flag: the client side view can intercept back progress, so system does not
+         * need to pilfer pointers.
+         * {@hide} */
+        public static final int PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED = 1 << 7;
+
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
@@ -3451,6 +3476,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
 
         /**
+         * Flag to indicate that the window has the
+         * {@link R.styleable.Window_windowOptOutEdgeToEdgeEnforcement} flag set.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE = 1 << 26;
+
+        /**
          * Flag to indicate that the window is controlling how it fits window insets on its own.
          * So we don't need to adjust its attributes for fitting window insets.
          * @hide
@@ -3505,6 +3537,7 @@ public interface WindowManager extends ViewManager {
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                 PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
                 PRIVATE_FLAG_NO_MOVE_ANIMATION,
+                PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED,
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
@@ -3522,6 +3555,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                 PRIVATE_FLAG_CONSUME_IME_INSETS,
+                PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
                 PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
@@ -3625,6 +3659,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         name = "CONSUME_IME_INSETS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
+                        equals = PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
+                        name = "OPTOUT_EDGE_TO_EDGE"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                         equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
@@ -6386,10 +6424,6 @@ public interface WindowManager extends ViewManager {
      * The host is likely to be an {@link AttachedSurfaceControl} so the host token can be
      * retrieved via {@link AttachedSurfaceControl#getInputTransferToken()}.
      * <p><br>
-     * Only the window currently receiving touch is allowed to transfer the gesture so if the caller
-     * attempts to transfer touch gesture from a token that doesn't have touch, it will fail the
-     * transfer.
-     * <p><br>
      * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
      * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} or use the
      * value returned from either
@@ -6413,6 +6447,23 @@ public interface WindowManager extends ViewManager {
      * arrives, input dispatcher will do a new round of hit testing. So, if the host window is
      * still the first thing that's being touched, then it will receive the new gesture again. It
      * will again be up to the host to transfer this new gesture to the embedded.
+     * <p><br>
+     * The call can fail for the following reasons:
+     * <ul>
+     * <li>
+     * Caller attempts to transfer touch gesture from a token that doesn't have an active gesture.
+     * </li>
+     * <li>
+     * The gesture is transferred to a token that is not associated with the transferFromToken. For
+     * example, if the caller transfers to a {@link SurfaceControlViewHost} not attached to the
+     * host window via {@link SurfaceView#setChildSurfacePackage(SurfacePackage)}.
+     * </li>
+     * <li>
+     * The active gesture completes before the transfer is complete, such as in the case of a
+     * fling.
+     * </li>
+     * </ul>
+     * <p>
      *
      * @param transferFromToken the InputTransferToken for the currently active gesture
      * @param transferToToken   the InputTransferToken to transfer the gesture to.

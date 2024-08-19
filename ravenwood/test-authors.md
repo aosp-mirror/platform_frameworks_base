@@ -46,7 +46,7 @@ android_ravenwood_test {
 * Write your unit test just like you would for an Android device:
 
 ```
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -66,7 +66,7 @@ public class MyCodeTest {
 * APIs available under Ravenwood are stateless by default.  If your test requires explicit states (such as defining the UID you’re running under, or requiring a main `Looper` thread), add a `RavenwoodRule` to declare that:
 
 ```
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -165,7 +165,7 @@ public class MyCodeTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = PackageManager.class)
+    @DisabledOnRavenwood(blockedBy = PackageManager.class)
     public void testComplex() {
         // Complex test that runs on devices, but is ignored under Ravenwood
     }

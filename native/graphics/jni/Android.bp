@@ -23,6 +23,9 @@ package {
 
 cc_library_shared {
     name: "libjnigraphics",
+    defaults: [
+        "bug_24465209_workaround",
+    ],
 
     cflags: [
         "-Wall",
@@ -47,13 +50,6 @@ cc_library_shared {
 
     static_libs: ["libarect"],
 
-    arch: {
-        arm: {
-            // TODO: This is to work around b/24465209. Remove after root cause is fixed
-            pack_relocations: false,
-            ldflags: ["-Wl,--hash-style=both"],
-        },
-    },
     host_supported: true,
     target: {
         android: {
@@ -129,5 +125,32 @@ cc_fuzz {
     ],
     cflags: [
         "-DPNG_MUTATOR_DEFINE_LIBFUZZER_CUSTOM_MUTATOR",
+    ],
+}
+
+cc_fuzz {
+    name: "imagedecoder_heif_fuzzer",
+    defaults: ["imagedecoder_fuzzer_defaults"],
+    team: "trendy_team_android_core_graphics_stack",
+    shared_libs: [
+        "libfakeservicemanager",
+    ],
+    target: {
+        android: {
+            shared_libs: [
+                "libmediaplayerservice",
+                "libmediaextractorservice",
+            ],
+        },
+        host: {
+            static_libs: [
+                "libbinder_random_parcel",
+                "libcutils",
+            ],
+        },
+    },
+    include_dirs: ["frameworks/av/services/mediaextractor"],
+    cflags: [
+        "-DFUZZ_HEIF_FORMAT",
     ],
 }

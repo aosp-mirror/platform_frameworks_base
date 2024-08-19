@@ -21,8 +21,6 @@ import static android.graphics.Color.WHITE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
-import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
-
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,7 +28,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -51,7 +48,7 @@ import android.window.SnapshotDrawerUtils;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.view.BaseIWindow;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -139,16 +136,10 @@ public class TaskSnapshotWindow {
         }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
-            if (windowSessionRelayoutInfo()) {
-                final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(tmpFrames,
-                        tmpMergedConfiguration, surfaceControl, tmpInsetsState, tmpControls);
-                session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
-                        outRelayoutResult);
-            } else {
-                session.relayoutLegacy(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
-                        tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                        tmpControls, new Bundle());
-            }
+            final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(tmpFrames,
+                    tmpMergedConfiguration, surfaceControl, tmpInsetsState, tmpControls);
+            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
+                    outRelayoutResult);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();

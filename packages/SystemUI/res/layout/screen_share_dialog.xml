@@ -46,7 +46,7 @@
             android:layout_marginTop="@dimen/screenrecord_title_margin_top"
             android:gravity="center"/>
         <Spinner
-            android:id="@+id/screen_share_mode_spinner"
+            android:id="@+id/screen_share_mode_options"
             android:layout_width="match_parent"
             android:layout_height="@dimen/screenrecord_spinner_height"
             android:layout_marginTop="@dimen/screenrecord_spinner_margin"

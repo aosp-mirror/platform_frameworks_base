@@ -42,4 +42,5 @@ data class MediaPlayerViewModel(
     val onLongClicked: () -> Unit,
     val onSeek: () -> Unit,
     val onBindSeekbar: (SeekBarViewModel) -> Unit,
+    val onLocationChanged: (Int) -> Unit,
 )

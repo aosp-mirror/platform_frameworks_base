@@ -19,29 +19,27 @@ package com.android.systemui.qs.panels.dagger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
+import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositoryImpl
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
 import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepositoryImpl
-import com.android.systemui.qs.panels.data.repository.IconTilesRepository
-import com.android.systemui.qs.panels.data.repository.IconTilesRepositoryImpl
 import com.android.systemui.qs.panels.domain.interactor.GridTypeConsistencyInteractor
 import com.android.systemui.qs.panels.domain.interactor.InfiniteGridConsistencyInteractor
 import com.android.systemui.qs.panels.domain.interactor.NoopGridConsistencyInteractor
-import com.android.systemui.qs.panels.shared.model.GridConsistencyLog
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
-import com.android.systemui.qs.panels.shared.model.IconLabelVisibilityLog
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
-import com.android.systemui.qs.panels.shared.model.PartitionedGridLayoutType
-import com.android.systemui.qs.panels.shared.model.StretchedGridLayoutType
+import com.android.systemui.qs.panels.shared.model.PaginatedGridLayoutType
+import com.android.systemui.qs.panels.shared.model.PanelsLog
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.compose.PartitionedGridLayout
-import com.android.systemui.qs.panels.ui.compose.StretchedGridLayout
+import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
+import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout
+import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconLabelVisibilityViewModelImpl
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
-import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridSizeViewModelImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -50,7 +48,10 @@ import javax.inject.Named
 
 @Module
 interface PanelsModule {
-    @Binds fun bindIconTilesRepository(impl: IconTilesRepositoryImpl): IconTilesRepository
+    @Binds
+    fun bindDefaultLargeTilesSpecsRepository(
+        impl: DefaultLargeTilesRepositoryImpl
+    ): DefaultLargeTilesRepository
 
     @Binds
     fun bindGridLayoutTypeRepository(impl: GridLayoutTypeRepositoryImpl): GridLayoutTypeRepository
@@ -62,28 +63,31 @@ interface PanelsModule {
 
     @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
 
-    @Binds fun bindGridSizeViewModel(impl: InfiniteGridSizeViewModelImpl): InfiniteGridSizeViewModel
+    @Binds fun bindGridSizeViewModel(impl: FixedColumnsSizeViewModelImpl): FixedColumnsSizeViewModel
 
     @Binds
     fun bindIconLabelVisibilityViewModel(
         impl: IconLabelVisibilityViewModelImpl
     ): IconLabelVisibilityViewModel
 
-    @Binds @Named("Default") fun bindDefaultGridLayout(impl: PartitionedGridLayout): GridLayout
+    @Binds
+    @PaginatedBaseLayoutType
+    fun bindPaginatedBaseGridLayout(impl: InfiniteGridLayout): PaginatableGridLayout
+
+    @Binds
+    @PaginatedBaseLayoutType
+    fun bindPaginatedBaseConsistencyInteractor(
+        impl: NoopGridConsistencyInteractor
+    ): GridTypeConsistencyInteractor
+
+    @Binds @Named("Default") fun bindDefaultGridLayout(impl: PaginatedGridLayout): GridLayout
 
     companion object {
         @Provides
         @SysUISingleton
-        @GridConsistencyLog
-        fun providesGridConsistencyLog(factory: LogBufferFactory): LogBuffer {
-            return factory.create("GridConsistencyLog", 50)
-        }
-
-        @Provides
-        @SysUISingleton
-        @IconLabelVisibilityLog
-        fun providesIconTileLabelVisibilityLog(factory: LogBufferFactory): LogBuffer {
-            return factory.create("IconLabelVisibilityLog", 50)
+        @PanelsLog
+        fun providesPanelsLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("PanelsLog", 50)
         }
 
         @Provides
@@ -94,18 +98,10 @@ interface PanelsModule {
 
         @Provides
         @IntoSet
-        fun provideStretchedGridLayout(
-            gridLayout: StretchedGridLayout
+        fun providePaginatedGridLayout(
+            gridLayout: PaginatedGridLayout
         ): Pair<GridLayoutType, GridLayout> {
-            return Pair(StretchedGridLayoutType, gridLayout)
-        }
-
-        @Provides
-        @IntoSet
-        fun providePartitionedGridLayout(
-            gridLayout: PartitionedGridLayout
-        ): Pair<GridLayoutType, GridLayout> {
-            return Pair(PartitionedGridLayoutType, gridLayout)
+            return Pair(PaginatedGridLayoutType, gridLayout)
         }
 
         @Provides
@@ -132,18 +128,10 @@ interface PanelsModule {
 
         @Provides
         @IntoSet
-        fun provideStretchedGridConsistencyInteractor(
-            consistencyInteractor: NoopGridConsistencyInteractor
+        fun providePaginatedGridConsistencyInteractor(
+            @PaginatedBaseLayoutType consistencyInteractor: GridTypeConsistencyInteractor,
         ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
-            return Pair(StretchedGridLayoutType, consistencyInteractor)
-        }
-
-        @Provides
-        @IntoSet
-        fun providePartitionedGridConsistencyInteractor(
-            consistencyInteractor: NoopGridConsistencyInteractor
-        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
-            return Pair(PartitionedGridLayoutType, consistencyInteractor)
+            return Pair(PaginatedGridLayoutType, consistencyInteractor)
         }
 
         @Provides

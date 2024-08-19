@@ -16,16 +16,21 @@
 
 package com.android.systemui.screenshot.appclips;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_TASK_ID;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CLIP_DATA;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.PERMISSION_SELF;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -41,19 +46,33 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
+import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
+import com.android.systemui.Flags;
+import com.android.systemui.log.DebugLogger;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
+
+import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -73,13 +92,12 @@ import javax.inject.Inject;
  *
  * <p>This {@link Activity} runs in its own separate process to isolate memory intensive image
  * editing from SysUI process.
- *
- * TODO(b/267309532): Polish UI and animations.
  */
 public class AppClipsActivity extends ComponentActivity {
 
     private static final String TAG = AppClipsActivity.class.getSimpleName();
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
+    private static final int DRAWABLE_END = 2;
 
     private final AppClipsViewModel.Factory mViewModelFactory;
     private final PackageManager mPackageManager;
@@ -94,6 +112,8 @@ public class AppClipsActivity extends ComponentActivity {
     private CropView mCropView;
     private Button mSave;
     private Button mCancel;
+    private CheckBox mBacklinksIncludeDataCheckBox;
+    private TextView mBacklinksDataTextView;
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
@@ -149,26 +169,48 @@ public class AppClipsActivity extends ComponentActivity {
         mLayout = getLayoutInflater().inflate(R.layout.app_clips_screenshot, null);
         mRoot = mLayout.findViewById(R.id.root);
 
+        // Manually handle window insets post Android V to support edge-to-edge display.
+        ViewCompat.setOnApplyWindowInsetsListener(mRoot, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+
         mSave = mLayout.findViewById(R.id.save);
         mCancel = mLayout.findViewById(R.id.cancel);
         mSave.setOnClickListener(this::onClick);
         mCancel.setOnClickListener(this::onClick);
-
-
         mCropView = mLayout.findViewById(R.id.crop_view);
-
         mPreview = mLayout.findViewById(R.id.preview);
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                         updateImageDimensions());
 
+        mBacklinksDataTextView = mLayout.findViewById(R.id.backlinks_data);
+        mBacklinksIncludeDataCheckBox = mLayout.findViewById(R.id.backlinks_include_data);
+        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE));
+
         mViewModel = new ViewModelProvider(this, mViewModelFactory).get(AppClipsViewModel.class);
         mViewModel.getScreenshot().observe(this, this::setScreenshot);
         mViewModel.getResultLiveData().observe(this, this::setResultThenFinish);
         mViewModel.getErrorLiveData().observe(this, this::setErrorThenFinish);
+        mViewModel.getBacklinksLiveData().observe(this, this::setBacklinksData);
+        mViewModel.mSelectedBacklinksLiveData.observe(this, this::updateBacklinksTextView);
 
         if (savedInstanceState == null) {
-            mViewModel.performScreenshot();
+            int displayId = getDisplayId();
+            mViewModel.performScreenshot(displayId);
+
+            if (Flags.appClipsBacklinks()) {
+                int appClipsTaskId = getTaskId();
+                int callingPackageTaskId = intent.getIntExtra(EXTRA_CALLING_PACKAGE_TASK_ID,
+                        INVALID_TASK_ID);
+                Set<Integer> taskIdsToIgnore = Set.of(appClipsTaskId, callingPackageTaskId);
+                mViewModel.triggerBacklinks(taskIdsToIgnore, displayId);
+            }
         }
     }
 
@@ -217,6 +259,9 @@ public class AppClipsActivity extends ComponentActivity {
 
         // Screenshot is now available so set content view.
         setContentView(mLayout);
+
+        // Request view to apply insets as it is added late and not when activity was first created.
+        mRoot.requestApplyInsets();
     }
 
     private void onClick(View view) {
@@ -264,11 +309,22 @@ public class AppClipsActivity extends ComponentActivity {
         data.putInt(Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE,
                 Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
         data.putParcelable(EXTRA_SCREENSHOT_URI, uri);
+
+        if (mBacklinksIncludeDataCheckBox.getVisibility() == View.VISIBLE
+                && mBacklinksIncludeDataCheckBox.isChecked()
+                && mViewModel.mSelectedBacklinksLiveData.getValue() != null) {
+            ClipData backlinksData = mViewModel.mSelectedBacklinksLiveData.getValue().getClipData();
+            data.putParcelable(EXTRA_CLIP_DATA, backlinksData);
+
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "setResultThenFinish: sending notes app ClipData");
+        }
+
         try {
             mResultReceiver.send(Activity.RESULT_OK, data);
             logUiEvent(SCREENSHOT_FOR_NOTE_ACCEPTED);
         } catch (Exception e) {
-            // Do nothing.
+            Log.e(TAG, "Error while sending data to trampoline activity", e);
         }
 
         // Nullify the ResultReceiver before finishing to avoid resending the result.
@@ -279,6 +335,82 @@ public class AppClipsActivity extends ComponentActivity {
     private void setErrorThenFinish(int errorCode) {
         setError(errorCode);
         finish();
+    }
+
+    private void setBacklinksData(List<InternalBacklinksData> backlinksData) {
+        mBacklinksIncludeDataCheckBox.setVisibility(View.VISIBLE);
+        mBacklinksDataTextView.setVisibility(
+                mBacklinksIncludeDataCheckBox.isChecked() ? View.VISIBLE : View.GONE);
+
+        // Set up the dropdown when multiple backlinks are available.
+        if (backlinksData.size() > 1) {
+            setUpListPopupWindow(backlinksData, mBacklinksDataTextView);
+        }
+    }
+
+    private void setUpListPopupWindow(List<InternalBacklinksData> backlinksData, View anchor) {
+        ListPopupWindow listPopupWindow = new ListPopupWindow(this);
+        listPopupWindow.setAnchorView(anchor);
+        listPopupWindow.setOverlapAnchor(true);
+        listPopupWindow.setBackgroundDrawable(
+                AppCompatResources.getDrawable(this, R.drawable.backlinks_rounded_rectangle));
+        listPopupWindow.setOnItemClickListener((parent, view, position, id) -> {
+            mViewModel.mSelectedBacklinksLiveData.setValue(backlinksData.get(position));
+            listPopupWindow.dismiss();
+        });
+
+        ArrayAdapter<InternalBacklinksData> adapter = new ArrayAdapter<>(this,
+                R.layout.app_clips_backlinks_drop_down_entry) {
+            @Override
+            public View getView(int position, @Nullable View convertView, ViewGroup parent) {
+                TextView itemView = (TextView) super.getView(position, convertView, parent);
+                InternalBacklinksData data = backlinksData.get(position);
+                itemView.setText(data.getClipData().getDescription().getLabel());
+
+                Drawable icon = data.getAppIcon();
+                icon.setBounds(createBacklinksTextViewDrawableBounds());
+                itemView.setCompoundDrawablesRelative(/* start= */ icon, /* top= */ null,
+                        /* end= */ null, /* bottom= */ null);
+
+                return itemView;
+            }
+        };
+        adapter.addAll(backlinksData);
+        listPopupWindow.setAdapter(adapter);
+
+        mBacklinksDataTextView.setOnClickListener(unused -> listPopupWindow.show());
+    }
+
+    /**
+     * Updates the {@link #mBacklinksDataTextView} with the currently selected
+     * {@link InternalBacklinksData}. The {@link AppClipsViewModel#getBacklinksLiveData()} is
+     * expected to be already set when this method is called.
+     */
+    private void updateBacklinksTextView(InternalBacklinksData backlinksData) {
+        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
+        Drawable appIcon = backlinksData.getAppIcon();
+        Rect compoundDrawableBounds = createBacklinksTextViewDrawableBounds();
+        appIcon.setBounds(compoundDrawableBounds);
+
+        // Try to reuse the dropdown down arrow icon if available, will be null if never set.
+        Drawable dropDownIcon = mBacklinksDataTextView.getCompoundDrawablesRelative()[DRAWABLE_END];
+        if (mViewModel.getBacklinksLiveData().getValue().size() > 1 && dropDownIcon == null) {
+            // Set up the dropdown down arrow drawable only if it is required.
+            dropDownIcon = AppCompatResources.getDrawable(this, R.drawable.arrow_pointing_down);
+            dropDownIcon.setBounds(compoundDrawableBounds);
+            dropDownIcon.setTint(Utils.getColorAttr(this,
+                    android.R.attr.textColorSecondary).getDefaultColor());
+        }
+
+        mBacklinksDataTextView.setCompoundDrawablesRelative(/* start= */ appIcon, /* top= */
+                null, /* end= */ dropDownIcon, /* bottom= */ null);
+    }
+
+    private Rect createBacklinksTextViewDrawableBounds() {
+        int size = getResources().getDimensionPixelSize(R.dimen.appclips_backlinks_icon_size);
+        Rect bounds = new Rect();
+        bounds.set(/* left= */ 0, /* top= */ 0, /* right= */ size, /* bottom= */ size);
+        return bounds;
     }
 
     private void setError(int errorCode) {
@@ -295,6 +427,7 @@ public class AppClipsActivity extends ComponentActivity {
             }
         } catch (Exception e) {
             // Do nothing.
+            Log.e(TAG, "Error while sending trampoline activity error code: " + errorCode, e);
         }
 
         // Nullify the ResultReceiver to avoid resending the result.

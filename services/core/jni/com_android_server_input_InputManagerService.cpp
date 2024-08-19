@@ -104,7 +104,6 @@ static const char* VELOCITYTRACKER_STRATEGY = "velocitytracker_strategy";
 
 static struct {
     jclass clazz;
-    jmethodID notifyConfigurationChanged;
     jmethodID notifyInputDevicesChanged;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
@@ -292,6 +291,7 @@ public:
     void setTouchpadNaturalScrollingEnabled(bool enabled);
     void setTouchpadTapToClickEnabled(bool enabled);
     void setTouchpadTapDraggingEnabled(bool enabled);
+    void setShouldNotifyTouchpadHardwareState(bool enabled);
     void setTouchpadRightClickZoneEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
@@ -331,7 +331,6 @@ public:
 
     void notifySwitch(nsecs_t when, uint32_t switchValues, uint32_t switchMask,
                       uint32_t policyFlags) override;
-    void notifyConfigurationChanged(nsecs_t when) override;
     // ANR-related callbacks -- start
     void notifyNoFocusedWindowAnr(const std::shared_ptr<InputApplicationHandle>& handle) override;
     void notifyWindowUnresponsive(const sp<IBinder>& token, std::optional<gui::Pid> pid,
@@ -362,6 +361,7 @@ public:
     void notifyDropWindow(const sp<IBinder>& token, float x, float y) override;
     void notifyDeviceInteraction(int32_t deviceId, nsecs_t timestamp,
                                  const std::set<gui::Uid>& uids) override;
+    void notifyFocusedDisplayChanged(ui::LogicalDisplayId displayId) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -381,6 +381,7 @@ public:
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(ui::LogicalDisplayId displayId,
                                        const FloatPoint& position) override;
+    void notifyMouseCursorFadedOnTyping() override;
 
     /* --- InputFilterPolicyInterface implementation --- */
     void notifyStickyModifierStateChanged(uint32_t modifierState,
@@ -439,6 +440,9 @@ private:
 
         // True to enable tap dragging on touchpads.
         bool touchpadTapDraggingEnabled{false};
+
+        // True if hardware state update notifications should be sent to the policy.
+        bool shouldNotifyTouchpadHardwareState{false};
 
         // True to enable a zone on the right-hand side of touchpads where clicks will be turned
         // into context (a.k.a. "right") clicks.
@@ -698,6 +702,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->touchpadNaturalScrollingEnabled = mLocked.touchpadNaturalScrollingEnabled;
         outConfig->touchpadTapToClickEnabled = mLocked.touchpadTapToClickEnabled;
         outConfig->touchpadTapDraggingEnabled = mLocked.touchpadTapDraggingEnabled;
+        outConfig->shouldNotifyTouchpadHardwareState = mLocked.shouldNotifyTouchpadHardwareState;
         outConfig->touchpadRightClickZoneEnabled = mLocked.touchpadRightClickZoneEnabled;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
@@ -785,6 +790,10 @@ void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId poin
     } // release lock
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+void NativeInputManager::notifyMouseCursorFadedOnTyping() {
+    mInputManager->getReader().notifyMouseCursorFadedOnTyping();
 }
 
 void NativeInputManager::notifyStickyModifierStateChanged(uint32_t modifierState,
@@ -932,18 +941,6 @@ void NativeInputManager::notifySwitch(nsecs_t when,
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifySwitch,
             when, switchValues, switchMask);
     checkAndClearExceptionFromCallback(env, "notifySwitch");
-}
-
-void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
-    ALOGD("notifyConfigurationChanged - when=%lld", when);
-#endif
-    ATRACE_CALL();
-
-    JNIEnv* env = jniEnv();
-
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyConfigurationChanged, when);
-    checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
 static jobject getInputApplicationHandleObjLocalRef(
@@ -1108,6 +1105,10 @@ void NativeInputManager::notifyVibratorState(int32_t deviceId, bool isOn) {
     checkAndClearExceptionFromCallback(env, "notifyVibratorState");
 }
 
+void NativeInputManager::notifyFocusedDisplayChanged(ui::LogicalDisplayId displayId) {
+    mInputManager->getChoreographer().setFocusedDisplay(displayId);
+}
+
 void NativeInputManager::displayRemoved(JNIEnv* env, ui::LogicalDisplayId displayId) {
     mInputManager->getDispatcher().displayRemoved(displayId);
 }
@@ -1258,6 +1259,22 @@ void NativeInputManager::setTouchpadTapDraggingEnabled(bool enabled) {
 
         ALOGI("Setting touchpad tap dragging to %s.", toString(enabled));
         mLocked.touchpadTapDraggingEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setShouldNotifyTouchpadHardwareState(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.shouldNotifyTouchpadHardwareState == enabled) {
+            return;
+        }
+
+        ALOGI("Should touchpad hardware state be notified: %s.", toString(enabled));
+        mLocked.shouldNotifyTouchpadHardwareState = enabled;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -1842,10 +1859,6 @@ static void handleInputChannelDisposed(JNIEnv* env, jobject /* inputChannelObj *
                                        const std::shared_ptr<InputChannel>& inputChannel,
                                        void* data) {
     NativeInputManager* im = static_cast<NativeInputManager*>(data);
-
-    ALOGW("Input channel object '%s' was disposed without first being removed with "
-          "the input manager!",
-          inputChannel->getName().c_str());
     im->removeInputChannel(inputChannel->getConnectionToken());
 }
 
@@ -2150,6 +2163,13 @@ static void nativeSetTouchpadTapDraggingEnabled(JNIEnv* env, jobject nativeImplO
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     im->setTouchpadTapDraggingEnabled(enabled);
+}
+
+static void nativeSetShouldNotifyTouchpadHardwareState(JNIEnv* env, jobject nativeImplObj,
+                                                       jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setShouldNotifyTouchpadHardwareState(enabled);
 }
 
 static void nativeSetTouchpadRightClickZoneEnabled(JNIEnv* env, jobject nativeImplObj,
@@ -2770,6 +2790,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetTouchpadNaturalScrollingEnabled},
         {"setTouchpadTapToClickEnabled", "(Z)V", (void*)nativeSetTouchpadTapToClickEnabled},
         {"setTouchpadTapDraggingEnabled", "(Z)V", (void*)nativeSetTouchpadTapDraggingEnabled},
+        {"setShouldNotifyTouchpadHardwareState", "(Z)V",
+         (void*)nativeSetShouldNotifyTouchpadHardwareState},
         {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
         {"setInteractive", "(Z)V", (void*)nativeSetInteractive},
@@ -2866,9 +2888,6 @@ int register_android_server_InputManager(JNIEnv* env) {
     jclass clazz;
     FIND_CLASS(clazz, "com/android/server/input/InputManagerService");
     gServiceClassInfo.clazz = reinterpret_cast<jclass>(env->NewGlobalRef(clazz));
-
-    GET_METHOD_ID(gServiceClassInfo.notifyConfigurationChanged, clazz,
-            "notifyConfigurationChanged", "(J)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputDevicesChanged, clazz,
             "notifyInputDevicesChanged", "([Landroid/view/InputDevice;)V");

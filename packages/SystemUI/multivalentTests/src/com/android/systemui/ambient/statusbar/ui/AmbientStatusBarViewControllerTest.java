@@ -146,6 +146,7 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStateController,
                 mUserTracker,
                 mKosmos.getWifiInteractor(),
+                mKosmos.getCommunalSceneInteractor(),
                 mLogBuffer);
     }
 
@@ -272,6 +273,7 @@ public class AmbientStatusBarViewControllerTest extends SysuiTestCase {
                 mDreamOverlayStateController,
                 mUserTracker,
                 mKosmos.getWifiInteractor(),
+                mKosmos.getCommunalSceneInteractor(),
                 mLogBuffer);
         controller.onViewAttached();
         verify(mView, never()).showIcon(

@@ -82,6 +82,15 @@ flag {
 }
 
 flag {
+    name: "ime_switcher_revamp_api"
+    is_exported: true
+    namespace: "input_method"
+    description: "Feature flag for APIs for revamping the Input Method Switcher menu"
+    bug: "311791923"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "initiation_without_input_connection"
     namespace: "input_method"
     description: "Feature flag for initiating handwriting without InputConnection"

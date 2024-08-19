@@ -16,7 +16,7 @@
 
 package androidx.window.extensions;
 
-import static androidx.window.extensions.WindowExtensionsImpl.EXTENSIONS_VERSION_CURRENT_PLATFORM;
+import static androidx.window.extensions.WindowExtensionsImpl.getExtensionsVersionCurrentPlatform;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,6 +29,7 @@ import android.view.WindowManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.window.extensions.embedding.AnimationBackground;
+import androidx.window.extensions.embedding.AnimationParams;
 import androidx.window.extensions.embedding.SplitAttributes;
 
 import org.junit.Before;
@@ -58,7 +59,8 @@ public class WindowExtensionsTest {
     @Test
     public void testGetVendorApiLevel_extensionsEnabled_matchesCurrentVersion() {
         assumeTrue(WindowManager.hasWindowExtensionsEnabled());
-        assertThat(mVersion).isEqualTo(EXTENSIONS_VERSION_CURRENT_PLATFORM);
+        assumeFalse(((WindowExtensionsImpl) mExtensions).hasLevelOverride());
+        assertThat(mVersion).isEqualTo(getExtensionsVersionCurrentPlatform());
     }
 
     @Test
@@ -112,5 +114,13 @@ public class WindowExtensionsTest {
                 .isEqualTo(new SplitAttributes.SplitType.RatioSplitType(0.5f));
         assertThat(splitAttributes.getAnimationBackground())
                 .isEqualTo(AnimationBackground.ANIMATION_BACKGROUND_DEFAULT);
+        assertThat(splitAttributes.getAnimationParams().getAnimationBackground())
+                .isEqualTo(AnimationBackground.ANIMATION_BACKGROUND_DEFAULT);
+        assertThat(splitAttributes.getAnimationParams().getOpenAnimationResId())
+                .isEqualTo(AnimationParams.DEFAULT_ANIMATION_RESOURCES_ID);
+        assertThat(splitAttributes.getAnimationParams().getCloseAnimationResId())
+                .isEqualTo(AnimationParams.DEFAULT_ANIMATION_RESOURCES_ID);
+        assertThat(splitAttributes.getAnimationParams().getChangeAnimationResId())
+                .isEqualTo(AnimationParams.DEFAULT_ANIMATION_RESOURCES_ID);
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.log.table
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
@@ -23,8 +24,10 @@ import com.android.systemui.log.table.TableChange.Companion.MAX_STRING_LENGTH
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class TableChangeTest : SysuiTestCase() {
 
     @Test

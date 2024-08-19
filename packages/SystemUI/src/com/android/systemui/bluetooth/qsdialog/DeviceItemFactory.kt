@@ -38,7 +38,7 @@ private val actionAccessibilityLabelDisconnect =
     R.string.accessibility_quick_settings_bluetooth_device_tap_to_disconnect
 
 /** Factories to create different types of Bluetooth device items from CachedBluetoothDevice. */
-internal abstract class DeviceItemFactory {
+abstract class DeviceItemFactory {
     abstract fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
@@ -55,7 +55,8 @@ internal abstract class DeviceItemFactory {
             type: DeviceItemType,
             connectionSummary: String,
             background: Int,
-            actionAccessibilityLabel: String
+            actionAccessibilityLabel: String,
+            isActive: Boolean
         ): DeviceItem {
             return DeviceItem(
                 type = type,
@@ -68,7 +69,8 @@ internal abstract class DeviceItemFactory {
                     },
                 background = background,
                 isEnabled = !cachedDevice.isBusy,
-                actionAccessibilityLabel = actionAccessibilityLabel
+                actionAccessibilityLabel = actionAccessibilityLabel,
+                isActive = isActive
             )
         }
     }
@@ -91,7 +93,8 @@ internal open class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
             DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
             cachedDevice.connectionSummary ?: "",
             backgroundOn,
-            context.getString(actionAccessibilityLabelDisconnect)
+            context.getString(actionAccessibilityLabelDisconnect),
+            isActive = true
         )
     }
 }
@@ -116,7 +119,8 @@ internal class AudioSharingMediaDeviceItemFactory(
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(audioSharing),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOn,
-            ""
+            "",
+            isActive = !cachedDevice.isBusy
         )
     }
 }
@@ -132,7 +136,7 @@ internal class ActiveHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
     }
 }
 
-internal open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
+open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
@@ -150,7 +154,8 @@ internal open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(connected),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
-            context.getString(actionAccessibilityLabelActivate)
+            context.getString(actionAccessibilityLabelActivate),
+            isActive = false
         )
     }
 }
@@ -188,7 +193,8 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(connected),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
-            context.getString(actionAccessibilityLabelDisconnect)
+            context.getString(actionAccessibilityLabelDisconnect),
+            isActive = false
         )
     }
 }
@@ -216,7 +222,8 @@ internal open class SavedDeviceItemFactory : DeviceItemFactory() {
             cachedDevice.connectionSummary.takeUnless { it.isNullOrEmpty() }
                 ?: context.getString(saved),
             if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
-            context.getString(actionAccessibilityLabelActivate)
+            context.getString(actionAccessibilityLabelActivate),
+            isActive = false
         )
     }
 }

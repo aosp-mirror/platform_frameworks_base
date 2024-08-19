@@ -77,11 +77,9 @@ public final class VirtualAudioController implements AudioPlaybackCallback,
         mAudioPlaybackDetector = new AudioPlaybackDetector(context);
         mAudioRecordingDetector = new AudioRecordingDetector(context);
 
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            Counter.logIncrementWithUid(
-                    "virtual_devices.value_virtual_audio_created_count",
-                    attributionSource.getUid());
-        }
+        Counter.logIncrementWithUid(
+                "virtual_devices.value_virtual_audio_created_count",
+                attributionSource.getUid());
     }
 
     /**

@@ -54,6 +54,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -147,6 +148,40 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testFindTask_includeLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertEquals(activity, mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                true /* includeLaunchedFromBubble */));
+    }
+
+    @Test
+    public void testFindTask_ignoreLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertNull(mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                false /* includeLaunchedFromBubble */));
+    }
+
+    @Test
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
         ActivityRecord activity = createActivityRecord(displayContent);
@@ -167,6 +202,28 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         activity.setState(FINISHING, "test FINISHING");
         assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+    }
+
+    @Test
+    public void testAllResumedActivitiesIdle() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final WindowProcessController proc2 = activity2.app;
+        activity1.setState(RESUMED, "test");
+        activity2.detachFromProcess();
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity1.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity2.setProcess(proc2);
+        activity2.setState(RESUMED, "test");
+        activity2.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        activity1.idle = false;
+        activity1.setVisibleRequested(false);
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
     }
 
     @Test
@@ -240,17 +297,28 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testAttachApplication() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setProcessName("testAttach")
+                .setCreateTask(true).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setProcessName("testAttach")
+                .setUseProcess(activity.app).setTask(activity.getTask()).build();
         activity.detachFromProcess();
-        mAtm.startProcessAsync(activity, false /* knownToBeDead */,
+        topActivity.detachFromProcess();
+        mAtm.startProcessAsync(topActivity, false /* knownToBeDead */,
                 true /* isTop */, "test" /* hostingType */);
+        // Even if the activity is added after topActivity, the start order should still follow
+        // z-order, i.e. the topActivity will be started first.
+        mAtm.startProcessAsync(activity, false /* knownToBeDead */,
+                false /* isTop */, "test" /* hostingType */);
+        assertEquals(2, mAtm.mStartingProcessActivities.size());
+        assertEquals("Top record must be at the tail to start first",
+                topActivity, mAtm.mStartingProcessActivities.get(1));
         final WindowProcessController proc = mSystemServicesTestRule.addProcess(
                 activity.packageName, activity.processName,
                 6789 /* pid */, activity.info.applicationInfo.uid);
         try {
             mRootWindowContainer.attachApplication(proc);
-            verify(mSupervisor).realStartActivityLocked(eq(activity), eq(proc), anyBoolean(),
-                    anyBoolean());
+            verify(mSupervisor).realStartActivityLocked(eq(topActivity), eq(proc),
+                    anyBoolean(), anyBoolean());
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -358,6 +426,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertEquals(newPipTask, mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask());
         assertNotEquals(newPipTask, activity1.getTask());
         assertFalse("Created PiP task must not be in recents", newPipTask.inRecents);
+        assertThat(newPipTask.autoRemoveRecents).isTrue();
+        assertThat(activity1.getTask().autoRemoveRecents).isFalse();
     }
 
     /**
@@ -392,7 +462,9 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final Rect bounds = new Rect(task.getBounds());
         bounds.scale(0.5f);
         task.setBounds(bounds);
-        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -417,6 +489,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -446,6 +519,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, secondActivity);
         assertTrue(pinnedRootTask.inPinnedWindowingMode());
         assertEquals(WINDOWING_MODE_FULLSCREEN, fullscreenTask.getWindowingMode());
+        assertThat(pinnedRootTask.autoRemoveRecents).isTrue();
+        assertThat(secondActivity.getTask().autoRemoveRecents).isFalse();
     }
 
     @Test
@@ -546,7 +621,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mRootWindowContainer.applySleepTokens(true);
         verify(task, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleeping();
         verify(task, times(expectResumeTopActivity ? 1 : 0)).resumeTopActivityUncheckedLocked(
-                null /* target */, null /* targetOptions */);
+                isNull() /* target */, isNull() /* targetOptions */, eq(false) /* deferPause */);
     }
 
     @Test
@@ -738,8 +813,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
         // Use the task as target to resume.
-        mRootWindowContainer.resumeFocusedTasksTopActivities(rootTask, activity,
-                null /* targetOptions */);
+        mRootWindowContainer.resumeFocusedTasksTopActivities(rootTask, activity);
 
         // Verify the target task should resume its activity.
         verify(rootTask, times(1)).resumeTopActivityUncheckedLocked(

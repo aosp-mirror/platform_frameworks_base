@@ -33,7 +33,7 @@ public class ZenAdapters {
                 .allowAlarms(policy.allowAlarms())
                 .allowCalls(
                         policy.allowCalls()
-                                ? notificationPolicySendersToZenPolicyPeopleType(
+                                ? prioritySendersToPeopleType(
                                         policy.allowCallsFrom())
                         : ZenPolicy.PEOPLE_TYPE_NONE)
                 .allowConversations(
@@ -45,7 +45,7 @@ public class ZenAdapters {
                 .allowMedia(policy.allowMedia())
                 .allowMessages(
                         policy.allowMessages()
-                                ? notificationPolicySendersToZenPolicyPeopleType(
+                                ? prioritySendersToPeopleType(
                                         policy.allowMessagesFrom())
                                 : ZenPolicy.PEOPLE_TYPE_NONE)
                 .allowReminders(policy.allowReminders())
@@ -71,7 +71,7 @@ public class ZenAdapters {
 
     /** Maps {@link ZenPolicy.PeopleType} enum to {@link Policy.PrioritySenders}. */
     @Policy.PrioritySenders
-    public static int zenPolicyPeopleTypeToNotificationPolicySenders(
+    public static int peopleTypeToPrioritySenders(
             @ZenPolicy.PeopleType int zpPeopleType, @Policy.PrioritySenders int defaultResult) {
         switch (zpPeopleType) {
             case ZenPolicy.PEOPLE_TYPE_ANYONE:
@@ -87,7 +87,7 @@ public class ZenAdapters {
 
     /** Maps {@link Policy.PrioritySenders} enum to {@link ZenPolicy.PeopleType}. */
     @ZenPolicy.PeopleType
-    public static int notificationPolicySendersToZenPolicyPeopleType(
+    public static int prioritySendersToPeopleType(
             @Policy.PrioritySenders int npPrioritySenders) {
         switch (npPrioritySenders) {
             case Policy.PRIORITY_SENDERS_ANY:

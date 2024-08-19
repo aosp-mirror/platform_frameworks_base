@@ -16,6 +16,7 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
+import android.bluetooth.BluetoothDevice
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.BluetoothTileDialogLog
@@ -89,6 +90,18 @@ constructor(@BluetoothTileDialogLog private val logBuffer: LogBuffer) {
             { "ProfileConnectionStateChanged. address=$str1 state=$str2 profileId=$int1" }
         )
 
+    fun logBatteryChanged(address: String, key: Int, value: ByteArray?) =
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = address
+                int1 = key
+                str2 = value?.toString() ?: ""
+            },
+            { "BatteryChanged. address=$str1 key=$int1 value=$str2" }
+        )
+
     fun logDeviceFetch(status: JobStatus, trigger: DeviceFetchTrigger, duration: Long) =
         logBuffer.log(
             TAG,
@@ -103,4 +116,29 @@ constructor(@BluetoothTileDialogLog private val logBuffer: LogBuffer) {
 
     fun logDeviceUiUpdate(duration: Long) =
         logBuffer.log(TAG, DEBUG, { long1 = duration }, { "DeviceUiUpdate. duration=$long1" })
+
+    fun logDeviceClickInAudioSharingWhenEnabled(inAudioSharing: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { str1 = inAudioSharing.toString() },
+            { "DeviceClick. in audio sharing=$str1" }
+        )
+    }
+
+    fun logConnectedLeByGroupId(map: Map<Int, List<BluetoothDevice>>) {
+        logBuffer.log(TAG, DEBUG, { str1 = map.toString() }, { "ConnectedLeByGroupId. map=$str1" })
+    }
+
+    fun logLaunchSettingsCriteriaMatched(criteria: String, deviceItem: DeviceItem) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = criteria
+                str2 = deviceItem.toString()
+            },
+            { "$str1. deviceItem=$str2" }
+        )
+    }
 }

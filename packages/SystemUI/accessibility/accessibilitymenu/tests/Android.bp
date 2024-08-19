@@ -31,6 +31,7 @@ android_test {
         "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.ext.junit",
+        "com_android_a11y_menu_flags_lib",
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "truth",

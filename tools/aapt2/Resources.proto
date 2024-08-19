@@ -246,6 +246,7 @@ message Entry {
 message ConfigValue {
   Configuration config = 1;
   Value value = 2;
+  reserved 3;
 }
 
 // The generic meta-data for every value in a resource table.
@@ -279,6 +280,9 @@ message Item {
     Id id = 6;
     Primitive prim = 7;
   }
+
+  // The status of the flag the value is behind if any
+  uint32 flag_status = 8;
 }
 
 // A CompoundValue is an abstract type. It represents a value that is a made of other values.

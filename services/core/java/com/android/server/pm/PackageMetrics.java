@@ -16,7 +16,12 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.GET_RESOLVED_FILTER;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -25,6 +30,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.SecurityLog;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.Flags;
 import android.content.pm.PackageManager;
@@ -376,7 +382,30 @@ final class PackageMetrics {
             mCallingUid = callingUid;
         }
 
-        public boolean isSameComponent(ActivityInfo activityInfo) {
+        public boolean isLauncherActivity(@NonNull Computer computer, @UserIdInt int userId) {
+            if (mIsForWholeApp) {
+                return false;
+            }
+            // Query the launcher activities with the package name.
+            final Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.setPackage(mPackageName);
+            List<ResolveInfo> launcherActivities = computer.queryIntentActivitiesInternal(
+                    intent, null,
+                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE | GET_RESOLVED_FILTER
+                            | MATCH_DISABLED_COMPONENTS, SYSTEM_UID, userId);
+            final int launcherActivitiesSize =
+                    launcherActivities != null ? launcherActivities.size() : 0;
+            for (int i = 0; i < launcherActivitiesSize; i++) {
+                ResolveInfo resolveInfo = launcherActivities.get(i);
+                if (isSameComponent(resolveInfo.activityInfo)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean isSameComponent(ActivityInfo activityInfo) {
             if (activityInfo == null) {
                 return false;
             }
@@ -395,25 +424,13 @@ final class PackageMetrics {
             Slog.d(TAG, "Fail to report component state due to metrics is empty");
             return;
         }
-        boolean isLauncher = false;
-        final List<ResolveInfo> resolveInfosForLauncher = getHomeActivitiesResolveInfoAsUser(
-                computer, userId);
-        final int resolveInfosForLauncherSize =
-                resolveInfosForLauncher != null ? resolveInfosForLauncher.size() : 0;
         final int metricsSize = componentStateMetricsList.size();
         for (int i = 0; i < metricsSize; i++) {
             final ComponentStateMetrics componentStateMetrics = componentStateMetricsList.get(i);
-            for (int j = 0; j < resolveInfosForLauncherSize; j++) {
-                ResolveInfo resolveInfo = resolveInfosForLauncher.get(j);
-                if (componentStateMetrics.isSameComponent(resolveInfo.activityInfo)) {
-                    isLauncher = true;
-                    break;
-                }
-            }
             reportComponentStateChanged(componentStateMetrics.mUid,
                     componentStateMetrics.mComponentOldState,
                     componentStateMetrics.mComponentNewState,
-                    isLauncher,
+                    componentStateMetrics.isLauncherActivity(computer, userId),
                     componentStateMetrics.mIsForWholeApp,
                     componentStateMetrics.mCallingUid);
         }
@@ -423,11 +440,5 @@ final class PackageMetrics {
             int componentNewState, boolean isLauncher, boolean isForWholeApp, int callingUid) {
         FrameworkStatsLog.write(FrameworkStatsLog.COMPONENT_STATE_CHANGED_REPORTED,
                 uid, componentOldState, componentNewState, isLauncher, isForWholeApp, callingUid);
-    }
-
-    private static List<ResolveInfo> getHomeActivitiesResolveInfoAsUser(@NonNull Computer computer,
-            @UserIdInt int userId) {
-        return computer.queryIntentActivitiesInternal(computer.getHomeIntent(), /* resolvedType */
-                null, /* flags */ 0, userId);
     }
 }

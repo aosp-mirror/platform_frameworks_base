@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -30,12 +31,16 @@ import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.TestableContext;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -68,6 +73,10 @@ public class FingerprintInternalCleanupClientTest {
     @Rule
     public final TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock
     ISession mSession;
@@ -166,6 +175,30 @@ public class FingerprintInternalCleanupClientTest {
         // Simulate finishing the removal of the second template.
         mClient.getCurrentRemoveClient().onRemoved(templates.get(1), 0);
         assertThat(mClient.getUnknownHALTemplates()).isEmpty();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NOTIFY_FINGERPRINTS_LOE)
+    public void invalidBiometricUserState() throws Exception {
+        mClient =  createClient();
+
+        final List<Fingerprint> templates = List.of(
+                new Fingerprint("one", 1, 1),
+                new Fingerprint("two", 2, 1),
+                new Fingerprint("three", 3, 1)
+        );
+
+        final List<Fingerprint> list = new ArrayList<>();
+        doReturn(true).when(mFingerprintUtils)
+                .hasValidBiometricUserState(mContext, 2);
+        doReturn(list).when(mFingerprintUtils).getBiometricsForUser(mContext, 2);
+
+        mClient.start(mCallback);
+        for (int i = templates.size() - 1; i >= 0; i--) {
+            mClient.getCurrentEnumerateClient().onEnumerationResult(templates.get(i), i);
+        }
+        verify(mLogger).logFingerprintsLoe();
+        verify(mFingerprintUtils).deleteStateForUser(2);
     }
 
     protected FingerprintInternalCleanupClient createClient() {

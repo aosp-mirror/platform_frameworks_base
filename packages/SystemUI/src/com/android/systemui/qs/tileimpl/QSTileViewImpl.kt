@@ -93,6 +93,7 @@ constructor(
         @VisibleForTesting internal const val TILE_STATE_RES_PREFIX = "tile_states_"
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
         @VisibleForTesting internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
+        internal val EMPTY_RECT = Rect()
     }
 
     private val icon: QSIconViewImpl = QSIconViewImpl(context)
@@ -106,7 +107,9 @@ constructor(
         set(value) {
             if (field == value) return
             field = value
-            updateHeight()
+            if (longPressEffect?.state != QSLongPressEffect.State.RUNNING_BACKWARDS_FROM_CANCEL) {
+                updateHeight()
+            }
         }
 
     override var squishinessFraction: Float = 1f
@@ -350,6 +353,10 @@ constructor(
 
         initialLongPressProperties?.width = width
         finalLongPressProperties?.width = LONG_PRESS_EFFECT_WIDTH_SCALE * width
+
+        val deltaW = (LONG_PRESS_EFFECT_WIDTH_SCALE - 1f) * width
+        paddingForLaunch.left = -deltaW.toInt() / 2
+        paddingForLaunch.right = deltaW.toInt() / 2
     }
 
     private fun maybeUpdateLongPressEffectHeight(height: Float) {
@@ -357,6 +364,10 @@ constructor(
 
         initialLongPressProperties?.height = height
         finalLongPressProperties?.height = LONG_PRESS_EFFECT_HEIGHT_SCALE * height
+
+        val deltaH = (LONG_PRESS_EFFECT_HEIGHT_SCALE - 1f) * height
+        paddingForLaunch.top = -deltaH.toInt() / 2
+        paddingForLaunch.bottom = deltaH.toInt() / 2
     }
 
     override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
@@ -372,13 +383,6 @@ constructor(
     }
 
     private fun updateHeight() {
-        // TODO(b/332900989): Find a more robust way of resetting the tile if not reset by the
-        //  launch animation.
-        if (!haveLongPressPropertiesBeenReset && longPressEffect != null) {
-            // The launch animation of a long-press effect did not reset the long-press effect so
-            // we must do it here
-            resetLongPressEffectProperties()
-        }
         val actualHeight =
             if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
                 heightOverride
@@ -407,17 +411,17 @@ constructor(
     }
 
     override fun init(tile: QSTile) {
-        val expandable = Expandable.fromView(this)
         if (longPressEffect != null) {
             isHapticFeedbackEnabled = false
             longPressEffect.qsTile = tile
-            longPressEffect.expandable = expandable
+            longPressEffect.createExpandableFromView(this)
             initLongPressEffectCallback()
             init(
                 { _: View -> longPressEffect.onTileClick() },
                 null, // Haptics and long-clicks will be handled by the [QSLongPressEffect]
             )
         } else {
+            val expandable = Expandable.fromView(this)
             init(
                 { _: View? -> tile.click(expandable) },
                 { _: View? ->
@@ -432,12 +436,14 @@ constructor(
         longPressEffect?.callback =
             object : QSLongPressEffect.Callback {
 
-                override fun onPrepareForLaunch() {
-                    prepareForLaunch()
-                }
-
                 override fun onResetProperties() {
                     resetLongPressEffectProperties()
+                }
+
+                override fun onEffectFinishedReversing() {
+                    // The long-press effect properties finished at the same starting point.
+                    // This is the same as if the properties were reset
+                    haveLongPressPropertiesBeenReset = true
                 }
 
                 override fun onStartAnimator() {
@@ -463,10 +469,10 @@ constructor(
                     }
                 }
 
-                override fun onReverseAnimator() {
+                override fun onReverseAnimator(playHaptics: Boolean) {
                     longPressEffectAnimator?.let {
                         val pausedProgress = it.animatedFraction
-                        longPressEffect?.playReverseHaptics(pausedProgress)
+                        if (playHaptics) longPressEffect?.playReverseHaptics(pausedProgress)
                         it.reverse()
                     }
                 }
@@ -580,6 +586,15 @@ constructor(
                     )
                 )
             )
+        } else {
+            if (isLongClickable) {
+                info.addAction(
+                    AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
+                        resources.getString(R.string.accessibility_long_click_tile)
+                    )
+                )
+            }
         }
         if (!TextUtils.isEmpty(accessibilityClass)) {
             info.className =
@@ -591,14 +606,6 @@ constructor(
             if (Switch::class.java.name == accessibilityClass) {
                 info.isChecked = tileState
                 info.isCheckable = true
-                if (isLongClickable) {
-                    info.addAction(
-                        AccessibilityNodeInfo.AccessibilityAction(
-                            AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
-                            resources.getString(R.string.accessibility_long_click_tile)
-                        )
-                    )
-                }
             }
         }
         if (position != INVALID) {
@@ -761,11 +768,14 @@ constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
+        longPressEffect?.qsTile?.state?.handlesLongClick = state.handlesLongClick
         if (
             state.handlesLongClick &&
                 longPressEffect?.initializeEffect(longPressEffectDuration) == true
         ) {
             showRippleEffect = false
+            longPressEffect.qsTile?.state?.state = lastState // Store the tile's state
+            longPressEffect.resetState()
             initializeLongPressProperties(measuredHeight, measuredWidth)
         } else {
             // Long-press effects might have been enabled before but the new state does not
@@ -896,12 +906,13 @@ constructor(
     }
 
     override fun onActivityLaunchAnimationEnd() {
+        longPressEffect?.resetState()
         if (longPressEffect != null && !haveLongPressPropertiesBeenReset) {
             resetLongPressEffectProperties()
         }
     }
 
-    fun prepareForLaunch() {
+    private fun prepareForLaunch() {
         val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
         val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
         val deltaH = finalLongPressProperties?.height?.minus(startingHeight)?.toInt() ?: 0
@@ -912,7 +923,12 @@ constructor(
         paddingForLaunch.bottom = deltaH / 2
     }
 
-    override fun getPaddingForLaunchAnimation(): Rect = paddingForLaunch
+    override fun getPaddingForLaunchAnimation(): Rect =
+        if (longPressEffect?.state == QSLongPressEffect.State.LONG_CLICKED) {
+            paddingForLaunch
+        } else {
+            EMPTY_RECT
+        }
 
     fun updateLongPressEffectProperties(effectProgress: Float) {
         if (!isLongClickable || longPressEffect == null) return
@@ -1043,6 +1059,7 @@ constructor(
                 getOverlayColorForState(Tile.STATE_ACTIVE),
                 Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive),
             )
+        prepareForLaunch()
     }
 
     private fun changeCornerRadius(radius: Float) {
@@ -1065,7 +1082,12 @@ constructor(
 
     inner class StateChangeRunnable(private val state: QSTile.State) : Runnable {
         override fun run() {
-            traceSection("QSTileViewImpl#handleStateChanged") { handleStateChanged(state) }
+            var traceTag = "QSTileViewImpl#handleStateChanged"
+            if (!state.spec.isNullOrEmpty()) {
+                traceTag += ":"
+                traceTag += state.spec
+            }
+            traceSection(traceTag.take(Trace.MAX_SECTION_NAME_LEN)) { handleStateChanged(state) }
         }
 
         // We want all instances of this runnable to be equal to each other, so they can be used to

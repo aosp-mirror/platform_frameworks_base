@@ -19,6 +19,7 @@ package com.android.systemui.media.taptotransfer
 import android.app.StatusBarManager
 import android.content.Context
 import android.media.MediaRoute2Info
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
@@ -35,6 +36,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -43,6 +45,7 @@ import java.io.StringWriter
 import java.util.concurrent.Executor
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
     private val inlineExecutor = Executor { command -> command.run() }

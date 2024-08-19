@@ -155,7 +155,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
                         Authenticators.BIOMETRIC_STRONG
                     }
                 isDeviceCredentialAllowed = allowCredentialFallback
-                componentNameForConfirmDeviceCredentialActivity =
+                realCallerForConfirmDeviceCredentialActivity =
                     if (setComponentNameForConfirmDeviceCredentialActivity)
                         componentNameOverriddenForConfirmDeviceCredentialActivity
                     else null

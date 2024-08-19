@@ -26,6 +26,8 @@ import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
 import com.android.systemui.biometrics.udfpsUtils
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.util.mockito.mock
+import org.mockito.Mockito.mock
 
 val Kosmos.promptViewModel by Fixture {
     PromptViewModel(
@@ -35,7 +37,9 @@ val Kosmos.promptViewModel by Fixture {
         udfpsOverlayInteractor = udfpsOverlayInteractor,
         biometricStatusInteractor = biometricStatusInteractor,
         udfpsUtils = udfpsUtils,
-        iconProvider = IconProvider(applicationContext),
+        iconProvider = iconProvider,
         activityTaskManager = activityTaskManager,
     )
 }
+
+val Kosmos.iconProvider by Fixture { mock<IconProvider>() }

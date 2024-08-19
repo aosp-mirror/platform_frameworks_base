@@ -43,11 +43,11 @@ import android.window.StartingWindowRemovalInfo;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
 
 /**

@@ -164,11 +164,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     }
                     mCurrentUser = mSelectedUserInteractor.getSelectedUserId();
                     showPrimarySecurityScreen(false);
-                    if (mCurrentSecurityMode != SimPin
-                            && mCurrentSecurityMode != SimPuk) {
-                        reinflateViewFlipper((l) -> {
-                        });
-                    }
                 }
             };
 
@@ -351,7 +346,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mDeviceEntryFaceAuthInteractor.onSwipeUpOnBouncer();
             if (mDeviceEntryFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()) {
                 mUpdateMonitor.requestActiveUnlock(
-                        ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
+                        ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT_LEGACY,
                         "swipeUpOnBouncer");
             }
         }
@@ -375,8 +370,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
                 @Override
                 public void onDensityOrFontScaleChanged() {
-                    KeyguardSecurityContainerController.this
-                            .onDensityOrFontScaleOrOrientationChanged();
+                    mView.onDensityOrFontScaleChanged();
                 }
 
                 @Override
@@ -724,7 +718,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     @Override
     public void onResume(int reason) {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
+        mView.clearFocus();
+        mView.clearAccessibilityFocus();
         mView.requestFocus();
+        mView.requestAccessibilityFocus();
         if (mCurrentSecurityMode != SecurityMode.None) {
             int state = SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN;
             if (mView.isSidedSecurityMode()) {
@@ -1224,11 +1221,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.reloadColors();
     }
 
-    /** Handles density or font scale changes. */
-    private void onDensityOrFontScaleOrOrientationChanged() {
-        reinflateViewFlipper(controller -> mView.onDensityOrFontScaleChanged());
-    }
-
     /**
      * Reinflate the view flipper child view.
      */
@@ -1236,7 +1228,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardSecurityViewFlipperController.OnViewInflatedCallback onViewInflatedListener) {
         mSecurityViewFlipperController.clearViews();
         mSecurityViewFlipperController.asynchronouslyInflateView(mCurrentSecurityMode,
-                mKeyguardSecurityCallback, onViewInflatedListener);
+                mKeyguardSecurityCallback, (controller) -> {
+                mView.updateSecurityViewFlipper();
+                onViewInflatedListener.onViewInflated(controller);
+            });
     }
 
     /**

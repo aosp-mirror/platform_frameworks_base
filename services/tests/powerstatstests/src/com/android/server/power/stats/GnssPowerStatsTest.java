@@ -30,8 +30,11 @@ import static com.android.server.power.stats.AggregatedPowerStatsConfig.STATE_SC
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.location.GnssSignalQuality;
 import android.os.BatteryConsumer;
@@ -119,8 +122,10 @@ public class GnssPowerStatsTest {
     @Test
     public void powerProfileModel() {
         // ODPM unsupported
-        when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.GNSS, null))
+        when(mConsumedEnergyRetriever
+                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
                 .thenReturn(new int[0]);
+
         GnssPowerStatsProcessor processor = new GnssPowerStatsProcessor(
                 mStatsRule.getPowerProfile(), mUidResolver);
 
@@ -209,7 +214,8 @@ public class GnssPowerStatsTest {
 
     @Test
     public void energyConsumerModel() {
-        when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.GNSS, null))
+        when(mConsumedEnergyRetriever
+                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID});
         GnssPowerStatsProcessor processor = new GnssPowerStatsProcessor(
                 mStatsRule.getPowerProfile(), mUidResolver);
@@ -224,8 +230,8 @@ public class GnssPowerStatsTest {
         collector.setEnabled(true);
 
         // Establish a baseline
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(new int[]{ENERGY_CONSUMER_ID}))
-                .thenReturn(new long[]{uCtoUj(10000)});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
+                .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 10000));
         collector.collectAndDeliverStats();
 
         processor.noteStateChange(stats, buildHistoryItem(0, true, APP_UID1));
@@ -237,8 +243,8 @@ public class GnssPowerStatsTest {
 
         processor.noteStateChange(stats, buildHistoryItem(6000, false, APP_UID1));
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(new int[]{ENERGY_CONSUMER_ID}))
-                .thenReturn(new long[]{uCtoUj(2_170_000)});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
+                .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 2_170_000));
         collector.collectAndDeliverStats();
 
         processor.noteStateChange(stats, buildHistoryItem(7000, true, APP_UID2));
@@ -247,8 +253,8 @@ public class GnssPowerStatsTest {
         processor.noteStateChange(stats, buildHistoryItem(8000,
                 GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR));
         mStatsRule.setTime(11_000, 11_000);
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(new int[]{ENERGY_CONSUMER_ID}))
-                .thenReturn(new long[]{uCtoUj(3_610_000)});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
+                .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 3_610_000));
         collector.collectAndDeliverStats();
 
         processor.finish(stats, 11_000);
@@ -369,7 +375,10 @@ public class GnssPowerStatsTest {
         return powerComponentStats;
     }
 
-    private static long uCtoUj(long uc) {
-        return (long) (uc * (double) VOLTAGE_MV / 1000);
+    private EnergyConsumerResult[] createEnergyConsumerResults(int id, long energyUWs) {
+        EnergyConsumerResult result = new EnergyConsumerResult();
+        result.id = id;
+        result.energyUWs = (long) (energyUWs * (double) VOLTAGE_MV / 1000);
+        return new EnergyConsumerResult[]{result};
     }
 }

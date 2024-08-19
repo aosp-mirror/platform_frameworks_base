@@ -19,12 +19,12 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.OverscrollScope
-import com.android.compose.animation.scene.Scene
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.ContentState
 
 internal class Translate(
     override val matcher: ElementMatcher,
@@ -33,10 +33,10 @@ internal class Translate(
 ) : PropertyTransformation<Offset> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
-        transition: TransitionState.Transition,
+        stateInContent: Element.State,
+        transition: ContentState.Transition<*>,
         value: Offset,
     ): Offset {
         return with(layoutImpl.density) {
@@ -55,16 +55,16 @@ internal class OverscrollTranslate(
 ) : PropertyTransformation<Offset> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
-        transition: TransitionState.Transition,
+        stateInContent: Element.State,
+        transition: ContentState.Transition<*>,
         value: Offset,
     ): Offset {
         // As this object is created by OverscrollBuilderImpl and we retrieve the current
         // OverscrollSpec only when the transition implements HasOverscrollProperties, we can assume
         // that this method was invoked after performing this check.
-        val overscrollProperties = transition as TransitionState.HasOverscrollProperties
+        val overscrollProperties = transition as ContentState.HasOverscrollProperties
 
         return Offset(
             x = value.x + overscrollProperties.overscrollScope.x(),

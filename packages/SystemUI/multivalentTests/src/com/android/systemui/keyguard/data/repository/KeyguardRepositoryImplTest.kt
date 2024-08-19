@@ -20,6 +20,7 @@ import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
@@ -73,6 +74,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
     @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Captor private lateinit var updateCallbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
@@ -100,6 +102,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 systemClock,
                 facePropertyRepository,
                 userTracker,
+                lockPatternUtils,
             )
     }
 
@@ -137,6 +140,27 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             underTest.setBottomAreaAlpha(1.0f)
             assertThat(underTest.bottomAreaAlpha.value).isEqualTo(1f)
+        }
+
+    @Test
+    fun panelAlpha() =
+        testScope.runTest {
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
+
+            underTest.setPanelAlpha(0.1f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.1f)
+
+            underTest.setPanelAlpha(0.2f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.2f)
+
+            underTest.setPanelAlpha(0.3f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.3f)
+
+            underTest.setPanelAlpha(0.5f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(0.5f)
+
+            underTest.setPanelAlpha(1.0f)
+            assertThat(underTest.panelAlpha.value).isEqualTo(1f)
         }
 
     @Test
@@ -333,27 +357,16 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDreamingFromKeyguardUpdateMonitor() =
-        TestScope(mainDispatcher).runTest {
-            whenever(keyguardUpdateMonitor.isDreaming()).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isDreaming.onEach { latest = it }.launchIn(this)
+    fun isDreaming() =
+        testScope.runTest {
+            val isDreaming by collectLastValue(underTest.isDreaming)
+            assertThat(isDreaming).isFalse()
 
-            runCurrent()
-            assertThat(latest).isFalse()
+            underTest.setDreaming(true)
+            assertThat(isDreaming).isTrue()
 
-            val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-            verify(keyguardUpdateMonitor).registerCallback(captor.capture())
-
-            captor.value.onDreamingStateChanged(true)
-            runCurrent()
-            assertThat(latest).isTrue()
-
-            captor.value.onDreamingStateChanged(false)
-            runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            underTest.setDreaming(false)
+            assertThat(isDreaming).isFalse()
         }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.systemui.dump
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 
 import com.android.systemui.SysuiTestCase
@@ -24,11 +25,13 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 import java.io.PrintWriter
 import java.io.StringWriter
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DumpsysTableLoggerTest : SysuiTestCase() {
     private val logger = DumpsysTableLogger(
             TEST_SECTION_NAME,

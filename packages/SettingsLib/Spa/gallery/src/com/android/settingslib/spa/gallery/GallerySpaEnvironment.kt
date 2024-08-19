@@ -55,7 +55,6 @@ import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.CopyablePageProvider
 import com.android.settingslib.spa.gallery.scaffold.ScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
-import com.android.settingslib.spa.slice.SpaSliceBroadcastReceiver
 
 /**
  * Enum to define all SPP name here.
@@ -120,9 +119,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
     override val logger = DebugLogger()
 
     override val browseActivityClass = GalleryMainActivity::class.java
-    override val sliceBroadcastReceiverClass = SpaSliceBroadcastReceiver::class.java
 
     // For debugging
     override val searchProviderAuthorities = "com.android.spa.gallery.search.provider"
-    override val sliceProviderAuthorities = "com.android.spa.gallery.slice.provider"
 }

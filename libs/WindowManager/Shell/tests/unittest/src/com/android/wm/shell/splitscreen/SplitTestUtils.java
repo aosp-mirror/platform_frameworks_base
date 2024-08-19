@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -34,9 +35,9 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -77,13 +78,13 @@ public class SplitTestUtils {
                 DisplayController displayController, DisplayImeController imeController,
                 DisplayInsetsController insetsController, SplitLayout splitLayout,
                 Transitions transitions, TransactionPool transactionPool,
-                ShellExecutor mainExecutor,
+                ShellExecutor mainExecutor, Handler mainHandler,
                 Optional<RecentTasksController> recentTasks,
                 LaunchAdjacentController launchAdjacentController,
                 Optional<WindowDecorViewModel> windowDecorViewModel) {
             super(context, displayId, syncQueue, taskOrganizer, mainStage,
                     sideStage, displayController, imeController, insetsController, splitLayout,
-                    transitions, transactionPool, mainExecutor, recentTasks,
+                    transitions, transactionPool, mainExecutor, mainHandler, recentTasks,
                     launchAdjacentController, windowDecorViewModel);
 
             // Prepare root task for testing.

@@ -205,7 +205,7 @@ public class TestDreamEnvironment {
 
         @Override
         public DreamOverlayConnectionHandler createOverlayConnection(
-                ComponentName overlayComponent) {
+                ComponentName overlayComponent, Runnable onDisconnected) {
             return mDreamOverlayConnectionHandler;
         }
 
@@ -398,8 +398,12 @@ public class TestDreamEnvironment {
         mService.dispatchKeyEvent(event);
     }
 
-    private void wakeDream() throws RemoteException {
+    private void wakeDream() {
         mService.wakeUp();
+    }
+
+    void comeToFront() throws RemoteException {
+        mDreamServiceWrapper.comeToFront();
     }
 
     /**

@@ -1,25 +1,18 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
+      "name": "PerformanceHintTests",
       "options": [
-        {
-          "include-filter": "com.android.server.power.hint"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
       ]
     },
     {
       "name": "CtsStatsdAtomHostTestCases",
       "options": [
+        {"include-filter": "android.cts.statsdatom.performancehintmanager"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"},
-        {"include-filter": "android.cts.statsdatom.powermanager"}
-      ],
-      "file_patterns": [
-        "(/|^)ThermalManagerService.java"
+        {"exclude-annotation": "org.junit.Ignore"}
       ]
     }
   ]

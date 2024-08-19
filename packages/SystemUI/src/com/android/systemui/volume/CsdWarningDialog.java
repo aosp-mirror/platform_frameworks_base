@@ -33,17 +33,26 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.Flags;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import com.google.common.collect.ImmutableList;
+
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import java.util.Optional;
 
 /**
  * A class that implements the three Computed Sound Dose-related warnings defined in
@@ -75,6 +84,9 @@ public class CsdWarningDialog extends SystemUIDialog
     private static final int KEY_CONFIRM_ALLOWED_AFTER_MS = 1000; // milliseconds
     // time after which action is taken when the user hasn't ack'd or dismissed the dialog
     public static final int NO_ACTION_TIMEOUT_MS = 5000;
+    // Notification dismiss intent
+    private static final String DISMISS_CSD_NOTIFICATION =
+            "com.android.systemui.volume.DISMISS_CSD_NOTIFICATION";
 
     private final Context mContext;
     private final AudioManager mAudioManager;
@@ -95,21 +107,32 @@ public class CsdWarningDialog extends SystemUIDialog
 
     private long mShowTime;
 
+    @VisibleForTesting public int mCachedMediaStreamVolume;
+    private Optional<ImmutableList<CsdWarningAction>> mActionIntents;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+
     /**
      * To inject dependencies and allow for easier testing
      */
     @AssistedFactory
     public interface Factory {
-        /**
-         * Create a dialog object
-         */
-        CsdWarningDialog create(int csdWarning, Runnable onCleanup);
+        /** Create a dialog object */
+        CsdWarningDialog create(
+                int csdWarning,
+                Runnable onCleanup,
+                Optional<ImmutableList<CsdWarningAction>> actionIntents);
     }
 
     @AssistedInject
-    public CsdWarningDialog(@Assisted @AudioManager.CsdWarning int csdWarning, Context context,
-            AudioManager audioManager, NotificationManager notificationManager,
-            @Background DelayableExecutor delayableExecutor, @Assisted Runnable onCleanup) {
+    public CsdWarningDialog(
+            @Assisted @AudioManager.CsdWarning int csdWarning,
+            Context context,
+            AudioManager audioManager,
+            NotificationManager notificationManager,
+            @Background DelayableExecutor delayableExecutor,
+            @Assisted Runnable onCleanup,
+            @Assisted Optional<ImmutableList<CsdWarningAction>> actionIntents,
+            BroadcastDispatcher broadcastDispatcher) {
         super(context);
         mCsdWarning = csdWarning;
         mContext = context;
@@ -118,7 +141,8 @@ public class CsdWarningDialog extends SystemUIDialog
         mOnCleanup = onCleanup;
 
         mDelayableExecutor = delayableExecutor;
-
+        mActionIntents = actionIntents;
+        mBroadcastDispatcher = broadcastDispatcher;
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         setShowForAllUsers(true);
         setMessage(mContext.getString(getStringForWarning(csdWarning)));
@@ -133,14 +157,17 @@ public class CsdWarningDialog extends SystemUIDialog
                 Context.RECEIVER_EXPORTED_UNAUDITED);
 
         if (csdWarning == AudioManager.CSD_WARNING_DOSE_REACHED_1X) {
-            mNoUserActionRunnable = () -> {
-                if (mCsdWarning == AudioManager.CSD_WARNING_DOSE_REACHED_1X) {
-                    // unlike on the 5x dose repeat, level is only reduced to RS1 when the warning
-                    // is not acknowledged quickly enough
-                    mAudioManager.lowerVolumeToRs1();
-                    sendNotification(/*for5XCsd=*/false);
-                }
-            };
+            mNoUserActionRunnable =
+                    () -> {
+                        if (mCsdWarning == AudioManager.CSD_WARNING_DOSE_REACHED_1X) {
+                            // unlike on the 5x dose repeat, level is only reduced to RS1 when the
+                            // warning is not acknowledged quickly enough
+                            mCachedMediaStreamVolume =
+                                    mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                            mAudioManager.lowerVolumeToRs1();
+                            sendNotification(/* for5XCsd= */ false);
+                        }
+                    };
         } else {
             mNoUserActionRunnable = null;
         }
@@ -242,6 +269,38 @@ public class CsdWarningDialog extends SystemUIDialog
         }
     };
 
+    @VisibleForTesting
+    public final BroadcastReceiver mReceiverUndo =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Flags.sounddoseCustomization()
+                            && VolumeDialog.ACTION_VOLUME_UNDO.equals(intent.getAction())) {
+                        if (D.BUG) Log.d(TAG, "Received ACTION_VOLUME_UNDO");
+                        mAudioManager.setStreamVolume(
+                                AudioManager.STREAM_MUSIC,
+                                mCachedMediaStreamVolume,
+                                AudioManager.FLAG_SHOW_UI);
+                        mNotificationManager.cancel(
+                                SystemMessageProto.SystemMessage.NOTE_CSD_LOWER_AUDIO);
+                        destroy();
+                    }
+                }
+            };
+
+    @VisibleForTesting
+    public final BroadcastReceiver mReceiverDismissNotification =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Flags.sounddoseCustomization()
+                            && DISMISS_CSD_NOTIFICATION.equals(intent.getAction())) {
+                        if (D.BUG) Log.d(TAG, "Received DISMISS_CSD_NOTIFICATION");
+                        destroy();
+                    }
+                }
+            };
+
     private @StringRes int getStringForWarning(@AudioManager.CsdWarning int csdWarning) {
         switch (csdWarning) {
             case AudioManager.CSD_WARNING_DOSE_REACHED_1X:
@@ -259,7 +318,7 @@ public class CsdWarningDialog extends SystemUIDialog
             Log.w(TAG, "Notification dose repeat 5x is not shown for " + mCsdWarning);
             return;
         }
-
+        mCachedMediaStreamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         mAudioManager.lowerVolumeToRs1();
         sendNotification(/*for5XCsd=*/true);
     }
@@ -288,7 +347,68 @@ public class CsdWarningDialog extends SystemUIDialog
                         .setAutoCancel(true)
                         .setCategory(Notification.CATEGORY_SYSTEM);
 
+        if (Flags.sounddoseCustomization()
+                && mActionIntents.isPresent()
+                && !mActionIntents.get().isEmpty()) {
+            ImmutableList<CsdWarningAction> actionIntentsList = mActionIntents.get();
+            for (CsdWarningAction action : actionIntentsList) {
+                if (action.getLabel() == null || action.getIntent() == null) {
+                    Log.w(TAG, "Null action intent received. Skipping addition to notification");
+                    continue;
+                }
+                PendingIntent pendingActionIntent = action.toPendingIntent(mContext);
+                if (pendingActionIntent == null) {
+                    Log.w(TAG, "Null pending intent received. Skipping addition to notification");
+                    continue;
+                }
+                builder.addAction(0, action.getLabel(), pendingActionIntent);
+
+                // Register receiver to undo volume only when
+                // notification conaining the undo action would be sent.
+                if (action.getLabel().equals(mContext.getString(R.string.volume_undo_action))) {
+                    final IntentFilter filterUndo = new IntentFilter(
+                            VolumeDialog.ACTION_VOLUME_UNDO);
+                    mBroadcastDispatcher.registerReceiver(mReceiverUndo,
+                            filterUndo,
+                            /* executor = default */ null,
+                            /* user = default */ null,
+                            Context.RECEIVER_NOT_EXPORTED,
+                            /* permission = default */ null);
+
+                    // Register receiver to learn if notification has been dismissed.
+                    // This is required to unregister receivers to prevent leak.
+                    Intent dismissIntent = new Intent(DISMISS_CSD_NOTIFICATION)
+                            .setPackage(mContext.getPackageName());
+                    PendingIntent pendingDismissIntent = PendingIntent.getBroadcast(
+                            mContext,
+                            0, dismissIntent, FLAG_IMMUTABLE);
+                    mBroadcastDispatcher.registerReceiver(mReceiverDismissNotification,
+                            new IntentFilter(DISMISS_CSD_NOTIFICATION),
+                            /* executor = default */ null,
+                            /* user = default */ null,
+                            Context.RECEIVER_NOT_EXPORTED,
+                            /* permission = default */ null);
+                    builder.setDeleteIntent(pendingDismissIntent);
+                }
+            }
+        }
+
         mNotificationManager.notify(SystemMessageProto.SystemMessage.NOTE_CSD_LOWER_AUDIO,
                 builder.build());
+    }
+
+    /**
+     * Unregister the Undo action receiver when the notification is dismissed.
+     * Unregister cannot happen when CsdWarning dialog is dismissed
+     * as the notification lifecycle would be longer.
+     */
+    @VisibleForTesting
+    public void destroy() {
+        if (Flags.sounddoseCustomization()
+                && mActionIntents.isPresent()
+                && !mActionIntents.get().isEmpty()) {
+            mBroadcastDispatcher.unregisterReceiver(mReceiverUndo);
+            mBroadcastDispatcher.unregisterReceiver(mReceiverDismissNotification);
+        }
     }
 }

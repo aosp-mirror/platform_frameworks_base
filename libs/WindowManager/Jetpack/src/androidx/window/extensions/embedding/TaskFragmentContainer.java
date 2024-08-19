@@ -36,7 +36,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -257,7 +256,7 @@ class TaskFragmentContainer {
         mPendingAppearedIntent = pendingAppearedIntent;
 
         // Save the information necessary for restoring the overlay when needed.
-        if (Flags.fixPipRestoreToOverlay() && overlayTag != null && pendingAppearedIntent != null
+        if (overlayTag != null && pendingAppearedIntent != null
                 && associatedActivity != null && !associatedActivity.isFinishing()) {
             final IBinder associatedActivityToken = associatedActivity.getActivityToken();
             final OverlayContainerRestoreParams params = new OverlayContainerRestoreParams(mToken,
@@ -338,6 +337,13 @@ class TaskFragmentContainer {
     /** Whether this TaskFragment is visible. */
     boolean isVisible() {
         return mInfo != null && mInfo.isVisible();
+    }
+
+    /**
+     * See {@link TaskFragmentInfo#isTopNonFinishingChild()}
+     */
+    boolean isTopNonFinishingChild() {
+        return mInfo != null && mInfo.isTopNonFinishingChild();
     }
 
     /** Whether the TaskFragment is in an intermediate state waiting for the server update.*/
@@ -1197,7 +1203,7 @@ class TaskFragmentContainer {
 
             if (taskContainer == null) {
                 // Adding a TaskContainer if no existed one.
-                taskContainer = new TaskContainer(mTaskId, mActivityInTask);
+                taskContainer = new TaskContainer(mTaskId, mActivityInTask, mSplitController);
                 mSplitController.addTaskContainer(mTaskId, taskContainer);
             }
 

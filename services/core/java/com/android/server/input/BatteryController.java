@@ -83,6 +83,7 @@ final class BatteryController {
     private final Handler mHandler;
     private final UEventManager mUEventManager;
     private final BluetoothBatteryManager mBluetoothBatteryManager;
+    private final Runnable mHandlePollEventCallback = this::handlePollEvent;
 
     // Maps a pid to the registered listener record for that process. There can only be one battery
     // listener per process.
@@ -206,7 +207,7 @@ final class BatteryController {
         if (!mIsInteractive || !anyOf(mDeviceMonitors, DeviceMonitor::requiresPolling)) {
             // Stop polling.
             mIsPolling = false;
-            mHandler.removeCallbacks(this::handlePollEvent);
+            mHandler.removeCallbacks(mHandlePollEventCallback);
             return;
         }
 
@@ -215,7 +216,7 @@ final class BatteryController {
         }
         // Start polling.
         mIsPolling = true;
-        mHandler.postDelayed(this::handlePollEvent, delayStart ? POLLING_PERIOD_MILLIS : 0);
+        mHandler.postDelayed(mHandlePollEventCallback, delayStart ? POLLING_PERIOD_MILLIS : 0);
     }
 
     private <R> R processInputDevice(int deviceId, R defaultValue, Function<InputDevice, R> func) {
@@ -366,7 +367,7 @@ final class BatteryController {
             }
             final long eventTime = SystemClock.uptimeMillis();
             mDeviceMonitors.forEach((deviceId, monitor) -> monitor.onPoll(eventTime));
-            mHandler.postDelayed(this::handlePollEvent, POLLING_PERIOD_MILLIS);
+            mHandler.postDelayed(mHandlePollEventCallback, POLLING_PERIOD_MILLIS);
         }
     }
 

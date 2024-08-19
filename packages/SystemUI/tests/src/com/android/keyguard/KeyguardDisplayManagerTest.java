@@ -28,11 +28,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.display.DisplayManagerGlobal;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.DisplayInfo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -49,7 +49,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.Executor;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class KeyguardDisplayManagerTest extends SysuiTestCase {
 

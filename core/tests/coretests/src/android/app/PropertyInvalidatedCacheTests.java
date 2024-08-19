@@ -375,20 +375,4 @@ public class PropertyInvalidatedCacheTests {
             PropertyInvalidatedCache.MODULE_BLUETOOTH, "getState");
         assertEquals(n1, "cache_key.bluetooth.get_state");
     }
-
-    @Test
-    public void testOnTrimMemory() {
-        TestCache cache = new TestCache(MODULE, "trimMemoryTest");
-        // The cache is not active until it has been invalidated once.
-        cache.invalidateCache();
-        // Populate the cache with six entries.
-        for (int i = 0; i < 6; i++) {
-            cache.query(i);
-        }
-        // The maximum number of entries in TestCache is 4, so even though six entries were
-        // created, only four are retained.
-        assertEquals(4, cache.size());
-        PropertyInvalidatedCache.onTrimMemory();
-        assertEquals(0, cache.size());
-    }
 }
