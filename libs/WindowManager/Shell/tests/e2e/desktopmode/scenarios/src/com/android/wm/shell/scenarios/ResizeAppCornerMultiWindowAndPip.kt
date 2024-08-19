@@ -28,6 +28,7 @@ import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.MailAppHelper
 import com.android.server.wm.flicker.helpers.NewTasksAppHelper
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
 import com.android.wm.shell.Utils
@@ -41,7 +42,7 @@ import org.junit.runners.BlockJUnit4ClassRunner
 
 @RunWith(BlockJUnit4ClassRunner::class)
 @Postsubmit
-open class ResizeAppCornerMultiWindow
+open class ResizeAppCornerMultiWindowAndPip
 @JvmOverloads
 constructor(val rotation: Rotation = Rotation.ROTATION_0,
     val horizontalChange: Int = 50,
@@ -52,6 +53,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0,
     private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val device = UiDevice.getInstance(instrumentation)
     private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
+    private val pipApp = PipAppHelper(instrumentation)
     private val mailApp = DesktopModeAppHelper(MailAppHelper(instrumentation))
     private val newTasksApp = DesktopModeAppHelper(NewTasksAppHelper(instrumentation))
     private val imeApp = DesktopModeAppHelper(ImeAppHelper(instrumentation))
@@ -65,6 +67,8 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0,
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+        // Set string extra to ensure the app is on PiP mode at launch
+        pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = mapOf("enter_pip" to "true"))
         testApp.enterDesktopWithDrag(wmHelper, device)
         mailApp.launchViaIntent(wmHelper)
         newTasksApp.launchViaIntent(wmHelper)
@@ -83,6 +87,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0,
     @After
     fun teardown() {
         testApp.exit(wmHelper)
+        pipApp.exit(wmHelper)
         mailApp.exit(wmHelper)
         newTasksApp.exit(wmHelper)
         imeApp.exit(wmHelper)
