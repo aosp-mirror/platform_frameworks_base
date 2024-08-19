@@ -161,6 +161,11 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
 
         getLogger().logUnknownEnrollmentInHal();
 
+        if (mBiometricUtils.hasValidBiometricUserState(getContext(), getTargetUserId())
+                && Flags.notifyFingerprintsLoe()) {
+            getLogger().logFingerprintsLoe();
+        }
+
         mCurrentTask.start(mRemoveCallback);
     }
 
