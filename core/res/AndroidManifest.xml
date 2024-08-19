@@ -2617,7 +2617,8 @@
          @hide
     -->
     <permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.os.vibrator.vendor_vibration_effects" />
 
     <!-- @SystemApi Allows access to the vibrator state.
          <p>Protection level: signature
