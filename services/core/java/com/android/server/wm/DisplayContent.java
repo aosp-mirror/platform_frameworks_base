@@ -3496,10 +3496,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void collectDisplayChange(@NonNull Transition transition) {
         if (!mLastHasContent) return;
-        if (!transition.isCollecting()) {
-            throw new IllegalArgumentException("Can only collect display change if transition"
-                    + " is collecting");
-        }
+        if (!transition.isCollecting()) return;
         if (!transition.mParticipants.contains(this)) {
             transition.collect(this);
             startAsyncRotationIfNeeded();
