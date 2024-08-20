@@ -1225,11 +1225,15 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         boolean avrSystemAudioMode = HdmiUtils.parseCommandParamSystemAudioStatus(message);
         // Set System Audio Mode according to TV's settings.
         // Handle <System Audio Mode Status> here only when
-        // SystemAudioAutoInitiationAction timeout
+        // SystemAudioAutoInitiationAction timeout.
+        // If AVR reports SAM on and it is in standby, the action SystemAudioActionFromTv
+        // triggers a <SAM Request> that will wake-up the AVR.
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
             setSystemAudioMode(false);
-        } else if (avrSystemAudioMode != tvSystemAudioMode) {
+        } else if (avrSystemAudioMode != tvSystemAudioMode
+                    || (avrSystemAudioMode && avr.getDevicePowerStatus()
+                        == HdmiControlManager.POWER_STATUS_STANDBY)) {
             addAndStartAction(new SystemAudioActionFromTv(this, avr.getLogicalAddress(),
                     tvSystemAudioMode, null));
         } else {

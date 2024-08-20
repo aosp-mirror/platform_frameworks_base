@@ -18,12 +18,44 @@ package com.android.systemui.lifecycle
 
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.StateFactoryMarker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /** Base class for all System UI view-models. */
-abstract class SysUiViewModel : SafeActivatable() {
+abstract class SysUiViewModel : BaseActivatable() {
+
+    @StateFactoryMarker
+    fun <T> hydratedStateOf(
+        source: StateFlow<T>,
+    ): State<T> {
+        return hydratedStateOf(
+            initialValue = source.value,
+            source = source,
+        )
+    }
+
+    @StateFactoryMarker
+    fun <T> hydratedStateOf(
+        initialValue: T,
+        source: Flow<T>,
+    ): State<T> {
+        val mutableState = mutableStateOf(initialValue)
+        addChild(
+            object : BaseActivatable() {
+                override suspend fun onActivated(): Nothing {
+                    source.collect { mutableState.value = it }
+                    awaitCancellation()
+                }
+            }
+        )
+        return mutableState
+    }
 
     override suspend fun onActivated(): Nothing {
         awaitCancellation()

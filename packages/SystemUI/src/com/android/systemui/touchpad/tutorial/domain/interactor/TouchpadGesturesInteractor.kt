@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad.tutorial.domain.interactor
 
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.model.SysUiState
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.QuickStepContract
@@ -25,13 +26,16 @@ import kotlinx.coroutines.launch
 class TouchpadGesturesInteractor(
     private val sysUiState: SysUiState,
     private val displayTracker: DisplayTracker,
-    private val backgroundScope: CoroutineScope
+    private val backgroundScope: CoroutineScope,
+    private val logger: InputDeviceTutorialLogger,
 ) {
     fun disableGestures() {
+        logger.log("Disabling touchpad gestures across the system")
         setGesturesState(disabled = true)
     }
 
     fun enableGestures() {
+        logger.log("Enabling touchpad gestures across the system")
         setGesturesState(disabled = false)
     }
 

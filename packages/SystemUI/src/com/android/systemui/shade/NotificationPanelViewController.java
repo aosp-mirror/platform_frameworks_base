@@ -4536,6 +4536,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final class StatusBarStateListener implements StateListener {
         @Override
         public void onStateChanged(int statusBarState) {
+            onStateChanged(statusBarState, false);
+        }
+
+        private void onStateChanged(
+                int statusBarState,
+                boolean animatingUnlockedShadeToKeyguardBypass
+        ) {
             boolean goingToFullShade = mStatusBarStateController.goingToFullShade();
             boolean keyguardFadingAway = mKeyguardStateController.isKeyguardFadingAway();
             int oldState = mBarState;
@@ -4607,15 +4614,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 //  - getting notified again about the current SHADE or KEYGUARD state
                 final boolean animatingUnlockedShadeToKeyguard = oldState == SHADE
                         && statusBarState == KEYGUARD
-                        && mScreenOffAnimationController.isKeyguardShowDelayed();
+                        && mScreenOffAnimationController.isKeyguardShowDelayed()
+                        //Bypasses animatingUnlockedShadeToKeyguard for b/337742708
+                        && !animatingUnlockedShadeToKeyguardBypass;
                 if (!animatingUnlockedShadeToKeyguard) {
                     // Only make the status bar visible if we're not animating the screen off, since
                     // we only want to be showing the clock/notifications during the animation.
-                    if (keyguardShowing) {
-                        mShadeLog.v("Updating keyguard status bar state to visible");
-                    } else {
-                        mShadeLog.v("Updating keyguard status bar state to invisible");
-                    }
+                    mShadeLog.logKeyguardStatudBarVisibiliy(keyguardShowing, isOnAod(),
+                            animatingUnlockedShadeToKeyguardBypass, oldState, statusBarState);
                     mKeyguardStatusBarViewController.updateViewState(
                             /* alpha= */ 1f,
                             keyguardShowing ? View.VISIBLE : View.INVISIBLE);
@@ -4692,7 +4698,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     .addTagListener(QS.TAG, mQsController.getQsFragmentListener());
             if (!SceneContainerFlag.isEnabled()) {
                 mStatusBarStateController.addCallback(mStatusBarStateListener);
-                mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
+                // Bypass animatingUnlockedShadeToKeyguard in onStateChanged for b/337742708
+                mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState(), true);
             }
             mConfigurationController.addCallback(mConfigurationListener);
             // Theme might have changed between inflating this view and attaching it to the

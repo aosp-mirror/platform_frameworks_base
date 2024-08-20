@@ -46,12 +46,12 @@ import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.art.ArtManagerLocal;
+import com.android.server.profcollect.Utils;
 import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -280,11 +280,7 @@ public final class ProfcollectForwardingService extends SystemService {
             return;
         }
 
-        // Sample for a fraction of app launches.
-        int traceFrequency = DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
-                "applaunch_trace_freq", 2);
-        int randomNum = ThreadLocalRandom.current().nextInt(100);
-        if (randomNum < traceFrequency) {
+        if (Utils.withFrequency("applaunch_trace_freq", 2)) {
             BackgroundThread.get().getThreadHandler().post(() -> {
                 try {
                     mIProfcollect.trace_system("applaunch");
@@ -318,12 +314,7 @@ public final class ProfcollectForwardingService extends SystemService {
         if (mIProfcollect == null) {
             return;
         }
-        // Sample for a fraction of dex2oat runs.
-        final int traceFrequency =
-            DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
-                "dex2oat_trace_freq", 25);
-        int randomNum = ThreadLocalRandom.current().nextInt(100);
-        if (randomNum < traceFrequency) {
+        if (Utils.withFrequency("dex2oat_trace_freq", 25)) {
             // Dex2oat could take a while before it starts. Add a short delay before start tracing.
             BackgroundThread.get().getThreadHandler().postDelayed(() -> {
                 try {
@@ -393,27 +384,22 @@ public final class ProfcollectForwardingService extends SystemService {
                 if (Arrays.asList(cameraSkipPackages).contains(packageId)) {
                     return;
                 }
-                // Sample for a fraction of camera events.
-                final int traceFrequency =
-                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
-                        "camera_trace_freq", 10);
-                int randomNum = ThreadLocalRandom.current().nextInt(100);
-                if (randomNum >= traceFrequency) {
-                    return;
-                }
-                final int traceDuration = 5000;
-                final String traceTag = "camera";
-                BackgroundThread.get().getThreadHandler().post(() -> {
-                    if (mIProfcollect == null) {
-                        return;
-                    }
-                    try {
-                        mIProfcollect.trace_process(traceTag, "android.hardware.camera.provider",
+                if (Utils.withFrequency("camera_trace_freq", 10)) {
+                    final int traceDuration = 5000;
+                    final String traceTag = "camera";
+                    BackgroundThread.get().getThreadHandler().post(() -> {
+                        if (mIProfcollect == null) {
+                            return;
+                        }
+                        try {
+                            mIProfcollect.trace_process(traceTag,
+                                "android.hardware.camera.provider",
                                 traceDuration);
-                    } catch (RemoteException e) {
-                        Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
-                    }
-                });
+                        } catch (RemoteException e) {
+                            Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+                        }
+                    });
+                }
             }
         }, null);
     }

@@ -134,11 +134,6 @@ class AppCompatActivityRobot {
                 isUnresizable);
     }
 
-    void configureTopActivityIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        mActivityStack.top().mDisplayContent
-                .setIgnoreOrientationRequest(ignoreOrientationRequest);
-    }
-
     void configureUnresizableTopActivity(@ActivityInfo.ScreenOrientation int screenOrientation) {
         configureTopActivity(/* minAspect */ -1, /* maxAspect */ -1, screenOrientation,
                 /* isUnresizable */ true);
@@ -246,6 +241,18 @@ class AppCompatActivityRobot {
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityVisible(boolean isVisible) {
+        doReturn(isVisible).when(mActivityStack.top()).isVisible();
+    }
+
+    void setTopActivityVisibleRequested(boolean isVisibleRequested) {
+        doReturn(isVisibleRequested).when(mActivityStack.top()).isVisibleRequested();
+    }
+
+    void setTopActivityFillsParent(boolean fillsParent) {
+        doReturn(fillsParent).when(mActivityStack.top()).fillsParent();
     }
 
     void setTopActivityInMultiWindowMode(boolean multiWindowMode) {

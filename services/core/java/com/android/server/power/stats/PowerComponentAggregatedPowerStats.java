@@ -172,6 +172,9 @@ class PowerComponentAggregatedPowerStats {
 
     void setUidStats(int uid, int[] states, long[] values) {
         UidStats uidStats = getUidStats(uid);
+        if (uidStats.stats == null) {
+            createUidStats(uidStats, mPowerStatsTimestamp);
+        }
         uidStats.stats.setStats(states, values);
     }
 

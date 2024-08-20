@@ -122,9 +122,4 @@ public interface TouchHandler {
      * @param session
      */
     void onSessionStart(TouchSession session);
-
-    /**
-     * Called when the handler is being torn down.
-     */
-    default void onDestroy() {}
 }

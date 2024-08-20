@@ -4233,6 +4233,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @NonNull UserData userData) {
         final var bindingController = userData.mBindingController;
         final var currentImi = bindingController.getSelectedMethod();
+        if (currentImi == null) {
+            return false;
+        }
         final ImeSubtypeListItem nextSubtype = userData.mSwitchingController
                 .getNextInputMethodLocked(onlyCurrentIme, currentImi,
                         bindingController.getCurrentSubtype(),
@@ -4250,6 +4253,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private boolean shouldOfferSwitchingToNextInputMethodLocked(@NonNull UserData userData) {
         final var bindingController = userData.mBindingController;
         final var currentImi = bindingController.getSelectedMethod();
+        if (currentImi == null) {
+            return false;
+        }
         final ImeSubtypeListItem nextSubtype = userData.mSwitchingController
                 .getNextInputMethodLocked(false /* onlyCurrentIme */, currentImi,
                         bindingController.getCurrentSubtype(),

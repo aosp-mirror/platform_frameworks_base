@@ -691,7 +691,7 @@ aconfig_declarations {
     exportable: true,
     package: "android.media.tv.flags",
     container: "system",
-    srcs: ["media/java/android/media/tv/flags/media_tv.aconfig"],
+    srcs: ["media/java/android/media/tv/flags/*.aconfig"],
 }
 
 java_aconfig_library {

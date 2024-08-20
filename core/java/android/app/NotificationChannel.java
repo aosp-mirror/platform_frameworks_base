@@ -753,9 +753,14 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Sets whether or not notifications posted to this channel can interrupt the user in
-     * {@link android.app.NotificationManager.Policy#INTERRUPTION_FILTER_PRIORITY} mode.
+     * {@link android.app.NotificationManager#INTERRUPTION_FILTER_PRIORITY} mode.
      *
-     * Only modifiable by the system and notification ranker.
+     * <p>Apps with Do Not Disturb policy access (see
+     * {@link NotificationManager#isNotificationPolicyAccessGranted()}) can set up their own
+     * channels this way, but only if the channel hasn't been updated by the user since its
+     * creation.
+     *
+     * <p>Otherwise, this value is only modifiable by the system and the notification ranker.
      */
     public void setBypassDnd(boolean bypassDnd) {
         this.mBypassDnd = bypassDnd;

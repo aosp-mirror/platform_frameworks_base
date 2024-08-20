@@ -27,7 +27,6 @@ import android.content.Context;
  *
  * <p>App function is a specific piece of functionality that an app offers to the system. These
  * functionalities can be integrated into various system features.
- *
  */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 @SystemService(Context.APP_FUNCTION_SERVICE)
