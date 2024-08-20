@@ -335,6 +335,8 @@ class TransparentPolicy {
             // Do not enable the policy if the activity can affect display orientation.
             final int orientation = mActivityRecord.getOverrideOrientation();
             return orientation == SCREEN_ORIENTATION_UNSPECIFIED
+                    // This "!condition" is true if the activity is multi-window mode or the
+                    // display ignores requested orientation.
                     || !mActivityRecord.handlesOrientationChangeFromDescendant(orientation);
         }
 
