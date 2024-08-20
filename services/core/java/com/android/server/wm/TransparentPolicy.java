@@ -95,7 +95,7 @@ class TransparentPolicy {
         }
         final boolean wasStarted = mTransparentPolicyState.isRunning();
         mTransparentPolicyState.reset();
-        // In case mActivityRecord.hasCompatDisplayInsetsWithoutOverride() we don't apply the
+        // In case mActivityRecord.hasAppCompatDisplayInsetsWithoutOverride() we don't apply the
         // opaque activity constraints because we're expecting the activity is already letterboxed.
         final ActivityRecord firstOpaqueActivity = mActivityRecord.getTask().getActivity(
                 FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
@@ -159,12 +159,12 @@ class TransparentPolicy {
         return mTransparentPolicyState.mInheritedOrientation;
     }
 
-    ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
-        return mTransparentPolicyState.mInheritedCompatDisplayInsets;
+    AppCompatDisplayInsets getInheritedAppCompatDisplayInsets() {
+        return mTransparentPolicyState.mInheritedAppCompatDisplayInsets;
     }
 
-    void clearInheritedCompatDisplayInsets() {
-        mTransparentPolicyState.clearInheritedCompatDisplayInsets();
+    void clearInheritedAppCompatDisplayInsets() {
+        mTransparentPolicyState.clearInheritedAppCompatDisplayInsets();
     }
 
     /**
@@ -202,7 +202,7 @@ class TransparentPolicy {
             return true;
         }
         if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
-                || mActivityRecord.hasCompatDisplayInsetsWithoutInheritance()) {
+                || mActivityRecord.hasAppCompatDisplayInsetsWithoutInheritance()) {
             return true;
         }
         return false;
@@ -239,9 +239,9 @@ class TransparentPolicy {
         // The app compat state for the opaque activity if any
         private int mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
 
-        // The CompatDisplayInsets of the opaque activity beneath the translucent one.
+        // The AppCompatDisplayInsets of the opaque activity beneath the translucent one.
         @Nullable
-        private ActivityRecord.CompatDisplayInsets mInheritedCompatDisplayInsets;
+        private AppCompatDisplayInsets mInheritedAppCompatDisplayInsets;
 
         @Nullable
         private ActivityRecord mFirstOpaqueActivity;
@@ -303,7 +303,7 @@ class TransparentPolicy {
             }
             mInheritedOrientation = opaqueActivity.getRequestedConfigurationOrientation();
             mInheritedAppCompatState = opaqueActivity.getAppCompatState();
-            mInheritedCompatDisplayInsets = opaqueActivity.getCompatDisplayInsets();
+            mInheritedAppCompatDisplayInsets = opaqueActivity.getAppCompatDisplayInsets();
         }
 
         private void reset() {
@@ -315,7 +315,7 @@ class TransparentPolicy {
             mInheritedMinAspectRatio = UNDEFINED_ASPECT_RATIO;
             mInheritedMaxAspectRatio = UNDEFINED_ASPECT_RATIO;
             mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
-            mInheritedCompatDisplayInsets = null;
+            mInheritedAppCompatDisplayInsets = null;
             if (mFirstOpaqueActivity != null) {
                 mFirstOpaqueActivity.mAppCompatController.getTransparentPolicy()
                         .mDestroyListeners.remove(mActivityRecord.mAppCompatController
@@ -340,8 +340,8 @@ class TransparentPolicy {
                     || !mActivityRecord.handlesOrientationChangeFromDescendant(orientation);
         }
 
-        private void clearInheritedCompatDisplayInsets() {
-            mInheritedCompatDisplayInsets = null;
+        private void clearInheritedAppCompatDisplayInsets() {
+            mInheritedAppCompatDisplayInsets = null;
         }
 
         /**

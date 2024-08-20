@@ -104,7 +104,7 @@ public class DesktopAppCompatAspectRatioPolicy {
      * resizability.
      */
     private float getFixedOrientationLetterboxAspectRatio(@NonNull Task task) {
-        return mActivityRecord.shouldCreateCompatDisplayInsets()
+        return mActivityRecord.shouldCreateAppCompatDisplayInsets()
                 ? getDefaultMinAspectRatioForUnresizableApps(task)
                 : getDefaultMinAspectRatio(task);
     }
