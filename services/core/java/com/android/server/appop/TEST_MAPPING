@@ -12,12 +12,7 @@
             "name": "CtsAppOps2TestCases"
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.appop"
-                }
-            ]
+            "name": "FrameworksServicesTests_android_server_appop"
         },
         {
             "name": "FrameworksMockingServicesTests",
