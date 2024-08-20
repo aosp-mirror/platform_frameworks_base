@@ -774,8 +774,8 @@
     <string name="tuner_circle" msgid="5270591778160525693">"Lingkaran"</string>
     <string name="tuner_plus" msgid="4130366441154416484">"Plus"</string>
     <string name="tuner_minus" msgid="5258518368944598545">"Minus"</string>
-    <string name="tuner_left" msgid="5758862558405684490">"Kiri"</string>
-    <string name="tuner_right" msgid="8247571132790812149">"Kanan"</string>
+    <string name="tuner_left" msgid="5758862558405684490">"Kiri (L)"</string>
+    <string name="tuner_right" msgid="8247571132790812149">"Kanan (R)"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Menu"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Aplikasi <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Notifikasi"</string>

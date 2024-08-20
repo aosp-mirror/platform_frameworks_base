@@ -452,7 +452,7 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Сертифікати центру сертифікації"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Переглянути правила"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Переглянути засоби контролю"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Цей пристрій належить організації \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nIT-адміністратор може відстежувати й контролювати налаштування, корпоративний доступ, додатки, дані пристрою та інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв\'яжіться з IT-адміністратором."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Цей пристрій належить організації \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\".\n\nСистемний адміністратор може відстежувати й контролювати налаштування, корпоративний доступ, додатки, дані пристрою і інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Компанія \"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>\" має доступ до даних, пов\'язаних із цим пристроєм, а також може змінювати його налаштування та керувати додатками.\n\nЯкщо у вас є запитання, зв\'яжіться з компанією \"<xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Цей пристрій належить вашій організації.\n\nІТ-адміністратор може відстежувати й контролювати налаштування, корпоративний доступ, додатки, дані пристрою та інформацію про його місцезнаходження.\n\nЩоб дізнатися більше, зв\'яжіться з ІТ-адміністратором."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Адміністратор організації встановив центр сертифікації на цьому пристрої. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
@@ -783,7 +783,7 @@
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Знімки екрана"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Додатки з миттєвим запуском"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"Налаштування"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"Пам’ять"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"Сховище"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Поради"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Додатки з миттєвим запуском"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> працює"</string>
