@@ -134,11 +134,6 @@ class AppCompatActivityRobot {
                 isUnresizable);
     }
 
-    void configureTopActivityIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        mActivityStack.top().mDisplayContent
-                .setIgnoreOrientationRequest(ignoreOrientationRequest);
-    }
-
     void configureUnresizableTopActivity(@ActivityInfo.ScreenOrientation int screenOrientation) {
         configureTopActivity(/* minAspect */ -1, /* maxAspect */ -1, screenOrientation,
                 /* isUnresizable */ true);
