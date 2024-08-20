@@ -82,10 +82,7 @@
         "PowerComponents\\.java",
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
-      "name": "FrameworksServicesTests",
-      "options": [
-        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" }
-      ]
+      "name": "FrameworksServicesTests_battery_stats"
     },
     {
       "file_patterns": [
