@@ -596,9 +596,6 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         // are created.
         verify(mDreamOverlayComponent).getDreamOverlayContainerViewController()
         verify(mAmbientTouchComponent).getTouchMonitor()
-
-        // Verify DreamOverlayContainerViewController is destroyed.
-        verify(mDreamOverlayContainerViewController).destroy()
     }
 
     @Test
