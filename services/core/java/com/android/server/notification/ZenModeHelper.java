@@ -968,7 +968,16 @@ public class ZenModeHelper {
                         rule.setConditionOverride(OVERRIDE_DEACTIVATE);
                     }
                 }
+            } else if (origin == ORIGIN_USER_IN_APP && condition != null
+                    && condition.source == SOURCE_USER_ACTION) {
+                // Remove override and just apply the condition. Since the app is reporting that the
+                // user asked for it, by definition it knows that, and will adjust its automatic
+                // behavior accordingly -> no need to override.
+                rule.condition = condition;
+                rule.resetConditionOverride();
             } else {
+                // Update the condition, and check whether we can remove the override (if automatic
+                // and manual decisions agree).
                 rule.condition = condition;
                 rule.reconsiderConditionOverride();
             }
