@@ -243,6 +243,18 @@ class AppCompatActivityRobot {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
     }
 
+    void setTopActivityVisible(boolean isVisible) {
+        doReturn(isVisible).when(mActivityStack.top()).isVisible();
+    }
+
+    void setTopActivityVisibleRequested(boolean isVisibleRequested) {
+        doReturn(isVisibleRequested).when(mActivityStack.top()).isVisibleRequested();
+    }
+
+    void setTopActivityFillsParent(boolean fillsParent) {
+        doReturn(fillsParent).when(mActivityStack.top()).fillsParent();
+    }
+
     void setTopActivityInMultiWindowMode(boolean multiWindowMode) {
         doReturn(multiWindowMode).when(mActivityStack.top()).inMultiWindowMode();
         if (multiWindowMode) {
