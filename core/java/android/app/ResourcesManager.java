@@ -41,6 +41,7 @@ import android.os.LocaleList;
 import android.os.Process;
 import android.os.Trace;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1409,6 +1410,7 @@ public class ResourcesManager {
         return newKey;
     }
 
+    @RavenwoodThrow(reason = "AppInfo update not supported")
     public void appendPendingAppInfoUpdate(@NonNull String[] oldSourceDirs,
             @NonNull ApplicationInfo appInfo) {
         synchronized (mLock) {
@@ -1427,6 +1429,7 @@ public class ResourcesManager {
         }
     }
 
+    @RavenwoodReplace(reason = "AppInfo update not supported")
     public final void applyAllPendingAppInfoUpdates() {
         synchronized (mLock) {
             if (mPendingAppInfoUpdates != null) {
@@ -1437,6 +1440,10 @@ public class ResourcesManager {
                 mPendingAppInfoUpdates = null;
             }
         }
+    }
+
+    private void applyAllPendingAppInfoUpdates$ravenwood() {
+        /* no-op */
     }
 
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
