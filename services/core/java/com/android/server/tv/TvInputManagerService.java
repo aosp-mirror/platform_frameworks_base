@@ -500,6 +500,7 @@ public final class TvInputManagerService extends SystemService {
                     && parentInfo != null
                     && parentInfo.id == mCurrentUserId) {
                 // only the children of the current user can be started in background
+                mCurrentUserId = userId;
                 startProfileLocked(userId);
             }
         }
