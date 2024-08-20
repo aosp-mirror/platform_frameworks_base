@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ravenwood.runtimetest;
+package com.android.ravenwoodtest.runtimetest;
 
 // Copied from libcore/luni/src/test/java/libcore/android/system/OsConstantsTest.java
 

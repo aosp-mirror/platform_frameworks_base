@@ -17,8 +17,6 @@
 package com.android.systemui.display.domain.interactor
 
 import android.companion.virtual.VirtualDeviceManager
-import android.companion.virtual.flags.Flags.FLAG_INTERACTIVE_SCREEN_MIRROR
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import android.view.Display
 import android.view.Display.TYPE_EXTERNAL
@@ -160,7 +158,6 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
     fun displayState_virtualDeviceOwnedMirrorVirtualDisplay_connected() =
         testScope.runTest {
             whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt()))
@@ -183,7 +180,6 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
     fun virtualDeviceOwnedMirrorVirtualDisplay_emitsConnectedDisplayAddition() =
         testScope.runTest {
             whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt()))

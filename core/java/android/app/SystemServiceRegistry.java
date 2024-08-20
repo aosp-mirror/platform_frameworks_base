@@ -475,7 +475,7 @@ public final class SystemServiceRegistry {
                 if (service == null
                         && ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
                         && android.server.Flags.allowRemovingVpnService()) {
-                    throw new ServiceNotFoundException(Context.VPN_MANAGEMENT_SERVICE);
+                    return null;
                 }
                 return new VpnManager(ctx, service);
             }});

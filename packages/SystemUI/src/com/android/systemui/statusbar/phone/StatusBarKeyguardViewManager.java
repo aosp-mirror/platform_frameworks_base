@@ -545,6 +545,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @VisibleForTesting
     void consumeFromAlternateBouncerTransitionSteps(TransitionStep step) {
+        SceneContainerFlag.assertInLegacyMode();
         hideAlternateBouncer(false);
     }
 
@@ -554,6 +555,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     @VisibleForTesting
     void consumeKeyguardAuthenticatedBiometricsHandled(Unit handled) {
+        SceneContainerFlag.assertInLegacyMode();
         if (mAlternateBouncerInteractor.isVisibleState()) {
             hideAlternateBouncer(false);
         }
@@ -981,7 +983,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing, isFalsingReset);
             }
-            if (hideBouncerWhenShowing) {
+            if (!SceneContainerFlag.isEnabled() && hideBouncerWhenShowing) {
                 hideAlternateBouncer(true);
             }
             mKeyguardUpdateManager.sendKeyguardReset();

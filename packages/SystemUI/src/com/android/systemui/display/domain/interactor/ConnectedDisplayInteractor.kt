@@ -17,7 +17,6 @@
 package com.android.systemui.display.domain.interactor
 
 import android.companion.virtual.VirtualDeviceManager
-import android.companion.virtual.flags.Flags
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -155,8 +154,7 @@ constructor(
     }
 
     private fun isVirtualDeviceOwnedMirrorDisplay(display: Display): Boolean {
-        return Flags.interactiveScreenMirror() &&
-            virtualDeviceManager != null &&
+        return virtualDeviceManager != null &&
             virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(display.displayId)
     }
 }

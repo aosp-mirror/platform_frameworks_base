@@ -419,7 +419,6 @@ public class LegacyProtoLogImpl implements IProtoLog {
         return group.isLogToLogcat() || (group.isLogToProto() && isProtoEnabled());
     }
 
-    @Override
     public void registerGroups(IProtoLogGroup... protoLogGroups) {
         for (IProtoLogGroup group : protoLogGroups) {
             mLogGroups.put(group.name(), group);

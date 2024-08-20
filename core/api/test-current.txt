@@ -941,7 +941,7 @@ package android.companion.virtual {
     method public int getAudioRecordingSessionId(int);
     method public int getDeviceIdForDisplayId(int);
     method public int getDevicePolicy(int, int);
-    method @FlaggedApi("android.companion.virtual.flags.interactive_screen_mirror") public boolean isVirtualDeviceOwnedMirrorDisplay(int);
+    method public boolean isVirtualDeviceOwnedMirrorDisplay(int);
     method public void playSoundEffect(int, int);
   }
 

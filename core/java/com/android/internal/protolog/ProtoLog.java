@@ -50,6 +50,24 @@ public class ProtoLog {
     private static IProtoLog sProtoLogInstance;
 
     /**
+     * Initialize ProtoLog in this process.
+     * <p>
+     * This method MUST be called before any protologging is performed in this process.
+     * Ensure that all groups that will be used for protologging are registered.
+     *
+     * @param groups The ProtoLog groups that will be used in the process.
+     */
+    public static void init(IProtoLogGroup... groups) {
+        if (android.tracing.Flags.perfettoProtologTracing()) {
+            sProtoLogInstance = new PerfettoProtoLogImpl(groups);
+        } else {
+            // The first call to ProtoLog is likely to flip REQUIRE_PROTOLOGTOOL, which is when this
+            // static block will be executed before REQUIRE_PROTOLOGTOOL is actually set.
+            sProtoLogInstance = new LogcatOnlyProtoLogImpl();
+        }
+    }
+
+    /**
      * DEBUG level log.
      *
      * @param group         {@code IProtoLogGroup} controlling this log call.
@@ -150,14 +168,6 @@ public class ProtoLog {
         return sProtoLogInstance;
     }
 
-    /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
-     */
-    public static void registerGroups(IProtoLogGroup... protoLogGroups) {
-        sProtoLogInstance.registerGroups(protoLogGroups);
-    }
-
     private static void logStringMessage(LogLevel logLevel, IProtoLogGroup group,
             String stringMessage, Object... args) {
         if (sProtoLogInstance == null) {
@@ -167,16 +177,6 @@ public class ProtoLog {
 
         if (sProtoLogInstance.isEnabled(group, logLevel)) {
             sProtoLogInstance.log(logLevel, group, stringMessage, args);
-        }
-    }
-
-    static {
-        if (android.tracing.Flags.perfettoProtologTracing()) {
-            sProtoLogInstance = new PerfettoProtoLogImpl();
-        } else {
-            // The first call to ProtoLog is likely to flip REQUIRE_PROTOLOGTOOL, which is when this
-            // static block will be executed before REQUIRE_PROTOLOGTOOL is actually set.
-            sProtoLogInstance = new LogcatOnlyProtoLogImpl();
         }
     }
 }
