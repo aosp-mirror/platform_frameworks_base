@@ -922,8 +922,8 @@ public final class NfcAdapter {
      * @hide
      */
     @UnsupportedAppUsage
-    public INfcAdapter getService() {
-        isEnabled();  // NOP call to recover sService if it is stale
+    public static INfcAdapter getService() {
+        isEnabledStatic();  // NOP call to recover sService if it is stale
         return sService;
     }
 
@@ -931,8 +931,8 @@ public final class NfcAdapter {
      * Returns the binder interface to the tag service.
      * @hide
      */
-    public INfcTag getTagService() {
-        isEnabled();  // NOP call to recover sTagService if it is stale
+    public static INfcTag getTagService() {
+        isEnabledStatic();  // NOP call to recover sTagService if it is stale
         return sTagService;
     }
 
@@ -940,8 +940,8 @@ public final class NfcAdapter {
      * Returns the binder interface to the card emulation service.
      * @hide
      */
-    public INfcCardEmulation getCardEmulationService() {
-        isEnabled();
+    public static INfcCardEmulation getCardEmulationService() {
+        isEnabledStatic();
         return sCardEmulationService;
     }
 
@@ -949,8 +949,8 @@ public final class NfcAdapter {
      * Returns the binder interface to the NFC-F card emulation service.
      * @hide
      */
-    public INfcFCardEmulation getNfcFCardEmulationService() {
-        isEnabled();
+    public static INfcFCardEmulation getNfcFCardEmulationService() {
+        isEnabledStatic();
         return sNfcFCardEmulationService;
     }
 
@@ -973,14 +973,14 @@ public final class NfcAdapter {
      * @hide
      */
     @UnsupportedAppUsage
-    public void attemptDeadServiceRecovery(Exception e) {
+    public static void attemptDeadServiceRecovery(RemoteException e) {
         Log.e(TAG, "NFC service dead - attempting to recover", e);
         INfcAdapter service = getServiceInterface();
         if (service == null) {
             Log.e(TAG, "could not retrieve NFC service during service recovery");
             // nothing more can be done now, sService is still stale, we'll hit
             // this recovery path again later
-            return;
+            e.rethrowAsRuntimeException();
         }
         // assigning to sService is not thread-safe, but this is best-effort code
         // and on a well-behaved system should never happen
@@ -993,7 +993,7 @@ public final class NfcAdapter {
                 Log.e(TAG, "could not retrieve NFC tag service during service recovery");
                 // nothing more can be done now, sService is still stale, we'll hit
                 // this recovery path again later
-                return;
+                ee.rethrowAsRuntimeException();
             }
         }
 
@@ -1014,24 +1014,27 @@ public final class NfcAdapter {
                         "could not retrieve NFC-F card emulation service during service recovery");
             }
         }
-
-        return;
     }
 
-    private boolean isCardEmulationEnabled() {
+    private static boolean isCardEmulationEnabled() {
         if (sHasCeFeature) {
             return (sCardEmulationService != null || sNfcFCardEmulationService != null);
         }
         return false;
     }
 
-    private boolean isTagReadingEnabled() {
+    private static boolean isTagReadingEnabled() {
         if (sHasNfcFeature) {
             return sTagService != null;
         }
         return false;
     }
 
+    private static boolean isEnabledStatic() {
+        boolean serviceState = callServiceReturn(() -> sService.getState() == STATE_ON, false);
+        return serviceState
+                && (isTagReadingEnabled() || isCardEmulationEnabled() || sHasNfcWlcFeature);
+    }
 
     /**
      * Return true if this NFC Adapter has any features enabled.
@@ -1046,24 +1049,7 @@ public final class NfcAdapter {
      * @return true if this NFC Adapter has any features enabled
      */
     public boolean isEnabled() {
-        boolean serviceState = false;
-        try {
-            serviceState = sService.getState() == STATE_ON;
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            // Try one more time
-            if (sService == null) {
-                Log.e(TAG, "Failed to recover NFC Service.");
-                return false;
-            }
-            try {
-                serviceState = sService.getState() == STATE_ON;
-            } catch (RemoteException ee) {
-                Log.e(TAG, "Failed to recover NFC Service.");
-            }
-        }
-        return serviceState
-                && (isTagReadingEnabled() || isCardEmulationEnabled() || sHasNfcWlcFeature);
+        return isEnabledStatic();
     }
 
     /**
@@ -1157,19 +1143,16 @@ public final class NfcAdapter {
      * @hide
      */
     public void pausePolling(int timeoutInMs) {
-        try {
-            sService.pausePolling(timeoutInMs);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
+        callService(() -> sService.pausePolling(timeoutInMs));
     }
 
 
     /**
-     * Returns whether the device supports observer mode or not. When observe
-     * mode is enabled, the NFC hardware will listen for NFC readers, but not
-     * respond to them. When observe mode is disabled, the NFC hardware will
-     * resoond to the reader and proceed with the transaction.
+     * Returns whether the device supports observe mode or not. When observe mode is enabled, the
+     * NFC hardware will listen to NFC readers, but not respond to them. While enabled, observed
+     * polling frames will be sent to the APDU service (see {@link #setObserveModeEnabled(boolean)}.
+     * When observe mode is disabled (or if it's not supported), the NFC hardware will automatically
+     * respond to the reader and proceed with the transaction.
      * @return true if the mode is supported, false otherwise.
      */
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
@@ -1193,9 +1176,10 @@ public final class NfcAdapter {
      * and simply observe and notify the APDU service of polling loop frames. See
      * {@link #isObserveModeSupported()} for a description of observe mode. Only the package of the
      * currently preferred service (the service set as preferred by the current foreground
-     * application via {@link CardEmulation#setPreferredService(Activity, ComponentName)} or the
-     * current Default Wallet Role Holder {@link android.app.role.RoleManager#ROLE_WALLET}),
-     * otherwise a call to this method will fail and return false.
+     * application via {@link android.nfc.cardemulation.CardEmulation#setPreferredService(Activity,
+     * android.content.ComponentName)} or the current Default Wallet Role Holder
+     * {@link android.app.role.RoleManager#ROLE_WALLET}), otherwise a call to this method will fail
+     * and return false.
      *
      * @param enabled false disables observe mode to allow the transaction to proceed while true
      *                enables observe mode and does not allow transactions to proceed.
@@ -1220,11 +1204,7 @@ public final class NfcAdapter {
      * @hide
      */
     public void resumePolling() {
-        try {
-            sService.resumePolling();
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
+        callService(() -> sService.resumePolling());
     }
 
     /**
@@ -1643,15 +1623,10 @@ public final class NfcAdapter {
         if (activity == null || intent == null) {
             throw new NullPointerException();
         }
-        try {
-            TechListParcel parcel = null;
-            if (techLists != null && techLists.length > 0) {
-                parcel = new TechListParcel(techLists);
-            }
-            sService.setForegroundDispatch(intent, filters, parcel);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
+        final TechListParcel parcel = (techLists != null && techLists.length > 0)
+            ? new TechListParcel(techLists)
+            : null;
+        callService(() -> sService.setForegroundDispatch(intent, filters, parcel));
     }
 
     /**
@@ -1675,11 +1650,7 @@ public final class NfcAdapter {
                 throw new UnsupportedOperationException();
             }
         }
-        try {
-            sService.setForegroundDispatch(null, null, null);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
+        callService(() -> sService.setForegroundDispatch(null, null, null));
     }
 
     /**
@@ -1760,11 +1731,7 @@ public final class NfcAdapter {
         }
         Binder token = new Binder();
         int flags = enable ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
-        try {
-            NfcAdapter.sService.setReaderMode(token, null, flags, null);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
+        callService(() -> sService.setReaderMode(token, null, flags, null));
     }
 
     /**
@@ -1836,12 +1803,8 @@ public final class NfcAdapter {
                 && ((pollTechnology & FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH
                 || (listenTechnology & FLAG_SET_DEFAULT_TECH) == FLAG_SET_DEFAULT_TECH)) {
             Binder token = new Binder();
-            try {
-                NfcAdapter.sService.updateDiscoveryTechnology(token,
-                        pollTechnology, listenTechnology);
-            } catch (RemoteException e) {
-                attemptDeadServiceRecovery(e);
-            }
+            callService( () ->
+                sService.updateDiscoveryTechnology(token, pollTechnology, listenTechnology));
         } else {
             mNfcActivityManager.setDiscoveryTech(activity, pollTechnology, listenTechnology);
         }
@@ -2048,7 +2011,8 @@ public final class NfcAdapter {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
-        return callServiceReturn(() ->  sService.enableReaderOption(enable), false);
+        return callServiceReturn(() ->
+                sService.enableReaderOption(enable, mContext.getPackageName()), false);
 
     }
 
@@ -2225,11 +2189,7 @@ public final class NfcAdapter {
         if (tag == null) {
             throw new NullPointerException("tag cannot be null");
         }
-        try {
-            sService.dispatch(tag);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
+        callService(() -> sService.dispatch(tag));
     }
 
     /**
@@ -2265,8 +2225,10 @@ public final class NfcAdapter {
             synchronized (mLock) {
                 if (mNfcUnlockHandlers.containsKey(unlockHandler)) {
                     // update the tag technologies
-                    sService.removeNfcUnlockHandler(mNfcUnlockHandlers.get(unlockHandler));
-                    mNfcUnlockHandlers.remove(unlockHandler);
+                    callService(() -> {
+                        sService.removeNfcUnlockHandler(mNfcUnlockHandlers.get(unlockHandler));
+                        mNfcUnlockHandlers.remove(unlockHandler);
+                    });
                 }
 
                 INfcUnlockHandler.Stub iHandler = new INfcUnlockHandler.Stub() {
@@ -2275,20 +2237,18 @@ public final class NfcAdapter {
                         return unlockHandler.onUnlockAttempted(tag);
                     }
                 };
-
-                sService.addNfcUnlockHandler(iHandler,
-                        Tag.getTechCodesFromStrings(tagTechnologies));
-                mNfcUnlockHandlers.put(unlockHandler, iHandler);
+                return callServiceReturn(() -> {
+                        sService.addNfcUnlockHandler(
+                            iHandler, Tag.getTechCodesFromStrings(tagTechnologies));
+                        mNfcUnlockHandlers.put(unlockHandler, iHandler);
+                        return true;
+                    }, false);
             }
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return false;
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register LockscreenDispatch", e);
             return false;
         }
 
-        return true;
     }
 
     /**
@@ -2305,17 +2265,14 @@ public final class NfcAdapter {
                 throw new UnsupportedOperationException();
             }
         }
-        try {
-            synchronized (mLock) {
-                if (mNfcUnlockHandlers.containsKey(unlockHandler)) {
+        synchronized (mLock) {
+            if (mNfcUnlockHandlers.containsKey(unlockHandler)) {
+                return callServiceReturn(() -> {
                     sService.removeNfcUnlockHandler(mNfcUnlockHandlers.remove(unlockHandler));
-                }
-
-                return true;
+                    return true;
+                }, false);
             }
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return false;
+            return true;
         }
     }
 
@@ -2523,26 +2480,8 @@ public final class NfcAdapter {
             Log.e(TAG, "TagIntentAppPreference is not supported");
             throw new UnsupportedOperationException();
         }
-        try {
-            Map<String, Boolean> result = (Map<String, Boolean>) sService
-                     .getTagIntentAppPreferenceForUser(userId);
-            return result;
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            // Try one more time
-            if (sService == null) {
-                Log.e(TAG, "Failed to recover NFC Service.");
-                return Collections.emptyMap();
-            }
-            try {
-                Map<String, Boolean> result = (Map<String, Boolean>) sService
-                        .getTagIntentAppPreferenceForUser(userId);
-                return result;
-            } catch (RemoteException ee) {
-                Log.e(TAG, "Failed to recover NFC Service.");
-            }
-            return Collections.emptyMap();
-        }
+        return callServiceReturn( () ->
+            sService.getTagIntentAppPreferenceForUser(userId), Collections.emptyMap());
     }
 
     /**
@@ -2588,50 +2527,44 @@ public final class NfcAdapter {
         callService(() ->  sService.notifyTestHceData(technology, data));
     }
 
+    /** @hide */
     interface ServiceCall {
         void call() throws RemoteException;
     }
-
-    void callService(ServiceCall call) {
+    /** @hide */
+    static void callService(ServiceCall call) {
         try {
             if (sService == null) {
-                attemptDeadServiceRecovery(null);
+                attemptDeadServiceRecovery(new RemoteException("NFC Service is null"));
             }
             call.call();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
-            // Try one more time
-            if (sService == null) {
-                Log.e(TAG, "Failed to recover NFC Service.");
-                return;
-            }
             try {
                 call.call();
             } catch (RemoteException ee) {
-                Log.e(TAG, "Failed to recover NFC Service.");
+                ee.rethrowAsRuntimeException();
             }
         }
     }
+    /** @hide */
     interface ServiceCallReturn<T> {
         T call() throws RemoteException;
     }
-    <T> T callServiceReturn(ServiceCallReturn<T> call, T defaultReturn) {
+    /** @hide */
+    static <T> T callServiceReturn(ServiceCallReturn<T> call, T defaultReturn) {
         try {
             if (sService == null) {
-                attemptDeadServiceRecovery(null);
+                attemptDeadServiceRecovery(new RemoteException("NFC Service is null"));
             }
             return call.call();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
-            if (sService == null) {
-                Log.e(TAG, "Failed to recover NFC Service.");
-                return defaultReturn;
-            }
             try {
                 return call.call();
             } catch (RemoteException ee) {
-                Log.e(TAG, "Failed to recover NFC Service.");
+                ee.rethrowAsRuntimeException();
             }
         }
         return defaultReturn;

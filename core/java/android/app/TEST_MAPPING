@@ -29,12 +29,7 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.appop"
-                }
-            ]
+            "name": "FrameworksServicesTests_android_server_appop"
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
@@ -153,18 +148,7 @@
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "FrameworksCoreTests",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.ContextTest"
-                }
-            ],
+            "name": "FrameworksCoreTests_context",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
@@ -177,35 +161,13 @@
             ]
         },
         {
-            "name": "FrameworksCoreTests",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.app.KeyguardManagerTest"
-                }
-            ],
+            "name": "FrameworksCoreTests_keyguard_manager",
             "file_patterns": [
                 "(/|^)KeyguardManager.java"
             ]
         },
         {
-            "name": "FrameworksCoreTests",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.app.PropertyInvalidatedCacheTests"
-                }
-            ],
+            "name": "FrameworksCoreTests_property_invalidated_cache",
             "file_patterns": [
                 "(/|^)PropertyInvalidatedCache.java"
             ]

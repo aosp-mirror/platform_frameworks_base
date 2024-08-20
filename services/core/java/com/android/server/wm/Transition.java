@@ -1745,8 +1745,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // already been reset by the original hiding-transition's finishTransaction (we can't
             // show in the finishTransaction because by then the activity doesn't hide until
             // surface placement).
-            for (WindowContainer p = ar.getParent(); p != null && !containsChangeFor(p, mTargets);
-                    p = p.getParent()) {
+            for (WindowContainer p = ar.getParent();
+                 p != null && !containsChangeFor(p, mTargets) && !p.isOrganized();
+                 p = p.getParent()) {
                 if (p.getSurfaceControl() != null) {
                     transaction.show(p.getSurfaceControl());
                 }

@@ -2,6 +2,14 @@ package: "android.nfc"
 container: "system"
 
 flag {
+    name: "nfc_event_listener"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC Event listener APIs"
+    bug: "356447790"
+}
+
+flag {
     name: "enable_nfc_mainline"
     is_exported: true
     namespace: "nfc"
@@ -117,3 +125,18 @@ flag {
     bug: "321310044"
 }
 
+flag {
+    name: "nfc_action_manage_services_settings"
+    is_exported: true
+    namespace: "nfc"
+    description: "Add Settings.ACTION_MANAGE_OTHER_NFC_SERVICES_SETTINGS"
+    bug: "358129872"
+}
+
+flag {
+    name: "nfc_override_recover_routing_table"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable override and recover routing table"
+    bug: "329043523"
+}
