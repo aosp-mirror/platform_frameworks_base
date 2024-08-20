@@ -76,7 +76,6 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final boolean mTestHarness;
     private final MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
-    private FeatureFlags mFeatureFlags;
     private static final Queue<String> RECENT_INFO_LOG =
             new ArrayDeque<>(RECENT_INFO_LOG_SIZE + 1);
     private static final Queue<DebugSwipeRecord> RECENT_SWIPES =
@@ -186,8 +185,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             DoubleTapClassifier doubleTapClassifier, HistoryTracker historyTracker,
             KeyguardStateController keyguardStateController,
             AccessibilityManager accessibilityManager,
-            @TestHarness boolean testHarness,
-            FeatureFlags featureFlags) {
+            @TestHarness boolean testHarness) {
         mDataProvider = falsingDataProvider;
         mMetricsLogger = metricsLogger;
         mClassifiers = classifiers;
@@ -198,7 +196,6 @@ public class BrightLineFalsingManager implements FalsingManager {
         mKeyguardStateController = keyguardStateController;
         mAccessibilityManager = accessibilityManager;
         mTestHarness = testHarness;
-        mFeatureFlags = featureFlags;
 
         mDataProvider.addSessionListener(mSessionListener);
         mDataProvider.addGestureCompleteListener(mGestureFinalizedListener);
@@ -399,8 +396,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || mDataProvider.isA11yAction()
                 || mDataProvider.isFromTrackpad()
                 || mDataProvider.isFromKeyboard()
-                || (mFeatureFlags.isEnabled(Flags.FALSING_OFF_FOR_UNFOLDED)
-                    && mDataProvider.isUnfolded());
+                || mDataProvider.isUnfolded();
     }
 
     @Override
