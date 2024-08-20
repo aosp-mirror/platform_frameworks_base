@@ -88,8 +88,8 @@ constructor(
                 modesList.map { mode ->
                     ModeTileViewModel(
                         id = mode.id,
-                        icon = zenModeInteractor.getModeIcon(mode, context),
-                        text = mode.rule.name,
+                        icon = zenModeInteractor.getModeIcon(context, mode),
+                        text = mode.name,
                         subtext = getTileSubtext(mode),
                         enabled = mode.isActive,
                         onClick = {

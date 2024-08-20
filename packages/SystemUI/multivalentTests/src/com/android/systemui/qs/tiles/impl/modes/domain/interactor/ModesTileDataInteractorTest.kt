@@ -16,19 +16,24 @@
 
 package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
+import android.app.AutomaticZenRule
 import android.app.Flags
+import android.graphics.drawable.TestStubDrawable
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,8 +41,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toCollection
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -48,7 +55,20 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
     private val dispatcher = kosmos.testDispatcher
     private val zenModeRepository = kosmos.fakeZenModeRepository
 
-    private val underTest = ModesTileDataInteractor(zenModeRepository, dispatcher)
+    private val underTest =
+        ModesTileDataInteractor(
+            context,
+            ZenModeInteractor(zenModeRepository, mock<NotificationSettingsRepository>()),
+            dispatcher
+        )
+
+    @Before
+    fun setUp() {
+        context.orCreateTestableResources.apply {
+            addOverride(com.android.internal.R.drawable.ic_zen_mode_type_bedtime, BEDTIME_DRAWABLE)
+            addOverride(com.android.internal.R.drawable.ic_zen_mode_type_driving, DRIVING_DRAWABLE)
+        }
+    }
 
     @EnableFlags(Flags.FLAG_MODES_UI)
     @Test
@@ -110,8 +130,62 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
             assertThat(dataList.map { it.activeModes }.last()).isEmpty()
         }
 
-    private companion object {
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS)
+    fun changesIconWhenActiveModesChange() =
+        testScope.runTest {
+            val dataList: List<ModesTileModel> by
+                collectValues(
+                    underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
+                )
+            runCurrent()
+            assertThat(dataList.map { it.icon }).containsExactly(null).inOrder()
 
+            // Add an inactive mode: state hasn't changed, so this shouldn't cause another emission
+            zenModeRepository.addMode(id = "Mode", active = false)
+            runCurrent()
+            assertThat(dataList.map { it.icon }).containsExactly(null).inOrder()
+
+            // Add an active mode: icon should be the mode icon
+            zenModeRepository.addMode(
+                id = "Bedtime",
+                type = AutomaticZenRule.TYPE_BEDTIME,
+                active = true
+            )
+            runCurrent()
+            assertThat(dataList.map { it.icon }).containsExactly(null, BEDTIME_ICON).inOrder()
+
+            // Add another, less-prioritized mode: icon should remain the first mode icon
+            zenModeRepository.addMode(
+                id = "Driving",
+                type = AutomaticZenRule.TYPE_DRIVING,
+                active = true
+            )
+            runCurrent()
+            assertThat(dataList.map { it.icon })
+                .containsExactly(null, BEDTIME_ICON, BEDTIME_ICON)
+                .inOrder()
+
+            // Deactivate more important mode: icon should be the less important, still active mode.
+            zenModeRepository.deactivateMode("Bedtime")
+            runCurrent()
+            assertThat(dataList.map { it.icon })
+                .containsExactly(null, BEDTIME_ICON, BEDTIME_ICON, DRIVING_ICON)
+                .inOrder()
+
+            // Deactivate remaining mode: no icon
+            zenModeRepository.deactivateMode("Driving")
+            runCurrent()
+            assertThat(dataList.map { it.icon })
+                .containsExactly(null, BEDTIME_ICON, BEDTIME_ICON, DRIVING_ICON, null)
+                .inOrder()
+        }
+
+    private companion object {
         val TEST_USER = UserHandle.of(1)!!
+        val BEDTIME_DRAWABLE = TestStubDrawable("bedtime")
+        val DRIVING_DRAWABLE = TestStubDrawable("driving")
+        val BEDTIME_ICON = BEDTIME_DRAWABLE.asIcon()
+        val DRIVING_ICON = DRIVING_DRAWABLE.asIcon()
     }
 }
