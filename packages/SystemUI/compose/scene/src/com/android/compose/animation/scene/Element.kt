@@ -1106,7 +1106,7 @@ private inline fun <T> computeValue(
             val directionSign = if (transition.isUpOrLeft) -1 else 1
             val isToContent = overscroll.scene == transition.toContent
             val linearProgress = transition.progress.let { if (isToContent) it - 1f else it }
-            val progress = directionSign * overscroll.progressConverter(linearProgress)
+            val progress = directionSign * overscroll.progressConverter.convert(linearProgress)
             val rangeProgress = propertySpec.range?.progress(progress) ?: progress
 
             // Interpolate between the value at rest and the over scrolled value.

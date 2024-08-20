@@ -271,7 +271,7 @@ internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBu
 }
 
 internal open class OverscrollBuilderImpl : BaseTransitionBuilderImpl(), OverscrollBuilder {
-    override var progressConverter: (Float) -> Float = { it }
+    override var progressConverter: ProgressConverter = ProgressConverter.Default
 
     override fun translate(
         matcher: ElementMatcher,
