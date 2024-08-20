@@ -7999,7 +7999,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             boolean allWindowsDrawn = false;
             synchronized (mGlobalLock) {
-                if (mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
+                if (displayId == DEFAULT_DISPLAY
+                        && mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
                     // Use the ready-to-play of transition as the signal.
                     return;
                 }
