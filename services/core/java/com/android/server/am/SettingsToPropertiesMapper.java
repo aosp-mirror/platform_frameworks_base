@@ -214,6 +214,7 @@ public class SettingsToPropertiesMapper {
         "stability",
         "statsd",
         "system_performance",
+        "system_sw_battery",
         "system_sw_touch",
         "system_sw_usb",
         "test_suites",
