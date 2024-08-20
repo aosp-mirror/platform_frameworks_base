@@ -16,9 +16,22 @@
 
 package android.app.appfunctions;
 
+import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
+import android.app.appfunctions.IExecuteAppFunctionCallback;
+
 /**
 * Interface between an app and the server implementation service (AppFunctionManagerService).
 * @hide
 */
 oneway interface IAppFunctionManager {
+    /**
+    * Executes an app function provided by {@link AppFunctionService} through the system.
+    *
+    * @param request the request to execute an app function.
+    * @param callback the callback to report the result.
+    */
+    void executeAppFunction(
+        in ExecuteAppFunctionAidlRequest request,
+        in IExecuteAppFunctionCallback callback
+    );
 }
