@@ -16,12 +16,7 @@
             ]
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {"include-filter": "com.android.server.job"},
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-                {"exclude-annotation": "androidx.test.filters.LargeTest"}
-            ]
+            "name": "FrameworksServicesTests_com_android_server_job_Presubmit"
         }
     ],
     "postsubmit": [

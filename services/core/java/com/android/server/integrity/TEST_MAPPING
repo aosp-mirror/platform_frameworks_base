@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.integrity."
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_integrity"
     },
     {
       "name": "GtsSecurityHostTestCases",
