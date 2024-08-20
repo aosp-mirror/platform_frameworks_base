@@ -86,6 +86,10 @@ class DesktopModeLoggerTransitionObserver(
     // Caching whether the previous transition was exit to overview.
     private var wasPreviousTransitionExitToOverview: Boolean = false
 
+    // Caching whether the previous transition was exit due to screen off. This helps check if a
+    // following enter reason could be Screen On
+    private var wasPreviousTransitionExitByScreenOff: Boolean = false
+
     // The instanceId for the current logging session
     private var loggerInstanceId: InstanceId? = null
 
@@ -337,9 +341,12 @@ class DesktopModeLoggerTransitionObserver(
     }
 
     /** Get [EnterReason] for this session enter */
-    private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason =
-        when {
-            transitionInfo.type == WindowManager.TRANSIT_WAKE -> EnterReason.SCREEN_ON
+    private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason {
+       val enterReason = when {
+            transitionInfo.type == WindowManager.TRANSIT_WAKE
+                   // If there is a screen lock, desktop window entry is after dismissing keyguard
+                   || (transitionInfo.type == WindowManager.TRANSIT_TO_BACK
+                   && wasPreviousTransitionExitByScreenOff) -> EnterReason.SCREEN_ON
             transitionInfo.type == Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
                 EnterReason.APP_HANDLE_DRAG
             transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
@@ -367,11 +374,17 @@ class DesktopModeLoggerTransitionObserver(
                 EnterReason.UNKNOWN_ENTER
             }
         }
+        wasPreviousTransitionExitByScreenOff = false
+        return enterReason
+    }
 
     /** Get [ExitReason] for this session exit */
     private fun getExitReason(transitionInfo: TransitionInfo): ExitReason =
          when {
-            transitionInfo.type == WindowManager.TRANSIT_SLEEP -> ExitReason.SCREEN_OFF
+            transitionInfo.type == WindowManager.TRANSIT_SLEEP -> {
+                wasPreviousTransitionExitByScreenOff = true
+                ExitReason.SCREEN_OFF
+            }
             transitionInfo.type == WindowManager.TRANSIT_CLOSE -> ExitReason.TASK_FINISHED
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG -> ExitReason.DRAG_TO_EXIT
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON ->
