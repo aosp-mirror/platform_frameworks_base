@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial
+package com.android.systemui.inputdevice.tutorial
 
-import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.model.sysUiState
-import com.android.systemui.settings.displayTracker
-import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGesturesInteractor
+import org.mockito.kotlin.mock
 
-var Kosmos.touchpadGesturesInteractor: TouchpadGesturesInteractor by
-    Kosmos.Fixture {
-        TouchpadGesturesInteractor(
-            sysUiState,
-            displayTracker,
-            testScope.backgroundScope,
-            inputDeviceTutorialLogger
-        )
-    }
+var Kosmos.inputDeviceTutorialLogger: InputDeviceTutorialLogger by
+    Kosmos.Fixture { mock<InputDeviceTutorialLogger>() }
