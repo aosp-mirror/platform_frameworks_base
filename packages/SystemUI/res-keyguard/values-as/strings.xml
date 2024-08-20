@@ -27,7 +27,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"আপোনাৰ পাছৱর্ড দিয়ক"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"পাছৱৰ্ড দিয়ক"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ব্যৱহাৰৰ অযোগ্য ছিম কাৰ্ড"</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"চ্চার্জ কৰা হ’ল"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"চাৰ্জ কৰা হ’ল"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • বেতাঁৰৰ জৰিয়তে চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চ্চার্জ কৰি থকা হৈছে"</string>
