@@ -924,9 +924,13 @@ public class RingtoneManager {
                         + " ignored: failure to find mimeType (no access from this context?)");
                 return;
             }
-            if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg"))) {
+            if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg")
+                    || mimeType.equals("application/x-flac")
+                    // also check for video ringtones
+                    || mimeType.startsWith("video/") || mimeType.equals("application/mp4"))) {
                 Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
-                        + " ignored: associated mimeType:" + mimeType + " is not an audio type");
+                        + " ignored: associated MIME type:" + mimeType
+                        + " is not a recognized audio or video type");
                 return;
             }
         }
