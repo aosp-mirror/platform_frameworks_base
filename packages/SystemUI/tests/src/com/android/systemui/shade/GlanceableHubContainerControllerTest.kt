@@ -61,6 +61,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.controller.keyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.lockscreen.lockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
@@ -727,7 +728,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
                 // Touch event is sent to the container view.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
-                verify(containerView).onTouchEvent(any())
+                verify(containerView).onTouchEvent(DOWN_EVENT)
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
+                verify(containerView).onTouchEvent(UP_EVENT)
             }
         }
 
@@ -774,13 +777,83 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun onTouchEvent_shadeInteracting_movesNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+                whenever(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            any(),
+                            any()
+                        )
+                    )
+                    .thenReturn(true)
+
+                // Touches not consumed by default but are received by containerView.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(DOWN_EVENT)
+
+                // User is interacting with shade on lockscreen.
+                fakeShadeRepository.setLegacyLockscreenShadeTracking(true)
+                testableLooper.processAllMessages()
+
+                // A move event is ignored while the user is already interacting.
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(MOVE_EVENT)
+
+                // An up event is still delivered.
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(UP_EVENT)
+            }
+        }
+
+    @Test
+    fun onTouchEvent_bouncerInteracting_movesNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+                whenever(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            any(),
+                            any()
+                        )
+                    )
+                    .thenReturn(true)
+
+                // Touches not consumed by default but are received by containerView.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(DOWN_EVENT)
+
+                // User is interacting with bouncer on lockscreen.
+                fakeKeyguardBouncerRepository.setPrimaryShow(true)
+                testableLooper.processAllMessages()
+
+                // A move event is ignored while the user is already interacting.
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(MOVE_EVENT)
+
+                // An up event is still delivered.
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(UP_EVENT)
+            }
+        }
+
     private fun initAndAttachContainerView() {
         val mockInsets =
             mock<WindowInsets> {
                 on { getInsets(WindowInsets.Type.systemGestures()) } doReturn FAKE_INSETS
             }
 
-        containerView = spy(View(context)) { on { rootWindowInsets } doReturn mockInsets }
+        containerView =
+            spy(View(context)) {
+                on { rootWindowInsets } doReturn mockInsets
+                // Return true to handle touch events or else further events in the gesture will not
+                // be received as we are using real View objects.
+                onGeneric { onTouchEvent(any()) } doReturn true
+            }
 
         parentView = FrameLayout(context)
 
