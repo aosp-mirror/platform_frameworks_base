@@ -308,6 +308,15 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             )
         }
 
+    @Test
+    fun getConfig() =
+        testScope.runTest {
+            assertThat(underTest.getConfig(FakeCustomizationProviderClient.AFFORDANCE_1))
+                .isEqualTo(config1)
+            assertThat(underTest.getConfig(FakeCustomizationProviderClient.AFFORDANCE_2))
+                .isEqualTo(config2)
+        }
+
     private fun assertSelections(
         observed: Map<String, List<KeyguardQuickAffordanceConfig>>?,
         expected: Map<String, List<KeyguardQuickAffordanceConfig>>,

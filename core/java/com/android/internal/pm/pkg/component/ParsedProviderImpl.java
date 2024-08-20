@@ -174,7 +174,7 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedProviderImpl.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/com/android/internal/pm/pkg/component/ParsedProviderImpl.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -298,9 +298,9 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
     }
 
     @DataClass.Generated(
-            time = 1642560323360L,
+            time = 1723882842941L,
             codegenVersion = "1.0.23",
-            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedProviderImpl.java",
+            sourceFile = "frameworks/base/core/java/com/android/internal/pm/pkg/component/ParsedProviderImpl.java",
             inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String authority\nprivate  boolean syncable\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String readPermission\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String writePermission\nprivate  boolean grantUriPermissions\nprivate  boolean forceUriPermissions\nprivate  boolean multiProcess\nprivate  int initOrder\nprivate @android.annotation.NonNull java.util.List<android.os.PatternMatcher> uriPermissionPatterns\nprivate @android.annotation.NonNull java.util.List<android.content.pm.PathPermission> pathPermissions\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<com.android.internal.pm.pkg.component.ParsedProviderImpl> CREATOR\npublic  com.android.internal.pm.pkg.component.ParsedProviderImpl setReadPermission(java.lang.String)\npublic  com.android.internal.pm.pkg.component.ParsedProviderImpl setWritePermission(java.lang.String)\npublic @android.annotation.NonNull com.android.internal.pm.pkg.component.ParsedProviderImpl addUriPermissionPattern(android.os.PatternMatcher)\npublic @android.annotation.NonNull com.android.internal.pm.pkg.component.ParsedProviderImpl addPathPermission(android.content.pm.PathPermission)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedProviderImpl extends com.android.internal.pm.pkg.component.ParsedMainComponentImpl implements [com.android.internal.pm.pkg.component.ParsedProvider, android.os.Parcelable]\n@com.android.internal.util.DataClass(genSetters=true, genGetters=true, genParcelable=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}

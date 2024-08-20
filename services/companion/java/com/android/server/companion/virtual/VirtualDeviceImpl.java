@@ -137,11 +137,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
-    private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS_PRE_VIC =
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-
     private static final String PERSISTENT_ID_PREFIX_CDM_ASSOCIATION = "companion:";
 
     /**
@@ -373,9 +368,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
 
         int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
-        if (!Flags.consistentDisplayFlags()) {
-            flags |= DEFAULT_VIRTUAL_DISPLAY_FLAGS_PRE_VIC;
-        }
         if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
         }
@@ -1254,10 +1246,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     // as the virtual display doesn't have any focused windows. Hence, call this for
     // associating any input device to the source display if the input device emits any key events.
     private int getTargetDisplayIdForInput(int displayId) {
-        if (!Flags.interactiveScreenMirror()) {
-            return displayId;
-        }
-
         DisplayManagerInternal displayManager = LocalServices.getService(
                 DisplayManagerInternal.class);
         int mirroredDisplayId = displayManager.getDisplayIdToMirror(displayId);
@@ -1313,9 +1301,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         int displayId;
         displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig, callback,
                 this, gwpc, packageName);
-        gwpc.setDisplayId(displayId, /* isMirrorDisplay= */ Flags.interactiveScreenMirror()
-                && mDisplayManagerInternal.getDisplayIdToMirror(displayId)
-                != Display.INVALID_DISPLAY);
+        boolean isMirrorDisplay =
+                mDisplayManagerInternal.getDisplayIdToMirror(displayId) != Display.INVALID_DISPLAY;
+        gwpc.setDisplayId(displayId, isMirrorDisplay);
 
         boolean showPointer;
         synchronized (mVirtualDeviceLock) {

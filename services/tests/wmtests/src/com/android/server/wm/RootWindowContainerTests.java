@@ -205,6 +205,28 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAllResumedActivitiesIdle() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final WindowProcessController proc2 = activity2.app;
+        activity1.setState(RESUMED, "test");
+        activity2.detachFromProcess();
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity1.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity2.setProcess(proc2);
+        activity2.setState(RESUMED, "test");
+        activity2.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        activity1.idle = false;
+        activity1.setVisibleRequested(false);
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+    }
+
+    @Test
     public void testTaskLayerRank() {
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final Task task1 = new TaskBuilder(mSupervisor).setParentTask(rootTask).build();

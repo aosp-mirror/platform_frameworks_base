@@ -170,7 +170,6 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
-import com.android.systemui.communal.util.DensityUtils.Companion.scalingAdjustment
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
@@ -478,8 +477,7 @@ fun CommunalHub(
 }
 
 val hubDimensions: Dimensions
-    @Composable
-    get() = Dimensions(LocalContext.current, LocalConfiguration.current, LocalDensity.current)
+    @Composable get() = Dimensions(LocalContext.current, LocalConfiguration.current)
 
 @Composable
 private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
@@ -1288,8 +1286,9 @@ fun DisabledWidgetPlaceholder(
         modifier =
             modifier
                 .background(
-                    MaterialTheme.colorScheme.surfaceVariant,
-                    RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape =
+                        RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
                 )
                 .clickable(
                     enabled = !viewModel.isEditMode,
@@ -1325,10 +1324,8 @@ fun PendingWidgetPlaceholder(
     Column(
         modifier =
             modifier.background(
-                MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(
-                    dimensionResource(system_app_widget_background_radius) * scalingAdjustment
-                )
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1514,21 +1511,24 @@ data class ContentPaddingInPx(val start: Float, val top: Float) {
     fun toOffset(): Offset = Offset(start, top)
 }
 
-class Dimensions(val context: Context, val config: Configuration, val density: Density) {
+class Dimensions(val context: Context, val config: Configuration) {
     val GridTopSpacing: Dp
         get() {
-            if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                return 114.adjustedDp
-            } else {
-                val windowMetrics =
-                    WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
-                val screenHeight = with(density) { windowMetrics.bounds.height().adjustedDp }
-
-                return (screenHeight - CardHeightFull) / 2
-            }
+            val result =
+                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    114.dp
+                } else {
+                    val windowMetrics =
+                        WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+                    val density = context.resources.displayMetrics.density
+                    val screenHeight = (windowMetrics.bounds.height() / density).dp
+                    ((screenHeight - CardHeightFull) / 2)
+                }
+            return result
         }
 
-    val GridHeight = CardHeightFull + GridTopSpacing
+    val GridHeight: Dp
+        get() = CardHeightFull + GridTopSpacing
 
     companion object {
         val CardHeightFull

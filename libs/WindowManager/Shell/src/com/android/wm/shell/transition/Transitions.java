@@ -1187,12 +1187,15 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             if (request.getDisplayChange() != null) {
                 TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
-                if (change.getEndRotation() != change.getStartRotation()) {
-                    // Is a rotation, so dispatch to all displayChange listeners
+                if (change.getStartRotation() != change.getEndRotation()
+                        || (change.getStartAbsBounds() != null
+                        && !change.getStartAbsBounds().equals(change.getEndAbsBounds()))) {
+                    // Is a display change, so dispatch to all displayChange listeners
                     if (wct == null) {
                         wct = new WindowContainerTransaction();
                     }
-                    mDisplayController.onDisplayRotateRequested(wct, change.getDisplayId(),
+                    mDisplayController.onDisplayChangeRequested(wct, change.getDisplayId(),
+                            change.getStartAbsBounds(), change.getEndAbsBounds(),
                             change.getStartRotation(), change.getEndRotation());
                 }
             }

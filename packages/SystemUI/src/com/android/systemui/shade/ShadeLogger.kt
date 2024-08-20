@@ -411,4 +411,29 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             }
         )
     }
+
+    fun logKeyguardStatudBarVisibiliy(
+        visibility: Boolean,
+        isOnAod: Boolean,
+        animatingUnlockedShadeToKeyguardBypass: Boolean,
+        oldShadeState: Int,
+        newShadeState: Int,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = visibility
+                bool2 = isOnAod
+                bool3 = animatingUnlockedShadeToKeyguardBypass
+                int1 = oldShadeState
+                int2 = newShadeState
+            },
+            {
+                "Setting keyguard status bar visibility to: $bool1, isOnAod: $bool2" +
+                    "oldShadeState: $int1, newShadeState: $int2," +
+                    "animatingUnlockedShadeToKeyguardBypass: $bool3"
+            }
+        )
+    }
 }

@@ -17,15 +17,16 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
-import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolver
 import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolver
@@ -61,6 +62,8 @@ constructor(
     deviceEntryInteractor: DeviceEntryInteractor,
     quickSettingsSceneFamilyResolver: QuickSettingsSceneFamilyResolver,
     notifShadeSceneFamilyResolver: NotifShadeSceneFamilyResolver,
+    powerInteractor: PowerInteractor,
+    alternateBouncerInteractor: AlternateBouncerInteractor,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -124,10 +127,12 @@ constructor(
                     scene = Scenes.Bouncer,
                     stateWithoutSceneContainer = PRIMARY_BOUNCER
                 ),
-                transitionInteractor.isFinishedIn(state = ALTERNATE_BOUNCER),
+                alternateBouncerInteractor.isVisible,
                 isOnShadeWhileUnlocked,
-            ) { isOnGone, isOnBouncer, isOnAltBouncer, isOnShadeWhileUnlocked ->
-                !isOnGone && !isOnBouncer && !isOnAltBouncer && !isOnShadeWhileUnlocked
+                powerInteractor.isAsleep,
+            ) { isOnGone, isOnBouncer, isOnAltBouncer, isOnShadeWhileUnlocked, isAsleep ->
+                (!isOnGone && !isOnBouncer && !isOnAltBouncer && !isOnShadeWhileUnlocked) ||
+                    isAsleep
             }
             .filter { it }
             .sampleFilter(dismissAction) { it !is DismissAction.None }

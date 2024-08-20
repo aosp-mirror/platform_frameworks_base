@@ -19,6 +19,7 @@ package com.android.systemui.clipboardoverlay;
 import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_ACTIONS;
+import static com.android.systemui.Flags.clipboardImageTimeout;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISSED_OTHER;
@@ -32,7 +33,6 @@ import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBO
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TAP_OUTSIDE;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TIMED_OUT;
-import static com.android.systemui.flags.Flags.CLIPBOARD_IMAGE_TIMEOUT;
 import static com.android.systemui.flags.Flags.CLIPBOARD_SHARED_TRANSITIONS;
 
 import android.animation.Animator;
@@ -288,7 +288,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
         boolean shouldAnimate = !model.dataMatches(mClipboardModel) || wasExiting;
         mClipboardModel = model;
         mClipboardLogger.setClipSource(mClipboardModel.getSource());
-        if (mFeatureFlags.isEnabled(CLIPBOARD_IMAGE_TIMEOUT)) {
+        if (clipboardImageTimeout()) {
             if (shouldAnimate) {
                 reset();
                 mClipboardLogger.setClipSource(mClipboardModel.getSource());
@@ -452,7 +452,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED);
                     mIsMinimized = false;
                 }
-                if (mFeatureFlags.isEnabled(CLIPBOARD_IMAGE_TIMEOUT)) {
+                if (clipboardImageTimeout()) {
                     setExpandedView(() -> animateIn());
                 } else {
                     setExpandedView();
@@ -522,7 +522,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 mInputMonitor.getInputChannel(), Looper.getMainLooper()) {
             @Override
             public void onInputEvent(InputEvent event) {
-                if ((!mFeatureFlags.isEnabled(CLIPBOARD_IMAGE_TIMEOUT) || mShowingUi)
+                if ((!clipboardImageTimeout() || mShowingUi)
                         && event instanceof MotionEvent) {
                     MotionEvent motionEvent = (MotionEvent) event;
                     if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {

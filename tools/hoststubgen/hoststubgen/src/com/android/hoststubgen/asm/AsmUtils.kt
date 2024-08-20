@@ -58,7 +58,24 @@ fun findAnyAnnotation(
     return null
 }
 
-fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): String? {
+fun ClassNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
+    return findAnyAnnotation(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun MethodNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
+    return findAnyAnnotation(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun FieldNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
+    return findAnyAnnotation(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun <T> findAnnotationValueAsObject(
+    an: AnnotationNode,
+    propertyName: String,
+    expectedTypeHumanReadableName: String,
+    converter: (Any?) -> T?,
+): T? {
     for (i in 0..(an.values?.size ?: 0) - 2 step 2) {
         val name = an.values[i]
 
@@ -66,15 +83,29 @@ fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): Strin
             continue
         }
         val value = an.values[i + 1]
-        if (value is String) {
-            return value
+        if (value == null) {
+            return null
         }
-        throw ClassParseException(
-                "The type of '$name' in annotation \"${an.desc}\" must be String" +
-                        ", but is ${value?.javaClass?.canonicalName}")
+
+        try {
+            return converter(value)
+        } catch (e: ClassCastException) {
+            throw ClassParseException(
+                "The type of '$propertyName' in annotation @${an.desc} must be " +
+                        "$expectedTypeHumanReadableName, but is ${value?.javaClass?.canonicalName}")
+        }
     }
     return null
 }
+
+fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): String? {
+    return findAnnotationValueAsObject(an, propertyName, "String", {it as String})
+}
+
+fun findAnnotationValueAsType(an: AnnotationNode, propertyName: String): Type? {
+    return findAnnotationValueAsObject(an, propertyName, "Class", {it as Type})
+}
+
 
 val periodOrSlash = charArrayOf('.', '/')
 
@@ -125,6 +156,24 @@ fun splitWithLastPeriod(name: String): Pair<String, String>? {
     return Pair(name.substring(0, pos), name.substring(pos + 1))
 }
 
+fun String.startsWithAny(vararg prefixes: String): Boolean {
+    prefixes.forEach {
+        if (this.startsWith(it)) {
+            return true
+        }
+    }
+    return false
+}
+
+fun String.endsWithAny(vararg suffixes: String): Boolean {
+    suffixes.forEach {
+        if (this.endsWith(it)) {
+            return true
+        }
+    }
+    return false
+}
+
 fun String.toJvmClassName(): String {
     return this.replace('.', '/')
 }
@@ -135,6 +184,14 @@ fun String.toHumanReadableClassName(): String {
 
 fun String.toHumanReadableMethodName(): String {
     return this.replace('/', '.')
+}
+
+fun zipEntryNameToClassName(entryFilename: String): String? {
+    val suffix = ".class"
+    if (!entryFilename.endsWith(suffix)) {
+        return null
+    }
+    return entryFilename.substring(0, entryFilename.length - suffix.length)
 }
 
 private val numericalInnerClassName = """.*\$\d+$""".toRegex()
@@ -276,6 +333,14 @@ fun MethodNode.isSynthetic(): Boolean {
 
 fun MethodNode.isStatic(): Boolean {
     return (this.access and Opcodes.ACC_STATIC) != 0
+}
+
+fun MethodNode.isPublic(): Boolean {
+    return (this.access and Opcodes.ACC_PUBLIC) != 0
+}
+
+fun MethodNode.isSpecial(): Boolean {
+    return CTOR_NAME == this.name || CLASS_INITIALIZER_NAME == this.name
 }
 
 fun FieldNode.isEnum(): Boolean {

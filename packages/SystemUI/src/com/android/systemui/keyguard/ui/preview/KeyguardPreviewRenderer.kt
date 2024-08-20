@@ -275,12 +275,36 @@ constructor(
         }
     }
 
+    fun onStartCustomizingQuickAffordances(
+        initiallySelectedSlotId: String?,
+    ) {
+        quickAffordancesCombinedViewModel.enablePreviewMode(
+            initiallySelectedSlotId = initiallySelectedSlotId,
+            shouldHighlightSelectedAffordance = true,
+        )
+    }
+
     fun onSlotSelected(slotId: String) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.onPreviewSlotSelected(slotId = slotId)
         } else {
             bottomAreaViewModel.onPreviewSlotSelected(slotId = slotId)
         }
+    }
+
+    fun onPreviewQuickAffordanceSelected(slotId: String, quickAffordanceId: String) {
+        quickAffordancesCombinedViewModel.onPreviewQuickAffordanceSelected(
+            slotId,
+            quickAffordanceId,
+        )
+    }
+
+    fun onDefaultPreview() {
+        quickAffordancesCombinedViewModel.onClearPreviewQuickAffordances()
+        quickAffordancesCombinedViewModel.enablePreviewMode(
+            initiallySelectedSlotId = null,
+            shouldHighlightSelectedAffordance = false,
+        )
     }
 
     fun destroy() {

@@ -28,9 +28,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
-import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
@@ -357,6 +355,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
                 SuccessFingerprintAuthenticationStatus(0, true)
             )
+            runCurrent()
 
             assertThat(currentSceneKey).isEqualTo(Scenes.QuickSettings)
             assertThat(alternateBouncerVisible).isFalse()
@@ -504,6 +503,33 @@ class SceneContainerStartableTest : SysuiTestCase() {
             faceAuthRepository.isAuthenticated.value = true
 
             assertThat(currentSceneKey).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun hideAlternateBouncerAndNotifyDismissCancelledWhenDeviceSleeps() =
+        testScope.runTest {
+            val alternateBouncerVisible by
+                collectLastValue(bouncerRepository.alternateBouncerVisible)
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            prepareState(
+                isDeviceUnlocked = false,
+                initialSceneKey = Scenes.Shade,
+            )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Shade)
+            bouncerRepository.setAlternateVisible(true)
+            underTest.start()
+
+            // run all pending dismiss succeeded/cancelled calls from setup:
+            kosmos.fakeExecutor.runAllReady()
+
+            val dismissCallback: IKeyguardDismissCallback = mock()
+            kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+            kosmos.fakeExecutor.runAllReady()
+
+            assertThat(alternateBouncerVisible).isFalse()
+            verify(dismissCallback).onDismissCancelled()
         }
 
     @Test
@@ -1644,19 +1670,27 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun notifyKeyguardDismissCallbacks_whenUnlocking_onDismissSucceeded() =
+    fun notifyKeyguardDismissCallbacks_whenUnlockingFromBouncer_onDismissSucceeded() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            prepareState()
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene)
+            prepareState(
+                authenticationMethod = AuthenticationMethodModel.Pin,
+                isDeviceUnlocked = false,
+                initialSceneKey = Scenes.Bouncer,
+            )
+            assertThat(currentSceneKey).isEqualTo(Scenes.Bouncer)
             underTest.start()
+
+            // run all pending dismiss succeeded/cancelled calls from setup:
+            kosmos.fakeExecutor.runAllReady()
+
             val dismissCallback: IKeyguardDismissCallback = mock()
             kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
 
-            // Switch to bouncer and unlock device:
-            sceneInteractor.changeScene(Scenes.Bouncer, "")
-            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
-            kosmos.authenticationInteractor.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
             kosmos.fakeExecutor.runAllReady()
 
             verify(dismissCallback).onDismissSucceeded()
@@ -1665,19 +1699,26 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun notifyKeyguardDismissCallbacks_whenLeavingBouncer_onDismissCancelled() =
         testScope.runTest {
+            val isUnlocked by collectLastValue(kosmos.deviceEntryInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             prepareState()
             underTest.start()
+
+            // run all pending dismiss succeeded/cancelled calls from setup:
+            kosmos.fakeExecutor.runAllReady()
+
             val dismissCallback: IKeyguardDismissCallback = mock()
             kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
 
             // Switch to bouncer:
             sceneInteractor.changeScene(Scenes.Bouncer, "")
             assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+            runCurrent()
 
-            // Return to lockscreen:
+            // Return to lockscreen when isUnlocked=false:
             sceneInteractor.changeScene(Scenes.Lockscreen, "")
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isUnlocked).isFalse()
             runCurrent()
             kosmos.fakeExecutor.runAllReady()
 
