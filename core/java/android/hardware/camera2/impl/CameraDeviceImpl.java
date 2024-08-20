@@ -80,6 +80,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -354,7 +355,14 @@ public class CameraDeviceImpl extends CameraDevice
         mCameraId = cameraId;
         if (Flags.singleThreadExecutor()) {
             mDeviceCallback = new ClientStateCallback(executor, callback);
-            mDeviceExecutor = Executors.newSingleThreadExecutor();
+            mDeviceExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = Executors.defaultThreadFactory().newThread(r);
+                    thread.setName("CameraDeviceExecutor");
+                    return thread;
+                }
+            });
         } else {
             mDeviceCallback = callback;
             mDeviceExecutor = executor;
