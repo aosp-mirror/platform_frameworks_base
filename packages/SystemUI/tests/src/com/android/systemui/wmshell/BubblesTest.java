@@ -169,7 +169,6 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleEntry;
-import com.android.wm.shell.bubbles.BubbleExpandedViewManager;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
@@ -1408,7 +1407,6 @@ public class BubblesTest extends SysuiTestCase {
                 .thenReturn(userContext);
 
         BubbleViewInfoTask.BubbleViewInfo info = BubbleViewInfoTask.BubbleViewInfo.populate(context,
-                BubbleExpandedViewManager.fromBubbleController(mBubbleController),
                 () -> new BubbleTaskView(mock(TaskView.class), mock(Executor.class)),
                 mPositioner,
                 mBubbleController.getStackView(),
