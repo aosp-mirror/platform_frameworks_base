@@ -3416,7 +3416,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return handleHomeShortcuts(focusedToken, event);
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (firstDown) {
-                    toggleRecentApps();
+                    showRecentApps(false /* triggeredFromAltTab */);
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS);
                 }
