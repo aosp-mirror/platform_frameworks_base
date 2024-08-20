@@ -4598,6 +4598,8 @@ package android.content.rollback {
     method @NonNull public String getPackageName();
     method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackFrom();
     method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackTo();
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public boolean isApex();
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public boolean isApkInApex();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
   }
