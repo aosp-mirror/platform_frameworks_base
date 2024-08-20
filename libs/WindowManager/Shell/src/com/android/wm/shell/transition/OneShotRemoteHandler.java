@@ -114,7 +114,6 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
                 t.clear();
                 mMainExecutor.execute(() -> {
                     finishCallback.onTransitionFinished(wct);
-                    mRemote = null;
                 });
             }
         };

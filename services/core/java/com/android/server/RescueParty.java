@@ -917,7 +917,7 @@ public class RescueParty {
         }
 
         @Override
-        public String getName() {
+        public String getUniqueIdentifier() {
             return NAME;
         }
 

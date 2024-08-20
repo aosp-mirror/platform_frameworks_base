@@ -7,8 +7,19 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-sh_binary_host {
+java_binary_host {
     name: "ravenizer",
-    src: "ravenizer",
+    main_class: "com.android.platform.test.ravenwood.ravenizer.RavenizerMain",
+    srcs: ["src/**/*.kt"],
+    static_libs: [
+        "hoststubgen-lib",
+        "ow2-asm",
+        "ow2-asm-analysis",
+        "ow2-asm-commons",
+        "ow2-asm-tree",
+        "ow2-asm-util",
+        "junit",
+        "ravenwood-junit-impl-for-ravenizer",
+    ],
     visibility: ["//visibility:public"],
 }

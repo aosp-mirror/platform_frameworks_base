@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ravenwood.runtimetest;
+package com.android.ravenwoodtest.runtimetest;
 
 import static android.system.OsConstants.S_ISBLK;
 import static android.system.OsConstants.S_ISCHR;

@@ -77,6 +77,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var audioSharingInteractor: AudioSharingInteractor
 
+    @Mock private lateinit var bluetoothDeviceMetadataInteractor: BluetoothDeviceMetadataInteractor
+
     @Mock private lateinit var deviceItemInteractor: DeviceItemInteractor
 
     @Mock private lateinit var deviceItemActionInteractor: DeviceItemActionInteractor
@@ -138,6 +140,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                     )
                 ),
                 audioSharingInteractor,
+                bluetoothDeviceMetadataInteractor,
                 mDialogTransitionAnimator,
                 activityStarter,
                 uiEventLogger,
@@ -150,6 +153,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         whenever(deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
         whenever(deviceItemInteractor.deviceItemUpdateRequest)
             .thenReturn(MutableStateFlow(Unit).asStateFlow())
+        whenever(deviceItemInteractor.showSeeAllUpdate).thenReturn(getMutableStateFlow(false))
+        whenever(bluetoothDeviceMetadataInteractor.metadataUpdate).thenReturn(MutableSharedFlow())
         whenever(mBluetoothTileDialogDelegateDelegateFactory.create(any(), anyInt(), any(), any()))
             .thenReturn(bluetoothTileDialogDelegate)
         whenever(bluetoothTileDialogDelegate.createDialog()).thenReturn(sysuiDialog)

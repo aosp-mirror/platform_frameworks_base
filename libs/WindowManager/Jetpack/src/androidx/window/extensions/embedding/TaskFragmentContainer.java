@@ -1203,7 +1203,7 @@ class TaskFragmentContainer {
 
             if (taskContainer == null) {
                 // Adding a TaskContainer if no existed one.
-                taskContainer = new TaskContainer(mTaskId, mActivityInTask);
+                taskContainer = new TaskContainer(mTaskId, mActivityInTask, mSplitController);
                 mSplitController.addTaskContainer(mTaskId, taskContainer);
             }
 

@@ -21,7 +21,7 @@ import kotlinx.coroutines.awaitCancellation
 class FakeActivatable(
     private val onActivation: () -> Unit = {},
     private val onDeactivation: () -> Unit = {},
-) : SafeActivatable() {
+) : BaseActivatable() {
     var activationCount = 0
     var cancellationCount = 0
 

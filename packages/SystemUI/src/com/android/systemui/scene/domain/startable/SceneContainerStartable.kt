@@ -152,7 +152,7 @@ constructor(
             hydrateBackStack()
             resetShadeSessions()
             handleKeyguardEnabledness()
-            notifyKeyguardDismissCallbacks()
+            notifyKeyguardDismissCancelledCallbacks()
             refreshLockscreenEnabled()
         } else {
             sceneLogger.logFrameworkEnabled(
@@ -379,8 +379,10 @@ constructor(
                     when {
                         isAlternateBouncerVisible -> {
                             // When the device becomes unlocked when the alternate bouncer is
-                            // showing, always hide the alternate bouncer...
+                            // showing, always hide the alternate bouncer and notify dismiss
+                            // succeeded
                             alternateBouncerInteractor.hide()
+                            dismissCallbackRegistry.notifyDismissSucceeded()
 
                             // ... and go to Gone or stay on the current scene
                             if (
@@ -394,9 +396,11 @@ constructor(
                                 null
                             }
                         }
-                        isOnPrimaryBouncer ->
+                        isOnPrimaryBouncer -> {
                             // When the device becomes unlocked in primary Bouncer,
+                            // notify dismiss succeeded and
                             // go to previous scene or Gone.
+                            dismissCallbackRegistry.notifyDismissSucceeded()
                             if (
                                 previousScene.value == Scenes.Lockscreen ||
                                     !statusBarStateController.leaveOpenOnKeyguardHide()
@@ -410,6 +414,7 @@ constructor(
                                     "device was unlocked with primary bouncer showing," +
                                         " from sceneKey=$prevScene"
                             }
+                        }
                         isOnLockscreen ->
                             // The lockscreen should be dismissed automatically in 2 scenarios:
                             // 1. When face auth bypass is enabled and authentication happens while
@@ -468,6 +473,9 @@ constructor(
         applicationScope.launch {
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {
+                    alternateBouncerInteractor.hide()
+                    dismissCallbackRegistry.notifyDismissCancelled()
+
                     switchToScene(
                         targetSceneKey = Scenes.Lockscreen,
                         loggingReason = "device is starting to sleep",
@@ -771,15 +779,23 @@ constructor(
         }
     }
 
-    private fun notifyKeyguardDismissCallbacks() {
+    private fun notifyKeyguardDismissCancelledCallbacks() {
         applicationScope.launch {
-            sceneInteractor.currentScene.pairwise().collect { (from, to) ->
-                when {
-                    from != Scenes.Bouncer -> Unit
-                    to == Scenes.Gone -> dismissCallbackRegistry.notifyDismissSucceeded()
-                    else -> dismissCallbackRegistry.notifyDismissCancelled()
+            combine(
+                    deviceEntryInteractor.isUnlocked,
+                    sceneInteractor.currentScene.pairwise(),
+                ) { isUnlocked, (from, to) ->
+                    when {
+                        from != Scenes.Bouncer -> false
+                        to != Scenes.Gone && !isUnlocked -> true
+                        else -> false
+                    }
                 }
-            }
+                .collect { notifyKeyguardDismissCancelled ->
+                    if (notifyKeyguardDismissCancelled) {
+                        dismissCallbackRegistry.notifyDismissCancelled()
+                    }
+                }
         }
     }
 

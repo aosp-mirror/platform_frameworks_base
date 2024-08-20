@@ -79,9 +79,4 @@ public class LogcatOnlyProtoLogImpl implements IProtoLog {
     public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
         return true;
     }
-
-    @Override
-    public void registerGroups(IProtoLogGroup... protoLogGroups) {
-        // Does nothing
-    }
 }
