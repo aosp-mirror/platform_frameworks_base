@@ -7,12 +7,7 @@
       "name": "CtsBlobStoreHostTestCases"
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.blob"
-        }
-      ]
+      "name": "FrameworksMockingServicesTests_blob"
     }
   ]
 }
