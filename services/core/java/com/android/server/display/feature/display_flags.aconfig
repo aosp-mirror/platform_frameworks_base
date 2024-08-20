@@ -330,3 +330,14 @@ flag {
     bug: "331275392"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "idle_screen_config_in_subscribing_light_sensor"
+    namespace: "display_manager"
+    description: "Account for Idle screen refresh rate configs while subscribing to light sensor"
+    bug: "358019330"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
