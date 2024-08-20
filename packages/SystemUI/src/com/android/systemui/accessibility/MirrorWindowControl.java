@@ -18,6 +18,9 @@ package com.android.systemui.accessibility;
 
 import static android.view.WindowManager.LayoutParams;
 
+import static com.android.app.viewcapture.ViewCaptureFactory.getViewCaptureAwareWindowManagerInstance;
+import static com.android.systemui.Flags.enableViewCaptureTracing;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -29,8 +32,8 @@ import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.res.R;
 
 /**
@@ -70,11 +73,12 @@ public abstract class MirrorWindowControl {
      * @see #setDefaultPosition(LayoutParams)
      */
     private final Point mControlPosition = new Point();
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
 
     MirrorWindowControl(Context context) {
         mContext = context;
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = getViewCaptureAwareWindowManagerInstance(mContext,
+                enableViewCaptureTracing());
     }
 
     public void setWindowDelegate(@Nullable MirrorWindowDelegate windowDelegate) {
