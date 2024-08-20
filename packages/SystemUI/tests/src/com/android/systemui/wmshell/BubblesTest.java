@@ -102,6 +102,7 @@ import com.android.app.viewcapture.ViewCapture;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.systemui.SysuiTestCase;
@@ -381,6 +382,9 @@ public class BubblesTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        // Make sure ProtoLog is initialized before any logging occurs.
+        ProtoLog.init();
+
         MockitoAnnotations.initMocks(this);
         PhysicsAnimatorTestUtils.prepareForTest();
 
