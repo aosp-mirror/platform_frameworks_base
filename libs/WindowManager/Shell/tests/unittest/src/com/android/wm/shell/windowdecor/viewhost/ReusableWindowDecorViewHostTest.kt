@@ -33,53 +33,64 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 
-
 /**
- * Tests for [DefaultWindowDecorViewHost].
+ * Tests for [ReusableWindowDecorViewHost].
  *
  * Build/Install/Run:
- * atest WMShellUnitTests:DefaultWindowDecorViewHostTest
+ *  atest WMShellUnitTests:ReusableWindowDecorViewHostTest
  */
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
-class DefaultWindowDecorViewHostTest : ShellTestCase() {
+class ReusableWindowDecorViewHostTest : ShellTestCase() {
 
     @Test
-    fun updateView_layoutInViewHost() = runTest {
-        val windowDecorViewHost = createDefaultViewHost()
+    fun warmUp_addsRootView() = runTest {
+        val reusableVH = createReusableViewHost().apply {
+            warmUp()
+        }
+
+        assertThat(reusableVH.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(reusableVH.view()).isEqualTo(reusableVH.rootView)
+    }
+
+    @Test
+    fun update_differentView_replacesView() = runTest {
         val view = View(context)
+        val lp = WindowManager.LayoutParams()
+        val reusableVH = createReusableViewHost()
+        reusableVH.updateView(view, lp, context.resources.configuration, null)
 
-        windowDecorViewHost.updateView(
-            view = view,
-            attrs = WindowManager.LayoutParams(100, 100),
-            configuration = context.resources.configuration,
-            onDrawTransaction = null
-        )
+        assertThat(reusableVH.rootView.childCount).isEqualTo(1)
+        assertThat(reusableVH.rootView.getChildAt(0)).isEqualTo(view)
 
-        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
-        assertThat(windowDecorViewHost.view()).isEqualTo(view)
+        val newView = View(context)
+        val newLp = WindowManager.LayoutParams()
+        reusableVH.updateView(newView, newLp, context.resources.configuration, null)
+
+        assertThat(reusableVH.rootView.childCount).isEqualTo(1)
+        assertThat(reusableVH.rootView.getChildAt(0)).isEqualTo(newView)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun updateView_clearsPendingAsyncJob() = runTest {
-        val windowDecorViewHost = createDefaultViewHost()
+        val reusableVH = createReusableViewHost()
         val asyncView = View(context)
         val syncView = View(context)
         val asyncAttrs = WindowManager.LayoutParams(100, 100)
         val syncAttrs = WindowManager.LayoutParams(200, 200)
 
-        windowDecorViewHost.updateViewAsync(
+        reusableVH.updateViewAsync(
             view = asyncView,
             attrs = asyncAttrs,
             configuration = context.resources.configuration,
         )
 
         // No view host yet, since the coroutine hasn't run.
-        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isFalse()
+        assertThat(reusableVH.viewHostAdapter.isInitialized()).isFalse()
 
-        windowDecorViewHost.updateView(
+        reusableVH.updateView(
             view = syncView,
             attrs = syncAttrs,
             configuration = context.resources.configuration,
@@ -89,48 +100,47 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
         // Would run coroutine if it hadn't been cancelled.
         advanceUntilIdle()
 
-        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
-        assertThat(windowDecorViewHost.view()).isNotNull()
+        assertThat(reusableVH.viewHostAdapter.isInitialized()).isTrue()
         // View host view/attrs should match the ones from the sync call, plus, since the
         // sync/async were made with different views, if the job hadn't been cancelled there
         // would've been an exception thrown as replacing views isn't allowed.
-        assertThat(windowDecorViewHost.view()).isEqualTo(syncView)
-        assertThat(windowDecorViewHost.view()!!.layoutParams.width).isEqualTo(syncAttrs.width)
+        assertThat(reusableVH.rootView.getChildAt(0)).isEqualTo(syncView)
+        assertThat(reusableVH.view()!!.layoutParams.width).isEqualTo(syncAttrs.width)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun updateViewAsync() = runTest {
-        val windowDecorViewHost = createDefaultViewHost()
+        val reusableVH = createReusableViewHost()
         val view = View(context)
         val attrs = WindowManager.LayoutParams(100, 100)
 
-        windowDecorViewHost.updateViewAsync(
+        reusableVH.updateViewAsync(
             view = view,
             attrs = attrs,
             configuration = context.resources.configuration,
         )
 
-        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isFalse()
+        assertThat(reusableVH.viewHostAdapter.isInitialized()).isFalse()
 
         advanceUntilIdle()
 
-        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(reusableVH.viewHostAdapter.isInitialized()).isTrue()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun updateViewAsync_clearsPendingAsyncJob() = runTest {
-        val windowDecorViewHost = createDefaultViewHost()
+        val reusableVH = createReusableViewHost()
 
         val view = View(context)
-        windowDecorViewHost.updateViewAsync(
+        reusableVH.updateViewAsync(
             view = view,
             attrs = WindowManager.LayoutParams(100, 100),
             configuration = context.resources.configuration,
         )
         val otherView = View(context)
-        windowDecorViewHost.updateViewAsync(
+        reusableVH.updateViewAsync(
             view = otherView,
             attrs = WindowManager.LayoutParams(100, 100),
             configuration = context.resources.configuration,
@@ -138,16 +148,16 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
 
         advanceUntilIdle()
 
-        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
-        assertThat(windowDecorViewHost.view()).isEqualTo(otherView)
+        assertThat(reusableVH.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(reusableVH.rootView.getChildAt(0)).isEqualTo(otherView)
     }
 
     @Test
     fun release() = runTest {
-        val windowDecorViewHost = createDefaultViewHost()
+        val reusableVH = createReusableViewHost()
 
         val view = View(context)
-        windowDecorViewHost.updateView(
+        reusableVH.updateView(
             view = view,
             attrs = WindowManager.LayoutParams(100, 100),
             configuration = context.resources.configuration,
@@ -155,17 +165,18 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
         )
 
         val t = mock(SurfaceControl.Transaction::class.java)
-        windowDecorViewHost.release(t)
+        reusableVH.release(t)
 
-        verify(windowDecorViewHost.viewHostAdapter).release(t)
+        verify(reusableVH.viewHostAdapter).release(t)
     }
 
-    private fun CoroutineScope.createDefaultViewHost() = DefaultWindowDecorViewHost(
+    private fun CoroutineScope.createReusableViewHost() = ReusableWindowDecorViewHost(
         context = context,
         mainScope = this,
         display = context.display,
+        id = 1,
         viewHostAdapter = spy(SurfaceControlViewHostAdapter(context, context.display)),
     )
 
-    private fun DefaultWindowDecorViewHost.view(): View? = viewHostAdapter.viewHost?.view
+    private fun ReusableWindowDecorViewHost.view(): View? = viewHostAdapter.viewHost?.view
 }
