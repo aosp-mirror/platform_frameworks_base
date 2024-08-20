@@ -8140,6 +8140,7 @@ package android.media.tv.tuner {
     field public static final int TUNER_VERSION_1_1 = 65537; // 0x10001
     field public static final int TUNER_VERSION_2_0 = 131072; // 0x20000
     field public static final int TUNER_VERSION_3_0 = 196608; // 0x30000
+    field @FlaggedApi("android.media.tv.flags.tuner_w_apis") public static final int TUNER_VERSION_4_0 = 262144; // 0x40000
     field public static final int TUNER_VERSION_UNKNOWN = 0; // 0x0
   }
 
