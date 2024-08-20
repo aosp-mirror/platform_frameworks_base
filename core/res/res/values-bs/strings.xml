@@ -199,7 +199,7 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Radni profil više nije dostupan na ovom uređaju"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Previše puta ste pokušali otključati uređaj"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator je ustupio uređaj za ličnu upotrebu"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"Uređajem se upravlja."</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"Uređajem se upravlja"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Vaša organizacija upravlja ovim uređajem i može pratiti mrežni saobraćaj. Dodirnite za detalje."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacije mogu pristupiti vašoj lokaciji"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Za više informacija kontaktirajte IT administratora"</string>

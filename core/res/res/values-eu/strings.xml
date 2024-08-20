@@ -198,7 +198,7 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Laneko profila ez dago erabilgarri gailu honetan"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Gehiegitan saiatu zara pasahitza idazten"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Erabilera pertsonalerako utzi du gailua administratzaileak"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"Jabeak kudeatzen du gailua"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"Gailua kudeatuta dago"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikazioek zure kokapena atzi dezakete"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Informazio gehiago lortzeko, jo IKT saileko administratzailearengana"</string>

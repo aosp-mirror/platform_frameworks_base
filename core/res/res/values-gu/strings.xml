@@ -198,8 +198,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"આ ઉપકરણ પર તમારી કાર્યાલયની પ્રોફાઇલ હવે ઉપલબ્ધ નથી"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"પાસવર્ડના ઘણા વધુ પ્રયત્નો"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"વ્યવસ્થાપકે ડિવાઇસ વ્યક્તિગત ઉપયોગ માટે આપી દીધું છે"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલ છે"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલું છે"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ડિવાઇસને મેનેજ કરે છે અને નેટવર્ક ટ્રાફિફ મૉનિટર કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ઍપ તમારા સ્થાનને ઍક્સેસ કરી શકે છે"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"વધુ જાણવા માટે તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"જીઓફેન્સિંગ સેવા"</string>

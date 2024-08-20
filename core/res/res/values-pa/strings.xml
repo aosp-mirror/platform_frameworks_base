@@ -199,7 +199,7 @@
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ਕਈ ਵਾਰ ਗਲਤ ਪਾਸਵਰਡ ਦਾਖਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਨਿੱਜੀ ਵਰਤੋਂ ਲਈ ਡੀਵਾਈਸ ਤਿਆਗਿਆ"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦੀ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ਐਪਾਂ ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ਭੂਗੋਲਿਕ-ਘੇਰੇ ਸੰਬੰਧੀ ਸੇਵਾ"</string>
