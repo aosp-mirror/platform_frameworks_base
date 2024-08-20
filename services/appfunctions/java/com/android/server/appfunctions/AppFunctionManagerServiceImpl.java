@@ -82,10 +82,19 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         final SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback =
                 new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback);
 
-        String validatedCallingPackage = mCallerValidator
-                .validateCallingPackage(requestInternal.getCallingPackage());
-        UserHandle targetUser = mCallerValidator.verifyTargetUserHandle(
-                requestInternal.getUserHandle(), validatedCallingPackage);
+        String validatedCallingPackage;
+        UserHandle targetUser;
+        try {
+            validatedCallingPackage = mCallerValidator
+                    .validateCallingPackage(requestInternal.getCallingPackage());
+            targetUser = mCallerValidator.verifyTargetUserHandle(
+                    requestInternal.getUserHandle(), validatedCallingPackage);
+        } catch (SecurityException exception) {
+            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
+                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
+                    exception.getMessage()).build());
+            return;
+        }
 
         // TODO(b/354956319): Add and honor the new enterprise policies.
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
@@ -107,8 +116,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
         if (!mCallerValidator.verifyCallerCanExecuteAppFunction(
                 validatedCallingPackage, targetPackageName)) {
-            throw new SecurityException("Caller does not have permission to execute the app "
-                    + "function.");
+            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
+                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
+                    "Caller does not have permission to execute the appfunction")
+                    .build());
+            return;
         }
 
         Intent serviceIntent = mInternalServiceHelper.resolveAppFunctionService(
