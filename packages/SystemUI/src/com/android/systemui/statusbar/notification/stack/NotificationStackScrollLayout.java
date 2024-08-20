@@ -1487,7 +1487,14 @@ public class NotificationStackScrollLayout
 
     private float updateStackEndHeight() {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
-        float height = Math.max(0f, mAmbientState.getStackCutoff() - mAmbientState.getStackTop());
+        final float height;
+        if (mMaxDisplayedNotifications != -1) {
+            // The stack intrinsic height already contains the correct value when there is a limit
+            // in the max number of notifications (e.g. as in keyguard).
+            height = mIntrinsicContentHeight;
+        } else {
+            height = Math.max(0f, mAmbientState.getStackCutoff() - mAmbientState.getStackTop());
+        }
         mAmbientState.setStackEndHeight(height);
         return height;
     }
