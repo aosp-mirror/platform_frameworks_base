@@ -24,7 +24,7 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
-import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
@@ -242,11 +242,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
             @Override
             public void onActivityLaunchBlocked(int displayId,
-                    @NonNull ComponentName componentName, @UserIdInt int userId,
+                    @NonNull ComponentName componentName, @NonNull UserHandle user,
                     @Nullable IntentSender intentSender) {
                 try {
                     mActivityListener.onActivityLaunchBlocked(
-                            displayId, componentName, userId, intentSender);
+                            displayId, componentName, user, intentSender);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
@@ -744,7 +744,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     }
                 }
                 break;
-            case POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR:
+            case POLICY_TYPE_BLOCKED_ACTIVITY:
                 if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
                     synchronized (mVirtualDeviceLock) {
                         mDevicePolicies.put(policyType, devicePolicy);
@@ -1383,8 +1383,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mActivityListenerAdapter.onActivityLaunchBlocked(
                     displayId,
                     activityInfo.getComponentName(),
-                    UserHandle.getUserHandleForUid(
-                            activityInfo.applicationInfo.uid).getIdentifier(),
+                    UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid),
                     intentSender);
         }
     }
@@ -1400,7 +1399,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             return true;
         }
         // Do not show the dialog if disabled by policy.
-        return getDevicePolicy(POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR) == DEVICE_POLICY_DEFAULT;
+        return getDevicePolicy(POLICY_TYPE_BLOCKED_ACTIVITY) == DEVICE_POLICY_DEFAULT;
     }
 
     private void onSecureWindowShown(int displayId, int uid) {

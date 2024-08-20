@@ -67,6 +67,7 @@ import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.Display;
@@ -1264,7 +1265,7 @@ public final class VirtualDeviceManager {
          *
          * @param displayId The display ID on which the activity tried to launch.
          * @param componentName The component name of the blocked activity.
-         * @param userId The user ID associated with the blocked activity.
+         * @param user The user associated with the blocked activity.
          * @param intentSender The original sender of the intent. May be {@code null} if the sender
          *   expects an activity result to be reported. In that case
          *   {@link android.app.Activity#RESULT_CANCELED} was already reported back because the
@@ -1276,7 +1277,7 @@ public final class VirtualDeviceManager {
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         default void onActivityLaunchBlocked(int displayId, @NonNull ComponentName componentName,
-                @UserIdInt int userId, @Nullable IntentSender intentSender) {}
+                @NonNull UserHandle user, @Nullable IntentSender intentSender) {}
     }
 
     /**
