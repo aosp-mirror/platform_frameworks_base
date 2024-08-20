@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common.bubbles;
+package com.android.wm.shell.shared.bubbles;
 
 parcelable BubbleBarLocation;
