@@ -111,6 +111,7 @@ public class AggregatedPowerStatsTest {
 
     private AggregatedPowerStats prepareAggregatePowerStats() {
         AggregatedPowerStats stats = new AggregatedPowerStats(mAggregatedPowerStatsConfig);
+        stats.start(0);
 
         PowerStats ps = new PowerStats(mPowerComponentDescriptor);
         stats.addPowerStats(ps, 0);
