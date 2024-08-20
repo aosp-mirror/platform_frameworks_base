@@ -92,7 +92,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         } catch (SecurityException exception) {
             safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
                     .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
-                    exception.getMessage()).build());
+                    getExceptionMessage(exception)).build());
             return;
         }
 
@@ -171,8 +171,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             );
                         } catch (Exception e) {
                             safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                    .Builder(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                                    e.getMessage()).build());
+                                    .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
+                                    getExceptionMessage(e)).build());
                             serviceUsageCompleteListener.onCompleted();
                         }
                     }
@@ -181,7 +181,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     public void onFailedToConnect() {
                         Slog.e(TAG, "Failed to connect to service");
                         safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                .Builder(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                                .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
                                 "Failed to connect to AppFunctionService").build());
                     }
 
@@ -204,5 +204,9 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     "Failed to bind the AppFunctionService."
             ).build());
         }
+    }
+
+    private String getExceptionMessage(Exception exception) {
+        return exception.getMessage() == null ? "" : exception.getMessage();
     }
 }
