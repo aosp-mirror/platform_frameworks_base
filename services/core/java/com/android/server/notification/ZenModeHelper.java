@@ -39,6 +39,7 @@ import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_APP;
 import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
+import static android.service.notification.ZenModeConfig.implicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -154,8 +155,6 @@ public class ZenModeHelper {
     private static final int RULE_INSTANCE_GRACE_PERIOD = 1000 * 60 * 60 * 72;
     static final int RULE_LIMIT_PER_PACKAGE = 100;
     private static final Duration DELETED_RULE_KEPT_FOR = Duration.ofDays(30);
-
-    private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
 
     private static final int MAX_ICON_RESOURCE_NAME_LENGTH = 1000;
 
@@ -781,14 +780,6 @@ public class ZenModeHelper {
         rule.component = null;
         rule.configurationActivity = null;
         return rule;
-    }
-
-    private static String implicitRuleId(String forPackage) {
-        return IMPLICIT_RULE_ID_PREFIX + forPackage;
-    }
-
-    static boolean isImplicitRuleId(@NonNull String ruleId) {
-        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
     }
 
     boolean removeAutomaticZenRule(String id, @ConfigOrigin int origin, String reason,
