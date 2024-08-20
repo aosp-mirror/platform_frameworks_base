@@ -432,7 +432,7 @@
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Приспособете ги виџетите"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Икона за апликација за оневозможен виџет"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Изменување виџети"</string>
-    <string name="button_to_remove_widget" msgid="3948204829181214098">"Отстранува"</string>
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"Отстрани"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додајте виџет"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Промени го корисникот"</string>

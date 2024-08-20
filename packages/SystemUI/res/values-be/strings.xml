@@ -428,7 +428,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Закрыць"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Дадаць ці выдаліць віджэты ў гэтай вобласці або змяніць іх парадак"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Дадаць іншыя віджэты"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Доўга націскайце, каб наладзіць віджэты"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Націсніце і ўтрымлівайце, каб наладзіць віджэты"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Наладзіць віджэты"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Значок праграмы для адключанага віджэта"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Змяніць віджэт"</string>

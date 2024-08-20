@@ -432,7 +432,7 @@
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"விட்ஜெட்களைப் பிரத்தியேகமாக்குங்கள்"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"முடக்கப்பட்ட விட்ஜெட்டுக்கான ஆப்ஸ் ஐகான்"</string>
     <string name="edit_widget" msgid="9030848101135393954">"விட்ஜெட்டைத் திருத்து"</string>
-    <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்றும்"</string>
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்று"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"விட்ஜெட்டைச் சேர்"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"முடிந்தது"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>

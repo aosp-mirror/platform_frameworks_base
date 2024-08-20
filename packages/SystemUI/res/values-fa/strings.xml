@@ -285,7 +285,7 @@
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"دسترسی به میکروفون"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"دردسترس"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"مسدود"</string>
-    <string name="quick_settings_media_device_label" msgid="8034019242363789941">"دستگاه رسانه"</string>
+    <string name="quick_settings_media_device_label" msgid="8034019242363789941">"دستگاه رسانه‌ای"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"کاربر"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"اینترنت"</string>
@@ -426,14 +426,14 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"برای شروع آموزش گام‌به‌گام عمومی، تند به‌چپ بکشید"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"سفارشی‌سازی"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"بستن"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"افزودن، برداشتن، و تغییر ترتیب ابزارک‌ها در این فضا"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"افزودن، برداشتن، و تغییر ترتیب ابزاره‌ها در این فضا"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"افزودن ابزارک‌های بیشتر"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"برای سفارشی‌سازی ابزارک‌ها، فشار طولانی دهید"</string>
-    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"سفارشی‌سازی ابزارک‌ها"</string>
-    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"نماد برنامه برای ابزارک غیرفعال"</string>
-    <string name="edit_widget" msgid="9030848101135393954">"ویرایش ابزارک"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"برای سفارشی‌سازی ابزاره‌ها، فشار طولانی دهید"</string>
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"سفارشی‌سازی ابزاره‌ها"</string>
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"نماد برنامه برای ابزاره غیرفعال"</string>
+    <string name="edit_widget" msgid="9030848101135393954">"ویرایش ابزاره"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"برداشتن"</string>
-    <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"افزودن ابزارک"</string>
+    <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"افزودن ابزاره"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"تمام"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تغییر کاربر"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"منوی پایین‌پر"</string>
@@ -1191,7 +1191,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>، <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"یادداشت‌برداری"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"یادداشت‌برداری، <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
-    <string name="audio_sharing_description" msgid="8849060142768870004">"هم‌رسانی صدا"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"درحال هم‌رسانی صوتی"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"همه‌فرستی"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"همه‌فرستی <xliff:g id="APP_NAME">%1$s</xliff:g> متوقف شود؟"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"اگر <xliff:g id="SWITCHAPP">%1$s</xliff:g> را همه‌فرستی کنید یا خروجی را تغییر دهید، همه‌فرستی کنونی متوقف خواهد شد"</string>
