@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.bluetooth.BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice;
 import static com.android.settingslib.flags.Flags.FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -80,6 +81,7 @@ public class BluetoothUtilsTest {
     @Mock private LocalBluetoothProfileManager mProfileManager;
     @Mock private LocalBluetoothManager mLocalBluetoothManager;
     @Mock private LocalBluetoothLeBroadcastAssistant mAssistant;
+    @Mock private CachedBluetoothDeviceManager mDeviceManager;
     @Mock private BluetoothLeBroadcastReceiveState mLeBroadcastReceiveState;
 
     private Context mContext;
@@ -104,8 +106,10 @@ public class BluetoothUtilsTest {
         mContext = spy(RuntimeEnvironment.application);
         mSetFlagsRule.disableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
+        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(mDeviceManager);
         when(mProfileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
         when(mProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(mAssistant);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
         when(mA2dpProfile.getProfileId()).thenReturn(BluetoothProfile.A2DP);
         when(mLeAudioProfile.getProfileId()).thenReturn(BluetoothProfile.LE_AUDIO);
         when(mHearingAid.getProfileId()).thenReturn(BluetoothProfile.HEARING_AID);
@@ -764,6 +768,116 @@ public class BluetoothUtilsTest {
                         BluetoothUtils.getSecondaryDeviceForBroadcast(
                                 mContext.getContentResolver(), mLocalBluetoothManager))
                 .isEqualTo(mCachedBluetoothDevice);
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_nullProfiles() {
+        when(mProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(null);
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_alreadyBroadcasting() {
+        when(mBroadcast.isEnabled(any())).thenReturn(true);
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_availableDevice() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+
+        when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        cachedBluetoothDevice2, mLocalBluetoothManager);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_alreadyActive() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+
+        when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_notConnected() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+
+        when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device2));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_moreThanTwoConnected() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+        CachedBluetoothDevice cachedBluetoothDevice3 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice3.getGroupId()).thenReturn(3);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+        BluetoothDevice device3 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device3)).thenReturn(cachedBluetoothDevice3);
+
+        when(mAssistant.getAllConnectedDevices())
+                .thenReturn(ImmutableList.of(device1, device2, device3));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        cachedBluetoothDevice2, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
     }
 
     @Test

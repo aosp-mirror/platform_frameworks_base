@@ -857,8 +857,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
         if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
-                && !mImeLayeringTarget.isRequestedVisible(ime())
-                && !mImeLayeringTarget.isVisibleRequested()) {
+                && !(mImeLayeringTarget.isRequestedVisible(ime())
+                        && mImeLayeringTarget.isVisibleRequested())) {
             return false;
         }
 
@@ -3496,10 +3496,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void collectDisplayChange(@NonNull Transition transition) {
         if (!mLastHasContent) return;
-        if (!transition.isCollecting()) {
-            throw new IllegalArgumentException("Can only collect display change if transition"
-                    + " is collecting");
-        }
+        if (!transition.isCollecting()) return;
         if (!transition.mParticipants.contains(this)) {
             transition.collect(this);
             startAsyncRotationIfNeeded();

@@ -158,6 +158,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     private final WindowLayoutComponentImpl mWindowLayoutComponent;
     private final SplitController mController;
+    @NonNull
+    private final BackupHelper mBackupHelper;
 
     SplitPresenter(@NonNull Executor executor,
             @NonNull WindowLayoutComponentImpl windowLayoutComponent,
@@ -165,7 +167,18 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         super(executor, controller);
         mWindowLayoutComponent = windowLayoutComponent;
         mController = controller;
-        registerOrganizer();
+        final Bundle outSavedState = new Bundle();
+        if (Flags.aeBackStackRestore()) {
+            outSavedState.setClassLoader(TaskContainer.class.getClassLoader());
+            registerOrganizer(false /* isSystemOrganizer */, outSavedState);
+        } else {
+            registerOrganizer();
+        }
+        mBackupHelper = new BackupHelper(controller, outSavedState);
+    }
+
+    void scheduleBackup() {
+        mBackupHelper.scheduleBackup();
     }
 
     /**

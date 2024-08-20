@@ -17,6 +17,8 @@
 package com.android.server.accessibility.a11ychecker;
 
 
+import android.accessibility.AccessibilityCheckClass;
+import android.accessibility.AccessibilityCheckResultType;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageInfo;
@@ -25,9 +27,6 @@ import android.util.Slog;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckClass;
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckResultReported;
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckResultType;
 
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityCheckResult;
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityHierarchyCheck;
@@ -92,7 +91,7 @@ public class AccessibilityCheckerUtils {
                             AccessibilityCheckClass.TRAVERSAL_ORDER_CHECK));
     // LINT.ThenChange(/services/accessibility/java/com/android/server/accessibility/a11ychecker/proto/a11ychecker.proto)
 
-    static Set<AccessibilityCheckResultReported> processResults(
+    static Set<AndroidAccessibilityCheckerResult> processResults(
             AccessibilityNodeInfo nodeInfo,
             List<AccessibilityHierarchyCheckResult> checkResults,
             @Nullable String activityClassName,
@@ -103,16 +102,16 @@ public class AccessibilityCheckerUtils {
         if (nodePath == null) {
             return Set.of();
         }
-        AccessibilityCheckResultReported.Builder builder;
+        AndroidAccessibilityCheckerResult.Builder commonBuilder;
         try {
-            builder = AccessibilityCheckResultReported.newBuilder()
+            commonBuilder = AndroidAccessibilityCheckerResult.newBuilder()
                     .setPackageName(appPackageName)
                     .setAppVersionCode(getAppVersionCode(packageManager, appPackageName))
                     .setUiElementPath(nodePath)
                     .setActivityName(
                             getActivityName(packageManager, appPackageName, activityClassName))
                     .setWindowTitle(getWindowTitle(nodeInfo))
-                    .setSourceComponentName(a11yServiceComponentName.flattenToString())
+                    .setSourceComponentName(a11yServiceComponentName)
                     .setSourceVersionCode(
                             getAppVersionCode(packageManager,
                                     a11yServiceComponentName.getPackageName()));
@@ -126,7 +125,8 @@ public class AccessibilityCheckerUtils {
                         == AccessibilityCheckResult.AccessibilityCheckResultType.ERROR
                         || checkResult.getType()
                         == AccessibilityCheckResult.AccessibilityCheckResultType.WARNING)
-                .map(checkResult -> builder.setResultCheckClass(
+                .map(checkResult -> new AndroidAccessibilityCheckerResult.Builder(
+                        commonBuilder).setResultCheckClass(
                         getCheckClass(checkResult)).setResultType(
                         getCheckResultType(checkResult)).setResultId(
                         checkResult.getResultId()).build())
@@ -188,9 +188,9 @@ public class AccessibilityCheckerUtils {
     private static AccessibilityCheckResultType getCheckResultType(
             AccessibilityHierarchyCheckResult checkResult) {
         return switch (checkResult.getType()) {
-            case ERROR -> AccessibilityCheckResultType.ERROR;
-            case WARNING -> AccessibilityCheckResultType.WARNING;
-            default -> AccessibilityCheckResultType.UNKNOWN_RESULT_TYPE;
+            case ERROR -> AccessibilityCheckResultType.ERROR_CHECK_RESULT_TYPE;
+            case WARNING -> AccessibilityCheckResultType.WARNING_CHECK_RESULT_TYPE;
+            default -> AccessibilityCheckResultType.UNKNOWN_CHECK_RESULT_TYPE;
         };
     }
 

@@ -92,3 +92,10 @@ flag {
   description: "Dump keyboard shortcuts in dumpsys window"
   bug: "351963350"
 }
+
+flag {
+  name: "modifier_shortcut_manager_refactor"
+  namespace: "input"
+  description: "Refactor ModifierShortcutManager internal representation of shortcuts."
+  bug: "358603902"
+}

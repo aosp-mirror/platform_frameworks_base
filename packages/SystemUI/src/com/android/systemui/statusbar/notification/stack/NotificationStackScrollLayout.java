@@ -258,7 +258,7 @@ public class NotificationStackScrollLayout
     private float mOverScrolledBottomPixels;
     private final ListenerSet<Runnable> mStackHeightChangedListeners = new ListenerSet<>();
     private final ListenerSet<Runnable> mHeadsUpHeightChangedListeners = new ListenerSet<>();
-    private NotificationLogger.OnChildLocationsChangedListener mListener;
+    private NotificationLogger.OnChildLocationsChangedListener mLegacyLocationsChangedListener;
     private OnNotificationLocationsChangedListener mLocationsChangedListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
@@ -1281,7 +1281,7 @@ public class NotificationStackScrollLayout
     public void setChildLocationsChangedListener(
             NotificationLogger.OnChildLocationsChangedListener listener) {
         NotificationsLiveDataStoreRefactor.assertInLegacyMode();
-        mListener = listener;
+        mLegacyLocationsChangedListener = listener;
     }
 
     private void setMaxLayoutHeight(int maxLayoutHeight) {
@@ -4433,8 +4433,8 @@ public class NotificationStackScrollLayout
                 mLocationsChangedListener.onChildLocationsChanged(collectVisibleLocationsCallable);
             }
         } else {
-            if (mListener != null) {
-                mListener.onChildLocationsChanged();
+            if (mLegacyLocationsChangedListener != null) {
+                mLegacyLocationsChangedListener.onChildLocationsChanged();
             }
         }
 

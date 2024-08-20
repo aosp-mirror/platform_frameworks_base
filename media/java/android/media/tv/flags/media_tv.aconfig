@@ -32,3 +32,11 @@ flag {
     description: "Introduce ALWAYS_BOUND_TV_INPUT for TIS."
     bug: "332201346"
 }
+
+flag {
+    name: "kids_mode_tvdb_sharing"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Performance and Storage Optimization in Google TV Kids Mode."
+    bug: "288383796"
+}

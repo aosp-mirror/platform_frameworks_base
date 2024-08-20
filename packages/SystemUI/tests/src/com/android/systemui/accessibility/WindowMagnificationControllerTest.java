@@ -92,6 +92,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
@@ -106,6 +108,8 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.utils.os.FakeHandler;
 
 import com.google.common.util.concurrent.AtomicDouble;
+
+import kotlin.Lazy;
 
 import org.junit.After;
 import org.junit.Assume;
@@ -150,6 +154,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
 
     private long mWaitAnimationDuration;
     private long mWaitBounceEffectDuration;
@@ -226,6 +232,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         when(mContext.getSharedPreferences(
                 eq("window_magnification_preferences"), anyInt()))
                 .thenReturn(mSharedPreferences);
+        ViewCaptureAwareWindowManager viewCaptureAwareWindowManager = new
+                ViewCaptureAwareWindowManager(mWindowManager, mLazyViewCapture,
+                /* isViewCaptureEnabled= */ false);
         mWindowMagnificationController =
                 new WindowMagnificationController(
                         mContext,
@@ -238,7 +247,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                         mSecureSettings,
                         /* scvhSupplier= */ () -> null,
                         mSfVsyncFrameProvider,
-                        /* globalWindowSessionSupplier= */ () -> mWindowSessionSpy);
+                        /* globalWindowSessionSupplier= */ () -> mWindowSessionSpy,
+                        viewCaptureAwareWindowManager);
 
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));

@@ -20,6 +20,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.when;
 
+import android.accessibility.AccessibilityCheckClass;
+import android.accessibility.AccessibilityCheckResultType;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
@@ -90,20 +92,20 @@ public class TestUtils {
         return accessibilityEvent;
     }
 
-    static A11yCheckerProto.AccessibilityCheckResultReported createAtom(
+    static AndroidAccessibilityCheckerResult createResult(
             String viewIdResourceName,
             String activityName,
-            A11yCheckerProto.AccessibilityCheckClass checkClass,
-            A11yCheckerProto.AccessibilityCheckResultType resultType,
+            AccessibilityCheckClass checkClass,
+            AccessibilityCheckResultType resultType,
             int resultId) {
-        return A11yCheckerProto.AccessibilityCheckResultReported.newBuilder()
+        return AndroidAccessibilityCheckerResult.newBuilder()
                 .setPackageName(TEST_APP_PACKAGE_NAME)
                 .setAppVersionCode(TEST_APP_VERSION_CODE)
                 .setUiElementPath(TEST_APP_PACKAGE_NAME + ":" + viewIdResourceName)
                 .setWindowTitle(TEST_WINDOW_TITLE)
                 .setActivityName(activityName)
                 .setSourceComponentName(new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
-                        TEST_A11Y_SERVICE_CLASS_NAME).flattenToString())
+                        TEST_A11Y_SERVICE_CLASS_NAME))
                 .setSourceVersionCode(TEST_A11Y_SERVICE_SOURCE_VERSION_CODE)
                 .setResultCheckClass(checkClass)
                 .setResultType(resultType)

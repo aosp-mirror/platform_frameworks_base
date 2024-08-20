@@ -531,7 +531,6 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR)
     @TestApi
     public boolean isVirtualDeviceOwnedMirrorDisplay(int displayId) {
         if (mService == null) {

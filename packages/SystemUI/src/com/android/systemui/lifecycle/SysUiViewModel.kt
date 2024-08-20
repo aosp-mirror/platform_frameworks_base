@@ -23,7 +23,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 
 /** Base class for all System UI view-models. */
-abstract class SysUiViewModel : SafeActivatable() {
+abstract class SysUiViewModel : BaseActivatable() {
 
     override suspend fun onActivated(): Nothing {
         awaitCancellation()

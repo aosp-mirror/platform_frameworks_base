@@ -189,10 +189,13 @@ abstract class CrossActivityBackAnimation(
         preparePreCommitEnteringRectMovement()
 
         background.ensureBackground(
-            closingTarget!!.windowConfiguration.bounds,
-            getBackgroundColor(),
-            transaction,
-            statusbarHeight
+                closingTarget!!.windowConfiguration.bounds,
+                getBackgroundColor(),
+                transaction,
+                statusbarHeight,
+                if (closingTarget!!.windowConfiguration.tasksAreFloating())
+                    closingTarget!!.localBounds else null,
+                cornerRadius
         )
         ensureScrimLayer()
         if (isLetterboxed && enteringHasSameLetterbox) {
