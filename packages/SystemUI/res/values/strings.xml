@@ -1106,6 +1106,9 @@
     <!-- Priority modes: label for an active mode [CHAR LIMIT=35] -->
     <string name="zen_mode_on">On</string>
 
+    <!-- Priority modes: label for an active mode, with details [CHAR LIMIT=10] -->
+    <string name="zen_mode_on_with_details">On • <xliff:g id="trigger_description" example="Mon-Fri, 23:00-7:00">%1$s</xliff:g></string>
+
     <!-- Priority modes: label for an inactive mode [CHAR LIMIT=35] -->
     <string name="zen_mode_off">Off</string>
 
