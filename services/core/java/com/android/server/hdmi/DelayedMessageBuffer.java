@@ -17,8 +17,10 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Buffer storage to keep incoming messages for later processing. Used to
@@ -81,6 +83,16 @@ final class DelayedMessageBuffer {
             }
         }
         return false;
+    }
+
+    List<HdmiCecMessage> getBufferedMessagesWithOpcode(int opcode) {
+        List<HdmiCecMessage> messages = new ArrayList<>();
+        for (HdmiCecMessage message : mBuffer) {
+            if (message.getOpcode() == opcode) {
+                messages.add(message);
+            }
+        }
+        return messages;
     }
 
     void processAllMessages() {

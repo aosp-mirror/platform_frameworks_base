@@ -142,7 +142,7 @@ public final class ClientSocketPerfTest {
 
         // Always use the same server for consistency across the benchmarks.
         server = config.serverFactory().newServer(
-                ChannelType.CHANNEL, config.messageSize(), config.protocol().getProtocols(),
+                config.messageSize(), config.protocol().getProtocols(),
                 ciphers(config));
 
         server.setMessageProcessor(new ServerEndpoint.MessageProcessor() {

@@ -1,18 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.view.inputmethod"
-        },
-        {
-          "include-filter": "com.android.internal.inputmethod"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ],
+      "name": "FrameworksCoreTests_inputmethod",
       "file_patterns": [
         "core/java/com/android/internal/inputmethod/.*",
         "core/java/android/view/inputmethod/.*",

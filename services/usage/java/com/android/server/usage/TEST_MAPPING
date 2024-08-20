@@ -1,23 +1,10 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.app.usage"
-        }
-      ]
+      "name": "FrameworksCoreTests_usage"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.usage"
-        },
-        {
-          "exclude-filter": "com.android.server.usage.StorageStatsServiceTest"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_usage"
     },
     {
       "name": "CtsBRSTestCases",

@@ -30,6 +30,18 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "services.core-aidl-sources",
+    srcs: [
+        ":dumpstate_aidl",
+        ":framework_native_aidl",
+        ":gsiservice_aidl",
+        ":installd_aidl",
+        ":storaged_aidl",
+        ":vold_aidl",
+    ],
+}
+
 java_library_static {
     name: "services-config-update",
     srcs: [
@@ -151,14 +163,9 @@ java_library_static {
         ":android.hardware.tv.hdmi.earc-V1-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
+        ":services.core-aidl-sources",
         ":services.core-sources",
         ":services.core.protologsrc",
-        ":dumpstate_aidl",
-        ":framework_native_aidl",
-        ":gsiservice_aidl",
-        ":installd_aidl",
-        ":storaged_aidl",
-        ":vold_aidl",
         ":platform-compat-config",
         ":platform-compat-overrides",
         ":display-device-config",
