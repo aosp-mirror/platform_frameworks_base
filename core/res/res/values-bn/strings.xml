@@ -188,8 +188,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"আপনার কর্মস্থলের প্রোফাইলটি আর এই ডিভাইসে নেই"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"বহুবার ভুল পাসওয়ার্ড দিয়েছেন"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ব্যক্তিগত কাজের জন্য অ্যাডমিন এই ডিভাইস ব্যবহার করার অনুমতি দেয়নি"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি ম্যানেজ করা হচ্ছে"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি ম্যানেজ করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"অ্যাপগুলি আপনার লোকেশন অ্যাক্সেস করতে পারবে"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"আরও জানতে আইটি অ্যাডমিনের সাথে যোগাযোগ করুন"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"জিওফেন্সিং সার্ভিস"</string>
