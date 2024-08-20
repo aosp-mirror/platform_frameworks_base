@@ -49,7 +49,6 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -140,7 +139,6 @@ public class Dependency {
     @Inject Lazy<SysUiState> mSysUiStateFlagsContainer;
     @Inject Lazy<CommandQueue> mCommandQueue;
     @Inject Lazy<UiEventLogger> mUiEventLogger;
-    @Inject Lazy<StatusBarContentInsetsProvider> mContentInsetsProviderLazy;
     @Inject Lazy<FeatureFlags> mFeatureFlagsLazy;
     @Inject Lazy<NotificationSectionsManager> mNotificationSectionsManagerLazy;
     @Inject Lazy<ScreenOffAnimationController> mScreenOffAnimationController;
@@ -186,7 +184,6 @@ public class Dependency {
         mProviders.put(CommandQueue.class, mCommandQueue::get);
         mProviders.put(UiEventLogger.class, mUiEventLogger::get);
         mProviders.put(FeatureFlags.class, mFeatureFlagsLazy::get);
-        mProviders.put(StatusBarContentInsetsProvider.class, mContentInsetsProviderLazy::get);
         mProviders.put(NotificationSectionsManager.class, mNotificationSectionsManagerLazy::get);
         mProviders.put(ScreenOffAnimationController.class, mScreenOffAnimationController::get);
         mProviders.put(AmbientState.class, mAmbientStateLazy::get);
