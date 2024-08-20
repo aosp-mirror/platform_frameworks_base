@@ -2008,10 +2008,10 @@ public class TransitionTests extends WindowTestsBase {
     @DisableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
     public void testOverrideAnimationOptionsToInfoIfNecessary_disableAnimOptionsPerChange() {
-        initializeOverrideAnimationOptionsTest();
+        ActivityRecord r = initializeOverrideAnimationOptionsTest();
         TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
                 .makeCommonAnimOptions("testPackage");
-        mTransition.setOverrideAnimation(options, null /* startCallback */,
+        mTransition.setOverrideAnimation(options, r, null /* startCallback */,
                 null /* finishCallback */);
 
         mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
@@ -2022,10 +2022,10 @@ public class TransitionTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
     public void testOverrideAnimationOptionsToInfoIfNecessary_fromStyleAnimOptions() {
-        initializeOverrideAnimationOptionsTest();
+        ActivityRecord r = initializeOverrideAnimationOptionsTest();
         TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
                 .makeCommonAnimOptions("testPackage");
-        mTransition.setOverrideAnimation(options, null /* startCallback */,
+        mTransition.setOverrideAnimation(options, r, null /* startCallback */,
                 null /* finishCallback */);
 
         mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
@@ -2048,10 +2048,10 @@ public class TransitionTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
     public void testOverrideAnimationOptionsToInfoIfNecessary_sceneAnimOptions() {
-        initializeOverrideAnimationOptionsTest();
+        ActivityRecord r = initializeOverrideAnimationOptionsTest();
         TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
                 .makeSceneTransitionAnimOptions();
-        mTransition.setOverrideAnimation(options, null /* startCallback */,
+        mTransition.setOverrideAnimation(options, r, null /* startCallback */,
                 null /* finishCallback */);
 
         mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
@@ -2074,10 +2074,10 @@ public class TransitionTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
     public void testOverrideAnimationOptionsToInfoIfNecessary_crossProfileAnimOptions() {
-        initializeOverrideAnimationOptionsTest();
+        ActivityRecord r = initializeOverrideAnimationOptionsTest();
         TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
                 .makeCrossProfileAnimOptions();
-        mTransition.setOverrideAnimation(options, null /* startCallback */,
+        mTransition.setOverrideAnimation(options, r, null /* startCallback */,
                 null /* finishCallback */);
 
         final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
@@ -2102,13 +2102,13 @@ public class TransitionTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
     public void testOverrideAnimationOptionsToInfoIfNecessary_customAnimOptions() {
-        initializeOverrideAnimationOptionsTest();
+        ActivityRecord r = initializeOverrideAnimationOptionsTest();
         TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
                 .makeCustomAnimOptions("testPackage", Resources.ID_NULL,
                         TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
                         TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
                         Color.GREEN, false /* overrideTaskTransition */);
-        mTransition.setOverrideAnimation(options, null /* startCallback */,
+        mTransition.setOverrideAnimation(options, r, null /* startCallback */,
                 null /* finishCallback */);
 
         mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
@@ -2135,7 +2135,7 @@ public class TransitionTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
     public void testOverrideAnimationOptionsToInfoIfNecessary_haveTaskFragmentAnimParams() {
-        initializeOverrideAnimationOptionsTest();
+        ActivityRecord r = initializeOverrideAnimationOptionsTest();
 
         final TaskFragment embeddedTf = mTransition.mTargets.get(2).mContainer.asTaskFragment();
         embeddedTf.setAnimationParams(new TaskFragmentAnimationParams.Builder()
@@ -2148,7 +2148,7 @@ public class TransitionTests extends WindowTestsBase {
                         TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
                         TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
                         Color.GREEN, false /* overrideTaskTransition */);
-        mTransition.setOverrideAnimation(options, null /* startCallback */,
+        mTransition.setOverrideAnimation(options, r, null /* startCallback */,
                 null /* finishCallback */);
 
         final TransitionInfo.Change displayChange = mInfo.getChanges().get(0);
@@ -2184,13 +2184,13 @@ public class TransitionTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_MOVE_ANIMATION_OPTIONS_TO_CHANGE)
     @Test
     public void testOverrideAnimationOptionsToInfoIfNecessary_customAnimOptionsWithTaskOverride() {
-        initializeOverrideAnimationOptionsTest();
+        ActivityRecord r = initializeOverrideAnimationOptionsTest();
         TransitionInfo.AnimationOptions options = TransitionInfo.AnimationOptions
                 .makeCustomAnimOptions("testPackage", Resources.ID_NULL,
                         TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
                         TransitionInfo.AnimationOptions.DEFAULT_ANIMATION_RESOURCES_ID,
                         Color.GREEN, true /* overrideTaskTransition */);
-        mTransition.setOverrideAnimation(options, null /* startCallback */,
+        mTransition.setOverrideAnimation(options, r, null /* startCallback */,
                 null /* finishCallback */);
 
         mTransition.overrideAnimationOptionsToInfoIfNecessary(mInfo);
@@ -2216,7 +2216,7 @@ public class TransitionTests extends WindowTestsBase {
                 options.getBackgroundColor(), activityChange.getBackgroundColor());
     }
 
-    private void initializeOverrideAnimationOptionsTest() {
+    private ActivityRecord initializeOverrideAnimationOptionsTest() {
         mTransition = createTestTransition(TRANSIT_OPEN);
 
         // Test set AnimationOptions for Activity and Task.
@@ -2244,6 +2244,7 @@ public class TransitionTests extends WindowTestsBase {
                 embeddedTf.getAnimationLeash()));
         mInfo.addChange(new TransitionInfo.Change(null /* container */,
                 nonEmbeddedActivity.getAnimationLeash()));
+        return nonEmbeddedActivity;
     }
 
     @Test
