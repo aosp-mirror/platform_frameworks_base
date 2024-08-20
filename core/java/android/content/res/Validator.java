@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.annotation.NonNull;
 import android.annotation.StyleableRes;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import com.android.internal.R;
 
@@ -32,6 +33,7 @@ import java.util.ArrayDeque;
  *
  * {@hide}
  */
+@RavenwoodKeepWholeClass
 public class Validator {
 
     private final ArrayDeque<Element> mElements = new ArrayDeque<>();
