@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package android.content.pm;
+package com.android.server.profcollect;
 
-/** Stub for testing */
-public class PackageManager {
-    public static final String FEATURE_AUTO = "automotive";
-    public static final String FEATURE_PC = "pc";
-    public static final String FEATURE_VULKAN = "vulkan";
-    public static final String FEATURE_WATCH = "watch";
-    public static final String FEATURE_WIFI = "wifi";
+import android.provider.DeviceConfig;
 
-    /** @hide */
-    public boolean hasSystemFeature(String featureName, int version) {
-        return false;
+import java.util.concurrent.ThreadLocalRandom;
+
+public final class Utils {
+
+  public static boolean withFrequency(String configName, int defaultFrequency) {
+        int threshold = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT, configName, defaultFrequency);
+        int randomNum = ThreadLocalRandom.current().nextInt(100);
+        return randomNum < threshold;
     }
+
 }

@@ -132,3 +132,11 @@ flag {
     description: "Add Settings.ACTION_MANAGE_OTHER_NFC_SERVICES_SETTINGS"
     bug: "358129872"
 }
+
+flag {
+    name: "nfc_override_recover_routing_table"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable override and recover routing table"
+    bug: "329043523"
+}
