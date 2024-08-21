@@ -35,6 +35,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -345,7 +346,7 @@ public class RavenwoodRule implements TestRule {
         }
     }
 
-    private void commonPrologue(Statement base, Description description) {
+    private void commonPrologue(Statement base, Description description) throws IOException {
         RavenwoodRuleImpl.logTestRunner("started", description);
         RavenwoodRuleImpl.validate(base, description, ENABLE_OPTIONAL_VALIDATION);
         RavenwoodRuleImpl.init(RavenwoodRule.this);

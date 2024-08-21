@@ -39,6 +39,7 @@ android.util.ContainerHelpers
 android.util.DataUnit
 android.util.DayOfMonthCursor
 android.util.DebugUtils
+android.util.DisplayMetrics
 android.util.Dumpable
 android.util.DumpableContainer
 android.util.EmptyArray
@@ -102,6 +103,7 @@ android.util.StringBuilderPrinter
 android.util.TeeWriter
 android.util.TimeUtils
 android.util.TimingsTraceLog
+android.util.TypedValue
 android.util.UtilConfig
 android.util.Xml
 
@@ -193,6 +195,7 @@ android.content.ClipboardManager
 android.content.ComponentName
 android.content.ContentUris
 android.content.ContentValues
+android.content.Context
 android.content.ContextWrapper
 android.content.Intent
 android.content.IntentFilter
@@ -214,6 +217,23 @@ android.content.pm.ResolveInfo
 android.content.pm.ServiceInfo
 android.content.pm.Signature
 android.content.pm.UserInfo
+
+android.content.res.ApkAssets
+android.content.res.AssetFileDescriptor
+android.content.res.AssetManager
+android.content.res.AssetManager$Builder
+android.content.res.DrawableCache
+android.content.res.Element
+android.content.res.Resources
+android.content.res.Resources$Theme
+android.content.res.ResourceId
+android.content.res.ResourcesImpl
+android.content.res.ResourcesKey
+android.content.res.StringBlock
+android.content.res.TagCounter
+android.content.res.TypedArray
+android.content.res.Validator
+android.content.res.XmlBlock
 
 android.database.AbstractCursor
 android.database.CharArrayBuffer
@@ -258,6 +278,10 @@ android.app.ActivityOptions
 android.app.BroadcastOptions
 android.app.ComponentOptions
 android.app.Instrumentation
+android.app.LocaleConfig
+android.app.ResourcesManager
+android.app.ResourcesManager$UpdateHandler
+android.app.WindowConfiguration
 
 android.metrics.LogMaker
 

@@ -38,7 +38,6 @@ public abstract class JvmWorkaround {
      */
     public abstract void setFdInt(FileDescriptor fd, int fdInt);
 
-
     /**
      * Equivalent to Android's FileDescriptor.getInt$().
      */
@@ -48,6 +47,10 @@ public abstract class JvmWorkaround {
      * Equivalent to Android's Os.close(fd).
      */
     public abstract void closeFd(FileDescriptor fd) throws IOException;
+
+    public abstract long addressOf(Object o);
+
+    public abstract <T> T fromAddress(long address);
 
     /**
      * Placeholder implementation for the host side.
@@ -73,6 +76,16 @@ public abstract class JvmWorkaround {
 
         @Override
         public void closeFd(FileDescriptor fd) {
+            throw calledOnHostside();
+        }
+
+        @Override
+        public long addressOf(Object o) {
+            throw calledOnHostside();
+        }
+
+        @Override
+        public <T> T fromAddress(long address) {
             throw calledOnHostside();
         }
     }

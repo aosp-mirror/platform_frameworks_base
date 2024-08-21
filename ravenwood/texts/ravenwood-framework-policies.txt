@@ -9,8 +9,11 @@ class :feature_flags keepclass
 # Keep all sysprops generated code implementations
 class :sysprops keepclass
 
+# Keep all resource R classes
+class :r keepclass
+
 # To avoid VerifyError on nano proto files (b/324063814), we rename nano proto classes.
-# Note: The "rename" directive must use shashes (/) as a package name separator.
+# Note: The "rename" directive must use slashes (/) as a package name separator.
 rename com/.*/nano/   devicenano/
 rename android/.*/nano/   devicenano/
 
@@ -62,3 +65,24 @@ class android.content.pm.PackageManager keep
     method <init> ()V keep
 class android.text.ClipboardManager keep
     method <init> ()V keep
+
+# Just enough to allow ResourcesManager to run
+class android.hardware.display.DisplayManagerGlobal keep
+    method getInstance ()Landroid/hardware/display/DisplayManagerGlobal; ignore
+
+# These classes will be properly enabled in follow-up CLs
+
+class android.content.res.FontResourcesParser keepclass
+class android.content.res.FontResourcesParser.FamilyResourceEntry keepclass
+class android.content.res.FontResourcesParser.ProviderResourceEntry keepclass
+class android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry keepclass
+class android.content.res.FontResourcesParser.FontFileResourceEntry keepclass
+class android.content.res.FontScaleConverter keepclass
+class android.content.res.FontScaleConverterImpl keepclass
+class android.content.res.FontScaleConverterFactory keepclass
+class android.content.res.ThemedResourceCache keepclass
+class android.content.res.ConfigurationBoundResourceCache keepclass
+class android.content.res.Configuration keepclass
+class android.content.res.CompatibilityInfo keepclass
+class android.content.res.ConstantState keepclass
+class android.view.DisplayAdjustments keepclass
