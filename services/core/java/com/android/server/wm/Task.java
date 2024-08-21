@@ -3330,6 +3330,7 @@ class Task extends TaskFragment {
 
         info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.taskId = mTaskId;
+        info.effectiveUid = effectiveUid;
         info.displayId = getDisplayId();
         info.displayAreaFeatureId = tda != null ? tda.mFeatureId : FEATURE_UNDEFINED;
         final Intent baseIntent = getBaseIntent();
