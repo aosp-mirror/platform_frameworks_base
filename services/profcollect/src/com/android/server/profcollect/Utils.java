@@ -16,17 +16,67 @@
 
 package com.android.server.profcollect;
 
+import static com.android.server.profcollect.ProfcollectForwardingService.LOG_TAG;
+
+import android.os.RemoteException;
 import android.provider.DeviceConfig;
+import android.util.Log;
+
+import com.android.internal.os.BackgroundThread;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class Utils {
 
-  public static boolean withFrequency(String configName, int defaultFrequency) {
+    public static boolean withFrequency(String configName, int defaultFrequency) {
         int threshold = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT, configName, defaultFrequency);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         return randomNum < threshold;
     }
 
+    public static boolean traceSystem(IProfCollectd mIProfcollect, String eventName) {
+        if (mIProfcollect == null) {
+            return false;
+        }
+        BackgroundThread.get().getThreadHandler().post(() -> {
+            try {
+                mIProfcollect.trace_system(eventName);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+            }
+        });
+        return true;
+    }
+
+    public static boolean traceSystem(IProfCollectd mIProfcollect, String eventName, int delayMs) {
+        if (mIProfcollect == null) {
+            return false;
+        }
+        BackgroundThread.get().getThreadHandler().postDelayed(() -> {
+            try {
+                mIProfcollect.trace_system(eventName);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+            }
+        }, delayMs);
+        return true;
+    }
+
+    public static boolean traceProcess(IProfCollectd mIProfcollect,
+            String eventName, String processName, int durationMs) {
+        if (mIProfcollect == null) {
+            return false;
+        }
+        BackgroundThread.get().getThreadHandler().post(() -> {
+            try {
+                mIProfcollect.trace_process(eventName,
+                        processName,
+                        durationMs);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+            }
+        });
+        return true;
+    }
 }
