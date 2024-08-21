@@ -37,7 +37,7 @@ constructor(
     private val brightnessMirrorShowingInteractor: BrightnessMirrorShowingInteractor,
     @Main private val resources: Resources,
     val sliderControllerFactory: BrightnessSliderController.Factory,
-) : SysUiViewModel(), MirrorController {
+) : SysUiViewModel, MirrorController {
 
     private val tempPosition = IntArray(2)
 

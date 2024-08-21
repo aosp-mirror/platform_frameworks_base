@@ -23,6 +23,7 @@ import com.android.compose.animation.scene.ObservableTransitionState.Transition.
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -62,7 +63,8 @@ constructor(
     keyguardInteractor: Lazy<KeyguardInteractor>,
 ) :
     ActivatableFlowDumper by ActivatableFlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
-    SysUiViewModel() {
+    SysUiViewModel,
+    ExclusiveActivatable() {
 
     override suspend fun onActivated(): Nothing {
         activateFlowDumper()

@@ -35,7 +35,7 @@ class QuickSettingsShadeSceneContentViewModel
 constructor(
     val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
     val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
-) : SysUiViewModel() {
+) : SysUiViewModel {
 
     @AssistedFactory
     interface Factory {
