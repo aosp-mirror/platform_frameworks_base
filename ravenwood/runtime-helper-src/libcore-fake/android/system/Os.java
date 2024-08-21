@@ -15,8 +15,8 @@
  */
 package android.system;
 
+import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.common.JvmWorkaround;
-import com.android.ravenwood.common.RavenwoodRuntimeNative;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
