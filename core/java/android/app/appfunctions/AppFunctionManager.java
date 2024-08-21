@@ -54,9 +54,9 @@ public final class AppFunctionManager {
      *
      * @hide
      */
-    public AppFunctionManager(IAppFunctionManager mService, Context context) {
-        this.mService = mService;
-        this.mContext = context;
+    public AppFunctionManager(IAppFunctionManager service, Context context) {
+        mService = service;
+        mContext = context;
     }
 
     /**
@@ -114,7 +114,7 @@ public final class AppFunctionManager {
                         }
                     });
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 }
