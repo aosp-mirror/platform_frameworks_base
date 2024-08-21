@@ -112,7 +112,7 @@ public class ZenMode implements Parcelable {
     };
 
     // Manual DND first, Bedtime/Driving, then alphabetically.
-    static final Comparator<ZenMode> PRIORITIZING_COMPARATOR = Comparator
+    public static final Comparator<ZenMode> PRIORITIZING_COMPARATOR = Comparator
             .comparing(ZenMode::isManualDnd).reversed()
             .thenComparing(ZenMode::getType, PRIORITIZED_TYPE_COMPARATOR)
             .thenComparing(ZenMode::getName);
