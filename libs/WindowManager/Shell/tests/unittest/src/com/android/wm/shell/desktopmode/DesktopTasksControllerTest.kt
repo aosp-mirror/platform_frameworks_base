@@ -1443,8 +1443,34 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FREEFORM)
 
-    assertThat(wct.hierarchyOps).hasSize(2)
-    wct.assertReorderAt(1, homeTask, toTop = false)
+    assertThat(wct.hierarchyOps).hasSize(1)
+  }
+
+  @Test
+  fun handleRequest_fullscreenTaskWithTaskOnHome_freeformVisible_returnSwitchToFreeformWCT() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    val homeTask = setUpHomeTask()
+    val freeformTask = setUpFreeformTask()
+    markTaskVisible(freeformTask)
+    val fullscreenTask = createFullscreenTask()
+    fullscreenTask.baseIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME)
+
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
+      .isEqualTo(WINDOWING_MODE_FREEFORM)
+
+    // There are 5 hops that are happening in this case:
+    // 1. Moving the fullscreen task to top as we add moveToDesktop() changes
+    // 2. Bringing home task to front
+    // 3. Pending intent for the wallpaper
+    // 4. Bringing the existing freeform task to top
+    // 5. Bringing the fullscreen task back at the top
+    assertThat(wct.hierarchyOps).hasSize(5)
+    wct.assertReorderAt(1, homeTask, toTop = true)
+    wct.assertReorderAt(4, fullscreenTask, toTop = true)
   }
 
   @Test
@@ -1469,19 +1495,34 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
     freeformTasks.forEach { markTaskVisible(it) }
     val fullscreenTask = createFullscreenTask()
-    val homeTask = setUpHomeTask(DEFAULT_DISPLAY)
 
     val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
 
     // Make sure we reorder the new task to top, and the back task to the bottom
-    assertThat(wct!!.hierarchyOps.size).isEqualTo(3)
+    assertThat(wct!!.hierarchyOps.size).isEqualTo(2)
     wct.assertReorderAt(0, fullscreenTask, toTop = true)
-    wct.assertReorderAt(1, homeTask, toTop = false)
-    wct.assertReorderAt(2, freeformTasks[0], toTop = false)
+    wct.assertReorderAt(1, freeformTasks[0], toTop = false)
   }
 
   @Test
-  fun handleRequest_fullscreenTaskToFreeform_alreadyBeyondLimit_existingAndNewTasksAreMinimized() {
+  fun handleRequest_fullscreenTaskWithTaskOnHome_bringsTasksOverLimit_otherTaskIsMinimized() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
+    freeformTasks.forEach { markTaskVisible(it) }
+    val fullscreenTask = createFullscreenTask()
+    fullscreenTask.baseIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME)
+
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    // Make sure we reorder the new task to top, and the back task to the bottom
+    assertThat(wct!!.hierarchyOps.size).isEqualTo(9)
+    wct.assertReorderAt(0, fullscreenTask, toTop = true)
+    wct.assertReorderAt(8, freeformTasks[0], toTop = false)
+  }
+
+  @Test
+  fun handleRequest_fullscreenTaskWithTaskOnHome_beyondLimit_existingAndNewTasksAreMinimized() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
     val minimizedTask = setUpFreeformTask()
@@ -1490,15 +1531,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
     freeformTasks.forEach { markTaskVisible(it) }
     val homeTask = setUpHomeTask()
     val fullscreenTask = createFullscreenTask()
+    fullscreenTask.baseIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME)
 
     val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
 
-    assertThat(wct!!.hierarchyOps.size).isEqualTo(4)
+    assertThat(wct!!.hierarchyOps.size).isEqualTo(10)
     wct.assertReorderAt(0, fullscreenTask, toTop = true)
-    // Make sure we reorder the home task to the bottom, and minimized tasks below the home task.
-    wct.assertReorderAt(1, homeTask, toTop = false)
-    wct.assertReorderAt(2, minimizedTask, toTop = false)
-    wct.assertReorderAt(3, freeformTasks[0], toTop = false)
+    // Make sure we reorder the home task to the top, desktop tasks to top of them and minimized
+    // task is under the home task.
+    wct.assertReorderAt(1, homeTask, toTop = true)
+    wct.assertReorderAt(9, freeformTasks[0], toTop = false)
   }
 
   @Test
