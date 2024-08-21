@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
+import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.res.R
@@ -81,7 +82,7 @@ constructor(
                 getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
             } else {
                 getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                    getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard) +
+                    SystemBarUtils.getStatusBarHeight(context) +
                     getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
             }
         }
