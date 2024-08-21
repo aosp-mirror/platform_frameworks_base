@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -50,7 +49,6 @@ import java.util.List;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptVerticalListContentView implements PromptContentViewParcelable {
-    private static final String TAG = "PromptVerticalListContentView";
     @VisibleForTesting
     static final int MAX_ITEM_NUMBER = 20;
     @VisibleForTesting
@@ -157,11 +155,12 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
          *
          * @param description The description to display.
          * @return This builder.
+         * @throws IllegalArgumentException If description exceeds certain character limit.
          */
         @NonNull
         public Builder setDescription(@NonNull String description) {
             if (description.length() > MAX_DESCRIPTION_CHARACTER_NUMBER) {
-                Log.w(TAG, "The character number of description exceeds "
+                throw new IllegalArgumentException("The character number of description exceeds "
                         + MAX_DESCRIPTION_CHARACTER_NUMBER);
             }
             mDescription = description;
@@ -173,7 +172,8 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
          *
          * @param listItem The list item view to display
          * @return This builder.
-         * @throws IllegalArgumentException If the number of list items exceeds certain limit.
+         * @throws IllegalArgumentException If this list item exceeds certain character limits or
+         *                                  the number of list items exceeds certain limit.
          */
         @NonNull
         public Builder addListItem(@NonNull PromptContentItem listItem) {
@@ -188,7 +188,8 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
          * @param listItem The list item view to display
          * @param index    The position at which to add the item
          * @return This builder.
-         * @throws IllegalArgumentException If the number of list items exceeds certain limit.
+         * @throws IllegalArgumentException If this list item exceeds certain character limits or
+         *                                  the number of list items exceeds certain limit.
          */
         @NonNull
         public Builder addListItem(@NonNull PromptContentItem listItem, int index) {
@@ -199,8 +200,9 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
 
         private void checkItemLimits(@NonNull PromptContentItem listItem) {
             if (doesListItemExceedsCharLimit(listItem)) {
-                Log.w(TAG, "The character number of list item exceeds "
-                        + MAX_EACH_ITEM_CHARACTER_NUMBER);
+                throw new IllegalArgumentException(
+                        "The character number of list item exceeds "
+                                + MAX_EACH_ITEM_CHARACTER_NUMBER);
             }
             if (mContentList.size() > MAX_ITEM_NUMBER) {
                 throw new IllegalArgumentException(
