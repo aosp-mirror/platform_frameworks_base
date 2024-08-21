@@ -951,6 +951,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     w.updateLastFrames();
                     mWmService.mFrameChangingWindows.remove(w);
                 }
+                w.updateSurfacePositionNonOrganized();
                 w.onResizeHandled();
             }
 
