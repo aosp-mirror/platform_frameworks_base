@@ -43,9 +43,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     private static final String TAG = AppFunctionManagerServiceImpl.class.getSimpleName();
+
     private final RemoteServiceCaller<IAppFunctionService> mRemoteServiceCaller;
     private final CallerValidator mCallerValidator;
     private final ServiceHelper mInternalServiceHelper;
+    private final ServiceConfig mServiceConfig;
+
 
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
         this(new RemoteServiceCallerImpl<>(
@@ -57,17 +60,20 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         /*unit=*/ TimeUnit.SECONDS,
                         /*workQueue=*/ new LinkedBlockingQueue<>())),
                 new CallerValidatorImpl(context),
-                new ServiceHelperImpl(context));
+                new ServiceHelperImpl(context),
+                new ServiceConfigImpl());
     }
 
     @VisibleForTesting
     AppFunctionManagerServiceImpl(RemoteServiceCaller<IAppFunctionService> remoteServiceCaller,
                                   CallerValidator callerValidator,
-                                  ServiceHelper appFunctionInternalServiceHelper) {
+                                  ServiceHelper appFunctionInternalServiceHelper,
+                                  ServiceConfig serviceConfig) {
         mRemoteServiceCaller = Objects.requireNonNull(remoteServiceCaller);
         mCallerValidator = Objects.requireNonNull(callerValidator);
         mInternalServiceHelper =
                 Objects.requireNonNull(appFunctionInternalServiceHelper);
+        mServiceConfig = serviceConfig;
     }
 
     @Override
@@ -131,12 +137,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             ).build());
             return;
         }
-
         bindAppFunctionServiceUnchecked(requestInternal, serviceIntent, targetUser,
                 safeExecuteAppFunctionCallback,
                 /*bindFlags=*/ Context.BIND_AUTO_CREATE,
-                // TODO(b/357551503): Make timeout configurable.
-                /*timeoutInMillis=*/ 30_000L);
+                /*timeoutInMillis=*/ mServiceConfig.getExecutionTimeoutConfig());
     }
 
     private void bindAppFunctionServiceUnchecked(
