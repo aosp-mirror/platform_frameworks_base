@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -30,12 +30,13 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class MultiplicationPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeMultiplyIntByConstant10() {
         int result = 1;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result *= 10;
         }
@@ -44,7 +45,7 @@ public class MultiplicationPerfTest {
     @Test
     public void timeMultiplyIntByConstant8() {
         int result = 1;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result *= 8;
         }
@@ -54,7 +55,7 @@ public class MultiplicationPerfTest {
     public void timeMultiplyIntByVariable10() {
         int result = 1;
         int factor = 10;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result *= factor;
         }
@@ -64,7 +65,7 @@ public class MultiplicationPerfTest {
     public void timeMultiplyIntByVariable8() {
         int result = 1;
         int factor = 8;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result *= factor;
         }
