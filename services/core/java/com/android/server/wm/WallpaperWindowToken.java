@@ -32,7 +32,6 @@ import android.os.RemoteException;
 import android.util.SparseArray;
 
 import com.android.internal.protolog.ProtoLog;
-import com.android.window.flags.Flags;
 
 import java.util.function.Consumer;
 
@@ -85,7 +84,7 @@ class WallpaperWindowToken extends WindowToken {
     public void prepareSurfaces() {
         super.prepareSurfaces();
 
-        if (Flags.ensureWallpaperInTransitions()) {
+        if (mWmService.mFlags.mEnsureWallpaperInTransitions) {
             // Similar to Task.prepareSurfaces, outside of transitions we need to apply visibility
             // changes directly. In transitions the transition player will take care of applying the
             // visibility change.
