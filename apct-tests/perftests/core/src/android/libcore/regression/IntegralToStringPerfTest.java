@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class IntegralToStringPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static final int SMALL = 12;
     private static final int MEDIUM = 12345;
@@ -37,7 +37,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(SMALL);
         }
@@ -45,7 +45,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(MEDIUM);
         }
@@ -53,7 +53,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(LARGE);
         }
@@ -61,7 +61,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString2_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(SMALL, 2);
         }
@@ -69,7 +69,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString2_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(MEDIUM, 2);
         }
@@ -77,7 +77,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString2_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(LARGE, 2);
         }
@@ -85,7 +85,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString10_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(SMALL, 10);
         }
@@ -93,7 +93,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString10_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(MEDIUM, 10);
         }
@@ -101,7 +101,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString10_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(LARGE, 10);
         }
@@ -109,7 +109,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString16_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(SMALL, 16);
         }
@@ -117,7 +117,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString16_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(MEDIUM, 16);
         }
@@ -125,7 +125,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToString16_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toString(LARGE, 16);
         }
@@ -133,7 +133,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToBinaryString_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toBinaryString(SMALL);
         }
@@ -141,7 +141,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToBinaryString_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toBinaryString(MEDIUM);
         }
@@ -149,7 +149,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToBinaryString_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toBinaryString(LARGE);
         }
@@ -157,7 +157,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToHexString_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toHexString(SMALL);
         }
@@ -165,7 +165,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToHexString_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toHexString(MEDIUM);
         }
@@ -173,7 +173,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_IntegerToHexString_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Integer.toHexString(LARGE);
         }
@@ -181,7 +181,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_StringBuilder_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new StringBuilder().append(SMALL);
         }
@@ -189,7 +189,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_StringBuilder_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new StringBuilder().append(MEDIUM);
         }
@@ -197,7 +197,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_StringBuilder_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new StringBuilder().append(LARGE);
         }
@@ -205,7 +205,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_Formatter_small() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             String.format("%d", SMALL);
         }
@@ -213,7 +213,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_Formatter_medium() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             String.format("%d", MEDIUM);
         }
@@ -221,7 +221,7 @@ public class IntegralToStringPerfTest {
 
     @Test
     public void time_Formatter_large() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             String.format("%d", LARGE);
         }

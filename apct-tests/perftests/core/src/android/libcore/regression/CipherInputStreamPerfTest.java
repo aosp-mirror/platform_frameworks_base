@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -41,7 +41,7 @@ import javax.crypto.spec.IvParameterSpec;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class CipherInputStreamPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static final int DATA_SIZE = 1024 * 1024;
     private static final byte[] DATA = new byte[DATA_SIZE];
@@ -80,7 +80,7 @@ public class CipherInputStreamPerfTest {
 
     @Test
     public void timeEncrypt() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mCipherEncrypt.init(Cipher.ENCRYPT_MODE, mKey, mSpec);
             InputStream is = new CipherInputStream(new ByteArrayInputStream(DATA), mCipherEncrypt);

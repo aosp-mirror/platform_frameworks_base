@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,7 +34,7 @@ import java.util.Locale;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class DecimalFormatPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static final String EXP_PATTERN = "##E0";
 
@@ -58,7 +58,7 @@ public class DecimalFormatPerfTest {
     public void formatWithGrouping(Object obj) {
         DF.setGroupingSize(3);
         DF.setGroupingUsed(true);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             DF.format(obj);
         }
@@ -66,21 +66,21 @@ public class DecimalFormatPerfTest {
 
     public void format(String pattern, Object obj) {
         PATTERN_INSTANCE.applyPattern(pattern);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             PATTERN_INSTANCE.format(obj);
         }
     }
 
     public void format(Object obj) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             DF.format(obj);
         }
     }
 
     public void formatToCharacterIterator(Object obj) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             DF.formatToCharacterIterator(obj);
         }
@@ -88,14 +88,14 @@ public class DecimalFormatPerfTest {
 
 
     public void formatCurrencyUS(Object obj) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             DF_CURRENCY_US.format(obj);
         }
     }
 
     public void formatCurrencyFR(Object obj) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             DF_CURRENCY_FR.format(obj);
         }
@@ -213,7 +213,7 @@ public class DecimalFormatPerfTest {
 
     @Test
     public void time_instantiation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new DecimalFormat();
         }
