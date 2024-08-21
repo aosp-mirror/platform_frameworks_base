@@ -660,6 +660,14 @@ public class LogModule {
         return factory.create("KeyboardLog", 50);
     }
 
+    /** Provides a {@link LogBuffer} for the input devices tutorial. */
+    @Provides
+    @SysUISingleton
+    @InputDeviceTutorialLog
+    public static LogBuffer provideInputDeviceTutorialLogBuffer(LogBufferFactory factory) {
+        return factory.create("InputDeviceTutorialLog", 50);
+    }
+
     /** Provides a {@link LogBuffer} for {@link PackageChangeRepository} */
     @Provides
     @SysUISingleton

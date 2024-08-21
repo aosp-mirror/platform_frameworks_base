@@ -44,4 +44,10 @@ interface HeadsUpRepository {
 
     /** Snooze the currently pinned HUN. */
     fun snooze()
+
+    /** Unpin all currently pinned HUNs. */
+    fun unpinAll(userUnPinned: Boolean)
+
+    /** Release entries that were waiting for a shade expansion to complete. */
+    fun releaseAfterExpansion()
 }

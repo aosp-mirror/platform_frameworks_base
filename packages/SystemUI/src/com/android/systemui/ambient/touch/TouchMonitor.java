@@ -581,10 +581,6 @@ public class TouchMonitor {
             mBoundsFlow.cancel(new CancellationException());
         }
 
-        for (TouchHandler handler : mHandlers) {
-            handler.onDestroy();
-        }
-
         mInitialized = false;
     }
 

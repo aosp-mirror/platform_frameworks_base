@@ -74,6 +74,8 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -221,6 +223,7 @@ public class PowerStatsServiceTest {
     };
 
     public static final class TestPowerStatsHALWrapper implements IPowerStatsHALWrapper {
+        public RuntimeException exception;
         public EnergyConsumerResult[] energyConsumerResults;
         public EnergyMeasurement[] energyMeasurements;
 
@@ -243,6 +246,9 @@ public class PowerStatsServiceTest {
 
         @Override
         public StateResidencyResult[] getStateResidency(int[] powerEntityIds) {
+            if (exception != null) {
+                throw exception;
+            }
             StateResidencyResult[] stateResidencyResultList =
                     new StateResidencyResult[POWER_ENTITY_COUNT];
             for (int i = 0; i < stateResidencyResultList.length; i++) {
@@ -294,6 +300,9 @@ public class PowerStatsServiceTest {
 
         @Override
         public EnergyConsumerResult[] getEnergyConsumed(int[] energyConsumerIds) {
+            if (exception != null) {
+                throw exception;
+            }
             return energyConsumerResults;
         }
 
@@ -322,6 +331,9 @@ public class PowerStatsServiceTest {
 
         @Override
         public EnergyMeasurement[] readEnergyMeter(int[] channelIds) {
+            if (exception != null) {
+                throw exception;
+            }
             return energyMeasurements;
         }
 
@@ -1221,5 +1233,32 @@ public class PowerStatsServiceTest {
                 null, new GetPowerMonitorsResult()));
         assertThrows(NullPointerException.class, () -> iPowerStatsService.getPowerMonitorReadings(
                 new int[] {0}, null));
+    }
+
+    @Test
+    public void getEnergyConsumedAsync_halException() {
+        mPowerStatsHALWrapper.exception = new IllegalArgumentException();
+        CompletableFuture<EnergyConsumerResult[]> future =
+                mService.getPowerStatsInternal().getEnergyConsumedAsync(new int[]{1});
+        ExecutionException exception = assertThrows(ExecutionException.class, future::get);
+        assertThat(exception.getCause()).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void getStateResidencyAsync_halException() {
+        mPowerStatsHALWrapper.exception = new IllegalArgumentException();
+        CompletableFuture<StateResidencyResult[]> future =
+                mService.getPowerStatsInternal().getStateResidencyAsync(new int[]{1});
+        ExecutionException exception = assertThrows(ExecutionException.class, future::get);
+        assertThat(exception.getCause()).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void readEnergyMeterAsync_halException() {
+        mPowerStatsHALWrapper.exception = new IllegalArgumentException();
+        CompletableFuture<EnergyMeasurement[]> future =
+                mService.getPowerStatsInternal().readEnergyMeterAsync(new int[]{1});
+        ExecutionException exception = assertThrows(ExecutionException.class, future::get);
+        assertThat(exception.getCause()).isInstanceOf(IllegalArgumentException.class);
     }
 }

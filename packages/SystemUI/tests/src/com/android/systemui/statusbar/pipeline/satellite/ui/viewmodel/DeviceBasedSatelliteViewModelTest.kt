@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -44,6 +43,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -73,6 +73,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
                 wifiInteractor,
                 testScope.backgroundScope,
                 FakeLogBuffer.Factory.create(),
+                mock(),
             )
 
         underTest =
@@ -82,6 +83,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 airplaneModeRepository,
                 FakeLogBuffer.Factory.create(),
+                mock(),
             )
     }
 

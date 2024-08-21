@@ -59,7 +59,6 @@ import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
 
 import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.DisposableHandle;
 import kotlinx.coroutines.flow.FlowKt;
 
 import java.util.Arrays;
@@ -186,8 +185,6 @@ public class DreamOverlayContainerViewController extends
                 }
             };
 
-    private DisposableHandle mFlowHandle;
-
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
@@ -255,17 +252,6 @@ public class DreamOverlayContainerViewController extends
     }
 
     @Override
-    public void destroy() {
-        mStateController.removeCallback(mDreamOverlayStateCallback);
-        mStatusBarViewController.destroy();
-        mComplicationHostViewController.destroy();
-        mDreamOverlayAnimationsController.destroy();
-        mLowLightTransitionCoordinator.setLowLightEnterListener(null);
-
-        super.destroy();
-    }
-
-    @Override
     protected void onViewAttached() {
         mWakingUpFromSwipe = false;
         mJitterStartTimeMillis = System.currentTimeMillis();
@@ -277,7 +263,7 @@ public class DreamOverlayContainerViewController extends
         emptyRegion.recycle();
 
         if (dreamHandlesBeingObscured()) {
-            mFlowHandle = collectFlow(
+            collectFlow(
                     mView,
                     FlowKt.distinctUntilChanged(combineFlows(
                             mKeyguardTransitionInteractor.isFinishedIn(
@@ -309,10 +295,6 @@ public class DreamOverlayContainerViewController extends
 
     @Override
     protected void onViewDetached() {
-        if (mFlowHandle != null) {
-            mFlowHandle.dispose();
-            mFlowHandle = null;
-        }
         mHandler.removeCallbacksAndMessages(null);
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         mBouncerlessScrimController.removeCallback(mBouncerlessExpansionCallback);

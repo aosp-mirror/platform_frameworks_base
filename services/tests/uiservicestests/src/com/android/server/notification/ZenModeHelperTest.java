@@ -82,6 +82,7 @@ import static com.android.os.dnd.DNDProtoEnums.STATE_DISALLOW;
 import static com.android.server.notification.ZenModeEventLogger.ACTIVE_RULE_TYPE_MANUAL;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -6670,6 +6671,91 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(zenRule.isAutomaticActive()).isTrue();
         assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_withActivationOverride_userActionFromAppCanDeactivate() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+
+        // User manually turns on rule from SysUI / Settings...
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-on-from-sysui", STATE_TRUE,
+                        SOURCE_USER_ACTION), ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+        assertThat(getZenRule(ruleId).isAutomaticActive()).isTrue();
+        assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_ACTIVATE);
+
+        // ... and they can turn it off manually from inside the app.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-off-from-app", STATE_FALSE,
+                        SOURCE_USER_ACTION), ORIGIN_USER_IN_APP, CUSTOM_PKG_UID);
+        assertThat(getZenRule(ruleId).isAutomaticActive()).isFalse();
+        assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_withDeactivationOverride_userActionFromAppCanActivate() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+
+        // Rule is activated due to its schedule.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "auto-on-from-app", STATE_TRUE,
+                        SOURCE_SCHEDULE), ORIGIN_APP, CUSTOM_PKG_UID);
+        assertThat(getZenRule(ruleId).isAutomaticActive()).isTrue();
+        assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+
+        // User manually turns off rule from SysUI / Settings...
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-off-from-sysui", STATE_FALSE,
+                        SOURCE_USER_ACTION), ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+        assertThat(getZenRule(ruleId).isAutomaticActive()).isFalse();
+        assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_DEACTIVATE);
+
+        // ... and they can turn it on manually from inside the app.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-on-from-app", STATE_TRUE,
+                        SOURCE_USER_ACTION), ORIGIN_USER_IN_APP, CUSTOM_PKG_UID);
+        assertThat(getZenRule(ruleId).isAutomaticActive()).isTrue();
+        assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_manualActionFromApp_isNotOverride() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+
+        // Rule is manually activated by the user in the app.
+        // This turns the rule on, but is NOT an override...
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-on-from-app", STATE_TRUE,
+                        SOURCE_USER_ACTION), ORIGIN_USER_IN_APP, CUSTOM_PKG_UID);
+        assertThat(getZenRule(ruleId).isAutomaticActive()).isTrue();
+        assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+
+        // ... so the app can turn it off when its schedule is over.
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "auto-off-from-app", STATE_FALSE,
+                        SOURCE_SCHEDULE), ORIGIN_APP, CUSTOM_PKG_UID);
+        assertThat(getZenRule(ruleId).isAutomaticActive()).isFalse();
+        assertThat(getZenRule(ruleId).getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+    }
+
+    private ZenRule getZenRule(String ruleId) {
+        return checkNotNull(mZenModeHelper.mConfig.automaticRules.get(ruleId),
+                "Didn't find rule with id %s", ruleId);
     }
 
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,

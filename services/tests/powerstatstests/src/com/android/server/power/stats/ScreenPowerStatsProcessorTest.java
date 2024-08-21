@@ -16,8 +16,6 @@
 
 package com.android.server.power.stats;
 
-import static android.os.BatteryConsumer.PROCESS_STATE_ANY;
-
 import static com.android.server.power.stats.AggregatedPowerStatsConfig.POWER_STATE_BATTERY;
 import static com.android.server.power.stats.AggregatedPowerStatsConfig.POWER_STATE_OTHER;
 import static com.android.server.power.stats.AggregatedPowerStatsConfig.SCREEN_STATE_ON;
@@ -280,7 +278,7 @@ public class ScreenPowerStatsProcessorTest {
         ScreenPowerStatsLayout layout = new ScreenPowerStatsLayout(descriptor);
         long[] stats = new long[descriptor.uidStatsArrayLength];
         aggregatedStats.getUidStats(stats, uid,
-                new int[]{powerState, screenState, PROCESS_STATE_ANY});
+                new int[]{powerState, screenState, BatteryConsumer.PROCESS_STATE_UNSPECIFIED});
         assertThat(layout.getUidPowerEstimate(stats)).isWithin(PRECISION)
                 .of(expectedScreenPowerEstimate);
     }

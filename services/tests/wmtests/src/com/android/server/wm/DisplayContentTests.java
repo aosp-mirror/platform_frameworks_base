@@ -2796,15 +2796,17 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState imeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
-        spyOn(imeAppTarget);
-        doReturn(true).when(imeAppTarget).isRequestedVisible(ime());
+        imeAppTarget.setRequestedVisibleTypes(ime());
         assertEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
 
         // Verify imeMenuDialog doesn't be focused window if the next IME target is closing.
         final WindowState nextImeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "nextImeAppTarget");
         makeWindowVisibleAndDrawn(nextImeAppTarget);
-        nextImeAppTarget.mActivityRecord.commitVisibility(false, false);
+        // Even if the app still requests IME, the ime dialog should not gain focus if the target
+        // app is invisible.
+        nextImeAppTarget.setRequestedVisibleTypes(ime());
+        nextImeAppTarget.mActivityRecord.setVisibility(false);
         mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
         assertNotEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
     }
