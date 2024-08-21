@@ -33,6 +33,7 @@ import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
 import android.view.View
+import android.view.WindowManager
 import androidx.core.graphics.toPointF
 import androidx.test.filters.SmallTest
 import com.android.window.flags.Flags
@@ -76,6 +77,8 @@ class HandleMenuTest : ShellTestCase() {
 
     @Mock
     private lateinit var mockDesktopWindowDecoration: DesktopModeWindowDecoration
+    @Mock
+    private lateinit var mockWindowManager: WindowManager
     @Mock
     private lateinit var onClickListener: View.OnClickListener
     @Mock
@@ -230,8 +233,9 @@ class HandleMenuTest : ShellTestCase() {
             }
             else -> error("Invalid windowing mode")
         }
-        val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId, appIcon, appName,
-            splitScreenController, shouldShowWindowingPill = true,
+        val handleMenu = HandleMenu(mockDesktopWindowDecoration,
+            WindowManagerWrapper(mockWindowManager),
+            layoutId, appIcon, appName, splitScreenController, shouldShowWindowingPill = true,
             shouldShowNewWindowButton = true,
             null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
             captionX = captionX
