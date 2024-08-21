@@ -492,23 +492,19 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         PackageManager pm = mContext.getPackageManager();
 
         if (Flags.refactorCrashrecovery() && provideInfoOfApkInApex()) {
-            // Check if the package is listed among the system modules.
-            boolean isApex = false;
-            try {
-                isApex = (pm.getModuleInfo(packageName, 0 /* flags */) != null);
-            } catch (PackageManager.NameNotFoundException e) {
-                //pass
-            }
-
-            // Check if the package is an APK inside an APEX.
-            boolean isApkInApex = false;
+            // Check if the package is listed among the system modules or is an
+            // APK inside an updatable APEX.
             try {
                 final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
-                isApkInApex = (pkg.getApexPackageName() != null);
+                String apexPackageName = pkg.getApexPackageName();
+                if (apexPackageName != null) {
+                    packageName = apexPackageName;
+                }
+
+                return pm.getModuleInfo(packageName, 0 /* flags */) != null;
             } catch (PackageManager.NameNotFoundException e) {
-                // pass
+                return false;
             }
-            return isApex || isApkInApex;
         } else {
             // Check if the package is an APK inside an APEX. If it is, use the parent APEX package
             // when querying PackageManager.
