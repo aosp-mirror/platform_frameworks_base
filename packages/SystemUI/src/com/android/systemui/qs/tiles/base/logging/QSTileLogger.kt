@@ -222,6 +222,7 @@ constructor(
     private fun QSTileUserAction.toLogString(): String =
         when (this) {
             is QSTileUserAction.Click -> "click"
+            is QSTileUserAction.ToggleClick -> "toggle click"
             is QSTileUserAction.LongClick -> "long click"
         }
 

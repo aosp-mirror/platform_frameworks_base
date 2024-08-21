@@ -16,9 +16,10 @@
 
 package android.app.appfunctions;
 
+import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
+import static android.app.appfunctions.ExecuteAppFunctionResponse.getResultCode;
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
-import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
 
 import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
@@ -81,17 +82,10 @@ public abstract class AppFunctionService extends Service {
                         // behalf of them.
                         safeCallback.onResult(
                                 new ExecuteAppFunctionResponse.Builder(
-                                        getResultCode(ex), ex.getMessage()).build());
+                                        getResultCode(ex), getExceptionMessage(ex)).build());
                     }
                 }
             };
-
-    private static int getResultCode(@NonNull Throwable t) {
-        if (t instanceof IllegalArgumentException) {
-            return ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT;
-        }
-        return ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR;
-    }
 
     @NonNull
     @Override
@@ -116,11 +110,15 @@ public abstract class AppFunctionService extends Service {
      * thread and dispatch the result with the given callback. You should always report back the
      * result using the callback, no matter if the execution was successful or not.
      *
-     * @param request The function execution request.
+     * @param request  The function execution request.
      * @param callback A callback to report back the result.
      */
     @MainThread
     public abstract void onExecuteFunction(
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull Consumer<ExecuteAppFunctionResponse> callback);
+
+    private String getExceptionMessage(Exception exception) {
+        return exception.getMessage() == null ? "" : exception.getMessage();
+    }
 }

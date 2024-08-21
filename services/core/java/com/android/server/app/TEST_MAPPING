@@ -26,15 +26,7 @@
       ]
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.app"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksMockingServicesTests_android_server_app"
     },
     {
       "name": "FrameworksCoreGameManagerTests",

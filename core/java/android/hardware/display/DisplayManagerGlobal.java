@@ -174,10 +174,14 @@ public final class DisplayManagerGlobal {
     /**
      * Gets an instance of the display manager global singleton.
      *
+     * This method is actually unsupported on Ravenwood, however to support
+     * {@link android.app.ResourcesManager} we make this method always return null.
+     *
      * @return The display manager instance, may be null early in system startup
      * before the display manager has been fully initialized.
      */
     @UnsupportedAppUsage
+    // @RavenwoodIgnore(value = "null")
     public static DisplayManagerGlobal getInstance() {
         synchronized (DisplayManagerGlobal.class) {
             if (sInstance == null) {

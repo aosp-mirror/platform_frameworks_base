@@ -16,16 +16,27 @@
 
 package android.content.res;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.os.FileUtils;
 import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
-import android.test.AndroidTestCase;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.DisplayMetrics;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.frameworks.coretests.R;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.InputStream;
@@ -33,12 +44,24 @@ import java.util.Arrays;
 import java.util.Locale;
 
 @Presubmit
-public class ResourcesLocaleTest extends AndroidTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class ResourcesLocaleTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
+
+    private Context mContext;
+
+    @Before
+    public void setup() {
+        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+    }
 
     private String extractApkAndGetPath(int id) throws Exception {
-        final Resources resources = getContext().getResources();
+        final Resources resources = mContext.getResources();
         try (InputStream is = resources.openRawResource(id)) {
-            File path = new File(getContext().getFilesDir(), resources.getResourceEntryName(id));
+            File path = new File(mContext.getFilesDir(), resources.getResourceEntryName(id));
             FileUtils.copyToFileOrThrow(is, path);
             return path.getAbsolutePath();
         }
@@ -47,6 +70,15 @@ public class ResourcesLocaleTest extends AndroidTestCase {
     private Resources createResourcesWithApk(int rawApkId) throws Exception {
         final AssetManager assets = new AssetManager();
         assertTrue(assets.addAssetPath(extractApkAndGetPath(rawApkId)) != 0);
+
+        final DisplayMetrics dm = new DisplayMetrics();
+        dm.setToDefaults();
+        return new Resources(assets, dm, new Configuration());
+    }
+
+    private Resources createResourcesWithSelfApk() {
+        final AssetManager assets = new AssetManager();
+        assertTrue(assets.addAssetPath(mContext.getPackageResourcePath()) != 0);
 
         final DisplayMetrics dm = new DisplayMetrics();
         dm.setToDefaults();
@@ -65,7 +97,7 @@ public class ResourcesLocaleTest extends AndroidTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testEnglishIsAlwaysConsideredSupported() throws Exception {
         final Resources resources = createResourcesWithApk(R.raw.locales);
         ensureNoLanguage(resources, "en");
@@ -82,7 +114,7 @@ public class ResourcesLocaleTest extends AndroidTestCase {
                 resources.getConfiguration().getLocales().get(0));
     }
 
-    @SmallTest
+    @Test
     public void testSelectFirstSupportedLanguage() throws Exception {
         final Resources resources = createResourcesWithApk(R.raw.locales);
         ensureNoLanguage(resources, "fr");
@@ -99,7 +131,7 @@ public class ResourcesLocaleTest extends AndroidTestCase {
                 resources.getConfiguration().getLocales().get(0));
     }
 
-    @SmallTest
+    @Test
     public void testDeprecatedISOLanguageCode() {
         assertResGetString(Locale.US, R.string.locale_test_res_1, "Testing ID");
         assertResGetString(Locale.forLanguageTag("id"), R.string.locale_test_res_2, "Pengujian IN");
@@ -115,7 +147,8 @@ public class ResourcesLocaleTest extends AndroidTestCase {
         LocaleList locales = new LocaleList(locale);
         final Configuration config = new Configuration();
         config.setLocales(locales);
-        Context newContext = getContext().createConfigurationContext(config);
-        assertEquals(expectedString, newContext.getResources().getString(resId));
+        final Resources resources = createResourcesWithSelfApk();
+        resources.updateConfiguration(config, null);
+        assertEquals(expectedString, resources.getString(resId));
     }
 }

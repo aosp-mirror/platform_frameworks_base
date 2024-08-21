@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.content.pm.ActivityInfo.Config;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * Container for a dynamically typed data value.  Primarily used with
  * {@link android.content.res.Resources} for holding resource values.
  */
+@RavenwoodKeepWholeClass
 public class TypedValue {
     /** The value contains no data. */
     public static final int TYPE_NULL = 0x00;
@@ -827,4 +829,3 @@ public class TypedValue {
         return sb.toString();
     }
 }
-

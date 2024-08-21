@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * will be invoked on that thread.
  * <p>
  * Syncs can be cancelled at any time by the framework. For example a sync that was not
- * user-initiated and lasts longer than 30 minutes will be considered timed-out and cancelled.
+ * user-initiated and lasts longer than 10 minutes will be considered timed-out and cancelled.
  * Similarly the framework will attempt to determine whether or not an adapter is making progress
  * by monitoring its network activity over the course of a minute. If the network traffic over this
  * window is close enough to zero the sync will be cancelled. You can also request the sync be

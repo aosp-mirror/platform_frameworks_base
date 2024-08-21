@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
@@ -45,6 +47,7 @@ import java.nio.channels.WritableByteChannel;
  * opened FileDescriptor that can be used to read the data, as well as the
  * offset and length of that entry's data in the file.
  */
+@RavenwoodKeepWholeClass
 public class AssetFileDescriptor implements Parcelable, Closeable {
     /**
      * Length used with {@link #AssetFileDescriptor(ParcelFileDescriptor, long, long)}
@@ -300,8 +303,28 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
 
         NonSeekableAutoCloseInputStream(AssetFileDescriptor fd) throws IOException {
             super(fd.getParcelFileDescriptor());
-            super.skip(fd.getStartOffset());
+            skipRaw(fd.getStartOffset());
             mRemaining = (int) fd.getLength();
+        }
+
+        @RavenwoodReplace
+        private long skipRaw(long count) throws IOException {
+            return super.skip(count);
+        }
+
+        private long skipRaw$ravenwood(long count) throws IOException {
+            // OpenJDK doesn't allow skip on pipes, so just use read.
+            final byte[] buf = new byte[(int) Math.min(1024, count)];
+            long totalRead = 0;
+            while (totalRead < count) {
+                final int toRead = (int) Math.min(count - totalRead, buf.length);
+                final int read = super.read(buf, 0, toRead);
+                if (read == -1) {
+                    break;
+                }
+                totalRead += read;
+            }
+            return totalRead;
         }
 
         @Override
@@ -341,12 +364,12 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
             if (mRemaining >= 0) {
                 if (mRemaining == 0) return -1;
                 if (count > mRemaining) count = mRemaining;
-                long res = super.skip(count);
+                long res = skipRaw(count);
                 if (res >= 0) mRemaining -= res;
                 return res;
             }
 
-            return super.skip(count);
+            return skipRaw(count);
         }
 
         @Override

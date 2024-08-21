@@ -109,6 +109,7 @@ import com.android.systemui.qs.panels.ui.model.GridCell
 import com.android.systemui.qs.panels.ui.model.SpacerGridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -129,7 +130,7 @@ fun Tile(
 ) {
     val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
     val uiState = remember(state) { state.toUiState() }
-    val colors = TileDefaults.getColorForState(uiState.state)
+    val colors = TileDefaults.getColorForState(uiState)
 
     TileContainer(
         colors = colors,
@@ -150,9 +151,13 @@ fun Tile(
                 secondaryLabel = uiState.secondaryLabel,
                 icon = icon,
                 colors = colors,
-                clickEnabled = true,
-                onClick = tile::onSecondaryClick,
-                onLongClick = tile::onLongClick,
+                toggleClickSupported = state.handlesSecondaryClick,
+                onClick = {
+                    if (state.handlesSecondaryClick) {
+                        tile.onSecondaryClick()
+                    }
+                },
+                onLongClick = { tile.onLongClick(it) },
             )
         }
     }
@@ -168,7 +173,7 @@ private fun TileContainer(
     onClick: (Expandable) -> Unit = {},
     onLongClick: (Expandable) -> Unit = {},
     modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit,
+    content: @Composable BoxScope.(Expandable) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -200,7 +205,7 @@ private fun TileContainer(
                         }
                         .tilePadding(),
             ) {
-                content()
+                content(it)
             }
         }
 
@@ -222,36 +227,27 @@ private fun LargeTileContent(
     secondaryLabel: String?,
     icon: Icon,
     colors: TileColors,
-    clickEnabled: Boolean = false,
-    onClick: (Expandable) -> Unit = {},
-    onLongClick: (Expandable) -> Unit = {},
+    toggleClickSupported: Boolean = false,
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = tileHorizontalArrangement()
     ) {
-        Expandable(
-            color = colors.iconBackground,
-            shape = TileDefaults.TileShape,
-            modifier = Modifier.fillMaxHeight().aspectRatio(1f)
+        // Icon
+        Box(
+            modifier =
+                Modifier.fillMaxHeight().aspectRatio(1f).thenIf(toggleClickSupported) {
+                    Modifier.clip(TileDefaults.TileShape)
+                        .background(colors.iconBackground, { 1f })
+                        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                }
         ) {
-            Box(
-                modifier =
-                    Modifier.fillMaxSize().clip(TileDefaults.TileShape).thenIf(clickEnabled) {
-                        Modifier.combinedClickable(
-                            onClick = { onClick(it) },
-                            onLongClick = { onLongClick(it) }
-                        )
-                    }
-            ) {
-                TileIcon(
-                    icon = icon,
-                    color = colors.icon,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
+            TileIcon(icon = icon, color = colors.icon, modifier = Modifier.align(Alignment.Center))
         }
 
+        // Labels
         Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
             Text(
                 label,
@@ -743,8 +739,20 @@ private object TileDefaults {
     val TileShape = CircleShape
     val IconTileWithLabelHeight = 140.dp
 
+    /** An active tile without dual target uses the active color as background */
     @Composable
     fun activeTileColors(): TileColors =
+        TileColors(
+            background = MaterialTheme.colorScheme.primary,
+            iconBackground = MaterialTheme.colorScheme.primary,
+            label = MaterialTheme.colorScheme.onPrimary,
+            secondaryLabel = MaterialTheme.colorScheme.onPrimary,
+            icon = MaterialTheme.colorScheme.onPrimary,
+        )
+
+    /** An active tile with dual target only show the active color on the icon */
+    @Composable
+    fun activeDualTargetTileColors(): TileColors =
         TileColors(
             background = MaterialTheme.colorScheme.surfaceVariant,
             iconBackground = MaterialTheme.colorScheme.primary,
@@ -774,9 +782,15 @@ private object TileDefaults {
         )
 
     @Composable
-    fun getColorForState(state: Int): TileColors {
-        return when (state) {
-            STATE_ACTIVE -> activeTileColors()
+    fun getColorForState(uiState: TileUiState): TileColors {
+        return when (uiState.state) {
+            STATE_ACTIVE -> {
+                if (uiState.handlesSecondaryClick) {
+                    activeDualTargetTileColors()
+                } else {
+                    activeTileColors()
+                }
+            }
             STATE_INACTIVE -> inactiveTileColors()
             else -> unavailableTileColors()
         }
