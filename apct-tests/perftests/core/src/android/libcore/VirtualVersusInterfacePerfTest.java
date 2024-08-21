@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -36,12 +36,13 @@ import java.util.Map;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class VirtualVersusInterfacePerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeMapPut() {
         Map<String, String> map = new HashMap<String, String>();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             map.put("hello", "world");
         }
@@ -50,7 +51,7 @@ public class VirtualVersusInterfacePerfTest {
     @Test
     public void timeHashMapPut() {
         HashMap<String, String> map = new HashMap<String, String>();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             map.put("hello", "world");
         }
