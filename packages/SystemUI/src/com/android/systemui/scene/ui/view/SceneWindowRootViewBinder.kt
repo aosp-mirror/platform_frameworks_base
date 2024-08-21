@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.ui.composable.AlternateBouncer
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -56,7 +57,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 object SceneWindowRootViewBinder {
@@ -140,11 +140,7 @@ object SceneWindowRootViewBinder {
                         )
                     }
 
-                    launch {
-                        viewModel.isVisible.collect { isVisible ->
-                            onVisibilityChangedInternal(isVisible)
-                        }
-                    }
+                    view.setSnapshotBinding { onVisibilityChangedInternal(viewModel.isVisible) }
                     awaitCancellation()
                 } finally {
                     // Here when destroyed.

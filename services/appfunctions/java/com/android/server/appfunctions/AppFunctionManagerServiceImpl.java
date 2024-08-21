@@ -23,10 +23,6 @@ import android.app.appfunctions.IAppFunctionManager;
 import android.app.appfunctions.IAppFunctionService;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback;
-import android.app.appfunctions.ServiceCallHelper;
-import android.app.appfunctions.ServiceCallHelper.RunServiceCallCallback;
-import android.app.appfunctions.ServiceCallHelper.ServiceUsageCompleteListener;
-import android.app.appfunctions.ServiceCallHelperImpl;
 import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
@@ -34,6 +30,8 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
+import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteListener;
 
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -45,12 +43,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     private static final String TAG = AppFunctionManagerServiceImpl.class.getSimpleName();
-    private final ServiceCallHelper<IAppFunctionService> mExternalServiceCallHelper;
+
+    private final RemoteServiceCaller<IAppFunctionService> mRemoteServiceCaller;
     private final CallerValidator mCallerValidator;
     private final ServiceHelper mInternalServiceHelper;
+    private final ServiceConfig mServiceConfig;
+
 
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
-        this(new ServiceCallHelperImpl<>(
+        this(new RemoteServiceCallerImpl<>(
                         context,
                         IAppFunctionService.Stub::asInterface, new ThreadPoolExecutor(
                         /*corePoolSize=*/ Runtime.getRuntime().availableProcessors(),
@@ -59,17 +60,20 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         /*unit=*/ TimeUnit.SECONDS,
                         /*workQueue=*/ new LinkedBlockingQueue<>())),
                 new CallerValidatorImpl(context),
-                new ServiceHelperImpl(context));
+                new ServiceHelperImpl(context),
+                new ServiceConfigImpl());
     }
 
     @VisibleForTesting
-    AppFunctionManagerServiceImpl(ServiceCallHelper<IAppFunctionService> serviceCallHelper,
-                                  CallerValidator apiValidator,
-                                  ServiceHelper appFunctionInternalServiceHelper) {
-        mExternalServiceCallHelper = Objects.requireNonNull(serviceCallHelper);
-        mCallerValidator = Objects.requireNonNull(apiValidator);
+    AppFunctionManagerServiceImpl(RemoteServiceCaller<IAppFunctionService> remoteServiceCaller,
+                                  CallerValidator callerValidator,
+                                  ServiceHelper appFunctionInternalServiceHelper,
+                                  ServiceConfig serviceConfig) {
+        mRemoteServiceCaller = Objects.requireNonNull(remoteServiceCaller);
+        mCallerValidator = Objects.requireNonNull(callerValidator);
         mInternalServiceHelper =
                 Objects.requireNonNull(appFunctionInternalServiceHelper);
+        mServiceConfig = serviceConfig;
     }
 
     @Override
@@ -82,10 +86,19 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         final SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback =
                 new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback);
 
-        String validatedCallingPackage = mCallerValidator
-                .validateCallingPackage(requestInternal.getCallingPackage());
-        UserHandle targetUser = mCallerValidator.verifyTargetUserHandle(
-                requestInternal.getUserHandle(), validatedCallingPackage);
+        String validatedCallingPackage;
+        UserHandle targetUser;
+        try {
+            validatedCallingPackage = mCallerValidator
+                    .validateCallingPackage(requestInternal.getCallingPackage());
+            targetUser = mCallerValidator.verifyTargetUserHandle(
+                    requestInternal.getUserHandle(), validatedCallingPackage);
+        } catch (SecurityException exception) {
+            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
+                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
+                    getExceptionMessage(exception)).build());
+            return;
+        }
 
         // TODO(b/354956319): Add and honor the new enterprise policies.
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
@@ -107,8 +120,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
         if (!mCallerValidator.verifyCallerCanExecuteAppFunction(
                 validatedCallingPackage, targetPackageName)) {
-            throw new SecurityException("Caller does not have permission to execute the app "
-                    + "function.");
+            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
+                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
+                    "Caller does not have permission to execute the appfunction")
+                    .build());
+            return;
         }
 
         Intent serviceIntent = mInternalServiceHelper.resolveAppFunctionService(
@@ -121,13 +137,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             ).build());
             return;
         }
-
-        // TODO(b/357551503): Offload call to async executor.
         bindAppFunctionServiceUnchecked(requestInternal, serviceIntent, targetUser,
                 safeExecuteAppFunctionCallback,
                 /*bindFlags=*/ Context.BIND_AUTO_CREATE,
-                // TODO(b/357551503): Make timeout configurable.
-                /*timeoutInMillis=*/ 30_000L);
+                /*timeoutInMillis=*/ mServiceConfig.getExecutionTimeoutConfig());
     }
 
     private void bindAppFunctionServiceUnchecked(
@@ -136,12 +149,12 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             @NonNull SafeOneTimeExecuteAppFunctionCallback
                     safeExecuteAppFunctionCallback,
             int bindFlags, long timeoutInMillis) {
-        boolean bindServiceResult = mExternalServiceCallHelper.runServiceCall(
+        boolean bindServiceResult = mRemoteServiceCaller.runServiceCall(
                 serviceIntent,
                 bindFlags,
                 timeoutInMillis,
                 targetUser,
-                /*timeOutCallback=*/ new RunServiceCallCallback<IAppFunctionService>() {
+                new RunServiceCallCallback<IAppFunctionService>() {
                     @Override
                     public void onServiceConnected(@NonNull IAppFunctionService service,
                                                    @NonNull ServiceUsageCompleteListener
@@ -159,8 +172,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             );
                         } catch (Exception e) {
                             safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                    .Builder(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                                    e.getMessage()).build());
+                                    .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
+                                    getExceptionMessage(e)).build());
                             serviceUsageCompleteListener.onCompleted();
                         }
                     }
@@ -169,7 +182,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     public void onFailedToConnect() {
                         Slog.e(TAG, "Failed to connect to service");
                         safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                .Builder(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                                .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
                                 "Failed to connect to AppFunctionService").build());
                     }
 
@@ -192,5 +205,9 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     "Failed to bind the AppFunctionService."
             ).build());
         }
+    }
+
+    private String getExceptionMessage(Exception exception) {
+        return exception.getMessage() == null ? "" : exception.getMessage();
     }
 }

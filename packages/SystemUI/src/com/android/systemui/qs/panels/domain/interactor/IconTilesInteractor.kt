@@ -22,10 +22,12 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
 import com.android.systemui.qs.panels.shared.model.PanelsLog
+import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
@@ -35,24 +37,47 @@ class IconTilesInteractor
 @Inject
 constructor(
     repo: DefaultLargeTilesRepository,
+    private val currentTilesInteractor: CurrentTilesInteractor,
     private val preferencesInteractor: QSPreferencesInteractor,
     @PanelsLog private val logBuffer: LogBuffer,
     @Application private val applicationScope: CoroutineScope
 ) {
 
     val largeTilesSpecs =
-        preferencesInteractor.largeTilesSpecs
+        combine(preferencesInteractor.largeTilesSpecs, currentTilesInteractor.currentTiles) {
+                largeTiles,
+                currentTiles ->
+                if (currentTiles.isEmpty()) {
+                    largeTiles
+                } else {
+                    // Only current tiles can be resized, so observe the current tiles and find the
+                    // intersection between them and the large tiles.
+                    val newLargeTiles = largeTiles intersect currentTiles.map { it.spec }.toSet()
+                    if (newLargeTiles != largeTiles) {
+                        preferencesInteractor.setLargeTilesSpecs(newLargeTiles)
+                    }
+                    newLargeTiles
+                }
+            }
             .onEach { logChange(it) }
             .stateIn(applicationScope, SharingStarted.Eagerly, repo.defaultLargeTiles)
 
     fun isIconTile(spec: TileSpec): Boolean = !largeTilesSpecs.value.contains(spec)
 
     fun resize(spec: TileSpec) {
+        if (!isCurrent(spec)) {
+            return
+        }
+
         if (largeTilesSpecs.value.contains(spec)) {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value - spec)
         } else {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value + spec)
         }
+    }
+
+    private fun isCurrent(spec: TileSpec): Boolean {
+        return currentTilesInteractor.currentTilesSpecs.contains(spec)
     }
 
     private fun logChange(specs: Set<TileSpec>) {

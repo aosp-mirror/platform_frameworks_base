@@ -57,6 +57,7 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.util.ShortcutUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -578,6 +579,9 @@ class AccessibilityUserState {
         pw.append(", alwaysOnMagnificationEnabled=")
                 .append(String.valueOf(mAlwaysOnMagnificationEnabled));
         pw.append("}");
+        pw.println();
+        pw.append("     button mode: ");
+        pw.append(String.valueOf(ShortcutUtils.getButtonMode(mContext, mUserId)));
         pw.println();
         dumpShortcutTargets(pw, HARDWARE, "shortcut key");
         dumpShortcutTargets(pw, SOFTWARE, "button");

@@ -502,13 +502,6 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
-        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
-            ComponentName component = focusedWin.mActivityRecord != null
-                    ? focusedWin.mActivityRecord.mActivityComponent : null;
-            mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    component, focusedWin.getRequestedVisibleTypes());
-            return mDisplayContent.mRemoteInsetsControlTarget;
-        }
         if (areTypesForciblyShowing(Type.statusBars())) {
             // Status bar is forcibly shown. We don't want the client to control the status bar, and
             // we will dispatch the real visibility of status bar to the client.
@@ -525,7 +518,17 @@ class InsetsPolicy {
                 && (notificationShade == null || !notificationShade.canReceiveKeys())) {
             // Non-fullscreen focused window should not break the state that the top-fullscreen-app
             // window hides status bar, unless the notification shade can receive keys.
-            return mPolicy.getTopFullscreenOpaqueWindow();
+            if (remoteInsetsControllerControlsSystemBars(
+                    mPolicy.getTopFullscreenOpaqueWindow())) {
+                notifyRemoteInsetsController(mPolicy.getTopFullscreenOpaqueWindow());
+                return mDisplayContent.mRemoteInsetsControlTarget;
+            } else {
+                return mPolicy.getTopFullscreenOpaqueWindow();
+            }
+        }
+        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            notifyRemoteInsetsController(focusedWin);
+            return mDisplayContent.mRemoteInsetsControlTarget;
         }
         return focusedWin;
     }
@@ -562,13 +565,6 @@ class InsetsPolicy {
                 return focusedWin;
             }
         }
-        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
-            ComponentName component = focusedWin.mActivityRecord != null
-                    ? focusedWin.mActivityRecord.mActivityComponent : null;
-            mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    component, focusedWin.getRequestedVisibleTypes());
-            return mDisplayContent.mRemoteInsetsControlTarget;
-        }
         if (areTypesForciblyShowing(Type.navigationBars())) {
             // Navigation bar is forcibly shown. We don't want the client to control the navigation
             // bar, and we will dispatch the real visibility of navigation bar to the client.
@@ -586,9 +582,29 @@ class InsetsPolicy {
                 && (notificationShade == null || !notificationShade.canReceiveKeys())) {
             // Non-fullscreen focused window should not break the state that the top-fullscreen-app
             // window hides navigation bar, unless the notification shade can receive keys.
-            return mPolicy.getTopFullscreenOpaqueWindow();
+            if (remoteInsetsControllerControlsSystemBars(
+                    mPolicy.getTopFullscreenOpaqueWindow())) {
+                notifyRemoteInsetsController(mPolicy.getTopFullscreenOpaqueWindow());
+                return mDisplayContent.mRemoteInsetsControlTarget;
+            } else {
+                return mPolicy.getTopFullscreenOpaqueWindow();
+            }
+        }
+        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            notifyRemoteInsetsController(focusedWin);
+            return mDisplayContent.mRemoteInsetsControlTarget;
         }
         return focusedWin;
+    }
+
+    private void notifyRemoteInsetsController(@Nullable WindowState win) {
+        if (win == null) {
+            return;
+        }
+        ComponentName component = win.mActivityRecord != null
+                ? win.mActivityRecord.mActivityComponent : null;
+        mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
+                component, win.getRequestedVisibleTypes());
     }
 
     boolean areTypesForciblyShowing(@InsetsType int types) {

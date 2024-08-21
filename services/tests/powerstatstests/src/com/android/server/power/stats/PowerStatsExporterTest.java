@@ -96,8 +96,8 @@ public class PowerStatsExporterTest {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new CpuPowerStatsProcessor(mStatsRule.getPowerProfile(),
+                .setProcessorSupplier(
+                        () -> new CpuPowerStatsProcessor(mStatsRule.getPowerProfile(),
                                 mStatsRule.getCpuScalingPolicies()));
         config.trackCustomPowerComponents(CustomEnergyConsumerPowerStatsProcessor::new)
                 .trackDeviceStates(
@@ -508,9 +508,8 @@ public class PowerStatsExporterTest {
         mCpuStatsArrayLayout.setUidTimeByPowerBracket(uidStats2, 0, 2469);
         mHistory.recordPowerStats(3000, 3000, powerStats);
 
-        mPowerStatsAggregator.aggregatePowerStats(0, 3500, stats -> {
-            mPowerStatsStore.storeAggregatedPowerStats(stats);
-        });
+        mPowerStatsAggregator.aggregatePowerStats(0, 3500,
+                stats -> mPowerStatsStore.storeAggregatedPowerStats(stats));
 
         mHistory.recordProcessStateChange(4000, 4000, APP_UID1,
                 BatteryConsumer.PROCESS_STATE_BACKGROUND);

@@ -18,7 +18,10 @@ package com.android.systemui.qs.tiles;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
@@ -38,6 +41,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager;
+import com.android.systemui.qs.tiles.dialog.WifiStateWorker;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.IconState;
@@ -65,6 +69,8 @@ public class InternetTileTest extends SysuiTestCase {
     @Mock
     private InternetDialogManager mInternetDialogManager;
     @Mock
+    private WifiStateWorker mWifiStateWorker;
+    @Mock
     private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
@@ -89,7 +95,8 @@ public class InternetTileTest extends SysuiTestCase {
             mock(QSLogger.class),
             mNetworkController,
             mAccessPointController,
-                mInternetDialogManager
+            mInternetDialogManager,
+            mWifiStateWorker
         );
 
         mTile.initialize();
@@ -166,5 +173,23 @@ public class InternetTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         assertThat(mTile.getState().icon).isEqualTo(
                 QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable));
+    }
+
+    @Test
+    public void secondaryClick_turnsWifiOff() {
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
+
+        mTile.secondaryClick(null);
+
+        verify(mWifiStateWorker, times(1)).setWifiEnabled(eq(false));
+    }
+
+    @Test
+    public void secondaryClick_turnsWifiOn() {
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(false);
+
+        mTile.secondaryClick(null);
+
+        verify(mWifiStateWorker, times(1)).setWifiEnabled(eq(true));
     }
 }

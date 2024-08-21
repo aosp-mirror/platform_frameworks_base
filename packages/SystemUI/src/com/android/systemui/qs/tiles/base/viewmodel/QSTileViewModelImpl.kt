@@ -229,7 +229,8 @@ class QSTileViewModelImpl<DATA_TYPE>(
         filter { action ->
             val isFalseAction =
                 when (action) {
-                    is QSTileUserAction.Click ->
+                    is QSTileUserAction.Click,
+                    is QSTileUserAction.ToggleClick ->
                         falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
                     is QSTileUserAction.LongClick ->
                         falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)

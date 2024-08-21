@@ -112,13 +112,13 @@
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Иштеп жатат (сол жана оң)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Жигердүү (медиа үчүн гана). Батарея: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Жигердүү (медиа үчүн гана). Батарея: L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Туташкан (чогуу угуу колдоого алынат). Батарея: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
-    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Туташкан (чогуу угуу колдоого алынат). Батарея: L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
-    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Туташкан (чогуу угуу колдоого алынат). Сол кулак – батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
-    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Туташкан (чогуу угуу колдоого алынат). Оң кулак – батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
-    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Туташкан (чогуу угуу колдоого алынат)"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Туташып турат (чогуу уксаңыз болот). Батарея: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Туташып турат (чогуу уксаңыз болот). Батарея: L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Туташып турат (чогуу уксаңыз болот). Сол кулак – батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Туташып турат (чогуу уксаңыз болот). Оң кулак – батареянын деңгээли: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Туташып турат (чогуу уксаңыз болот)"</string>
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Активдүү (медиа үчүн гана)"</string>
-    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Чогуу угуу колдоого алынат"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Чогуу уксаңыз болот"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Активдүү (медиа үчүн гана), сол кулакчын гана"</string>
     <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Активдүү (медиа үчүн гана), оң кулакчын гана"</string>
     <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Активдүү (медиа үчүн гана), сол жана оң кулакчын"</string>

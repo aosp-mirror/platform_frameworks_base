@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.app.appfunctions;
+package com.android.server.appfunctions;
 
 import android.annotation.NonNull;
 import android.content.Intent;
@@ -27,7 +27,7 @@ import android.os.UserHandle;
  * @param <T> Class of wrapped service.
  * @hide
  */
-public interface ServiceCallHelper<T> {
+public interface RemoteServiceCaller<T> {
 
     /**
      * Initiates service binding and executes a provided method when the service connects. Unbinds

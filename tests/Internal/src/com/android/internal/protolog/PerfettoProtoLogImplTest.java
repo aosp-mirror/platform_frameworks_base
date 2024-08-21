@@ -756,6 +756,48 @@ public class PerfettoProtoLogImplTest {
                 .isEqualTo("My null args: 0, 0, false");
     }
 
+    @Test
+    public void handlesConcurrentTracingSessions() throws IOException {
+        PerfettoTraceMonitor traceMonitor1 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true)
+                        .build();
+
+        PerfettoTraceMonitor traceMonitor2 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true)
+                        .build();
+
+        final ResultWriter writer2 = new ResultWriter()
+                .forScenario(new ScenarioBuilder()
+                        .forClass(createTempFile("temp", "").getName()).build())
+                .withOutputDir(mTracingDirectory)
+                .setRunComplete();
+
+        try {
+            traceMonitor1.start();
+            traceMonitor2.start();
+
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
+                    LogDataType.BOOLEAN, new Object[]{true});
+        } finally {
+            traceMonitor1.stop(mWriter);
+            traceMonitor2.stop(writer2);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protologFromMonitor1 = reader.readProtoLogTrace();
+
+        final ResultReader reader2 = new ResultReader(writer2.write(), mTraceConfig);
+        final ProtoLogTrace protologFromMonitor2 = reader2.readProtoLogTrace();
+
+        Truth.assertThat(protologFromMonitor1.messages).hasSize(1);
+        Truth.assertThat(protologFromMonitor1.messages.get(0).getMessage())
+                .isEqualTo("My Test Debug Log Message true");
+
+        Truth.assertThat(protologFromMonitor2.messages).hasSize(1);
+        Truth.assertThat(protologFromMonitor2.messages.get(0).getMessage())
+                .isEqualTo("My Test Debug Log Message true");
+    }
+
     private enum TestProtoLogGroup implements IProtoLogGroup {
         TEST_GROUP(true, true, false, "TEST_TAG");
 

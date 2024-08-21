@@ -3434,6 +3434,23 @@ package android.companion {
 
 package android.companion.virtual {
 
+  @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public final class ActivityPolicyExemption implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.content.ComponentName getComponentName();
+    method public int getDisplayId();
+    method @Nullable public String getPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.ActivityPolicyExemption> CREATOR;
+  }
+
+  public static final class ActivityPolicyExemption.Builder {
+    ctor public ActivityPolicyExemption.Builder();
+    method @NonNull public android.companion.virtual.ActivityPolicyExemption build();
+    method @NonNull public android.companion.virtual.ActivityPolicyExemption.Builder setComponentName(@NonNull android.content.ComponentName);
+    method @NonNull public android.companion.virtual.ActivityPolicyExemption.Builder setDisplayId(int);
+    method @NonNull public android.companion.virtual.ActivityPolicyExemption.Builder setPackageName(@NonNull String);
+  }
+
   public final class VirtualDevice implements android.os.Parcelable {
     method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") public boolean hasCustomAudioInputSupport();
     method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") public boolean hasCustomCameraSupport();
@@ -3467,7 +3484,7 @@ package android.companion.virtual {
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.content.ComponentName);
-    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.content.ComponentName, int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.companion.virtual.ActivityPolicyExemption);
     method public void addSoundEffectListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
     method @NonNull public android.content.Context createContext();
@@ -3492,7 +3509,7 @@ package android.companion.virtual {
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
-    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName, int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.companion.virtual.ActivityPolicyExemption);
     method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
     method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int, int);

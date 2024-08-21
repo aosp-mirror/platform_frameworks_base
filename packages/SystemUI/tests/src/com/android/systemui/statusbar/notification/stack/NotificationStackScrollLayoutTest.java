@@ -354,6 +354,20 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
+    public void updateStackEndHeightAndStackHeight_maxNotificationsSet_withSceneContainer() {
+        float stackHeight = 300f;
+        when(mStackSizeCalculator.computeHeight(eq(mStackScroller), anyInt(), anyFloat()))
+                .thenReturn(stackHeight);
+        mStackScroller.setMaxDisplayedNotifications(3); // any non-zero amount
+
+        clearInvocations(mAmbientState);
+        mStackScroller.updateStackEndHeightAndStackHeight(1f);
+
+        verify(mAmbientState).setStackHeight(eq(300f));
+    }
+
+    @Test
     public void updateStackEndHeightAndStackHeight_onlyUpdatesStackHeightDuringSwipeUp() {
         final float expansionFraction = 0.5f;
         mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);

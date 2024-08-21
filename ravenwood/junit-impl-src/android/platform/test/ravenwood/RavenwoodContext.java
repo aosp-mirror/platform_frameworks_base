@@ -16,8 +16,13 @@
 
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
+
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManager;
 import android.os.Handler;
@@ -31,11 +36,18 @@ import android.ravenwood.example.RedManager;
 import android.util.ArrayMap;
 import android.util.Singleton;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class RavenwoodContext extends RavenwoodBaseContext {
+    private static final String TAG = "Ravenwood";
+
+    private final Object mLock = new Object();
     private final String mPackageName;
     private final HandlerThread mMainThread;
 
@@ -44,15 +56,29 @@ public class RavenwoodContext extends RavenwoodBaseContext {
     private final ArrayMap<Class<?>, String> mClassToName = new ArrayMap<>();
     private final ArrayMap<String, Supplier<?>> mNameToFactory = new ArrayMap<>();
 
+    private final File mFilesDir;
+    private final File mCacheDir;
+    private final Supplier<Resources> mResourcesSupplier;
+
+    @GuardedBy("mLock")
+    private Resources mResources;
+
+    @GuardedBy("mLock")
+    private Resources.Theme mTheme;
+
     private void registerService(Class<?> serviceClass, String serviceName,
             Supplier<?> serviceSupplier) {
         mClassToName.put(serviceClass, serviceName);
         mNameToFactory.put(serviceName, serviceSupplier);
     }
 
-    public RavenwoodContext(String packageName, HandlerThread mainThread) {
+    public RavenwoodContext(String packageName, HandlerThread mainThread,
+            Supplier<Resources> resourcesSupplier) throws IOException {
         mPackageName = packageName;
         mMainThread = mainThread;
+        mResourcesSupplier = resourcesSupplier;
+        mFilesDir = createTempDir("files-dir");
+        mCacheDir = createTempDir("cache-dir");
 
         // Services provided by a typical shipping device
         registerService(ClipboardManager.class,
@@ -83,6 +109,11 @@ public class RavenwoodContext extends RavenwoodBaseContext {
             throw new UnsupportedOperationException(
                     "Service " + serviceName + " not yet supported under Ravenwood");
         }
+    }
+
+    void cleanUp() {
+        deleteDir(mFilesDir);
+        deleteDir(mCacheDir);
     }
 
     @Override
@@ -150,6 +181,52 @@ public class RavenwoodContext extends RavenwoodBaseContext {
         return Context.DEVICE_ID_DEFAULT;
     }
 
+    @Override
+    public File getFilesDir() {
+        return mFilesDir;
+    }
+
+    @Override
+    public File getCacheDir() {
+        return mCacheDir;
+    }
+
+    @Override
+    public boolean deleteFile(String name) {
+        File f = new File(name);
+        return f.delete();
+    }
+
+    @Override
+    public Resources getResources() {
+        synchronized (mLock) {
+            if (mResources == null) {
+                mResources = mResourcesSupplier.get();
+            }
+            return mResources;
+        }
+    }
+
+    @Override
+    public AssetManager getAssets() {
+        return getResources().getAssets();
+    }
+
+    @Override
+    public Theme getTheme() {
+        synchronized (mLock) {
+            if (mTheme == null) {
+                mTheme = getResources().newTheme();
+            }
+            return mTheme;
+        }
+    }
+
+    @Override
+    public String getPackageResourcePath() {
+        return new File(RAVENWOOD_RESOURCE_APK).getAbsolutePath();
+    }
+
     /**
      * Wrap the given {@link Supplier} to become memoized.
      *
@@ -174,5 +251,27 @@ public class RavenwoodContext extends RavenwoodBaseContext {
 
     public interface ThrowingSupplier<T> {
         T get() throws Exception;
+    }
+
+
+    static File createTempDir(String prefix) throws IOException {
+        // Create a temp file, delete it and recreate it as a directory.
+        final File dir = File.createTempFile(prefix + "-", "");
+        dir.delete();
+        dir.mkdirs();
+        return dir;
+    }
+
+    static void deleteDir(File dir) {
+        File[] children = dir.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                if (child.isDirectory()) {
+                    deleteDir(child);
+                } else {
+                    child.delete();
+                }
+            }
+        }
     }
 }
