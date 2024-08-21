@@ -466,7 +466,7 @@ public class InputManagerService extends IInputManager.Stub
                 injector.getLooper());
         mTouchpadDebugViewController =
                 touchpadVisualizer() ? new TouchpadDebugViewController(mContext,
-                        injector.getLooper()) : null;
+                        injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
         mKeyboardBacklightController = InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
@@ -1796,6 +1796,16 @@ public class InputManagerService extends IInputManager.Stub
     @Override // Binder call
     public InputSensorInfo[] getSensorList(int deviceId) {
         return mNative.getSensorList(deviceId);
+    }
+
+    /**
+     * Retrieves the hardware properties of the touchpad for the given device ID.
+     * Returns null if the device has no touchpad hardware properties
+     * or if the device ID is invalid.
+     */
+    @Nullable
+    public TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId) {
+        return mNative.getTouchpadHardwareProperties(deviceId);
     }
 
     @Override // Binder call

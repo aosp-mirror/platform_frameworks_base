@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 class NotificationScrollViewModel
@@ -116,6 +117,14 @@ constructor(
             }
             .distinctUntilChanged()
             .dumpWhileCollecting("expandFraction")
+
+    val shouldResetStackTop: Flow<Boolean> =
+        sceneInteractor.transitionState
+            .mapNotNull { state ->
+                state is ObservableTransitionState.Idle && state.currentScene == Scenes.Gone
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("shouldResetStackTop")
 
     private operator fun SceneKey.contains(scene: SceneKey) =
         sceneInteractor.isSceneInFamily(scene, this)

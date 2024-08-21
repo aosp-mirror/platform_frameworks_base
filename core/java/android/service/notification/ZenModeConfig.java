@@ -187,6 +187,13 @@ public class ZenModeConfig implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConfigOrigin {}
 
+    /**
+     * Prefix for the ids of implicit Zen rules. Implicit rules are those created automatically
+     * on behalf of apps that call {@link NotificationManager#setNotificationPolicy} or
+     * {@link NotificationManager#setInterruptionFilter}.
+     */
+    private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
+
     public static final int SOURCE_ANYONE = Policy.PRIORITY_SENDERS_ANY;
     public static final int SOURCE_CONTACT = Policy.PRIORITY_SENDERS_CONTACTS;
     public static final int SOURCE_STAR = Policy.PRIORITY_SENDERS_STARRED;
@@ -2491,6 +2498,16 @@ public class ZenModeConfig implements Parcelable {
     }
 
     // ==== End built-in system conditions ====
+
+    /** Generate the rule id for the implicit rule for the specified package. */
+    public static String implicitRuleId(String forPackage) {
+        return IMPLICIT_RULE_ID_PREFIX + forPackage;
+    }
+
+    /** Returns whether the rule id corresponds to an implicit rule. */
+    public static boolean isImplicitRuleId(@NonNull String ruleId) {
+        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
+    }
 
     private static int[] tryParseHourAndMinute(String value) {
         if (TextUtils.isEmpty(value)) return null;

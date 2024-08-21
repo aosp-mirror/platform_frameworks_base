@@ -1721,6 +1721,19 @@ public class NotificationStackScrollLayout
         if (mTopHeadsUpRow == null) {
             return 0;
         }
+        ExpandableNotificationRow row = getTopHeadsUpRow();
+        return row.getPinnedHeadsUpHeight();
+    }
+
+    private int getTopHeadsUpIntrinsicHeight() {
+        if (mTopHeadsUpRow == null) {
+            return 0;
+        }
+        ExpandableNotificationRow row = getTopHeadsUpRow();
+        return row.getIntrinsicHeight();
+    }
+
+    private ExpandableNotificationRow getTopHeadsUpRow() {
         ExpandableNotificationRow row = mTopHeadsUpRow;
         if (row.isChildInGroup()) {
             final NotificationEntry groupSummary =
@@ -1729,7 +1742,7 @@ public class NotificationStackScrollLayout
                 row = groupSummary.getRow();
             }
         }
-        return row.getPinnedHeadsUpHeight();
+        return row;
     }
 
     /**
@@ -2511,7 +2524,7 @@ public class NotificationStackScrollLayout
 
     @Override
     public int getTopHeadsUpHeight() {
-        return getTopHeadsUpPinnedHeight();
+        return getTopHeadsUpIntrinsicHeight();
     }
 
     /**
@@ -5732,7 +5745,7 @@ public class NotificationStackScrollLayout
         return mDisallowScrollingInThisMotion;
     }
 
-    boolean isBeingDragged() {
+    public boolean isBeingDragged() {
         return mIsBeingDragged;
     }
 

@@ -857,8 +857,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
         if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
-                && !mImeLayeringTarget.isRequestedVisible(ime())
-                && !mImeLayeringTarget.isVisibleRequested()) {
+                && !(mImeLayeringTarget.isRequestedVisible(ime())
+                        && mImeLayeringTarget.isVisibleRequested())) {
             return false;
         }
 

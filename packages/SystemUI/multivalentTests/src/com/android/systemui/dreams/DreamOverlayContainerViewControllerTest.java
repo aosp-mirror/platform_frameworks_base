@@ -62,7 +62,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -324,14 +323,5 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         // This test will catch failures in presubmit when the dream_handles_being_obscured flag is
         // enabled.
         mController.onViewAttached();
-    }
-
-    @Test
-    public void destroy_cleansUpState() {
-        mController.destroy();
-        verify(mStateController).removeCallback(any());
-        verify(mAmbientStatusBarViewController).destroy();
-        verify(mComplicationHostViewController).destroy();
-        verify(mLowLightTransitionCoordinator).setLowLightEnterListener(ArgumentMatchers.isNull());
     }
 }

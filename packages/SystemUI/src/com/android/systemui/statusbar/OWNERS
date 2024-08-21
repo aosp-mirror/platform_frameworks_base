@@ -16,7 +16,7 @@ per-file *Keyguard* = set noparent
 per-file *Keyguard* = file:../keyguard/OWNERS
 per-file *Notification* = set noparent
 per-file *Notification* = file:notification/OWNERS
-per-file *Mode* = set noparent
+# Not setting noparent here, since *Mode* matches many other classes (e.g., *ViewModel*)
 per-file *Mode* = file:notification/OWNERS
 per-file *RemoteInput* = set noparent
 per-file *RemoteInput* = file:notification/OWNERS

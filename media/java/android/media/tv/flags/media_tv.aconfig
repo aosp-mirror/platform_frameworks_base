@@ -40,3 +40,11 @@ flag {
     description: "Performance and Storage Optimization in Google TV Kids Mode."
     bug: "288383796"
 }
+
+flag {
+    name: "tuner_w_apis"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Tuner V4.0 APIs for Android W"
+    bug: "320419647"
+}

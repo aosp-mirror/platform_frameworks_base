@@ -39,6 +39,7 @@ import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_APP;
 import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
+import static android.service.notification.ZenModeConfig.implicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -154,8 +155,6 @@ public class ZenModeHelper {
     private static final int RULE_INSTANCE_GRACE_PERIOD = 1000 * 60 * 60 * 72;
     static final int RULE_LIMIT_PER_PACKAGE = 100;
     private static final Duration DELETED_RULE_KEPT_FOR = Duration.ofDays(30);
-
-    private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
 
     private static final int MAX_ICON_RESOURCE_NAME_LENGTH = 1000;
 
@@ -783,14 +782,6 @@ public class ZenModeHelper {
         return rule;
     }
 
-    private static String implicitRuleId(String forPackage) {
-        return IMPLICIT_RULE_ID_PREFIX + forPackage;
-    }
-
-    static boolean isImplicitRuleId(@NonNull String ruleId) {
-        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
-    }
-
     boolean removeAutomaticZenRule(String id, @ConfigOrigin int origin, String reason,
             int callingUid) {
         checkManageRuleOrigin("removeAutomaticZenRule", origin);
@@ -977,7 +968,16 @@ public class ZenModeHelper {
                         rule.setConditionOverride(OVERRIDE_DEACTIVATE);
                     }
                 }
+            } else if (origin == ORIGIN_USER_IN_APP && condition != null
+                    && condition.source == SOURCE_USER_ACTION) {
+                // Remove override and just apply the condition. Since the app is reporting that the
+                // user asked for it, by definition it knows that, and will adjust its automatic
+                // behavior accordingly -> no need to override.
+                rule.condition = condition;
+                rule.resetConditionOverride();
             } else {
+                // Update the condition, and check whether we can remove the override (if automatic
+                // and manual decisions agree).
                 rule.condition = condition;
                 rule.reconsiderConditionOverride();
             }

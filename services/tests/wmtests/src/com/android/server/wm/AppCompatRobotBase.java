@@ -37,6 +37,8 @@ abstract class AppCompatRobotBase {
     private final AppCompatConfigurationRobot mConfigurationRobot;
     @NonNull
     private final AppCompatComponentPropRobot mOptPropRobot;
+    @NonNull
+    private final AppCompatResourcesRobot mResourcesRobot;
 
     AppCompatRobotBase(@NonNull WindowManagerService wm,
             @NonNull ActivityTaskManagerService atm,
@@ -48,6 +50,7 @@ abstract class AppCompatRobotBase {
         mConfigurationRobot =
                 new AppCompatConfigurationRobot(wm.mAppCompatConfiguration);
         mOptPropRobot = new AppCompatComponentPropRobot(wm);
+        mResourcesRobot = new AppCompatResourcesRobot(wm.mContext.getResources());
     }
 
     AppCompatRobotBase(@NonNull WindowManagerService wm,
@@ -60,7 +63,7 @@ abstract class AppCompatRobotBase {
      * Specific Robots can override this method to add operation to run on a newly created
      * {@link ActivityRecord}. Common case is to invoke spyOn().
      *
-     * @param activity THe newly created {@link ActivityRecord}.
+     * @param activity The newly created {@link ActivityRecord}.
      */
     @CallSuper
     void onPostActivityCreation(@NonNull ActivityRecord activity) {
@@ -81,7 +84,6 @@ abstract class AppCompatRobotBase {
         return mConfigurationRobot;
     }
 
-    @NonNull
     void applyOnConf(@NonNull Consumer<AppCompatConfigurationRobot> consumer) {
         consumer.accept(mConfigurationRobot);
     }
@@ -91,7 +93,6 @@ abstract class AppCompatRobotBase {
         return mActivityRobot;
     }
 
-    @NonNull
     void applyOnActivity(@NonNull Consumer<AppCompatActivityRobot> consumer) {
         consumer.accept(mActivityRobot);
     }
@@ -101,8 +102,16 @@ abstract class AppCompatRobotBase {
         return mOptPropRobot;
     }
 
-    @NonNull
     void applyOnProp(@NonNull Consumer<AppCompatComponentPropRobot> consumer) {
         consumer.accept(mOptPropRobot);
+    }
+
+    @NonNull
+    AppCompatResourcesRobot resources() {
+        return mResourcesRobot;
+    }
+
+    void applyOnResources(@NonNull Consumer<AppCompatResourcesRobot> consumer) {
+        consumer.accept(mResourcesRobot);
     }
 }
