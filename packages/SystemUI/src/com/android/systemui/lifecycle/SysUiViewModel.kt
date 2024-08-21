@@ -30,6 +30,12 @@ import kotlinx.coroutines.launch
 /** Base class for all System UI view-models. */
 abstract class SysUiViewModel : BaseActivatable() {
 
+    /**
+     * Returns a snapshot [State] that's kept up-to-date as long as the [SysUiViewModel] is active.
+     *
+     * @param source The upstream [StateFlow] to collect from; values emitted to it will be
+     *   automatically set on the returned [State].
+     */
     @StateFactoryMarker
     fun <T> hydratedStateOf(
         source: StateFlow<T>,
@@ -40,6 +46,13 @@ abstract class SysUiViewModel : BaseActivatable() {
         )
     }
 
+    /**
+     * Returns a snapshot [State] that's kept up-to-date as long as the [SysUiViewModel] is active.
+     *
+     * @param initialValue The first value to place on the [State]
+     * @param source The upstream [Flow] to collect from; values emitted to it will be automatically
+     *   set on the returned [State].
+     */
     @StateFactoryMarker
     fun <T> hydratedStateOf(
         initialValue: T,
