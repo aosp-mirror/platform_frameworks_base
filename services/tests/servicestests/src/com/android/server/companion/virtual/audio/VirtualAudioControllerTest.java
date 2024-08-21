@@ -83,6 +83,7 @@ public class VirtualAudioControllerTest {
                         /* allowedUsers= */ new ArraySet<>(),
                         /* activityLaunchAllowedByDefault= */ true,
                         /* activityPolicyExemptions= */ new ArraySet<>(),
+                        /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                         /* crossTaskNavigationAllowedByDefault= */ true,
                         /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                         /* activityListener= */ null,

@@ -799,6 +799,62 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Specifies a package name to be exempt from the current activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then all activities from the specified package will be blocked from launching.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then all
+         * activities from the specified package will be allowed to launch.</p>
+         *
+         * <p>Package level exemptions are independent of component level exemptions added via
+         * {@link #addActivityPolicyExemption(String)}, i.e. removing a package exemption will not
+         * remove any existing component exemptions, even if the component belongs to that package.
+         * </p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * packages.</p>
+         *
+         * @see #removeActivityPolicyExemption(String)
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void addActivityPolicyExemption(@NonNull String packageName) {
+            mVirtualDeviceInternal.addActivityPolicyPackageExemption(
+                    Objects.requireNonNull(packageName));
+        }
+
+        /**
+         * Makes the specified package name adhere to the default activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then all activities from the specified package will be allowed to launch.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then all
+         * activities from the specified package will be blocked from launching.</p>
+         *
+         * <p>Package level exemptions are independent of component level exemptions added via
+         * {@link #addActivityPolicyExemption(String)}, i.e. removing a package exemption will not
+         * remove any existing component exemptions, even if the component belongs to that package.
+         * </p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * packages.</p>
+         *
+         * @see #addActivityPolicyExemption(String)
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void removeActivityPolicyExemption(@NonNull String packageName) {
+            mVirtualDeviceInternal.removeActivityPolicyPackageExemption(
+                    Objects.requireNonNull(packageName));
+        }
+
+        /**
          * Specifies a policy for this virtual device to be applied on the given virtual display.
          * <p>
          * Any policy specified for a particular display takes precedence over the policy specified
@@ -885,6 +941,79 @@ public final class VirtualDeviceManager {
                 @NonNull ComponentName componentName, int displayId) {
             mVirtualDeviceInternal.removeActivityPolicyExemptionForDisplay(
                     displayId, Objects.requireNonNull(componentName));
+        }
+
+        /**
+         * Specifies a package name to be exempt from the given display's activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then all activities from the specified package will be blocked from launching.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then all
+         * activities from the specified package will be allowed to launch.</p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * packages.</p>
+         * <p>Any change to the exemptions will only be applied for new activity launches.</p>
+         *
+         * <p>Package level exemptions are independent of component level exemptions added via
+         * {@link #addActivityPolicyExemption(String, int)}, i.e. removing a package exemption will
+         * not remove any existing component exemptions, even if the component belongs to that
+         * package.</p>
+         *
+         * @param packageName the package name to be exempt from the activity launch policy. All
+         *   activities from that package will be exempt.
+         * @param displayId the ID of the display, for which to apply the exemption. The display
+         *   must belong to the virtual device.
+         * @throws IllegalArgumentException if the specified display does not belong to the virtual
+         *   device.
+         *
+         * @see #removeActivityPolicyExemption(String, int)
+         * @see #setDevicePolicy
+         * @see Display#getDisplayId
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void addActivityPolicyExemption(@NonNull String packageName, int displayId) {
+            mVirtualDeviceInternal.addActivityPolicyPackageExemptionForDisplay(
+                    displayId, Objects.requireNonNull(packageName));
+        }
+
+        /**
+         * Makes the specified package name adhere to the given display's activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then all activities from the specified package will be allowed to launch.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then all
+         * activities from the specified package will be blocked from launching.</p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * packages.</p>
+         *
+         * <p>Package level exemptions are independent of component level exemptions added via
+         * {@link #addActivityPolicyExemption(String, int)}, i.e. removing a package exemption will
+         * not remove any existing component exemptions, even if the component belongs to that
+         * package.</p>
+         *
+         * @param packageName the package name to be removed from the exemption list. All activities
+         *   from that package stop being exempt from the activity launch policy.
+         * @param displayId the ID of the display, for which to apply the exemption. The display
+         *   must belong to the virtual device.
+         * @throws IllegalArgumentException if the specified display does not belong to the virtual
+         *   device.
+         *
+         * @see #addActivityPolicyExemption(String, int)
+         * @see #setDevicePolicy
+         * @see Display#getDisplayId
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void removeActivityPolicyExemption(@NonNull String packageName, int displayId) {
+            mVirtualDeviceInternal.removeActivityPolicyPackageExemptionForDisplay(
+                    displayId, Objects.requireNonNull(packageName));
         }
 
         /**
