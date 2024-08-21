@@ -16,20 +16,20 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import org.junit.Rule;
 import org.junit.Test;
 
 public class IntegerPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeLongSignumBranch() {
         int t = 0;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             t += signum1(-(++i));
             t += signum1(0);
@@ -41,7 +41,7 @@ public class IntegerPerfTest {
     public void timeLongSignumBranchFree() {
         int t = 0;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             t += signum2(-(++i));
             t += signum2(0);
@@ -61,7 +61,7 @@ public class IntegerPerfTest {
     public void timeLongBitCount_BitSet() {
         int t = 0;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             t += pop((long) ++i);
         }
@@ -89,7 +89,7 @@ public class IntegerPerfTest {
     public void timeLongBitCount_2Int() {
         int t = 0;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             t += pop2((long) ++i);
         }
@@ -105,7 +105,7 @@ public class IntegerPerfTest {
     public void timeLongBitCount_Long() {
         int t = 0;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             t += Long.bitCount((long) ++i);
         }
@@ -140,7 +140,7 @@ public class IntegerPerfTest {
     public void timeNumberOfTrailingZerosHD() {
         int t = 0;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             t += numberOfTrailingZerosHD(++i);
         }
@@ -150,7 +150,7 @@ public class IntegerPerfTest {
     public void timeNumberOfTrailingZerosOL() {
         int t = 0;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             t += numberOfTrailingZerosOL(++i);
         }
@@ -163,7 +163,7 @@ public class IntegerPerfTest {
                     "0", "1", "12", "123", "1234", "12345", "123456", "1234567", "12345678"
                 };
         int t = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             for (int j = 0; j < intStrings.length; ++j) {
                 t += Integer.valueOf(intStrings[j]);
