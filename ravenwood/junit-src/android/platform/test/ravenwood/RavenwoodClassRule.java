@@ -18,14 +18,12 @@ package android.platform.test.ravenwood;
 
 import static android.platform.test.ravenwood.RavenwoodRule.ENABLE_PROBE_IGNORED;
 import static android.platform.test.ravenwood.RavenwoodRule.IS_ON_RAVENWOOD;
-import static android.platform.test.ravenwood.RavenwoodRule.shouldEnableOnDevice;
 import static android.platform.test.ravenwood.RavenwoodRule.shouldEnableOnRavenwood;
 import static android.platform.test.ravenwood.RavenwoodRule.shouldStillIgnoreInProbeIgnoreMode;
 
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -43,10 +41,7 @@ public class RavenwoodClassRule implements TestRule {
     @Override
     public Statement apply(Statement base, Description description) {
         if (!IS_ON_RAVENWOOD) {
-            // This should be "Assume", not Assert, but if we use assume here, the device side
-            // test runner would complain.
-            // See the TODO comment in RavenwoodClassRuleRavenwoodOnlyTest.
-            Assert.assertTrue(shouldEnableOnDevice(description));
+            // No check on a real device.
         } else if (ENABLE_PROBE_IGNORED) {
             Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
         } else {

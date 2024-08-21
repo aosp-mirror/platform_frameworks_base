@@ -488,8 +488,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
+                .setProcessorSupplier(
+                        () -> new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SCREEN)
                 .trackDeviceStates(
@@ -498,12 +498,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .trackUidStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN)
-                .setProcessor(
-                        new ScreenPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new ScreenPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
                         BatteryConsumer.POWER_COMPONENT_SCREEN)
-                .setProcessor(new AmbientDisplayPowerStatsProcessor());
+                .setProcessorSupplier(AmbientDisplayPowerStatsProcessor::new);
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                 .trackDeviceStates(
@@ -513,12 +513,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new MobileRadioPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new MobileRadioPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_PHONE,
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
-                .setProcessor(new PhoneCallPowerStatsProcessor());
+                .setProcessorSupplier(PhoneCallPowerStatsProcessor::new);
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WIFI)
                 .trackDeviceStates(
@@ -528,8 +528,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new WifiPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new WifiPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_BLUETOOTH)
                 .trackDeviceStates(
@@ -539,8 +539,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new BluetoothPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new BluetoothPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_AUDIO)
                 .trackDeviceStates(
@@ -550,8 +550,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new AudioPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new AudioPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_VIDEO)
                 .trackDeviceStates(
@@ -561,7 +561,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(new VideoPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new VideoPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)
                 .trackDeviceStates(
@@ -571,8 +572,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new FlashlightPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new FlashlightPowerStatsProcessor(mPowerProfile,
+                                mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CAMERA)
                 .trackDeviceStates(
@@ -582,8 +584,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new CameraPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new CameraPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_GNSS)
                 .trackDeviceStates(
@@ -593,8 +595,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new GnssPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new GnssPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SENSORS)
                 .trackDeviceStates(
@@ -604,7 +606,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(new SensorPowerStatsProcessor(
+                .setProcessorSupplier(() -> new SensorPowerStatsProcessor(
                         () -> mContext.getSystemService(SensorManager.class)));
 
         config.trackCustomPowerComponents(CustomEnergyConsumerPowerStatsProcessor::new)

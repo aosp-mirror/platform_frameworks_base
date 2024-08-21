@@ -28,23 +28,27 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Surface.ROTATION_90;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.AtomicFile;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.usage.IntervalStatsProto;
 
-import junit.framework.TestCase;
-
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,10 +58,14 @@ import java.util.Locale;
 /**
  * Build/install/run: bit FrameworksCoreTests:android.content.res.ConfigurationTest
  */
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
-public class ConfigurationTest extends TestCase {
+public class ConfigurationTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
+
     @Test
     public void testUpdateFromPreservesRoundBit() {
         Configuration config = new Configuration();
@@ -82,7 +90,7 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testReadWriteProto() throws Exception {
-        final Context context = InstrumentationRegistry.getTargetContext();
+        final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         final File testDir = new File(context.getFilesDir(), "ConfigurationTest");
         testDir.mkdirs();
         final File proto = new File(testDir, "configs");

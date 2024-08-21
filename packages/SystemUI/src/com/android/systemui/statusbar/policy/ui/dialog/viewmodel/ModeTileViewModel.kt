@@ -28,7 +28,6 @@ data class ModeTileViewModel(
     val icon: Icon,
     val text: String,
     val subtext: String,
-    val contentDescription: String,
     val enabled: Boolean,
     val onClick: () -> Unit,
     val onLongClick: () -> Unit,

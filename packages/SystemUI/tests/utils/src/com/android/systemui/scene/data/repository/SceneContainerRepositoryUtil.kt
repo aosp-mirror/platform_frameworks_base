@@ -69,6 +69,8 @@ fun Transition(
     progress: Flow<Float> = flowOf(0f),
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Flow<Boolean> = flowOf(false),
+    previewProgress: Flow<Float> = flowOf(0f),
+    isInPreviewStage: Flow<Boolean> = flowOf(false)
 ): ObservableTransitionState.Transition {
     return ObservableTransitionState.Transition(
         fromScene = from,
@@ -76,7 +78,9 @@ fun Transition(
         currentScene = currentScene,
         progress = progress,
         isInitiatedByUserInput = isInitiatedByUserInput,
-        isUserInputOngoing = isUserInputOngoing
+        isUserInputOngoing = isUserInputOngoing,
+        previewProgress = previewProgress,
+        isInPreviewStage = isInPreviewStage
     )
 }
 

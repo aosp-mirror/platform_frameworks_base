@@ -19,6 +19,8 @@ package dalvik.system;
 // The original is here:
 // $ANDROID_BUILD_TOP/libcore/libart/src/main/java/dalvik/system/VMRuntime.java
 
+import com.android.ravenwood.common.JvmWorkaround;
+
 import java.lang.reflect.Array;
 
 public class VMRuntime {
@@ -41,5 +43,13 @@ public class VMRuntime {
 
     public Object newUnpaddedArray(Class<?> componentType, int minLength) {
         return Array.newInstance(componentType, minLength);
+    }
+
+    public Object newNonMovableArray(Class<?> componentType, int length) {
+        return Array.newInstance(componentType, length);
+    }
+
+    public long addressOf(Object obj) {
+        return JvmWorkaround.getInstance().addressOf(obj);
     }
 }

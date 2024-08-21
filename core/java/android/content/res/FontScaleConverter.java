@@ -20,6 +20,7 @@ package android.content.res;
 import android.annotation.AnyThread;
 import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 /**
  * A converter for non-linear font scaling. Converts font sizes given in "sp" dimensions to a
@@ -32,6 +33,7 @@ import android.annotation.Nullable;
  * scale them slightly to preserve the visual hierarchy when compared to smaller fonts.
  */
 @FlaggedApi(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
+@RavenwoodKeepWholeClass
 public interface FontScaleConverter {
     /**
      * Converts a dimension in "sp" to "dp".

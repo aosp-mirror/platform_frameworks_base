@@ -16,6 +16,7 @@
 package android.content.res;
 
 import android.content.pm.ActivityInfo.Config;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 /**
  * A cache class that can provide new instances of a particular resource which may change
@@ -29,6 +30,7 @@ import android.content.pm.ActivityInfo.Config;
  * changing configurations of each Animator in the set)
  * @hide
  */
+@RavenwoodKeepWholeClass
 abstract public class ConstantState<T> {
 
     /**

@@ -15,7 +15,6 @@
  */
 package com.android.ravenwoodtest.bivalenttest;
 
-import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
@@ -36,12 +35,6 @@ public class RavenwoodRuleTest {
     @DisabledOnRavenwood
     public void testDeviceOnly() {
         Assert.assertFalse(RavenwoodRule.isOnRavenwood());
-    }
-
-    @Test
-    @DisabledOnNonRavenwood
-    public void testRavenwoodOnly() {
-        Assert.assertTrue(RavenwoodRule.isOnRavenwood());
     }
 
     @Test

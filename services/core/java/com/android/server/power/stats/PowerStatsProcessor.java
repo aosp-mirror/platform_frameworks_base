@@ -57,7 +57,7 @@ public abstract class PowerStatsProcessor {
 
     void addPowerStats(PowerComponentAggregatedPowerStats stats, PowerStats powerStats,
             long timestampMs) {
-        stats.addPowerStats(powerStats, timestampMs);
+        stats.addProcessedPowerStats(powerStats, timestampMs);
     }
 
     abstract void finish(PowerComponentAggregatedPowerStats stats, long timestampMs);

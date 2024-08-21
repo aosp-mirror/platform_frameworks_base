@@ -3426,6 +3426,25 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return null;
     }
 
+    /** Returns the top direct activity if it should be idle but has not yet been reported. */
+    @Nullable
+    private static ActivityRecord getNotYetIdleActivity(@NonNull TaskFragment visibleTf) {
+        for (int i = visibleTf.getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = visibleTf.getChildAt(i).asActivityRecord();
+            if (r == null || r.finishing) {
+                continue;
+            }
+            if (!r.idle && (r.isState(RESUMED)
+                    // Its process is not attached yet and it may resume later.
+                    || (r.app == null && r.isFocusable()))) {
+                return r;
+            }
+            // Only check the top running activity.
+            break;
+        }
+        return null;
+    }
+
     boolean allResumedActivitiesIdle() {
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
             final DisplayContent display = getChildAt(displayNdx);
@@ -3434,19 +3453,31 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 continue;
             }
 
-            final boolean foundNotIdle = display.forAllLeafTaskFragments(tf -> {
-                if (!tf.isVisibleRequested()) {
+            final boolean foundNotIdle = display.forAllLeafTasks(task -> {
+                if (!task.isVisibleRequested()) {
                     return false;
                 }
-                // Note that only activities that will be resumed can report idle.
-                final ActivityRecord r = tf.topRunningActivity();
-                if (r != null && !r.idle && (r.isState(RESUMED)
-                        // Its process is not attached yet and it may resume later.
-                        || (r.app == null && r.isFocusable()))) {
-                    ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: %s not idle", r);
+                final ActivityRecord notIdle = getNotYetIdleActivity(task);
+                if (notIdle != null) {
+                    ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: %s not idle", notIdle);
                     return true;
                 }
-                return false;
+                if (task.isLeafTaskFragment()) {
+                    // The task doesn't contain child TaskFragment.
+                    return false;
+                }
+                return task.forAllLeafTaskFragments(tf -> {
+                    if (!tf.isVisibleRequested()) {
+                        return false;
+                    }
+                    final ActivityRecord tfNotIdle = getNotYetIdleActivity(tf);
+                    if (tfNotIdle != null) {
+                        ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: %s not idle",
+                                tfNotIdle);
+                        return true;
+                    }
+                    return false;
+                });
             });
             if (foundNotIdle) {
                 return false;

@@ -46,6 +46,8 @@ public class RavenwoodCommonUtils {
 
     public static final String RAVENWOOD_SYSPROP = "ro.is_on_ravenwood";
 
+    public static final String RAVENWOOD_RESOURCE_APK = "ravenwood-res-apks/ravenwood-res.apk";
+
     // @GuardedBy("sLock")
     private static boolean sIntegrityChecked = false;
 
