@@ -847,7 +847,7 @@ public final class VirtualDeviceManager {
          * @see #addActivityPolicyExemption(String)
          * @see #setDevicePolicy
          */
-        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void removeActivityPolicyExemption(@NonNull String packageName) {
             mVirtualDeviceInternal.removeActivityPolicyPackageExemption(
