@@ -391,6 +391,13 @@ flag {
 }
 
 flag {
+    name: "status_bar_ron_chips"
+    namespace: "systemui"
+    description: "Show rich ongoing notifications as chips in the status bar"
+    bug: "361346412"
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"

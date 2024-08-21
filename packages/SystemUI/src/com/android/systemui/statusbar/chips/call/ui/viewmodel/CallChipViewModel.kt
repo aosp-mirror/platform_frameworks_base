@@ -69,7 +69,7 @@ constructor(
                                     state.notificationIconView
                                 )
                             } else {
-                                OngoingActivityChipModel.ChipIcon.Basic(phoneIcon)
+                                OngoingActivityChipModel.ChipIcon.SingleColorIcon(phoneIcon)
                             }
 
                         // This block mimics OngoingCallController#updateChip.

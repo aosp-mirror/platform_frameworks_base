@@ -106,7 +106,13 @@ sealed class OngoingActivityChipModel {
             }
         }
 
-        /** The icon is a basic resource or drawable icon that System UI created internally. */
-        data class Basic(val impl: Icon) : ChipIcon
+        /**
+         * This icon is a single color and it came from basic resource or drawable icon that System
+         * UI created internally.
+         */
+        data class SingleColorIcon(val impl: Icon) : ChipIcon
+
+        /** This icon is an app icon in full color (so it should not get tinted in any way). */
+        data class FullColorAppIcon(val impl: Icon) : ChipIcon
     }
 }

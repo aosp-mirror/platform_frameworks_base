@@ -35,6 +35,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
 import com.android.systemui.statusbar.chips.ui.binder.ChipChronometerBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -124,10 +125,6 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
                                     // Colors
                                     val textColor = chipModel.colors.text(chipContext)
-                                    chipDefaultIconView.imageTintList =
-                                        ColorStateList.valueOf(textColor)
-                                    chipBackgroundView.getCustomIconView()?.imageTintList =
-                                        ColorStateList.valueOf(textColor)
                                     chipTimeView.setTextColor(textColor)
                                     chipTextView.setTextColor(textColor)
                                     (chipBackgroundView.background as GradientDrawable).color =
@@ -173,13 +170,22 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
         // it.
         backgroundView.removeView(backgroundView.getCustomIconView())
 
+        val iconTint = chipModel.colors.text(defaultIconView.context)
+
         when (val icon = chipModel.icon) {
             null -> {
                 defaultIconView.visibility = View.GONE
             }
-            is OngoingActivityChipModel.ChipIcon.Basic -> {
+            is OngoingActivityChipModel.ChipIcon.SingleColorIcon -> {
                 IconViewBinder.bind(icon.impl, defaultIconView)
                 defaultIconView.visibility = View.VISIBLE
+                defaultIconView.tintView(iconTint)
+            }
+            is OngoingActivityChipModel.ChipIcon.FullColorAppIcon -> {
+                StatusBarRonChips.assertInNewMode()
+                IconViewBinder.bind(icon.impl, defaultIconView)
+                defaultIconView.visibility = View.VISIBLE
+                defaultIconView.untintView()
             }
             is OngoingActivityChipModel.ChipIcon.StatusBarView -> {
                 // Hide the default icon since we'll show this custom icon instead.
@@ -194,6 +200,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                     // maybe include the app name.
                     contentDescription =
                         context.resources.getString(R.string.ongoing_phone_call_content_description)
+                    tintView(iconTint)
                 }
 
                 // 2. If we just reinflated the view, we may need to detach the icon view from the
@@ -217,6 +224,14 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
 
     private fun View.getCustomIconView(): StatusBarIconView? {
         return this.findViewById(CUSTOM_ICON_VIEW_ID)
+    }
+
+    private fun ImageView.tintView(color: Int) {
+        this.imageTintList = ColorStateList.valueOf(color)
+    }
+
+    private fun ImageView.untintView() {
+        this.imageTintList = null
     }
 
     private fun generateCustomIconLayoutParams(iconView: ImageView): FrameLayout.LayoutParams {
