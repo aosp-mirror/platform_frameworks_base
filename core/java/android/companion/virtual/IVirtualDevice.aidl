@@ -17,6 +17,7 @@
 package android.companion.virtual;
 
 import android.app.PendingIntent;
+import android.companion.virtual.ActivityPolicyExemption;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
@@ -103,55 +104,19 @@ interface IVirtualDevice {
      * Adds an exemption to the default activity launch policy.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void addActivityPolicyExemption(in ComponentName exemption);
+    void addActivityPolicyExemption(in ActivityPolicyExemption exemption);
 
     /**
      * Removes an exemption to the default activity launch policy.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void removeActivityPolicyExemption(in ComponentName exemption);
-
-    /**
-     * Adds a package level exemption to the default activity launch policy.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void addActivityPolicyPackageExemption(in String exemption);
-
-    /**
-     * Removes a package level exemption to the default activity launch policy.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void removeActivityPolicyPackageExemption(in String exemption);
+    void removeActivityPolicyExemption(in ActivityPolicyExemption exemption);
 
     /**
      * Specifies a policy for this virtual device on the given display.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void setDevicePolicyForDisplay(int displayId, int policyType, int devicePolicy);
-
-    /**
-     * Adds an exemption to the default activity launch policy on the given display.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void addActivityPolicyExemptionForDisplay(int displayId, in ComponentName exemption);
-
-    /**
-     * Removes an exemption to the default activity launch policy on the given display.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void removeActivityPolicyExemptionForDisplay(int displayId, in ComponentName exemption);
-
-    /**
-     * Adds a package level exemption to the default activity launch policy on the given display.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void addActivityPolicyPackageExemptionForDisplay(int displayId, in String exemption);
-
-    /**
-     * Removes a package level exemption to the default activity launch policy on the given display.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void removeActivityPolicyPackageExemptionForDisplay(int displayId, in String exemption);
 
     /**
      * Notifies that an audio session being started.
