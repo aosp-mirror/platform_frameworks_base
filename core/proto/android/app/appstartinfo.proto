@@ -40,4 +40,5 @@ message ApplicationStartInfoProto {
     optional bytes start_intent = 10;
     optional AppStartLaunchMode launch_mode = 11;
     optional bool was_force_stopped = 12;
+    optional int64 monotonic_creation_time_ms = 13;
 }
