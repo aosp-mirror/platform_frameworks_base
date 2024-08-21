@@ -1274,7 +1274,7 @@ public final class UiAutomation {
                 ScreenCapture.createSyncCaptureListener();
         try {
             if (!mUiAutomationConnection.takeScreenshot(
-                    new Rect(0, 0, displaySize.x, displaySize.y), syncScreenCapture)) {
+                    new Rect(0, 0, displaySize.x, displaySize.y), syncScreenCapture, mDisplayId)) {
                 return null;
             }
         } catch (RemoteException re) {
