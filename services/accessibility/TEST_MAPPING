@@ -45,12 +45,7 @@
       "name": "CtsUiAutomationTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.accessibility"
-        }
-      ]
+      "name": "FrameworksServicesTests_accessibility"
     },
     {
       "name": "FrameworksCoreTests",

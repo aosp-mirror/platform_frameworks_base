@@ -6,10 +6,7 @@
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.logcat"}
-      ]
+      "name": "FrameworksServicesTests_android_server_logcat"
     }
   ]
 }

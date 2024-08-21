@@ -62,24 +62,11 @@
             "file_patterns": ["SensorPrivacyService\\.java"]
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.BinaryTransparencyServiceTest"
-                }
-            ],
+            "name": "FrameworksServicesTests_binary_transparency",
             "file_patterns": ["BinaryTransparencyService\\.java"]
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.PinnerServiceTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                }
-            ],
+            "name": "FrameworksServicesTests_pinner_service",
             "file_patterns": ["PinnerService\\.java"]
         },
         {
@@ -153,15 +140,7 @@
             "name": "CtsPackageManagerTestCases"
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.PinnerServiceTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                }
-            ],
+            "name": "FrameworksServicesTests_pinner_service",
             "file_patterns": ["PinnerService\\.java"]
         }
     ]
