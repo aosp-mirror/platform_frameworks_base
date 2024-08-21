@@ -236,7 +236,8 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
-            MultiInstanceHelper multiInstanceHelper) {
+            MultiInstanceHelper multiInstanceHelper,
+            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -257,7 +258,8 @@ public abstract class WMShellModule {
                     rootTaskDisplayAreaOrganizer,
                     interactionJankMonitor,
                     genericLinksParser,
-                    multiInstanceHelper);
+                    multiInstanceHelper,
+                    desktopTasksLimiter);
         }
         return new CaptionWindowDecorViewModel(
                 context,

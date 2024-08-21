@@ -1429,6 +1429,78 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun onDesktopWindowMinimize_noActiveTask_doesntUpdateTransaction() {
+    val wct = WindowContainerTransaction()
+    controller.onDesktopWindowMinimize(wct, taskId = 1)
+    // Nothing happens.
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_singleActiveTask_noWallpaperActivityToken_doesntUpdateTransaction() {
+    val task = setUpFreeformTask()
+    val wct = WindowContainerTransaction()
+    controller.onDesktopWindowMinimize(wct, taskId = task.taskId)
+    // Nothing happens.
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_singleActiveTask_hasWallpaperActivityToken_removesWallpaper() {
+    val task = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+
+    val wct = WindowContainerTransaction()
+    // The only active task is being minimized.
+    controller.onDesktopWindowMinimize(wct, taskId = task.taskId)
+    // Adds remove wallpaper operation
+    wct.assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_singleActiveTask_alreadyMinimized_doesntUpdateTransaction() {
+    val task = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+    taskRepository.minimizeTask(DEFAULT_DISPLAY, task.taskId)
+
+    val wct = WindowContainerTransaction()
+    // The only active task is already minimized.
+    controller.onDesktopWindowMinimize(wct, taskId = task.taskId)
+    // Doesn't modify transaction
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_multipleActiveTasks_doesntUpdateTransaction() {
+    val task1 = setUpFreeformTask()
+    setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+
+    val wct = WindowContainerTransaction()
+    controller.onDesktopWindowMinimize(wct, taskId = task1.taskId)
+    // Doesn't modify transaction
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_multipleActiveTasks_minimizesTheOnlyVisibleTask_removesWallpaper() {
+    val task1 = setUpFreeformTask()
+    val task2 = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+    taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
+
+    val wct = WindowContainerTransaction()
+    // task1 is the only visible task as task2 is minimized.
+    controller.onDesktopWindowMinimize(wct, taskId = task1.taskId)
+    // Adds remove wallpaper operation
+    wct.assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
   fun handleRequest_fullscreenTask_freeformVisible_returnSwitchToFreeformWCT() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
