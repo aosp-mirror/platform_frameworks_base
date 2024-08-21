@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.gesture.data
+package android.app.appfunctions;
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.navigationbar.gestural.data.respository.GestureRepository
-import com.android.systemui.navigationbar.gestural.data.respository.GestureRepositoryImpl
+import android.os.Bundle;
+import android.app.appfunctions.IExecuteAppFunctionCallback;
+import android.app.appfunctions.ExecuteAppFunctionRequest;
 
-val Kosmos.gestureRepository: GestureRepository by
-    Kosmos.Fixture { GestureRepositoryImpl(testDispatcher) }
+
+ /** {@hide} */
+oneway interface IAppFunctionService {
+    /**
+     * Called by the system to execute a specific app function.
+     *
+     * @param request  the function execution request.
+     * @param callback a callback to report back the result.
+     */
+    void executeAppFunction(
+        in ExecuteAppFunctionRequest request,
+        in IExecuteAppFunctionCallback callback
+    );
+}

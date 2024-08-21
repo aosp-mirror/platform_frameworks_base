@@ -28,7 +28,6 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -63,9 +62,7 @@ constructor(
 /**
  * Collect information for the given [flow], calling [consumer] for each emitted event. Defaults to
  * [LifeCycle.State.CREATED] to better align with legacy ViewController usage of attaching listeners
- * during onViewAttached() and removing during onViewRemoved().
- *
- * @return a disposable handle in order to cancel the flow in the future.
+ * during onViewAttached() and removing during onViewRemoved()
  */
 @JvmOverloads
 fun <T> collectFlow(
@@ -74,8 +71,8 @@ fun <T> collectFlow(
     consumer: Consumer<T>,
     coroutineContext: CoroutineContext = EmptyCoroutineContext,
     state: Lifecycle.State = Lifecycle.State.CREATED,
-): DisposableHandle {
-    return view.repeatWhenAttached(coroutineContext) {
+) {
+    view.repeatWhenAttached(coroutineContext) {
         repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
     }
 }

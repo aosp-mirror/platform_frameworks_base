@@ -28,9 +28,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.WindowManager;
 
-import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 
 /**
@@ -54,21 +52,13 @@ public abstract class DreamOverlayService extends Service {
     // An {@link IDreamOverlayClient} implementation that identifies itself when forwarding
     // requests to the {@link DreamOverlayService}
     private static class OverlayClient extends IDreamOverlayClient.Stub {
-        private final WeakReference<DreamOverlayService> mService;
+        private final DreamOverlayService mService;
         private boolean mShowComplications;
         private ComponentName mDreamComponent;
         IDreamOverlayCallback mDreamOverlayCallback;
 
-        OverlayClient(WeakReference<DreamOverlayService> service) {
+        OverlayClient(DreamOverlayService service) {
             mService = service;
-        }
-
-        private void applyToDream(Consumer<DreamOverlayService> consumer) {
-            final DreamOverlayService service = mService.get();
-
-            if (service != null) {
-                consumer.accept(service);
-            }
         }
 
         @Override
@@ -77,28 +67,28 @@ public abstract class DreamOverlayService extends Service {
             mDreamComponent = ComponentName.unflattenFromString(dreamComponent);
             mShowComplications = shouldShowComplications;
             mDreamOverlayCallback = callback;
-            applyToDream(dreamOverlayService -> dreamOverlayService.startDream(this, params));
+            mService.startDream(this, params);
         }
 
         @Override
         public void wakeUp() {
-            applyToDream(dreamOverlayService -> dreamOverlayService.wakeUp(this));
+            mService.wakeUp(this);
         }
 
         @Override
         public void endDream() {
-            applyToDream(dreamOverlayService -> dreamOverlayService.endDream(this));
+            mService.endDream(this);
         }
 
         @Override
         public void comeToFront() {
-            applyToDream(dreamOverlayService -> dreamOverlayService.comeToFront(this));
+            mService.comeToFront(this);
         }
 
         @Override
         public void onWakeRequested() {
             if (Flags.dreamWakeRedirect()) {
-                applyToDream(DreamOverlayService::onWakeRequested);
+                mService.onWakeRequested();
             }
         }
 
@@ -171,24 +161,17 @@ public abstract class DreamOverlayService extends Service {
         });
     }
 
-    private static class DreamOverlay extends IDreamOverlay.Stub {
-        private final WeakReference<DreamOverlayService> mService;
-
-        DreamOverlay(DreamOverlayService service) {
-            mService = new WeakReference<>(service);
-        }
-
+    private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
         @Override
         public void getClient(IDreamOverlayClientCallback callback) {
             try {
-                callback.onDreamOverlayClient(new OverlayClient(mService));
+                callback.onDreamOverlayClient(
+                        new OverlayClient(DreamOverlayService.this));
             } catch (RemoteException e) {
                 Log.e(TAG, "could not send client to callback", e);
             }
         }
-    }
-
-    private final IDreamOverlay mDreamOverlay = new DreamOverlay(this);
+    };
 
     public DreamOverlayService() {
     }
@@ -210,12 +193,6 @@ public abstract class DreamOverlayService extends Service {
             // getMainExecutor is available.
             mExecutor = getMainExecutor();
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        mCurrentClient = null;
-        super.onDestroy();
     }
 
     @Nullable

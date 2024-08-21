@@ -25,15 +25,7 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.accessibility"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksServicesTests_accessibility_Presubmit"
     },
     {
       "name": "FrameworksCoreTests_accessibility_NO_FLAKES"

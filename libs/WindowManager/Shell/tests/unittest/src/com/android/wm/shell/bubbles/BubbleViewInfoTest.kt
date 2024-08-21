@@ -74,7 +74,6 @@ class BubbleViewInfoTest : ShellTestCase() {
     private lateinit var bubbleStackView: BubbleStackView
     private lateinit var bubbleBarLayerView: BubbleBarLayerView
     private lateinit var bubblePositioner: BubblePositioner
-    private lateinit var expandedViewManager: BubbleExpandedViewManager
 
     private val bubbleTaskViewFactory = BubbleTaskViewFactory {
         BubbleTaskView(mock<TaskView>(), mock<Executor>())
@@ -155,7 +154,6 @@ class BubbleViewInfoTest : ShellTestCase() {
                 bubbleController,
                 mainExecutor
             )
-        expandedViewManager = BubbleExpandedViewManager.fromBubbleController(bubbleController)
         bubbleBarLayerView = BubbleBarLayerView(context, bubbleController, bubbleData)
     }
 
@@ -165,7 +163,6 @@ class BubbleViewInfoTest : ShellTestCase() {
         val info =
             BubbleViewInfoTask.BubbleViewInfo.populate(
                 context,
-                expandedViewManager,
                 bubbleTaskViewFactory,
                 bubblePositioner,
                 bubbleStackView,
@@ -193,9 +190,7 @@ class BubbleViewInfoTest : ShellTestCase() {
         val info =
             BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(
                 context,
-                expandedViewManager,
                 bubbleTaskViewFactory,
-                bubblePositioner,
                 bubbleBarLayerView,
                 iconFactory,
                 bubble,
@@ -229,9 +224,7 @@ class BubbleViewInfoTest : ShellTestCase() {
         val info =
             BubbleViewInfoTask.BubbleViewInfo.populateForBubbleBar(
                 context,
-                expandedViewManager,
                 bubbleTaskViewFactory,
-                bubblePositioner,
                 bubbleBarLayerView,
                 iconFactory,
                 bubble,

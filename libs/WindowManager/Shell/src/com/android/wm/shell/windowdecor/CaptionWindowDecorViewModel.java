@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -174,6 +175,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         if (decoration == null) return;
 
+        if (!shouldShowWindowDecor(taskInfo)) {
+            destroyWindowDecoration(taskInfo);
+            return;
+        }
+
         decoration.relayout(taskInfo);
         setupCaptionColor(taskInfo, decoration);
     }
@@ -249,6 +255,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             return true;
+        }
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            return false;
         }
         if (taskInfo.getActivityType() != ACTIVITY_TYPE_STANDARD) {
             return false;

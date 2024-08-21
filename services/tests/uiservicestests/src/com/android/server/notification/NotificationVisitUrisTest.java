@@ -89,7 +89,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 @RunWith(AndroidJUnit4.class)
-@EnableFlags(Flags.FLAG_VISIT_PERSON_URI)
+@EnableFlags({Flags.FLAG_VISIT_PERSON_URI, Flags.FLAG_API_RICH_ONGOING})
 public class NotificationVisitUrisTest extends UiServiceTestCase {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();

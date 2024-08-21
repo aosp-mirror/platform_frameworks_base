@@ -44,6 +44,7 @@
 #include <batteryservice/include/batteryservice/BatteryServiceConstants.h>
 #include <binder/IServiceManager.h>
 #include <com_android_input_flags.h>
+#include <include/gestures.h>
 #include <input/Input.h>
 #include <input/PointerController.h>
 #include <input/PrintTools.h>
@@ -216,6 +217,23 @@ static struct InputSensorInfoOffsets {
     // methods
     jmethodID init;
 } gInputSensorInfo;
+
+static struct TouchpadHardwarePropertiesOffsets {
+    jclass clazz;
+    jmethodID constructor;
+    jfieldID left;
+    jfieldID top;
+    jfieldID right;
+    jfieldID bottom;
+    jfieldID resX;
+    jfieldID resY;
+    jfieldID orientationMinimum;
+    jfieldID orientationMaximum;
+    jfieldID maxFingerCount;
+    jfieldID isButtonPad;
+    jfieldID isHapticPad;
+    jfieldID reportsPressure;
+} gTouchpadHardwarePropertiesOffsets;
 
 // --- Global functions ---
 
@@ -2632,6 +2650,45 @@ static jobjectArray nativeGetSensorList(JNIEnv* env, jobject nativeImplObj, jint
     return arr;
 }
 
+static jobject nativeGetTouchpadHardwareProperties(JNIEnv* env, jobject nativeImplObj,
+                                                   jint deviceId) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    std::optional<HardwareProperties> touchpadHardwareProperties =
+            im->getInputManager()->getReader().getTouchpadHardwareProperties(deviceId);
+
+    jobject hwPropsObj = env->NewObject(gTouchpadHardwarePropertiesOffsets.clazz,
+                                        gTouchpadHardwarePropertiesOffsets.constructor);
+    if (hwPropsObj == NULL || !touchpadHardwareProperties.has_value()) {
+        return hwPropsObj;
+    }
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.left,
+                       touchpadHardwareProperties->left);
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.top,
+                       touchpadHardwareProperties->top);
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.right,
+                       touchpadHardwareProperties->right);
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.bottom,
+                       touchpadHardwareProperties->bottom);
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.resX,
+                       touchpadHardwareProperties->res_x);
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.resY,
+                       touchpadHardwareProperties->res_y);
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.orientationMinimum,
+                       touchpadHardwareProperties->orientation_minimum);
+    env->SetFloatField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.orientationMaximum,
+                       touchpadHardwareProperties->orientation_maximum);
+    env->SetIntField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.maxFingerCount,
+                     touchpadHardwareProperties->max_finger_cnt);
+    env->SetBooleanField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.isButtonPad,
+                         touchpadHardwareProperties->is_button_pad);
+    env->SetBooleanField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.isHapticPad,
+                         touchpadHardwareProperties->is_haptic_pad);
+    env->SetBooleanField(hwPropsObj, gTouchpadHardwarePropertiesOffsets.reportsPressure,
+                         touchpadHardwareProperties->reports_pressure);
+
+    return hwPropsObj;
+}
+
 static jboolean nativeEnableSensor(JNIEnv* env, jobject nativeImplObj, jint deviceId,
                                    jint sensorType, jint samplingPeriodUs,
                                    jint maxBatchReportLatencyUs) {
@@ -2831,6 +2888,9 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setKeyRepeatConfiguration", "(II)V", (void*)nativeSetKeyRepeatConfiguration},
         {"getSensorList", "(I)[Landroid/hardware/input/InputSensorInfo;",
          (void*)nativeGetSensorList},
+        {"getTouchpadHardwareProperties",
+         "(I)Lcom/android/server/input/TouchpadHardwareProperties;",
+         (void*)nativeGetTouchpadHardwareProperties},
         {"enableSensor", "(IIII)Z", (void*)nativeEnableSensor},
         {"disableSensor", "(II)V", (void*)nativeDisableSensor},
         {"flushSensor", "(II)Z", (void*)nativeFlushSensor},
@@ -3089,6 +3149,42 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_FIELD_ID(gInputSensorInfo.id, gInputSensorInfo.clazz, "mId", "I");
 
     GET_METHOD_ID(gInputSensorInfo.init, gInputSensorInfo.clazz, "<init>", "()V");
+
+    // TouchpadHardawreProperties
+    FIND_CLASS(gTouchpadHardwarePropertiesOffsets.clazz,
+               "com/android/server/input/TouchpadHardwareProperties");
+    gTouchpadHardwarePropertiesOffsets.clazz =
+            reinterpret_cast<jclass>(env->NewGlobalRef(gTouchpadHardwarePropertiesOffsets.clazz));
+
+    // Get the constructor ID
+    GET_METHOD_ID(gTouchpadHardwarePropertiesOffsets.constructor,
+                  gTouchpadHardwarePropertiesOffsets.clazz, "<init>", "()V");
+
+    // Get the field IDs
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.left, gTouchpadHardwarePropertiesOffsets.clazz,
+                 "mLeft", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.top, gTouchpadHardwarePropertiesOffsets.clazz,
+                 "mTop", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.right, gTouchpadHardwarePropertiesOffsets.clazz,
+                 "mRight", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.bottom,
+                 gTouchpadHardwarePropertiesOffsets.clazz, "mBottom", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.resX, gTouchpadHardwarePropertiesOffsets.clazz,
+                 "mResX", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.resY, gTouchpadHardwarePropertiesOffsets.clazz,
+                 "mResY", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.orientationMinimum,
+                 gTouchpadHardwarePropertiesOffsets.clazz, "mOrientationMinimum", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.orientationMaximum,
+                 gTouchpadHardwarePropertiesOffsets.clazz, "mOrientationMaximum", "F");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.maxFingerCount,
+                 gTouchpadHardwarePropertiesOffsets.clazz, "mMaxFingerCount", "S");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.isButtonPad,
+                 gTouchpadHardwarePropertiesOffsets.clazz, "mIsButtonPad", "Z");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.isHapticPad,
+                 gTouchpadHardwarePropertiesOffsets.clazz, "mIsHapticPad", "Z");
+    GET_FIELD_ID(gTouchpadHardwarePropertiesOffsets.reportsPressure,
+                 gTouchpadHardwarePropertiesOffsets.clazz, "mReportsPressure", "Z");
 
     return 0;
 }

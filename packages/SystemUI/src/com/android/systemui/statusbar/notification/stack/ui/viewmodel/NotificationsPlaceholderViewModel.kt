@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
@@ -30,7 +32,11 @@ import com.android.systemui.util.kotlin.ActivatableFlowDumper
 import com.android.systemui.util.kotlin.ActivatableFlowDumperImpl
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -40,7 +46,8 @@ class NotificationsPlaceholderViewModel
 @AssistedInject
 constructor(
     private val interactor: NotificationStackAppearanceInteractor,
-    shadeInteractor: ShadeInteractor,
+    private val sceneInteractor: SceneInteractor,
+    private val shadeInteractor: ShadeInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     featureFlags: FeatureFlagsClassic,
     dumpManager: DumpManager,
@@ -58,6 +65,20 @@ constructor(
     val isDebugLoggingEnabled: Boolean = SceneContainerFlag.isEnabled
 
     override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                shadeInteractor.isAnyExpanded
+                    .filter { it }
+                    .collect { headsUpNotificationInteractor.unpinAll(true) }
+            }
+
+            launch {
+                sceneInteractor.transitionState
+                    .map { state -> state is ObservableTransitionState.Idle }
+                    .filter { it }
+                    .collect { headsUpNotificationInteractor.onTransitionIdle() }
+            }
+        }
         activateFlowDumper()
     }
 

@@ -695,6 +695,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 return;
             }
 
+            if (mSplitScreenOptional.isPresent()) {
+                // If pip activity will reparent to origin task case and if the origin task still
+                // under split root, apply exit split transaction to make it expand to fullscreen.
+                SplitScreenController split = mSplitScreenOptional.get();
+                if (split.isTaskInSplitScreen(mTaskInfo.lastParentTaskIdBeforePip)) {
+                    split.prepareExitSplitScreen(wct, split.getStageOfTask(
+                            mTaskInfo.lastParentTaskIdBeforePip),
+                            SplitScreenController.EXIT_REASON_APP_FINISHED);
+                }
+            }
             mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
             return;
         }

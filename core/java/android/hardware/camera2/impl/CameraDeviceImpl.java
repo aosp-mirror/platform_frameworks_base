@@ -80,6 +80,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -354,7 +355,14 @@ public class CameraDeviceImpl extends CameraDevice
         mCameraId = cameraId;
         if (Flags.singleThreadExecutor()) {
             mDeviceCallback = new ClientStateCallback(executor, callback);
-            mDeviceExecutor = Executors.newSingleThreadExecutor();
+            mDeviceExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = Executors.defaultThreadFactory().newThread(r);
+                    thread.setName("CameraDeviceExecutor");
+                    return thread;
+                }
+            });
         } else {
             mDeviceCallback = callback;
             mDeviceExecutor = executor;
@@ -2272,6 +2280,19 @@ public class CameraDeviceImpl extends CameraDevice
                 // TODO: Handle CameraCharacteristics access from CaptureResult correctly.
                 result.set(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE,
                         getCharacteristics().get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE));
+                Map<String, CameraCharacteristics> physicalIdToChars = getPhysicalIdToChars();
+                for (PhysicalCaptureResultInfo oneResultInfo : physicalResults) {
+                    String physicalId = oneResultInfo.getCameraId();
+                    CameraMetadataNative physicalResult = oneResultInfo.getCameraMetadata();
+                    CameraCharacteristics ch = physicalIdToChars.get(physicalId);
+                    if (ch != null)  {
+                        physicalResult.set(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE,
+                                ch.get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE));
+                    } else {
+                        Log.e(TAG, "Unable to find characteristics for physical camera "
+                                + physicalId);
+                    }
+                }
 
                 final CaptureCallbackHolder holder =
                         CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);
