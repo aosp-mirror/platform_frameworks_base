@@ -446,11 +446,11 @@
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"మీ వ్యక్తిగత యాప్‌లు <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడ్డాయి"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ద్వారా అందించబడింది"</string>
-    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"పరికర నిర్వహణ"</string>
+    <string name="monitoring_title_device_owned" msgid="7029691083837606324">"డివైజ్ మేనేజ్‌మెంట్"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"నెట్‌వర్క్ లాగింగ్‌"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA ప్రమాణపత్రాలు"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"విధానాలను చూడండి"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"పాలసీలను చూడండి"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"నియంత్రణలను చూడండి"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>కు చెందినది.\n\nసెట్టింగ్‌లను, కార్పొరేట్ యాక్సెస్‌ను, యాప్‌లను, మీ పరికరానికి సంబంధించిన డేటాను, అలాగే మీ పరికరం యొక్క లొకేషన్ సమాచారాన్ని మీ IT అడ్మిన్ పర్యవేక్షించగలరు, మేనేజ్ చేయగలరు.\n\nమరింత సమాచారం కోసం, మీ IT అడ్మిన్‌ను సంప్రదించండి."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g>, ఈ పరికరంతో అనుబంధించబడిన డేటాను యాక్సెస్ చేయవచ్చు, యాప్‌లను మేనేజ్ చేయవచ్చు అలాగే ఈ పరికరాల సెట్టింగ్‌లను మార్చవచ్చు.\n\nమీకు ఏవైనా సందేహాలు ఉంటే, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>ను కాంటాక్ట్ చేయండి."</string>
@@ -458,7 +458,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ఈ పరికరంలో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"మీ కార్యాలయ ప్రొఫైల్‌లో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ఈ పరికరంలో ప్రమాణపత్ర అధికారం ఇన్‌స్టాల్ చేయబడింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"మీ నిర్వాహకులు మీ పరికరంలోని ట్రాఫిక్‌ని పర్యవేక్షించగల నెట్‌వర్క్ లాగింగ్‌ని ఆన్ చేశారు."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"మీ అడ్మిన్, నెట్‌వర్క్ లాగింగ్‌ను ఆన్ చేశారు. ఇది మీ డివైజ్‌లో ట్రాఫిక్‌ను మానిటర్ చేస్తుంది."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"మీ అడ్మిన్ నెట్‌వర్క్ లాగింగ్‌ను ఆన్ చేశారు, ఇది మీ వర్క్ ప్రొఫైల్‌లోని ట్రాఫిక్‌ను పర్యవేక్షిస్తుంది కానీ మీ వ్యక్తిగత ప్రొఫైల్‌లో కాదు."</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది. ఈమెయిళ్లు, బ్రౌజింగ్ డేటాతో సహా మీ నెట్‌వర్క్ యాక్టివిటీ VPN ప్రొవైడర్‌కు కనిపిస్తుంది."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"ఈ పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g> ద్వారా ఇంటర్నెట్‌కు కనెక్ట్ చేయబడింది. ఈమెయిళ్లు, బ్రౌజింగ్ డేటాతో సహా మీ నెట్‌వర్క్ యాక్టివిటీ మీ IT అడ్మిన్‌కు కనిపిస్తుంది."</string>

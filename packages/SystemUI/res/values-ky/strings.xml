@@ -450,7 +450,7 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Тармактын таржымалы"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Тастыктоочу борбордун тастыктамасы"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Саясаттарды карап көрүү"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Эрежелерди карап көрүү"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Башкаруу элементтерин көрүү"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык.\n\nАдминистраторуңуз бул түзмөктөгү параметрлерди, корпоративдик ресурстарды пайдалануу мүмкүнчүлүгүн берген параметрлерди жана колдонмолорду, түзмөгүңүзгө байланыштуу маалыматтарды (мисалы, түзмөгүңүздүн жайгашкан жери сыяктуу) көзөмөлдөп башкара алат.\n\nТолугураак маалымат алуу үчүн IT администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> бул түзмөк менен байланышкан маалыматты көрүп, колдонмолорду башкарып, анын параметрлерин өзгөртө алат.\n\nЭгер суроолоруңуз болсо, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> уюмуна кайрылыңыз."</string>

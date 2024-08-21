@@ -450,15 +450,15 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"רישום התנועה ברשת"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"‏אישורי CA"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"הצגת מדיניות"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"צפייה במדיניות"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"לצפייה באמצעי בקרת ההורים"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"‏המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nמנהל ה-IT יכול לנטר ולנהל הגדרות, גישה ארגונית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, יש לפנות למנהל ה-IT."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"ל-<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> תהיה אפשרות לגשת לנתונים המשויכים למכשיר הזה, לנהל אפליקציות ולשנות את הגדרות המכשיר.\n\nאם יש לך שאלות, ניתן ליצור קשר עם <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"‏המכשיר הזה שייך לארגון שלך.\n\nמנהל ה-IT יכול לנטר ולנהל הגדרות, גישה ארגונית, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, יש לפנות למנהל ה-IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"‏המכשיר הזה שייך לארגון שלך.\n\nהאדמין ב-IT יכול לנטר ולנהל הגדרות, הרשאות גישה לארגון, אפליקציות, נתונים המשויכים למכשיר ומידע על מיקום המכשיר.\n\nלמידע נוסף, אפשר לפנות לאדמין ב-IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"הארגון שלך התקין רשות אישורים במכשיר. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"הארגון שלך התקין רשות אישורים בפרופיל העבודה. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"במכשיר זה מותקנת רשות אישורים. ניתן לעקוב אחר התנועה ברשת המאובטחת או לשנות אותה."</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"מנהל המערכת הפעיל את התכונה \'רישום התנועה ברשת\', שמנטרת את תנועת הנתונים במכשיר."</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"האדמין הפעיל את התכונה \'רישום התנועה ברשת\', שמנטרת את תנועת הנתונים במכשיר."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"מנהל המערכת הפעיל את תכונת רישום התנועה ברשת, שמנטרת את תנועת הנתונים בפרופיל העבודה, אבל לא בפרופיל האישי."</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"‏המכשיר הזה מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>. הפעילויות שלך ברשת, כולל האימיילים ונתוני הגלישה, גלויות לספק ה-VPN."</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"‏המכשיר הזה מחובר לאינטרנט דרך <xliff:g id="VPN_APP">%1$s</xliff:g>. הפעילויות שלך ברשת, כולל האימיילים ונתוני הגלישה, גלויות לאדמין ב-IT."</string>
