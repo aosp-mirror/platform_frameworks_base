@@ -24,7 +24,6 @@ import android.service.quicksettings.Tile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.internal.R.attr.contentDescription
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
@@ -36,6 +35,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.asQSTileIcon
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.impl.modes.domain.interactor.ModesTileDataInteractor
@@ -115,7 +115,8 @@ constructor(
 
             state?.apply {
                 this.state = tileState.activationState.legacyState
-                icon = ResourceIcon.get(tileState.iconRes ?: R.drawable.qs_dnd_icon_off)
+                val tileStateIcon = tileState.icon()
+                icon = tileStateIcon?.asQSTileIcon() ?: ResourceIcon.get(R.drawable.qs_dnd_icon_off)
                 label = tileLabel
                 secondaryLabel = tileState.secondaryLabel
                 contentDescription = tileState.contentDescription
