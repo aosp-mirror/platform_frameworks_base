@@ -63,6 +63,37 @@ constructor(
         activateFlowDumper()
     }
 
+    private fun expandFractionForScene(scene: SceneKey, shadeExpansion: Float): Float =
+        when (scene) {
+            Scenes.Lockscreen,
+            Scenes.QuickSettings -> 1f
+            else -> shadeExpansion
+        }
+
+    private fun expandFractionForTransition(
+        state: ObservableTransitionState.Transition,
+        shadeExpansion: Float,
+        shadeMode: ShadeMode,
+        qsExpansion: Float,
+        quickSettingsScene: SceneKey
+    ): Float =
+        if (
+            state.isBetween({ it == Scenes.Lockscreen }, { it in SceneFamilies.NotifShade }) ||
+                state.isBetween({ it in SceneFamilies.NotifShade }, { it == quickSettingsScene })
+        ) {
+            1f
+        } else if (
+            shadeMode != ShadeMode.Split &&
+                state.isBetween({ it in SceneFamilies.Home }, { it == quickSettingsScene })
+        ) {
+            // during QS expansion, increase fraction at same rate as scrim alpha,
+            // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
+            (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA - EXPANSION_FOR_DELAYED_STACK_FADE_IN)
+                .coerceIn(0f, 1f)
+        } else {
+            shadeExpansion
+        }
+
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
      * from Gone to Shade scenes, and remain at 1 when in Lockscreen or Shade scenes and while
@@ -77,41 +108,16 @@ constructor(
                 sceneInteractor.resolveSceneFamily(SceneFamilies.QuickSettings),
             ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
                 when (transitionState) {
-                    is ObservableTransitionState.Idle -> {
-                        when (transitionState.currentScene) {
-                            Scenes.Lockscreen,
-                            Scenes.QuickSettings -> 1f
-                            else -> shadeExpansion
-                        }
-                    }
-                    is ObservableTransitionState.Transition -> {
-                        if (
-                            (transitionState.fromScene in SceneFamilies.NotifShade &&
-                                transitionState.toScene == quickSettingsScene) ||
-                                (transitionState.fromScene in quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.NotifShade) ||
-                                (transitionState.fromScene == Scenes.Lockscreen &&
-                                    transitionState.toScene in SceneFamilies.NotifShade) ||
-                                (transitionState.fromScene in SceneFamilies.NotifShade &&
-                                    transitionState.toScene == Scenes.Lockscreen)
-                        ) {
-                            1f
-                        } else if (
-                            shadeMode != ShadeMode.Split &&
-                                (transitionState.fromScene in SceneFamilies.Home &&
-                                    transitionState.toScene == quickSettingsScene) ||
-                                (transitionState.fromScene == quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.Home)
-                        ) {
-                            // during QS expansion, increase fraction at same rate as scrim alpha,
-                            // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
-                            (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA -
-                                    EXPANSION_FOR_DELAYED_STACK_FADE_IN)
-                                .coerceIn(0f, 1f)
-                        } else {
-                            shadeExpansion
-                        }
-                    }
+                    is ObservableTransitionState.Idle ->
+                        expandFractionForScene(transitionState.currentScene, shadeExpansion)
+                    is ObservableTransitionState.Transition ->
+                        expandFractionForTransition(
+                            transitionState,
+                            shadeExpansion,
+                            shadeMode,
+                            qsExpansion,
+                            quickSettingsScene
+                        )
                 }
             }
             .distinctUntilChanged()
@@ -200,3 +206,8 @@ constructor(
         fun create(): NotificationScrollViewModel
     }
 }
+
+private fun ObservableTransitionState.Transition.isBetween(
+    a: (SceneKey) -> Boolean,
+    b: (SceneKey) -> Boolean
+): Boolean = (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))
