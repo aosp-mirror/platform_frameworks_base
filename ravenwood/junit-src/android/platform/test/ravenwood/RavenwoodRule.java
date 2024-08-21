@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
@@ -273,21 +272,6 @@ public class RavenwoodRule implements TestRule {
                 "Instrumentation is only available during @Test execution");
     }
 
-    static boolean shouldEnableOnDevice(Description description) {
-        if (description.isTest()) {
-            if (description.getAnnotation(DisabledOnNonRavenwood.class) != null) {
-                return false;
-            }
-        }
-        final var clazz = description.getTestClass();
-        if (clazz != null) {
-            if (clazz.getAnnotation(DisabledOnNonRavenwood.class) != null) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * Determine if the given {@link Description} should be enabled when running on the
      * Ravenwood test environment.
@@ -351,7 +335,6 @@ public class RavenwoodRule implements TestRule {
     public Statement apply(Statement base, Description description) {
         // No special treatment when running outside Ravenwood; run tests as-is
         if (!IS_ON_RAVENWOOD) {
-            Assume.assumeTrue(shouldEnableOnDevice(description));
             return base;
         }
 
