@@ -53,18 +53,7 @@
       ]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.accessibilityservice"
-        },
-        {
-          "include-filter": "android.view.accessibility"
-        },
-        {
-          "include-filter": "com.android.internal.accessibility"
-        }
-      ]
+      "name": "FrameworksCoreTests_accessibility"
     }
   ]
 }

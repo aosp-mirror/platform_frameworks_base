@@ -16,6 +16,7 @@
 
 package com.android.settingslib.notification.data.repository
 
+import android.app.AutomaticZenRule
 import android.app.NotificationManager
 import android.provider.Settings
 import com.android.settingslib.notification.modes.TestModeBuilder
@@ -58,8 +59,9 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableModesFlow.value += zenModes
     }
 
-    fun addMode(id: String, active: Boolean = false) {
-        mutableModesFlow.value += newMode(id, active)
+    fun addMode(id: String, @AutomaticZenRule.Type type: Int = AutomaticZenRule.TYPE_UNKNOWN,
+        active: Boolean = false) {
+        mutableModesFlow.value += newMode(id, type, active)
     }
 
     fun removeMode(id: String) {
@@ -128,6 +130,6 @@ fun FakeZenModeRepository.updateNotificationPolicy(
         )
     )
 
-private fun newMode(id: String, active: Boolean = false): ZenMode {
-    return TestModeBuilder().setId(id).setName("Mode $id").setActive(active).build()
+private fun newMode(id: String, @AutomaticZenRule.Type type: Int, active: Boolean): ZenMode {
+    return TestModeBuilder().setId(id).setName("Mode $id").setType(type).setActive(active).build()
 }
