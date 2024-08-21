@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Запіс экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Апрацоўваецца запіс экрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Бягучае апавяшчэнне для сеанса запісу экрана"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Запісаць экран?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Запісаць адну праграму"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Запісаць змесціва ўсяго экрана"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Пры запісе ўсяго экрана запісваецца ўсё, што паказваецца на экране. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Пры запісе праграмы запісваецца ўсё, што паказваецца або прайграецца ў гэтай праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Запісаць экран"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Выберыце праграму для запісу"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Запісаць аўдыя"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аўдыя з прылады"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Гук на вашай прыладзе, напрыклад музыка, выклікі і рынгтоны"</string>
@@ -315,6 +308,8 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth уключыцца заўтра раніцай"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Абагуліць аўдыя"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Ідзе абагульванне аўдыя"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Узровень зараду: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Гук"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнітура"</string>
@@ -489,7 +484,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Закрыць"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Дадаць ці выдаліць віджэты ў гэтай вобласці або змяніць іх парадак"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Дадаць іншыя віджэты"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Доўга націскайце, каб наладзіць віджэты"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Націсніце і ўтрымлівайце, каб наладзіць віджэты"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Наладзіць віджэты"</string>
     <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Разблакіруйце, каб наладзіць віджэты"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Значок праграмы для адключанага віджэта"</string>
@@ -535,8 +530,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Падчас запісу ці трансляцыі праграма \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" будзе мець доступ да ўсёй інфармацыі, адлюстраванай на экране вашай прылады, ці той, якая праз яе прайграецца. Гэтая інфармацыя ўключае паролі, звесткі пра аплату, фота, паведамленні і аўдыя, якое вы прайграяце."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Пачаць запіс або трансляцыю?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Падчас запісу ці трансляцыі служба, якая забяспечвае работу гэтай функцыі, будзе мець доступ да ўсёй інфармацыі, адлюстраванай на экране вашай прылады, ці той, якая праз яе прайграецца. Гэтая інфармацыя ўключае паролі, плацежных рэквізітаў, фота, паведамленні і аўдыя, якое вы прайграяце."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Абагульванне або запіс праграмы"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Абагуліць экран з праграмай \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Абагуліць адну праграму"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Абагуліць увесь экран"</string>
@@ -544,16 +538,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Калі вы абагульваеце праграму, праграма \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" можа бачыць усё, што паказваецца ці прайграецца ў гэтай праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Абагуліць экран"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" адключыла гэты параметр"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Выберыце праграму для абагульвання"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Уключыць трансляцыю экрана?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Трансліраваць адну праграму"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Трансліраваць увесь экран"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Калі вы трансліруеце ўвесь экран, бачна ўсё, што адбываецца на экране. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Калі вы трансліруеце праграму, бачна ўсё, што паказваецца ці прайграецца ў гэтай праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Трансліраваць экран"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Выберыце праграму для трансляцыі"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Пачаць абагульванне?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Калі адбываецца абагульванне, запіс ці трансляцыя, Android мае доступ да ўсяго змесціва, якое паказваецца на экране ці прайграецца на прыладзе. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Калі адбываецца абагульванне, запіс ці трансляцыя змесціва праграмы, Android мае доступ да ўсяго змесціва, якое паказваецца ці прайграецца ў праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>

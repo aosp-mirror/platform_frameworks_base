@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"क्या आपको स्क्रीन रिकॉर्ड करनी है?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एक ऐप्लिकेशन की रिकॉर्डिंग करें"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"पूरी स्क्रीन रिकॉर्ड करें"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"पूरी स्क्रीन रिकॉर्ड करते समय, स्क्रीन पर दिखने वाली हर चीज़ रिकॉर्ड की जाती है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"किसी ऐप्लिकेशन को रिकॉर्ड करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी रिकॉर्ड होता है. इसलिए, रिकॉर्ड करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"स्क्रीन रिकॉर्ड करें"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"रिकॉर्ड करने के लिए ऐप्लिकेशन चुनें"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडियो रिकॉर्ड करें"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिवाइस ऑडियो"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"आपके डिवाइस से आने वाली आवाज़ जैसे कि संगीत, कॉल, और रिंगटोन"</string>
@@ -315,6 +308,8 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ब्लूटूथ कल सुबह चालू होगा"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ऑडियो शेयर करें"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ऑडियो शेयर किया जा रहा है"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बैटरी"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ऑडियो"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
@@ -487,10 +482,10 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"कम्यूनिटी ट्यूटोरियल शुरू करने के लिए, बाईं ओर स्वाइप करें"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"पसंद के मुताबिक बनाएं"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"खारिज करें"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"इस स्पेस में विजेट जोड़ें, हटाएं, और उन्हें फिर से क्रम में लगाएं"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"इस स्पेस में विजेट जोड़ें, हटाएं, और उन्हें नए क्रम में लगाएं"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ज़्यादा विजेट जोड़ें"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेट पसंद के मुताबिक बनाने के लिए उसे दबाकर रखें"</string>
-    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेट अपनी पसंद के मुताबिक बनाएं"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेट को मनमुताबिक बनाने के लिए उसे दबाकर रखें"</string>
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेट को अपनी पसंद के मुताबिक बनाएं"</string>
     <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"विजेट को पसंद के मुताबिक बनाने के लिए, डिवाइस अनलॉक करें"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"बंद किए गए विजेट के लिए ऐप्लिकेशन आइकॉन"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"इंस्टॉल हो रहे विजेट के लिए ऐप्लिकेशन आइकॉन"</string>
@@ -535,8 +530,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास आपकी स्क्रीन पर दिख रही जानकारी या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. जैसे, पासवर्ड, पेमेंट के तरीके की जानकारी, फ़ोटो, मैसेज, और डिवाइस पर चल रहा ऑडियो."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"क्या मीडिया रिकॉर्ड या कास्ट करना है?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"रिकॉर्ड या कास्ट करते समय, इस सुविधा को उपलब्ध कराने वाली सेवा के पास आपकी स्क्रीन पर दिख रही जानकारी या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. जैसे, पासवर्ड, पेमेंट के तरीके की जानकारी, फ़ोटो, मैसेज, और डिवाइस पर चल रहा ऑडियो."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ऐप्लिकेशन शेयर करें या उसकी रिकॉर्डिंग करें"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"क्या आपको <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> पर अपनी स्क्रीन शेयर करनी है?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"एक ऐप्लिकेशन शेयर करें"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"पूरी स्क्रीन शेयर करें"</string>
@@ -544,16 +538,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"जब कोई ऐप्लिकेशन शेयर किया जाता है, तो उस ऐप्लिकेशन में दिख रहा या चलाया जा रहा पूरा कॉन्टेंट <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> पर दिखता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"स्क्रीन शेयर करें"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ने इस विकल्प को बंद कर दिया है"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"शेयर करने के लिए ऐप्लिकेशन चुनें"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"क्या स्क्रीन को कास्ट करना है?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"एक ऐप्लिकेशन को कास्ट करें"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"पूरी स्क्रीन को कास्ट करें"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"पूरी स्क्रीन को कास्ट करने के दौरान, उस पर दिख रहा कॉन्टेंट दूसरी स्क्रीन पर भी दिखता है. इसलिए, कास्ट करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"किसी ऐप्लिकेशन को कास्ट करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी दिखता है. इसलिए, कास्ट करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"स्क्रीन कास्ट करें"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"कास्ट करने के लिए ऐप्लिकेशन चुनें"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"क्या मीडिया शेयर करना है?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"शेयर, रिकॉर्ड या कास्ट करते समय, Android के पास स्क्रीन पर दिख रहे कॉन्टेंट या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"किसी ऐप्लिकेशन को शेयर, रिकॉर्ड या कास्ट करते समय, Android के पास उस ऐप्लिकेशन पर दिख रहे कॉन्टेंट या उस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
