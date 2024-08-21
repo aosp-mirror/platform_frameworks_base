@@ -1419,7 +1419,7 @@
     <!-- Name of the internal speaker and mic. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_desktop">This computer (internal)</string>
     <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name_tv">@string/tv_media_transfer_default</string>
+    <string name="media_transfer_this_device_name_tv">This TV</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
     <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
     <!-- Default name of the external device. [CHAR LIMIT=30] -->
@@ -1462,12 +1462,11 @@
     <!-- Media output switcher. Subtitle for devices connected through HDMI EARC if a device name is available. [CHAR LIMIT=NONE] -->
     <string name="tv_media_transfer_earc_subtitle">Connected via eARC</string>
 
-    <!-- TV media output switcher. Title for the default audio output of the device [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_default">TV default</string>
-    <!-- TV media output switcher. Subtitle for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_hdmi">HDMI output</string>
-    <!-- TV media output switcher. Subtitle for default audio output which is internal speaker, i.e. panel VTs [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_internal_speakers">Internal speakers</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is internal speaker [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_internal_speakers">Built-in speaker</string>
+
+    <!-- TV media output switcher. Title for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_hdmi_title">TV Audio</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
