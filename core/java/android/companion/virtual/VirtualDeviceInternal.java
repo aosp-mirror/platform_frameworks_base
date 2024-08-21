@@ -306,38 +306,21 @@ public class VirtualDeviceInternal {
         }
     }
 
-    void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+    void addActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
-            mVirtualDevice.addActivityPolicyExemption(componentName);
+            mVirtualDevice.addActivityPolicyExemption(exemption);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+    void removeActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
-            mVirtualDevice.removeActivityPolicyExemption(componentName);
+            mVirtualDevice.removeActivityPolicyExemption(exemption);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
-
-    void addActivityPolicyPackageExemption(@NonNull String packageName) {
-        try {
-            mVirtualDevice.addActivityPolicyPackageExemption(packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    void removeActivityPolicyPackageExemption(@NonNull String packageName) {
-        try {
-            mVirtualDevice.removeActivityPolicyPackageExemption(packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
 
     void setDevicePolicyForDisplay(int displayId,
             @VirtualDeviceParams.DynamicDisplayPolicyType int policyType,
@@ -353,40 +336,6 @@ public class VirtualDeviceInternal {
 
         try {
             mVirtualDevice.setDevicePolicyForDisplay(displayId, policyType, devicePolicy);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    void addActivityPolicyExemptionForDisplay(int displayId, @NonNull ComponentName componentName) {
-        try {
-            mVirtualDevice.addActivityPolicyExemptionForDisplay(displayId, componentName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    void removeActivityPolicyExemptionForDisplay(int displayId,
-            @NonNull ComponentName componentName) {
-        try {
-            mVirtualDevice.removeActivityPolicyExemptionForDisplay(displayId, componentName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    void addActivityPolicyPackageExemptionForDisplay(int displayId, @NonNull String packageName) {
-        try {
-            mVirtualDevice.addActivityPolicyPackageExemptionForDisplay(displayId, packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    void removeActivityPolicyPackageExemptionForDisplay(int displayId,
-            @NonNull String packageName) {
-        try {
-            mVirtualDevice.removeActivityPolicyPackageExemptionForDisplay(displayId, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
