@@ -349,6 +349,47 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
   }
 
   @Test
+  fun transitBack_previousExitReasonScreenOff_logTaskAddedAndEnterReasonScreenOn() {
+    val freeformTask = createTaskInfo(WINDOWING_MODE_FREEFORM)
+    // Previous Exit reason recorded as Screen Off
+    val sessionId = 1
+    transitionObserver.addTaskInfosToCachedMap(freeformTask)
+    transitionObserver.setLoggerSessionId(sessionId)
+    callOnTransitionReady(TransitionInfoBuilder(TRANSIT_SLEEP).build())
+    verifyTaskRemovedAndExitLogging(sessionId, ExitReason.SCREEN_OFF, DEFAULT_TASK_UPDATE)
+    // Enter desktop through back transition, this happens when user enters after dismissing
+    // keyguard
+    val change = createChange(TRANSIT_TO_FRONT, freeformTask)
+    val transitionInfo = TransitionInfoBuilder(TRANSIT_TO_BACK, 0).addChange(change).build()
+
+    callOnTransitionReady(transitionInfo)
+
+    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON, DEFAULT_TASK_UPDATE)
+  }
+
+  @Test
+  fun transitEndDragToDesktop_previousExitReasonScreenOff_logTaskAddedAndEnterReasonAppDrag() {
+    val freeformTask = createTaskInfo(WINDOWING_MODE_FREEFORM)
+    // Previous Exit reason recorded as Screen Off
+    val sessionId = 1
+    transitionObserver.addTaskInfosToCachedMap(freeformTask)
+    transitionObserver.setLoggerSessionId(sessionId)
+    callOnTransitionReady(TransitionInfoBuilder(TRANSIT_SLEEP).build())
+    verifyTaskRemovedAndExitLogging(sessionId, ExitReason.SCREEN_OFF, DEFAULT_TASK_UPDATE)
+
+    // Enter desktop through app handle drag. This represents cases where instead of moving to
+    // desktop right after turning the screen on, we move to fullscreen then move another task
+    // to desktop
+    val transitionInfo =
+        TransitionInfoBuilder(Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, 0)
+            .addChange(createChange(TRANSIT_TO_FRONT, freeformTask))
+            .build()
+    callOnTransitionReady(transitionInfo)
+
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG, DEFAULT_TASK_UPDATE)
+  }
+
+  @Test
   fun transitSleep_logTaskRemovedAndExitReasonScreenOff_sessionIdNull() {
     val sessionId = 1
     // add a freeform task
