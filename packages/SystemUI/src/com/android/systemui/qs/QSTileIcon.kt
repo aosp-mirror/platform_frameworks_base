@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.impl.modes.domain.model
+package com.android.systemui.qs
 
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.tileimpl.QSTileImpl
 
-data class ModesTileModel(
-    val isActivated: Boolean,
-    val activeModes: List<String>,
-    val icon: Icon? = null
-)
+/**
+ * Creates a [QSTile.Icon] from an [Icon].
+ * * [Icon.Loaded] -> [QSTileImpl.DrawableIcon]
+ * * [Icon.Resource] -> [QSTileImpl.ResourceIcon]
+ */
+fun Icon.asQSTileIcon(): QSTile.Icon {
+    return when (this) {
+        is Icon.Loaded -> {
+            QSTileImpl.DrawableIcon(this.drawable)
+        }
+        is Icon.Resource -> {
+            QSTileImpl.ResourceIcon.get(this.res)
+        }
+    }
+}

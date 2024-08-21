@@ -2,6 +2,7 @@ package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.Edge
+import com.android.compose.animation.scene.ProgressConverter
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
@@ -40,6 +41,9 @@ import com.android.systemui.shade.ui.composable.Shade
  * Please keep the list sorted alphabetically.
  */
 val SceneContainerTransitions = transitions {
+
+    // Overscroll progress starts linearly with some resistance (3f) and slowly approaches 0.2f
+    defaultOverscrollProgressConverter = ProgressConverter.tanh(maxProgress = 0.2f, tilt = 3f)
 
     // Scene transitions
 

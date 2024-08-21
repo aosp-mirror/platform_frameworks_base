@@ -41,6 +41,8 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigTestBuilder
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.res.R
+import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.FakeSettings
@@ -57,6 +59,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,7 +90,12 @@ class ModesTileTest : SysuiTestCase() {
 
     private val inputHandler = FakeQSTileIntentUserInputHandler()
     private val zenModeRepository = FakeZenModeRepository()
-    private val tileDataInteractor = ModesTileDataInteractor(zenModeRepository, testDispatcher)
+    private val tileDataInteractor =
+        ModesTileDataInteractor(
+            context,
+            ZenModeInteractor(zenModeRepository, mock<NotificationSettingsRepository>()),
+            testDispatcher
+        )
     private val mapper =
         ModesTileMapper(
             context.orCreateTestableResources
