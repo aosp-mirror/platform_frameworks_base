@@ -218,4 +218,60 @@ class FaceHelpMessageDebouncerTest : SysuiTestCase() {
         assertThat(underTest.getMessageToShow(startWindow)?.msgId)
             .isEqualTo(BiometricFaceConstants.FACE_ACQUIRED_TOO_CLOSE)
     }
+
+    @Test
+    fun messageMustMeetThreshold() {
+        underTest =
+            FaceHelpMessageDebouncer(
+                window = window,
+                startWindow = 0,
+                shownFaceMessageFrequencyBoost = 0,
+                threshold = .8f,
+            )
+
+        underTest.addMessage(
+            HelpFaceAuthenticationStatus(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_CLOSE,
+                "tooClose",
+                0
+            )
+        )
+        underTest.addMessage(
+            HelpFaceAuthenticationStatus(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_CLOSE,
+                "tooClose",
+                0
+            )
+        )
+        underTest.addMessage(
+            HelpFaceAuthenticationStatus(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT,
+                "tooBright",
+                0
+            )
+        )
+
+        // although tooClose message is the majority, it doesn't meet the 80% threshold
+        assertThat(underTest.getMessageToShow(startWindow)).isNull()
+
+        underTest.addMessage(
+            HelpFaceAuthenticationStatus(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_CLOSE,
+                "tooClose",
+                0
+            )
+        )
+        underTest.addMessage(
+            HelpFaceAuthenticationStatus(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_CLOSE,
+                "tooClose",
+                0
+            )
+        )
+
+        // message shows once it meets the threshold
+        assertThat(underTest.getMessageToShow(startWindow)?.msgId)
+            .isEqualTo(BiometricFaceConstants.FACE_ACQUIRED_TOO_CLOSE)
+        assertThat(underTest.getMessageToShow(startWindow)?.msg).isEqualTo("tooClose")
+    }
 }
