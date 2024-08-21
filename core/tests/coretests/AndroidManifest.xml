@@ -1672,14 +1672,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.content.res.ResourceCacheActivity"
-                  android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
-            </intent-filter>
-        </activity>
-
         <activity
             android:name="android.print.test.PrintDocumentActivity"
             android:theme="@style/Theme" />

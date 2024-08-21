@@ -69,20 +69,3 @@ class android.text.ClipboardManager keep
 # Just enough to allow ResourcesManager to run
 class android.hardware.display.DisplayManagerGlobal keep
     method getInstance ()Landroid/hardware/display/DisplayManagerGlobal; ignore
-
-# These classes will be properly enabled in follow-up CLs
-
-class android.content.res.FontResourcesParser keepclass
-class android.content.res.FontResourcesParser.FamilyResourceEntry keepclass
-class android.content.res.FontResourcesParser.ProviderResourceEntry keepclass
-class android.content.res.FontResourcesParser.FontFamilyFilesResourceEntry keepclass
-class android.content.res.FontResourcesParser.FontFileResourceEntry keepclass
-class android.content.res.FontScaleConverter keepclass
-class android.content.res.FontScaleConverterImpl keepclass
-class android.content.res.FontScaleConverterFactory keepclass
-class android.content.res.ThemedResourceCache keepclass
-class android.content.res.ConfigurationBoundResourceCache keepclass
-class android.content.res.Configuration keepclass
-class android.content.res.CompatibilityInfo keepclass
-class android.content.res.ConstantState keepclass
-class android.view.DisplayAdjustments keepclass

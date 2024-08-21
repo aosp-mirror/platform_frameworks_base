@@ -222,8 +222,16 @@ android.content.res.ApkAssets
 android.content.res.AssetFileDescriptor
 android.content.res.AssetManager
 android.content.res.AssetManager$Builder
+android.content.res.ConfigurationBoundResourceCache
+android.content.res.Configuration
+android.content.res.CompatibilityInfo
+android.content.res.ConstantState
 android.content.res.DrawableCache
 android.content.res.Element
+android.content.res.FontResourcesParser
+android.content.res.FontScaleConverter
+android.content.res.FontScaleConverterImpl
+android.content.res.FontScaleConverterFactory
 android.content.res.Resources
 android.content.res.Resources$Theme
 android.content.res.ResourceId
@@ -231,6 +239,7 @@ android.content.res.ResourcesImpl
 android.content.res.ResourcesKey
 android.content.res.StringBlock
 android.content.res.TagCounter
+android.content.res.ThemedResourceCache
 android.content.res.TypedArray
 android.content.res.Validator
 android.content.res.XmlBlock
@@ -275,6 +284,7 @@ android.content.ContentProvider
 
 android.app.ActivityManager
 android.app.ActivityOptions
+android.app.ApplicationPackageManager
 android.app.BroadcastOptions
 android.app.ComponentOptions
 android.app.Instrumentation
@@ -288,6 +298,7 @@ android.metrics.LogMaker
 android.view.Display
 android.view.Display$HdrCapabilities
 android.view.Display$Mode
+android.view.DisplayAdjustments
 android.view.DisplayInfo
 android.view.inputmethod.InputBinding
 
