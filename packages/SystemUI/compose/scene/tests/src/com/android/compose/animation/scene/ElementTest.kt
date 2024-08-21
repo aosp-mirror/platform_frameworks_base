@@ -972,7 +972,7 @@ class ElementTest {
                 sceneTransitions = {
                     overscroll(SceneB, Orientation.Vertical) {
                         // Overscroll progress will be halved
-                        progressConverter = { it / 2f }
+                        progressConverter = ProgressConverter { it / 2f }
 
                         // On overscroll 100% -> Foo should translate by layoutHeight
                         translate(TestElements.Foo, y = { absoluteDistance })

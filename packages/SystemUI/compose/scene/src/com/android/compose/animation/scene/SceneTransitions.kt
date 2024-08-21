@@ -282,14 +282,14 @@ interface OverscrollSpec {
      * - 1, the user overscrolled by exactly the [OverscrollBuilder.distance].
      * - Greater than 1, the user overscrolled more than the [OverscrollBuilder.distance].
      */
-    val progressConverter: (Float) -> Float
+    val progressConverter: ProgressConverter
 }
 
 internal class OverscrollSpecImpl(
     override val scene: SceneKey,
     override val orientation: Orientation,
     override val transformationSpec: TransformationSpecImpl,
-    override val progressConverter: (Float) -> Float,
+    override val progressConverter: ProgressConverter,
 ) : OverscrollSpec
 
 /**
