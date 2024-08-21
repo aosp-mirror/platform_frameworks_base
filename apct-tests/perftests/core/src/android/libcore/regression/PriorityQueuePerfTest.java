@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -39,7 +39,7 @@ import java.util.Random;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class PriorityQueuePerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -108,7 +108,7 @@ public class PriorityQueuePerfTest {
         // At most allow the queue to empty 10%.
         int resizingThreshold = queueSize / 10;
         int i = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             // Reset queue every so often. This will be called more often for smaller
             // queueSizes, but since a copy is linear, it will also cost proportionally
