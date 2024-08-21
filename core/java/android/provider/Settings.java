@@ -11254,7 +11254,8 @@ public final class Settings {
                 "assist_long_press_home_enabled";
 
         /**
-         * Whether all entrypoints can trigger search. Replaces individual settings.
+         * Whether all entrypoints (e.g. long-press home, long-press nav handle)
+         * can trigger contextual search.
          *
          * @hide
          */
