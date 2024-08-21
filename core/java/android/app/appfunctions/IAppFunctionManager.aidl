@@ -20,10 +20,11 @@ import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 
 /**
-* Interface between an app and the server implementation service (AppFunctionManagerService).
-* @hide
-*/
-oneway interface IAppFunctionManager {
+ * Defines the interface for apps to interact with the app function execution service
+ * {@code AppFunctionManagerService} running in the system server process.
+ * @hide
+ */
+interface IAppFunctionManager {
     /**
     * Executes an app function provided by {@link AppFunctionService} through the system.
     *

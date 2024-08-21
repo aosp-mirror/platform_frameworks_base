@@ -82,10 +82,19 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         final SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback =
                 new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback);
 
-        String validatedCallingPackage = mCallerValidator
-                .validateCallingPackage(requestInternal.getCallingPackage());
-        UserHandle targetUser = mCallerValidator.verifyTargetUserHandle(
-                requestInternal.getUserHandle(), validatedCallingPackage);
+        String validatedCallingPackage;
+        UserHandle targetUser;
+        try {
+            validatedCallingPackage = mCallerValidator
+                    .validateCallingPackage(requestInternal.getCallingPackage());
+            targetUser = mCallerValidator.verifyTargetUserHandle(
+                    requestInternal.getUserHandle(), validatedCallingPackage);
+        } catch (SecurityException exception) {
+            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
+                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
+                    getExceptionMessage(exception)).build());
+            return;
+        }
 
         // TODO(b/354956319): Add and honor the new enterprise policies.
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
@@ -107,8 +116,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
         if (!mCallerValidator.verifyCallerCanExecuteAppFunction(
                 validatedCallingPackage, targetPackageName)) {
-            throw new SecurityException("Caller does not have permission to execute the app "
-                    + "function.");
+            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
+                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
+                    "Caller does not have permission to execute the appfunction")
+                    .build());
+            return;
         }
 
         Intent serviceIntent = mInternalServiceHelper.resolveAppFunctionService(
@@ -159,8 +171,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             );
                         } catch (Exception e) {
                             safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                    .Builder(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                                    e.getMessage()).build());
+                                    .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
+                                    getExceptionMessage(e)).build());
                             serviceUsageCompleteListener.onCompleted();
                         }
                     }
@@ -169,7 +181,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     public void onFailedToConnect() {
                         Slog.e(TAG, "Failed to connect to service");
                         safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                .Builder(ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                                .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
                                 "Failed to connect to AppFunctionService").build());
                     }
 
@@ -192,5 +204,9 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     "Failed to bind the AppFunctionService."
             ).build());
         }
+    }
+
+    private String getExceptionMessage(Exception exception) {
+        return exception.getMessage() == null ? "" : exception.getMessage();
     }
 }

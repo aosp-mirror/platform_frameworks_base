@@ -236,6 +236,18 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
     }
 
     /**
+     * Returns result codes from throwable.
+     *
+     * @hide
+     */
+    static @ResultCode int getResultCode(@NonNull Throwable t) {
+        if (t instanceof IllegalArgumentException) {
+            return ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT;
+        }
+        return ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR;
+    }
+
+    /**
      * The builder for creating {@link ExecuteAppFunctionResponse} instances.
      */
     @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
