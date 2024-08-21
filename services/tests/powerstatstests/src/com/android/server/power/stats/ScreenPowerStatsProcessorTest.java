@@ -49,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class ScreenPowerStatsProcessorTest {
 
@@ -167,10 +168,8 @@ public class ScreenPowerStatsProcessorTest {
 
     private PowerComponentAggregatedPowerStats collectAndAggregatePowerStats(
             boolean energyConsumer) {
-        ScreenPowerStatsProcessor processor =
-                new ScreenPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
+                () -> new ScreenPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         ScreenPowerStatsCollector collector = new ScreenPowerStatsCollector(mInjector);
         collector.setEnabled(true);
@@ -193,6 +192,8 @@ public class ScreenPowerStatsProcessorTest {
             return null;
         }).when(mScreenUsageTimeRetriever).retrieveTopActivityTimes(any(
                 ScreenPowerStatsCollector.ScreenUsageTimeRetriever.Callback.class));
+
+        aggregatedStats.start(0);
 
         aggregatedStats.addPowerStats(collector.collectStats(), 1000);
 
@@ -236,18 +237,18 @@ public class ScreenPowerStatsProcessorTest {
         // between state changes and power stats collection
         aggregatedStats.addPowerStats(collector.collectStats(), 612_000);
 
-        aggregatedStats.getConfig().getProcessor().finish(aggregatedStats, 180_000);
+        aggregatedStats.finish(180_000);
         return aggregatedStats;
     }
 
     private static PowerComponentAggregatedPowerStats createAggregatedPowerStats(
-            ScreenPowerStatsProcessor processor) {
+            Supplier<PowerStatsProcessor> processorSupplier) {
         AggregatedPowerStatsConfig.PowerComponent config =
                 new AggregatedPowerStatsConfig.PowerComponent(
                         BatteryConsumer.POWER_COMPONENT_SCREEN)
                         .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                         .trackUidStates(STATE_POWER, STATE_SCREEN)
-                        .setProcessor(processor);
+                        .setProcessorSupplier(processorSupplier);
 
         PowerComponentAggregatedPowerStats aggregatedStats =
                 new PowerComponentAggregatedPowerStats(
