@@ -16,47 +16,46 @@
 
 package com.android.settingslib.bluetooth.devicesettings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-/** A data class representing a footer preference. */
-public class DeviceSettingFooterPreference extends DeviceSettingPreference implements Parcelable {
+/** A data class representing a help button displayed on the top right corner of the page. */
+public class DeviceSettingHelpPreference extends DeviceSettingPreference implements Parcelable {
 
-    private final String mFooterText;
+    private final Intent mIntent;
     private final Bundle mExtras;
 
-    DeviceSettingFooterPreference(
-            @NonNull String footerText,
-            Bundle extras) {
-        super(DeviceSettingType.DEVICE_SETTING_TYPE_FOOTER);
-        mFooterText = footerText;
+    DeviceSettingHelpPreference(@NonNull Intent intent, Bundle extras) {
+        super(DeviceSettingType.DEVICE_SETTING_TYPE_HELP);
+        mIntent = intent;
         mExtras = extras;
     }
 
-    /** Read a {@link DeviceSettingFooterPreference} from {@link Parcel}. */
+    /** Read a {@link DeviceSettingHelpPreference} from {@link Parcel}. */
     @NonNull
-    public static DeviceSettingFooterPreference readFromParcel(@NonNull Parcel in) {
-        String footerText = in.readString();
+    public static DeviceSettingHelpPreference readFromParcel(@NonNull Parcel in) {
+        Intent intent = in.readParcelable(Intent.class.getClassLoader());
         Bundle extras = in.readBundle(Bundle.class.getClassLoader());
-        return new DeviceSettingFooterPreference(footerText, extras);
+        return new DeviceSettingHelpPreference(intent, extras);
     }
 
-    public static final Creator<DeviceSettingFooterPreference> CREATOR =
+    public static final Creator<DeviceSettingHelpPreference> CREATOR =
             new Creator<>() {
                 @Override
                 @NonNull
-                public DeviceSettingFooterPreference createFromParcel(@NonNull Parcel in) {
+                public DeviceSettingHelpPreference createFromParcel(@NonNull Parcel in) {
                     in.readInt();
                     return readFromParcel(in);
                 }
 
                 @Override
                 @NonNull
-                public DeviceSettingFooterPreference[] newArray(int size) {
-                    return new DeviceSettingFooterPreference[size];
+                public DeviceSettingHelpPreference[] newArray(int size) {
+                    return new DeviceSettingHelpPreference[size];
                 }
             };
 
@@ -68,24 +67,24 @@ public class DeviceSettingFooterPreference extends DeviceSettingPreference imple
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeString(mFooterText);
+        dest.writeParcelable(mIntent, flags);
         dest.writeBundle(mExtras);
     }
 
-    /** Builder class for {@link DeviceSettingFooterPreference}. */
+    /** Builder class for {@link DeviceSettingHelpPreference}. */
     public static final class Builder {
-        private String mFooterText = "";
+        private Intent mIntent;
         private Bundle mExtras = Bundle.EMPTY;
 
         /**
-         * Sets the footer text of the preference.
+         * Sets the intent of the preference, should be an activity intent.
          *
-         * @param footerText The footer text of the preference.
+         * @param intent The intent to launch when clicked.
          * @return Returns the Builder object.
          */
         @NonNull
-        public DeviceSettingFooterPreference.Builder setFooterText(@NonNull String footerText) {
-            mFooterText = footerText;
+        public DeviceSettingHelpPreference.Builder setIntent(@NonNull Intent intent) {
+            mIntent = intent;
             return this;
         }
 
@@ -95,31 +94,30 @@ public class DeviceSettingFooterPreference extends DeviceSettingPreference imple
          * @return Returns the Builder object.
          */
         @NonNull
-        public DeviceSettingFooterPreference.Builder setExtras(@NonNull Bundle extras) {
+        public DeviceSettingHelpPreference.Builder setExtras(@NonNull Bundle extras) {
             mExtras = extras;
             return this;
         }
 
         /**
-         * Builds the {@link DeviceSettingFooterPreference} object.
+         * Builds the {@link DeviceSettingHelpPreference} object.
          *
-         * @return Returns the built {@link DeviceSettingFooterPreference} object.
+         * @return Returns the built {@link DeviceSettingHelpPreference} object.
          */
         @NonNull
-        public DeviceSettingFooterPreference build() {
-            return new DeviceSettingFooterPreference(
-                    mFooterText, mExtras);
+        public DeviceSettingHelpPreference build() {
+            return new DeviceSettingHelpPreference(mIntent, mExtras);
         }
     }
 
     /**
-     * Gets the footer text of the preference.
+     * Gets the intent to launch when clicked.
      *
-     * @return The footer text.
+     * @return The intent.
      */
     @NonNull
-    public String getFooterText() {
-        return mFooterText;
+    public Intent getIntent() {
+        return mIntent;
     }
 
     /**
