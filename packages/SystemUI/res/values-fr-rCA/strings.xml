@@ -428,7 +428,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Fermer"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Ajouter, retirer et réorganiser vos widgets dans cet espace"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Ajouter plus de widgets"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Maintenez le doigt pour personnaliser les widgets"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Appuyez longuement pour personnaliser les widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personnaliser les widgets"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icône d\'appli pour un widget désactivé"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Modifier le widget"</string>

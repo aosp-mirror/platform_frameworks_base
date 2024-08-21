@@ -424,7 +424,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се бавно • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарежда се • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до пълно зареждане"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Прекарайте пръст наляво, за да стартирате общия урок"</string>
-    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Персонализиране"</string>
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Персонализи­ране"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Отхвърляне"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Добавяйте, премахвайте и пренареждайте приспособленията си в тази област"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Добавете още приспособления"</string>

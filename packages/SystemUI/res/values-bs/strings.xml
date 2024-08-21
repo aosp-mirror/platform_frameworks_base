@@ -426,13 +426,13 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Prevucite ulijevo da pokrenete zajednički vodič"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Prilagodite"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Odbaci"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodajte, uklonite i promijenite raspored vidžeta u ovom prostoru"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodajte, uklonite i preuredite vidžete u prostoru"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodajte još vidžeta"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pritisnite i zadržite da prilagodite vidžete"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prilagodite vidžete"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikona aplikacije za onemogućeni vidžet"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Uredite vidžet"</string>
-    <string name="button_to_remove_widget" msgid="3948204829181214098">"Uklanjanje"</string>
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"Ukloni"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Dodajte vidžet"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Gotovo"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Zamijeni korisnika"</string>

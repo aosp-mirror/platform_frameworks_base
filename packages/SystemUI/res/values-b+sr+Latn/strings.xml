@@ -426,7 +426,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Prevucite ulevo da biste započeli zajednički vodič"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Prilagodite"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Odbaci"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodajte, uklonite i preuredite vidžete u ovom prostoru"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Dodajte, uklonite i preuredite vidžete ovde"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Dodajte još vidžeta"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Dugi pritisak za prilagođavanje vidžeta"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Prilagodi vidžete"</string>

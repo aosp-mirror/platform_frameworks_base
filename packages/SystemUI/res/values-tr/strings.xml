@@ -426,7 +426,7 @@
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Ortak eğitimi başlatmak için sola kaydırın"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Özelleştir"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Kapat"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Bu alanda widget\'larınızı ekleyin, kaldırın ve yeniden sıralayın"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Burada widget\'larınızı ekleyin, kaldırın ve düzenleyin"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Daha fazla widget ekle"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Widget\'ları özelleştirmek için uzun basın"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Widget\'ları özelleştir"</string>
