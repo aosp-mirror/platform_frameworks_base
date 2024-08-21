@@ -1,11 +1,18 @@
 package com.android.systemui.scene
 
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.FakeOverlay
+import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
 var Kosmos.sceneKeys by Fixture {
     listOf(
@@ -48,4 +55,21 @@ var Kosmos.sceneContainerConfig by Fixture {
         overlayKeys = overlayKeys,
         navigationDistances = navigationDistances,
     )
+}
+
+val Kosmos.transitionState by Fixture {
+    MutableStateFlow<ObservableTransitionState>(
+        ObservableTransitionState.Idle(sceneContainerConfig.initialSceneKey)
+    )
+}
+
+val Kosmos.sceneContainerViewModel by Fixture {
+    SceneContainerViewModel(
+            sceneInteractor = sceneInteractor,
+            falsingInteractor = falsingInteractor,
+            powerInteractor = powerInteractor,
+            motionEventHandlerReceiver = {},
+            logger = sceneLogger
+        )
+        .apply { setTransitionState(transitionState) }
 }
