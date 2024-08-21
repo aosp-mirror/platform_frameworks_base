@@ -332,7 +332,7 @@ class DesktopModeLoggerTransitionObserver(
         val positionInParent = taskInfo.positionInParent
         return TaskUpdate(
             instanceId = taskInfo.taskId,
-            uid = taskInfo.userId,
+            uid = taskInfo.effectiveUid,
             taskHeight = screenBounds.height(),
             taskWidth = screenBounds.width(),
             taskX = positionInParent.x,

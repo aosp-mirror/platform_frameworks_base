@@ -715,7 +715,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     ) =
         ActivityManager.RunningTaskInfo().apply {
           taskId = id
-          userId = uid
+          effectiveUid = uid
           configuration.windowConfiguration.apply {
             windowingMode = windowMode
             positionInParent = Point(taskX, taskY)
