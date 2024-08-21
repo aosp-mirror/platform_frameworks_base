@@ -29,12 +29,7 @@
       "name": "CtsMatchFlagTestCases"
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm."
-        }
-      ]
+      "name": "FrameworksMockingServicesTests_android_server_pm"
     },
     {
       "file_patterns": ["(/|^)PackageManagerService\\.java","(/|^)UserManagerService\\.java"],

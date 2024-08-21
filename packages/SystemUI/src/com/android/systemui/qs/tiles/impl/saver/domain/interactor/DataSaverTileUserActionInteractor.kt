@@ -94,8 +94,7 @@ constructor(
                             )
                             ?.let { controller ->
                                 dialogTransitionAnimator.show(dialog, controller)
-                            }
-                            ?: dialog.show()
+                            } ?: dialog.show()
                     }
                 }
                 is QSTileUserAction.LongClick -> {
@@ -104,6 +103,7 @@ constructor(
                         Intent(Settings.ACTION_DATA_SAVER_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

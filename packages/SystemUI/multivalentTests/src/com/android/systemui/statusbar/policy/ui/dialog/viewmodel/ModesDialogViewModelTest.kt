@@ -330,67 +330,6 @@ class ModesDialogViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun tiles_calculatesContentDescription() =
-        testScope.runTest {
-            val tiles by collectLastValue(underTest.tiles)
-
-            repository.addModes(
-                listOf(
-                    TestModeBuilder()
-                        .setName("With description, inactive")
-                        .setManualInvocationAllowed(true)
-                        .setTriggerDescription("When the going gets tough")
-                        .setActive(false)
-                        .build(),
-                    TestModeBuilder()
-                        .setName("With description, active")
-                        .setManualInvocationAllowed(true)
-                        .setTriggerDescription("When in Rome")
-                        .setActive(true)
-                        .build(),
-                    TestModeBuilder()
-                        .setName("With description, needs setup")
-                        .setManualInvocationAllowed(true)
-                        .setTriggerDescription("When you find yourself in a hole")
-                        .setEnabled(false, /* byUser= */ false)
-                        .build(),
-                    TestModeBuilder()
-                        .setName("Without description, inactive")
-                        .setManualInvocationAllowed(true)
-                        .setTriggerDescription(null)
-                        .setActive(false)
-                        .build(),
-                    TestModeBuilder()
-                        .setName("Without description, active")
-                        .setManualInvocationAllowed(true)
-                        .setTriggerDescription(null)
-                        .setActive(true)
-                        .build(),
-                    TestModeBuilder()
-                        .setName("Without description, needs setup")
-                        .setManualInvocationAllowed(true)
-                        .setTriggerDescription(null)
-                        .setEnabled(false, /* byUser= */ false)
-                        .build(),
-                )
-            )
-            runCurrent()
-
-            assertThat(tiles!!).hasSize(6)
-            assertThat(tiles!![0].contentDescription)
-                .isEqualTo("With description, inactive\nOff\nWhen the going gets tough")
-            assertThat(tiles!![1].contentDescription)
-                .isEqualTo("With description, active\nOn\nWhen in Rome")
-            assertThat(tiles!![2].contentDescription)
-                .isEqualTo("With description, needs setup\nSet up")
-            assertThat(tiles!![3].contentDescription)
-                .isEqualTo("Without description, inactive\nOff")
-            assertThat(tiles!![4].contentDescription).isEqualTo("Without description, active\nOn")
-            assertThat(tiles!![5].contentDescription)
-                .isEqualTo("Without description, needs setup\nSet up")
-        }
-
-    @Test
     fun onClick_togglesTileState() =
         testScope.runTest {
             val tiles by collectLastValue(underTest.tiles)

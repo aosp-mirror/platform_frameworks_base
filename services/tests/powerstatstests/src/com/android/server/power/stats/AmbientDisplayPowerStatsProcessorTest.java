@@ -124,22 +124,18 @@ public class AmbientDisplayPowerStatsProcessorTest {
     }
 
     private PowerComponentAggregatedPowerStats collectAndAggregatePowerStats() {
-        ScreenPowerStatsProcessor screenPowerStatsProcessor =
-                new ScreenPowerStatsProcessor(mStatsRule.getPowerProfile());
-        AmbientDisplayPowerStatsProcessor ambientDisplayPowerStatsProcessor =
-                new AmbientDisplayPowerStatsProcessor();
-
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SCREEN)
                 .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                 .trackUidStates(STATE_POWER, STATE_SCREEN)
-                .setProcessor(screenPowerStatsProcessor);
+                .setProcessorSupplier(
+                        () -> new ScreenPowerStatsProcessor(mStatsRule.getPowerProfile()));
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
                         BatteryConsumer.POWER_COMPONENT_SCREEN)
-                .setProcessor(ambientDisplayPowerStatsProcessor);
+                .setProcessorSupplier(AmbientDisplayPowerStatsProcessor::new);
 
         AggregatedPowerStats stats = new AggregatedPowerStats(config);
-
+        stats.start(0);
         stats.setDeviceState(STATE_POWER, POWER_STATE_OTHER, 0);
         stats.setDeviceState(STATE_SCREEN, SCREEN_STATE_OTHER, 0);
 

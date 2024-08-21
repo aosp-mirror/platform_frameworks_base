@@ -20,6 +20,7 @@ import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
 import android.app.StatusBarManager.WINDOW_STATE_HIDING
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import android.graphics.Insets
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.InputDevice
@@ -92,6 +93,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var windowRootView: Provider<WindowRootView>
     @Mock private lateinit var shadeLogger: ShadeLogger
     @Mock private lateinit var viewUtil: ViewUtil
+    @Mock private lateinit var statusBarContentInsetsProvider: StatusBarContentInsetsProvider
     private lateinit var statusBarWindowStateController: StatusBarWindowStateController
 
     private lateinit var view: PhoneStatusBarView
@@ -110,6 +112,9 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         statusBarWindowStateController = StatusBarWindowStateController(DISPLAY_ID, commandQueue)
+
+        `when`(statusBarContentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+            .thenReturn(Insets.NONE)
 
         `when`(sysuiUnfoldComponent.getStatusBarMoveFromCenterAnimationController())
             .thenReturn(moveFromCenterAnimation)
@@ -391,6 +396,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 configurationController,
                 mStatusOverlayHoverListenerFactory,
                 fakeDarkIconDispatcher,
+                statusBarContentInsetsProvider,
             )
             .create(view)
             .also { it.init() }

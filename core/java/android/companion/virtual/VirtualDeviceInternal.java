@@ -306,17 +306,17 @@ public class VirtualDeviceInternal {
         }
     }
 
-    void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+    void addActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
-            mVirtualDevice.addActivityPolicyExemption(componentName);
+            mVirtualDevice.addActivityPolicyExemption(exemption);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
-    void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+    void removeActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
-            mVirtualDevice.removeActivityPolicyExemption(componentName);
+            mVirtualDevice.removeActivityPolicyExemption(exemption);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -336,23 +336,6 @@ public class VirtualDeviceInternal {
 
         try {
             mVirtualDevice.setDevicePolicyForDisplay(displayId, policyType, devicePolicy);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    void addActivityPolicyExemptionForDisplay(int displayId, @NonNull ComponentName componentName) {
-        try {
-            mVirtualDevice.addActivityPolicyExemptionForDisplay(displayId, componentName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    void removeActivityPolicyExemptionForDisplay(int displayId,
-            @NonNull ComponentName componentName) {
-        try {
-            mVirtualDevice.removeActivityPolicyExemptionForDisplay(displayId, componentName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

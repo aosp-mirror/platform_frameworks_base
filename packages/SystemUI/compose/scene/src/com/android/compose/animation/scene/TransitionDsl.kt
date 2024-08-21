@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.content.state.ContentState
+import kotlin.math.tanh
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -47,6 +48,12 @@ interface SceneTransitionsBuilder {
      * [DefaultInterruptionHandler].
      */
     var interruptionHandler: InterruptionHandler
+
+    /**
+     * Default [ProgressConverter] used during overscroll. It lets you change a linear progress into
+     * a function of your choice. Defaults to [ProgressConverter.Default].
+     */
+    var defaultOverscrollProgressConverter: ProgressConverter
 
     /**
      * Define the default animation to be played when transitioning [to] the specified content, from
@@ -216,7 +223,7 @@ interface OverscrollBuilder : BaseTransitionBuilder {
      * - 1, the user overscrolled by exactly the [distance].
      * - Greater than 1, the user overscrolled more than the [distance].
      */
-    var progressConverter: (Float) -> Float
+    var progressConverter: ProgressConverter?
 
     /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
     fun translate(
@@ -509,4 +516,36 @@ interface PropertyTransformationBuilder {
         anchorWidth: Boolean = true,
         anchorHeight: Boolean = true,
     )
+}
+
+/** This converter lets you change a linear progress into a function of your choice. */
+fun interface ProgressConverter {
+    fun convert(progress: Float): Float
+
+    companion object {
+        /** Keeps scrolling linearly */
+        val Default = linear()
+
+        /**
+         * The scroll stays linear, with [factor] you can control how much resistance there is.
+         *
+         * @param factor If you choose a value between 0f and 1f, the progress will grow more
+         *   slowly, like there's resistance. A value of 1f means there's no resistance.
+         */
+        fun linear(factor: Float = 1f) = ProgressConverter { it * factor }
+
+        /**
+         * This function starts linear and slowly approaches [maxProgress].
+         *
+         * See a [visual representation](https://www.desmos.com/calculator/usgvvf0z1u) of this
+         * function.
+         *
+         * @param maxProgress is the maximum progress value.
+         * @param tilt behaves similarly to the factor in the [linear] function, and allows you to
+         *   control how quickly you get to the [maxProgress].
+         */
+        fun tanh(maxProgress: Float, tilt: Float = 1f) = ProgressConverter {
+            maxProgress * tanh(x = it / (maxProgress * tilt))
+        }
+    }
 }

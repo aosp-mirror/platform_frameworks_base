@@ -59,7 +59,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -759,7 +758,7 @@ class WallpaperController {
 
     void collectTopWallpapers(Transition transition) {
         if (mFindResults.hasTopShowWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
@@ -767,7 +766,7 @@ class WallpaperController {
 
         }
         if (mFindResults.hasTopHideWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);

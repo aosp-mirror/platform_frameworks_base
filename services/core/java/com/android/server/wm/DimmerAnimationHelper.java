@@ -56,9 +56,14 @@ public class DimmerAnimationHelper {
         Change() {}
 
         Change(@NonNull Change other) {
+            copyFrom(other);
+        }
+
+        void copyFrom(@NonNull Change other) {
             mAlpha = other.mAlpha;
             mBlurRadius = other.mBlurRadius;
             mDimmingContainer = other.mDimmingContainer;
+            mGeometryParent = other.mGeometryParent;
             mRelativeLayer = other.mRelativeLayer;
         }
 
@@ -83,8 +88,8 @@ public class DimmerAnimationHelper {
         }
     }
 
-    private Change mCurrentProperties = new Change();
-    private Change mRequestedProperties = new Change();
+    private final Change mCurrentProperties = new Change();
+    private final Change mRequestedProperties = new Change();
     private AnimationSpec mAlphaAnimationSpec;
 
     private final AnimationAdapterFactory mAnimationAdapterFactory;
@@ -123,12 +128,15 @@ public class DimmerAnimationHelper {
      * {@link Change#setRequestedAppearance(float, int)}
      */
     void applyChanges(@NonNull SurfaceControl.Transaction t, @NonNull Dimmer.DimState dim) {
+        final Change startProperties = new Change(mCurrentProperties);
+        mCurrentProperties.copyFrom(mRequestedProperties);
+
         if (mRequestedProperties.mDimmingContainer == null) {
             Log.e(TAG, this + " does not have a dimming container. Have you forgotten to "
                     + "call adjustRelativeLayer?");
             return;
         }
-        if (mRequestedProperties.mDimmingContainer.mSurfaceControl == null) {
+        if (mRequestedProperties.mDimmingContainer.getSurfaceControl() == null) {
             Log.w(TAG, "container " + mRequestedProperties.mDimmingContainer
                     + "does not have a surface");
             dim.remove(t);
@@ -137,52 +145,49 @@ public class DimmerAnimationHelper {
 
         dim.ensureVisible(t);
         reparent(dim.mDimSurface,
-                mRequestedProperties.mGeometryParent != mCurrentProperties.mGeometryParent
+                startProperties.mGeometryParent != mRequestedProperties.mGeometryParent
                         ? mRequestedProperties.mGeometryParent.getSurfaceControl() : null,
                 mRequestedProperties.mDimmingContainer.getSurfaceControl(),
                 mRequestedProperties.mRelativeLayer, t);
 
-        if (!mCurrentProperties.hasSameVisualProperties(mRequestedProperties)) {
+        if (!startProperties.hasSameVisualProperties(mRequestedProperties)) {
             stopCurrentAnimation(dim.mDimSurface);
 
             if (dim.mSkipAnimation
                     // If the container doesn't change but requests a dim change, then it is
                     // directly providing us the animated values
-                    || (mRequestedProperties.hasSameDimmingContainer(mCurrentProperties)
+                    || (startProperties.hasSameDimmingContainer(mRequestedProperties)
                     && dim.isDimming())) {
                 ProtoLog.d(WM_DEBUG_DIMMER,
                         "%s skipping animation and directly setting alpha=%f, blur=%d",
-                        dim, mRequestedProperties.mAlpha,
+                        dim, startProperties.mAlpha,
                         mRequestedProperties.mBlurRadius);
-                setAlphaBlur(dim.mDimSurface, mRequestedProperties.mAlpha,
-                        mRequestedProperties.mBlurRadius, t);
+                setCurrentAlphaBlur(dim.mDimSurface, t);
                 dim.mSkipAnimation = false;
             } else {
-                startAnimation(t, dim);
+                startAnimation(t, dim, startProperties, mRequestedProperties);
             }
-
         } else if (!dim.isDimming()) {
             // We are not dimming, so we tried the exit animation but the alpha is already 0,
             // therefore, let's just remove this surface
             dim.remove(t);
         }
-        mCurrentProperties = new Change(mRequestedProperties);
     }
 
     private void startAnimation(
-            @NonNull SurfaceControl.Transaction t, @NonNull Dimmer.DimState dim) {
+            @NonNull SurfaceControl.Transaction t, @NonNull Dimmer.DimState dim,
+            @NonNull Change from, @NonNull Change to) {
         ProtoLog.v(WM_DEBUG_DIMMER, "Starting animation on %s", dim);
-        mAlphaAnimationSpec = getRequestedAnimationSpec();
+        mAlphaAnimationSpec = getRequestedAnimationSpec(from, to);
         mLocalAnimationAdapter = mAnimationAdapterFactory.get(mAlphaAnimationSpec,
                 dim.mHostContainer.mWmService.mSurfaceAnimationRunner);
 
-        float targetAlpha = mRequestedProperties.mAlpha;
-        int targetBlur = mRequestedProperties.mBlurRadius;
+        float targetAlpha = to.mAlpha;
 
         mLocalAnimationAdapter.startAnimation(dim.mDimSurface, t,
                 ANIMATION_TYPE_DIMMER, /* finishCallback */ (type, animator) -> {
                     synchronized (dim.mHostContainer.mWmService.mGlobalLock) {
-                        setAlphaBlur(dim.mDimSurface, targetAlpha, targetBlur, t);
+                        setCurrentAlphaBlur(dim.mDimSurface, t);
                         if (targetAlpha == 0f && !dim.isDimming()) {
                             dim.remove(t);
                         }
@@ -207,15 +212,15 @@ public class DimmerAnimationHelper {
     }
 
     @NonNull
-    private AnimationSpec getRequestedAnimationSpec() {
-        final float startAlpha = Math.max(mCurrentProperties.mAlpha, 0f);
-        final int startBlur = Math.max(mCurrentProperties.mBlurRadius, 0);
-        long duration = (long) (getDimDuration(mRequestedProperties.mDimmingContainer)
-                * Math.abs(mRequestedProperties.mAlpha - startAlpha));
+    private static AnimationSpec getRequestedAnimationSpec(Change from, Change to) {
+        final float startAlpha = Math.max(from.mAlpha, 0f);
+        final int startBlur = Math.max(from.mBlurRadius, 0);
+        long duration = (long) (getDimDuration(to.mDimmingContainer)
+                * Math.abs(to.mAlpha - startAlpha));
 
         final AnimationSpec spec =  new AnimationSpec(
-                new AnimationSpec.AnimationExtremes<>(startAlpha, mRequestedProperties.mAlpha),
-                new AnimationSpec.AnimationExtremes<>(startBlur, mRequestedProperties.mBlurRadius),
+                new AnimationSpec.AnimationExtremes<>(startAlpha, to.mAlpha),
+                new AnimationSpec.AnimationExtremes<>(startBlur, to.mBlurRadius),
                 duration
         );
         ProtoLog.v(WM_DEBUG_DIMMER, "Dim animation requested: %s", spec);
@@ -225,7 +230,7 @@ public class DimmerAnimationHelper {
     /**
      * Change the geometry and relative parent of this dim layer
      */
-    void reparent(@NonNull SurfaceControl dimLayer,
+    static void reparent(@NonNull SurfaceControl dimLayer,
                   @Nullable SurfaceControl newGeometryParent,
                   @NonNull SurfaceControl relativeParent,
                   int relativePosition,
@@ -240,17 +245,16 @@ public class DimmerAnimationHelper {
         }
     }
 
-    void setAlphaBlur(@NonNull SurfaceControl sc, float alpha, int blur,
-                      @NonNull SurfaceControl.Transaction t) {
+    void setCurrentAlphaBlur(@NonNull SurfaceControl sc, @NonNull SurfaceControl.Transaction t) {
         try {
-            t.setAlpha(sc, alpha);
-            t.setBackgroundBlurRadius(sc, blur);
+            t.setAlpha(sc, mCurrentProperties.mAlpha);
+            t.setBackgroundBlurRadius(sc, mCurrentProperties.mBlurRadius);
         } catch (NullPointerException e) {
             Log.w(TAG , "Tried to change look of dim " + sc + " after remove",  e);
         }
     }
 
-    private long getDimDuration(@NonNull WindowContainer<?> container) {
+    private static long getDimDuration(@NonNull WindowContainer<?> container) {
         // Use the same duration as the animation on the WindowContainer
         AnimationAdapter animationAdapter = container.mSurfaceAnimator.getAnimation();
         final float durationScale = container.mWmService.getTransitionAnimationScaleLocked();
