@@ -50,6 +50,12 @@ interface SceneTransitionsBuilder {
     var interruptionHandler: InterruptionHandler
 
     /**
+     * Default [ProgressConverter] used during overscroll. It lets you change a linear progress into
+     * a function of your choice. Defaults to [ProgressConverter.Default].
+     */
+    var defaultOverscrollProgressConverter: ProgressConverter
+
+    /**
      * Define the default animation to be played when transitioning [to] the specified content, from
      * any content. For the animation specification to apply only when transitioning between two
      * specific contents, use [from] instead.
@@ -217,7 +223,7 @@ interface OverscrollBuilder : BaseTransitionBuilder {
      * - 1, the user overscrolled by exactly the [distance].
      * - Greater than 1, the user overscrolled more than the [distance].
      */
-    var progressConverter: ProgressConverter
+    var progressConverter: ProgressConverter?
 
     /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
     fun translate(

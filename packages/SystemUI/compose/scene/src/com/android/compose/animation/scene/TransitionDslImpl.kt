@@ -50,12 +50,14 @@ internal fun transitionsImpl(
         impl.transitionSpecs,
         impl.transitionOverscrollSpecs,
         impl.interruptionHandler,
+        impl.defaultOverscrollProgressConverter,
     )
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
     override var interruptionHandler: InterruptionHandler = DefaultInterruptionHandler
+    override var defaultOverscrollProgressConverter: ProgressConverter = ProgressConverter.Default
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
     val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()
@@ -271,7 +273,7 @@ internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBu
 }
 
 internal open class OverscrollBuilderImpl : BaseTransitionBuilderImpl(), OverscrollBuilder {
-    override var progressConverter: ProgressConverter = ProgressConverter.Default
+    override var progressConverter: ProgressConverter? = null
 
     override fun translate(
         matcher: ElementMatcher,
