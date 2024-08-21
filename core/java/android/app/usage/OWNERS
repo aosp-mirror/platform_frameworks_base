@@ -1,9 +1,1 @@
-# Bug component: 532296
-
-yamasani@google.com
-mwachens@google.com
-varunshah@google.com
-guanxin@google.com
-
-per-file *StorageStats* = file:/core/java/android/os/storage/OWNERS
-per-file *Broadcast* = sudheersai@google.com
+include /services/usage/OWNERS
