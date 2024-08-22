@@ -87,6 +87,7 @@ public class PipTransition extends PipTransitionController implements
     //
 
     private final Context mContext;
+    private final PipTaskListener mPipTaskListener;
     private final PipScheduler mPipScheduler;
     private final PipTransitionState mPipTransitionState;
 
@@ -118,6 +119,7 @@ public class PipTransition extends PipTransitionController implements
             PipBoundsState pipBoundsState,
             PipMenuController pipMenuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipTaskListener pipTaskListener,
             PipScheduler pipScheduler,
             PipTransitionState pipTransitionState,
             PipUiStateChangeController pipUiStateChangeController) {
@@ -125,6 +127,7 @@ public class PipTransition extends PipTransitionController implements
                 pipBoundsAlgorithm);
 
         mContext = context;
+        mPipTaskListener = pipTaskListener;
         mPipScheduler = pipScheduler;
         mPipScheduler.setPipTransitionController(this);
         mPipTransitionState = pipTransitionState;
@@ -510,6 +513,7 @@ public class PipTransition extends PipTransitionController implements
         // cache the original task token to check for multi-activity case later
         final ActivityManager.RunningTaskInfo pipTask = request.getPipTask();
         PictureInPictureParams pipParams = pipTask.pictureInPictureParams;
+        mPipTaskListener.setPictureInPictureParams(pipParams);
         mPipBoundsState.setBoundsStateForEntry(pipTask.topActivity, pipTask.topActivityInfo,
                 pipParams, mPipBoundsAlgorithm);
 
