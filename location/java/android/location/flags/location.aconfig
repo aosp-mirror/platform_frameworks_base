@@ -2,6 +2,13 @@ package: "android.location.flags"
 container: "system"
 
 flag {
+    name: "deprecate_provider_request_apis"
+    namespace: "location"
+    description: "Deprecates LocationManager ProviderChanged APIs"
+    bug: "361811782"
+}
+
+flag {
     name: "keep_gnss_stationary_throttling"
     namespace: "location"
     description: "Keeps stationary throttling for the GNSS provider even if the disable_stationary_throttling flag is true."
