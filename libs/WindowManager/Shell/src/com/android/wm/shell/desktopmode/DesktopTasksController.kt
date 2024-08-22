@@ -53,6 +53,7 @@ import androidx.annotation.BinderThread
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
@@ -693,6 +694,10 @@ class DesktopTasksController(
     ) {
         releaseVisualIndicator()
         if (!taskInfo.isResizeable && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(context)) {
+            interactionJankMonitor.begin(
+                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_non_resizable"
+            )
+
             // reposition non-resizable app back to its original position before being dragged
             returnToDragStartAnimator.start(
                 taskInfo.taskId,
@@ -701,6 +706,9 @@ class DesktopTasksController(
                 endBounds = dragStartBounds
             )
         } else {
+            interactionJankMonitor.begin(
+                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
+            )
             snapToHalfScreen(taskInfo, currentDragBounds, position)
         }
     }

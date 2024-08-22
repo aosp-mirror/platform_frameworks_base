@@ -480,6 +480,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Toast.makeText(mContext,
                     R.string.desktop_mode_non_resizable_snap_text, Toast.LENGTH_SHORT).show();
         } else {
+            mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext,
+                    Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE, "maximize_menu_resizable");
             mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
                     decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
                     left ? SnapPosition.LEFT : SnapPosition.RIGHT);
