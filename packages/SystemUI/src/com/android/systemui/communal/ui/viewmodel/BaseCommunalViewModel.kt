@@ -153,7 +153,7 @@ abstract class BaseCommunalViewModel(
     open fun onAddWidget(
         componentName: ComponentName,
         user: UserHandle,
-        rank: Int,
+        rank: Int? = null,
         configurator: WidgetConfigurator? = null,
     ) {}
 

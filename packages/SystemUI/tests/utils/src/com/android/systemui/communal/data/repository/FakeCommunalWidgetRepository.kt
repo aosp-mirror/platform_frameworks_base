@@ -30,7 +30,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     override fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        rank: Int,
+        rank: Int?,
         configurator: WidgetConfigurator?
     ) {
         coroutineScope.launch {
@@ -38,7 +38,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
             val providerInfo = AppWidgetProviderInfo().apply { this.provider = provider }
             val configured = configurator?.configureWidget(id) ?: true
             if (configured) {
-                onConfigured(id, providerInfo, rank)
+                onConfigured(id, providerInfo, rank ?: -1)
             }
         }
     }

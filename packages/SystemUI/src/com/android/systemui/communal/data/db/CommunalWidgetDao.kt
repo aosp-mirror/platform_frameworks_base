@@ -97,7 +97,7 @@ constructor(
                             .addWidget(
                                 widgetId = id,
                                 componentName = name,
-                                rank = defaultWidgets.size - index,
+                                rank = index,
                                 userSerialNumber = userSerialNumber,
                             )
                     }
@@ -132,9 +132,16 @@ interface CommunalWidgetDao {
     @Query(
         "SELECT * FROM communal_widget_table JOIN communal_item_rank_table " +
             "ON communal_item_rank_table.uid = communal_widget_table.item_id " +
-            "ORDER BY communal_item_rank_table.rank DESC"
+            "ORDER BY communal_item_rank_table.rank ASC"
     )
     fun getWidgets(): Flow<Map<CommunalItemRank, CommunalWidgetItem>>
+
+    @Query(
+        "SELECT * FROM communal_widget_table JOIN communal_item_rank_table " +
+            "ON communal_item_rank_table.uid = communal_widget_table.item_id " +
+            "ORDER BY communal_item_rank_table.rank ASC"
+    )
+    fun getWidgetsNow(): Map<CommunalItemRank, CommunalWidgetItem>
 
     @Query("SELECT * FROM communal_widget_table WHERE widget_id = :id")
     fun getWidgetByIdNow(id: Int): CommunalWidgetItem?
@@ -180,7 +187,7 @@ interface CommunalWidgetDao {
     fun addWidget(
         widgetId: Int,
         provider: ComponentName,
-        rank: Int,
+        rank: Int? = null,
         userSerialNumber: Int,
     ): Long {
         return addWidget(
@@ -195,13 +202,27 @@ interface CommunalWidgetDao {
     fun addWidget(
         widgetId: Int,
         componentName: String,
-        rank: Int,
+        rank: Int? = null,
         userSerialNumber: Int,
     ): Long {
+        val widgets = getWidgetsNow()
+
+        // If rank is not specified, rank it last by finding the current maximum rank and increment
+        // by 1. If the new widget is the first widget, set the rank to 0.
+        val newRank = rank ?: widgets.keys.maxOfOrNull { it.rank + 1 } ?: 0
+
+        // Shift widgets after [rank], unless widget is added at the end.
+        if (rank != null) {
+            widgets.forEach { (rankEntry, widgetEntry) ->
+                if (rankEntry.rank < newRank) return@forEach
+                updateItemRank(widgetEntry.itemId, rankEntry.rank + 1)
+            }
+        }
+
         return insertWidget(
             widgetId = widgetId,
             componentName = componentName,
-            itemId = insertItemRank(rank),
+            itemId = insertItemRank(newRank),
             userSerialNumber = userSerialNumber,
         )
     }

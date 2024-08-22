@@ -125,7 +125,7 @@ constructor(
     override fun onAddWidget(
         componentName: ComponentName,
         user: UserHandle,
-        rank: Int,
+        rank: Int?,
         configurator: WidgetConfigurator?
     ) {
         communalInteractor.addWidget(componentName, user, rank, configurator)

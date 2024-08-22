@@ -115,6 +115,37 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
         }
 
     @Test
+    fun addWidget_rankNotSpecified_widgetAddedAtTheEnd(): Unit =
+        testScope.runTest {
+            val widgets by collectLastValue(communalWidgetDao.getWidgets())
+
+            // Verify database is empty
+            assertThat(widgets).isEmpty()
+
+            // Add widgets one by one without specifying rank
+            val widgetsToAdd = listOf(widgetInfo1, widgetInfo2, widgetInfo3)
+            widgetsToAdd.forEach {
+                val (widgetId, provider, _, userSerialNumber) = it
+                communalWidgetDao.addWidget(
+                    widgetId = widgetId,
+                    provider = provider,
+                    userSerialNumber = userSerialNumber
+                )
+            }
+
+            // Verify new each widget is added at the end
+            assertThat(widgets)
+                .containsExactly(
+                    communalItemRankEntry1,
+                    communalWidgetItemEntry1,
+                    communalItemRankEntry2,
+                    communalWidgetItemEntry2,
+                    communalItemRankEntry3,
+                    communalWidgetItemEntry3,
+                )
+        }
+
+    @Test
     fun deleteWidget_emitsActiveWidgetsInDb() =
         testScope.runTest {
             val widgetsToAdd = listOf(widgetInfo1, widgetInfo2)
@@ -158,22 +189,22 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             }
             assertThat(widgets())
                 .containsExactly(
-                    communalItemRankEntry2,
-                    communalWidgetItemEntry2,
                     communalItemRankEntry1,
                     communalWidgetItemEntry1,
+                    communalItemRankEntry2,
+                    communalWidgetItemEntry2,
                 )
                 .inOrder()
 
             // swapped ranks
-            val widgetIdsToRankMap = mapOf(widgetInfo1.widgetId to 2, widgetInfo2.widgetId to 1)
+            val widgetIdsToRankMap = mapOf(widgetInfo1.widgetId to 1, widgetInfo2.widgetId to 0)
             communalWidgetDao.updateWidgetOrder(widgetIdsToRankMap)
             assertThat(widgets())
                 .containsExactly(
-                    communalItemRankEntry1.copy(rank = 2),
+                    communalItemRankEntry2.copy(rank = 0),
+                    communalWidgetItemEntry2,
+                    communalItemRankEntry1.copy(rank = 1),
                     communalWidgetItemEntry1,
-                    communalItemRankEntry2.copy(rank = 1),
-                    communalWidgetItemEntry2
                 )
                 .inOrder()
         }
@@ -181,7 +212,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
     @Test
     fun addNewWidgetWithReorder_emitsWidgetsInNewOrder() =
         testScope.runTest {
-            val existingWidgets = listOf(widgetInfo1, widgetInfo2)
+            val existingWidgets = listOf(widgetInfo1, widgetInfo2, widgetInfo3)
             val widgets = collectLastValue(communalWidgetDao.getWidgets())
 
             existingWidgets.forEach {
@@ -195,39 +226,42 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             }
             assertThat(widgets())
                 .containsExactly(
-                    communalItemRankEntry2,
-                    communalWidgetItemEntry2,
                     communalItemRankEntry1,
                     communalWidgetItemEntry1,
+                    communalItemRankEntry2,
+                    communalWidgetItemEntry2,
+                    communalItemRankEntry3,
+                    communalWidgetItemEntry3,
                 )
                 .inOrder()
 
-            // map with no item in the middle at index 1
-            val widgetIdsToIndexMap = mapOf(widgetInfo1.widgetId to 1, widgetInfo2.widgetId to 3)
-            communalWidgetDao.updateWidgetOrder(widgetIdsToIndexMap)
-            assertThat(widgets())
-                .containsExactly(
-                    communalItemRankEntry2.copy(rank = 3),
-                    communalWidgetItemEntry2,
-                    communalItemRankEntry1.copy(rank = 1),
-                    communalWidgetItemEntry1,
-                )
-                .inOrder()
-            // add the new middle item that we left space for.
+            // add a new widget at rank 1.
             communalWidgetDao.addWidget(
-                widgetId = widgetInfo3.widgetId,
-                provider = widgetInfo3.provider,
-                rank = 2,
-                userSerialNumber = widgetInfo3.userSerialNumber,
+                widgetId = 4,
+                provider = ComponentName("pk_name", "cls_name_4"),
+                rank = 1,
+                userSerialNumber = 0,
             )
+
+            val newRankEntry = CommunalItemRank(uid = 4L, rank = 1)
+            val newWidgetEntry =
+                CommunalWidgetItem(
+                    uid = 4L,
+                    widgetId = 4,
+                    componentName = "pk_name/cls_name_4",
+                    itemId = 4L,
+                    userSerialNumber = 0,
+                )
             assertThat(widgets())
                 .containsExactly(
-                    communalItemRankEntry2.copy(rank = 3),
-                    communalWidgetItemEntry2,
-                    communalItemRankEntry3.copy(rank = 2),
-                    communalWidgetItemEntry3,
-                    communalItemRankEntry1.copy(rank = 1),
+                    communalItemRankEntry1.copy(rank = 0),
                     communalWidgetItemEntry1,
+                    newRankEntry,
+                    newWidgetEntry,
+                    communalItemRankEntry2.copy(rank = 2),
+                    communalWidgetItemEntry2,
+                    communalItemRankEntry3.copy(rank = 3),
+                    communalWidgetItemEntry3,
                 )
                 .inOrder()
         }
@@ -282,21 +316,21 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             FakeWidgetMetadata(
                 widgetId = 1,
                 provider = ComponentName("pk_name", "cls_name_1"),
-                rank = 1,
+                rank = 0,
                 userSerialNumber = 0,
             )
         val widgetInfo2 =
             FakeWidgetMetadata(
                 widgetId = 2,
                 provider = ComponentName("pk_name", "cls_name_2"),
-                rank = 2,
+                rank = 1,
                 userSerialNumber = 0,
             )
         val widgetInfo3 =
             FakeWidgetMetadata(
                 widgetId = 3,
                 provider = ComponentName("pk_name", "cls_name_3"),
-                rank = 3,
+                rank = 2,
                 userSerialNumber = 10,
             )
         val communalItemRankEntry1 = CommunalItemRank(uid = 1L, rank = widgetInfo1.rank)

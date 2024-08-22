@@ -93,24 +93,24 @@ internal constructor(
         newItemUser: UserHandle? = null,
         newItemIndex: Int? = null
     ) {
-        // filters placeholder, but, maintains the indices of the widgets as if the placeholder was
-        // in the list. When persisted in DB, this leaves space for the new item (to be added) at
-        // the correct rank.
+        // New widget added to the grid. Other widgets are shifted as needed at the database level.
+        if (newItemComponentName != null && newItemUser != null && newItemIndex != null) {
+            onAddWidget(newItemComponentName, newItemUser, /* rank= */ newItemIndex)
+            return
+        }
+
+        // No new widget, only reorder existing widgets.
         val widgetIdToRankMap: Map<Int, Int> =
             list
                 .mapIndexedNotNull { index, item ->
                     if (item is CommunalContentModel.WidgetContent) {
-                        item.appWidgetId to list.size - index
+                        item.appWidgetId to index
                     } else {
                         null
                     }
                 }
                 .toMap()
-        // reorder and then add the new widget
         onReorderWidgets(widgetIdToRankMap)
-        if (newItemComponentName != null && newItemUser != null && newItemIndex != null) {
-            onAddWidget(newItemComponentName, newItemUser, /* rank= */ list.size - newItemIndex)
-        }
     }
 
     /** Returns true if the item at given index is editable. */

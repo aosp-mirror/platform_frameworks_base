@@ -57,12 +57,17 @@ interface CommunalWidgetRepository {
     /** A flow of information about active communal widgets stored in database. */
     val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 
-    /** Add a widget at the specified position in the app widget service and the database. */
+    /**
+     * Add a widget in the app widget service and the database.
+     *
+     * @param rank The rank of the widget determines its position in the grid. 0 is first place, 1
+     *   is second, etc. If rank is not specified, widget is added at the end.
+     */
     fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        rank: Int,
-        configurator: WidgetConfigurator? = null
+        rank: Int?,
+        configurator: WidgetConfigurator? = null,
     ) {}
 
     /**
@@ -151,8 +156,8 @@ constructor(
     override fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        rank: Int,
-        configurator: WidgetConfigurator?
+        rank: Int?,
+        configurator: WidgetConfigurator?,
     ) {
         bgScope.launch {
             val id = communalWidgetHost.allocateIdAndBindWidget(provider, user)

@@ -89,11 +89,11 @@ constructor(
                         if (!isPendingWidgetDrag) {
                             val (componentName, user) = getWidgetExtraFromIntent(intent)
                             if (componentName != null && user != null) {
+                                // Add widget at the end.
                                 communalViewModel.onAddWidget(
                                     componentName,
                                     user,
-                                    0,
-                                    widgetConfigurator
+                                    configurator = widgetConfigurator,
                                 )
                             } else {
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }

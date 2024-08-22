@@ -367,11 +367,14 @@ constructor(
     /** Dismiss the CTA tile from the hub in view mode. */
     suspend fun dismissCtaTile() = communalPrefsInteractor.setCtaDismissed()
 
-    /** Add a widget at the specified position. */
+    /**
+     * Add a widget at the specified rank. If rank is not provided, the widget will be added at the
+     * end.
+     */
     fun addWidget(
         componentName: ComponentName,
         user: UserHandle,
-        rank: Int,
+        rank: Int? = null,
         configurator: WidgetConfigurator?,
     ) = widgetRepository.addWidget(componentName, user, rank, configurator)
 
