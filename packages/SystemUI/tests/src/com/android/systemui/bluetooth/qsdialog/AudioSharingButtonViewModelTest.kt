@@ -26,6 +26,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -46,7 +47,7 @@ import org.mockito.Mock
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class AudioSharingInteractorTest : SysuiTestCase() {
+class AudioSharingButtonViewModelTest : SysuiTestCase() {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val bluetoothState = MutableStateFlow(false)
@@ -57,7 +58,7 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     @Mock private lateinit var deviceItemInteractor: DeviceItemInteractor
     @Mock private lateinit var deviceItem: DeviceItem
     private lateinit var mockitoSession: StaticMockitoSession
-    private lateinit var audioSharingInteractor: AudioSharingInteractor
+    private lateinit var audioSharingButtonViewModel: AudioSharingButtonViewModel
 
     @Before
     fun setUp() {
@@ -65,14 +66,13 @@ class AudioSharingInteractorTest : SysuiTestCase() {
             mockitoSession().initMocks(this).mockStatic(BluetoothUtils::class.java).startMocking()
         whenever(bluetoothStateInteractor.bluetoothStateUpdate).thenReturn(bluetoothState)
         whenever(deviceItemInteractor.deviceItemUpdate).thenReturn(deviceItemUpdate)
-        audioSharingInteractor =
-            AudioSharingInteractor(
+        audioSharingButtonViewModel =
+            AudioSharingButtonViewModel(
                 localBluetoothManager,
                 bluetoothStateInteractor,
                 deviceItemInteractor,
-                testScope.backgroundScope,
-                testDispatcher,
             )
+        audioSharingButtonViewModel.activateIn(testScope)
     }
 
     @After
@@ -83,7 +83,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     @Test
     fun testButtonStateUpdate_bluetoothOff_returnGone() {
         testScope.runTest {
-            val actual by collectLastValue(audioSharingInteractor.audioSharingButtonStateUpdate)
+            val actual by
+                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
 
             assertThat(actual).isEqualTo(AudioSharingButtonState.Gone)
         }
@@ -92,7 +93,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     @Test
     fun testButtonStateUpdate_noDevice_returnGone() {
         testScope.runTest {
-            val actual by collectLastValue(audioSharingInteractor.audioSharingButtonStateUpdate)
+            val actual by
+                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
             bluetoothState.value = true
             runCurrent()
 
@@ -105,7 +107,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
         testScope.runTest {
             whenever(BluetoothUtils.isBroadcasting(localBluetoothManager)).thenReturn(true)
 
-            val actual by collectLastValue(audioSharingInteractor.audioSharingButtonStateUpdate)
+            val actual by
+                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
             bluetoothState.value = true
             deviceItemUpdate.emit(listOf())
             runCurrent()
@@ -133,7 +136,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
                 )
                 .thenReturn(true)
 
-            val actual by collectLastValue(audioSharingInteractor.audioSharingButtonStateUpdate)
+            val actual by
+                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
             bluetoothState.value = true
             deviceItemUpdate.emit(listOf(deviceItem))
             runCurrent()
@@ -156,7 +160,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
                 .thenReturn(false)
             whenever(BluetoothUtils.isActiveLeAudioDevice(cachedBluetoothDevice)).thenReturn(true)
 
-            val actual by collectLastValue(audioSharingInteractor.audioSharingButtonStateUpdate)
+            val actual by
+                collectLastValue(audioSharingButtonViewModel.audioSharingButtonStateUpdate)
             bluetoothState.value = true
             deviceItemUpdate.emit(listOf(deviceItem))
             runCurrent()

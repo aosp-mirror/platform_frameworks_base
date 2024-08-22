@@ -23,7 +23,6 @@ import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.flags.Flags
-import com.android.settingslib.flags.Flags.enableLeAudioSharing
 import com.android.systemui.res.R
 
 private val backgroundOn = R.drawable.settingslib_switch_bar_bg_on
@@ -107,8 +106,7 @@ internal class AudioSharingMediaDeviceItemFactory(
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager
     ): Boolean {
-        return enableLeAudioSharing() &&
-            BluetoothUtils.hasConnectedBroadcastSource(cachedDevice, localBluetoothManager)
+        return BluetoothUtils.hasConnectedBroadcastSource(cachedDevice, localBluetoothManager)
     }
 
     override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
@@ -133,8 +131,7 @@ internal class AvailableAudioSharingMediaDeviceItemFactory(
         cachedDevice: CachedBluetoothDevice,
         audioManager: AudioManager
     ): Boolean {
-        return BluetoothUtils.isAudioSharingEnabled() &&
-            super.isFilterMatched(context, cachedDevice, audioManager) &&
+        return super.isFilterMatched(context, cachedDevice, audioManager) &&
             BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(
                 cachedDevice,
                 localBluetoothManager

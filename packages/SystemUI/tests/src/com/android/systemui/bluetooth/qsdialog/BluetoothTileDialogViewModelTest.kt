@@ -33,6 +33,7 @@ import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.kotlin.getMutableStateFlow
@@ -68,14 +69,13 @@ import org.mockito.junit.MockitoRule
 class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    private val kosmos = testKosmos()
     private val fakeSystemClock = FakeSystemClock()
     private val backgroundExecutor = FakeExecutor(fakeSystemClock)
 
     private lateinit var bluetoothTileDialogViewModel: BluetoothTileDialogViewModel
 
     @Mock private lateinit var bluetoothStateInteractor: BluetoothStateInteractor
-
-    @Mock private lateinit var audioSharingInteractor: AudioSharingInteractor
 
     @Mock private lateinit var bluetoothDeviceMetadataInteractor: BluetoothDeviceMetadataInteractor
 
@@ -120,6 +120,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         scheduler = TestCoroutineScheduler()
         dispatcher = UnconfinedTestDispatcher(scheduler)
         testScope = TestScope(dispatcher)
+        // TODO(b/364515243): use real object instead of mock
+        whenever(kosmos.deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
         bluetoothTileDialogViewModel =
             BluetoothTileDialogViewModel(
                 deviceItemInteractor,
@@ -139,11 +141,12 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                         dispatcher
                     )
                 ),
-                audioSharingInteractor,
+                kosmos.audioSharingButtonViewModelFactory,
                 bluetoothDeviceMetadataInteractor,
                 mDialogTransitionAnimator,
                 activityStarter,
                 uiEventLogger,
+                bluetoothTileDialogLogger,
                 testScope.backgroundScope,
                 dispatcher,
                 dispatcher,
@@ -161,13 +164,10 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         whenever(sysuiDialog.context).thenReturn(mContext)
         whenever(bluetoothTileDialogDelegate.bluetoothStateToggle)
             .thenReturn(getMutableStateFlow(false))
-        whenever(bluetoothTileDialogDelegate.deviceItemClick)
-            .thenReturn(getMutableStateFlow(deviceItem))
+        whenever(bluetoothTileDialogDelegate.deviceItemClick).thenReturn(MutableSharedFlow())
         whenever(bluetoothTileDialogDelegate.contentHeight).thenReturn(getMutableStateFlow(0))
         whenever(bluetoothTileDialogDelegate.bluetoothAutoOnToggle)
             .thenReturn(getMutableStateFlow(false))
-        whenever(audioSharingInteractor.audioSharingButtonStateUpdate)
-            .thenReturn(getMutableStateFlow(AudioSharingButtonState.Gone))
         whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
     }
 

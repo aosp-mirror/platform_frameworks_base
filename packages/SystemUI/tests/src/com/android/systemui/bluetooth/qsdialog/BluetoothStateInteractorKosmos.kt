@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.bluetooth.qsdialog
 
-import com.android.internal.logging.uiEventLogger
-import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
-import org.mockito.kotlin.mock
+import com.android.systemui.kosmos.testScope
 
-val Kosmos.bluetoothTileDialogLogger: BluetoothTileDialogLogger by Kosmos.Fixture { mock {} }
-
-val Kosmos.localBluetoothManager: LocalBluetoothManager by Kosmos.Fixture { mock {} }
-
-val Kosmos.dialogTransitionAnimator: DialogTransitionAnimator by Kosmos.Fixture { mock {} }
-
-val Kosmos.deviceItemActionInteractorImpl: DeviceItemActionInteractorImpl by
+val Kosmos.bluetoothStateInteractor: BluetoothStateInteractor by
     Kosmos.Fixture {
-        DeviceItemActionInteractorImpl(
-            testDispatcher,
-            uiEventLogger,
+        BluetoothStateInteractor(
+            localBluetoothManager,
+            bluetoothTileDialogLogger,
+            testScope.backgroundScope,
+            testDispatcher
         )
     }

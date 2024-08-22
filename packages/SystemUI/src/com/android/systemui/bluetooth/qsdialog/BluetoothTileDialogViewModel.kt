@@ -67,11 +67,12 @@ constructor(
     private val deviceItemActionInteractor: DeviceItemActionInteractor,
     private val bluetoothStateInteractor: BluetoothStateInteractor,
     private val bluetoothAutoOnInteractor: BluetoothAutoOnInteractor,
-    private val audioSharingInteractor: AudioSharingInteractor,
+    private val audioSharingButtonViewModelFactory: AudioSharingButtonViewModel.Factory,
     private val bluetoothDeviceMetadataInteractor: BluetoothDeviceMetadataInteractor,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val activityStarter: ActivityStarter,
     private val uiEventLogger: UiEventLogger,
+    private val logger: BluetoothTileDialogLogger,
     @Application private val coroutineScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
@@ -154,28 +155,31 @@ constructor(
                     .launchIn(this)
 
                 if (BluetoothUtils.isAudioSharingEnabled()) {
-                    audioSharingInteractor.audioSharingButtonStateUpdate
-                        .onEach {
-                            when (it) {
-                                is AudioSharingButtonState.Visible -> {
-                                    dialogDelegate.onAudioSharingButtonUpdated(
-                                        dialog,
-                                        VISIBLE,
-                                        context.getString(it.resId),
-                                        it.isActive
-                                    )
-                                }
-                                is AudioSharingButtonState.Gone -> {
-                                    dialogDelegate.onAudioSharingButtonUpdated(
-                                        dialog,
-                                        GONE,
-                                        label = null,
-                                        isActive = false
-                                    )
+                    audioSharingButtonViewModelFactory.create().run {
+                        audioSharingButtonStateUpdate
+                            .onEach {
+                                when (it) {
+                                    is AudioSharingButtonState.Visible -> {
+                                        dialogDelegate.onAudioSharingButtonUpdated(
+                                            dialog,
+                                            VISIBLE,
+                                            context.getString(it.resId),
+                                            it.isActive
+                                        )
+                                    }
+                                    is AudioSharingButtonState.Gone -> {
+                                        dialogDelegate.onAudioSharingButtonUpdated(
+                                            dialog,
+                                            GONE,
+                                            label = null,
+                                            isActive = false
+                                        )
+                                    }
                                 }
                             }
-                        }
-                        .launchIn(this)
+                            .launchIn(this@launch)
+                        launch { activate() }
+                    }
                 }
 
                 // bluetoothStateUpdate is emitted when bluetooth on/off state is changed, re-fetch
@@ -209,7 +213,10 @@ constructor(
 
                 // deviceItemClick is emitted when user clicked on a device item.
                 dialogDelegate.deviceItemClick
-                    .onEach { deviceItemActionInteractor.onClick(it, dialog) }
+                    .onEach {
+                        deviceItemActionInteractor.onClick(it, dialog)
+                        logger.logDeviceClick(it.cachedBluetoothDevice.address, it.type)
+                    }
                     .launchIn(this)
 
                 // contentHeight is emitted when the dialog is dismissed.
