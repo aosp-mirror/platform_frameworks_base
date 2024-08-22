@@ -281,7 +281,7 @@ public final class ProfcollectForwardingService extends SystemService {
             if (mIProfcollect == null) {
                 return;
             }
-            if (Utils.withFrequency("applaunch_trace_freq", 2)) {
+            if (Utils.withFrequency("applaunch_trace_freq", 5)) {
                 Utils.traceSystem(mIProfcollect, "applaunch");
             }
         }
