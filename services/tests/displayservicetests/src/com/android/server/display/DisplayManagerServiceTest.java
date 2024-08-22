@@ -37,6 +37,7 @@ import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.c
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -1521,6 +1522,47 @@ public class DisplayManagerServiceTest {
         // be invalid.
         assertEquals(localDisplayManager.getDisplayIdToMirror(secondDisplayId),
                 Display.INVALID_DISPLAY);
+    }
+
+    @Test
+    public void testGetDisplayIdsForGroup() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        // Create display 1
+        FakeDisplayDevice displayDevice1 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        LogicalDisplay display1 = logicalDisplayMapper.getDisplayLocked(displayDevice1);
+        final int groupId1 = display1.getDisplayInfoLocked().displayGroupId;
+        // Create display 2
+        FakeDisplayDevice displayDevice2 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        LogicalDisplay display2 = logicalDisplayMapper.getDisplayLocked(displayDevice2);
+        final int groupId2 = display2.getDisplayInfoLocked().displayGroupId;
+        // Both displays should be in the same display group
+        assertEquals(groupId1, groupId2);
+        final int[] expectedDisplayIds = new int[]{
+                display1.getDisplayIdLocked(), display2.getDisplayIdLocked()};
+
+        final int[] displayIds = localService.getDisplayIdsForGroup(groupId1);
+
+        assertArrayEquals(expectedDisplayIds, displayIds);
+    }
+
+    @Test
+    public void testGetDisplayIdsForUnknownGroup() throws Exception {
+        final int unknownDisplayGroupId = 999;
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        // Verify that display manager does not have display group
+        assertNull(logicalDisplayMapper.getDisplayGroupLocked(unknownDisplayGroupId));
+
+        final int[] displayIds = localService.getDisplayIdsForGroup(unknownDisplayGroupId);
+
+        assertEquals(0, displayIds.length);
     }
 
     @Test

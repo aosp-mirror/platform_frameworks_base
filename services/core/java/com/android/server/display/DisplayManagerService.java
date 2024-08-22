@@ -5575,6 +5575,20 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public int[] getDisplayIdsForGroup(int groupId) {
+            synchronized (mSyncRoot) {
+                return mLogicalDisplayMapper.getDisplayIdsForGroupLocked(groupId);
+            }
+        }
+
+        @Override
+        public SparseArray<int[]> getDisplayIdsByGroupsIds() {
+            synchronized (mSyncRoot) {
+                return mLogicalDisplayMapper.getDisplayIdsByGroupIdLocked();
+            }
+        }
+
+        @Override
         public IntArray getDisplayIds() {
             IntArray displayIds = new IntArray();
             synchronized (mSyncRoot) {
