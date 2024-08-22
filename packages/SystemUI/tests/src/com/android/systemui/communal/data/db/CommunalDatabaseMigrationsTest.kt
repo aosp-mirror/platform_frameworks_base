@@ -72,6 +72,82 @@ class CommunalDatabaseMigrationsTest : SysuiTestCase() {
         databaseV2.verifyWidgetsV2(fakeWidgetsV1.map { it.getV2() })
     }
 
+    @Test
+    fun migrate2To3_noGapBetweenRanks_ranksReversed() {
+        // Create a communal database in version 2
+        val databaseV2 = migrationTestHelper.createDatabase(DATABASE_NAME, version = 2)
+
+        // Populate some fake data
+        val fakeRanks =
+            listOf(
+                FakeCommunalItemRank(3),
+                FakeCommunalItemRank(2),
+                FakeCommunalItemRank(1),
+                FakeCommunalItemRank(0),
+            )
+        databaseV2.insertRanks(fakeRanks)
+
+        // Verify fake ranks populated
+        databaseV2.verifyRanksInOrder(fakeRanks)
+
+        // Run migration and get database V3
+        val databaseV3 =
+            migrationTestHelper.runMigrationsAndValidate(
+                name = DATABASE_NAME,
+                version = 3,
+                validateDroppedTables = false,
+                CommunalDatabase.MIGRATION_2_3,
+            )
+
+        // Verify ranks are reversed
+        databaseV3.verifyRanksInOrder(
+            listOf(
+                FakeCommunalItemRank(0),
+                FakeCommunalItemRank(1),
+                FakeCommunalItemRank(2),
+                FakeCommunalItemRank(3),
+            )
+        )
+    }
+
+    @Test
+    fun migrate2To3_withGapBetweenRanks_ranksReversed() {
+        // Create a communal database in version 2
+        val databaseV2 = migrationTestHelper.createDatabase(DATABASE_NAME, version = 2)
+
+        // Populate some fake data with gaps between ranks
+        val fakeRanks =
+            listOf(
+                FakeCommunalItemRank(9),
+                FakeCommunalItemRank(7),
+                FakeCommunalItemRank(2),
+                FakeCommunalItemRank(0),
+            )
+        databaseV2.insertRanks(fakeRanks)
+
+        // Verify fake ranks populated
+        databaseV2.verifyRanksInOrder(fakeRanks)
+
+        // Run migration and get database V3
+        val databaseV3 =
+            migrationTestHelper.runMigrationsAndValidate(
+                name = DATABASE_NAME,
+                version = 3,
+                validateDroppedTables = false,
+                CommunalDatabase.MIGRATION_2_3,
+            )
+
+        // Verify ranks are reversed
+        databaseV3.verifyRanksInOrder(
+            listOf(
+                FakeCommunalItemRank(0),
+                FakeCommunalItemRank(2),
+                FakeCommunalItemRank(7),
+                FakeCommunalItemRank(9),
+            )
+        )
+    }
+
     private fun SupportSQLiteDatabase.insertWidgetsV1(widgets: List<FakeCommunalWidgetItemV1>) {
         widgets.forEach { widget ->
             execSQL(
@@ -117,6 +193,25 @@ class CommunalDatabaseMigrationsTest : SysuiTestCase() {
         assertThat(cursor.isAfterLast).isTrue()
     }
 
+    private fun SupportSQLiteDatabase.insertRanks(ranks: List<FakeCommunalItemRank>) {
+        ranks.forEach { rank ->
+            execSQL("INSERT INTO communal_item_rank_table(rank) VALUES(${rank.rank})")
+        }
+    }
+
+    private fun SupportSQLiteDatabase.verifyRanksInOrder(ranks: List<FakeCommunalItemRank>) {
+        val cursor = query("SELECT * FROM communal_item_rank_table ORDER BY uid")
+        assertThat(cursor.moveToFirst()).isTrue()
+
+        ranks.forEach { rank ->
+            assertThat(cursor.getInt(cursor.getColumnIndex("rank"))).isEqualTo(rank.rank)
+            cursor.moveToNext()
+        }
+
+        // Verify there is no more columns
+        assertThat(cursor.isAfterLast).isTrue()
+    }
+
     /**
      * Returns the expected data after migration from V1 to V2, which is simply that the new user
      * serial number field is now set to [CommunalWidgetItem.USER_SERIAL_NUMBER_UNDEFINED].
@@ -141,6 +236,10 @@ class CommunalDatabaseMigrationsTest : SysuiTestCase() {
         val componentName: String,
         val itemId: Int,
         val userSerialNumber: Int,
+    )
+
+    private data class FakeCommunalItemRank(
+        val rank: Int,
     )
 
     companion object {
