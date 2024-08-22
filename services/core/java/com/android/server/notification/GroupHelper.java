@@ -122,8 +122,9 @@ public class GroupHelper {
             getNotificationShadeSections();
 
     private static List<NotificationSectioner> getNotificationShadeSections() {
+        ArrayList<NotificationSectioner> sectionsList = new ArrayList<>();
         if (android.service.notification.Flags.notificationClassification()) {
-            return List.of(
+            sectionsList.addAll(List.of(
                 new NotificationSectioner("PromotionsSection", 0, (record) ->
                     NotificationChannel.PROMOTIONS_ID.equals(record.getChannel().getId())),
                 new NotificationSectioner("SocialSection", 0, (record) ->
@@ -131,18 +132,36 @@ public class GroupHelper {
                 new NotificationSectioner("NewsSection", 0, (record) ->
                     NotificationChannel.NEWS_ID.equals(record.getChannel().getId())),
                 new NotificationSectioner("RecsSection", 0, (record) ->
-                    NotificationChannel.RECS_ID.equals(record.getChannel().getId())),
-                new NotificationSectioner("AlertingSection", 0, (record) ->
-                    record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT),
-                new NotificationSectioner("SilentSection", 1, (record) ->
-                    record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT));
-        } else {
-            return List.of(
-                new NotificationSectioner("AlertingSection", 0, (record) ->
-                    record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT),
-                new NotificationSectioner("SilentSection", 1, (record) ->
-                    record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT));
+                    NotificationChannel.RECS_ID.equals(record.getChannel().getId()))));
         }
+
+        if (Flags.notificationForceGroupConversations()) {
+            // add priority people section
+            sectionsList.add(new NotificationSectioner("PeopleSection(priority)", 1, (record) ->
+                    record.isConversation() && record.getChannel().isImportantConversation()));
+
+            if (android.app.Flags.sortSectionByTime()) {
+                // add single people (alerting) section
+                sectionsList.add(new NotificationSectioner("PeopleSection", 0,
+                        NotificationRecord::isConversation));
+            } else {
+                // add people alerting section
+                sectionsList.add(new NotificationSectioner("PeopleSection(alerting)", 1, (record) ->
+                        record.isConversation()
+                        && record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT));
+                // add people silent section
+                sectionsList.add(new NotificationSectioner("PeopleSection(silent)", 1, (record) ->
+                        record.isConversation()
+                        && record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT));
+            }
+        }
+
+        sectionsList.addAll(List.of(
+            new NotificationSectioner("AlertingSection", 0, (record) ->
+                record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT),
+            new NotificationSectioner("SilentSection", 1, (record) ->
+                record.getImportance() < NotificationManager.IMPORTANCE_DEFAULT)));
+        return sectionsList;
     }
 
     public GroupHelper(Context context, PackageManager packageManager, int autoGroupAtCount,
@@ -1387,8 +1406,10 @@ public class GroupHelper {
         }
 
         private boolean isNotificationGroupable(final NotificationRecord record) {
-            if (record.isConversation()) {
-                return false;
+            if (!Flags.notificationForceGroupConversations()) {
+                if (record.isConversation()) {
+                    return false;
+                }
             }
 
             Notification notification = record.getSbn().getNotification();
