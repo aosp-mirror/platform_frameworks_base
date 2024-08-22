@@ -698,7 +698,7 @@ public class Cuj {
             case CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE:
                 return "DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE";
             case CUJ_DESKTOP_MODE_SNAP_RESIZE:
-                return "CUJ_DESKTOP_MODE_SNAP_RESIZE";
+                return "DESKTOP_MODE_SNAP_RESIZE";
         }
         return "UNKNOWN";
     }
