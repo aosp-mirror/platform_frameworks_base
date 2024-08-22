@@ -541,6 +541,16 @@ flag {
 }
 
 flag {
+    name: "clipboard_shared_transitions"
+    namespace: "systemui"
+    description: "Show shared transitions from clipboard"
+    bug: "360843770"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "clipboard_image_timeout"
     namespace: "systemui"
     description: "Wait for clipboard image to load before showing UI"
