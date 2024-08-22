@@ -119,6 +119,7 @@ android_test {
         "libpowermanagertest_jni",
         "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
+        "libAppOpsTest_jni",
     ],
 
     sdk_version: "core_platform",
@@ -139,6 +140,7 @@ android_test {
         ":com.android.cts.helpers.aosp",
         ":BinderProxyCountingTestApp",
         ":BinderProxyCountingTestService",
+        ":AppThatUsesAppOps",
     ],
 }
 

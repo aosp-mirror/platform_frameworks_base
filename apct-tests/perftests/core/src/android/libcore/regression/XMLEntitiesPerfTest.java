@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -42,7 +42,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class XMLEntitiesPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -85,7 +85,7 @@ public final class XMLEntitiesPerfTest {
     @Parameters(method = "getData")
     public void timeXmlParser(int length, float entityFraction) throws Exception {
         setUp(length, entityFraction);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             XmlPullParser parser = mXmlPullParserFactory.newPullParser();
             parser.setInput(new StringReader(mXml));
@@ -99,7 +99,7 @@ public final class XMLEntitiesPerfTest {
     @Parameters(method = "getData")
     public void timeDocumentBuilder(int length, float entityFraction) throws Exception {
         setUp(length, entityFraction);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             DocumentBuilder documentBuilder = mDocumentBuilderFactory.newDocumentBuilder();
             documentBuilder.parse(new InputSource(new StringReader(mXml)));

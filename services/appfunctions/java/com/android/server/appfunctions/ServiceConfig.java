@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package android.widget;
+package com.android.server.appfunctions;
 
-import android.app.Activity;
-import android.os.Bundle;
+/**
+ * This interface is used to expose configs to the AppFunctionManagerService.
+ */
+public interface ServiceConfig {
+    // TODO(b/357551503): Obtain namespace from DeviceConfig.
+    String NAMESPACE_APP_FUNCTIONS = "appfunctions";
 
-import com.android.frameworks.coretests.R;
-
-public class TextViewContextMenuActivity extends Activity {
-    @Override
-    public void onCreate(Bundle savedBundleInstance) {
-        super.onCreate(savedBundleInstance);
-        setContentView(R.layout.textview_contextmenu);
-    }
+    /**
+     * Returns the maximum time to wait for an app function execution to be complete.
+     */
+    long getExecutionTimeoutConfig();
 }
