@@ -323,7 +323,7 @@ class DesktopTasksController(
             logW("moveBackgroundTaskToDesktop taskId=%d not found", taskId)
             return false
         }
-        logV("moveBackgroundTaskToDesktop with taskId=%d, displayId=%d", taskId)
+        logV("moveBackgroundTaskToDesktop with taskId=%d", taskId)
         // TODO(342378842): Instead of using default display, support multiple displays
         val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
             DEFAULT_DISPLAY, wct, taskId)
