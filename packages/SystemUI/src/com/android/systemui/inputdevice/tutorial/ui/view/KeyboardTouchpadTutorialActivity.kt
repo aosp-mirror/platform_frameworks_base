@@ -54,6 +54,7 @@ constructor(
         const val INTENT_TUTORIAL_TYPE_KEY = "tutorial_type"
         const val INTENT_TUTORIAL_TYPE_TOUCHPAD = "touchpad"
         const val INTENT_TUTORIAL_TYPE_KEYBOARD = "keyboard"
+        const val INTENT_TUTORIAL_TYPE_BOTH = "both"
     }
 
     private val vm by

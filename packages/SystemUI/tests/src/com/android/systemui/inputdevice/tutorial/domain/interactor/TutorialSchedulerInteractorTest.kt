@@ -32,6 +32,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -63,13 +65,7 @@ class TutorialSchedulerInteractorTest : SysuiTestCase() {
                 dataStoreName = "TutorialSchedulerInteractorTest"
             )
         underTest =
-            TutorialSchedulerInteractor(
-                testScope.backgroundScope,
-                keyboardRepository,
-                touchpadRepository,
-                schedulerRepository
-            )
-        underTest.start()
+            TutorialSchedulerInteractor(keyboardRepository, touchpadRepository, schedulerRepository)
     }
 
     @After
@@ -81,80 +77,90 @@ class TutorialSchedulerInteractorTest : SysuiTestCase() {
     @Test
     fun connectKeyboard_delayElapse_launchForKeyboard() =
         testScope.runTest {
+            launchAndAssert(TutorialType.KEYBOARD)
+
             keyboardRepository.setIsAnyKeyboardConnected(true)
             advanceTimeBy(LAUNCH_DELAY)
-            assertLaunch(TutorialType.KEYBOARD)
         }
 
     @Test
     fun connectBothDevices_delayElapse_launchForBoth() =
         testScope.runTest {
+            launchAndAssert(TutorialType.BOTH)
+
             keyboardRepository.setIsAnyKeyboardConnected(true)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             advanceTimeBy(LAUNCH_DELAY)
-            assertLaunch(TutorialType.BOTH)
         }
 
     @Test
     fun connectBothDevice_delayNotElapse_launchNothing() =
         testScope.runTest {
+            launchAndAssert(TutorialType.NONE)
+
             keyboardRepository.setIsAnyKeyboardConnected(true)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             advanceTimeBy(A_SHORT_PERIOD_OF_TIME)
-            assertLaunch(TutorialType.NONE)
         }
 
     @Test
     fun nothingConnect_delayElapse_launchNothing() =
         testScope.runTest {
+            launchAndAssert(TutorialType.NONE)
+
             keyboardRepository.setIsAnyKeyboardConnected(false)
             touchpadRepository.setIsAnyTouchpadConnected(false)
             advanceTimeBy(LAUNCH_DELAY)
-            assertLaunch(TutorialType.NONE)
         }
 
     @Test
     fun connectKeyboard_thenTouchpad_delayElapse_launchForBoth() =
         testScope.runTest {
+            launchAndAssert(TutorialType.BOTH)
+
             keyboardRepository.setIsAnyKeyboardConnected(true)
             advanceTimeBy(A_SHORT_PERIOD_OF_TIME)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             advanceTimeBy(REMAINING_TIME)
-            assertLaunch(TutorialType.BOTH)
         }
 
     @Test
     fun connectKeyboard_thenTouchpad_removeKeyboard_delayElapse_launchNothing() =
         testScope.runTest {
+            launchAndAssert(TutorialType.NONE)
+
             keyboardRepository.setIsAnyKeyboardConnected(true)
             advanceTimeBy(A_SHORT_PERIOD_OF_TIME)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             keyboardRepository.setIsAnyKeyboardConnected(false)
             advanceTimeBy(REMAINING_TIME)
-            assertLaunch(TutorialType.NONE)
         }
 
-    // TODO: likely to be changed after we update TutorialSchedulerInteractor.launchTutorial
-    private suspend fun assertLaunch(tutorialType: TutorialType) {
-        when (tutorialType) {
-            TutorialType.KEYBOARD -> {
-                assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isTrue()
-                assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isFalse()
-            }
-            TutorialType.TOUCHPAD -> {
-                assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isFalse()
-                assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isTrue()
-            }
-            TutorialType.BOTH -> {
-                assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isTrue()
-                assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isTrue()
-            }
-            TutorialType.NONE -> {
-                assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isFalse()
-                assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isFalse()
+    private suspend fun launchAndAssert(expectedTutorial: TutorialType) =
+        testScope.backgroundScope.launch {
+            val actualTutorial = underTest.tutorials.first()
+            assertThat(actualTutorial).isEqualTo(expectedTutorial)
+
+            // TODO: need to update after we move launch into the tutorial
+            when (expectedTutorial) {
+                TutorialType.KEYBOARD -> {
+                    assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isTrue()
+                    assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isFalse()
+                }
+                TutorialType.TOUCHPAD -> {
+                    assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isFalse()
+                    assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isTrue()
+                }
+                TutorialType.BOTH -> {
+                    assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isTrue()
+                    assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isTrue()
+                }
+                TutorialType.NONE -> {
+                    assertThat(schedulerRepository.isLaunched(DeviceType.KEYBOARD)).isFalse()
+                    assertThat(schedulerRepository.isLaunched(DeviceType.TOUCHPAD)).isFalse()
+                }
             }
         }
-    }
 
     companion object {
         private val LAUNCH_DELAY = 72.hours
