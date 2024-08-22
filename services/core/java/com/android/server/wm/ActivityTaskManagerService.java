@@ -3652,6 +3652,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                boolean isPowerModePreApplied = false;
+                if (mPowerModeReasons == 0) {
+                    startPowerMode(POWER_MODE_REASON_START_ACTIVITY);
+                    isPowerModePreApplied = true;
+                }
                 // Keyguard asked us to clear the home task snapshot before going away, so do that.
                 if ((flags & KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT) != 0) {
                     mActivityClientController.invalidateHomeTaskSnapshot(null /* token */);
@@ -3660,9 +3665,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mDemoteTopAppReasons |= DEMOTE_TOP_REASON_DURING_UNLOCKING;
                 }
 
-                mRootWindowContainer.forAllDisplays(displayContent -> {
-                    mKeyguardController.keyguardGoingAway(displayContent.getDisplayId(), flags);
-                });
+                boolean foundResumed = false;
+                for (int i = mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
+                    final DisplayContent dc = mRootWindowContainer.getChildAt(i);
+                    final boolean wasNoResumed = dc.mFocusedApp == null
+                            || !dc.mFocusedApp.isState(RESUMED);
+                    mKeyguardController.keyguardGoingAway(dc.mDisplayId, flags);
+                    if (wasNoResumed && dc.mFocusedApp != null && dc.mFocusedApp.isState(RESUMED)) {
+                        foundResumed = true;
+                    }
+                }
+                if (isPowerModePreApplied && !foundResumed) {
+                    endPowerMode(POWER_MODE_REASON_START_ACTIVITY);
+                }
             }
             WallpaperManagerInternal wallpaperManagerInternal = getWallpaperManagerInternal();
             if (wallpaperManagerInternal != null) {
