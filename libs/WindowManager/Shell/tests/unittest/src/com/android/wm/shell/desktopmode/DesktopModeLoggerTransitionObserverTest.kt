@@ -138,7 +138,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_FREEFORM_INTENT, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_FREEFORM_INTENT,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -152,7 +153,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -165,7 +167,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_MENU_BUTTON, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_MENU_BUTTON,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -178,7 +181,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -191,7 +195,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.KEYBOARD_SHORTCUT_ENTER, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.KEYBOARD_SHORTCUT_ENTER,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -201,7 +206,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -231,7 +237,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -261,7 +268,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -291,7 +299,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -324,7 +333,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -335,7 +345,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.UNKNOWN_ENTER, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.UNKNOWN_ENTER,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -345,7 +356,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -522,7 +534,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     val transitionInfo2 = TransitionInfoBuilder(TRANSIT_NONE).build()
     callOnTransitionReady(transitionInfo2)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -538,7 +551,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     callOnTransitionReady(transitionInfo)
 
     verify(desktopModeEventLogger, times(1))
-        .logTaskAdded(eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(instanceId = 2)))
+        .logTaskAdded(eq(sessionId),
+            eq(DEFAULT_TASK_UPDATE.copy(instanceId = 2, visibleTaskCount = 2)))
     verify(desktopModeEventLogger, never()).logSessionEnter(any(), any())
   }
 
@@ -560,7 +574,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     verify(desktopModeEventLogger, times(1))
         .logTaskInfoChanged(
-            eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(taskX = DEFAULT_TASK_X + 100)))
+            eq(sessionId),
+            eq(DEFAULT_TASK_UPDATE.copy(taskX = DEFAULT_TASK_X + 100, visibleTaskCount = 1)))
     verifyZeroInteractions(desktopModeEventLogger)
   }
 
@@ -589,7 +604,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
             eq(sessionId),
             eq(
                 DEFAULT_TASK_UPDATE.copy(
-                    taskWidth = DEFAULT_TASK_WIDTH + 100, taskHeight = DEFAULT_TASK_HEIGHT - 100)))
+                    taskWidth = DEFAULT_TASK_WIDTH + 100, taskHeight = DEFAULT_TASK_HEIGHT - 100,
+                    visibleTaskCount = 1)))
     verifyZeroInteractions(desktopModeEventLogger)
   }
 
@@ -613,7 +629,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     verify(desktopModeEventLogger, times(1))
         .logTaskInfoChanged(
-            eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(taskX = DEFAULT_TASK_X + 100)))
+            eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(
+                taskX = DEFAULT_TASK_X + 100, visibleTaskCount = 2)))
     verifyZeroInteractions(desktopModeEventLogger)
 
     // task 2 resize
@@ -637,7 +654,9 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
                 DEFAULT_TASK_UPDATE.copy(
                     instanceId = 2,
                     taskWidth = DEFAULT_TASK_WIDTH + 100,
-                    taskHeight = DEFAULT_TASK_HEIGHT - 100)))
+                    taskHeight = DEFAULT_TASK_HEIGHT - 100,
+                    visibleTaskCount = 2)),
+            )
     verifyZeroInteractions(desktopModeEventLogger)
   }
 
@@ -655,7 +674,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     callOnTransitionReady(transitionInfo)
 
     verify(desktopModeEventLogger, times(1))
-        .logTaskRemoved(eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(instanceId = 2)))
+        .logTaskRemoved(eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(
+            instanceId = 2, visibleTaskCount = 1)))
     verify(desktopModeEventLogger, never()).logSessionExit(any(), any())
   }
 
@@ -694,6 +714,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     const val DEFAULT_TASK_WIDTH = 200
     const val DEFAULT_TASK_X = 30
     const val DEFAULT_TASK_Y = 70
+    const val DEFAULT_VISIBLE_TASK_COUNT = 0
     val DEFAULT_TASK_UPDATE =
         TaskUpdate(
             DEFAULT_TASK_ID,
@@ -702,6 +723,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
             DEFAULT_TASK_WIDTH,
             DEFAULT_TASK_X,
             DEFAULT_TASK_Y,
+            visibleTaskCount = DEFAULT_VISIBLE_TASK_COUNT,
         )
 
     fun createTaskInfo(
