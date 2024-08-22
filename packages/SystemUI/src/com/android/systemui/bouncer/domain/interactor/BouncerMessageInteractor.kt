@@ -16,6 +16,7 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import android.hardware.biometrics.BiometricFaceConstants
 import android.hardware.biometrics.BiometricSourceType
 import android.os.CountDownTimer
 import com.android.keyguard.KeyguardSecurityModel
@@ -115,7 +116,8 @@ constructor(
                                     isFingerprintAuthCurrentlyAllowedOnBouncer.value
                                 )
                                 .toMessage()
-                    }
+                    },
+                    biometricSourceType,
                 )
             }
 
@@ -123,7 +125,12 @@ constructor(
                 biometricSourceType: BiometricSourceType?,
                 acquireInfo: Int
             ) {
-                super.onBiometricAcquired(biometricSourceType, acquireInfo)
+                if (
+                    repository.getMessageSource() == BiometricSourceType.FACE &&
+                        acquireInfo == BiometricFaceConstants.FACE_ACQUIRED_START
+                ) {
+                    repository.setMessage(defaultMessage)
+                }
             }
 
             override fun onBiometricAuthenticated(
@@ -131,7 +138,7 @@ constructor(
                 biometricSourceType: BiometricSourceType?,
                 isStrongBiometric: Boolean
             ) {
-                repository.setMessage(defaultMessage)
+                repository.setMessage(defaultMessage, biometricSourceType)
             }
         }
 
@@ -291,7 +298,8 @@ constructor(
                 currentSecurityMode,
                 value,
                 isFingerprintAuthCurrentlyAllowedOnBouncer.value
-            )
+            ),
+            BiometricSourceType.FINGERPRINT,
         )
     }
 
@@ -302,7 +310,8 @@ constructor(
                 currentSecurityMode,
                 value,
                 isFingerprintAuthCurrentlyAllowedOnBouncer.value
-            )
+            ),
+            BiometricSourceType.FACE,
         )
     }
 
