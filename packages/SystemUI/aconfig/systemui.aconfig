@@ -1083,6 +1083,13 @@ flag {
 }
 
 flag {
+  name: "media_controls_posts_optimization"
+  namespace: "systemui"
+  description: "Ignore duplicate media notifications posted"
+  bug: "358645640"
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
