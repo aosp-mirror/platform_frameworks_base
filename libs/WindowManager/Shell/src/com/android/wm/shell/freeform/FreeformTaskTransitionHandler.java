@@ -18,6 +18,7 @@ package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+
 import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
 
 import android.animation.Animator;
@@ -116,9 +117,11 @@ public class FreeformTaskTransitionHandler
     }
 
     @Override
-    public void startMinimizedModeTransition(WindowContainerTransaction wct) {
+    public IBinder startMinimizedModeTransition(WindowContainerTransaction wct) {
         final int type = WindowManager.TRANSIT_TO_BACK;
-        mPendingTransitionTokens.add(mTransitions.startTransition(type, wct, this));
+        final IBinder token = mTransitions.startTransition(type, wct, this);
+        mPendingTransitionTokens.add(token);
+        return token;
     }
 
 

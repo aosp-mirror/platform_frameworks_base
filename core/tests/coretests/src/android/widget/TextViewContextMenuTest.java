@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -31,9 +33,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -42,15 +44,9 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.textclassifier.TextClassification;
 
-import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.MediumTest;
-import androidx.test.rule.ActivityTestRule;
-
-import com.android.frameworks.coretests.R;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -59,16 +55,11 @@ import org.mockito.ArgumentCaptor;
  * TextViewTest tests {@link TextView}.
  */
 @RunWith(AndroidJUnit4.class)
-@MediumTest
 public class TextViewContextMenuTest {
     private static final String INTENT_ACTION_MOCK_ACTION_TEXT_CLASSIFICATION =
             "android.text.coretest.textclassifiation";
     private static final String ACTION_TITLE = "ACTION_TITLE";
     private static final String ACTION_DESCRIPTION = "ACTION_DESCRIPTION";
-
-    @Rule
-    public final ActivityTestRule<TextViewContextMenuActivity> mActivityRule =
-            new ActivityTestRule<>(TextViewContextMenuActivity.class);
 
     // Setup MenuItem mock with chaining.
     private MenuItem newMockMenuItem() {
@@ -83,43 +74,39 @@ public class TextViewContextMenuTest {
         return mockItem;
     }
 
-    private RemoteAction createRemoteAction() {
+    private RemoteAction createRemoteAction(Context context) {
         Intent intent = new Intent(INTENT_ACTION_MOCK_ACTION_TEXT_CLASSIFICATION)
-                .setPackage(mActivity.getPackageName());
-        PendingIntent pIntent = PendingIntent.getBroadcast(mActivity, 0, intent,
+                .setPackage(context.getPackageName());
+        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent,
                 PendingIntent.FLAG_MUTABLE);
         return new RemoteAction(
-                Icon.createWithResource(mActivity, android.R.drawable.btn_star),
+                Icon.createWithResource(context, android.R.drawable.btn_star),
                 ACTION_TITLE, ACTION_DESCRIPTION, pIntent);
     }
 
-    private Activity mActivity;
     private SelectionActionModeHelper mMockHelper;
-    private Editor.AssistantCallbackHelper mCallbackHelper;
 
     @Before
     public void setUp() {
-        mActivity = mActivityRule.getActivity();
-        EditText et = mActivity.findViewById(R.id.editText);
-
         mMockHelper = mock(SelectionActionModeHelper.class);
-        mCallbackHelper = et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
     }
 
-    @UiThreadTest
     @Test
     public void testNoMenuInteraction_noTextClassification() {
         when(mMockHelper.getTextClassification()).thenReturn(null);
         ContextMenu menu = mock(ContextMenu.class);
-        mCallbackHelper.updateAssistMenuItems(menu, null);
+        EditText et = new EditText(getInstrumentation().getContext());
+        Editor.AssistantCallbackHelper cbh =
+                et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
+        cbh.updateAssistMenuItems(menu, null);
         verifyNoMoreInteractions(menu);
     }
 
-    @UiThreadTest
     @Test
     public void testAddMenuForTextClassification() {
         // Setup
-        RemoteAction action = createRemoteAction();
+        Context context = getInstrumentation().getContext();
+        RemoteAction action = createRemoteAction(context);
         TextClassification classification = new TextClassification.Builder()
                 .addAction(action).build();
         when(mMockHelper.getTextClassification()).thenReturn(classification);
@@ -129,7 +116,10 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), anyInt(), anyInt(), any())).thenReturn(mockMenuItem);
 
         // Execute
-        mCallbackHelper.updateAssistMenuItems(menu, null);
+        EditText et = new EditText(context);
+        Editor.AssistantCallbackHelper cbh =
+                et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
+        cbh.updateAssistMenuItems(menu, null);
 
         // Verify
         ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -142,14 +132,14 @@ public class TextViewContextMenuTest {
         verify(mockMenuItem, times(1)).setContentDescription(eq(ACTION_DESCRIPTION));
     }
 
-    @UiThreadTest
     @Test
     public void testAddMenuForLegacyTextClassification() {
         // Setup
+        Context context = getInstrumentation().getContext();
         Intent intent = new Intent(INTENT_ACTION_MOCK_ACTION_TEXT_CLASSIFICATION)
-                .setPackage(mActivity.getPackageName());
+                .setPackage(context.getPackageName());
         TextClassification classification = new TextClassification.Builder()
-                .setIcon(mActivity.getResources().getDrawable(android.R.drawable.star_on))
+                .setIcon(context.getResources().getDrawable(android.R.drawable.star_on))
                 .setLabel(ACTION_TITLE)
                 .setIntent(intent)
                 .build();
@@ -160,7 +150,10 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), anyInt(), anyInt(), any())).thenReturn(mockMenuItem);
 
         // Execute
-        mCallbackHelper.updateAssistMenuItems(menu, null);
+        EditText et = new EditText(context);
+        Editor.AssistantCallbackHelper cbh =
+                et.getEditorForTesting().new AssistantCallbackHelper(mMockHelper);
+        cbh.updateAssistMenuItems(menu, null);
 
         // Verify
         ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -172,7 +165,6 @@ public class TextViewContextMenuTest {
         assertThat(titleCaptor.getValue().toString()).isEqualTo(ACTION_TITLE);
     }
 
-    @UiThreadTest
     @Test
     public void testAdjustIconSpaces() {
         GradientDrawable gd = new GradientDrawable();
@@ -195,9 +187,8 @@ public class TextViewContextMenuTest {
         when(menu.getItem(1)).thenReturn(mockNoIconMenu);
         when(menu.getItem(2)).thenReturn(mockNoIconMenu2);
 
-
         // Execute the test method
-        EditText et = mActivity.findViewById(R.id.editText);
+        EditText et = new EditText(getInstrumentation().getContext());
         Editor editor = et.getEditorForTesting();
         editor.adjustIconSpacing(menu);
 
@@ -217,7 +208,6 @@ public class TextViewContextMenuTest {
         assertThat(paddingDrawable2).isSameInstanceAs(paddingDrawable);
     }
 
-    @UiThreadTest
     @Test
     public void testAdjustIconSpacesNoIconCase() {
         // Setup mocks
@@ -234,7 +224,7 @@ public class TextViewContextMenuTest {
         when(menu.getItem(1)).thenReturn(mockNoIconMenu2);
 
         // Execute the test method
-        EditText et = mActivity.findViewById(R.id.editText);
+        EditText et = new EditText(getInstrumentation().getContext());
         Editor editor = et.getEditorForTesting();
         editor.adjustIconSpacing(menu);
 
@@ -243,7 +233,6 @@ public class TextViewContextMenuTest {
         verify(mockNoIconMenu2, times(0)).setIcon(any());
     }
 
-    @UiThreadTest
     @Test
     public void testAutofillMenuItemEnabledWhenNoTextSelected() {
         ContextMenu menu = mock(ContextMenu.class);
@@ -253,18 +242,17 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
                 .thenReturn(mockAutofillMenuItem);
 
-        EditText et = spy(mActivity.findViewById(R.id.editText));
+        EditText et = spy(new EditText(getInstrumentation().getContext()));
         doReturn(true).when(et).canRequestAutofill();
         doReturn(null).when(et).getSelectedText();
 
-        Editor editor = et.getEditorForTesting();
-        editor.onCreateContextMenu(menu);
+        Editor editor = new Editor(et);
+        editor.setTextContextMenuItems(menu);
 
         verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
         verify(mockAutofillMenuItem).setEnabled(true);
     }
 
-    @UiThreadTest
     @Test
     public void testAutofillMenuItemNotEnabledWhenTextSelected() {
         ContextMenu menu = mock(ContextMenu.class);
@@ -274,7 +262,7 @@ public class TextViewContextMenuTest {
         when(menu.add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt()))
                 .thenReturn(mockAutofillMenuItem);
 
-        EditText et = spy(mActivity.findViewById(R.id.editText));
+        EditText et = spy(new EditText(getInstrumentation().getContext()));
         doReturn(true).when(et).canRequestAutofill();
         doReturn("test").when(et).getSelectedText();
         Editor editor = new Editor(et);
@@ -283,5 +271,4 @@ public class TextViewContextMenuTest {
         verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
         verify(mockAutofillMenuItem).setEnabled(false);
     }
-
 }

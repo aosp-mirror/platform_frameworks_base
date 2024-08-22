@@ -206,7 +206,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(sceneContainerViewModel.currentScene.value)
             .isEqualTo(sceneContainerConfig.initialSceneKey)
         assertWithMessage("Initial scene container visibility mismatch!")
-            .that(sceneContainerViewModel.isVisible.value)
+            .that(sceneContainerViewModel.isVisible)
             .isTrue()
     }
 
@@ -536,7 +536,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private fun TestScope.emulatePendingTransitionProgress(
         expectedVisible: Boolean = true,
     ) {
-        val isVisible by collectLastValue(sceneContainerViewModel.isVisible)
         assertWithMessage("The FakeSceneDataSource has to be paused for this to do anything.")
             .that(fakeSceneDataSource.isPaused)
             .isTrue()
@@ -574,7 +573,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         runCurrent()
 
         assertWithMessage("Visibility mismatch after scene transition from $from to $to!")
-            .that(isVisible)
+            .that(sceneContainerViewModel.isVisible)
             .isEqualTo(expectedVisible)
         assertThat(sceneContainerViewModel.currentScene.value).isEqualTo(to)
 

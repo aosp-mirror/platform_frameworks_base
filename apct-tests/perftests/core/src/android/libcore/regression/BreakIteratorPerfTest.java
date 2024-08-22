@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -36,7 +36,7 @@ import java.util.Locale;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class BreakIteratorPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public enum Text {
         LIPSUM(
@@ -165,7 +165,7 @@ public final class BreakIteratorPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeBreakIterator(Text text) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             BreakIterator it = BreakIterator.getLineInstance(text.mLocale);
             it.setText(text.mText);
@@ -179,7 +179,7 @@ public final class BreakIteratorPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeIcuBreakIterator(Text text) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             android.icu.text.BreakIterator it =
                     android.icu.text.BreakIterator.getLineInstance(text.mLocale);

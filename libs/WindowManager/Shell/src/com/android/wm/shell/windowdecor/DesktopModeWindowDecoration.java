@@ -643,6 +643,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             final RelayoutParams.OccludingCaptionElement controlsElement =
                     new RelayoutParams.OccludingCaptionElement();
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
+            if (Flags.enableMinimizeButton()) {
+                controlsElement.mWidthResId =
+                      R.dimen.desktop_mode_customizable_caption_with_minimize_button_margin_end;
+            }
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
         } else if (isAppHandle && !Flags.enableAdditionalWindowsAboveStatusBar()) {
