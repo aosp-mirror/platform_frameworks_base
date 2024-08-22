@@ -57,6 +57,7 @@ import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
@@ -385,7 +386,16 @@ constructor(
                 biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
                 "isFaceAuthEnrolledAndEnabled"
             ),
-            Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
+            Pair(
+                if (SceneContainerFlag.isEnabled) {
+                    keyguardTransitionInteractor
+                        .isInTransitionWhere(toStatePredicate = { it == KeyguardState.UNDEFINED })
+                        .isFalse()
+                } else {
+                    keyguardRepository.isKeyguardGoingAway.isFalse()
+                },
+                "keyguardNotGoingAway"
+            ),
             Pair(
                 keyguardTransitionInteractor
                     .isInTransitionWhere(toStatePredicate = KeyguardState::deviceIsAsleepInState)
