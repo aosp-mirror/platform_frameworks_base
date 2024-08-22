@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -30,7 +30,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ClassLoaderResourcePerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static final String EXISTENT_RESOURCE = "java/util/logging/logging.properties";
     private static final String MISSING_RESOURCE = "missing_entry";
@@ -40,7 +41,7 @@ public class ClassLoaderResourcePerfTest {
         ClassLoader currentClassLoader = getClass().getClassLoader();
         Assert.assertNotNull(currentClassLoader.getResource(EXISTENT_RESOURCE));
 
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             currentClassLoader.getResource(EXISTENT_RESOURCE);
         }
@@ -51,7 +52,7 @@ public class ClassLoaderResourcePerfTest {
         ClassLoader currentClassLoader = getClass().getClassLoader();
         Assert.assertNull(currentClassLoader.getResource(MISSING_RESOURCE));
 
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             currentClassLoader.getResource(MISSING_RESOURCE);
         }

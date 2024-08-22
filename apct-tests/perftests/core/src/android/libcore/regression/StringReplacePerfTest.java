@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -34,7 +34,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class StringReplacePerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     enum StringLengths {
         EMPTY(""),
@@ -80,7 +80,7 @@ public class StringReplacePerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceCharNonExistent(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.replace('z', '0');
         }
@@ -89,7 +89,7 @@ public class StringReplacePerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceCharRepeated(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.replace('a', '0');
         }
@@ -98,7 +98,7 @@ public class StringReplacePerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceSingleChar(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.replace('q', '0');
         }
@@ -107,7 +107,7 @@ public class StringReplacePerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceSequenceNonExistent(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.replace("fish", "0");
         }
@@ -116,7 +116,7 @@ public class StringReplacePerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceSequenceRepeated(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.replace("jklm", "0");
         }
@@ -125,7 +125,7 @@ public class StringReplacePerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeReplaceSingleSequence(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.replace("qrst", "0");
         }
