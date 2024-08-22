@@ -132,6 +132,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewbinder.Notificat
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpNotificationViewControllerEmptyImpl;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.phone.HeadsUpTouchHelper.HeadsUpNotificationViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -773,7 +774,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     mHeadsUpManager,
                     statusBarService.get(),
                     getHeadsUpCallback(),
-                    new HeadsUpNotificationViewControllerEmptyImpl()
+                    getHeadsUpNotificationViewController()
             );
         }
         mNotificationRoundnessManager = notificationRoundnessManager;
@@ -1849,6 +1850,32 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     @VisibleForTesting
     TouchHandler getTouchHandler() {
         return mTouchHandler;
+    }
+
+    private HeadsUpNotificationViewController getHeadsUpNotificationViewController() {
+        HeadsUpNotificationViewController headsUpViewController;
+        if (SceneContainerFlag.isEnabled()) {
+            headsUpViewController = new HeadsUpNotificationViewController() {
+                @Override
+                public void setHeadsUpDraggingStartingHeight(int startHeight) {
+                    // do nothing
+                }
+
+                @Override
+                public void setTrackedHeadsUp(ExpandableNotificationRow expandableNotificationRow) {
+                    setTrackingHeadsUp(expandableNotificationRow);
+                }
+
+                @Override
+                public void startExpand(float newX, float newY, boolean startTracking,
+                        float expandedHeight) {
+                    // do nothing
+                }
+            };
+        } else {
+            headsUpViewController = new HeadsUpNotificationViewControllerEmptyImpl();
+        }
+        return headsUpViewController;
     }
 
     @Override

@@ -1244,6 +1244,7 @@ public class NotificationStackScrollLayout
     @Override
     public void setHeadsUpTop(float headsUpTop) {
         mAmbientState.setHeadsUpTop(headsUpTop);
+        requestChildrenUpdate();
     }
 
     @Override
@@ -1561,6 +1562,12 @@ public class NotificationStackScrollLayout
             setCheckForLeaveBehind(false);
             onExpansionStopped();
         }
+    }
+
+    @Override
+    public void setQsExpandFraction(float expandFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mAmbientState.setQsExpansionFraction(expandFraction);
     }
 
     /**
@@ -2532,6 +2539,11 @@ public class NotificationStackScrollLayout
     @Override
     public int getTopHeadsUpHeight() {
         return getTopHeadsUpIntrinsicHeight();
+    }
+
+    @Override
+    public int getHeadsUpInset() {
+        return mHeadsUpInset;
     }
 
     /**
