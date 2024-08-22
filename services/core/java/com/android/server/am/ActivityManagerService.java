@@ -435,6 +435,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
@@ -763,6 +764,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final AppErrors mAppErrors;
     final PackageWatchdog mPackageWatchdog;
+    final CrashRecoveryHelper mCrashRecoveryHelper;
 
     @GuardedBy("mDeliveryGroupPolicyIgnoredActions")
     private final ArraySet<String> mDeliveryGroupPolicyIgnoredActions = new ArraySet();
@@ -2330,6 +2332,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 if (!refactorCrashrecovery()) {
                     mService.mPackageWatchdog.onPackagesReady();
+                } else {
+                    mService.mCrashRecoveryHelper.registerConnectivityModuleHealthListener();
                 }
                 mService.scheduleHomeTimeout();
             }
@@ -2500,6 +2504,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiContext = null;
         mAppErrors = injector.getAppErrors();
         mPackageWatchdog = null;
+        mCrashRecoveryHelper = null;
         mAppOpsService = mInjector.getAppOpsService(null /* recentAccessesFile */,
             null /* storageFile */, null /* handler */);
         mBatteryStatsService = mInjector.getBatteryStatsService();
@@ -2582,6 +2587,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mServices = new ActiveServices(this);
         mCpHelper = new ContentProviderHelper(this, true);
+        mCrashRecoveryHelper = new CrashRecoveryHelper(mUiContext);
         mPackageWatchdog = PackageWatchdog.getInstance(mUiContext);
         mAppErrors = new AppErrors(mUiContext, this, mPackageWatchdog);
         mUidObserverController = new UidObserverController(mUiHandler);
