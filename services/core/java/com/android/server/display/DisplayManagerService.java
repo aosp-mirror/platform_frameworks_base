@@ -1182,7 +1182,10 @@ public final class DisplayManagerService extends SystemService {
 
     private DisplayInfo getDisplayInfoForFrameRateOverride(DisplayEventReceiver.FrameRateOverride[]
             frameRateOverrides, DisplayInfo info, int callingUid) {
+        // Start with the display frame rate
         float frameRateHz = info.renderFrameRate;
+
+        // If the app has a specific override, use that instead
         for (DisplayEventReceiver.FrameRateOverride frameRateOverride : frameRateOverrides) {
             if (frameRateOverride.uid == callingUid) {
                 frameRateHz = frameRateOverride.frameRateHz;
@@ -1201,18 +1204,21 @@ public final class DisplayManagerService extends SystemService {
                                 DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE, callingUid);
 
         // Override the refresh rate only if it is a divisor of the current
-        // refresh rate. This calculation needs to be in sync with the native code
+        // vsync rate. This calculation needs to be in sync with the native code
         // in RefreshRateSelector::getFrameRateDivisor
         Display.Mode currentMode = info.getMode();
-        float numPeriods = currentMode.getRefreshRate() / frameRateHz;
+        float vsyncRate = currentMode.getVsyncRate();
+        float numPeriods = vsyncRate / frameRateHz;
         float numPeriodsRound = Math.round(numPeriods);
         if (Math.abs(numPeriods - numPeriodsRound) > THRESHOLD_FOR_REFRESH_RATES_DIVISORS) {
             return info;
         }
-        frameRateHz = currentMode.getRefreshRate() / numPeriodsRound;
+        frameRateHz = vsyncRate / numPeriodsRound;
 
         DisplayInfo overriddenInfo = new DisplayInfo();
         overriddenInfo.copyFrom(info);
+
+        // If there is a mode that matches the override, use that one
         for (Display.Mode mode : info.supportedModes) {
             if (!mode.equalsExceptRefreshRate(currentMode)) {
                 continue;
@@ -1232,8 +1238,9 @@ public final class DisplayManagerService extends SystemService {
                 return overriddenInfo;
             }
         }
-
         overriddenInfo.refreshRateOverride = frameRateHz;
+
+        // Create a fake mode for app compat
         if (!displayModeReturnsPhysicalRefreshRate) {
             overriddenInfo.supportedModes = Arrays.copyOf(info.supportedModes,
                     info.supportedModes.length + 1);
