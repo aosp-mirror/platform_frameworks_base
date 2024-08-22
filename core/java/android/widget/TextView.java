@@ -10627,7 +10627,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int startOffset = mLayout.getOffsetForHorizontal(line, point.x);
         if (mLayout.isLevelBoundary(startOffset)) {
-            // TODO(b/247551937): Support gesture at level boundaries.
+            // Gesture at level boundaries is not supported.
             return handleGestureFailure(gesture);
         }
 
