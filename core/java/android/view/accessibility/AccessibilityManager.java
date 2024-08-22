@@ -1051,6 +1051,52 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Registers callback for when user initialization has completed.
+     * Does nothing if the same callback is already registered.
+     *
+     * @param callback The callback to be registered
+     * @hide
+     */
+    public void registerUserInitializationCompleteCallback(
+            @NonNull IUserInitializationCompleteCallback callback) {
+        IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.registerUserInitializationCompleteCallback(callback);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while registering userInitializationCompleteCallback. ", re);
+        }
+    }
+
+    /**
+     * Unregisters callback for when user initialization has completed.
+     *
+     * @param callback The callback to be unregistered
+     * @hide
+     */
+    public void unregisterUserInitializationCompleteCallback(
+            @NonNull IUserInitializationCompleteCallback callback) {
+        IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.unregisterUserInitializationCompleteCallback(callback);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG,
+                    "Error while unregistering userInitializationCompleteCallback. ", re);
+        }
+    }
+
+    /**
      * Whether the current accessibility request comes from an
      * {@link AccessibilityService} with the {@link AccessibilityServiceInfo#isAccessibilityTool}
      * property set to true.

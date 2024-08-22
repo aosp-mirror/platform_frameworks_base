@@ -102,6 +102,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.IAccessibilityManager;
+import android.view.accessibility.IUserInitializationCompleteCallback;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
@@ -137,6 +138,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.internal.util.reflection.FieldReader;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.stubbing.Answer;
@@ -209,6 +211,7 @@ public class AccessibilityManagerServiceTest {
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private ProxyManager mProxyManager;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
+    @Spy private IUserInitializationCompleteCallback mUserInitializationCompleteCallback;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     private IAccessibilityManager mA11yManagerServiceOnDevice;
     private AccessibilityServiceConnection mAccessibilityServiceConnection;
@@ -2040,6 +2043,36 @@ public class AccessibilityManagerServiceTest {
 
         assertThat(ShortcutUtils.getButtonMode(mTestableContext, userState.mUserId))
                 .isEqualTo(ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
+    }
+
+    @Test
+    public void registerUserInitializationCompleteCallback_isRegistered() {
+        mA11yms.mUserInitializationCompleteCallbacks.clear();
+
+        mA11yms.registerUserInitializationCompleteCallback(mUserInitializationCompleteCallback);
+
+        assertThat(mA11yms.mUserInitializationCompleteCallbacks).containsExactly(
+                mUserInitializationCompleteCallback);
+    }
+
+    @Test
+    public void unregisterUserInitializationCompleteCallback_isUnregistered() {
+        mA11yms.mUserInitializationCompleteCallbacks.clear();
+        mA11yms.mUserInitializationCompleteCallbacks.add(mUserInitializationCompleteCallback);
+
+        mA11yms.unregisterUserInitializationCompleteCallback(mUserInitializationCompleteCallback);
+
+        assertThat(mA11yms.mUserInitializationCompleteCallbacks).isEmpty();
+    }
+
+    @Test
+    public void switchUser_callsUserInitializationCompleteCallback() throws RemoteException {
+        mA11yms.mUserInitializationCompleteCallbacks.add(mUserInitializationCompleteCallback);
+
+        mA11yms.switchUser(UserHandle.MIN_SECONDARY_USER_ID);
+
+        verify(mUserInitializationCompleteCallback).onUserInitializationComplete(
+                UserHandle.MIN_SECONDARY_USER_ID);
     }
 
     private Set<String> readStringsFromSetting(String setting) {
