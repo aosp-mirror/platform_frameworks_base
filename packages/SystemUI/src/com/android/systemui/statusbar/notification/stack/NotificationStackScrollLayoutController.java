@@ -1186,6 +1186,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setIntrinsicPadding(int intrinsicPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setIntrinsicPadding(intrinsicPadding);
     }
 
