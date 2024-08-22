@@ -38,6 +38,9 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Bundle
+import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.testing.TestableLooper
@@ -48,10 +51,13 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.MediaDataRepository
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
@@ -69,6 +75,7 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
+import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.FakeSettings
@@ -79,6 +86,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -146,7 +154,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Mock lateinit var mediaSessionBasedFilter: MediaSessionBasedFilter
     @Mock lateinit var mediaDeviceManager: MediaDeviceManager
     @Mock lateinit var mediaDataCombineLatest: MediaDataCombineLatest
-    @Mock lateinit var mediaDataFilter: MediaDataFilterImpl
     @Mock lateinit var listener: MediaDataManager.Listener
     @Mock lateinit var pendingIntent: PendingIntent
     @Mock lateinit var activityStarter: ActivityStarter
@@ -185,7 +192,9 @@ class MediaDataProcessorTest : SysuiTestCase() {
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
             1
         )
+    private val notificationLockscreenUserManager = kosmos.notificationLockscreenUserManager
     private val mediaFilterRepository: MediaFilterRepository = kosmos.mediaFilterRepository
+    private val mediaDataFilter: MediaDataFilterImpl = kosmos.mediaDataFilter
 
     private lateinit var staticMockSession: MockitoSession
 
@@ -258,6 +267,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         session = MediaSession(context, "MediaDataProcessorTestSession")
         mediaNotification =
             SbnBuilder().run {
+                setUser(UserHandle(USER_ID))
                 setPkg(PACKAGE_NAME)
                 modifyNotification(context).also {
                     it.setSmallIcon(android.R.drawable.ic_media_pause)
@@ -1796,6 +1806,85 @@ class MediaDataProcessorTest : SysuiTestCase() {
         assertThat(actions.playOrPause!!.contentDescription)
             .isEqualTo(context.getString(R.string.controls_media_button_connecting))
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
+    fun postWithPlaybackActions_drawablesReused() =
+        kosmos.testScope.runTest {
+            whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+            whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+            whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+            val stateActions =
+                PlaybackState.ACTION_PAUSE or
+                    PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+                    PlaybackState.ACTION_SKIP_TO_NEXT
+            val stateBuilder =
+                PlaybackState.Builder()
+                    .setState(PlaybackState.STATE_PLAYING, 0, 10f)
+                    .setActions(stateActions)
+            whenever(controller.playbackState).thenReturn(stateBuilder.build())
+            val userEntries by collectLastValue(mediaFilterRepository.selectedUserEntries)
+
+            mediaDataProcessor.addInternalListener(mediaDataFilter)
+            mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+            addNotificationAndLoad()
+
+            assertThat(userEntries).hasSize(1)
+            val firstSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+
+            addNotificationAndLoad()
+
+            assertThat(userEntries).hasSize(1)
+            val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+            assertThat(secondSemanticActions.playOrPause?.icon)
+                .isEqualTo(firstSemanticActions.playOrPause?.icon)
+            assertThat(secondSemanticActions.playOrPause?.background)
+                .isEqualTo(firstSemanticActions.playOrPause?.background)
+            assertThat(secondSemanticActions.nextOrCustom?.icon)
+                .isEqualTo(firstSemanticActions.nextOrCustom?.icon)
+            assertThat(secondSemanticActions.prevOrCustom?.icon)
+                .isEqualTo(firstSemanticActions.prevOrCustom?.icon)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
+    fun postWithPlaybackActions_drawablesNotReused() =
+        kosmos.testScope.runTest {
+            whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+            whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+            whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+            val stateActions =
+                PlaybackState.ACTION_PAUSE or
+                    PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+                    PlaybackState.ACTION_SKIP_TO_NEXT
+            val stateBuilder =
+                PlaybackState.Builder()
+                    .setState(PlaybackState.STATE_PLAYING, 0, 10f)
+                    .setActions(stateActions)
+            whenever(controller.playbackState).thenReturn(stateBuilder.build())
+            val userEntries by collectLastValue(mediaFilterRepository.selectedUserEntries)
+
+            mediaDataProcessor.addInternalListener(mediaDataFilter)
+            mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+            addNotificationAndLoad()
+
+            assertThat(userEntries).hasSize(1)
+            val firstSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+
+            addNotificationAndLoad()
+
+            assertThat(userEntries).hasSize(1)
+            val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
+
+            assertThat(secondSemanticActions.playOrPause?.icon)
+                .isNotEqualTo(firstSemanticActions.playOrPause?.icon)
+            assertThat(secondSemanticActions.playOrPause?.background)
+                .isNotEqualTo(firstSemanticActions.playOrPause?.background)
+            assertThat(secondSemanticActions.nextOrCustom?.icon)
+                .isNotEqualTo(firstSemanticActions.nextOrCustom?.icon)
+            assertThat(secondSemanticActions.prevOrCustom?.icon)
+                .isNotEqualTo(firstSemanticActions.prevOrCustom?.icon)
+        }
 
     @Test
     fun testPlaybackActions_reservedSpace() {
