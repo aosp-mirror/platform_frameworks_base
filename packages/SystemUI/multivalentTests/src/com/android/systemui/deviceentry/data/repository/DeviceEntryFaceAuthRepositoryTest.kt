@@ -34,6 +34,7 @@ import android.hardware.face.FaceSensorPropertiesInternal
 import android.os.CancellationSignal
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.InstanceId.fakeInstanceId
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags as AConfigFlags
@@ -78,7 +79,9 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectionStatus
@@ -92,6 +95,7 @@ import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -232,6 +236,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             powerInteractor,
             keyguardInteractor,
             alternateBouncerInteractor,
+            { kosmos.sceneInteractor },
             faceDetectBuffer,
             faceAuthBuffer,
             keyguardTransitionInteractor,
@@ -614,6 +619,31 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             // but bouncer is shown after that.
             bouncerRepository.setPrimaryShow(true)
+            assertThat(canFaceAuthRun()).isTrue()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun withSceneContainer_authenticateRunsWhenSecureCameraIsActiveIfBouncerIsShowing() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue(sceneContainerEnabled = true)
+            bouncerRepository.setAlternateVisible(false)
+
+            // launch secure camera
+            keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
+            keyguardRepository.setKeyguardOccluded(true)
+            kosmos.sceneInteractor.snapToScene(Scenes.Lockscreen, "for-test")
+            runCurrent()
+            assertThat(canFaceAuthRun()).isFalse()
+
+            // but bouncer is shown after that.
+            kosmos.sceneInteractor.changeScene(Scenes.Bouncer, "for-test")
+            kosmos.sceneInteractor.setTransitionState(
+                MutableStateFlow(ObservableTransitionState.Idle(Scenes.Bouncer))
+            )
+            runCurrent()
+
             assertThat(canFaceAuthRun()).isTrue()
         }
 
