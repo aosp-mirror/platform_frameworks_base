@@ -193,6 +193,9 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Remote Transition that split accepts but ultimately needs to be animated by the remote. */
     public static final int TRANSIT_SPLIT_PASSTHROUGH = TRANSIT_FIRST_CUSTOM + 18;
 
+    /** Transition to set windowing mode after exit pip transition is finished animating. */
+    public static final int TRANSIT_CLEANUP_PIP_EXIT = WindowManager.TRANSIT_FIRST_CUSTOM + 19;
+
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
             WindowManager.TRANSIT_FIRST_CUSTOM + 100;
