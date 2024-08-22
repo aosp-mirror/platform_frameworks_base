@@ -23,6 +23,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
+import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
 import org.junit.After
@@ -36,13 +37,17 @@ import org.junit.runners.BlockJUnit4ClassRunner
 @Postsubmit
 open class SnapResizeAppWindowWithButton
 @JvmOverloads
-constructor(private val toLeft: Boolean = true) {
+constructor(private val toLeft: Boolean = true, private val isResizable: Boolean = true) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
     private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val device = UiDevice.getInstance(instrumentation)
-    private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
+    private val testApp = if (isResizable) {
+        DesktopModeAppHelper(SimpleAppHelper(instrumentation))
+    } else {
+        DesktopModeAppHelper(NonResizeableAppHelper(instrumentation))
+    }
 
     @Before
     fun setup() {
