@@ -275,26 +275,15 @@ public final class ProfcollectForwardingService extends SystemService {
         launchObserverRegistry.registerLaunchObserver(mAppLaunchObserver);
     }
 
-    private void traceOnAppStart(String packageName) {
-        if (mIProfcollect == null) {
-            return;
-        }
-
-        if (Utils.withFrequency("applaunch_trace_freq", 2)) {
-            BackgroundThread.get().getThreadHandler().post(() -> {
-                try {
-                    mIProfcollect.trace_system("applaunch");
-                } catch (RemoteException e) {
-                    Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
-                }
-            });
-        }
-    }
-
     private class AppLaunchObserver extends ActivityMetricsLaunchObserver {
         @Override
         public void onIntentStarted(Intent intent, long timestampNanos) {
-            traceOnAppStart(intent.getPackage());
+            if (mIProfcollect == null) {
+                return;
+            }
+            if (Utils.withFrequency("applaunch_trace_freq", 2)) {
+                Utils.traceSystem(mIProfcollect, "applaunch");
+            }
         }
     }
 
@@ -316,13 +305,7 @@ public final class ProfcollectForwardingService extends SystemService {
         }
         if (Utils.withFrequency("dex2oat_trace_freq", 25)) {
             // Dex2oat could take a while before it starts. Add a short delay before start tracing.
-            BackgroundThread.get().getThreadHandler().postDelayed(() -> {
-                try {
-                    mIProfcollect.trace_system("dex2oat");
-                } catch (RemoteException e) {
-                    Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
-                }
-            }, 1000);
+            Utils.traceSystem(mIProfcollect, "dex2oat", /* delayMs */ 1000);
         }
     }
 
@@ -385,20 +368,10 @@ public final class ProfcollectForwardingService extends SystemService {
                     return;
                 }
                 if (Utils.withFrequency("camera_trace_freq", 10)) {
-                    final int traceDuration = 5000;
-                    final String traceTag = "camera";
-                    BackgroundThread.get().getThreadHandler().post(() -> {
-                        if (mIProfcollect == null) {
-                            return;
-                        }
-                        try {
-                            mIProfcollect.trace_process(traceTag,
-                                "android.hardware.camera.provider",
-                                traceDuration);
-                        } catch (RemoteException e) {
-                            Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
-                        }
-                    });
+                    Utils.traceProcess(mIProfcollect,
+                            "camera",
+                            "android.hardware.camera.provider",
+                            /* durationMs */ 5000);
                 }
             }
         }, null);
