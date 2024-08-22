@@ -223,19 +223,15 @@ constructor(
             // KTF for this case and just collect the new progress instead.
             collectProgress(transition)
         } else if (transition.toScene == CommunalScenes.Communal) {
-            if (currentTransitionId != null) {
-                if (currentToState == KeyguardState.GLANCEABLE_HUB) {
-                    transitionKtfTo(transitionInteractor.getStartedFromState())
-                }
+            if (currentToState == KeyguardState.GLANCEABLE_HUB) {
+                transitionKtfTo(transitionInteractor.getStartedFromState())
             }
             startTransitionToGlanceableHub()
             collectProgress(transition)
         } else if (transition.toScene == CommunalScenes.Blank) {
-            if (currentTransitionId != null) {
-                // Another transition started before this one is completed. Transition to the
-                // GLANCEABLE_HUB state so that we can properly transition away from it.
-                transitionKtfTo(KeyguardState.GLANCEABLE_HUB)
-            }
+            // Another transition started before this one is completed. Transition to the
+            // GLANCEABLE_HUB state so that we can properly transition away from it.
+            transitionKtfTo(KeyguardState.GLANCEABLE_HUB)
             startTransitionFromGlanceableHub()
             collectProgress(transition)
         }
