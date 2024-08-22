@@ -1196,6 +1196,10 @@ public class AccountManagerService
                             obsoleteAuthType.add(type);
                             // And delete it from the TABLE_META
                             accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
+                        } else if (knownUid != null && knownUid != uid) {
+                            Slog.w(TAG, "authenticator no longer exist for type " + type);
+                            obsoleteAuthType.add(type);
+                            accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
                         }
                     }
                 }
