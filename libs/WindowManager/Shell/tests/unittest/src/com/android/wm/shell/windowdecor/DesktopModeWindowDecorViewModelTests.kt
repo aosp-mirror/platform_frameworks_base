@@ -166,6 +166,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private val bgExecutor = TestShellExecutor()
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
     @Mock private lateinit var mockTasksLimiter: DesktopTasksLimiter
+    @Mock private lateinit var mockFreeformTaskTransitionStarter: FreeformTaskTransitionStarter
     private lateinit var spyContext: TestableContext
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -350,9 +351,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val inputManager = mock(InputManager::class.java)
         spyContext.addMockSystemService(InputManager::class.java, inputManager)
 
-        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
         desktopModeWindowDecorViewModel
-                .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+                .setFreeformTaskTransitionStarter(mockFreeformTaskTransitionStarter)
 
         onClickListener.onClick(view)
 
@@ -375,14 +375,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val view = mock(View::class.java)
         whenever(view.id).thenReturn(R.id.close_window)
 
-        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
         desktopModeWindowDecorViewModel
-            .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+            .setFreeformTaskTransitionStarter(mockFreeformTaskTransitionStarter)
 
         onClickListenerCaptor.value.onClick(view)
 
         val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
-        verify(freeformTaskTransitionStarter).startRemoveTransition(transactionCaptor.capture())
+        verify(mockFreeformTaskTransitionStarter).startRemoveTransition(transactionCaptor.capture())
         val wct = transactionCaptor.firstValue
 
         assertEquals(1, wct.getHierarchyOps().size)
@@ -404,14 +403,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val view = mock(View::class.java)
         whenever(view.id).thenReturn(R.id.minimize_window)
 
-        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
         desktopModeWindowDecorViewModel
-            .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+            .setFreeformTaskTransitionStarter(mockFreeformTaskTransitionStarter)
 
         onClickListenerCaptor.value.onClick(view)
 
         val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
-        verify(freeformTaskTransitionStarter)
+        verify(mockFreeformTaskTransitionStarter)
             .startMinimizedModeTransition(transactionCaptor.capture())
         val wct = transactionCaptor.firstValue
 
