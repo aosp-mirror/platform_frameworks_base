@@ -15,8 +15,8 @@
  */
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -31,13 +31,13 @@ import java.util.Locale;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class DecimalFormatSymbolsPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static Locale sLocale = Locale.getDefault(Locale.Category.FORMAT);
 
     @Test
     public void time_instantiation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             new DecimalFormatSymbols(sLocale);
         }

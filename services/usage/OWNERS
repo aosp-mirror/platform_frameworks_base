@@ -1,7 +1,10 @@
+# Bug component: 532296
+set noparent
+
 mwachens@google.com
 varunshah@google.com
-huiyu@google.com
 yamasani@google.com
+guanxin@google.com
 
 per-file *StorageStats* = file:/core/java/android/os/storage/OWNERS
 per-file *Broadcast* = sudheersai@google.com

@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,11 +34,11 @@ import javax.crypto.Cipher;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ProviderPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeStableProviders() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Cipher c = Cipher.getInstance("RSA");
         }
@@ -46,7 +46,7 @@ public class ProviderPerfTest {
 
     @Test
     public void timeWithNewProvider() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Security.addProvider(new MockProvider());
             try {

@@ -17,6 +17,7 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.UserAction
@@ -55,7 +56,7 @@ constructor(
     val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
     /** Whether the container is visible. */
-    val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
+    val isVisible: Boolean by hydratedStateOf(sceneInteractor.isVisible)
 
     override suspend fun onActivated(): Nothing {
         try {

@@ -82,6 +82,7 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.DesktopTasksLimiter
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -112,6 +113,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
@@ -163,6 +165,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockToast: Toast
     private val bgExecutor = TestShellExecutor()
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
+    @Mock private lateinit var mockTasksLimiter: DesktopTasksLimiter
     private lateinit var spyContext: TestableContext
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -215,7 +218,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 transactionFactory,
                 mockRootTaskDisplayAreaOrganizer,
                 windowDecorByTaskIdSpy,
-                mockInteractionJankMonitor
+                mockInteractionJankMonitor,
+                Optional.of(mockTasksLimiter)
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -384,6 +388,39 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         assertEquals(1, wct.getHierarchyOps().size)
         assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK,
                      wct.getHierarchyOps().get(0).getType())
+        assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MINIMIZE_BUTTON)
+    fun testMinimizeButtonInFreefrom_minimizeWindow() {
+        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
+                as ArgumentCaptor<View.OnClickListener>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onCaptionButtonClickListener = onClickListenerCaptor
+        )
+
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.minimize_window)
+
+        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
+        desktopModeWindowDecorViewModel
+            .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+
+        onClickListenerCaptor.value.onClick(view)
+
+        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
+        verify(freeformTaskTransitionStarter)
+            .startMinimizedModeTransition(transactionCaptor.capture())
+        val wct = transactionCaptor.firstValue
+
+        verify(mockTasksLimiter).addPendingMinimizeChange(
+                anyOrNull(), eq(DEFAULT_DISPLAY), eq(decor.mTaskInfo.taskId))
+
+        assertEquals(1, wct.getHierarchyOps().size)
+        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REORDER, wct.getHierarchyOps().get(0).getType())
+        assertFalse(wct.getHierarchyOps().get(0).getToTop())
         assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
     }
 

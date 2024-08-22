@@ -82,7 +82,10 @@ class SceneContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun activate_setsMotionEventHandler() =
-        testScope.runTest { assertThat(motionEventHandler).isNotNull() }
+        testScope.runTest {
+            runCurrent()
+            assertThat(motionEventHandler).isNotNull()
+        }
 
     @Test
     fun deactivate_clearsMotionEventHandler() =
@@ -96,14 +99,15 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     @Test
     fun isVisible() =
         testScope.runTest {
-            val isVisible by collectLastValue(underTest.isVisible)
-            assertThat(isVisible).isTrue()
+            assertThat(underTest.isVisible).isTrue()
 
             sceneInteractor.setVisible(false, "reason")
-            assertThat(isVisible).isFalse()
+            runCurrent()
+            assertThat(underTest.isVisible).isFalse()
 
             sceneInteractor.setVisible(true, "reason")
-            assertThat(isVisible).isTrue()
+            runCurrent()
+            assertThat(underTest.isVisible).isTrue()
         }
 
     @Test
@@ -229,15 +233,17 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     fun remoteUserInteraction_keepsContainerVisible() =
         testScope.runTest {
             sceneInteractor.setVisible(false, "reason")
-            val isVisible by collectLastValue(underTest.isVisible)
-            assertThat(isVisible).isFalse()
+            runCurrent()
+            assertThat(underTest.isVisible).isFalse()
             sceneInteractor.onRemoteUserInteractionStarted("reason")
-            assertThat(isVisible).isTrue()
+            runCurrent()
+            assertThat(underTest.isVisible).isTrue()
 
             underTest.onMotionEvent(
                 mock { whenever(actionMasked).thenReturn(MotionEvent.ACTION_UP) }
             )
+            runCurrent()
 
-            assertThat(isVisible).isFalse()
+            assertThat(underTest.isVisible).isFalse()
         }
 }

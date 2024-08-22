@@ -49,7 +49,7 @@
   ],
   "postsubmit": [
     {
-      "name": "FrameworksCoreTests",
+      "name": "PowerStatsTests",
       "options": [
         {
           "include-filter": "com.android.server.power.stats.BstatsCpuTimesValidationTest"

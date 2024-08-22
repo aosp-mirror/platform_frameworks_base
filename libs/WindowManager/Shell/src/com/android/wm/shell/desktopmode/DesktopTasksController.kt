@@ -431,6 +431,20 @@ class DesktopTasksController(
         taskRepository.addClosingTask(displayId, taskId)
     }
 
+    /**
+     * Perform clean up of the desktop wallpaper activity if the minimized window task is the last
+     * active task.
+     *
+     * @param wct transaction to modify if the last active task is minimized
+     * @param taskId task id of the window that's being minimized
+     */
+    fun onDesktopWindowMinimize(wct: WindowContainerTransaction, taskId: Int) {
+        if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
+            removeWallpaperActivity(wct)
+        }
+        // Do not call taskRepository.minimizeTask because it will be called by DekstopTasksLimiter.
+    }
+
     /** Move a task with given `taskId` to fullscreen */
     fun moveToFullscreen(taskId: Int, transitionSource: DesktopModeTransitionSource) {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task ->
