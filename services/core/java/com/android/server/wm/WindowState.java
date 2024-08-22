@@ -3002,7 +3002,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 resolvedConfig,
                 (mAttrs.privateFlags & PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE) != 0,
                 false /* hasFixedRotationTransform */,
-                false /* hasCompatDisplayInsets */);
+                false /* hasCompatDisplayInsets */,
+                null /* task */);
     }
 
     /**

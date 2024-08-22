@@ -85,9 +85,14 @@ constructor(
             launch {
                 viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) }
             }
+            launch { viewModel.qsExpandFraction.collect { view.setQsExpandFraction(it) } }
             launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
             launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
-            launch { viewModel.shouldResetStackTop.filter { it }.collect { view.setStackTop(0f) } }
+            launch {
+                viewModel.shouldResetStackTop
+                    .filter { it }
+                    .collect { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
+            }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)

@@ -20,6 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_REAR;
 
+import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
@@ -61,6 +63,7 @@ import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCapture;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -180,6 +183,8 @@ public class AuthController implements
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
     @NonNull private final VibratorHelper mVibratorHelper;
+
+    private final kotlin.Lazy<ViewCapture> mLazyViewCapture;
 
     @VisibleForTesting
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
@@ -736,7 +741,8 @@ public class AuthController implements
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor,
             @NonNull UdfpsUtils udfpsUtils,
-            @NonNull VibratorHelper vibratorHelper) {
+            @NonNull VibratorHelper vibratorHelper,
+            Lazy<ViewCapture> daggerLazyViewCapture) {
         mContext = context;
         mExecution = execution;
         mUserManager = userManager;
@@ -785,6 +791,8 @@ public class AuthController implements
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED_UNAUDITED);
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+
+        mLazyViewCapture = toKotlinLazy(daggerLazyViewCapture);
     }
 
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
@@ -1318,7 +1326,8 @@ public class AuthController implements
         return new AuthContainerView(config, mApplicationCoroutineScope, mFpProps, mFaceProps,
                 wakefulnessLifecycle, userManager, lockPatternUtils,
                 mInteractionJankMonitor, mPromptSelectorInteractor, viewModel,
-                mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
+                mCredentialViewModelProvider, bgExecutor, mVibratorHelper,
+                mLazyViewCapture);
     }
 
     @Override

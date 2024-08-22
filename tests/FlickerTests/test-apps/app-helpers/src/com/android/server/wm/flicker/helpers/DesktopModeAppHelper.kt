@@ -16,12 +16,17 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.content.Context
+import android.graphics.Insets
 import android.graphics.Rect
+import android.graphics.Region
 import android.platform.uiautomator_helpers.DeviceHelpers
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
+import android.view.WindowInsets
+import android.view.WindowManager
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
@@ -70,9 +75,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         // Start dragging a little under the top to prevent dragging the notification shade.
         val startY = 10
 
-        val displayRect =
-            wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
-                ?: throw IllegalStateException("Default display is null")
+        val displayRect = getDisplayRect(wmHelper)
 
         // The position we want to drag to
         val endY = displayRect.centerY() / 2
@@ -81,18 +84,61 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         device.drag(startX, startY, startX, endY, 100)
     }
 
+    private fun getMaximizeButtonForTheApp(caption: UiObject2?): UiObject2 {
+        return caption
+            ?.children
+            ?.find { it.resourceName.endsWith(MAXIMIZE_BUTTON_VIEW) }
+            ?.children
+            ?.get(0)
+            ?: error("Unable to find resource $MAXIMIZE_BUTTON_VIEW\n")
+    }
+
     /** Click maximise button on the app header for the given app. */
     fun maximiseDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
         val caption = getCaptionForTheApp(wmHelper, device)
-        val maximizeButton =
-            caption
-                ?.children
-                ?.find { it.resourceName.endsWith(MAXIMIZE_BUTTON_VIEW) }
-                ?.children
-                ?.get(0)
-        maximizeButton?.click()
+        val maximizeButton = getMaximizeButtonForTheApp(caption)
+        maximizeButton.click()
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
     }
+
+    /** Open maximize menu and click snap resize button on the app header for the given app. */
+    fun snapResizeDesktopApp(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        context: Context,
+        toLeft: Boolean
+    ) {
+        val caption = getCaptionForTheApp(wmHelper, device)
+        val maximizeButton = getMaximizeButtonForTheApp(caption)
+        maximizeButton?.longClick()
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
+
+        val buttonResId = if (toLeft) SNAP_LEFT_BUTTON else SNAP_RIGHT_BUTTON
+        val maximizeMenu = getDesktopAppViewByRes(MAXIMIZE_MENU)
+
+        val snapResizeButton =
+            maximizeMenu
+                ?.wait(Until.findObject(By.res(SYSTEMUI_PACKAGE, buttonResId)), TIMEOUT.toMillis())
+                ?: error("Unable to find object with resource id $buttonResId")
+        snapResizeButton.click()
+
+        val displayRect = getDisplayRect(wmHelper)
+        val insets = getWindowInsets(
+            context, WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+        displayRect.inset(insets)
+
+        val expectedWidth = displayRect.width() / 2
+        val expectedRect = Rect(displayRect).apply {
+            if (toLeft) right -= expectedWidth else left += expectedWidth
+        }
+
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withSurfaceVisibleRegion(this, Region(expectedRect))
+            .waitForAndVerify()
+    }
+
     /** Click close button on the app header for the given app. */
     fun closeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
         val caption = getCaptionForTheApp(wmHelper, device)
@@ -112,8 +158,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         if (
             wmHelper.getWindow(innerHelper)?.windowingMode !=
             WindowingMode.WINDOWING_MODE_FREEFORM.value
-        )
-            error("expected a freeform window with caption but window is not in freeform mode")
+        ) error("expected a freeform window with caption but window is not in freeform mode")
         val captions =
             device.wait(Until.findObjects(caption), TIMEOUT.toMillis())
                 ?: error("Unable to find view $caption\n")
@@ -156,6 +201,30 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .waitForAndVerify()
     }
 
+    /** Drag a window to a snap resize region, found at the left and right edges of the screen. */
+    fun dragToSnapResizeRegion(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        isLeft: Boolean,
+    ) {
+        val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
+        // Set start x-coordinate as center of app header.
+        val startX = windowRect.centerX()
+        val startY = windowRect.top
+
+        val displayRect = getDisplayRect(wmHelper)
+
+        val endX = if (isLeft) displayRect.left else displayRect.right
+        val endY = displayRect.centerY() / 2
+
+        // drag the window to snap resize
+        device.drag(startX, startY, endX, endY, /* steps= */ 100)
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .waitForAndVerify()
+    }
+
     private fun getStartCoordinatesForCornerResize(
         windowRect: Rect,
         corner: Corners
@@ -179,9 +248,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
     private fun dragAppWindowToTopDragZone(wmHelper: WindowManagerStateHelper, device: UiDevice) {
         val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
-        val displayRect =
-            wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
-                ?: throw IllegalStateException("Default display is null")
+        val displayRect = getDisplayRect(wmHelper)
 
         val startX = windowRect.centerX()
         val endX = displayRect.centerX()
@@ -194,7 +261,8 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
     fun enterDesktopModeFromAppHandleMenu(
         wmHelper: WindowManagerStateHelper,
-        device: UiDevice) {
+        device: UiDevice
+    ) {
         val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
         val startX = windowRect.centerX()
         // Click a little under the top to prevent opening the notification shade.
@@ -204,7 +272,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         device.click(startX, startY)
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
 
-        val pill = getAppHandlePillForWindow()
+        val pill = getDesktopAppViewByRes(PILL_CONTAINER)
         val desktopModeButton =
             pill
                 ?.children
@@ -214,10 +282,13 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
     }
 
-    private fun getAppHandlePillForWindow(): UiObject2? {
-        val pillContainer: BySelector = By.res(SYSTEMUI_PACKAGE, PILL_CONTAINER)
-        return DeviceHelpers.waitForObj(pillContainer, TIMEOUT)
-    }
+    private fun getDesktopAppViewByRes(viewResId: String): UiObject2? =
+        DeviceHelpers.waitForObj(By.res(SYSTEMUI_PACKAGE, viewResId), TIMEOUT)
+
+    private fun getDisplayRect(wmHelper: WindowManagerStateHelper): Rect =
+        wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
+            ?: throw IllegalStateException("Default display is null")
+
 
     /** Wait for transition to full screen to finish. */
     private fun waitForTransitionToFullscreen(wmHelper: WindowManagerStateHelper) {
@@ -228,13 +299,23 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .waitForAndVerify()
     }
 
+    private fun getWindowInsets(context: Context, typeMask: Int): Insets {
+        val wm: WindowManager = context.getSystemService(WindowManager::class.java)
+            ?: error("Unable to connect to WindowManager service")
+        val metricInsets = wm.currentWindowMetrics.windowInsets
+        return metricInsets.getInsetsIgnoringVisibility(typeMask)
+    }
+
     private companion object {
-        val TIMEOUT = Duration.ofSeconds(3)
-        val CAPTION = "desktop_mode_caption"
-        val MAXIMIZE_BUTTON_VIEW = "maximize_button_view"
-        val CLOSE_BUTTON = "close_window"
-        val PILL_CONTAINER = "windowing_pill"
-        val DESKTOP_MODE_BUTTON = "desktop_button"
+        val TIMEOUT: Duration = Duration.ofSeconds(3)
+        const val CAPTION: String = "desktop_mode_caption"
+        const val MAXIMIZE_BUTTON_VIEW: String = "maximize_button_view"
+        const val MAXIMIZE_MENU: String = "maximize_menu"
+        const val CLOSE_BUTTON: String = "close_window"
+        const val PILL_CONTAINER: String = "windowing_pill"
+        const val DESKTOP_MODE_BUTTON: String = "desktop_button"
+        const val SNAP_LEFT_BUTTON: String = "maximize_menu_snap_left_button"
+        const val SNAP_RIGHT_BUTTON: String = "maximize_menu_snap_right_button"
         val caption: BySelector
             get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
     }

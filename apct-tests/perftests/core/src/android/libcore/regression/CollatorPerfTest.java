@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,7 +33,7 @@ import java.util.Locale;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class CollatorPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static final RuleBasedCollator COLLATOR =
             (RuleBasedCollator) Collator.getInstance(Locale.US);
@@ -41,7 +41,7 @@ public class CollatorPerfTest {
     @Test
     public void timeCollatorPrimary() {
         COLLATOR.setStrength(Collator.PRIMARY);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             COLLATOR.compare("abcde", "abcdf");
             COLLATOR.compare("abcde", "abcde");
@@ -52,7 +52,7 @@ public class CollatorPerfTest {
     @Test
     public void timeCollatorSecondary() {
         COLLATOR.setStrength(Collator.SECONDARY);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             COLLATOR.compare("abcdÂ", "abcdÄ");
             COLLATOR.compare("abcdÂ", "abcdÂ");
@@ -63,7 +63,7 @@ public class CollatorPerfTest {
     @Test
     public void timeCollatorTertiary() {
         COLLATOR.setStrength(Collator.TERTIARY);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             COLLATOR.compare("abcdE", "abcde");
             COLLATOR.compare("abcde", "abcde");
@@ -74,7 +74,7 @@ public class CollatorPerfTest {
     @Test
     public void timeCollatorIdentical() {
         COLLATOR.setStrength(Collator.IDENTICAL);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             COLLATOR.compare("abcdȪ", "abcdȫ");
             COLLATOR.compare("abcdȪ", "abcdȪ");

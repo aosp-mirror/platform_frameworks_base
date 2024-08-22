@@ -38,6 +38,10 @@ struct FeatureFlagsFilterOptions {
   // If true, `Consume()` will return false (error) if a flag was found whose value in
   // `feature_flag_values` is not defined (std::nullopt).
   bool flags_must_have_value = true;
+
+  // If true, `Consume()` will return false (error) if a flag was found whose value in
+  // `feature_flag_values` is not readonly.
+  bool flags_must_be_readonly = false;
 };
 
 // Looks for the `android:featureFlag` attribute in each XML element, validates the flag names and

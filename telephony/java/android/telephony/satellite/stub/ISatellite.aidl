@@ -24,6 +24,7 @@ import android.telephony.satellite.stub.ISatelliteCapabilitiesConsumer;
 import android.telephony.satellite.stub.ISatelliteListener;
 import android.telephony.satellite.stub.SatelliteDatagram;
 import android.telephony.satellite.stub.SystemSelectionSpecifier;
+import android.telephony.satellite.stub.SatelliteModemEnableRequestAttributes;
 
 /**
  * {@hide}
@@ -82,12 +83,7 @@ oneway interface ISatellite {
      * is enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
      * this may also re-enable the cellular modem.
      *
-     * @param enableSatellite True to enable the satellite modem and false to disable.
-     * @param enableDemoMode True to enable demo mode and false to disable.
-     * @param isEmergency To specify the satellite is enabled for emergency session and false for
-     * non emergency session. Note: it is possible that a emergency session started get converted
-     * to a non emergency session and vice versa.
-     * @param resultCallback The callback to receive the error code result of the operation.
+     * @param enableAttributes The enable parameters that will be applied to the satellite session
      *
      * Valid result codes returned:
      *   SatelliteResult:SATELLITE_RESULT_SUCCESS
@@ -99,8 +95,8 @@ oneway interface ISatellite {
      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
      *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
      */
-    void requestSatelliteEnabled(in boolean enableSatellite, in boolean enableDemoMode,
-            in boolean isEmergency, in IIntegerConsumer resultCallback);
+    void requestSatelliteEnabled(in SatelliteModemEnableRequestAttributes enableAttributes,
+            in IIntegerConsumer resultCallback);
 
     /**
      * Request to get whether the satellite modem is enabled.

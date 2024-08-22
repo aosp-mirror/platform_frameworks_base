@@ -201,6 +201,7 @@ public class SettingsToPropertiesMapper {
         "pixel_watch",
         "platform_compat",
         "platform_security",
+        "pixel_watch_debug_trace",
         "pmw",
         "power",
         "preload_safety",

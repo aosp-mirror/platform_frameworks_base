@@ -53,6 +53,10 @@ import com.android.compose.modifiers.padding
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.dagger.MediaModule.QS_PANEL
+import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.composefragment.viewmodel.QSFragmentComposeViewModel
@@ -65,6 +69,7 @@ import com.android.systemui.res.R
 import com.android.systemui.util.LifecycleFragment
 import java.util.function.Consumer
 import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -77,6 +82,8 @@ class QSFragmentCompose
 @Inject
 constructor(
     private val qsFragmentComposeViewModelFactory: QSFragmentComposeViewModel.Factory,
+    @Named(QUICK_QS_PANEL) private val qqsMediaHost: MediaHost,
+    @Named(QS_PANEL) private val qsMediaHost: MediaHost,
 ) : LifecycleFragment(), QS {
 
     private val scrollListener = MutableStateFlow<QS.ScrollListener?>(null)
@@ -99,6 +106,8 @@ constructor(
         QSComposeFragment.isUnexpectedlyInLegacyMode()
         viewModel = qsFragmentComposeViewModelFactory.create(lifecycleScope)
 
+        qqsMediaHost.init(MediaHierarchyManager.LOCATION_QQS)
+        qsMediaHost.init(MediaHierarchyManager.LOCATION_QS)
         setListenerCollections()
     }
 
@@ -274,7 +283,7 @@ constructor(
     ) {}
 
     override fun isFullyCollapsed(): Boolean {
-        return !viewModel.isQSVisible
+        return viewModel.qsExpansionValue <= 0f
     }
 
     override fun setCollapsedMediaVisibilityChangedListener(listener: Consumer<Boolean>?) {

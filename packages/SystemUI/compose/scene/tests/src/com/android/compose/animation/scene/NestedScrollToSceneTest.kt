@@ -133,33 +133,6 @@ class NestedScrollToSceneTest {
     }
 
     @Test
-    fun customizeStlNestedScrollBehavior_DuringTransitionBetweenScenes() {
-        var canScroll = true
-        val state = setup2ScenesAndScrollTouchSlop {
-            Modifier.verticalNestedScrollToScene(
-                    bottomBehavior = NestedScrollBehavior.DuringTransitionBetweenScenes
-                )
-                .scrollable(rememberScrollableState { if (canScroll) it else 0f }, Vertical)
-        }
-
-        scrollUp(percent = 0.5f)
-        assertThat(state.transitionState).isIdle()
-
-        // Reach the end of the scrollable element
-        canScroll = false
-        scrollUp(percent = 0.5f)
-        assertThat(state.transitionState).isIdle()
-
-        pointerUp()
-        assertThat(state.transitionState).isIdle()
-
-        // Start a new gesture
-        pointerDownAndScrollTouchSlop()
-        scrollUp(percent = 0.5f)
-        assertThat(state.transitionState).isIdle()
-    }
-
-    @Test
     fun customizeStlNestedScrollBehavior_EdgeNoPreview() {
         var canScroll = true
         val state = setup2ScenesAndScrollTouchSlop {
@@ -253,19 +226,24 @@ class NestedScrollToSceneTest {
 
     @Test
     fun customizeStlNestedScrollBehavior_multipleRequests() {
+        var canScroll = true
         val state = setup2ScenesAndScrollTouchSlop {
             Modifier
                 // This verticalNestedScrollToScene is closer the STL (an ancestor node)
                 .verticalNestedScrollToScene(bottomBehavior = NestedScrollBehavior.EdgeAlways)
                 // Another verticalNestedScrollToScene modifier
-                .verticalNestedScrollToScene(
-                    bottomBehavior = NestedScrollBehavior.DuringTransitionBetweenScenes
-                )
-                .scrollable(rememberScrollableState { 0f }, Vertical)
+                .verticalNestedScrollToScene(bottomBehavior = NestedScrollBehavior.EdgeNoPreview)
+                .scrollable(rememberScrollableState { if (canScroll) it else 0f }, Vertical)
         }
 
         scrollUp(percent = 0.5f)
-        // EdgeAlways always consume the remaining scroll, DuringTransitionBetweenScenes does not.
+        assertThat(state.transitionState).isIdle()
+
+        // Reach the end of the scrollable element
+        canScroll = false
+
+        scrollUp(percent = 0.5f)
+        // EdgeAlways always consume the remaining scroll, EdgeNoPreview does not.
         val transition = assertThat(state.transitionState).isTransition()
         assertThat(transition).hasProgress(0.5f)
     }

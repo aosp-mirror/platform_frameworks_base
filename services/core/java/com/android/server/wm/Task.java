@@ -499,6 +499,13 @@ class Task extends TaskFragment {
      */
     boolean mIsTrimmableFromRecents;
 
+    /**
+     * Bounds offset should be applied when calculating compatible configuration for apps targeting
+     * SDK level 34 or before.
+     */
+    int mOffsetXForInsets;
+    int mOffsetYForInsets;
+
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
 
@@ -3330,6 +3337,7 @@ class Task extends TaskFragment {
 
         info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.taskId = mTaskId;
+        info.effectiveUid = effectiveUid;
         info.displayId = getDisplayId();
         info.displayAreaFeatureId = tda != null ? tda.mFeatureId : FEATURE_UNDEFINED;
         final Intent baseIntent = getBaseIntent();
@@ -5873,6 +5881,10 @@ class Task extends TaskFragment {
         super.dumpInner(prefix, pw, dumpAll, dumpPackage);
         if (mCreatedByOrganizer) {
             pw.println(prefix + "  mCreatedByOrganizer=true");
+            if (mOffsetXForInsets != 0 || mOffsetYForInsets != 0) {
+                pw.println(prefix + "  mOffsetXForInsets=" + mOffsetXForInsets
+                        + " mOffsetYForInsets=" + mOffsetYForInsets);
+            }
         }
         if (mLastNonFullscreenBounds != null) {
             pw.print(prefix); pw.print("  mLastNonFullscreenBounds=");

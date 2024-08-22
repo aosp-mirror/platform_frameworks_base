@@ -296,6 +296,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             collapsedHeight = 100,
             intrinsicHeight = intrinsicHunHeight,
         )
+        ambientState.qsExpansionFraction = 1.0f
         whenever(notificationRow.isAboveShelf).thenReturn(true)
 
         // When

@@ -18,9 +18,12 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
@@ -818,6 +821,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final Configuration c =
                         new Configuration(container.getRequestedOverrideConfiguration());
                 c.setTo(change.getConfiguration(), configMask, windowMask);
+                if (container.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
+                        && (change.getConfigSetMask() & ActivityInfo.CONFIG_SCREEN_SIZE) != 0) {
+                    // Special handling for split screen window got offset. The insets calculation
+                    // for configuration should be stable regardless of the offset. Set offset to
+                    // the task level to be applied when calculate compat override for apps
+                    // targeting SDK level 34 or before.
+                    final Task task = container.asTask();
+                    if (task != null) {
+                        if (c.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED
+                                && c.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
+                            final Rect oldBounds = container.getRequestedOverrideBounds();
+                            final Rect newBounds =
+                                    change.getConfiguration().windowConfiguration.getBounds();
+                            if (oldBounds.width() == newBounds.width()
+                                    && oldBounds.height() == newBounds.height()) {
+                                task.mOffsetXForInsets = oldBounds.left - newBounds.left;
+                                task.mOffsetYForInsets = oldBounds.top - newBounds.top;
+                            } else {
+                                task.mOffsetXForInsets = task.mOffsetYForInsets = 0;
+                            }
+                        } else {
+                            task.mOffsetXForInsets = task.mOffsetYForInsets = 0;
+                        }
+                    }
+                }
                 container.onRequestedOverrideConfigurationChanged(c);
             }
             effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;

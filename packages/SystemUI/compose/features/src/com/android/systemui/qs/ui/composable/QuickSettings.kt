@@ -103,10 +103,10 @@ private fun SceneScope.stateForQuickSettingsContent(
                 when {
                     isSplitShade -> UnsquishingQS(squishiness)
                     fromScene == Scenes.Shade && toScene == Scenes.QuickSettings -> {
-                        Expanding(progress)
+                        Expanding { progress }
                     }
                     fromScene == Scenes.QuickSettings && toScene == Scenes.Shade -> {
-                        Collapsing(progress)
+                        Collapsing { progress }
                     }
                     fromScene == Scenes.Shade || toScene == Scenes.Shade -> {
                         UnsquishingQQS(squishiness)

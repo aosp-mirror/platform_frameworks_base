@@ -80,8 +80,14 @@ interface NotificationScrollView {
     /** sets the current expand fraction */
     fun setExpandFraction(expandFraction: Float)
 
+    /** sets the current QS expand fraction */
+    fun setQsExpandFraction(expandFraction: Float)
+
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
+
+    /** Gets the inset for HUNs when they are not visible */
+    fun getHeadsUpInset(): Int
 
     /** Adds a listener to be notified, when the stack height might have changed. */
     fun addStackHeightChangedListener(runnable: Runnable)

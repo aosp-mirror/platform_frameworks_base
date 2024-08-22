@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Wrapper class to provide access to WindowInfosListener within tests.
@@ -184,11 +185,15 @@ public class WindowInfosListenerForTest {
 
     private static final String TAG = "WindowInfosListenerForTest";
 
-    private ArrayMap<BiConsumer<List<WindowInfo>, List<DisplayInfo>>, WindowInfosListener>
+    private final ArrayMap<BiConsumer<List<WindowInfo>, List<DisplayInfo>>, WindowInfosListener>
             mListeners;
+    private final ArrayMap<Consumer<List<WindowInfo>>, BiConsumer<List<WindowInfo>,
+            List<DisplayInfo>>>
+            mConsumersToBiConsumers;
 
     public WindowInfosListenerForTest() {
         mListeners = new ArrayMap<>();
+        mConsumersToBiConsumers = new ArrayMap<>();
     }
 
     /**
@@ -196,6 +201,29 @@ public class WindowInfosListenerForTest {
      * position or visibility.
      *
      * @param consumer Consumer that is called with reverse Z ordered lists of WindowInfo instances
+     *                 where the first value is the topmost window.
+     *
+     * @deprecated Use {@link #addWindowInfosListener(BiConsumer)} which provides window and
+     *             display info.
+     */
+    @Deprecated
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
+    public void addWindowInfosListener(@NonNull Consumer<List<WindowInfo>> consumer) {
+        // This method isn't used in current versions of CTS but can't be removed yet because
+        // newer builds need to pass on some older versions of CTS.
+        BiConsumer<List<WindowInfo>, List<DisplayInfo>> biConsumer =
+                (windowHandles, displayInfos) -> consumer.accept(windowHandles);
+        mConsumersToBiConsumers.put(consumer, biConsumer);
+        addWindowInfosListener(biConsumer);
+    }
+
+    /**
+     * Register a listener that is called when the system's list of visible windows or displays has
+     * changes in position or visibility.
+     *
+     * @param consumer Consumer that is called with window and display info. {@code WindowInfo}
+     *                 instances are passed as a reverse Z ordered list of WindowInfo instances
      *                 where the first value is the topmost window.
      */
     @SuppressLint("UnflaggedApi") // The API is only used for tests.
@@ -226,6 +254,29 @@ public class WindowInfosListenerForTest {
 
         consumer.accept(params.first, params.second);
         calledWithInitialState.countDown();
+    }
+
+    /**
+     * Unregisters the listener.
+     *
+     * @deprecated Use {@link #addWindowInfosListener(BiConsumer)} and
+     *             {@link #removeWindowInfosListener(BiConsumer)} instead.
+     */
+    @Deprecated
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    public void removeWindowInfosListener(
+            @NonNull Consumer<List<WindowInfo>> consumer) {
+        // This method isn't used in current versions of CTS but can't be removed yet because
+        // newer builds need to pass on some older versions of CTS.
+        var biConsumer = mConsumersToBiConsumers.remove(consumer);
+        if (biConsumer == null) {
+            return;
+        }
+        WindowInfosListener listener = mListeners.remove(biConsumer);
+        if (listener == null) {
+            return;
+        }
+        listener.unregister();
     }
 
     /** Unregisters the listener. */

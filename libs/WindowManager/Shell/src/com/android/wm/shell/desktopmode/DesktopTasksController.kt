@@ -53,6 +53,7 @@ import androidx.annotation.BinderThread
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
+import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
@@ -322,7 +323,7 @@ class DesktopTasksController(
             logW("moveBackgroundTaskToDesktop taskId=%d not found", taskId)
             return false
         }
-        logV("moveBackgroundTaskToDesktop with taskId=%d, displayId=%d", taskId)
+        logV("moveBackgroundTaskToDesktop with taskId=%d", taskId)
         // TODO(342378842): Instead of using default display, support multiple displays
         val taskToMinimize = bringDesktopAppsToFrontBeforeShowingNewTask(
             DEFAULT_DISPLAY, wct, taskId)
@@ -429,6 +430,20 @@ class DesktopTasksController(
             removeWallpaperActivity(wct)
         }
         taskRepository.addClosingTask(displayId, taskId)
+    }
+
+    /**
+     * Perform clean up of the desktop wallpaper activity if the minimized window task is the last
+     * active task.
+     *
+     * @param wct transaction to modify if the last active task is minimized
+     * @param taskId task id of the window that's being minimized
+     */
+    fun onDesktopWindowMinimize(wct: WindowContainerTransaction, taskId: Int) {
+        if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
+            removeWallpaperActivity(wct)
+        }
+        // Do not call taskRepository.minimizeTask because it will be called by DekstopTasksLimiter.
     }
 
     /** Move a task with given `taskId` to fullscreen */
@@ -679,6 +694,10 @@ class DesktopTasksController(
     ) {
         releaseVisualIndicator()
         if (!taskInfo.isResizeable && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(context)) {
+            interactionJankMonitor.begin(
+                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_non_resizable"
+            )
+
             // reposition non-resizable app back to its original position before being dragged
             returnToDragStartAnimator.start(
                 taskInfo.taskId,
@@ -687,6 +706,9 @@ class DesktopTasksController(
                 endBounds = dragStartBounds
             )
         } else {
+            interactionJankMonitor.begin(
+                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
+            )
             snapToHalfScreen(taskInfo, currentDragBounds, position)
         }
     }
@@ -1090,12 +1112,11 @@ class DesktopTasksController(
                 addMoveToDesktopChanges(wct, task)
                 // In some launches home task is moved behind new task being launched. Make sure
                 // that's not the case for launches in desktop.
-                moveHomeTask(wct, toTop = false)
-                // Move existing minimized tasks behind Home
-                taskRepository.getFreeformTasksInZOrder(task.displayId)
-                    .filter { taskId -> taskRepository.isMinimizedTask(taskId) }
-                    .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
-                    .forEach { taskInfo -> wct.reorder(taskInfo.token, /* onTop= */ false) }
+                if (task.baseIntent.flags.and(Intent.FLAG_ACTIVITY_TASK_ON_HOME) != 0) {
+                    bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
+                    wct.reorder(task.token, true)
+                }
+
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)
