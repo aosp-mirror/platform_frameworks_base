@@ -371,9 +371,9 @@ constructor(
     fun addWidget(
         componentName: ComponentName,
         user: UserHandle,
-        priority: Int,
+        rank: Int,
         configurator: WidgetConfigurator?,
-    ) = widgetRepository.addWidget(componentName, user, priority, configurator)
+    ) = widgetRepository.addWidget(componentName, user, rank, configurator)
 
     /**
      * Delete a widget by id. Called when user deletes a widget from the hub or a widget is
@@ -384,10 +384,10 @@ constructor(
     /**
      * Reorder the widgets.
      *
-     * @param widgetIdToPriorityMap mapping of the widget ids to their new priorities.
+     * @param widgetIdToRankMap mapping of the widget ids to their new priorities.
      */
-    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) =
-        widgetRepository.updateWidgetOrder(widgetIdToPriorityMap)
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) =
+        widgetRepository.updateWidgetOrder(widgetIdToRankMap)
 
     /** Request to unpause work profile that is currently in quiet mode. */
     fun unpauseWorkProfile() {
@@ -440,7 +440,7 @@ constructor(
                     is CommunalWidgetContentModel.Available -> {
                         WidgetContent.Widget(
                             appWidgetId = widget.appWidgetId,
-                            priority = widget.priority,
+                            rank = widget.rank,
                             providerInfo = widget.providerInfo,
                             appWidgetHost = appWidgetHost,
                             inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
@@ -449,7 +449,7 @@ constructor(
                     is CommunalWidgetContentModel.Pending -> {
                         WidgetContent.PendingWidget(
                             appWidgetId = widget.appWidgetId,
-                            priority = widget.priority,
+                            rank = widget.rank,
                             componentName = widget.componentName,
                             icon = widget.icon,
                         )

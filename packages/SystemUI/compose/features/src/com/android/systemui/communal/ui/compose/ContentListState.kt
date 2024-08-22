@@ -34,11 +34,11 @@ fun rememberContentListState(
     return remember(communalContent) {
         ContentListState(
             communalContent,
-            { componentName, user, priority ->
+            { componentName, user, rank ->
                 viewModel.onAddWidget(
                     componentName,
                     user,
-                    priority,
+                    rank,
                     widgetConfigurator,
                 )
             },
@@ -56,10 +56,9 @@ fun rememberContentListState(
 class ContentListState
 internal constructor(
     communalContent: List<CommunalContentModel>,
-    private val onAddWidget:
-        (componentName: ComponentName, user: UserHandle, priority: Int) -> Unit,
-    private val onDeleteWidget: (id: Int, componentName: ComponentName, priority: Int) -> Unit,
-    private val onReorderWidgets: (widgetIdToPriorityMap: Map<Int, Int>) -> Unit,
+    private val onAddWidget: (componentName: ComponentName, user: UserHandle, rank: Int) -> Unit,
+    private val onDeleteWidget: (id: Int, componentName: ComponentName, rank: Int) -> Unit,
+    private val onReorderWidgets: (widgetIdToRankMap: Map<Int, Int>) -> Unit,
 ) {
     var list = communalContent.toMutableStateList()
         private set
@@ -74,7 +73,7 @@ internal constructor(
         if (list[indexToRemove].isWidgetContent()) {
             val widget = list[indexToRemove] as CommunalContentModel.WidgetContent
             list.apply { removeAt(indexToRemove) }
-            onDeleteWidget(widget.appWidgetId, widget.componentName, widget.priority)
+            onDeleteWidget(widget.appWidgetId, widget.componentName, widget.rank)
         }
     }
 
@@ -96,8 +95,8 @@ internal constructor(
     ) {
         // filters placeholder, but, maintains the indices of the widgets as if the placeholder was
         // in the list. When persisted in DB, this leaves space for the new item (to be added) at
-        // the correct priority.
-        val widgetIdToPriorityMap: Map<Int, Int> =
+        // the correct rank.
+        val widgetIdToRankMap: Map<Int, Int> =
             list
                 .mapIndexedNotNull { index, item ->
                     if (item is CommunalContentModel.WidgetContent) {
@@ -108,9 +107,9 @@ internal constructor(
                 }
                 .toMap()
         // reorder and then add the new widget
-        onReorderWidgets(widgetIdToPriorityMap)
+        onReorderWidgets(widgetIdToRankMap)
         if (newItemComponentName != null && newItemUser != null && newItemIndex != null) {
-            onAddWidget(newItemComponentName, newItemUser, /* priority= */ list.size - newItemIndex)
+            onAddWidget(newItemComponentName, newItemUser, /* rank= */ list.size - newItemIndex)
         }
     }
 

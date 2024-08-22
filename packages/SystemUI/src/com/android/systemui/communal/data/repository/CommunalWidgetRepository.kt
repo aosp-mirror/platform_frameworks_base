@@ -61,7 +61,7 @@ interface CommunalWidgetRepository {
     fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        priority: Int,
+        rank: Int,
         configurator: WidgetConfigurator? = null
     ) {}
 
@@ -75,9 +75,9 @@ interface CommunalWidgetRepository {
     /**
      * Update the order of widgets in the database.
      *
-     * @param widgetIdToPriorityMap mapping of the widget ids to the priority of the widget.
+     * @param widgetIdToRankMap mapping of the widget ids to the rank of the widget.
      */
-    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {}
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {}
 
     /**
      * Restores the database by reading a state file from disk and updating the widget ids according
@@ -121,7 +121,7 @@ constructor(
                 CommunalWidgetEntry(
                     appWidgetId = widget.widgetId,
                     componentName = widget.componentName,
-                    priority = rank.rank,
+                    rank = rank.rank,
                     providerInfo = providers[widget.widgetId]
                 )
             }
@@ -151,7 +151,7 @@ constructor(
     override fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        priority: Int,
+        rank: Int,
         configurator: WidgetConfigurator?
     ) {
         bgScope.launch {
@@ -190,14 +190,14 @@ constructor(
                 communalWidgetDao.addWidget(
                     widgetId = id,
                     provider = provider,
-                    priority = priority,
+                    rank = rank,
                     userSerialNumber = userManager.getUserSerialNumber(user.identifier),
                 )
                 backupManager.dataChanged()
             } else {
                 appWidgetHost.deleteAppWidgetId(id)
             }
-            logger.i("Added widget ${provider.flattenToString()} at position $priority.")
+            logger.i("Added widget ${provider.flattenToString()} at position $rank.")
         }
     }
 
@@ -211,11 +211,11 @@ constructor(
         }
     }
 
-    override fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
+    override fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {
         bgScope.launch {
-            communalWidgetDao.updateWidgetOrder(widgetIdToPriorityMap)
+            communalWidgetDao.updateWidgetOrder(widgetIdToRankMap)
             logger.i({ "Updated the order of widget list with ids: $str1." }) {
-                str1 = widgetIdToPriorityMap.toString()
+                str1 = widgetIdToRankMap.toString()
             }
             backupManager.dataChanged()
         }
@@ -342,7 +342,7 @@ constructor(
                 addWidget(
                     provider = ComponentName.unflattenFromString(widget.componentName)!!,
                     user = newUser,
-                    priority = widget.rank,
+                    rank = widget.rank,
                 )
             }
 
@@ -377,7 +377,7 @@ constructor(
         return CommunalWidgetContentModel.Available(
             appWidgetId = entry.appWidgetId,
             providerInfo = entry.providerInfo!!,
-            priority = entry.priority,
+            rank = entry.rank,
         )
     }
 
@@ -394,7 +394,7 @@ constructor(
             return CommunalWidgetContentModel.Available(
                 appWidgetId = entry.appWidgetId,
                 providerInfo = entry.providerInfo!!,
-                priority = entry.priority,
+                rank = entry.rank,
             )
         }
 
@@ -403,7 +403,7 @@ constructor(
         return if (componentName != null && session != null) {
             CommunalWidgetContentModel.Pending(
                 appWidgetId = entry.appWidgetId,
-                priority = entry.priority,
+                rank = entry.rank,
                 componentName = componentName,
                 icon = session.icon,
                 user = session.user,
@@ -416,7 +416,7 @@ constructor(
     private data class CommunalWidgetEntry(
         val appWidgetId: Int,
         val componentName: String,
-        val priority: Int,
+        val rank: Int,
         var providerInfo: AppWidgetProviderInfo? = null,
     )
 }
