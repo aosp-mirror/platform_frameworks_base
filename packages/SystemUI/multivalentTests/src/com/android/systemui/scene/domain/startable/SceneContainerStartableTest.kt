@@ -1682,6 +1682,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             underTest.start()
 
             // run all pending dismiss succeeded/cancelled calls from setup:
+            runCurrent()
             kosmos.fakeExecutor.runAllReady()
 
             val dismissCallback: IKeyguardDismissCallback = mock()
