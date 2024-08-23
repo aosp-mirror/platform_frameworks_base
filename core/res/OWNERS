@@ -78,6 +78,11 @@ per-file remote_color_resources_res/values/colors.xml = pbdr@google.com
 per-file res/values/config_telephony.xml = file:/platform/frameworks/opt/telephony:/OWNERS
 per-file res/xml/sms_short_codes.xml = file:/platform/frameworks/opt/telephony:/OWNERS
 
+# Input Method Framework
+per-file res/*/*input_method* = file:/services/core/java/com/android/server/inputmethod/OWNERS
+per-file res/*/*_ime* = file:/services/core/java/com/android/server/inputmethod/OWNERS
+per-file res/*/ime_* = file:/services/core/java/com/android/server/inputmethod/OWNERS
+
 # TV Input Framework
 per-file res/values/config_tv_external_input_logging.xml = file:/services/core/java/com/android/server/tv/OWNERS
 

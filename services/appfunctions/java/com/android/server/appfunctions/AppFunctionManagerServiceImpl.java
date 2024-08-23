@@ -140,7 +140,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         bindAppFunctionServiceUnchecked(requestInternal, serviceIntent, targetUser,
                 safeExecuteAppFunctionCallback,
                 /*bindFlags=*/ Context.BIND_AUTO_CREATE,
-                /*timeoutInMillis=*/ mServiceConfig.getExecutionTimeoutConfig());
+                /*timeoutInMillis=*/ mServiceConfig.getExecuteAppFunctionTimeoutMillis());
     }
 
     private void bindAppFunctionServiceUnchecked(

@@ -18,6 +18,7 @@ package com.android.systemui.clipboardoverlay;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.systemui.Flags.FLAG_CLIPBOARD_SHARED_TRANSITIONS;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED;
@@ -26,7 +27,6 @@ import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBO
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_MINIMIZED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.flags.Flags.CLIPBOARD_IMAGE_TIMEOUT;
-import static com.android.systemui.flags.Flags.CLIPBOARD_SHARED_TRANSITIONS;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -47,6 +47,8 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.PersistableBundle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.view.WindowInsets;
 import android.view.textclassifier.TextLinks;
 
@@ -130,7 +132,6 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
                 new ClipData.Item("Test Item"));
 
         mFeatureFlags.set(CLIPBOARD_IMAGE_TIMEOUT, true); // turned off for legacy tests
-        mFeatureFlags.set(CLIPBOARD_SHARED_TRANSITIONS, true); // turned off for old tests
     }
 
     /**
@@ -299,8 +300,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_CLIPBOARD_SHARED_TRANSITIONS)
     public void test_viewCallbacks_onShareTapped_sharedTransitionsOff() {
-        mFeatureFlags.set(CLIPBOARD_SHARED_TRANSITIONS, false);
         initController();
         mOverlayController.setClipData(mSampleClipData, "");
 
@@ -311,6 +312,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_CLIPBOARD_SHARED_TRANSITIONS)
     public void test_viewCallbacks_onShareTapped() {
         initController();
         mOverlayController.setClipData(mSampleClipData, "");
@@ -324,8 +326,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_CLIPBOARD_SHARED_TRANSITIONS)
     public void test_viewCallbacks_onDismissTapped_sharedTransitionsOff() {
-        mFeatureFlags.set(CLIPBOARD_SHARED_TRANSITIONS, false);
         initController();
         mOverlayController.setClipData(mSampleClipData, "");
 
@@ -336,6 +338,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_CLIPBOARD_SHARED_TRANSITIONS)
     public void test_viewCallbacks_onDismissTapped() {
         initController();
 
@@ -350,7 +353,6 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_multipleDismissals_dismissesOnce_sharedTransitionsOff() {
-        mFeatureFlags.set(CLIPBOARD_SHARED_TRANSITIONS, false);
         initController();
         mCallbacks.onSwipeDismissInitiated(mAnimator);
         mCallbacks.onDismissButtonTapped();
@@ -362,6 +364,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_CLIPBOARD_SHARED_TRANSITIONS)
     public void test_multipleDismissals_dismissesOnce() {
         initController();
 

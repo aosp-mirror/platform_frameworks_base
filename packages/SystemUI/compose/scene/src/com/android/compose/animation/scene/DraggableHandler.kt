@@ -1024,10 +1024,6 @@ internal class NestedScrollHandlerImpl(
 
                 val canStart =
                     when (behavior) {
-                        NestedScrollBehavior.DuringTransitionBetweenScenes -> {
-                            canChangeScene = false // unused: added for consistency
-                            false
-                        }
                         NestedScrollBehavior.EdgeNoPreview -> {
                             canChangeScene = isZeroOffset
                             isZeroOffset && hasNextScene(offsetAvailable)

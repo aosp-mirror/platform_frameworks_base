@@ -20,6 +20,7 @@ import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
+import static android.companion.CompanionDeviceManager.RESULT_SECURITY_ERROR;
 import static android.content.ComponentName.createRelative;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 
@@ -40,6 +41,7 @@ import android.app.PendingIntent;
 import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.Flags;
 import android.companion.IAssociationRequestCallback;
 import android.content.ComponentName;
 import android.content.Context;
@@ -182,7 +184,11 @@ public class AssociationRequestsProcessor {
             String errorMessage = "3p apps are not allowed to create associations on watch.";
             Slog.e(TAG, errorMessage);
             try {
-                callback.onFailure(RESULT_INTERNAL_ERROR);
+                if (Flags.associationFailureCode()) {
+                    callback.onFailure(RESULT_SECURITY_ERROR, errorMessage);
+                } else {
+                    callback.onFailure(RESULT_INTERNAL_ERROR, errorMessage);
+                }
             } catch (RemoteException e) {
                 // ignored
             }
@@ -251,9 +257,12 @@ public class AssociationRequestsProcessor {
         } catch (SecurityException e) {
             // Since, at this point the caller is our own UI, we need to catch the exception on
             // forward it back to the application via the callback.
-            Slog.e(TAG, e.getMessage());
             try {
-                callback.onFailure(RESULT_INTERNAL_ERROR);
+                if (Flags.associationFailureCode()) {
+                    callback.onFailure(RESULT_SECURITY_ERROR, e.getMessage());
+                } else {
+                    callback.onFailure(RESULT_INTERNAL_ERROR, e.getMessage());
+                }
             } catch (RemoteException ignore) {
             }
             return;
@@ -378,7 +387,7 @@ public class AssociationRequestsProcessor {
             // Send the association back via the app's callback
             if (callback != null) {
                 try {
-                    callback.onFailure(RESULT_INTERNAL_ERROR);
+                    callback.onFailure(RESULT_INTERNAL_ERROR, "Association doesn't exist.");
                 } catch (RemoteException ignore) {
                 }
             }

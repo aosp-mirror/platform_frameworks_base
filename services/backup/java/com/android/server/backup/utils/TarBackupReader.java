@@ -73,6 +73,8 @@ import java.util.List;
 
 /**
  * Utility methods to read backup tar file.
+ * Exteranl depenency:
+ *  <li> @android.provider.Settings.Secure.V_TO_U_RESTORE_ALLOWLIST
  */
 public class TarBackupReader {
     private static final int TAR_HEADER_OFFSET_TYPE_CHAR = 156;

@@ -1372,6 +1372,10 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (isHeadlessSystemUserMode()) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser)) {
+                return UserHandle.USER_SYSTEM;
+            }
             // Return the previous foreground user, if there is one.
             final int previousUser = getPreviousFullUserToEnterForeground();
             if (previousUser != UserHandle.USER_NULL) {

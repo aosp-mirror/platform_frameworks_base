@@ -22,10 +22,14 @@ import android.util.Log
 import com.android.window.flags.Flags
 
 /*
- * A shared class to check desktop mode flags state.
+ * An enum to check desktop mode flags state.
  *
- * The class computes whether a Desktop Windowing flag should be enabled by using the aconfig flag
- * value and the developer option override state (if applicable).
+ * This enum provides a centralized way to control the behavior of flags related to desktop
+ * windowing features which are aiming for developer preview before their release. It allows
+ * developer option to override the default behavior of these flags.
+ *
+ * NOTE: Flags should only be added to this enum when they have received Product and UX
+ * alignment that the feature is ready for developer preview, otherwise just do a flag check.
  */
 enum class DesktopModeFlags(
     // Function called to obtain aconfig flag value.

@@ -27,7 +27,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -181,7 +180,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         }
 
         decoration.relayout(taskInfo);
-        setupCaptionColor(taskInfo, decoration);
     }
 
     @Override
@@ -241,15 +239,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) return;
 
         decoration.close();
-    }
-
-    private void setupCaptionColor(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
-        if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
-            decoration.setCaptionColor(Color.TRANSPARENT);
-        } else {
-            final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
-            decoration.setCaptionColor(statusBarColor);
-        }
     }
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
@@ -320,7 +309,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setTaskDragResizer(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* setTaskCropAndPosition */);
-        setupCaptionColor(taskInfo, windowDecoration);
     }
 
     private class CaptionTouchEventListener implements

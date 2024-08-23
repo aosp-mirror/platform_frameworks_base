@@ -214,8 +214,7 @@ public class CropView extends View {
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                if (mCurrentDraggingBoundary != CropBoundary.NONE
-                        && mActivePointerId == event.getPointerId(mActivePointerId)) {
+                if (mCurrentDraggingBoundary != CropBoundary.NONE) {
                     updateListener(MotionEvent.ACTION_UP, event.getX(0));
                     return true;
                 }

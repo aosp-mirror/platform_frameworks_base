@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog.common;
 
+import java.util.List;
+
 /**
  * Interface for ProtoLog implementations.
  */
@@ -68,4 +70,9 @@ public interface IProtoLog {
      * @return If we need to log this group and level to either ProtoLog or Logcat.
      */
     boolean isEnabled(IProtoLogGroup group, LogLevel level);
+
+    /**
+     * @return an immutable list of the registered ProtoLog groups in this ProtoLog instance.
+     */
+    List<IProtoLogGroup> getRegisteredGroups();
 }
