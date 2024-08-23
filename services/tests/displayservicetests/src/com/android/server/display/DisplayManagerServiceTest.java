@@ -2080,6 +2080,31 @@ public class DisplayManagerServiceTest {
     }
 
     /**
+     * Tests that the DisplayInfo is updated correctly with a render frame rate even if it not
+     * a divisor of the peak refresh rate.
+     */
+    @Test
+    public void testDisplayInfoRenderFrameRateNonPeakDivisor() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{120f}, new float[]{240f});
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        DisplayInfo displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(120f, displayInfo.getRefreshRate(), 0.01f);
+
+        updateRenderFrameRate(displayManager, displayDevice, 80f);
+        displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(80f, displayInfo.getRefreshRate(), 0.01f);
+    }
+
+    /**
      * Tests that the mode reflects the render frame rate is in compat mode
      */
     @Test
@@ -3348,13 +3373,26 @@ public class DisplayManagerServiceTest {
     }
 
     private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
-
                                                       float[] refreshRates) {
         return createFakeDisplayDevice(displayManager, refreshRates, Display.TYPE_UNKNOWN);
     }
 
     private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
                                                       float[] refreshRates,
+                                                      float[] vsyncRates) {
+        return createFakeDisplayDevice(displayManager, refreshRates, vsyncRates,
+                Display.TYPE_UNKNOWN);
+    }
+
+    private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
+            float[] refreshRates,
+            int displayType) {
+        return createFakeDisplayDevice(displayManager, refreshRates, refreshRates, displayType);
+    }
+
+    private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
+                                                      float[] refreshRates,
+                                                      float[] vsyncRates,
                                                       int displayType) {
         FakeDisplayDevice displayDevice = new FakeDisplayDevice();
         DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
@@ -3363,7 +3401,8 @@ public class DisplayManagerServiceTest {
         displayDeviceInfo.supportedModes = new Display.Mode[refreshRates.length];
         for (int i = 0; i < refreshRates.length; i++) {
             displayDeviceInfo.supportedModes[i] =
-                    new Display.Mode(i + 1, width, height, refreshRates[i]);
+                    new Display.Mode(i + 1, width, height, refreshRates[i], vsyncRates[i],
+                            new float[0], new int[0]);
         }
         displayDeviceInfo.modeId = 1;
         displayDeviceInfo.type = displayType;
