@@ -48,45 +48,14 @@ import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 /* Used as credential suggestion or user action chip. */
 @Composable
 fun CredentialsScreenChip(
-    label: String,
+    primaryText: @Composable () -> Unit,
+    secondaryText: (@Composable () -> Unit)? = null,
     onClick: () -> Unit,
-    secondaryLabel: String? = null,
     icon: Drawable? = null,
     isAuthenticationEntryLocked: Boolean? = null,
-    textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
     colors: ChipColors = ChipDefaults.secondaryChipColors()
 ) {
-        return CredentialsScreenChip(
-                    onClick,
-                    text = {
-                        WearButtonText(
-                            text = label,
-                            textAlign = textAlign,
-                            maxLines = 2
-                        )
-                    },
-                    secondaryLabel,
-                    icon,
-                    isAuthenticationEntryLocked,
-                    modifier,
-                    colors
-        )
-}
-
-
-
-/* Used as credential suggestion or user action chip. */
-@Composable
-fun CredentialsScreenChip(
-    onClick: () -> Unit,
-    text: @Composable () -> Unit,
-    secondaryLabel: String? = null,
-    icon: Drawable? = null,
-    isAuthenticationEntryLocked: Boolean? = null,
-    modifier: Modifier = Modifier,
-    colors: ChipColors = ChipDefaults.primaryChipColors(),
-    ) {
     val labelParam: (@Composable RowScope.() -> Unit) =
         {
             var horizontalArrangement = Arrangement.Start
@@ -94,19 +63,15 @@ fun CredentialsScreenChip(
                 horizontalArrangement = Arrangement.Center
             }
             Row(horizontalArrangement = horizontalArrangement, modifier = modifier.fillMaxWidth()) {
-                text()
+                primaryText()
             }
         }
 
     val secondaryLabelParam: (@Composable RowScope.() -> Unit)? =
-        secondaryLabel?.let {
+        secondaryText?.let {
             {
                 Row {
-                    WearSecondaryLabel(
-                        text = secondaryLabel,
-                        color = WearMaterialTheme.colors.onSurfaceVariant
-                    )
-
+                    secondaryText()
                     if (isAuthenticationEntryLocked != null) {
                         if (isAuthenticationEntryLocked) {
                             Icon(
@@ -156,9 +121,19 @@ fun CredentialsScreenChip(
 @Composable
 fun CredentialsScreenChipPreview() {
     CredentialsScreenChip(
-        label = "Elisa Beckett",
+        primaryText = {
+            WearButtonText(
+                text = "Elisa Beckett",
+                textAlign = TextAlign.Start,
+            )
+        },
         onClick = { },
-        secondaryLabel = "beckett_bakery@gmail.com",
+        secondaryText = {
+            WearSecondaryLabel(
+                text = "beckett_bakery@gmail.com",
+                color = WearMaterialTheme.colors.onSurfaceVariant
+            )
+        },
         icon = null,
     )
 }
@@ -166,8 +141,13 @@ fun CredentialsScreenChipPreview() {
 @Composable
 fun SignInOptionsChip(onClick: () -> Unit) {
     CredentialsScreenChip(
-        label = stringResource(R.string.dialog_sign_in_options_button),
-        textAlign = TextAlign.Start,
+        primaryText = {
+            WearButtonText(
+                text = stringResource(R.string.dialog_sign_in_options_button),
+                textAlign = TextAlign.Center,
+                maxLines = 2
+            )
+        },
         onClick = onClick,
     )
 }
@@ -182,7 +162,7 @@ fun SignInOptionsChipPreview() {
 fun ContinueChip(onClick: () -> Unit) {
     CredentialsScreenChip(
         onClick = onClick,
-        text = {
+        primaryText = {
             WearButtonText(
                 text = stringResource(R.string.dialog_continue_button),
                 textAlign = TextAlign.Center,
@@ -202,14 +182,21 @@ fun ContinueChipPreview() {
 @Composable
 fun DismissChip(onClick: () -> Unit) {
     CredentialsScreenChip(
-        label = stringResource(R.string.dialog_dismiss_button),
+        primaryText = {
+            WearButtonText(
+                text = stringResource(R.string.dialog_dismiss_button),
+                textAlign = TextAlign.Center,
+                maxLines = 2
+            )
+        },
         onClick = onClick,
     )
 }
 @Composable
 fun LockedProviderChip(
     authenticationEntryInfo: AuthenticationEntryInfo,
-    onClick: () -> Unit
+    secondaryMaxLines: Int = 1,
+    onClick: () -> Unit,
 ) {
     val secondaryLabel = stringResource(
         if (authenticationEntryInfo.isUnlockedAndEmpty)
@@ -218,10 +205,21 @@ fun LockedProviderChip(
     )
 
     CredentialsScreenChip(
-        label = authenticationEntryInfo.title,
+        primaryText = {
+            WearButtonText(
+                text = authenticationEntryInfo.title,
+                textAlign = TextAlign.Start,
+                maxLines = 2,
+            )
+        },
         icon = authenticationEntryInfo.icon,
-        secondaryLabel = secondaryLabel,
-        textAlign = TextAlign.Start,
+        secondaryText = {
+            WearSecondaryLabel(
+                text = secondaryLabel,
+                color = WearMaterialTheme.colors.onSurfaceVariant,
+                maxLines = secondaryMaxLines
+                )
+        },
         isAuthenticationEntryLocked = !authenticationEntryInfo.isUnlockedAndEmpty,
         onClick = onClick,
     )
