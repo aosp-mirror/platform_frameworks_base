@@ -158,7 +158,7 @@ public class Sensor {
                                         Slog.e(TAG, "Face sensor hardware unavailable.");
                                         mCurrentSession = null;
                                     }
-                                });
+                                }, getFaceUtilsInstance());
 
                         return Sensor.this.getStartUserClient(resultController, sensorId,
                                 newUserId, provider);
@@ -280,8 +280,7 @@ public class Sensor {
             final long userToken = proto.start(SensorStateProto.USER_STATES);
             proto.write(UserStateProto.USER_ID, userId);
             proto.write(UserStateProto.NUM_ENROLLED,
-                    FaceUtils.getInstance(mSensorProperties.sensorId)
-                            .getBiometricsForUser(mContext, userId).size());
+                    getFaceUtilsInstance().getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
 
@@ -357,5 +356,9 @@ public class Sensor {
     public void setLazySession(
             Supplier<AidlSession> lazySession) {
         mLazySession = lazySession;
+    }
+
+    public FaceUtils getFaceUtilsInstance() {
+        return FaceUtils.getInstance(mSensorProperties.sensorId);
     }
 }
