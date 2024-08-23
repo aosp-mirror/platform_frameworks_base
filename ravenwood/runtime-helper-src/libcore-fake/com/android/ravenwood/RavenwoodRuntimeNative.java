@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ravenwood.common;
+package com.android.ravenwood;
 
 import android.system.ErrnoException;
 import android.system.StructStat;
+
+import com.android.ravenwood.common.JvmWorkaround;
+import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import java.io.FileDescriptor;
 

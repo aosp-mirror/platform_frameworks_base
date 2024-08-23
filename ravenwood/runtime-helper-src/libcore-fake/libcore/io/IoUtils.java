@@ -16,7 +16,13 @@
 
 package libcore.io;
 
+import android.system.ErrnoException;
+import android.system.Os;
+
+import com.android.ravenwood.common.JvmWorkaround;
+
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -47,6 +53,13 @@ public final class IoUtils {
         }
     }
 
+    public static void closeQuietly(FileDescriptor fd) {
+        try {
+            Os.close(fd);
+        } catch (ErrnoException ignored) {
+        }
+    }
+
     public static void deleteContents(File dir) throws IOException {
         File[] files = dir.listFiles();
         if (files != null) {
@@ -57,5 +70,18 @@ public final class IoUtils {
                 file.delete();
             }
         }
+    }
+
+    /**
+     * FD owners currently unsupported under Ravenwood; ignored
+     */
+    public static void setFdOwner(FileDescriptor fd, Object owner) {
+    }
+
+    /**
+     * FD owners currently unsupported under Ravenwood; return FD directly
+     */
+    public static int acquireRawFd(FileDescriptor fd) {
+        return JvmWorkaround.getInstance().getFdInt(fd);
     }
 }
