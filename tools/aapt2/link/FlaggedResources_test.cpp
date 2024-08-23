@@ -84,7 +84,7 @@ TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTableChunks) {
   std::string output;
   DumpChunksToString(loaded_apk.get(), &output);
 
-  ASSERT_EQ(output.find("res4"), std::string::npos);
+  ASSERT_EQ(output.find("bool4"), std::string::npos);
   ASSERT_EQ(output.find("str1"), std::string::npos);
 }
 
@@ -94,7 +94,7 @@ TEST_F(FlaggedResourcesTest, DisabledResourcesInRJava) {
   std::string r_contents;
   ::android::base::ReadFileToString(r_path, &r_contents);
 
-  ASSERT_NE(r_contents.find("public static final int res4"), std::string::npos);
+  ASSERT_NE(r_contents.find("public static final int bool4"), std::string::npos);
   ASSERT_NE(r_contents.find("public static final int str1"), std::string::npos);
 }
 

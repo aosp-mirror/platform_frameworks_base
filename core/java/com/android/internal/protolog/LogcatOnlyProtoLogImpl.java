@@ -18,6 +18,7 @@ package com.android.internal.protolog;
 
 import static com.android.internal.protolog.ProtoLog.REQUIRE_PROTOLOGTOOL;
 
+import android.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -25,6 +26,9 @@ import com.android.internal.protolog.common.ILogger;
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class only create and used to server temporarily for when there is source code pre-processing by
@@ -78,5 +82,11 @@ public class LogcatOnlyProtoLogImpl implements IProtoLog {
     @Override
     public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
         return true;
+    }
+
+    @Override
+    @NonNull
+    public List<IProtoLogGroup> getRegisteredGroups() {
+        return Collections.emptyList();
     }
 }

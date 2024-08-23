@@ -2484,6 +2484,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
         mAutomaticBrightnessStrategy.setUseAutoBrightness(screenBrightnessModeSetting
                 == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        if (screenBrightnessModeSetting == Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL) {
+            // In manual mode, all brightness changes should be saved immediately.
+            mDisplayBrightnessController.saveBrightnessIfNeeded();
+        }
     }
 
 

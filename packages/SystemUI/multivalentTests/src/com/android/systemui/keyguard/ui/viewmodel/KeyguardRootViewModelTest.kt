@@ -360,6 +360,25 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         }
 
     @Test
+    fun alpha_transitionBetweenHubAndDream_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+
+            // Default value check
+            assertThat(alpha).isEqualTo(1f)
+
+            // Start transitioning between DREAM and HUB but don't finish.
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+                throughTransitionState = TransitionState.STARTED,
+            )
+
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
     @EnableSceneContainer
     fun alpha_transitionToHub_isZero_scene_container() =
         testScope.runTest {

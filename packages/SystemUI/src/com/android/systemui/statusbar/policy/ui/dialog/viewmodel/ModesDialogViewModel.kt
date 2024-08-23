@@ -88,7 +88,7 @@ constructor(
                 modesList.map { mode ->
                     ModeTileViewModel(
                         id = mode.id,
-                        icon = zenModeInteractor.getModeIcon(context, mode),
+                        icon = zenModeInteractor.getModeIcon(mode),
                         text = mode.name,
                         subtext = getTileSubtext(mode),
                         enabled = mode.isActive,

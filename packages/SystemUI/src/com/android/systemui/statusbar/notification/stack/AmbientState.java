@@ -139,6 +139,9 @@ public class AmbientState implements Dumpable {
     /** Fraction of shade expansion. */
     private float mExpansionFraction;
 
+    /** Fraction of QS expansion. 0 when in shade, 1 when in QS. */
+    private float mQsExpansionFraction;
+
     /** Height of the notifications panel when expansion completes. */
     private float mStackEndHeight;
 
@@ -208,6 +211,14 @@ public class AmbientState implements Dumpable {
     }
 
     /**
+     * @param expansionFraction Fraction of QS expansion.
+     */
+    public void setQsExpansionFraction(float expansionFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mQsExpansionFraction = expansionFraction;
+    }
+
+    /**
      * @param isSwipingUp Whether we are swiping up.
      */
     public void setSwipingUp(boolean isSwipingUp) {
@@ -255,6 +266,14 @@ public class AmbientState implements Dumpable {
      */
     public float getExpansionFraction() {
         return mExpansionFraction;
+    }
+
+    /**
+     * @return Fraction of QS expansion.
+     */
+    public float getQsExpansionFraction() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mQsExpansionFraction;
     }
 
     /**
@@ -837,6 +856,7 @@ public class AmbientState implements Dumpable {
         pw.println("mAppearFraction=" + mAppearFraction);
         pw.println("mAppearing=" + mAppearing);
         pw.println("mExpansionFraction=" + mExpansionFraction);
+        pw.println("mQsExpansionFraction=" + mQsExpansionFraction);
         pw.println("mExpandingVelocity=" + mExpandingVelocity);
         pw.println("mOverScrollTopAmount=" + mOverScrollTopAmount);
         pw.println("mOverScrollBottomAmount=" + mOverScrollBottomAmount);

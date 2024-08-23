@@ -27,6 +27,7 @@ import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -42,6 +43,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
+    private val logger: SceneLogger,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : SysUiViewModel() {
     /**
@@ -135,16 +137,29 @@ constructor(
                 else -> null
             }
 
-        return interactionTypeOrNull?.let { interactionType ->
-            // It's important that the falsing system is always queried, even if no enforcement will
-            // occur. This helps build up the right signal in the system.
-            val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
+        val fromScene = currentScene.value
+        val isAllowed =
+            interactionTypeOrNull?.let { interactionType ->
+                // It's important that the falsing system is always queried, even if no enforcement
+                // will occur. This helps build up the right signal in the system.
+                val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
 
-            // Only enforce falsing if moving from the lockscreen scene to a new scene.
-            val fromLockscreenScene = currentScene.value == Scenes.Lockscreen
+                // Only enforce falsing if moving from the lockscreen scene to a new scene.
+                val fromLockscreenScene = fromScene == Scenes.Lockscreen
 
-            !fromLockscreenScene || !isFalseTouch
-        } ?: true
+                !fromLockscreenScene || !isFalseTouch
+            } ?: true
+
+        if (isAllowed) {
+            // A scene change is guaranteed; log it.
+            logger.logSceneChanged(
+                from = fromScene,
+                to = toScene,
+                reason = "user interaction",
+                isInstant = false,
+            )
+        }
+        return isAllowed
     }
 
     /**

@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.map
 class ZenModeInteractor
 @Inject
 constructor(
+    private val context: Context,
     private val zenModeRepository: ZenModeRepository,
     private val notificationSettingsRepository: NotificationSettingsRepository,
 ) {
@@ -78,6 +79,26 @@ constructor(
     val activeModes: Flow<List<ZenMode>> =
         modes.map { modes -> modes.filter { mode -> mode.isActive } }.distinctUntilChanged()
 
+    /** Flow returning the most prioritized of the active modes, if any. */
+    val mainActiveMode: Flow<ZenMode?> =
+        activeModes.map { modes -> getMainActiveMode(modes) }.distinctUntilChanged()
+
+    /**
+     * Given the list of modes (which may include zero or more currently active modes), returns the
+     * most prioritized of the active modes, if any.
+     */
+    private fun getMainActiveMode(modes: List<ZenMode>): ZenMode? {
+        return modes.sortedWith(ZenMode.PRIORITIZING_COMPARATOR).firstOrNull { it.isActive }
+    }
+
+    suspend fun getModeIcon(mode: ZenMode): Icon {
+        return mode.getIcon(context, iconLoader).await().asIcon()
+    }
+
+    suspend fun getLockscreenModeIcon(mode: ZenMode): Icon {
+        return mode.getLockscreenIcon(context, iconLoader).await().asIcon()
+    }
+
     /**
      * Given the list of modes (which may include zero or more currently active modes), returns an
      * icon representing the active mode, if any (or, if multiple modes are active, to the most
@@ -86,16 +107,7 @@ constructor(
      * package).
      */
     suspend fun getActiveModeIcon(context: Context, modes: List<ZenMode>): Icon? {
-        return modes
-            .sortedWith(ZenMode.PRIORITIZING_COMPARATOR)
-            .firstOrNull { it.isActive }
-            ?.getLockscreenIcon(context, iconLoader)
-            ?.await()
-            ?.asIcon()
-    }
-
-    suspend fun getModeIcon(context: Context, mode: ZenMode): Icon {
-        return mode.getIcon(context, iconLoader).await().asIcon()
+        return getMainActiveMode(modes)?.let { m -> getLockscreenModeIcon(m) }
     }
 
     fun activateMode(zenMode: ZenMode) {

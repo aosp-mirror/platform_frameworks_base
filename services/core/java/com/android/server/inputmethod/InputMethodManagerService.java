@@ -3037,6 +3037,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 intent.putExtra("input_method_id", id);
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             }
+            bindingController.unbindCurrentMethod();
             unbindCurrentClientLocked(UnbindReason.SWITCH_IME, userId);
         } finally {
             Binder.restoreCallingIdentity(ident);

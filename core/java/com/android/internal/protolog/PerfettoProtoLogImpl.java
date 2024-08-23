@@ -306,6 +306,12 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 || group.isLogToLogcat();
     }
 
+    @Override
+    @NonNull
+    public List<IProtoLogGroup> getRegisteredGroups() {
+        return mLogGroups.values().stream().toList();
+    }
+
     private void registerGroupsLocally(@NonNull IProtoLogGroup[] protoLogGroups) {
         final var groupsLoggingToLogcat = new ArrayList<String>();
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {

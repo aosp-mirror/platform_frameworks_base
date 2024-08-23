@@ -26,5 +26,5 @@ public interface ServiceConfig {
     /**
      * Returns the maximum time to wait for an app function execution to be complete.
      */
-    long getExecutionTimeoutConfig();
+    long getExecuteAppFunctionTimeoutMillis();
 }

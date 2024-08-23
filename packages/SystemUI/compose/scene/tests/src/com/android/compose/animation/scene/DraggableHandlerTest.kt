@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.animation.scene.NestedScrollBehavior.DuringTransitionBetweenScenes
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeAlways
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeNoPreview
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeWithPreview
@@ -730,13 +729,6 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun flingAfterScroll_DuringTransitionBetweenScenes_doNothing() = runGestureTest {
-        flingAfterScroll(use = DuringTransitionBetweenScenes, idleAfterScroll = true)
-
-        assertIdle(currentScene = SceneA)
-    }
-
-    @Test
     fun flingAfterScroll_EdgeNoOverscroll_goToNextScene() = runGestureTest {
         flingAfterScroll(use = EdgeNoPreview, idleAfterScroll = false)
 
@@ -786,13 +778,6 @@ class DraggableHandlerTest {
         if (idleAfterScroll) assertIdle(SceneA) else assertTransition(SceneA)
 
         nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
-    }
-
-    @Test
-    fun flingAfterScrollStartedInScene_DuringTransitionBetweenScenes_doNothing() = runGestureTest {
-        flingAfterScrollStartedInScene(use = DuringTransitionBetweenScenes, idleAfterScroll = true)
-
-        assertIdle(currentScene = SceneA)
     }
 
     @Test
