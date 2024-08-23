@@ -51,37 +51,22 @@ final class HalVibration extends Vibration {
     @NonNull
     private volatile CombinedVibration mEffectToPlay;
 
-    /** Vibration status. */
-    private Vibration.Status mStatus;
-
     /** Reported scale values applied to the vibration effects. */
     private int mScaleLevel;
     private float mAdaptiveScale;
 
     HalVibration(@NonNull IBinder token, @NonNull CombinedVibration effect,
-            @NonNull CallerInfo callerInfo) {
+            @NonNull VibrationSession.CallerInfo callerInfo) {
         super(token, callerInfo);
         mOriginalEffect = effect;
         mEffectToPlay = effect;
-        mStatus = Vibration.Status.RUNNING;
         mScaleLevel = VibrationScaler.SCALE_NONE;
         mAdaptiveScale = VibrationScaler.ADAPTIVE_SCALE_NONE;
     }
 
-    /**
-     * Set the {@link Status} of this vibration and reports the current system time as this
-     * vibration end time, for debugging purposes.
-     *
-     * <p>This method will only accept given value if the current status is {@link
-     * Status#RUNNING}.
-     */
-    public void end(EndInfo info) {
-        if (hasEnded()) {
-            // Vibration already ended, keep first ending status set and ignore this one.
-            return;
-        }
-        mStatus = info.status;
-        stats.reportEnded(info.endedBy);
+    @Override
+    public void end(EndInfo endInfo) {
+        super.end(endInfo);
         mCompletionLatch.countDown();
     }
 
@@ -144,11 +129,6 @@ final class HalVibration extends Vibration {
         // No need to update fallback effects, they are already configured per device.
     }
 
-    /** Return true is current status is different from {@link Status#RUNNING}. */
-    public boolean hasEnded() {
-        return mStatus != Status.RUNNING;
-    }
-
     @Override
     public boolean isRepeating() {
         return mOriginalEffect.getDuration() == Long.MAX_VALUE;
@@ -159,16 +139,16 @@ final class HalVibration extends Vibration {
         return mEffectToPlay;
     }
 
-    /** Return {@link Vibration.DebugInfo} with read-only debug information about this vibration. */
-    public Vibration.DebugInfo getDebugInfo() {
+    @Override
+    public VibrationSession.DebugInfo getDebugInfo() {
         // Clear the original effect if it's the same as the effect that was played, for simplicity
         CombinedVibration originalEffect =
                 Objects.equals(mOriginalEffect, mEffectToPlay) ? null : mOriginalEffect;
-        return new Vibration.DebugInfo(mStatus, stats, mEffectToPlay, originalEffect,
+        return new Vibration.DebugInfoImpl(getStatus(), stats, mEffectToPlay, originalEffect,
                 mScaleLevel, mAdaptiveScale, callerInfo);
     }
 
-    /** Return {@link VibrationStats.StatsInfo} with read-only metrics about this vibration. */
+    @Override
     public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
         int vibrationType = mEffectToPlay.hasVendorEffects()
                 ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__VENDOR
@@ -176,7 +156,7 @@ final class HalVibration extends Vibration {
                         ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED
                         : FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
         return new VibrationStats.StatsInfo(
-                callerInfo.uid, vibrationType, callerInfo.attrs.getUsage(), mStatus,
+                callerInfo.uid, vibrationType, callerInfo.attrs.getUsage(), getStatus(),
                 stats, completionUptimeMillis);
     }
 
