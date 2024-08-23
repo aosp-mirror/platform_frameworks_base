@@ -209,7 +209,7 @@ class AppCompatActivityRobot {
     }
 
     void setShouldCreateCompatDisplayInsets(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()).shouldCreateCompatDisplayInsets();
+        doReturn(enabled).when(mActivityStack.top()).shouldCreateAppCompatDisplayInsets();
     }
 
     void setTopActivityInSizeCompatMode(boolean inScm) {

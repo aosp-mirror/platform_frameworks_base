@@ -1629,10 +1629,10 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testCompleteResume_updateCompatDisplayInsets() {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        doReturn(true).when(activity).shouldCreateCompatDisplayInsets();
+        doReturn(true).when(activity).shouldCreateAppCompatDisplayInsets();
         activity.setState(RESUMED, "test");
         activity.completeResumeLocked();
-        assertNotNull(activity.getCompatDisplayInsets());
+        assertNotNull(activity.getAppCompatDisplayInsets());
     }
 
     /**
