@@ -49,6 +49,15 @@ inline bool letter_spacing_justification() {
 #endif  // __ANDROID__
 }
 
+inline bool typeface_redesign() {
+#ifdef __ANDROID__
+    static bool flag = com_android_text_flags_typeface_redesign();
+    return flag;
+#else
+    return true;
+#endif  // __ANDROID__
+}
+
 }  // namespace text_feature
 
 }  // namespace android
