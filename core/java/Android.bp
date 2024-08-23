@@ -176,6 +176,9 @@ filegroup {
 
 aidl_interface {
     name: "android.os.hintmanager_aidl",
+    defaults: [
+        "android.hardware.power-aidl",
+    ],
     srcs: [
         "android/os/IHintManager.aidl",
         "android/os/IHintSession.aidl",
@@ -193,9 +196,6 @@ aidl_interface {
             enabled: true,
         },
     },
-    imports: [
-        "android.hardware.power-V5",
-    ],
 }
 
 aidl_library {
