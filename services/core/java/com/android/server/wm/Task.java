@@ -1285,8 +1285,8 @@ class Task extends TaskFragment {
         EventLogTags.writeWmTaskMoved(mTaskId, getRootTaskId(), getDisplayId(), toTop ? 1 : 0,
                 position);
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
-        if (taskDisplayArea != null && isLeafTask()) {
-            taskDisplayArea.onLeafTaskMoved(this, toTop, toBottom);
+        if (taskDisplayArea != null) {
+            taskDisplayArea.onTaskMoved(this, toTop, toBottom);
         }
         if (isPersistable) {
             mLastTimeMoved = System.currentTimeMillis();
@@ -6141,9 +6141,7 @@ class Task extends TaskFragment {
 
         if (canBeLaunchedOnDisplay(newParent.getDisplayId())) {
             reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
-            if (isLeafTask()) {
-                newParent.onLeafTaskMoved(this, onTop, !onTop);
-            }
+            newParent.onTaskMoved(this, onTop, !onTop);
         } else {
             Slog.w(TAG, "Task=" + this + " can't reparent to " + newParent);
         }

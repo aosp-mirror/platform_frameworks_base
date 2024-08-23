@@ -37,6 +37,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
@@ -435,7 +436,19 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
     }
 
-    void onLeafTaskMoved(Task t, boolean toTop, boolean toBottom) {
+    void onTaskMoved(@NonNull Task t, boolean toTop, boolean toBottom) {
+        if (toBottom && !t.isLeafTask()) {
+            // Return early when a non-leaf task moved to bottom, to prevent sending duplicated
+            // leaf task movement callback if the leaf task is moved along with its parent tasks.
+            // Unless, we also track the task id, like `mLastLeafTaskToFrontId`.
+            return;
+        }
+
+        final Task topLeafTask = t.getTopLeafTask();
+        onLeafTaskMoved(topLeafTask, toTop, toBottom);
+    }
+
+    void onLeafTaskMoved(@NonNull Task t, boolean toTop, boolean toBottom) {
         if (toBottom) {
             mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
                     t.getTaskInfo());
