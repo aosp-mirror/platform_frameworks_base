@@ -24,6 +24,7 @@ import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.shared.model.EducationInfo
 import com.android.systemui.education.shared.model.EducationUiType
+import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
 import java.time.Clock
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
@@ -39,6 +40,7 @@ class KeyboardTouchpadEduInteractor
 constructor(
     @Background private val backgroundScope: CoroutineScope,
     private val contextualEducationInteractor: ContextualEducationInteractor,
+    private val userInputDeviceRepository: UserInputDeviceRepository,
     @EduClock private val clock: Clock,
 ) : CoreStartable {
 
@@ -58,6 +60,32 @@ constructor(
                 } else if (isEducationNeeded(it)) {
                     _educationTriggered.value = EducationInfo(BACK, getEduType(it), it.userId)
                     contextualEducationInteractor.updateOnEduTriggered(BACK)
+                }
+            }
+        }
+
+        backgroundScope.launch {
+            userInputDeviceRepository.isAnyTouchpadConnectedForUser.collect {
+                if (
+                    it.isConnected &&
+                        contextualEducationInteractor
+                            .getEduDeviceConnectionTime()
+                            .touchpadFirstConnectionTime == null
+                ) {
+                    contextualEducationInteractor.updateTouchpadFirstConnectionTime()
+                }
+            }
+        }
+
+        backgroundScope.launch {
+            userInputDeviceRepository.isAnyKeyboardConnectedForUser.collect {
+                if (
+                    it.isConnected &&
+                        contextualEducationInteractor
+                            .getEduDeviceConnectionTime()
+                            .keyboardFirstConnectionTime == null
+                ) {
+                    contextualEducationInteractor.updateKeyboardFirstConnectionTime()
                 }
             }
         }
