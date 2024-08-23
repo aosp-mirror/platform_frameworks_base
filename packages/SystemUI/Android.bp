@@ -949,36 +949,37 @@ android_robolectric_test {
     strict_mode: false,
 }
 
-// Disable for now. TODO(b/356666754) Re-enable it
-// android_ravenwood_test {
-//     name: "SystemUiRavenTests",
-//     srcs: [
-//         ":SystemUI-tests-utils",
-//         ":SystemUI-tests-multivalent",
-//         // TODO(b/294256649): pivot to using {.aapt.jar} and re-enable
-//         // use_resource_processor: true when better supported by soong
-//         ":SystemUIRobo-stub{.aapt.srcjar}",
-//     ],
-//     static_libs: [
-//         "SystemUI-core",
-//         "SystemUI-res",
-//         "SystemUI-tests-base",
-//         "androidx.test.uiautomator_uiautomator",
-//         "androidx.core_core-animation-testing",
-//         "androidx.test.ext.junit",
-//         "kosmos",
-//         "mockito-kotlin-nodeps",
-//     ],
-//     libs: [
-//         "android.test.runner",
-//         "android.test.base",
-//         "android.test.mock",
-//     ],
-//     auto_gen_config: true,
-//     plugins: [
-//         "dagger2-compiler",
-//     ],
-// }
+android_ravenwood_test {
+    name: "SystemUiRavenTests",
+    srcs: [
+        ":SystemUI-tests-utils",
+        ":SystemUI-tests-multivalent",
+        // TODO(b/294256649): pivot to using {.aapt.jar} and re-enable
+        // use_resource_processor: true when better supported by soong
+        ":SystemUIRobo-stub{.aapt.srcjar}",
+    ],
+    static_libs: [
+        "SystemUI-core",
+        "SystemUI-res",
+        "SystemUI-tests-base",
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.core_core-animation-testing",
+        "androidx.test.ext.junit",
+        "kosmos",
+        "kotlin-test",
+        "mockito-kotlin-nodeps",
+        "androidx.compose.runtime_runtime",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+    auto_gen_config: true,
+    plugins: [
+        "dagger2-compiler",
+    ],
+}
 
 // Opt-out config for optimizing the SystemUI target using R8.
 // Disabled via `export SYSTEMUI_OPTIMIZE_JAVA=false`, or explicitly in Make via
