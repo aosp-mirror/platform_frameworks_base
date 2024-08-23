@@ -104,10 +104,10 @@ interface SceneTransitionLayoutScope {
      * call order. Calling overlay(A) followed by overlay(B) will mean that overlay B renders
      * after/above overlay A.
      */
-    // TODO(b/353679003): Allow to specify user actions. When overlays are shown, the user actions
-    // of the top-most overlay in currentOverlays will be used.
     fun overlay(
         key: OverlayKey,
+        userActions: Map<UserAction, UserActionResult> =
+            mapOf(Back to UserActionResult.HideOverlay(key)),
         alignment: Alignment = Alignment.Center,
         content: @Composable ContentScope.() -> Unit,
     )
@@ -500,6 +500,38 @@ sealed class UserActionResult(
         override val requiresFullDistanceSwipe: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = toScene
+    }
+
+    /** A [UserActionResult] that shows [overlay]. */
+    class ShowOverlay(
+        val overlay: OverlayKey,
+        transitionKey: TransitionKey? = null,
+        requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = overlay
+    }
+
+    /** A [UserActionResult] that hides [overlay]. */
+    class HideOverlay(
+        val overlay: OverlayKey,
+        transitionKey: TransitionKey? = null,
+        requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = currentScene
+    }
+
+    /**
+     * A [UserActionResult] that replaces the current overlay by [overlay].
+     *
+     * Note: This result can only be used for user actions of overlays and an exception will be
+     * thrown if it is used for a scene.
+     */
+    class ReplaceByOverlay(
+        val overlay: OverlayKey,
+        transitionKey: TransitionKey? = null,
+        requiresFullDistanceSwipe: Boolean = false,
+    ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
+        override fun toContent(currentScene: SceneKey): ContentKey = overlay
     }
 
     companion object {

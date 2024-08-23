@@ -185,6 +185,9 @@ constructor(
                         )
                     }
                 }
+                is UserActionResult.ShowOverlay,
+                is UserActionResult.HideOverlay,
+                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
             } ?: actionResult
         }
     }
