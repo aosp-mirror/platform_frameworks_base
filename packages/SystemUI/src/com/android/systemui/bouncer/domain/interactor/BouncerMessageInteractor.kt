@@ -33,9 +33,7 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageStrings
 import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
@@ -75,8 +73,6 @@ constructor(
     primaryBouncerInteractor: PrimaryBouncerInteractor,
     @Application private val applicationScope: CoroutineScope,
     private val facePropertyRepository: FacePropertyRepository,
-    private val deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
-    faceAuthRepository: DeviceEntryFaceAuthRepository,
     private val securityModel: KeyguardSecurityModel,
     deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
 ) {
@@ -97,6 +93,17 @@ constructor(
     private val kumCallback =
         object : KeyguardUpdateMonitorCallback() {
             override fun onBiometricAuthFailed(biometricSourceType: BiometricSourceType?) {
+                // Only show the biometric failure messages if the biometric is NOT locked out.
+                // If the biometric is locked out, rely on the lock out message to show
+                // the lockout message & don't override it with the failure message.
+                if (
+                    (biometricSourceType == BiometricSourceType.FACE &&
+                        deviceEntryBiometricsAllowedInteractor.isFaceLockedOut.value) ||
+                        (biometricSourceType == BiometricSourceType.FINGERPRINT &&
+                            deviceEntryBiometricsAllowedInteractor.isFingerprintLockedOut.value)
+                ) {
+                    return
+                }
                 repository.setMessage(
                     when (biometricSourceType) {
                         BiometricSourceType.FINGERPRINT ->
@@ -159,8 +166,8 @@ constructor(
                 biometricSettingsRepository.authenticationFlags,
                 trustRepository.isCurrentUserTrustManaged,
                 isAnyBiometricsEnabledAndEnrolled,
-                deviceEntryFingerprintAuthInteractor.isLockedOut,
-                faceAuthRepository.isLockedOut,
+                deviceEntryBiometricsAllowedInteractor.isFingerprintLockedOut,
+                deviceEntryBiometricsAllowedInteractor.isFaceLockedOut,
                 isFingerprintAuthCurrentlyAllowedOnBouncer,
                 ::Septuple
             )
