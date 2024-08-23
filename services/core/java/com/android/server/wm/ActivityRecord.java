@@ -4942,9 +4942,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         newIntents.add(intent);
     }
 
-    final boolean isSleeping() {
-        final Task rootTask = getRootTask();
-        return rootTask != null ? rootTask.shouldSleepActivities() : mAtmService.isSleepingLocked();
+    boolean isSleeping() {
+        return task != null ? task.shouldSleepActivities() : mAtmService.isSleepingLocked();
     }
 
     /**
@@ -4968,7 +4967,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ReferrerIntent rintent = new ReferrerIntent(intent, getFilteredReferrer(referrer),
                 callerToken);
         boolean unsent = true;
-        final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();
+        final boolean isTopActivityWhileSleeping = isSleeping() && isTopRunningActivity();
 
         // We want to immediately deliver the intent to the activity if:
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
@@ -5835,7 +5834,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void setState(State state, String reason) {
         ProtoLog.v(WM_DEBUG_STATES, "State movement: %s from:%s to:%s reason:%s",
-                this, getState(), state, reason);
+                this, mState, state, reason);
 
         if (state == mState) {
             // No need to do anything if state doesn't change.
@@ -6160,7 +6159,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Now for any activities that aren't visible to the user, make sure they no longer are
         // keeping the screen frozen.
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_VISIBILITY, "Making invisible: " + this + ", state=" + getState());
+            Slog.v(TAG_VISIBILITY, "Making invisible: " + this + ", state=" + mState);
         }
         try {
             final boolean canEnterPictureInPicture = checkEnterPictureInPictureState(
@@ -6176,7 +6175,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             setVisibility(false);
 
-            switch (getState()) {
+            switch (mState) {
                 case STOPPING:
                 case STOPPED:
                     // Reset the flag indicating that an app can enter picture-in-picture once the
