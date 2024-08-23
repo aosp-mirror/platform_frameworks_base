@@ -4840,6 +4840,7 @@ public class NotificationStackScrollLayout
     }
 
     public boolean isBelowLastNotification(float touchX, float touchY) {
+        SceneContainerFlag.assertInLegacyMode();
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableView child = getChildAtIndex(i);
