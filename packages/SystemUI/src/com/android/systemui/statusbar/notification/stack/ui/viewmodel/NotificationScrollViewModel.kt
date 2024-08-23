@@ -74,7 +74,7 @@ constructor(
         }
 
     private fun expandFractionForTransition(
-        state: ObservableTransitionState.Transition,
+        state: ObservableTransitionState.Transition.ChangeCurrentScene,
         shadeExpansion: Float,
         shadeMode: ShadeMode,
         qsExpansion: Float,
@@ -113,7 +113,7 @@ constructor(
                 when (transitionState) {
                     is ObservableTransitionState.Idle ->
                         expandFractionForScene(transitionState.currentScene, shadeExpansion)
-                    is ObservableTransitionState.Transition ->
+                    is ObservableTransitionState.Transition.ChangeCurrentScene ->
                         expandFractionForTransition(
                             transitionState,
                             shadeExpansion,
@@ -121,6 +121,9 @@ constructor(
                             qsExpansion,
                             quickSettingsScene
                         )
+                    is ObservableTransitionState.Transition.ShowOrHideOverlay,
+                    is ObservableTransitionState.Transition.ReplaceOverlay ->
+                        TODO("b/359173565: Handle overlay transitions")
                 }
             }
             .distinctUntilChanged()
@@ -238,7 +241,7 @@ constructor(
     }
 }
 
-private fun ObservableTransitionState.Transition.isBetween(
+private fun ObservableTransitionState.Transition.ChangeCurrentScene.isBetween(
     a: (SceneKey) -> Boolean,
     b: (SceneKey) -> Boolean
 ): Boolean = (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))

@@ -121,6 +121,8 @@ private fun SceneScope.stateForQuickSettingsContent(
                         )
                 }
             }
+        is TransitionState.Transition.OverlayTransition ->
+            TODO("b/359173565: Handle overlay transitions")
     }
 }
 
@@ -212,7 +214,8 @@ private fun QuickSettingsContent(
                             addView(view)
                         }
                     },
-                    // When the view changes (e.g. due to a theme change), this will be recomposed
+                    // When the view changes (e.g. due to a theme change), this will be
+                    // recomposed
                     // if needed and the new view will be attached to the FrameLayout here.
                     update = {
                         qsSceneAdapter.setState(state())

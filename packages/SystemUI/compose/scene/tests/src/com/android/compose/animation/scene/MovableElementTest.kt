@@ -106,7 +106,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneA))
+                            hasParent(isElement(TestElements.Foo, content = SceneA))
                     )
                     .assertExists()
                     .assertIsNotDisplayed()
@@ -114,7 +114,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 0") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneB))
+                            hasParent(isElement(TestElements.Foo, content = SceneB))
                     )
                     .assertIsDisplayed()
                     .assertSizeIsEqualTo(75.dp, 75.dp)
@@ -213,7 +213,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneA))
+                            hasParent(isElement(TestElements.Foo, content = SceneA))
                     )
                     .assertIsDisplayed()
                     .assertSizeIsEqualTo(75.dp, 75.dp)
@@ -234,7 +234,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = SceneB))
+                            hasParent(isElement(TestElements.Foo, content = SceneB))
                     )
                     .assertIsDisplayed()
 
@@ -324,7 +324,7 @@ class MovableElementTest {
     fun movableElementScopeExtendsBoxScope() {
         val key = MovableElementKey("Foo", contents = setOf(SceneA))
         rule.setContent {
-            TestContentScope {
+            TestContentScope(currentScene = SceneA) {
                 MovableElement(key, Modifier.size(200.dp)) {
                     content {
                         Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
