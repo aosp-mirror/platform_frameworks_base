@@ -1066,14 +1066,30 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         return true;
     }
 
+    private void kickStartAnimation() {
+        startSystemAnimation();
+
+        // Dispatch the first progress after animation start for
+        // smoothing the initial animation, instead of waiting for next
+        // onMove.
+        final BackMotionEvent backFinish = mCurrentTracker
+                .createProgressEvent();
+        dispatchOnBackProgressed(mActiveCallback, backFinish);
+        if (!mBackGestureStarted) {
+            // if the down -> up gesture happened before animation
+            // start, we have to trigger the uninterruptible transition
+            // to finish the back animation.
+            startPostCommitAnimation();
+        }
+    }
+
     private void createAdapter() {
         IBackAnimationRunner runner =
                 new IBackAnimationRunner.Stub() {
                     @Override
                     public void onAnimationStart(
                             RemoteAnimationTarget[] apps,
-                            RemoteAnimationTarget[] wallpapers,
-                            RemoteAnimationTarget[] nonApps,
+                            IBinder token,
                             IBackAnimationFinishedCallback finishedCallback) {
                         mShellExecutor.execute(
                                 () -> {
@@ -1085,21 +1101,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                     }
                                     mBackAnimationFinishedCallback = finishedCallback;
                                     mApps = apps;
-                                    startSystemAnimation();
-                                    mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
-
-                                    // Dispatch the first progress after animation start for
-                                    // smoothing the initial animation, instead of waiting for next
-                                    // onMove.
-                                    final BackMotionEvent backFinish = mCurrentTracker
-                                            .createProgressEvent();
-                                    dispatchOnBackProgressed(mActiveCallback, backFinish);
-                                    if (!mBackGestureStarted) {
-                                        // if the down -> up gesture happened before animation
-                                        // start, we have to trigger the uninterruptible transition
-                                        // to finish the back animation.
-                                        startPostCommitAnimation();
+                                    // app only visible after transition ready, break for now.
+                                    if (token != null) {
+                                        return;
                                     }
+                                    kickStartAnimation();
+                                    mBackTransitionHandler.consumeQueuedTransitionIfNeeded();
                                 });
                     }
 
@@ -1199,6 +1206,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
+            if (info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION) {
+                kickStartAnimation();
+            }
             // Both mShellExecutor and Transitions#mMainExecutor are ShellMainThread, so we don't
             // need to post to ShellExecutor when called.
             if (info.getType() == WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION) {
