@@ -938,13 +938,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * Set animation options for collecting transition by ActivityRecord.
      * @param options AnimationOptions captured from ActivityOptions
      */
-    void setOverrideAnimation(@Nullable AnimationOptions options, @NonNull ActivityRecord r,
+    void setOverrideAnimation(@Nullable AnimationOptions options,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (!isCollecting()) return;
         mOverrideOptions = options;
-        if (mOverrideOptions != null) {
-            mOverrideOptions.setUserId(r.mUserId);
-        }
         sendRemoteCallback(mClientAnimationStartCallback);
         mClientAnimationStartCallback = startCallback;
         mClientAnimationFinishCallback = finishCallback;
@@ -2798,7 +2795,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 }
             }
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
-                            "Transition Root: " + leashReference.getName())
+                    "Transition Root: " + leashReference.getName())
                     .setCallsite("Transition.calculateTransitionRoots").build();
             rootLeash.setUnreleasedWarningCallSite("Transition.calculateTransitionRoots");
             // Update layers to start transaction because we prevent assignment during collect, so
@@ -2969,7 +2966,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         // Create the options based on this change's custom animations and layout
                         // parameters
                         animOptions = getOptions(activityRecord /* customAnimActivity */,
-                                activityRecord /* animLpActivity */);
+                                                 activityRecord /* animLpActivity */);
                         if (!change.hasFlags(FLAG_TRANSLUCENT)) {
                             // If this change is not translucent, its options are going to be
                             // inherited by the changes below
@@ -2994,7 +2991,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     }
                 }
                 if (animOptions != null) {
-                    animOptions.setUserId(activityRecord.mUserId);
                     change.setAnimationOptions(animOptions);
                 }
             }
@@ -3055,9 +3051,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     animOptions);
             animOptions = addCustomActivityTransition(customAnimActivity, false /* open */,
                     animOptions);
-            if (animOptions != null) {
-                animOptions.setUserId(customAnimActivity.mUserId);
-            }
         }
 
         // Layout parameters
@@ -3071,12 +3064,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // are running an app starting animation, in which case we don't want the app to be
             // able to change its animation directly.
             if (animOptions != null) {
-                animOptions.setUserId(animLpActivity.mUserId);
                 animOptions.addOptionsFromLayoutParameters(animLp);
             } else {
                 animOptions = TransitionInfo.AnimationOptions
                         .makeAnimOptionsFromLayoutParameters(animLp);
-                animOptions.setUserId(animLpActivity.mUserId);
             }
         }
         return animOptions;
@@ -3102,7 +3093,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (animOptions == null) {
                 animOptions = TransitionInfo.AnimationOptions
                         .makeCommonAnimOptions(activity.packageName);
-                animOptions.setUserId(activity.mUserId);
             }
             animOptions.addCustomActivityTransition(open, customAnim.mEnterAnim,
                     customAnim.mExitAnim, customAnim.mBackgroundColor);
@@ -3231,7 +3221,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Remote animations always win, but fullscreen windows override non-fullscreen windows.
         ActivityRecord result = lookForTopWindowWithFilter(sortedTargets,
                 w -> w.getRemoteAnimationDefinition() != null
-                        && w.getRemoteAnimationDefinition().hasTransition(transit, activityTypes));
+                    && w.getRemoteAnimationDefinition().hasTransition(transit, activityTypes));
         if (result != null) {
             return result;
         }
@@ -3278,7 +3268,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private void validateKeyguardOcclusion() {
         if ((mFlags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
             mController.mStateValidators.add(
-                    mController.mAtm.mWindowManager.mPolicy::applyKeyguardOcclusionChange);
+                mController.mAtm.mWindowManager.mPolicy::applyKeyguardOcclusionChange);
         }
     }
 
@@ -3882,9 +3872,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         /** @return true if all tracked subtrees are ready. */
         boolean allReady() {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    " allReady query: used=%b " + "override=%b defer=%d states=[%s]", mUsed,
-                    mReadyOverride, mDeferReadyDepth, groupsToString());
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " allReady query: used=%b "
+                    + "override=%b defer=%d states=[%s]", mUsed, mReadyOverride, mDeferReadyDepth,
+                    groupsToString());
             // If the readiness has never been touched, mUsed will be false. We never want to
             // consider a transition ready if nothing has been reported on it.
             if (!mUsed) return false;
