@@ -25,6 +25,7 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 
 import javax.inject.Inject;
 
@@ -124,6 +125,11 @@ public class DozeScrimController implements StateListener {
 
         // Begin pulse. Note that it's very important that the pulse finished callback
         // be invoked when we're done so that the caller can drop the pulse wakelock.
+        if (SceneContainerFlag.isEnabled()) {
+            // ScrimController.Callback#onDisplayBlanked is no longer triggered when flexiglass is
+            // on, but we still need to signal that pulsing has started.
+            callback.onPulseStarted();
+        }
         mPulseCallback = callback;
         mPulseReason = reason;
     }
