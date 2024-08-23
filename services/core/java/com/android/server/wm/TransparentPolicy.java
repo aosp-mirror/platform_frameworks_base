@@ -201,8 +201,10 @@ class TransparentPolicy {
             // never has letterbox.
             return true;
         }
+        final AppCompatSizeCompatModePolicy scmPolicy = mActivityRecord.mAppCompatController
+                .getAppCompatSizeCompatModePolicy();
         if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
-                || mActivityRecord.hasAppCompatDisplayInsetsWithoutInheritance()) {
+                || scmPolicy.hasAppCompatDisplayInsetsWithoutInheritance()) {
             return true;
         }
         return false;
