@@ -5605,12 +5605,13 @@
     <!-- This permission is required among systems services to always keep the
          binding with TvInputManagerService.
          <p>This should only be used by the OEM TvInputService.
+         @FlaggedApi("android.media.tv.flags.tif_unbind_inactive_tis")
          <p>Protection level: signature|privileged|vendorPrivileged
          @hide
     -->
     <permission android:name="android.permission.ALWAYS_BOUND_TV_INPUT"
         android:protectionLevel="signature|privileged|vendorPrivileged"
-        android:featureFlag="android.media.tv.flags.tis_always_bound_permission"/>
+        android:featureFlag="android.media.tv.flags.tif_unbind_inactive_tis"/>
 
     <!-- Must be required by a {@link android.media.tv.interactive.TvInteractiveAppService}
          to ensure that only the system can bind to it.
