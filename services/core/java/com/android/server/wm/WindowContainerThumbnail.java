@@ -121,13 +121,6 @@ class WindowContainerThumbnail implements Animatable {
                 ANIMATION_TYPE_RECENTS);
     }
 
-    /**
-     * Start animation with existing adapter.
-     */
-    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
-        mSurfaceAnimator.startAnimation(t, anim, hidden, ANIMATION_TYPE_RECENTS);
-    }
-
     private void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
     }
 

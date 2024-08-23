@@ -563,10 +563,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void onRecentsAnimationStateChanged(boolean running) {
-    }
-
-    @Override
     public void onNavigationModeChanged(int mode) {
         mNavigationMode = mode;
         mEdgeBackGestureHandler.onNavigationModeChanged(mode);

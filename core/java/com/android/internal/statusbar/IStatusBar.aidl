@@ -209,11 +209,6 @@ oneway interface IStatusBar
     void onDisplayReady(int displayId);
 
     /**
-     * Notifies System UI whether the recents animation is running or not.
-     */
-    void onRecentsAnimationStateChanged(boolean running);
-
-    /**
      * Notifies System UI side of system bar attribute change on the specified display.
      *
      * @param displayId the ID of the display to notify.

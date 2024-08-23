@@ -143,13 +143,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * current focused root task.
      */
     Task mLastFocusedRootTask;
-    /**
-     * All of the root tasks on this display. Order matters, topmost root task is in front of all
-     * other root tasks, bottommost behind. Accessed directly by ActivityManager package classes.
-     * Any calls changing the list should also call {@link #onRootTaskOrderChanged(Task)}.
-     */
-    private ArrayList<OnRootTaskOrderChangedListener> mRootTaskOrderChangedCallbacks =
-            new ArrayList<>();
 
     /**
      * The task display area is removed from the system and we are just waiting for all activities
@@ -332,7 +325,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("addChildTask");
 
         mAtmService.updateSleepIfNeededLocked();
-        onRootTaskOrderChanged(task);
     }
 
     @Override
@@ -424,10 +416,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         // Update the top resumed activity because the preferred top focusable task may be changed.
         mAtmService.mTaskSupervisor.updateTopResumedActivityIfNeeded("positionChildTaskAt");
-
-        if (mChildren.indexOf(child) != oldPosition) {
-            onRootTaskOrderChanged(child);
-        }
     }
 
     void onLeafTaskRemoved(int taskId) {
@@ -844,7 +832,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             mLaunchAdjacentFlagRootTask = null;
         }
         mDisplayContent.releaseSelfIfNeeded();
-        onRootTaskOrderChanged(rootTask);
     }
 
     /**
@@ -1743,35 +1730,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         return mRemoved;
     }
 
-    /**
-     * Adds a listener to be notified whenever the root task order in the display changes. Currently
-     * only used by the {@link RecentsAnimation} to determine whether to interrupt and cancel the
-     * current animation when the system state changes.
-     */
-    void registerRootTaskOrderChangedListener(OnRootTaskOrderChangedListener listener) {
-        if (!mRootTaskOrderChangedCallbacks.contains(listener)) {
-            mRootTaskOrderChangedCallbacks.add(listener);
-        }
-    }
-
-    /**
-     * Removes a previously registered root task order change listener.
-     */
-    void unregisterRootTaskOrderChangedListener(OnRootTaskOrderChangedListener listener) {
-        mRootTaskOrderChangedCallbacks.remove(listener);
-    }
-
-    /**
-     * Notifies of a root task order change
-     *
-     * @param rootTask The root task which triggered the order change
-     */
-    void onRootTaskOrderChanged(Task rootTask) {
-        for (int i = mRootTaskOrderChangedCallbacks.size() - 1; i >= 0; i--) {
-            mRootTaskOrderChangedCallbacks.get(i).onRootTaskOrderChanged(rootTask);
-        }
-    }
-
     @Override
     boolean canCreateRemoteAnimationTarget() {
         // In the legacy transition system, promoting animation target from TaskFragment to
@@ -1784,13 +1742,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     boolean canHostHomeTask() {
         return mDisplayContent.isHomeSupported() && mCanHostHomeTask;
-    }
-
-    /**
-     * Callback for when the order of the root tasks in the display changes.
-     */
-    interface OnRootTaskOrderChangedListener {
-        void onRootTaskOrderChanged(Task rootTask);
     }
 
     void ensureActivitiesVisible(ActivityRecord starting, boolean notifyClients) {
