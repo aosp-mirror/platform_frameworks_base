@@ -125,7 +125,7 @@ class NestedScrollToSceneTest {
 
         scrollUp(percent = 0.5f)
         // STL will start a transition with the remaining scroll
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         scrollUp(percent = 1f)
@@ -156,7 +156,7 @@ class NestedScrollToSceneTest {
         // Start a new gesture
         pointerDownAndScrollTouchSlop()
         scrollUp(percent = 0.5f)
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         pointerUp()
@@ -181,7 +181,7 @@ class NestedScrollToSceneTest {
         // Reach the end of the scrollable element
         canScroll = false
         scrollUp(percent = 0.5f)
-        val transition1 = assertThat(state.transitionState).isTransition()
+        val transition1 = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition1).hasProgress(0.5f)
 
         pointerUp()
@@ -192,7 +192,7 @@ class NestedScrollToSceneTest {
         // Start a new gesture
         pointerDownAndScrollTouchSlop()
         scrollUp(percent = 0.5f)
-        val transition2 = assertThat(state.transitionState).isTransition()
+        val transition2 = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition2).hasProgress(0.5f)
 
         pointerUp()
@@ -215,7 +215,7 @@ class NestedScrollToSceneTest {
         // Reach the end of the scrollable element
         canScroll = false
         scrollUp(percent = 0.5f)
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         pointerUp()
@@ -244,7 +244,7 @@ class NestedScrollToSceneTest {
 
         scrollUp(percent = 0.5f)
         // EdgeAlways always consume the remaining scroll, EdgeNoPreview does not.
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
     }
 
@@ -278,7 +278,7 @@ class NestedScrollToSceneTest {
         scrollUp(percent = 0.2f)
 
         // STL can only start the transition if it has reset the amount of scroll consumed.
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.2f)
     }
 }

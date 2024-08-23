@@ -25,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
-import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transition.link.LinkedTransition
 import com.android.compose.animation.scene.transition.link.StateLink
@@ -209,7 +208,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         targetScene: SceneKey,
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey?,
-    ): TransitionState.Transition? {
+    ): TransitionState.Transition.ChangeCurrentScene? {
         checkThread()
 
         return coroutineScope.animateToScene(
@@ -228,13 +227,16 @@ internal class MutableSceneTransitionLayoutStateImpl(
      *
      * Important: you *must* call [finishTransition] once the transition is finished.
      */
-    internal fun startTransition(transition: TransitionState.Transition, chain: Boolean = true) {
+    internal fun startTransition(
+        transition: TransitionState.Transition.ChangeCurrentScene,
+        chain: Boolean = true,
+    ) {
         checkThread()
 
         // Compute the [TransformationSpec] when the transition starts.
         val fromScene = transition.fromScene
         val toScene = transition.toScene
-        val orientation = (transition as? ContentState.HasOverscrollProperties)?.orientation
+        val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
 
         // Update the transition specs.
         transition.transformationSpec =
@@ -312,8 +314,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
                 appendLine("  Transitions (size=${transitionStates.size}):")
                 transitionStates.fastForEach { state ->
                     val transition = state as TransitionState.Transition
-                    val from = transition.fromScene
-                    val to = transition.toScene
+                    val from = transition.fromContent
+                    val to = transition.toContent
                     val indicator = if (finishedTransitions.contains(transition)) "x" else " "
                     appendLine("  [$indicator] $from => $to ($transition)")
                 }
@@ -329,27 +331,31 @@ internal class MutableSceneTransitionLayoutStateImpl(
     }
 
     private fun setupTransitionLinks(transition: TransitionState.Transition) {
-        stateLinks.fastForEach { stateLink ->
-            val matchingLinks =
-                stateLink.transitionLinks.fastFilter { it.isMatchingLink(transition) }
-            if (matchingLinks.isEmpty()) return@fastForEach
-            if (matchingLinks.size > 1) error("More than one link matched.")
+        when (transition) {
+            is TransitionState.Transition.ChangeCurrentScene -> {
+                stateLinks.fastForEach { stateLink ->
+                    val matchingLinks =
+                        stateLink.transitionLinks.fastFilter { it.isMatchingLink(transition) }
+                    if (matchingLinks.isEmpty()) return@fastForEach
+                    if (matchingLinks.size > 1) error("More than one link matched.")
 
-            val targetCurrentScene = stateLink.target.transitionState.currentScene
-            val matchingLink = matchingLinks[0]
+                    val targetCurrentScene = stateLink.target.transitionState.currentScene
+                    val matchingLink = matchingLinks[0]
 
-            if (!matchingLink.targetIsInValidState(targetCurrentScene)) return@fastForEach
+                    if (!matchingLink.targetIsInValidState(targetCurrentScene)) return@fastForEach
 
-            val linkedTransition =
-                LinkedTransition(
-                    originalTransition = transition,
-                    fromScene = targetCurrentScene,
-                    toScene = matchingLink.targetTo,
-                    key = matchingLink.targetTransitionKey,
-                )
+                    val linkedTransition =
+                        LinkedTransition(
+                            originalTransition = transition,
+                            fromScene = targetCurrentScene,
+                            toScene = matchingLink.targetTo,
+                            key = matchingLink.targetTransitionKey,
+                        )
 
-            stateLink.target.startTransition(linkedTransition)
-            transition.activeTransitionLinks[stateLink] = linkedTransition
+                    stateLink.target.startTransition(linkedTransition)
+                    transition.activeTransitionLinks[stateLink] = linkedTransition
+                }
+            }
         }
     }
 
@@ -451,8 +457,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
 
         val shouldSnap =
-            (isProgressCloseTo(0f) && transition.currentScene == transition.fromScene) ||
-                (isProgressCloseTo(1f) && transition.currentScene == transition.toScene)
+            (isProgressCloseTo(0f) && transition.currentScene == transition.fromContent) ||
+                (isProgressCloseTo(1f) && transition.currentScene == transition.toContent)
         return if (shouldSnap) {
             finishAllTransitions()
             true

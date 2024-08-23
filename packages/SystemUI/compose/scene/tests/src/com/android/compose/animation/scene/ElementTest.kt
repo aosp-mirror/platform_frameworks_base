@@ -735,7 +735,7 @@ class ElementTest {
 
         val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).isNotNull()
         assertThat(transition).hasProgress(0.5f)
         assertThat(animatedFloat).isEqualTo(50f)
@@ -822,7 +822,7 @@ class ElementTest {
             moveBy(Offset(0f, touchSlop + layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
         }
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasOverscrollSpec()
         assertThat(transition).hasProgress(-0.5f)
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 0.5f)
@@ -905,7 +905,7 @@ class ElementTest {
             }
         }
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
         fooElement.assertTopPositionInRootIsEqualTo(translateY * 0.5f)
     }
@@ -939,7 +939,7 @@ class ElementTest {
             moveBy(Offset(0f, layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
         }
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(animatedFloat).isEqualTo(100f)
 
         // Scroll 150% (100% scroll + 50% overscroll)
@@ -992,7 +992,7 @@ class ElementTest {
             moveBy(Offset(0f, layoutHeight.toPx()), delayMillis = 1_000)
         }
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(animatedFloat).isEqualTo(100f)
 
         // Scroll 200% (100% scroll + 100% overscroll)
@@ -1039,7 +1039,7 @@ class ElementTest {
             moveBy(Offset(0f, layoutHeight.toPx()), delayMillis = 1_000)
         }
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(animatedFloat).isEqualTo(100f)
 
         // Scroll 200% (100% scroll + 100% overscroll)
@@ -1083,7 +1083,7 @@ class ElementTest {
             moveBy(Offset(0f, layoutHeight.toPx()), delayMillis = 1_000)
         }
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(animatedFloat).isEqualTo(100f)
 
         // Scroll 200% (100% scroll + 100% overscroll)
@@ -1143,7 +1143,7 @@ class ElementTest {
             moveBy(Offset(0f, layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
         }
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
 
         // Scroll 150% (100% scroll + 50% overscroll)
         assertThat(transition).hasProgress(1.5f)
@@ -1160,7 +1160,7 @@ class ElementTest {
 
         assertThat(transition.progress).isLessThan(1f)
         assertThat(transition).hasOverscrollSpec()
-        assertThat(transition).hasBouncingScene(transition.toScene)
+        assertThat(transition).hasBouncingContent(transition.toContent)
         assertThat(animatedFloat).isEqualTo(100f)
     }
 
@@ -1243,13 +1243,15 @@ class ElementTest {
 
         val transitions = state.currentTransitions
         assertThat(transitions).hasSize(2)
-        assertThat(transitions[0]).hasFromScene(SceneA)
-        assertThat(transitions[0]).hasToScene(SceneB)
-        assertThat(transitions[0]).hasProgress(0f)
+        val firstTransition = assertThat(transitions[0]).isSceneTransition()
+        assertThat(firstTransition).hasFromScene(SceneA)
+        assertThat(firstTransition).hasToScene(SceneB)
+        assertThat(firstTransition).hasProgress(0f)
 
-        assertThat(transitions[1]).hasFromScene(SceneB)
-        assertThat(transitions[1]).hasToScene(SceneC)
-        assertThat(transitions[1]).hasProgress(0f)
+        val secondTransition = assertThat(transitions[1]).isSceneTransition()
+        assertThat(secondTransition).hasFromScene(SceneB)
+        assertThat(secondTransition).hasToScene(SceneC)
+        assertThat(secondTransition).hasProgress(0f)
 
         // First frame: both are at x = 0dp. For the whole transition, Foo is at y = 0dp and Bar is
         // at y = layoutSize - elementSoze = 100dp.

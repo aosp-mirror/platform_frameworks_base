@@ -25,7 +25,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.tanh
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
@@ -262,7 +262,7 @@ interface ElementContentPicker {
      */
     fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float,
     ): ContentKey
@@ -278,7 +278,7 @@ interface ElementContentPicker {
      */
     fun pickSingleContentIn(
         contents: Set<ContentKey>,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         element: ElementKey,
     ): ContentKey {
         val fromContent = transition.fromContent
@@ -331,7 +331,7 @@ interface StaticElementContentPicker : ElementContentPicker {
 object HighestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float
     ): ContentKey {
@@ -352,7 +352,7 @@ object HighestZIndexContentPicker : ElementContentPicker {
 
             override fun contentDuringTransition(
                 element: ElementKey,
-                transition: ContentState.Transition<*>,
+                transition: TransitionState.Transition,
                 fromContentZIndex: Float,
                 toContentZIndex: Float
             ): ContentKey {
@@ -373,7 +373,7 @@ object HighestZIndexContentPicker : ElementContentPicker {
 object LowestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float
     ): ContentKey {
@@ -394,7 +394,7 @@ object LowestZIndexContentPicker : ElementContentPicker {
 
             override fun contentDuringTransition(
                 element: ElementKey,
-                transition: ContentState.Transition<*>,
+                transition: TransitionState.Transition,
                 fromContentZIndex: Float,
                 toContentZIndex: Float
             ): ContentKey {
@@ -428,7 +428,7 @@ class MovableElementContentPicker(
 ) : StaticElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float,
     ): ContentKey {

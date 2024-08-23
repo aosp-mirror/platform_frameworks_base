@@ -49,7 +49,6 @@ import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastLastOrNull
 import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.content.Content
-import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
@@ -69,7 +68,7 @@ internal class Element(val key: ElementKey) {
      * The last transition that was used when computing the state (size, position and alpha) of this
      * element in any content, or `null` if it was last laid out when idle.
      */
-    var lastTransition: ContentState.Transition<*>? = null
+    var lastTransition: TransitionState.Transition? = null
 
     /** Whether this element was ever drawn in a content. */
     var wasDrawnInAnyContent = false
@@ -312,7 +311,7 @@ internal class ElementNode(
     }
 
     private fun Placeable.PlacementScope.place(
-        transition: ContentState.Transition<*>?,
+        transition: TransitionState.Transition?,
         placeable: Placeable,
     ) {
         with(layoutImpl.lookaheadScope) {
@@ -477,11 +476,11 @@ private fun elementTransition(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
     transitions: List<TransitionState.Transition>,
-): ContentState.Transition<*>? {
+): TransitionState.Transition? {
     val transition =
         transitions.fastLastOrNull { transition ->
-            transition.fromScene in element.stateByContent ||
-                transition.toScene in element.stateByContent
+            transition.fromContent in element.stateByContent ||
+                transition.toContent in element.stateByContent
         }
 
     val previousTransition = element.lastTransition
@@ -504,8 +503,8 @@ private fun elementTransition(
 private fun prepareInterruption(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    transition: ContentState.Transition<*>,
-    previousTransition: ContentState.Transition<*>,
+    transition: TransitionState.Transition,
+    previousTransition: TransitionState.Transition,
 ) {
     if (transition.replacedTransition == previousTransition) {
         return
@@ -552,7 +551,7 @@ private fun prepareInterruption(
  */
 private fun reconcileStates(
     element: Element,
-    transition: ContentState.Transition<*>,
+    transition: TransitionState.Transition,
 ) {
     val fromContentState = element.stateByContent[transition.fromContent] ?: return
     val toContentState = element.stateByContent[transition.toContent] ?: return
@@ -621,7 +620,7 @@ private fun Element.State.clearValuesBeforeInterruption() {
  */
 private inline fun <T> computeInterruptedValue(
     layoutImpl: SceneTransitionLayoutImpl,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
     value: T,
     unspecifiedValue: T,
     zeroValue: T,
@@ -668,7 +667,7 @@ private inline fun <T> computeInterruptedValue(
 private inline fun <T> setPlacementInterruptionDelta(
     element: Element,
     stateInContent: Element.State,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
     delta: T,
     setter: (Element.State, T) -> Unit,
 ) {
@@ -694,7 +693,7 @@ private fun shouldPlaceElement(
     layoutImpl: SceneTransitionLayoutImpl,
     content: ContentKey,
     element: Element,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
 ): Boolean {
     // Always place the element if we are idle.
     if (transition == null) {
@@ -732,7 +731,7 @@ internal fun shouldPlaceOrComposeSharedElement(
     layoutImpl: SceneTransitionLayoutImpl,
     content: ContentKey,
     element: ElementKey,
-    transition: ContentState.Transition<*>,
+    transition: TransitionState.Transition,
 ): Boolean {
     // If we are overscrolling, only place/compose the element in the overscrolling scene.
     val overscrollScene = transition.currentOverscrollSpec?.scene
@@ -743,7 +742,7 @@ internal fun shouldPlaceOrComposeSharedElement(
     val scenePicker = element.contentPicker
     val pickedScene =
         when (transition) {
-            is TransitionState.Transition -> {
+            is TransitionState.Transition.ChangeCurrentScene -> {
                 scenePicker.contentDuringTransition(
                     element = element,
                     transition = transition,
@@ -758,14 +757,14 @@ internal fun shouldPlaceOrComposeSharedElement(
 
 private fun isSharedElementEnabled(
     element: ElementKey,
-    transition: ContentState.Transition<*>,
+    transition: TransitionState.Transition,
 ): Boolean {
     return sharedElementTransformation(element, transition)?.enabled ?: true
 }
 
 internal fun sharedElementTransformation(
     element: ElementKey,
-    transition: ContentState.Transition<*>,
+    transition: TransitionState.Transition,
 ): SharedElementTransformation? {
     val transformationSpec = transition.transformationSpec
     val sharedInFromContent =
@@ -793,7 +792,7 @@ internal fun sharedElementTransformation(
 private fun isElementOpaque(
     content: Content,
     element: Element,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
 ): Boolean {
     if (transition == null) {
         return true
@@ -827,7 +826,7 @@ private fun isElementOpaque(
 private fun elementAlpha(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
     stateInContent: Element.State,
 ): Float {
     val alpha =
@@ -858,7 +857,7 @@ private fun elementAlpha(
 private fun interruptedAlpha(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
     stateInContent: Element.State,
     alpha: Float,
 ): Float {
@@ -888,7 +887,7 @@ private fun interruptedAlpha(
 private fun measure(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
     stateInContent: Element.State,
     measurable: Measurable,
     constraints: Constraints,
@@ -952,7 +951,7 @@ private fun Placeable.size(): IntSize = IntSize(width, height)
 private fun ContentDrawScope.getDrawScale(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
     stateInContent: Element.State,
 ): Scale {
     val scale =
@@ -1048,7 +1047,7 @@ private inline fun <T> computeValue(
     layoutImpl: SceneTransitionLayoutImpl,
     currentContentState: Element.State,
     element: Element,
-    transition: ContentState.Transition<*>?,
+    transition: TransitionState.Transition?,
     contentValue: (Element.State) -> T,
     transformation: (ElementTransformations) -> PropertyTransformation<T>?,
     currentValue: () -> T,
@@ -1076,7 +1075,7 @@ private inline fun <T> computeValue(
     }
 
     val currentContent = currentContentState.content
-    if (transition is ContentState.HasOverscrollProperties) {
+    if (transition is TransitionState.HasOverscrollProperties) {
         val overscroll = transition.currentOverscrollSpec
         if (overscroll?.scene == currentContent) {
             val elementSpec =

@@ -396,8 +396,8 @@ private class AnimatedStateImpl<T, Delta>(
             return sharedValue[layoutImpl.state.transitionState.currentScene]
         }
 
-        val fromValue = sharedValue[transition.fromScene]
-        val toValue = sharedValue[transition.toScene]
+        val fromValue = sharedValue[transition.fromContent]
+        val toValue = sharedValue[transition.toContent]
         return if (fromValue != null && toValue != null) {
             if (fromValue == toValue) {
                 // Optimization: avoid reading progress if the values are the same, so we don't
@@ -411,7 +411,7 @@ private class AnimatedStateImpl<T, Delta>(
                             if (canOverflow) transition.progress
                             else transition.progress.fastCoerceIn(0f, 1f)
                         }
-                        overscrollSpec.scene == transition.toScene -> 1f
+                        overscrollSpec.scene == transition.toContent -> 1f
                         else -> 0f
                     }
 
@@ -426,12 +426,12 @@ private class AnimatedStateImpl<T, Delta>(
             if (element != null) {
                 layoutImpl.elements[element]?.stateByContent?.let { sceneStates ->
                     layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                        transition.fromScene in sceneStates || transition.toScene in sceneStates
+                        transition.fromContent in sceneStates || transition.toContent in sceneStates
                     }
                 }
             } else {
                 layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                    transition.fromScene in targetValues || transition.toScene in targetValues
+                    transition.fromContent in targetValues || transition.toContent in targetValues
                 }
             }
 
