@@ -118,6 +118,7 @@ public final class ActivityPolicyExemption implements Parcelable {
     /**
      * Builder for {@link ActivityPolicyExemption}.
      */
+    @FlaggedApi(Flags.FLAG_ACTIVITY_CONTROL_API)
     public static final class Builder {
 
         private @Nullable ComponentName mComponentName;
