@@ -10,23 +10,12 @@ android {
         }
     }
 
-    compileSdk 33
-
-    defaultConfig {
-        minSdk 33
-        targetSdk 33
-    }
-
     lintOptions {
         abortOnError false
     }
     tasks.lint.enabled = false
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-        freeCompilerArgs = ["-Xjvm-default=all"]
     }
 }
 
