@@ -1253,6 +1253,11 @@ public class NotificationStackScrollLayout
     }
 
     @Override
+    public void closeGutsOnSceneTouch() {
+        mController.closeControlsDueToOutsideTouch();
+    }
+
+    @Override
     public void setSyntheticScrollConsumer(@Nullable Consumer<Float> consumer) {
         mScrollViewFields.setSyntheticScrollConsumer(consumer);
     }
@@ -1260,6 +1265,11 @@ public class NotificationStackScrollLayout
     @Override
     public void setCurrentGestureOverscrollConsumer(@Nullable Consumer<Boolean> consumer) {
         mScrollViewFields.setCurrentGestureOverscrollConsumer(consumer);
+    }
+
+    @Override
+    public void setCurrentGestureInGutsConsumer(@Nullable Consumer<Boolean> consumer) {
+        mScrollViewFields.setCurrentGestureInGutsConsumer(consumer);
     }
 
     @Override
@@ -3537,33 +3547,41 @@ public class NotificationStackScrollLayout
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (SceneContainerFlag.isEnabled() && mIsBeingDragged) {
+        if (SceneContainerFlag.isEnabled()) {
             int action = ev.getActionMasked();
-            boolean isUpOrCancel = action == ACTION_UP || action == ACTION_CANCEL;
-            if (mSendingTouchesToSceneFramework) {
-                MotionEvent adjustedEvent = MotionEvent.obtain(ev);
-                adjustedEvent.setLocation(ev.getRawX(), ev.getRawY());
-                mController.sendTouchToSceneFramework(adjustedEvent);
-                mScrollViewFields.sendCurrentGestureOverscroll(
-                        getExpandedInThisMotion() && !isUpOrCancel);
-                adjustedEvent.recycle();
-            } else if (!isUpOrCancel) {
-                // if this is the first touch being sent to the scene framework,
-                // convert it into a synthetic DOWN event.
-                mSendingTouchesToSceneFramework = true;
-                MotionEvent downEvent = MotionEvent.obtain(ev);
-                downEvent.setAction(MotionEvent.ACTION_DOWN);
-                downEvent.setLocation(ev.getRawX(), ev.getRawY());
-                mController.sendTouchToSceneFramework(downEvent);
-                mScrollViewFields.sendCurrentGestureOverscroll(getExpandedInThisMotion());
-                downEvent.recycle();
+            boolean isTouchInGuts = mController.isTouchInGutsView(ev);
+            if (action == MotionEvent.ACTION_DOWN && !isTouchInGuts) {
+                mController.closeControlsDueToOutsideTouch();
             }
+            if (mIsBeingDragged) {
+                boolean isUpOrCancel = action == ACTION_UP || action == ACTION_CANCEL;
+                if (mSendingTouchesToSceneFramework) {
+                    MotionEvent adjustedEvent = MotionEvent.obtain(ev);
+                    adjustedEvent.setLocation(ev.getRawX(), ev.getRawY());
+                    mScrollViewFields.sendCurrentGestureOverscroll(
+                            getExpandedInThisMotion() && !isUpOrCancel);
+                    mController.sendTouchToSceneFramework(adjustedEvent);
+                    adjustedEvent.recycle();
+                } else if (!isUpOrCancel) {
+                    // if this is the first touch being sent to the scene framework,
+                    // convert it into a synthetic DOWN event.
+                    mSendingTouchesToSceneFramework = true;
+                    MotionEvent downEvent = MotionEvent.obtain(ev);
+                    downEvent.setAction(MotionEvent.ACTION_DOWN);
+                    downEvent.setLocation(ev.getRawX(), ev.getRawY());
+                    mScrollViewFields.sendCurrentGestureInGuts(isTouchInGuts);
+                    mScrollViewFields.sendCurrentGestureOverscroll(getExpandedInThisMotion());
+                    mController.sendTouchToSceneFramework(downEvent);
+                    downEvent.recycle();
+                }
 
-            if (isUpOrCancel) {
-                mScrollViewFields.sendCurrentGestureOverscroll(false);
-                setIsBeingDragged(false);
+                if (isUpOrCancel) {
+                    mScrollViewFields.sendCurrentGestureInGuts(false);
+                    mScrollViewFields.sendCurrentGestureOverscroll(false);
+                    setIsBeingDragged(false);
+                }
+                return false;
             }
-            return false;
         }
         return TouchLogger.logDispatchTouch(TAG, ev, super.dispatchTouchEvent(ev));
     }

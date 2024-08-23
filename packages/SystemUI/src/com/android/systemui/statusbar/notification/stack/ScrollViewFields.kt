@@ -53,6 +53,11 @@ class ScrollViewFields {
      */
     var currentGestureOverscrollConsumer: Consumer<Boolean>? = null
     /**
+     * When a gesture is on open notification guts, which means scene container should not close the
+     * guts off of this gesture, we can notify the placeholder through here.
+     */
+    var currentGestureInGutsConsumer: Consumer<Boolean>? = null
+    /**
      * Any time the heads up height is recalculated, it should be updated here to be used by the
      * placeholder
      */
@@ -65,6 +70,10 @@ class ScrollViewFields {
     /** send [isCurrentGestureOverscroll] to the [currentGestureOverscrollConsumer], if present. */
     fun sendCurrentGestureOverscroll(isCurrentGestureOverscroll: Boolean) =
         currentGestureOverscrollConsumer?.accept(isCurrentGestureOverscroll)
+
+    /** send [isCurrentGestureInGuts] to the [currentGestureInGutsConsumer], if present. */
+    fun sendCurrentGestureInGuts(isCurrentGestureInGuts: Boolean) =
+        currentGestureInGutsConsumer?.accept(isCurrentGestureInGuts)
 
     /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
     fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)
