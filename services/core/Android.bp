@@ -225,6 +225,7 @@ java_library_static {
         "updates_flags_lib",
         "com_android_server_accessibility_flags_lib",
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
+        "com_android_launcher3_flags_lib",
         "com_android_wm_shell_flags_lib",
         "com.android.server.utils_aconfig-java",
         "service-jobscheduler-deviceidle.flags-aconfig-java",
