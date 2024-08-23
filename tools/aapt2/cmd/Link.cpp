@@ -306,6 +306,7 @@ struct ResourceFileFlattenerOptions {
   OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
+  FeatureFlagValues feature_flag_values;
 };
 
 // A sampling of public framework resource IDs.
@@ -670,6 +671,13 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               if (!result) {
                 return false;
               }
+            }
+
+            FeatureFlagsFilterOptions flags_filter_options;
+            flags_filter_options.flags_must_be_readonly = true;
+            FeatureFlagsFilter flags_filter(options_.feature_flag_values, flags_filter_options);
+            if (!flags_filter.Consume(context_, doc.get())) {
+              return 1;
             }
 
             error |= !FlattenXml(context_, *doc, dst_path, options_.keep_raw_values,
@@ -1926,6 +1934,7 @@ class Linker {
         static_cast<bool>(options_.generate_proguard_rules_path);
     file_flattener_options.output_format = options_.output_format;
     file_flattener_options.do_not_fail_on_missing_resources = options_.merge_only;
+    file_flattener_options.feature_flag_values = options_.feature_flag_values;
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
     if (!file_flattener.Flatten(table, writer)) {

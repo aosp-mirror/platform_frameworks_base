@@ -117,8 +117,8 @@ class ToggleResizeDesktopTaskTransitionHandler(
                             finishCallback.onTransitionFinished(null)
                             initialBounds = null
                             boundsAnimator = null
-                            interactionJankMonitor.end(
-                                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
                         }
                     )
                     addUpdateListener { anim ->

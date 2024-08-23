@@ -31,9 +31,8 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
-import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
-import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +43,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -55,12 +53,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
     private val dispatcher = kosmos.testDispatcher
     private val zenModeRepository = kosmos.fakeZenModeRepository
 
-    private val underTest =
-        ModesTileDataInteractor(
-            context,
-            ZenModeInteractor(zenModeRepository, mock<NotificationSettingsRepository>()),
-            dispatcher
-        )
+    private val underTest = ModesTileDataInteractor(context, kosmos.zenModeInteractor, dispatcher)
 
     @Before
     fun setUp() {

@@ -93,7 +93,7 @@ class ModesTileTest : SysuiTestCase() {
     private val tileDataInteractor =
         ModesTileDataInteractor(
             context,
-            ZenModeInteractor(zenModeRepository, mock<NotificationSettingsRepository>()),
+            ZenModeInteractor(context, zenModeRepository, mock<NotificationSettingsRepository>()),
             testDispatcher
         )
     private val mapper =

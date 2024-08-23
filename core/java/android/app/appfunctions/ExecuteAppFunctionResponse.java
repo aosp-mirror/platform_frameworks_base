@@ -41,13 +41,16 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
             new Creator<ExecuteAppFunctionResponse>() {
                 @Override
                 public ExecuteAppFunctionResponse createFromParcel(Parcel parcel) {
-                    GenericDocument result =
-                            Objects.requireNonNull(GenericDocument.createFromParcel(parcel));
+                    GenericDocumentWrapper resultWrapper =
+                            Objects.requireNonNull(
+                                    GenericDocumentWrapper
+                                            .CREATOR.createFromParcel(parcel));
                     Bundle extras = Objects.requireNonNull(
                             parcel.readBundle(Bundle.class.getClassLoader()));
                     int resultCode = parcel.readInt();
                     String errorMessage = parcel.readString8();
-                    return new ExecuteAppFunctionResponse(result, extras, resultCode, errorMessage);
+                    return new ExecuteAppFunctionResponse(
+                            resultWrapper, extras, resultCode, errorMessage);
                 }
 
                 @Override
@@ -127,7 +130,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      * <p>See {@link #getResultDocument} for more information on extracting the return value.
      */
     @NonNull
-    private final GenericDocument mResultDocument;
+    private final GenericDocumentWrapper mResultDocumentWrapper;
 
     /**
      * Returns the additional metadata data relevant to this function execution response.
@@ -135,14 +138,27 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
     @NonNull
     private final Bundle mExtras;
 
-    private ExecuteAppFunctionResponse(@NonNull GenericDocument resultDocument,
+    private ExecuteAppFunctionResponse(@NonNull GenericDocumentWrapper resultDocumentWrapper,
                                        @NonNull Bundle extras,
                                        @ResultCode int resultCode,
                                        @Nullable String errorMessage) {
-        mResultDocument = Objects.requireNonNull(resultDocument);
+        mResultDocumentWrapper = Objects.requireNonNull(resultDocumentWrapper);
         mExtras = Objects.requireNonNull(extras);
         mResultCode = resultCode;
         mErrorMessage = errorMessage;
+    }
+
+    /**
+     * Returns result codes from throwable.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    static @ResultCode int getResultCode(@NonNull Throwable t) {
+        if (t instanceof IllegalArgumentException) {
+            return ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT;
+        }
+        return ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR;
     }
 
     /**
@@ -166,7 +182,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      */
     @NonNull
     public GenericDocument getResultDocument() {
-        return mResultDocument;
+        return mResultDocumentWrapper.getValue();
     }
 
     /**
@@ -210,7 +226,7 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mResultDocument.writeToParcel(dest, flags);
+        mResultDocumentWrapper.writeToParcel(dest, flags);
         dest.writeBundle(mExtras);
         dest.writeInt(mResultCode);
         dest.writeString8(mErrorMessage);
@@ -236,24 +252,13 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
     }
 
     /**
-     * Returns result codes from throwable.
-     *
-     * @hide
-     */
-    static @ResultCode int getResultCode(@NonNull Throwable t) {
-        if (t instanceof IllegalArgumentException) {
-            return ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT;
-        }
-        return ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR;
-    }
-
-    /**
      * The builder for creating {@link ExecuteAppFunctionResponse} instances.
      */
     @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
     public static final class Builder {
         @NonNull
-        private GenericDocument mResultDocument = new GenericDocument.Builder<>("", "", "").build();
+        private GenericDocument mResultDocument =
+                new GenericDocument.Builder<>("", "", "").build();
         @NonNull
         private Bundle mExtras = Bundle.EMPTY;
         private int mResultCode;
@@ -271,7 +276,8 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
          * with a result code of {@link #RESULT_OK} and a resultDocument.
          */
         public Builder(@NonNull GenericDocument resultDocument) {
-            mResultDocument = Objects.requireNonNull(resultDocument);
+            Objects.requireNonNull(resultDocument);
+            mResultDocument = resultDocument;
             mResultCode = RESULT_OK;
         }
 
@@ -300,7 +306,8 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
         @NonNull
         public ExecuteAppFunctionResponse build() {
             return new ExecuteAppFunctionResponse(
-                    mResultDocument, mExtras, mResultCode, mErrorMessage);
+                    new GenericDocumentWrapper(mResultDocument),
+                    mExtras, mResultCode, mErrorMessage);
         }
     }
 }

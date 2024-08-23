@@ -13928,7 +13928,10 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public void getCarrierRestrictionStatus(@NonNull Executor executor,
             @NonNull @CarrierRestrictionStatus
                     Consumer<Integer> resultListener) {

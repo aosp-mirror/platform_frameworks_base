@@ -18,6 +18,7 @@ package com.android.systemui.qs.composefragment.viewmodel
 
 import android.content.res.Resources
 import android.graphics.Rect
+import androidx.annotation.FloatRange
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
@@ -79,11 +80,17 @@ constructor(
             _qsVisible.value = value
         }
 
-    private val _qsExpansion = MutableStateFlow(0f)
+    // This can only be negative if undefined (in which case it will be -1f), else it will be
+    // in [0, 1]. In some cases, it could be set back to -1f internally to indicate that it's
+    // different to every value in [0, 1].
+    @FloatRange(from = -1.0, to = 1.0) private val _qsExpansion = MutableStateFlow(-1f)
     var qsExpansionValue: Float
         get() = _qsExpansion.value
         set(value) {
-            _qsExpansion.value = value
+            if (value < 0f) {
+                _qsExpansion.value = -1f
+            }
+            _qsExpansion.value = value.coerceIn(0f, 1f)
         }
 
     private val _panelFraction = MutableStateFlow(0f)
