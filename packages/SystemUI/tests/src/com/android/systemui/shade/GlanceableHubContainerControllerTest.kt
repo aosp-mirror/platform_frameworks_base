@@ -58,6 +58,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.controller.keyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
@@ -140,7 +141,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
-                    kosmos.lockscreenSmartspaceController
+                    kosmos.lockscreenSmartspaceController,
+                    logcatLogBuffer("GlanceableHubContainerControllerTest")
                 )
         }
         testableLooper = TestableLooper.get(this)
@@ -186,7 +188,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         kosmos.sceneDataSourceDelegator,
                         kosmos.notificationStackScrollLayoutController,
                         kosmos.keyguardMediaController,
-                        kosmos.lockscreenSmartspaceController
+                        kosmos.lockscreenSmartspaceController,
+                        logcatLogBuffer("GlanceableHubContainerControllerTest")
                     )
 
                 // First call succeeds.
@@ -214,7 +217,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
-                    kosmos.lockscreenSmartspaceController
+                    kosmos.lockscreenSmartspaceController,
+                    logcatLogBuffer("GlanceableHubContainerControllerTest")
                 )
 
             assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.INITIALIZED)
@@ -237,7 +241,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
-                    kosmos.lockscreenSmartspaceController
+                    kosmos.lockscreenSmartspaceController,
+                    logcatLogBuffer("GlanceableHubContainerControllerTest")
                 )
 
             // Only initView without attaching a view as we don't want the flows to start collecting
