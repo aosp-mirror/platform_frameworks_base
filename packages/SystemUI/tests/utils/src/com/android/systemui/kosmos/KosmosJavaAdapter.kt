@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.fromOccludedTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -128,6 +129,7 @@ class KosmosJavaAdapter() {
     val deviceProvisioningInteractor by lazy { kosmos.deviceProvisioningInteractor }
     val fakeDeviceProvisioningRepository by lazy { kosmos.fakeDeviceProvisioningRepository }
     val fromLockscreenTransitionInteractor by lazy { kosmos.fromLockscreenTransitionInteractor }
+    val fromOccludedTransitionInteractor by lazy { kosmos.fromOccludedTransitionInteractor }
     val fromPrimaryBouncerTransitionInteractor by lazy {
         kosmos.fromPrimaryBouncerTransitionInteractor
     }
