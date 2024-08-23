@@ -52,10 +52,6 @@
       "host": true
     },
     {
-      "name": "RavenwoodCoreTest",
-      "host": true
-    },
-    {
       "name": "RavenwoodResApkTest",
       "host": true
     },
