@@ -322,41 +322,6 @@ public class ZenModeTest {
         verify(iconLoader).getIcon(any(), eq(IMPLICIT_ZEN_RULE));
     }
 
-    @Test
-    public void getLockscreenIcon_normalMode_loadsIconNormally() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
-        ZenMode mode = new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, false));
-
-        ListenableFuture<Drawable> unused = mode.getLockscreenIcon(
-                RuntimeEnvironment.getApplication(), iconLoader);
-
-        verify(iconLoader).getIcon(any(), eq(ZEN_RULE));
-    }
-
-    @Test
-    public void getLockscreenIcon_manualDnd_returnsFixedIcon() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
-
-        ListenableFuture<Drawable> future = TestModeBuilder.MANUAL_DND_INACTIVE.getLockscreenIcon(
-                RuntimeEnvironment.getApplication(), iconLoader);
-
-        assertThat(future.isDone()).isTrue();
-        verify(iconLoader, never()).getIcon(any(), any());
-    }
-
-    @Test
-    public void getLockscreenIcon_implicitMode_returnsFixedIcon() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
-        ZenMode mode = new ZenMode(IMPLICIT_RULE_ID, IMPLICIT_ZEN_RULE,
-                zenConfigRuleFor(IMPLICIT_ZEN_RULE, false));
-
-        ListenableFuture<Drawable> future = mode.getLockscreenIcon(
-                RuntimeEnvironment.getApplication(), iconLoader);
-
-        assertThat(future.isDone()).isTrue();
-        verify(iconLoader, never()).getIcon(any(), any());
-    }
-
     private static void assertUnparceledIsEqualToOriginal(String type, ZenMode original) {
         Parcel parcel = Parcel.obtain();
         try {
