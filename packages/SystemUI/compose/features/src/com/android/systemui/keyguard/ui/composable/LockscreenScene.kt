@@ -25,6 +25,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneActionsViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -39,7 +40,7 @@ class LockscreenScene
 constructor(
     actionsViewModelFactory: LockscreenSceneActionsViewModel.Factory,
     private val lockscreenContent: Lazy<LockscreenContent>,
-) : ComposableScene {
+) : ExclusiveActivatable(), ComposableScene {
     override val key = Scenes.Lockscreen
 
     private val actionsViewModel: LockscreenSceneActionsViewModel by lazy {
@@ -49,7 +50,7 @@ constructor(
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions
 
-    override suspend fun activate(): Nothing {
+    override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
     }
 
