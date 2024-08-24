@@ -89,6 +89,11 @@ constructor(
             launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
             launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
             launch {
+                viewModel.isPulsing.collect { isPulsing ->
+                    view.setPulsing(isPulsing, viewModel.shouldAnimatePulse.value)
+                }
+            }
+            launch {
                 viewModel.shouldResetStackTop
                     .filter { it }
                     .collect { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }

@@ -70,7 +70,7 @@ private class PredictiveBackTransition(
     val coroutineScope: CoroutineScope,
     fromScene: SceneKey,
     toScene: SceneKey,
-) : TransitionState.Transition(fromScene, toScene) {
+) : TransitionState.Transition.ChangeCurrentScene(fromScene, toScene) {
     override var currentScene by mutableStateOf(fromScene)
         private set
 

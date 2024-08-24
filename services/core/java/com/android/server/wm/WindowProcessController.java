@@ -284,14 +284,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     static final int ANIMATING_REASON_REMOTE_ANIMATION = 1;
     /** It is set for wakefulness transition. */
     static final int ANIMATING_REASON_WAKEFULNESS_CHANGE = 1 << 1;
-    /** Whether the legacy {@link RecentsAnimation} is running. */
-    static final int ANIMATING_REASON_LEGACY_RECENT_ANIMATION = 1 << 2;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             ANIMATING_REASON_REMOTE_ANIMATION,
             ANIMATING_REASON_WAKEFULNESS_CHANGE,
-            ANIMATING_REASON_LEGACY_RECENT_ANIMATION,
     })
     @interface AnimatingReason {}
 
@@ -2017,14 +2014,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mStoppedState == STOPPED_STATE_FIRST_LAUNCH;
     }
 
-    void setRunningRecentsAnimation(boolean running) {
-        if (running) {
-            addAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        } else {
-            removeAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        }
-    }
-
     void setRunningRemoteAnimation(boolean running) {
         if (running) {
             addAnimatingReason(ANIMATING_REASON_REMOTE_ANIMATION);
@@ -2118,9 +2107,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             if ((animatingReasons & ANIMATING_REASON_WAKEFULNESS_CHANGE) != 0) {
                 pw.print("wakefulness|");
-            }
-            if ((animatingReasons & ANIMATING_REASON_LEGACY_RECENT_ANIMATION) != 0) {
-                pw.print("legacy-recents");
             }
             pw.println();
         }

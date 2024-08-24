@@ -438,13 +438,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** It is set from keyguard-going-away to set-keyguard-shown. */
     static final int DEMOTE_TOP_REASON_DURING_UNLOCKING = 1;
-    /** It is set if legacy recents animation is running. */
-    static final int DEMOTE_TOP_REASON_ANIMATING_RECENTS = 1 << 1;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             DEMOTE_TOP_REASON_DURING_UNLOCKING,
-            DEMOTE_TOP_REASON_ANIMATING_RECENTS,
     })
     @interface DemoteTopReason {}
 
@@ -1777,19 +1774,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void preloadRecentsActivity(Intent intent) {
         enforceTaskPermission("preloadRecentsActivity()");
-        final int callingPid = Binder.getCallingPid();
-        final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
                 final String recentsFeatureId = mRecentTasks.getRecentsComponentFeatureId();
                 final int recentsUid = mRecentTasks.getRecentsComponentUid();
-                final WindowProcessController caller = getProcessController(callingPid, callingUid);
-
                 final RecentsAnimation anim = new RecentsAnimation(this, mTaskSupervisor,
-                        getActivityStartController(), mWindowManager, intent, recentsComponent,
-                        recentsFeatureId, recentsUid, caller);
+                        getActivityStartController(), intent, recentsComponent,
+                        recentsFeatureId, recentsUid);
                 anim.preloadRecentsActivity();
             }
         } finally {
