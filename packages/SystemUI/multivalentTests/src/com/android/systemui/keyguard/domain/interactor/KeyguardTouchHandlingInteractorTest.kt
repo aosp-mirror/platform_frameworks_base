@@ -25,8 +25,11 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -260,6 +263,23 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun triggersFaceAuthWhenLockscreenIsClicked() =
+        testScope.runTest {
+            collectLastValue(underTest.isMenuVisible)
+            runCurrent()
+            kosmos.fakeDeviceEntryFaceAuthRepository.canRunFaceAuth.value = true
+
+            underTest.onClick(100.0f, 100.0f)
+            runCurrent()
+
+            val runningAuthRequest =
+                kosmos.fakeDeviceEntryFaceAuthRepository.runningAuthRequest.value
+            assertThat(runningAuthRequest?.first)
+                .isEqualTo(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED)
+            assertThat(runningAuthRequest?.second).isEqualTo(true)
+        }
+
+    @Test
     fun showMenu_leaveLockscreen_returnToLockscreen_menuNotVisible() =
         testScope.runTest {
             val isMenuVisible by collectLastValue(underTest.isMenuVisible)
@@ -302,6 +322,7 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 accessibilityManager = kosmos.accessibilityManagerWrapper,
                 pulsingGestureListener = kosmos.pulsingGestureListener,
+                faceAuthInteractor = kosmos.deviceEntryFaceAuthInteractor,
             )
         setUpState()
     }
