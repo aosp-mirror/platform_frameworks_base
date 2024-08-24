@@ -16,9 +16,9 @@
 
 package com.android.compose.animation.scene.subjects
 
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.OverscrollSpec
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.google.common.truth.Fact.simpleFact
 import com.google.common.truth.FailureMetadata
@@ -31,9 +31,9 @@ fun assertThat(state: TransitionState): TransitionStateSubject {
     return Truth.assertAbout(TransitionStateSubject.transitionStates()).that(state)
 }
 
-/** Assert on a [TransitionState.Transition]. */
-fun assertThat(transitions: TransitionState.Transition): TransitionSubject {
-    return Truth.assertAbout(TransitionSubject.transitions()).that(transitions)
+/** Assert on a [TransitionState.Transition.ChangeCurrentScene]. */
+fun assertThat(transition: TransitionState.Transition.ChangeCurrentScene): SceneTransitionSubject {
+    return Truth.assertAbout(SceneTransitionSubject.transitions()).that(transition)
 }
 
 class TransitionStateSubject
@@ -53,12 +53,14 @@ private constructor(
         return actual as TransitionState.Idle
     }
 
-    fun isTransition(): TransitionState.Transition {
-        if (actual !is TransitionState.Transition) {
-            failWithActual(simpleFact("expected to be TransitionState.Transition"))
+    fun isSceneTransition(): TransitionState.Transition.ChangeCurrentScene {
+        if (actual !is TransitionState.Transition.ChangeCurrentScene) {
+            failWithActual(
+                simpleFact("expected to be TransitionState.Transition.ChangeCurrentScene")
+            )
         }
 
-        return actual as TransitionState.Transition
+        return actual as TransitionState.Transition.ChangeCurrentScene
     }
 
     companion object {
@@ -68,10 +70,10 @@ private constructor(
     }
 }
 
-class TransitionSubject
+class SceneTransitionSubject
 private constructor(
     metadata: FailureMetadata,
-    private val actual: TransitionState.Transition,
+    private val actual: TransitionState.Transition.ChangeCurrentScene,
 ) : Subject(metadata, actual) {
     fun hasCurrentScene(sceneKey: SceneKey) {
         check("currentScene").that(actual.currentScene).isEqualTo(sceneKey)
@@ -132,19 +134,21 @@ private constructor(
         check("currentOverscrollSpec").that(actual.currentOverscrollSpec).isNull()
     }
 
-    fun hasBouncingScene(scene: SceneKey) {
-        if (actual !is ContentState.HasOverscrollProperties) {
+    fun hasBouncingContent(content: ContentKey) {
+        val actual = actual
+        if (actual !is TransitionState.HasOverscrollProperties) {
             failWithActual(simpleFact("expected to be ContentState.HasOverscrollProperties"))
         }
 
         check("bouncingContent")
-            .that((actual as ContentState.HasOverscrollProperties).bouncingContent)
-            .isEqualTo(scene)
+            .that((actual as TransitionState.HasOverscrollProperties).bouncingContent)
+            .isEqualTo(content)
     }
 
     companion object {
-        fun transitions() = Factory { metadata, actual: TransitionState.Transition ->
-            TransitionSubject(metadata, actual)
-        }
+        fun transitions() =
+            Factory { metadata, actual: TransitionState.Transition.ChangeCurrentScene ->
+                SceneTransitionSubject(metadata, actual)
+            }
     }
 }

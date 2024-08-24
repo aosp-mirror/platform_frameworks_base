@@ -76,7 +76,7 @@ class PredictiveBackHandlerTest {
             dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
         }
 
-        val transition = assertThat(layoutState.transitionState).isTransition()
+        val transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(0.4f)
@@ -124,7 +124,7 @@ class PredictiveBackHandlerTest {
             dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
         }
 
-        val transition = assertThat(layoutState.transitionState).isTransition()
+        val transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasPreviewProgress(0.4f)
@@ -178,13 +178,13 @@ class PredictiveBackHandlerTest {
         val dispatcher = rule.activity.onBackPressedDispatcher
         rule.runOnUiThread { dispatcher.dispatchOnBackStarted(backEvent()) }
 
-        val predictiveTransition = assertThat(layoutState.transitionState).isTransition()
+        val predictiveTransition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(predictiveTransition).hasFromScene(SceneA)
         assertThat(predictiveTransition).hasToScene(SceneB)
 
         // Start a new transition to C.
         rule.runOnUiThread { layoutState.setTargetScene(SceneC, coroutineScope) }
-        val newTransition = assertThat(layoutState.transitionState).isTransition()
+        val newTransition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(newTransition).hasFromScene(SceneA)
         assertThat(newTransition).hasToScene(SceneC)
 

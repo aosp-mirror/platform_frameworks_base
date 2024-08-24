@@ -39,6 +39,8 @@ import dagger.Lazy
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
@@ -72,7 +74,7 @@ constructor(
         }
 
     private fun expandFractionForTransition(
-        state: ObservableTransitionState.Transition,
+        state: ObservableTransitionState.Transition.ChangeCurrentScene,
         shadeExpansion: Float,
         shadeMode: ShadeMode,
         qsExpansion: Float,
@@ -111,7 +113,7 @@ constructor(
                 when (transitionState) {
                     is ObservableTransitionState.Idle ->
                         expandFractionForScene(transitionState.currentScene, shadeExpansion)
-                    is ObservableTransitionState.Transition ->
+                    is ObservableTransitionState.Transition.ChangeCurrentScene ->
                         expandFractionForTransition(
                             transitionState,
                             shadeExpansion,
@@ -119,6 +121,9 @@ constructor(
                             qsExpansion,
                             quickSettingsScene
                         )
+                    is ObservableTransitionState.Transition.ShowOrHideOverlay,
+                    is ObservableTransitionState.Transition.ReplaceOverlay ->
+                        TODO("b/359173565: Handle overlay transitions")
                 }
             }
             .distinctUntilChanged()
@@ -213,13 +218,30 @@ constructor(
         }
     }
 
+    /** Whether the notification stack is displayed in pulsing mode. */
+    val isPulsing: Flow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            keyguardInteractor.get().isPulsing.dumpWhileCollecting("isPulsing")
+        }
+    }
+
+    val shouldAnimatePulse: StateFlow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            MutableStateFlow(false)
+        } else {
+            keyguardInteractor.get().isAodAvailable
+        }
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(): NotificationScrollViewModel
     }
 }
 
-private fun ObservableTransitionState.Transition.isBetween(
+private fun ObservableTransitionState.Transition.ChangeCurrentScene.isBetween(
     a: (SceneKey) -> Boolean,
     b: (SceneKey) -> Boolean
 ): Boolean = (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))

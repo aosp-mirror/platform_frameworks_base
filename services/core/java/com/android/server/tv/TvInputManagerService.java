@@ -19,6 +19,7 @@ package com.android.server.tv;
 import static android.media.AudioManager.DEVICE_NONE;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
+import static android.media.tv.flags.Flags.tifUnbindInactiveTis;
 import static android.media.tv.flags.Flags.kidsModeTvdbSharing;
 
 import android.annotation.NonNull;
@@ -4515,12 +4516,14 @@ public final class TvInputManagerService extends SystemService {
                     break;
                 }
                 case MSG_UPDATE_HARDWARE_TIS_BINDING:
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    int userId = (int) args.arg1;
-                    synchronized (mLock) {
-                        updateHardwareTvInputServiceBindingLocked(userId);
+                    if (tifUnbindInactiveTis()) {
+                        SomeArgs args = (SomeArgs) msg.obj;
+                        int userId = (int) args.arg1;
+                        synchronized (mLock) {
+                            updateHardwareTvInputServiceBindingLocked(userId);
+                        }
+                        args.recycle();
                     }
-                    args.recycle();
                     break;
                 default: {
                     Slog.w(TAG, "unhandled message code: " + msg.what);

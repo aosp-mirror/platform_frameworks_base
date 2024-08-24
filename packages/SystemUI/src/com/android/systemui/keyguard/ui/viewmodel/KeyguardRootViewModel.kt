@@ -162,30 +162,26 @@ constructor(
 
     private val alphaOnShadeExpansion: Flow<Float> =
         combineTransform(
-                keyguardTransitionInteractor.isInTransition(
-                    edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
-                    edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
-                ),
-                keyguardTransitionInteractor.isInTransition(
-                    edge = Edge.create(from = Scenes.Bouncer, to = LOCKSCREEN),
-                    edgeWithoutSceneContainer =
-                        Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
+                anyOf(
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
+                        edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
+                    ),
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(from = Scenes.Bouncer, to = LOCKSCREEN),
+                        edgeWithoutSceneContainer =
+                            Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
+                    ),
+                    keyguardTransitionInteractor.isInTransition(
+                        Edge.create(from = LOCKSCREEN, to = DREAMING)
+                    ),
                 ),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) {
-                lockscreenToGoneTransitionRunning,
-                primaryBouncerToLockscreenTransitionRunning,
-                isOnLockscreen,
-                qsExpansion,
-                shadeExpansion ->
+            ) { disabledTransitionRunning, isOnLockscreen, qsExpansion, shadeExpansion ->
                 // Fade out quickly as the shade expands
-                if (
-                    isOnLockscreen &&
-                        !lockscreenToGoneTransitionRunning &&
-                        !primaryBouncerToLockscreenTransitionRunning
-                ) {
+                if (isOnLockscreen && !disabledTransitionRunning) {
                     val alpha =
                         1f -
                             MathUtils.constrainedMap(

@@ -20,6 +20,7 @@ import android.content.res.Resources
 import com.android.compose.animation.scene.ContentKey
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
@@ -57,6 +58,7 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
 ) : SysUiViewModel() {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
@@ -72,6 +74,10 @@ constructor(
     private val _isContentVisible = MutableStateFlow(true)
     /** Whether the content of the scene UI should be shown. */
     val isContentVisible: StateFlow<Boolean> = _isContentVisible.asStateFlow()
+
+    /** @see DeviceEntryInteractor.isBypassEnabled */
+    val isBypassEnabled: StateFlow<Boolean>
+        get() = deviceEntryInteractor.isBypassEnabled
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {

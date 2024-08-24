@@ -16,7 +16,10 @@
 
 package com.android.systemui.communal.widgets
 
+import android.app.Activity
+import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Intent
+import android.content.IntentSender
 import android.os.Bundle
 import android.os.RemoteException
 import android.util.Log
@@ -34,6 +37,7 @@ import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.Flags.communalEditWidgetsActivityFinishFix
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -68,11 +72,105 @@ constructor(
         const val EXTRA_OPEN_WIDGET_PICKER_ON_START = "open_widget_picker_on_start"
     }
 
+    /**
+     * [ActivityController] handles closing the activity in the case it is backgrounded without
+     * waiting for an activity result
+     */
+    interface ActivityController {
+        /**
+         * Invoked when waiting for an activity result changes, either initiating such wait or
+         * finishing due to the return of a result.
+         */
+        fun onWaitingForResult(waitingForResult: Boolean) {}
+
+        /** Set the visibility of the activity under control. */
+        fun setActivityFullyVisible(fullyVisible: Boolean) {}
+    }
+
+    /**
+     * A nop ActivityController to be use when the communalEditWidgetsActivityFinishFix flag is
+     * false.
+     */
+    class NopActivityController : ActivityController
+
+    /**
+     * A functional ActivityController to be used when the communalEditWidgetsActivityFinishFix flag
+     * is true.
+     */
+    class ActivityControllerImpl(activity: Activity) : ActivityController {
+        companion object {
+            private const val STATE_EXTRA_IS_WAITING_FOR_RESULT = "extra_is_waiting_for_result"
+        }
+
+        private var waitingForResult = false
+        private var activityFullyVisible = false
+
+        init {
+            activity.registerActivityLifecycleCallbacks(
+                object : ActivityLifecycleCallbacks {
+                    override fun onActivityCreated(
+                        activity: Activity,
+                        savedInstanceState: Bundle?
+                    ) {
+                        waitingForResult =
+                            savedInstanceState?.getBoolean(STATE_EXTRA_IS_WAITING_FOR_RESULT)
+                                ?: false
+                    }
+
+                    override fun onActivityStarted(activity: Activity) {
+                        // Nothing to implement.
+                    }
+
+                    override fun onActivityResumed(activity: Activity) {
+                        // Nothing to implement.
+                    }
+
+                    override fun onActivityPaused(activity: Activity) {
+                        // Nothing to implement.
+                    }
+
+                    override fun onActivityStopped(activity: Activity) {
+                        // If we're not backgrounded due to waiting for a result (either widget
+                        // selection or configuration), and we are fully visible, then finish the
+                        // activity.
+                        if (
+                            !waitingForResult &&
+                                activityFullyVisible &&
+                                !activity.isChangingConfigurations
+                        ) {
+                            activity.finish()
+                        }
+                    }
+
+                    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+                        outState.putBoolean(STATE_EXTRA_IS_WAITING_FOR_RESULT, waitingForResult)
+                    }
+
+                    override fun onActivityDestroyed(activity: Activity) {
+                        // Nothing to implement.
+                    }
+                }
+            )
+        }
+
+        override fun onWaitingForResult(waitingForResult: Boolean) {
+            this.waitingForResult = waitingForResult
+        }
+
+        override fun setActivityFullyVisible(fullyVisible: Boolean) {
+            activityFullyVisible = fullyVisible
+        }
+    }
+
     private val logger = Logger(logBuffer, "EditWidgetsActivity")
 
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
 
     private var shouldOpenWidgetPickerOnStart = false
+
+    private val activityController: ActivityController =
+        if (communalEditWidgetsActivityFinishFix()) ActivityControllerImpl(this)
+        else NopActivityController()
 
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -111,8 +209,10 @@ constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         listenForTransitionAndChangeScene()
 
+        activityController.setActivityFullyVisible(false)
         communalViewModel.setEditModeOpen(true)
 
         val windowInsetsController = window.decorView.windowInsetsController
@@ -159,6 +259,9 @@ constructor(
                 communalViewModel.currentScene.first { it == CommunalScenes.Blank }
                 communalViewModel.setEditModeState(EditModeState.SHOWING)
 
+                // Inform the ActivityController that we are now fully visible.
+                activityController.setActivityFullyVisible(true)
+
                 // Show the widget picker, if necessary, after the edit activity has animated in.
                 // Waiting until after the activity has appeared avoids transitions issues.
                 if (shouldOpenWidgetPickerOnStart) {
@@ -198,7 +301,34 @@ constructor(
         }
     }
 
+    override fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
+        activityController.onWaitingForResult(true)
+        super.startActivityForResult(intent, requestCode, options)
+    }
+
+    override fun startIntentSenderForResult(
+        intent: IntentSender,
+        requestCode: Int,
+        fillInIntent: Intent?,
+        flagsMask: Int,
+        flagsValues: Int,
+        extraFlags: Int,
+        options: Bundle?
+    ) {
+        activityController.onWaitingForResult(true)
+        super.startIntentSenderForResult(
+            intent,
+            requestCode,
+            fillInIntent,
+            flagsMask,
+            flagsValues,
+            extraFlags,
+            options
+        )
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        activityController.onWaitingForResult(false)
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == WidgetConfigurationController.REQUEST_CODE) {
             widgetConfigurator.setConfigurationResult(resultCode)

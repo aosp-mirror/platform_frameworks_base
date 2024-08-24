@@ -1275,10 +1275,8 @@ class ActivityMetricsLogger {
         final ActivityRecord r = info.mLastLaunchedActivity;
         final long lastTopLossTime = r.topResumedStateLossTime;
         final WindowManagerService wm = mSupervisor.mService.mWindowManager;
-        final Object controller = wm.getRecentsAnimationController();
         mLoggerHandler.postDelayed(() -> {
-            if (lastTopLossTime != r.topResumedStateLossTime
-                    || controller != wm.getRecentsAnimationController()) {
+            if (lastTopLossTime != r.topResumedStateLossTime) {
                 // Skip if the animation was finished in a short time.
                 return;
             }

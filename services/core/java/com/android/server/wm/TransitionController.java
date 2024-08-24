@@ -880,10 +880,10 @@ class TransitionController {
     }
 
     /** @see Transition#setOverrideAnimation */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options, ActivityRecord r,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setOverrideAnimation(options, startCallback, finishCallback);
+        mCollectingTransition.setOverrideAnimation(options, r, startCallback, finishCallback);
     }
 
     void setNoAnimation(WindowContainer wc) {

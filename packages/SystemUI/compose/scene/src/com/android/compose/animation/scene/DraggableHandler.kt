@@ -31,9 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.content.Scene
-import com.android.compose.animation.scene.content.state.ContentState
-import com.android.compose.animation.scene.content.state.ContentState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
@@ -582,8 +581,8 @@ private class SwipeTransition(
     replacedTransition: SwipeTransition?,
     var lastDistance: Float = DistanceUnspecified,
 ) :
-    TransitionState.Transition(_fromScene.key, _toScene.key, replacedTransition),
-    ContentState.HasOverscrollProperties {
+    TransitionState.Transition.ChangeCurrentScene(_fromScene.key, _toScene.key, replacedTransition),
+    TransitionState.HasOverscrollProperties {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
         get() = _currentScene.key

@@ -24,6 +24,7 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
+import android.provider.Settings
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -90,7 +91,16 @@ constructor(
                 // ViewCapture needs to save it's data before it is disabled, or else the data will
                 // be lost. This is expected to change in the near future, and when that happens
                 // this line should be removed.
-                bgExecutor.execute { traceurMessageSender.stopTracing() }
+                bgExecutor.execute {
+                    if (issueRecordingState.traceConfig.longTrace) {
+                        Settings.Global.putInt(
+                            contentResolver,
+                            NOTIFY_SESSION_ENDED_SETTING,
+                            DISABLED
+                        )
+                    }
+                    traceurMessageSender.stopTracing()
+                }
                 issueRecordingState.isRecording = false
             }
             ACTION_SHARE -> {
@@ -125,6 +135,8 @@ constructor(
     companion object {
         private const val TAG = "IssueRecordingService"
         private const val CHANNEL_ID = "issue_record"
+        private const val NOTIFY_SESSION_ENDED_SETTING = "should_notify_trace_session_ended"
+        private const val DISABLED = 0
 
         /**
          * Get an intent to stop the issue recording service.

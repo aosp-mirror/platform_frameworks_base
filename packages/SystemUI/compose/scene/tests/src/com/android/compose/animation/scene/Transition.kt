@@ -17,7 +17,6 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
-import com.android.compose.animation.scene.content.state.ContentState
 import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -43,10 +42,10 @@ fun transition(
     orientation: Orientation = Orientation.Horizontal,
     onFinish: ((TransitionState.Transition) -> Job)? = null,
     replacedTransition: TransitionState.Transition? = null,
-): TransitionState.Transition {
+): TransitionState.Transition.ChangeCurrentScene {
     return object :
-        TransitionState.Transition(from, to, replacedTransition),
-        ContentState.HasOverscrollProperties {
+        TransitionState.Transition.ChangeCurrentScene(from, to, replacedTransition),
+        TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
 

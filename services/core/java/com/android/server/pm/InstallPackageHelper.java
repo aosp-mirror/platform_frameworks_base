@@ -1415,8 +1415,13 @@ final class InstallPackageHelper {
                                                 + " an sdk library <"
                                                 + parsedPackage.getSdkLibraryName() + ">"
                                                 + " without changing the versionMajor, but the"
-                                                + " targetSdkVersion or minSdkVersion has changed."
-                                );
+                                                + " targetSdkVersion or minSdkVersion has changed:"
+                                                + " Old targetSdkVersion: " + oldTargetSdk
+                                                + " new targetSdkVersion: " + newTargetSdk
+                                                + " Old minSdkVersion: " + oldMinSdk
+                                                + " new minSdkVersion: " + newMinSdk
+                                                + " versionMajor: " + newVersionMajor
+                                    );
                             }
                         }
                     }

@@ -31,6 +31,8 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.fgsManagerController
 import com.android.systemui.res.R
 import com.android.systemui.shade.largeScreenHeaderHelper
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
@@ -137,6 +139,42 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
                 underTest
                 runCurrent()
                 assertThat(fgsManagerController.initialized).isTrue()
+            }
+        }
+
+    @Test
+    fun statusBarState_followsController() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val statusBarState by collectLastValue(underTest.statusBarState)
+                runCurrent()
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE)
+                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+
+                sysuiStatusBarStateController.setState(StatusBarState.KEYGUARD)
+                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE_LOCKED)
+                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE_LOCKED)
+            }
+        }
+
+    @Test
+    fun statusBarState_changesEarlyIfUpcomingStateIsKeyguard() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val statusBarState by collectLastValue(underTest.statusBarState)
+
+                sysuiStatusBarStateController.setState(StatusBarState.SHADE)
+                sysuiStatusBarStateController.setUpcomingState(StatusBarState.SHADE_LOCKED)
+                assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+
+                sysuiStatusBarStateController.setUpcomingState(StatusBarState.KEYGUARD)
+                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+
+                sysuiStatusBarStateController.setUpcomingState(StatusBarState.SHADE)
+                assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
             }
         }
 

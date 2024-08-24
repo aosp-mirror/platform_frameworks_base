@@ -39,7 +39,6 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryBiometricsAllowedInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
@@ -114,8 +113,6 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 systemPropertiesHelper = systemPropertiesHelper,
                 primaryBouncerInteractor = kosmos.primaryBouncerInteractor,
                 facePropertyRepository = kosmos.fakeFacePropertyRepository,
-                deviceEntryFingerprintAuthInteractor = kosmos.deviceEntryFingerprintAuthInteractor,
-                faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository,
                 securityModel = securityModel,
                 deviceEntryBiometricsAllowedInteractor =
                     kosmos.deviceEntryBiometricsAllowedInteractor,
@@ -217,7 +214,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
     fun resetMessageBackToDefault_faceAuthRestarts() =
         testScope.runTest {
             init()
-            verify(updateMonitor).registerCallback(keyguardUpdateMonitorCaptor.capture())
+            captureKeyguardUpdateMonitorCallback()
             val bouncerMessage by collectLastValue(underTest.bouncerMessage)
 
             underTest.setFaceAcquisitionMessage("not empty")
@@ -240,7 +237,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
     fun faceRestartDoesNotResetFingerprintMessage() =
         testScope.runTest {
             init()
-            verify(updateMonitor).registerCallback(keyguardUpdateMonitorCaptor.capture())
+            captureKeyguardUpdateMonitorCallback()
             val bouncerMessage by collectLastValue(underTest.bouncerMessage)
 
             underTest.setFingerprintAcquisitionMessage("not empty")
@@ -334,6 +331,32 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             assertThat(primaryResMessage(lockoutMessage))
                 .isEqualTo("Unlock with PIN or fingerprint")
             assertThat(lockoutMessage?.secondaryMessage?.message).isNull()
+        }
+
+    @Test
+    fun faceLockoutThenFaceFailure_doesNotUpdateMessage() =
+        testScope.runTest {
+            init()
+            captureKeyguardUpdateMonitorCallback()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
+
+            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+            kosmos.fakeDeviceEntryFaceAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(secondaryResMessage(bouncerMessage))
+                .isEqualTo("Can’t unlock with face. Too many attempts.")
+
+            // WHEN face failure comes in during lockout
+            keyguardUpdateMonitorCaptor.value.onBiometricAuthFailed(BiometricSourceType.FACE)
+
+            // THEN lockout message does NOT update to face failure message
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(secondaryResMessage(bouncerMessage))
+                .isEqualTo("Can’t unlock with face. Too many attempts.")
         }
 
     @Test
@@ -627,6 +650,10 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 assertThat(secondaryResMessage(authFlagsMessage)).isEqualTo(messagePair.second)
             }
         }
+    }
+
+    private fun captureKeyguardUpdateMonitorCallback() {
+        verify(updateMonitor).registerCallback(keyguardUpdateMonitorCaptor.capture())
     }
 
     companion object {

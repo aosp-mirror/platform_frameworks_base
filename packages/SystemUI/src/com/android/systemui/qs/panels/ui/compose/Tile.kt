@@ -24,6 +24,7 @@ import android.service.quicksettings.Tile.STATE_INACTIVE
 import android.text.TextUtils
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
@@ -81,6 +82,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
@@ -132,11 +134,16 @@ fun Tile(
     val uiState = remember(state) { state.toUiState() }
     val colors = TileDefaults.getColorForState(uiState)
 
+    // TODO(b/361789146): Draw the shapes instead of clipping
+    val tileShape = TileDefaults.animateTileShape(uiState.state)
+    val iconShape = TileDefaults.animateIconShape(uiState.state)
+
     TileContainer(
         colors = colors,
         showLabels = showLabels,
         label = uiState.label,
         iconOnly = iconOnly,
+        shape = if (iconOnly) iconShape else tileShape,
         clickEnabled = true,
         onClick = tile::onClick,
         onLongClick = tile::onLongClick,
@@ -151,6 +158,7 @@ fun Tile(
                 secondaryLabel = uiState.secondaryLabel,
                 icon = icon,
                 colors = colors,
+                iconShape = iconShape,
                 toggleClickSupported = state.handlesSecondaryClick,
                 onClick = {
                     if (state.handlesSecondaryClick) {
@@ -169,6 +177,7 @@ private fun TileContainer(
     showLabels: Boolean,
     label: String,
     iconOnly: Boolean,
+    shape: Shape,
     clickEnabled: Boolean = false,
     onClick: (Expandable) -> Unit = {},
     onLongClick: (Expandable) -> Unit = {},
@@ -189,10 +198,8 @@ private fun TileContainer(
             }
         Expandable(
             color = backgroundColor,
-            shape = TileDefaults.TileShape,
-            modifier =
-                Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
-                    .clip(TileDefaults.TileShape)
+            shape = shape,
+            modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height)).clip(shape)
         ) {
             Box(
                 modifier =
@@ -227,6 +234,7 @@ private fun LargeTileContent(
     secondaryLabel: String?,
     icon: Icon,
     colors: TileColors,
+    iconShape: Shape,
     toggleClickSupported: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
@@ -239,7 +247,7 @@ private fun LargeTileContent(
         Box(
             modifier =
                 Modifier.fillMaxHeight().aspectRatio(1f).thenIf(toggleClickSupported) {
-                    Modifier.clip(TileDefaults.TileShape)
+                    Modifier.clip(iconShape)
                         .background(colors.iconBackground, { 1f })
                         .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                 }
@@ -391,7 +399,7 @@ private fun RemoveTileTarget() {
         horizontalArrangement = tileHorizontalArrangement(),
         modifier =
             Modifier.fillMaxHeight()
-                .border(1.dp, LocalContentColor.current, shape = TileDefaults.TileShape)
+                .border(1.dp, LocalContentColor.current, shape = CircleShape)
                 .padding(10.dp)
     ) {
         Icon(imageVector = Icons.Default.Clear, contentDescription = null)
@@ -533,7 +541,7 @@ fun LazyGridScope.editTiles(
                         Modifier.background(
                                 color = MaterialTheme.colorScheme.secondary,
                                 alpha = { EditModeTileDefaults.PLACEHOLDER_ALPHA },
-                                shape = TileDefaults.TileShape
+                                shape = RoundedCornerShape(TileDefaults.InactiveCornerRadius)
                             )
                             .animateItem()
                     )
@@ -619,6 +627,7 @@ fun EditTile(
         showLabels = showLabels,
         label = label,
         iconOnly = iconOnly,
+        shape = RoundedCornerShape(TileDefaults.InactiveCornerRadius),
         modifier = modifier,
     ) {
         if (iconOnly) {
@@ -633,6 +642,7 @@ fun EditTile(
                 secondaryLabel = tileViewModel.appName?.load(),
                 icon = tileViewModel.icon,
                 colors = colors,
+                iconShape = RoundedCornerShape(TileDefaults.InactiveCornerRadius),
             )
         }
     }
@@ -736,7 +746,9 @@ private object EditModeTileDefaults {
 }
 
 private object TileDefaults {
-    val TileShape = CircleShape
+    val InactiveCornerRadius = 50.dp
+    val ActiveIconCornerRadius = 16.dp
+    val ActiveTileCornerRadius = 24.dp
     val IconTileWithLabelHeight = 140.dp
 
     /** An active tile without dual target uses the active color as background */
@@ -794,6 +806,39 @@ private object TileDefaults {
             STATE_INACTIVE -> inactiveTileColors()
             else -> unavailableTileColors()
         }
+    }
+
+    @Composable
+    fun animateIconShape(state: Int): Shape {
+        return animateShape(
+            state = state,
+            activeCornerRadius = ActiveTileCornerRadius,
+            label = "QSTileCornerRadius",
+        )
+    }
+
+    @Composable
+    fun animateTileShape(state: Int): Shape {
+        return animateShape(
+            state = state,
+            activeCornerRadius = ActiveIconCornerRadius,
+            label = "QSTileIconCornerRadius",
+        )
+    }
+
+    @Composable
+    fun animateShape(state: Int, activeCornerRadius: Dp, label: String): Shape {
+        val animatedCornerRadius by
+            animateDpAsState(
+                targetValue =
+                    if (state == STATE_ACTIVE) {
+                        activeCornerRadius
+                    } else {
+                        InactiveCornerRadius
+                    },
+                label = label
+            )
+        return RoundedCornerShape(animatedCornerRadius)
     }
 }
 
