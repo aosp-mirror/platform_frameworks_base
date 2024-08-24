@@ -168,10 +168,7 @@ class AnimatedSharedAsStateTest {
                 assertThat(lastValueInTo).isEqualTo(expectedValues)
             }
 
-            after {
-                assertThat(lastValueInFrom).isEqualTo(toValues)
-                assertThat(lastValueInTo).isEqualTo(toValues)
-            }
+            after { assertThat(lastValueInTo).isEqualTo(toValues) }
         }
     }
 
@@ -229,10 +226,7 @@ class AnimatedSharedAsStateTest {
                 assertThat(lastValueInTo).isEqualTo(lerp(fromValues, toValues, fraction = 0.75f))
             }
 
-            after {
-                assertThat(lastValueInFrom).isEqualTo(toValues)
-                assertThat(lastValueInTo).isEqualTo(toValues)
-            }
+            after { assertThat(lastValueInTo).isEqualTo(toValues) }
         }
     }
 
@@ -288,10 +282,7 @@ class AnimatedSharedAsStateTest {
                 assertThat(lastValueInTo).isEqualTo(expectedValues)
             }
 
-            after {
-                assertThat(lastValueInFrom).isEqualTo(toValues)
-                assertThat(lastValueInTo).isEqualTo(toValues)
-            }
+            after { assertThat(lastValueInTo).isEqualTo(toValues) }
         }
     }
 

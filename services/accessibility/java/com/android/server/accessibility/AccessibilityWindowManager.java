@@ -594,10 +594,6 @@ public class AccessibilityWindowManager {
 
         private boolean windowMattersToAccessibilityLocked(AccessibilityWindow a11yWindow,
                 int windowId, Region regionInScreen, Region unaccountedSpace) {
-            if (a11yWindow.ignoreRecentsAnimationForAccessibility()) {
-                return false;
-            }
-
             if (a11yWindow.isFocused()) {
                 return true;
             }

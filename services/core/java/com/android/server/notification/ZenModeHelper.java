@@ -485,7 +485,7 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
             populateZenRule(pkg, automaticZenRule, rule, origin, /* isNew= */ true);
-            rule = maybeRestoreRemovedRule(newConfig, rule, automaticZenRule, origin);
+            rule = maybeRestoreRemovedRule(newConfig, pkg, rule, automaticZenRule, origin);
             newConfig.automaticRules.put(rule.id, rule);
             maybeReplaceDefaultRule(newConfig, automaticZenRule);
 
@@ -498,7 +498,7 @@ public class ZenModeHelper {
     }
 
     @GuardedBy("mConfigLock")
-    private ZenRule maybeRestoreRemovedRule(ZenModeConfig config, ZenRule ruleToAdd,
+    private ZenRule maybeRestoreRemovedRule(ZenModeConfig config, String pkg, ZenRule ruleToAdd,
             AutomaticZenRule azrToAdd, @ConfigOrigin int origin) {
         if (!Flags.modesApi()) {
             return ruleToAdd;
@@ -522,10 +522,18 @@ public class ZenModeHelper {
         if (origin != ORIGIN_APP) {
             return ruleToAdd; // Okay to create anew.
         }
+        if (Flags.modesUi()) {
+            if (!Objects.equals(ruleToRestore.pkg, pkg)
+                    || !Objects.equals(ruleToRestore.component, azrToAdd.getOwner())) {
+                // Apps are not allowed to change the owner via updateAutomaticZenRule(). Thus, if
+                // they have to, delete+add is their only option.
+                return ruleToAdd;
+            }
+        }
 
         // "Preserve" the previous rule by considering the azrToAdd an update instead.
         // Only app-modifiable fields will actually be modified.
-        populateZenRule(ruleToRestore.pkg, azrToAdd, ruleToRestore, origin, /* isNew= */ false);
+        populateZenRule(pkg, azrToAdd, ruleToRestore, origin, /* isNew= */ false);
         return ruleToRestore;
     }
 

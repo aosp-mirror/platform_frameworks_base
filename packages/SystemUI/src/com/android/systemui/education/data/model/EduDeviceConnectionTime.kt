@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.platform.test.ravenwood.nativesubstitution;
+package com.android.systemui.education.data.model
 
-import com.android.ravenwood.common.JvmWorkaround;
+import java.time.Instant
 
-import java.io.FileDescriptor;
-
-public class ParcelFileDescriptor_host {
-    public static void setFdInt(FileDescriptor fd, int fdInt) {
-        JvmWorkaround.getInstance().setFdInt(fd, fdInt);
-    }
-
-    public static int getFdInt(FileDescriptor fd) {
-        return JvmWorkaround.getInstance().getFdInt(fd);
-    }
-}
+data class EduDeviceConnectionTime(
+    val keyboardFirstConnectionTime: Instant? = null,
+    val touchpadFirstConnectionTime: Instant? = null
+)

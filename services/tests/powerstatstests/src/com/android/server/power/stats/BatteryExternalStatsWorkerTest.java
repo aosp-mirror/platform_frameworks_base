@@ -38,6 +38,7 @@ import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.StateResidencyResult;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.connectivity.WifiActivityEnergyInfo;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.power.PowerStatsInternal;
 import android.util.IntArray;
@@ -85,6 +86,33 @@ public class BatteryExternalStatsWorkerTest {
         mPowerStatsInternal = new TestPowerStatsInternal();
         mBatteryExternalStatsWorker =
                 new BatteryExternalStatsWorker(new TestInjector(context), batteryStats);
+    }
+
+    @Test
+    public void testUpdateWifiState() {
+        WifiActivityEnergyInfo firstInfo = new WifiActivityEnergyInfo(1111,
+                WifiActivityEnergyInfo.STACK_STATE_STATE_ACTIVE, 11, 22, 33, 44);
+
+        WifiActivityEnergyInfo delta = mBatteryExternalStatsWorker.extractDeltaLocked(firstInfo);
+
+        assertEquals(1111, delta.getTimeSinceBootMillis());
+        assertEquals(WifiActivityEnergyInfo.STACK_STATE_STATE_ACTIVE, delta.getStackState());
+        assertEquals(0, delta.getControllerTxDurationMillis());
+        assertEquals(0, delta.getControllerRxDurationMillis());
+        assertEquals(0, delta.getControllerScanDurationMillis());
+        assertEquals(0, delta.getControllerIdleDurationMillis());
+
+        WifiActivityEnergyInfo secondInfo = new WifiActivityEnergyInfo(91111,
+                WifiActivityEnergyInfo.STACK_STATE_STATE_IDLE, 811, 722, 633, 544);
+
+        delta = mBatteryExternalStatsWorker.extractDeltaLocked(secondInfo);
+
+        assertEquals(91111, delta.getTimeSinceBootMillis());
+        assertEquals(WifiActivityEnergyInfo.STACK_STATE_STATE_IDLE, delta.getStackState());
+        assertEquals(800, delta.getControllerTxDurationMillis());
+        assertEquals(700, delta.getControllerRxDurationMillis());
+        assertEquals(600, delta.getControllerScanDurationMillis());
+        assertEquals(500, delta.getControllerIdleDurationMillis());
     }
 
     @Test
