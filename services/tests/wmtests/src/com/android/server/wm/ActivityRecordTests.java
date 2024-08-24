@@ -705,7 +705,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
 
         // Clear size compat.
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         mDisplayContent.sendNewConfiguration();
 

@@ -31,7 +31,7 @@ constructor(
     private val statsLogProxy: StatsLogProxy,
 ) {
     /** Logs an add widget event for metrics. No-op if widget is not loggable. */
-    fun logAddWidget(componentName: String, rank: Int) {
+    fun logAddWidget(componentName: String, rank: Int?) {
         if (!componentName.isLoggable()) {
             return
         }
@@ -39,7 +39,7 @@ constructor(
         statsLogProxy.writeCommunalHubWidgetEventReported(
             SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__ADD,
             componentName,
-            rank,
+            rank ?: -1,
         )
     }
 

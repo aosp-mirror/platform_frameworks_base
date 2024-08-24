@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.time.DateFormatUtil;
 
@@ -127,6 +128,9 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
     private final DreamOverlayStatusBarItemsProvider.Callback mStatusBarItemsProviderCallback =
             this::onStatusBarItemsChanged;
 
+    private final StatusBarWindowStateListener mStatusBarWindowStateListener =
+            this::onSystemStatusBarStateChanged;
+
     @Inject
     public AmbientStatusBarViewController(
             AmbientStatusBarView view,
@@ -161,10 +165,22 @@ public class AmbientStatusBarViewController extends ViewController<AmbientStatus
         mWifiInteractor = wifiInteractor;
         mCommunalSceneInteractor = communalSceneInteractor;
         mLogger = new DreamLogger(logBuffer, TAG);
+    }
+
+    @Override
+    protected void onInit() {
+        super.onInit();
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
         // needs to hide when the system status bar is showing to ovoid overlapping status bars.
-        statusBarWindowStateController.addListener(this::onSystemStatusBarStateChanged);
+        mStatusBarWindowStateController.addListener(mStatusBarWindowStateListener);
+    }
+
+    @Override
+    public void destroy() {
+        mStatusBarWindowStateController.removeListener(mStatusBarWindowStateListener);
+
+        super.destroy();
     }
 
     @Override
