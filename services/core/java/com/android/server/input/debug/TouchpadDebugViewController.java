@@ -29,6 +29,9 @@ import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.WindowManager;
 
+import com.android.server.input.InputManagerService;
+import com.android.server.input.TouchpadHardwareProperties;
+
 import java.util.Objects;
 
 public class TouchpadDebugViewController {
@@ -39,13 +42,16 @@ public class TouchpadDebugViewController {
     private final Handler mHandler;
     @Nullable
     private TouchpadDebugView mTouchpadDebugView;
+    private final InputManagerService mInputManagerService;
 
-    public TouchpadDebugViewController(Context context, Looper looper) {
+    public TouchpadDebugViewController(Context context, Looper looper,
+                                       InputManagerService inputManagerService) {
         final DisplayManager displayManager = Objects.requireNonNull(
                 context.getSystemService(DisplayManager.class));
         final Display defaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
         mContext = context.createDisplayContext(defaultDisplay);
         mHandler = new Handler(looper);
+        mInputManagerService = inputManagerService;
     }
 
     public void systemRunning() {
@@ -110,6 +116,17 @@ public class TouchpadDebugViewController {
 
         wm.addView(mTouchpadDebugView, lp);
         Slog.d(TAG, "Touchpad debug view created.");
+
+        TouchpadHardwareProperties mTouchpadHardwareProperties =
+                mInputManagerService.getTouchpadHardwareProperties(
+                        touchpadId);
+        // TODO(b/360137366): Use the hardware properties to initialise layout parameters.
+        if (mTouchpadHardwareProperties != null) {
+            Slog.d(TAG, mTouchpadHardwareProperties.toString());
+        } else {
+            Slog.w(TAG, "Failed to retrieve touchpad hardware properties for "
+                    + "device ID: " + touchpadId);
+        }
     }
 
     private void hideDebugView(int touchpadId) {

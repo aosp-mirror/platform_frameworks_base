@@ -144,3 +144,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_audio_input_device_routing_and_volume_control"
+    namespace: "media_better_together"
+    description: "Allows audio input devices routing and volume control via system settings."
+    bug: "355684672"
+}

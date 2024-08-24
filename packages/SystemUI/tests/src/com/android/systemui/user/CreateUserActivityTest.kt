@@ -26,8 +26,8 @@ class CreateUserActivityTest : SysuiTestCase() {
                 val dialog: Dialog = mock()
                 whenever(
                         createDialog(
-                            /* activity = */ nullable(),
-                            /* activityStarter = */ nullable(),
+                            /* activity = */ any(),
+                            /* activityStarter = */ any(),
                             /* isMultipleAdminsEnabled = */ any(),
                             /* successCallback = */ nullable(),
                             /* cancelCallback = */ nullable()

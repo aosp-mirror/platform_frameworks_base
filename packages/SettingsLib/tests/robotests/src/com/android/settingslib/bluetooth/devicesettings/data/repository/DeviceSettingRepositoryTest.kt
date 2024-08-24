@@ -97,9 +97,7 @@ class DeviceSettingRepositoryTest {
         `when`(cachedDevice.address).thenReturn(BLUETOOTH_ADDRESS)
         `when`(
                 bluetoothDevice.getMetadata(
-                    DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS
-                )
-            )
+                    DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
             .thenReturn(BLUETOOTH_DEVICE_METADATA.toByteArray())
 
         `when`(configService.queryLocalInterface(anyString())).thenReturn(configService)
@@ -122,8 +120,7 @@ class DeviceSettingRepositoryTest {
                     connection.onServiceConnected(
                         ComponentName(
                             SETTING_PROVIDER_SERVICE_PACKAGE_NAME_1,
-                            SETTING_PROVIDER_SERVICE_CLASS_NAME_1
-                        ),
+                            SETTING_PROVIDER_SERVICE_CLASS_NAME_1),
                         settingProviderService1,
                     )
                 SETTING_PROVIDER_SERVICE_INTENT_ACTION_2 ->
@@ -168,9 +165,7 @@ class DeviceSettingRepositoryTest {
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
             `when`(
                     bluetoothDevice.getMetadata(
-                        DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS
-                    )
-                )
+                        DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
                 .thenReturn("".toByteArray())
 
             var config: DeviceSettingConfigModel? = null
@@ -178,10 +173,7 @@ class DeviceSettingRepositoryTest {
             delay(1000)
             verify(bluetoothAdapter)
                 .addOnMetadataChangedListener(
-                    eq(bluetoothDevice),
-                    any(),
-                    metadataChangeCaptor.capture()
-                )
+                    eq(bluetoothDevice), any(), metadataChangeCaptor.capture())
             metadataChangeCaptor.value.onMetadataChanged(
                 bluetoothDevice,
                 DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS,
@@ -189,9 +181,7 @@ class DeviceSettingRepositoryTest {
             )
             `when`(
                     bluetoothDevice.getMetadata(
-                        DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS
-                    )
-                )
+                        DeviceSettingServiceConnection.METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
                 .thenReturn(BLUETOOTH_DEVICE_METADATA.toByteArray())
 
             job.join()
@@ -303,10 +293,8 @@ class DeviceSettingRepositoryTest {
                     DeviceSettingState.Builder()
                         .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_HEADER)
                         .setPreferenceState(
-                            ActionSwitchPreferenceState.Builder().setChecked(false).build()
-                        )
-                        .build()
-                )
+                            ActionSwitchPreferenceState.Builder().setChecked(false).build())
+                        .build())
         }
     }
 
@@ -337,10 +325,8 @@ class DeviceSettingRepositoryTest {
                     DeviceSettingState.Builder()
                         .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_ANC)
                         .setPreferenceState(
-                            MultiTogglePreferenceState.Builder().setState(2).build()
-                        )
-                        .build()
-                )
+                            MultiTogglePreferenceState.Builder().setState(2).build())
+                        .build())
         }
     }
 
@@ -353,7 +339,8 @@ class DeviceSettingRepositoryTest {
                 val pref = serviceResponse.preference as ActionSwitchPreference
                 assertThat(actual.title).isEqualTo(pref.title)
                 assertThat(actual.summary).isEqualTo(pref.summary)
-                assertThat(actual.icon).isEqualTo(DeviceSettingIcon.BitmapIcon(pref.icon!!))
+                assertThat(actual.icon)
+                    .isEqualTo(pref.icon?.let { DeviceSettingIcon.BitmapIcon(it) })
                 assertThat(actual.isAllowedChangingState).isEqualTo(pref.isAllowedChangingState)
                 if (pref.hasSwitch()) {
                     assertThat(actual.switchState!!.checked).isEqualTo(pref.checked)
@@ -378,7 +365,8 @@ class DeviceSettingRepositoryTest {
 
     private fun assertToggle(actual: ToggleModel, serviceResponse: ToggleInfo) {
         assertThat(actual.label).isEqualTo(serviceResponse.label)
-        assertThat(actual.icon).isEqualTo(serviceResponse.icon)
+        assertThat((actual.icon as DeviceSettingIcon.BitmapIcon).bitmap)
+            .isEqualTo(serviceResponse.icon)
     }
 
     private fun assertConfig(
@@ -393,7 +381,6 @@ class DeviceSettingRepositoryTest {
         for (i in 0..<actual.moreSettingsItems.size) {
             assertConfigItem(actual.moreSettingsItems[i], serviceResponse.moreSettingsItems[i])
         }
-        assertThat(actual.moreSettingsPageFooter).isEqualTo(serviceResponse.moreSettingsFooter)
     }
 
     private fun assertConfigItem(
@@ -437,15 +424,13 @@ class DeviceSettingRepositoryTest {
                 DeviceSettingId.DEVICE_SETTING_ID_HEADER,
                 SETTING_PROVIDER_SERVICE_PACKAGE_NAME_1,
                 SETTING_PROVIDER_SERVICE_CLASS_NAME_1,
-                SETTING_PROVIDER_SERVICE_INTENT_ACTION_1
-            )
+                SETTING_PROVIDER_SERVICE_INTENT_ACTION_1)
         val DEVICE_SETTING_ITEM_2 =
             DeviceSettingItem(
                 DeviceSettingId.DEVICE_SETTING_ID_ANC,
                 SETTING_PROVIDER_SERVICE_PACKAGE_NAME_2,
                 SETTING_PROVIDER_SERVICE_CLASS_NAME_2,
-                SETTING_PROVIDER_SERVICE_INTENT_ACTION_2
-            )
+                SETTING_PROVIDER_SERVICE_INTENT_ACTION_2)
         val DEVICE_SETTING_1 =
             DeviceSetting.Builder()
                 .setSettingId(DeviceSettingId.DEVICE_SETTING_ID_HEADER)
@@ -454,8 +439,7 @@ class DeviceSettingRepositoryTest {
                         .setTitle("title1")
                         .setHasSwitch(true)
                         .setAllowedChangingState(true)
-                        .build()
-                )
+                        .build())
                 .build()
         val DEVICE_SETTING_2 =
             DeviceSetting.Builder()
@@ -468,22 +452,18 @@ class DeviceSettingRepositoryTest {
                             ToggleInfo.Builder()
                                 .setLabel("label1")
                                 .setIcon(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-                                .build()
-                        )
+                                .build())
                         .addToggleInfo(
                             ToggleInfo.Builder()
                                 .setLabel("label2")
                                 .setIcon(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-                                .build()
-                        )
-                        .build()
-                )
+                                .build())
+                        .build())
                 .build()
         val DEVICE_SETTING_CONFIG =
             DeviceSettingsConfig(
                 listOf(DEVICE_SETTING_ITEM_1),
                 listOf(DEVICE_SETTING_ITEM_2),
-                "footer"
             )
     }
 }

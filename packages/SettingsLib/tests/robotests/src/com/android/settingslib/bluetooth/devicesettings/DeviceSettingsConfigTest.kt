@@ -50,7 +50,6 @@ class DeviceSettingsConfigTest {
                             null,
                             Bundle(),
                         )),
-                moreSettingsFooter = "footer",
                 extras = Bundle().apply { putString("key1", "value1") },
             )
 
@@ -72,7 +71,6 @@ class DeviceSettingsConfigTest {
             .containsExactly("class_name_2")
         assertThat(fromParcel.moreSettingsItems.stream().map { it.intentAction }.toList())
             .containsExactly("intent_action_2")
-        assertThat(fromParcel.moreSettingsFooter).isEqualTo(config.moreSettingsFooter)
     }
 
     private fun writeAndRead(item: DeviceSettingsConfig): DeviceSettingsConfig {

@@ -222,7 +222,7 @@ public class EmbeddingTestUtils {
         doReturn(resources).when(activity).getResources();
         doReturn(DEFAULT_DISPLAY).when(activity).getDisplayId();
 
-        return new TaskContainer(TASK_ID, activity);
+        return new TaskContainer(TASK_ID, activity, mock(SplitController.class));
     }
 
     static TaskContainer createTestTaskContainer(@NonNull SplitController controller) {

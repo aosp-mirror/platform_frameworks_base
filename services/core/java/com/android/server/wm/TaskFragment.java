@@ -2224,7 +2224,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
-        @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
+        @Nullable AppCompatDisplayInsets mTmpCompatInsets;
         @Nullable Rect mParentAppBoundsOverride;
         int mTmpOverrideConfigOrientation;
         boolean mUseOverrideInsetsForConfig;
@@ -2294,7 +2294,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig, @Nullable ConfigOverrideHint overrideHint) {
         DisplayInfo overrideDisplayInfo = null;
-        ActivityRecord.CompatDisplayInsets compatInsets = null;
+        AppCompatDisplayInsets compatInsets = null;
         boolean useOverrideInsetsForConfig = false;
         if (overrideHint != null) {
             overrideDisplayInfo = overrideHint.mTmpOverrideDisplayInfo;

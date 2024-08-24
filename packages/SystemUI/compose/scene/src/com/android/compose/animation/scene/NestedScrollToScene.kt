@@ -35,13 +35,6 @@ import androidx.compose.ui.platform.InspectorInfo
  */
 enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
     /**
-     * During scene transitions, if we are within
-     * [SceneTransitionLayoutImpl.transitionInterceptionThreshold], the [SceneTransitionLayout]
-     * consumes scroll events instead of the scrollable component.
-     */
-    DuringTransitionBetweenScenes(canStartOnPostFling = false),
-
-    /**
      * Overscroll will only be used by the [SceneTransitionLayout] to move to the next scene if the
      * gesture begins at the edge of the scrollable component (so that a scroll in that direction
      * can no longer be consumed). If the gesture is partially consumed by the scrollable component,

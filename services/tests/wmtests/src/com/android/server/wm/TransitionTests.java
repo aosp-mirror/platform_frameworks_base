@@ -1550,10 +1550,6 @@ public class TransitionTests extends WindowTestsBase {
 
         // An active transient launch overrides idle state to avoid clearing power mode before the
         // transition is finished.
-        spyOn(mRootWindowContainer.mTransitionController);
-        doAnswer(invocation -> controller.isTransientLaunch(invocation.getArgument(0))).when(
-                mRootWindowContainer.mTransitionController).isTransientLaunch(any());
-        activity2.getTask().setResumedActivity(activity2, "test");
         activity2.idle = true;
         assertFalse(mRootWindowContainer.allResumedActivitiesIdle());
 

@@ -24,6 +24,7 @@ import android.graphics.Rect
 import android.view.SurfaceControl
 import android.widget.Toast
 import androidx.core.animation.addListener
+import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.R
 import com.android.wm.shell.windowdecor.OnTaskRepositionAnimationListener
@@ -85,7 +86,7 @@ class ReturnToDragStartAnimator(
                                 R.string.desktop_mode_non_resizable_snap_text,
                                 Toast.LENGTH_SHORT
                             ).show()
-                            // TODO(b/339582583) - add Jank CUJ using interactionJankMonitor
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
                         }
                     )
                     addUpdateListener { anim ->

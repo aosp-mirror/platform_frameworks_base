@@ -193,6 +193,9 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Remote Transition that split accepts but ultimately needs to be animated by the remote. */
     public static final int TRANSIT_SPLIT_PASSTHROUGH = TRANSIT_FIRST_CUSTOM + 18;
 
+    /** Transition to set windowing mode after exit pip transition is finished animating. */
+    public static final int TRANSIT_CLEANUP_PIP_EXIT = WindowManager.TRANSIT_FIRST_CUSTOM + 19;
+
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
             WindowManager.TRANSIT_FIRST_CUSTOM + 100;
@@ -1187,12 +1190,15 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             if (request.getDisplayChange() != null) {
                 TransitionRequestInfo.DisplayChange change = request.getDisplayChange();
-                if (change.getEndRotation() != change.getStartRotation()) {
-                    // Is a rotation, so dispatch to all displayChange listeners
+                if (change.getStartRotation() != change.getEndRotation()
+                        || (change.getStartAbsBounds() != null
+                        && !change.getStartAbsBounds().equals(change.getEndAbsBounds()))) {
+                    // Is a display change, so dispatch to all displayChange listeners
                     if (wct == null) {
                         wct = new WindowContainerTransaction();
                     }
-                    mDisplayController.onDisplayRotateRequested(wct, change.getDisplayId(),
+                    mDisplayController.onDisplayChangeRequested(wct, change.getDisplayId(),
+                            change.getStartAbsBounds(), change.getEndAbsBounds(),
                             change.getStartRotation(), change.getEndRotation());
                 }
             }

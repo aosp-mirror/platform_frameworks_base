@@ -26,9 +26,11 @@ import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUC
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
 import com.android.systemui.keyboard.data.repository.KeyboardRepository
 import com.android.systemui.touchpad.data.repository.TouchpadRepository
+import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.toKotlinDuration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -84,9 +86,9 @@ constructor(
     private suspend fun schedule(deviceType: DeviceType) {
         if (!repo.wasEverConnected(deviceType)) {
             waitForDeviceConnection(deviceType)
-            repo.updateConnectTime(deviceType, Instant.now().toEpochMilli())
+            repo.updateFirstConnectionTime(deviceType, Instant.now())
         }
-        delay(remainingTimeMillis(start = repo.connectTime(deviceType)))
+        delay(remainingTime(start = repo.firstConnectionTime(deviceType)!!))
         waitForDeviceConnection(deviceType)
     }
 
@@ -95,9 +97,9 @@ constructor(
 
     private suspend fun launchTutorial(tutorialType: TutorialType) {
         if (tutorialType == TutorialType.KEYBOARD || tutorialType == TutorialType.BOTH)
-            repo.updateLaunch(KEYBOARD)
+            repo.updateLaunchTime(KEYBOARD, Instant.now())
         if (tutorialType == TutorialType.TOUCHPAD || tutorialType == TutorialType.BOTH)
-            repo.updateLaunch(TOUCHPAD)
+            repo.updateLaunchTime(TOUCHPAD, Instant.now())
         // TODO: launch tutorial
         Log.d(TAG, "Launch tutorial for $tutorialType")
     }
@@ -113,19 +115,21 @@ constructor(
         return if (deviceType == KEYBOARD) TutorialType.KEYBOARD else TutorialType.TOUCHPAD
     }
 
-    private fun remainingTimeMillis(start: Long): Long {
-        val elapsed = Instant.now().toEpochMilli() - start
-        return LAUNCH_DELAY - elapsed
+    private fun remainingTime(start: Instant): kotlin.time.Duration {
+        val elapsed = Duration.between(start, Instant.now())
+        return LAUNCH_DELAY.minus(elapsed).toKotlinDuration()
     }
 
     companion object {
         const val TAG = "TutorialSchedulerInteractor"
-        private val DEFAULT_LAUNCH_DELAY = 72.hours.inWholeMilliseconds
-        private val LAUNCH_DELAY: Long
+        private val DEFAULT_LAUNCH_DELAY_SEC = 72.hours.inWholeSeconds
+        private val LAUNCH_DELAY: Duration
             get() =
-                SystemProperties.getLong(
-                    "persist.peripheral_tutorial_delay_ms",
-                    DEFAULT_LAUNCH_DELAY
+                Duration.ofSeconds(
+                    SystemProperties.getLong(
+                        "persist.peripheral_tutorial_delay_sec",
+                        DEFAULT_LAUNCH_DELAY_SEC
+                    )
                 )
     }
 

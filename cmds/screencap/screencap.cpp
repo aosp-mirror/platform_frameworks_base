@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include <android/bitmap.h>
+#include <android/gui/DisplayCaptureArgs.h>
+#include <binder/ProcessState.h>
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -33,7 +36,6 @@
 
 #include <ftl/concat.h>
 #include <ftl/optional.h>
-#include <gui/DisplayCaptureArgs.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SyncScreenCaptureListener.h>

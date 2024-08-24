@@ -385,7 +385,15 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isDeviceInEmergencyCallsOnlyMode: Flow<Boolean> =
-        mobileConnectionsRepo.deviceServiceState.map { it?.isEmergencyOnly ?: false }
+        mobileConnectionsRepo.deviceServiceState
+            .map { it?.isEmergencyOnly ?: false }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = LOGGING_PREFIX,
+                columnName = "deviceEmergencyOnly",
+                initialValue = false,
+            )
 
     /** Vends out new [MobileIconInteractor] for a particular subId */
     override fun getMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =

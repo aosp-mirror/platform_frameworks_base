@@ -20,6 +20,7 @@ import static com.android.server.power.stats.MultiStateStats.STATE_DOES_NOT_EXIS
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.BatteryStats;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -64,6 +65,7 @@ class PowerComponentAggregatedPowerStats {
     private final MultiStateStats.States[] mUidStateConfig;
     private final int[] mDeviceStates;
 
+    private PowerStatsProcessor mProcessor;
     private MultiStateStats.Factory mStatsFactory;
     private MultiStateStats.Factory mStateStatsFactory;
     private MultiStateStats.Factory mUidStatsFactory;
@@ -108,6 +110,21 @@ class PowerComponentAggregatedPowerStats {
 
     public void setPowerStatsDescriptor(PowerStats.Descriptor powerStatsDescriptor) {
         mPowerStatsDescriptor = powerStatsDescriptor;
+    }
+
+    void start(long timestampMs) {
+        if (mProcessor == null) {
+            mProcessor = mConfig.createProcessor();
+        }
+        mProcessor.start(this, timestampMs);
+    }
+
+    void finish(long timestampMs) {
+        mProcessor.finish(this, timestampMs);
+    }
+
+    void noteStateChange(BatteryStats.HistoryItem item) {
+        mProcessor.noteStateChange(this, item);
     }
 
     void setState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state,
@@ -172,6 +189,9 @@ class PowerComponentAggregatedPowerStats {
 
     void setUidStats(int uid, int[] states, long[] values) {
         UidStats uidStats = getUidStats(uid);
+        if (uidStats.stats == null) {
+            createUidStats(uidStats, mPowerStatsTimestamp);
+        }
         uidStats.stats.setStats(states, values);
     }
 
@@ -180,6 +200,14 @@ class PowerComponentAggregatedPowerStats {
     }
 
     void addPowerStats(PowerStats powerStats, long timestampMs) {
+        // Should call powerStats.addProcessedPowerStats
+        mProcessor.addPowerStats(this, powerStats, timestampMs);
+    }
+
+    /**
+     * Should be called ONLY by PowerStatsProcessor.processPowerStats.
+     */
+    void addProcessedPowerStats(PowerStats powerStats, long timestampMs) {
         mPowerStatsDescriptor = powerStats.descriptor;
 
         if (mDeviceStats == null) {

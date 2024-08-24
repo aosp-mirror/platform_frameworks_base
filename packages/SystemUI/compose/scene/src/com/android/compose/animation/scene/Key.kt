@@ -63,6 +63,18 @@ class SceneKey(
     }
 }
 
+/** Key for an overlay. */
+class OverlayKey(
+    debugName: String,
+    identity: Any = Object(),
+) : ContentKey(debugName, identity) {
+    override val testTag: String = "overlay:$debugName"
+
+    override fun toString(): String {
+        return "OverlayKey(debugName=$debugName)"
+    }
+}
+
 /** Key for an element. */
 open class ElementKey(
     debugName: String,

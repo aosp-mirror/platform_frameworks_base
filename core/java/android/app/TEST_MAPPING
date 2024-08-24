@@ -29,12 +29,7 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.appop"
-                }
-            ]
+            "name": "FrameworksServicesTests_android_server_appop"
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],

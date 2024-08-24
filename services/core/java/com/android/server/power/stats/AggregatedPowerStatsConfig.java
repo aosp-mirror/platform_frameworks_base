@@ -74,7 +74,7 @@ public class AggregatedPowerStatsConfig {
         private final int mPowerComponentId;
         private @TrackedState int[] mTrackedDeviceStates;
         private @TrackedState int[] mTrackedUidStates;
-        private PowerStatsProcessor mProcessor = NO_OP_PROCESSOR;
+        private Supplier<PowerStatsProcessor> mProcessorSupplier;
 
         PowerComponent(int powerComponentId) {
             this.mPowerComponentId = powerComponentId;
@@ -103,12 +103,13 @@ public class AggregatedPowerStatsConfig {
         }
 
         /**
-         * Takes an object that should be invoked for every aggregated stats span
-         * before giving the aggregates stats to consumers. The processor can complete the
-         * aggregation process, for example by computing estimated power usage.
+         * A PowerStatsProcessor takes an object that should be invoked for every aggregated
+         * stats span before giving the aggregates stats to consumers. The processor can complete
+         * the aggregation process, for example by computing estimated power usage.
          */
-        public PowerComponent setProcessor(@NonNull PowerStatsProcessor processor) {
-            mProcessor = processor;
+        public PowerComponent setProcessorSupplier(
+                @NonNull Supplier<PowerStatsProcessor> processorSupplier) {
+            mProcessorSupplier = processorSupplier;
             return this;
         }
 
@@ -142,8 +143,11 @@ public class AggregatedPowerStatsConfig {
         }
 
         @NonNull
-        PowerStatsProcessor getProcessor() {
-            return mProcessor;
+        PowerStatsProcessor createProcessor() {
+            if (mProcessorSupplier == null) {
+                return NO_OP_PROCESSOR;
+            }
+            return mProcessorSupplier.get();
         }
 
         private boolean isTracked(int[] trackedStates, int state) {
@@ -236,7 +240,7 @@ public class AggregatedPowerStatsConfig {
         powerComponent.trackUidStates(mCustomPowerComponent.mTrackedUidStates);
 
         if (mCustomPowerStatsProcessorFactory != null) {
-            powerComponent.setProcessor(mCustomPowerStatsProcessorFactory.get());
+            powerComponent.setProcessorSupplier(mCustomPowerStatsProcessorFactory);
         }
 
         return powerComponent;

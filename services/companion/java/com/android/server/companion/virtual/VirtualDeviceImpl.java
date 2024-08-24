@@ -24,7 +24,7 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
-import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_BLOCKED_ACTIVITY;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
@@ -41,6 +41,7 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
+import android.companion.virtual.ActivityPolicyExemption;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
@@ -137,11 +138,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
-    private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS_PRE_VIC =
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-
     private static final String PERSISTENT_ID_PREFIX_CDM_ASSOCIATION = "companion:";
 
     /**
@@ -207,6 +203,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     @NonNull
     private final Set<ComponentName> mActivityPolicyExemptions;
+    @GuardedBy("mVirtualDeviceLock")
+    @NonNull
+    private final Set<String> mActivityPolicyPackageExemptions = new ArraySet<>();
 
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
@@ -242,11 +241,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
             @Override
             public void onActivityLaunchBlocked(int displayId,
-                    @NonNull ComponentName componentName, @UserIdInt int userId,
+                    @NonNull ComponentName componentName, @NonNull UserHandle user,
                     @Nullable IntentSender intentSender) {
                 try {
                     mActivityListener.onActivityLaunchBlocked(
-                            displayId, componentName, userId, intentSender);
+                            displayId, componentName, user, intentSender);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
@@ -373,9 +372,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
 
         int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
-        if (!Flags.consistentDisplayFlags()) {
-            flags |= DEFAULT_VIRTUAL_DISPLAY_FLAGS_PRE_VIC;
-        }
         if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
         }
@@ -527,13 +523,37 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+    public void addActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         super.addActivityPolicyExemption_enforcePermission();
+        final int displayId = exemption.getDisplayId();
+        if (exemption.getComponentName() == null || displayId != Display.INVALID_DISPLAY) {
+            if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                return;
+            }
+        }
         synchronized (mVirtualDeviceLock) {
-            if (mActivityPolicyExemptions.add(componentName)) {
-                for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                    mVirtualDisplays.valueAt(i).getWindowPolicyController()
-                            .addActivityPolicyExemption(componentName);
+            if (displayId != Display.INVALID_DISPLAY) {
+                checkDisplayOwnedByVirtualDeviceLocked(displayId);
+                if (exemption.getComponentName() != null) {
+                    mVirtualDisplays.get(displayId).getWindowPolicyController()
+                            .addActivityPolicyExemption(exemption.getComponentName());
+                } else if (exemption.getPackageName() != null) {
+                    mVirtualDisplays.get(displayId).getWindowPolicyController()
+                            .addActivityPolicyExemption(exemption.getPackageName());
+                }
+            } else {
+                if (exemption.getComponentName() != null
+                        && mActivityPolicyExemptions.add(exemption.getComponentName())) {
+                    for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                        mVirtualDisplays.valueAt(i).getWindowPolicyController()
+                                .addActivityPolicyExemption(exemption.getComponentName());
+                    }
+                } else if (exemption.getPackageName() != null
+                        && mActivityPolicyPackageExemptions.add(exemption.getPackageName())) {
+                    for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                        mVirtualDisplays.valueAt(i).getWindowPolicyController()
+                                .addActivityPolicyExemption(exemption.getPackageName());
+                    }
                 }
             }
         }
@@ -541,45 +561,39 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+    public void removeActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         super.removeActivityPolicyExemption_enforcePermission();
-        synchronized (mVirtualDeviceLock) {
-            if (mActivityPolicyExemptions.remove(componentName)) {
-                for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                    mVirtualDisplays.valueAt(i).getWindowPolicyController()
-                            .removeActivityPolicyExemption(componentName);
-                }
+        final int displayId = exemption.getDisplayId();
+        if (exemption.getComponentName() == null || displayId != Display.INVALID_DISPLAY) {
+            if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                return;
             }
         }
-    }
-
-    @Override // Binder call
-    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void addActivityPolicyExemptionForDisplay(
-            int displayId, @NonNull ComponentName componentName) {
-        super.addActivityPolicyExemptionForDisplay_enforcePermission();
-        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
-            return;
-        }
         synchronized (mVirtualDeviceLock) {
-            checkDisplayOwnedByVirtualDeviceLocked(displayId);
-            mVirtualDisplays.get(displayId).getWindowPolicyController()
-                    .addActivityPolicyExemption(componentName);
-        }
-    }
-
-    @Override // Binder call
-    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void removeActivityPolicyExemptionForDisplay(
-            int displayId, @NonNull ComponentName componentName) {
-        super.removeActivityPolicyExemptionForDisplay_enforcePermission();
-        if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
-            return;
-        }
-        synchronized (mVirtualDeviceLock) {
-            checkDisplayOwnedByVirtualDeviceLocked(displayId);
-            mVirtualDisplays.get(displayId).getWindowPolicyController()
-                    .removeActivityPolicyExemption(componentName);
+            if (displayId != Display.INVALID_DISPLAY) {
+                checkDisplayOwnedByVirtualDeviceLocked(displayId);
+                if (exemption.getComponentName() != null) {
+                    mVirtualDisplays.get(displayId).getWindowPolicyController()
+                            .removeActivityPolicyExemption(exemption.getComponentName());
+                } else if (exemption.getPackageName() != null) {
+                    mVirtualDisplays.get(displayId).getWindowPolicyController()
+                            .removeActivityPolicyExemption(exemption.getPackageName());
+                }
+            } else {
+                if (exemption.getComponentName() != null
+                        && mActivityPolicyExemptions.remove(exemption.getComponentName())) {
+                    for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                        mVirtualDisplays.valueAt(i).getWindowPolicyController()
+                                .removeActivityPolicyExemption(exemption.getComponentName());
+                    }
+                } else if (exemption.getPackageName() != null
+                        && mActivityPolicyPackageExemptions.remove(exemption.getPackageName())) {
+                    for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                        mVirtualDisplays.valueAt(i).getWindowPolicyController()
+                                .removeActivityPolicyExemption(exemption.getPackageName());
+                    }
+                }
+            }
         }
     }
 
@@ -728,6 +742,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 synchronized (mVirtualDeviceLock) {
                     if (getDevicePolicy(policyType) != devicePolicy) {
                         mActivityPolicyExemptions.clear();
+                        mActivityPolicyPackageExemptions.clear();
                     }
                     mDevicePolicies.put(policyType, devicePolicy);
                     for (int i = 0; i < mVirtualDisplays.size(); i++) {
@@ -744,7 +759,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     }
                 }
                 break;
-            case POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR:
+            case POLICY_TYPE_BLOCKED_ACTIVITY:
                 if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
                     synchronized (mVirtualDeviceLock) {
                         mDevicePolicies.put(policyType, devicePolicy);
@@ -1254,10 +1269,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     // as the virtual display doesn't have any focused windows. Hence, call this for
     // associating any input device to the source display if the input device emits any key events.
     private int getTargetDisplayIdForInput(int displayId) {
-        if (!Flags.interactiveScreenMirror()) {
-            return displayId;
-        }
-
         DisplayManagerInternal displayManager = LocalServices.getService(
                 DisplayManagerInternal.class);
         int mirroredDisplayId = displayManager.getDisplayIdToMirror(displayId);
@@ -1289,6 +1300,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 getAllowedUserHandles(),
                 activityLaunchAllowedByDefault,
                 mActivityPolicyExemptions,
+                mActivityPolicyPackageExemptions,
                 crossTaskNavigationAllowedByDefault,
                 /* crossTaskNavigationExemptions= */crossTaskNavigationAllowedByDefault
                         ? mParams.getBlockedCrossTaskNavigations()
@@ -1313,9 +1325,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         int displayId;
         displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig, callback,
                 this, gwpc, packageName);
-        gwpc.setDisplayId(displayId, /* isMirrorDisplay= */ Flags.interactiveScreenMirror()
-                && mDisplayManagerInternal.getDisplayIdToMirror(displayId)
-                != Display.INVALID_DISPLAY);
+        boolean isMirrorDisplay =
+                mDisplayManagerInternal.getDisplayIdToMirror(displayId) != Display.INVALID_DISPLAY;
+        gwpc.setDisplayId(displayId, isMirrorDisplay);
 
         boolean showPointer;
         synchronized (mVirtualDeviceLock) {
@@ -1383,8 +1395,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mActivityListenerAdapter.onActivityLaunchBlocked(
                     displayId,
                     activityInfo.getComponentName(),
-                    UserHandle.getUserHandleForUid(
-                            activityInfo.applicationInfo.uid).getIdentifier(),
+                    UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid),
                     intentSender);
         }
     }
@@ -1400,7 +1411,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             return true;
         }
         // Do not show the dialog if disabled by policy.
-        return getDevicePolicy(POLICY_TYPE_BLOCKED_ACTIVITY_BEHAVIOR) == DEVICE_POLICY_DEFAULT;
+        return getDevicePolicy(POLICY_TYPE_BLOCKED_ACTIVITY) == DEVICE_POLICY_DEFAULT;
     }
 
     private void onSecureWindowShown(int displayId, int uid) {

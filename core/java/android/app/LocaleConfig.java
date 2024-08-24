@@ -28,6 +28,8 @@ import android.content.res.XmlResourceParser;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.Xml;
@@ -64,6 +66,7 @@ import java.util.Set;
 // Add following to last Note: when guide is written:
 // For more information about the LocaleConfig overridden by the application, see TODO(b/261528306):
 // add link to guide
+@RavenwoodKeepWholeClass
 public class LocaleConfig implements Parcelable {
     private static final String TAG = "LocaleConfig";
     public static final String TAG_LOCALE_CONFIG = "locale-config";
@@ -104,6 +107,7 @@ public class LocaleConfig implements Parcelable {
      *
      * @see Context#createPackageContext(String, int).
      */
+    @RavenwoodThrow(blockedBy = LocaleManager.class)
     public LocaleConfig(@NonNull Context context) {
         this(context, true);
     }
@@ -117,10 +121,12 @@ public class LocaleConfig implements Parcelable {
      * @see Context#createPackageContext(String, int).
      */
     @NonNull
+    @RavenwoodThrow(blockedBy = LocaleManager.class)
     public static LocaleConfig fromContextIgnoringOverride(@NonNull Context context) {
         return new LocaleConfig(context, false);
     }
 
+    @RavenwoodThrow(blockedBy = LocaleManager.class)
     private LocaleConfig(@NonNull Context context, boolean allowOverride) {
         if (allowOverride) {
             LocaleManager localeManager = context.getSystemService(LocaleManager.class);

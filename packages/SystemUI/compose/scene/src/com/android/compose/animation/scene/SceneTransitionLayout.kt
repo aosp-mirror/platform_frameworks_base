@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.LayoutDirection
  *   if any.
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
- * @param scenes the configuration of the different scenes of this layout.
+ * @param builder the configuration of the different scenes and overlays of this layout.
  */
 @Composable
 fun SceneTransitionLayout(
@@ -58,7 +58,7 @@ fun SceneTransitionLayout(
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
-    scenes: SceneTransitionLayoutScope.() -> Unit,
+    builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
         state,
@@ -67,7 +67,7 @@ fun SceneTransitionLayout(
         swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
-        scenes,
+        builder,
     )
 }
 
@@ -84,6 +84,31 @@ interface SceneTransitionLayoutScope {
     fun scene(
         key: SceneKey,
         userActions: Map<UserAction, UserActionResult> = emptyMap(),
+        content: @Composable ContentScope.() -> Unit,
+    )
+
+    /**
+     * Add an overlay to this layout, identified by [key].
+     *
+     * Overlays are displayed above scenes and can be toggled using
+     * [MutableSceneTransitionLayoutState.showOverlay] and
+     * [MutableSceneTransitionLayoutState.hideOverlay].
+     *
+     * Overlays will have a maximum size that is the size of the layout without overlays, i.e. an
+     * overlay can be fillMaxSize() to match the layout size but it won't make the layout bigger.
+     *
+     * By default overlays are centered in their layout but they can be aligned differently using
+     * [alignment].
+     *
+     * Important: overlays must be defined after all scenes. Overlay order along the z-axis follows
+     * call order. Calling overlay(A) followed by overlay(B) will mean that overlay B renders
+     * after/above overlay A.
+     */
+    // TODO(b/353679003): Allow to specify user actions. When overlays are shown, the user actions
+    // of the top-most overlay in currentOverlays will be used.
+    fun overlay(
+        key: OverlayKey,
+        alignment: Alignment = Alignment.Center,
         content: @Composable ContentScope.() -> Unit,
     )
 }
@@ -239,7 +264,7 @@ interface ContentScope : BaseContentScope {
     /**
      * Animate some value at the content level.
      *
-     * @param value the value of this shared value in the current scene.
+     * @param value the value of this shared value in the current content.
      * @param key the key of this shared value.
      * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
@@ -292,7 +317,7 @@ interface ElementScope<ContentScope> {
     /**
      * Animate some value associated to this element.
      *
-     * @param value the value of this shared value in the current scene.
+     * @param value the value of this shared value in the current content.
      * @param key the key of this shared value.
      * @param type the [SharedValueType] of this animated value.
      * @param canOverflow whether this value can overflow past the values it is interpolated
@@ -509,7 +534,7 @@ internal fun SceneTransitionLayoutForTesting(
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
-    scenes: SceneTransitionLayoutScope.() -> Unit,
+    builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -521,7 +546,7 @@ internal fun SceneTransitionLayoutForTesting(
                 layoutDirection = layoutDirection,
                 swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
-                builder = scenes,
+                builder = builder,
                 coroutineScope = coroutineScope,
             )
             .also { onLayoutImpl?.invoke(it) }
@@ -529,7 +554,7 @@ internal fun SceneTransitionLayoutForTesting(
 
     // TODO(b/317014852): Move this into the SideEffect {} again once STLImpl.scenes is not a
     // SnapshotStateMap anymore.
-    layoutImpl.updateScenes(scenes, layoutDirection)
+    layoutImpl.updateContents(builder, layoutDirection)
 
     SideEffect {
         if (state != layoutImpl.state) {

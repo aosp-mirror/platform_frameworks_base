@@ -42,7 +42,7 @@ def to_camel_case(word):
     return ''.join(c for c in word.title() if not c == '_')
 
 
-LOOP ="BenchmarkState state = mPerfStatusReporter.getBenchmarkState();\n        while (state.keepRunning())"
+LOOP ="final BenchmarkState state = mBenchmarkRule.getState();\n        while (state.keepRunning())"
 
 class Benchmark:
     def __init__(self, code, static, vartype, flavour, klass, method, memloc,
@@ -158,8 +158,8 @@ BANNER = """/*
 VH_IMPORTS = """
 package android.libcore.varhandles;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -179,7 +179,7 @@ VH_START = BANNER + VH_IMPORTS + """
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
     static final {vartype} FIELD_VALUE = {value1};
     {static_kwd}{vartype} {static_prefix}Field = FIELD_VALUE;
     VarHandle mVh;
@@ -273,7 +273,7 @@ VH_START_ARRAY = BANNER + VH_IMPORTS + """
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
     static final {vartype} ELEMENT_VALUE = {value1};
     {vartype}[] mArray = {{ ELEMENT_VALUE }};
     VarHandle mVh;
@@ -324,7 +324,7 @@ import java.nio.ByteOrder;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
     static final {vartype} VALUE = {value1};
     byte[] mArray1 = {value1_byte_array};
     byte[] mArray2 = {value2_byte_array};
@@ -375,7 +375,7 @@ import java.lang.reflect.Field;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
     Field mField;
     {static_kwd}{vartype} {static_prefix}Value;
 
@@ -407,7 +407,7 @@ import jdk.internal.misc.Unsafe;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
     long mOffset;
     public {static_kwd}{vartype} {static_prefix}Value = {value1};
 

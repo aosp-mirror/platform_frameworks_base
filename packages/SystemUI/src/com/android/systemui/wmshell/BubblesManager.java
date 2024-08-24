@@ -115,7 +115,6 @@ public class BubblesManager {
     private final Executor mSysuiUiBgExecutor;
 
     private final Bubbles.SysuiProxy mSysuiProxy;
-    // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
     private final StatusBarWindowCallback mStatusBarWindowCallback;
     private final Runnable mSensitiveStateChangedListener;

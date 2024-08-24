@@ -20,11 +20,16 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 
-/** A [SemanticsMatcher] that matches [element], optionally restricted to scene [scene]. */
-fun isElement(element: ElementKey, scene: SceneKey? = null): SemanticsMatcher {
-    return if (scene == null) {
+/** A [SemanticsMatcher] that matches [element], optionally restricted to content [content]. */
+fun isElement(element: ElementKey, content: ContentKey? = null): SemanticsMatcher {
+    return if (content == null) {
         hasTestTag(element.testTag)
     } else {
-        hasTestTag(element.testTag) and hasAnyAncestor(hasTestTag(scene.testTag))
+        hasTestTag(element.testTag) and inContent(content)
     }
+}
+
+/** A [SemanticsMatcher] that matches anything inside [content]. */
+fun inContent(content: ContentKey): SemanticsMatcher {
+    return hasAnyAncestor(hasTestTag(content.testTag))
 }

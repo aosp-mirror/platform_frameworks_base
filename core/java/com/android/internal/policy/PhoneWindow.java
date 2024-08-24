@@ -2513,9 +2513,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         mIsFloating = a.getBoolean(R.styleable.Window_windowIsFloating, false);
+
+        // For floating windows that are *allowed* to fill the screen (like Wear) content
+        // should still be wrapped if they're not explicitly requested as fullscreen.
+        final boolean isFloatingAndFullscreen = mIsFloating
+                && mAllowFloatingWindowsFillScreen
+                && a.getBoolean(R.styleable.Window_windowFullscreen, false);
+
         int flagsToUpdate = (FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR)
                 & (~getForcedWindowFlags());
-        if (mIsFloating && !mAllowFloatingWindowsFillScreen) {
+        if (mIsFloating && !isFloatingAndFullscreen) {
             setLayout(WRAP_CONTENT, WRAP_CONTENT);
             setFlags(0, flagsToUpdate);
         } else {

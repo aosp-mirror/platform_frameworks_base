@@ -172,15 +172,13 @@ public class MobileRadioPowerStatsProcessorTest {
 
         mStatsRule.setTestPowerProfile("power_profile_test_modem_calculator");
 
-        MobileRadioPowerStatsProcessor processor =
-                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
-
         AggregatedPowerStatsConfig.PowerComponent config =
                 new AggregatedPowerStatsConfig.PowerComponent(
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                         .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                         .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
-                        .setProcessor(processor);
+                        .setProcessorSupplier(() -> new MobileRadioPowerStatsProcessor(
+                                mStatsRule.getPowerProfile()));
 
         PowerComponentAggregatedPowerStats aggregatedStats =
                 new PowerComponentAggregatedPowerStats(
@@ -197,6 +195,8 @@ public class MobileRadioPowerStatsProcessorTest {
 
         // Initial empty ModemActivityInfo.
         mockModemActivityInfo(new ModemActivityInfo(0L, 0L, 0L, new int[5], 0L));
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -229,7 +229,7 @@ public class MobileRadioPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(powerStats, 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
 
         MobileRadioPowerStatsLayout statsLayout =
                 new MobileRadioPowerStatsLayout(
@@ -412,15 +412,13 @@ public class MobileRadioPowerStatsProcessorTest {
         mStatsRule.setTestPowerProfile("power_profile_test_legacy_modem")
                 .initMeasuredEnergyStatsLocked();
 
-        MobileRadioPowerStatsProcessor processor =
-                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
-
         AggregatedPowerStatsConfig.PowerComponent config =
                 new AggregatedPowerStatsConfig.PowerComponent(
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                         .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                         .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
-                        .setProcessor(processor);
+                        .setProcessorSupplier(() -> new MobileRadioPowerStatsProcessor(
+                                mStatsRule.getPowerProfile()));
 
         PowerComponentAggregatedPowerStats aggregatedStats =
                 new PowerComponentAggregatedPowerStats(
@@ -441,6 +439,8 @@ public class MobileRadioPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getConsumedEnergyUws(
                 new int[]{MOBILE_RADIO_ENERGY_CONSUMER_ID}))
                 .thenReturn(new long[]{0});
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -477,7 +477,7 @@ public class MobileRadioPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(powerStats, 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
         return aggregatedStats;
     }
 

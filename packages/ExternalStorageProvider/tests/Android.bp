@@ -12,6 +12,10 @@ android_test {
 
     manifest: "AndroidManifest.xml",
 
+    test_suites: [
+        "general-tests",
+    ],
+
     srcs: [
         "src/**/*.java",
     ],

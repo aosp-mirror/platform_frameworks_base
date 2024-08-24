@@ -100,6 +100,7 @@ public final class PowerStats {
          * to; or a custom power component ID (if the value
          * is &gt;= {@link BatteryConsumer#FIRST_CUSTOM_POWER_COMPONENT_ID}).
          */
+        @BatteryConsumer.PowerComponentId
         public final int powerComponentId;
         public final String name;
 
@@ -142,9 +143,10 @@ public final class PowerStats {
                     extras);
         }
 
-        public Descriptor(int customPowerComponentId, String name, int statsArrayLength,
-                @Nullable SparseArray<String> stateLabels, int stateStatsArrayLength,
-                int uidStatsArrayLength, @NonNull PersistableBundle extras) {
+        public Descriptor(@BatteryConsumer.PowerComponentId int powerComponentId, String name,
+                int statsArrayLength, @Nullable SparseArray<String> stateLabels,
+                int stateStatsArrayLength, int uidStatsArrayLength,
+                @NonNull PersistableBundle extras) {
             if (statsArrayLength > MAX_STATS_ARRAY_LENGTH) {
                 throw new IllegalArgumentException(
                         "statsArrayLength is too high. Max = " + MAX_STATS_ARRAY_LENGTH);
@@ -157,7 +159,7 @@ public final class PowerStats {
                 throw new IllegalArgumentException(
                         "uidStatsArrayLength is too high. Max = " + MAX_UID_STATS_ARRAY_LENGTH);
             }
-            this.powerComponentId = customPowerComponentId;
+            this.powerComponentId = powerComponentId;
             this.name = name;
             this.statsArrayLength = statsArrayLength;
             this.stateLabels = stateLabels != null ? stateLabels : new SparseArray<>();

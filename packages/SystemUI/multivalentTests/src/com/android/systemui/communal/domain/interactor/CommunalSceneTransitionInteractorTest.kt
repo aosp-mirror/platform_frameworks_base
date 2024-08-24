@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.data.repository.keyguardTransitionRepositor
 import com.android.systemui.keyguard.data.repository.realKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -833,5 +834,87 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                         ownerName = ownerName,
                     )
                 )
+        }
+
+    /**
+     * KTF: LOCKSCREEN -> ALTERNATE_BOUNCER starts but then STL: GLANCEABLE_HUB -> BLANK interrupts.
+     *
+     * Verifies that we correctly cancel the previous KTF state before starting the glanceable hub
+     * transition.
+     */
+    @Test
+    fun transition_to_blank_after_ktf_started_another_transition() =
+        testScope.runTest {
+            // Another transition has already started to the alternate bouncer.
+            keyguardTransitionRepository.startTransition(
+                TransitionInfo(
+                    from = LOCKSCREEN,
+                    to = ALTERNATE_BOUNCER,
+                    animator = null,
+                    ownerName = "external",
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
+                ),
+            )
+
+            val allSteps by collectValues(keyguardTransitionRepository.transitions)
+            // Keep track of existing size to drop any pre-existing steps that we don't
+            // care about.
+            val numToDrop = allSteps.size
+
+            sceneTransitions.value = hubToBlank
+            runCurrent()
+            progress.emit(0.4f)
+            runCurrent()
+            // We land on blank.
+            sceneTransitions.value = Idle(CommunalScenes.Blank)
+
+            // We should cancel the previous ALTERNATE_BOUNCER transition and transition back
+            // to the GLANCEABLE_HUB before we can transition away from it.
+            assertThat(allSteps.drop(numToDrop))
+                .containsExactly(
+                    TransitionStep(
+                        from = LOCKSCREEN,
+                        to = ALTERNATE_BOUNCER,
+                        transitionState = CANCELED,
+                        value = 0f,
+                        ownerName = "external",
+                    ),
+                    TransitionStep(
+                        from = ALTERNATE_BOUNCER,
+                        to = GLANCEABLE_HUB,
+                        transitionState = STARTED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = ALTERNATE_BOUNCER,
+                        to = GLANCEABLE_HUB,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = LOCKSCREEN,
+                        transitionState = STARTED,
+                        value = 0f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = LOCKSCREEN,
+                        transitionState = RUNNING,
+                        value = 0.4f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = LOCKSCREEN,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    ),
+                )
+                .inOrder()
         }
 }

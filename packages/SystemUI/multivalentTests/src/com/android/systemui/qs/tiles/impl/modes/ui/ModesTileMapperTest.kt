@@ -16,10 +16,13 @@
 
 package com.android.systemui.qs.tiles.impl.modes.ui
 
+import android.app.Flags
 import android.graphics.drawable.TestStubDrawable
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigTestBuilder
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
@@ -31,6 +34,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(Flags.FLAG_MODES_UI)
 class ModesTileMapperTest : SysuiTestCase() {
     val config =
         QSTileConfigTestBuilder.build {
@@ -84,5 +88,17 @@ class ModesTileMapperTest : SysuiTestCase() {
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.ACTIVE)
         assertThat(state.iconRes).isEqualTo(R.drawable.qs_dnd_icon_on)
         assertThat(state.secondaryLabel).isEqualTo("3 modes are active")
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI_ICONS)
+    fun activeState_withIcon() {
+        val icon = Icon.Resource(1234, contentDescription = null)
+        val model = ModesTileModel(isActivated = true, activeModes = listOf("DND"), icon = icon)
+
+        val state = underTest.map(config, model)
+
+        assertThat(state.iconRes).isNull()
+        assertThat(state.icon()).isEqualTo(icon)
     }
 }

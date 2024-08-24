@@ -183,4 +183,7 @@
     <!-- This is to be overridden to define a list of packages mapped to web links which will be
          parsed and utilized for desktop windowing's app-to-web feature. -->
     <string name="generic_links_list" translatable="false"/>
+
+    <!-- Apps that can trigger Desktop Windowing App handle Education -->
+    <string-array name="desktop_windowing_app_handle_education_allowlist_apps"></string-array>
 </resources>

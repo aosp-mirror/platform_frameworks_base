@@ -369,4 +369,18 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
             invokeOnCallback { it.onStrongAuthStateChanged(0) }
             assertThat(shouldUpdateIndicatorVisibility).isTrue()
         }
+
+    @Test
+    fun isLockedOut_initialStateFalse() =
+        testScope.runTest {
+            whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
+            assertThat(underTest.isLockedOut.value).isEqualTo(false)
+        }
+
+    @Test
+    fun isLockedOut_initialStateTrue() =
+        testScope.runTest {
+            whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(true)
+            assertThat(underTest.isLockedOut.value).isEqualTo(true)
+        }
 }

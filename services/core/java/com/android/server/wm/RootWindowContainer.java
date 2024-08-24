@@ -804,12 +804,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         checkAppTransitionReady(surfacePlacer);
 
-        // Defer starting the recents animation until the wallpaper has drawn
-        final RecentsAnimationController recentsAnimationController =
-                mWmService.getRecentsAnimationController();
-        if (recentsAnimationController != null) {
-            recentsAnimationController.checkAnimationReady(defaultDisplay.mWallpaperController);
-        }
         mWmService.mAtmService.mBackNavigationController
                 .checkAnimationReady(defaultDisplay.mWallpaperController);
 
@@ -1002,6 +996,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // complete configuration.
                 continue;
             }
+            win.updateSurfacePositionIfNeeded();
             win.reportResized();
             mWmService.mResizingWindows.remove(i);
         }
@@ -1470,9 +1465,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Updates the extra information of the intent.
         if (fromHomeKey) {
             homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
-            if (mWindowManager.getRecentsAnimationController() != null) {
-                mWindowManager.getRecentsAnimationController().cancelAnimationForHomeStart();
-            }
         }
         homeIntent.putExtra(WindowManagerPolicy.EXTRA_START_REASON, reason);
 
@@ -3425,28 +3417,63 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return null;
     }
 
+    /** Returns the top direct activity if it should be idle but has not yet been reported. */
+    @Nullable
+    private static ActivityRecord getNotYetIdleActivity(@NonNull TaskFragment visibleTf) {
+        for (int i = visibleTf.getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = visibleTf.getChildAt(i).asActivityRecord();
+            if (r == null || r.finishing) {
+                continue;
+            }
+            if (!r.idle && (r.isState(RESUMED)
+                    // Its process is not attached yet and it may resume later.
+                    || (r.app == null && r.isFocusable()))) {
+                return r;
+            }
+            // Only check the top running activity.
+            break;
+        }
+        return null;
+    }
+
     boolean allResumedActivitiesIdle() {
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
-            // TODO(b/117135575): Check resumed activities on all visible root tasks.
             final DisplayContent display = getChildAt(displayNdx);
             if (display.isSleeping()) {
                 // No resumed activities while display is sleeping.
                 continue;
             }
 
-            // If the focused root task is not null or not empty, there should have some activities
-            // resuming or resumed. Make sure these activities are idle.
-            final Task rootTask = display.getFocusedRootTask();
-            if (rootTask == null || !rootTask.hasActivity()) {
-                continue;
-            }
-            final ActivityRecord resumedActivity = rootTask.getTopResumedActivity();
-            if (resumedActivity == null || !resumedActivity.idle) {
-                ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: rootTask=%d %s "
-                        + "not idle", rootTask.getRootTaskId(), resumedActivity);
+            final boolean foundNotIdle = display.forAllLeafTasks(task -> {
+                if (!task.isVisibleRequested()) {
+                    return false;
+                }
+                final ActivityRecord notIdle = getNotYetIdleActivity(task);
+                if (notIdle != null) {
+                    ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: %s not idle", notIdle);
+                    return true;
+                }
+                if (task.isLeafTaskFragment()) {
+                    // The task doesn't contain child TaskFragment.
+                    return false;
+                }
+                return task.forAllLeafTaskFragments(tf -> {
+                    if (!tf.isVisibleRequested()) {
+                        return false;
+                    }
+                    final ActivityRecord tfNotIdle = getNotYetIdleActivity(tf);
+                    if (tfNotIdle != null) {
+                        ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: %s not idle",
+                                tfNotIdle);
+                        return true;
+                    }
+                    return false;
+                });
+            });
+            if (foundNotIdle) {
                 return false;
             }
-            if (mTransitionController.isTransientLaunch(resumedActivity)) {
+            if (mTransitionController.hasTransientLaunch(display)) {
                 // Not idle if the transient transition animation is running.
                 return false;
             }

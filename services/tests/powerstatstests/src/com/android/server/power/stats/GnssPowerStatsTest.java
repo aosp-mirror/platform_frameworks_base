@@ -55,6 +55,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class GnssPowerStatsTest {
     @Rule(order = 0)
@@ -126,41 +127,38 @@ public class GnssPowerStatsTest {
                 .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
                 .thenReturn(new int[0]);
 
-        GnssPowerStatsProcessor processor = new GnssPowerStatsProcessor(
-                mStatsRule.getPowerProfile(), mUidResolver);
-
-        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
+                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
+        stats.start(0);
 
         GnssPowerStatsCollector collector = new GnssPowerStatsCollector(mInjector);
         collector.addConsumer(
-                powerStats -> {
-                    processor.addPowerStats(stats, powerStats, mMonotonicClock.monotonicTime());
-                });
+                powerStats -> stats.addPowerStats(powerStats, mMonotonicClock.monotonicTime()));
         collector.setEnabled(true);
 
         // Establish a baseline
         collector.collectAndDeliverStats();
 
-        processor.noteStateChange(stats, buildHistoryItem(0, true, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
         // Turn the screen off after 2.5 seconds
         stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
 
-        processor.noteStateChange(stats, buildHistoryItem(6000, false, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
 
         collector.collectAndDeliverStats();
 
-        processor.noteStateChange(stats, buildHistoryItem(7000, true, APP_UID2));
-        processor.noteStateChange(stats, buildHistoryItem(7000,
+        stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2));
+        stats.noteStateChange(buildHistoryItem(7000,
                 GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD));
-        processor.noteStateChange(stats, buildHistoryItem(8000,
+        stats.noteStateChange(buildHistoryItem(8000,
                 GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR));
         mStatsRule.setTime(11_000, 11_000);
         collector.collectAndDeliverStats();
 
-        processor.finish(stats, 11_000);
+        stats.finish(11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
         BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
@@ -217,47 +215,46 @@ public class GnssPowerStatsTest {
         when(mConsumedEnergyRetriever
                 .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID});
-        GnssPowerStatsProcessor processor = new GnssPowerStatsProcessor(
-                mStatsRule.getPowerProfile(), mUidResolver);
 
-        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
+                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
 
         GnssPowerStatsCollector collector = new GnssPowerStatsCollector(mInjector);
         collector.addConsumer(
-                powerStats -> {
-                    processor.addPowerStats(stats, powerStats, mMonotonicClock.monotonicTime());
-                });
+                powerStats -> stats.addPowerStats(powerStats, mMonotonicClock.monotonicTime()));
         collector.setEnabled(true);
+
+        stats.start(0);
 
         // Establish a baseline
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 10000));
         collector.collectAndDeliverStats();
 
-        processor.noteStateChange(stats, buildHistoryItem(0, true, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
         // Turn the screen off after 2.5 seconds
         stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
 
-        processor.noteStateChange(stats, buildHistoryItem(6000, false, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
 
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 2_170_000));
         collector.collectAndDeliverStats();
 
-        processor.noteStateChange(stats, buildHistoryItem(7000, true, APP_UID2));
-        processor.noteStateChange(stats, buildHistoryItem(7000,
+        stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2));
+        stats.noteStateChange(buildHistoryItem(7000,
                 GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD));
-        processor.noteStateChange(stats, buildHistoryItem(8000,
+        stats.noteStateChange(buildHistoryItem(8000,
                 GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR));
         mStatsRule.setTime(11_000, 11_000);
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 3_610_000));
         collector.collectAndDeliverStats();
 
-        processor.finish(stats, 11_000);
+        stats.finish(11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
         BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
@@ -350,7 +347,7 @@ public class GnssPowerStatsTest {
     }
 
     private static PowerComponentAggregatedPowerStats createAggregatedPowerStats(
-            BinaryStatePowerStatsProcessor processor) {
+            Supplier<PowerStatsProcessor> processorSupplier) {
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_GNSS)
                 .trackDeviceStates(
@@ -360,12 +357,12 @@ public class GnssPowerStatsTest {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(processor);
+                .setProcessorSupplier(processorSupplier);
 
         AggregatedPowerStats aggregatedPowerStats = new AggregatedPowerStats(config);
         PowerComponentAggregatedPowerStats powerComponentStats =
                 aggregatedPowerStats.getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_GNSS);
-        processor.start(powerComponentStats, 0);
+        powerComponentStats.start(0);
 
         powerComponentStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         powerComponentStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);

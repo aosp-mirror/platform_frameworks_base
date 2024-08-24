@@ -72,6 +72,7 @@ import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
 import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
@@ -235,7 +236,8 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
-            MultiInstanceHelper multiInstanceHelper) {
+            MultiInstanceHelper multiInstanceHelper,
+            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -256,7 +258,8 @@ public abstract class WMShellModule {
                     rootTaskDisplayAreaOrganizer,
                     interactionJankMonitor,
                     genericLinksParser,
-                    multiInstanceHelper);
+                    multiInstanceHelper,
+                    desktopTasksLimiter);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -709,6 +712,14 @@ public abstract class WMShellModule {
     static AppHandleEducationDatastoreRepository provideAppHandleEducationDatastoreRepository(
             Context context) {
         return new AppHandleEducationDatastoreRepository(context);
+    }
+
+    @WMSingleton
+    @Provides
+    static AppHandleEducationFilter provideAppHandleEducationFilter(
+            Context context,
+            AppHandleEducationDatastoreRepository appHandleEducationDatastoreRepository) {
+        return new AppHandleEducationFilter(context, appHandleEducationDatastoreRepository);
     }
 
     //

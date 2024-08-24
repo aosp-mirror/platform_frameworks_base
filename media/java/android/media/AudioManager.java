@@ -1027,7 +1027,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
-     * unless the app has been granted Do Not Disturb Access.
+     * unless the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      *
      * @param streamType The stream type to adjust. One of {@link #STREAM_VOICE_CALL},
@@ -1379,7 +1379,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
-     * unless the app has been granted Do Not Disturb Access.
+     * unless the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param ringerMode The ringer mode, one of {@link #RINGER_MODE_NORMAL},
      *            {@link #RINGER_MODE_SILENT}, or {@link #RINGER_MODE_VIBRATE}.
@@ -1403,7 +1403,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
-     * the app has been granted Do Not Disturb Access.
+     * the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param streamType The stream whose volume index should be set.
      * @param index The volume index to set. See
@@ -8829,7 +8829,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
-     * unless the app has been granted Do Not Disturb Access.
+     * unless the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * <p>This API checks if the caller has the necessary permissions based on the provided
      * component name, uid, and pid values.
@@ -8870,7 +8870,7 @@ public class AudioManager {
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
      * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
-     * the app has been granted Do Not Disturb Access.
+     * the app has been granted Notification Policy Access.
      * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * <p>This API checks if the caller has the necessary permissions based on the provided
      * component name, uid, and pid values.

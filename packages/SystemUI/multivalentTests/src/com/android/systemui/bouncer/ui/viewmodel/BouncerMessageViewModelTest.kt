@@ -430,6 +430,22 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
                 .isEqualTo("Can’t unlock with face. Too many attempts.")
         }
 
+    @Test
+    fun startLockdownCountdown_onActivated() =
+        testScope.runTest {
+            val bouncerMessage by collectLastValue(underTest.message)
+            val lockoutSeconds = 200 * 1000 // 200 second lockout
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.reportLockoutStarted(lockoutSeconds)
+            runCurrent()
+
+            assertThat(bouncerMessage?.text).isEqualTo("Try again in 200 seconds.")
+            advanceTimeBy(100.seconds)
+            assertThat(bouncerMessage?.text).isEqualTo("Try again in 100 seconds.")
+            advanceTimeBy(101.seconds)
+            assertThat(bouncerMessage?.text).isEqualTo("Enter PIN")
+        }
+
     private fun TestScope.verifyMessagesForAuthFlags(
         vararg authFlagToMessagePair: Pair<Int, Pair<String, String?>>
     ) {

@@ -103,11 +103,10 @@
     <style name="NegativeButtonMultipleDevices"
            parent="@android:style/Widget.Material.Button.Colored">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:minHeight">36dp</item>>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:paddingLeft">6dp</item>
-        <item name="android:paddingRight">6dp</item>
         <item name="android:background">@drawable/btn_negative_multiple_devices</item>
         <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
     </style>

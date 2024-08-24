@@ -15,4 +15,11 @@
  */
 
 package com.android.systemui.qs.tiles.impl.modes.domain.model
-data class ModesTileModel(val isActivated: Boolean, val activeModes: List<String>)
+
+import com.android.systemui.common.shared.model.Icon
+
+data class ModesTileModel(
+    val isActivated: Boolean,
+    val activeModes: List<String>,
+    val icon: Icon? = null
+)

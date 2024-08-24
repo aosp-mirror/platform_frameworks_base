@@ -23,6 +23,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -50,6 +52,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -181,6 +184,40 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         PackageInfo defaultPackageInfo = new PackageInfo();
         when(mMockPackageManagerAdapter.getPackageInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(defaultPackageInfo);
+    }
+
+    private void setPackageInstalledForUser(
+            boolean installed,
+            boolean active,
+            boolean toggleable,
+            int user
+    ) throws Exception {
+        ServiceInfo defaultServiceInfo = null;
+        if (installed) {
+            defaultServiceInfo = new ServiceInfo();
+            defaultServiceInfo.metaData = new Bundle();
+            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, active);
+            defaultServiceInfo.metaData
+                    .putBoolean(TileService.META_DATA_TOGGLEABLE_TILE, toggleable);
+            when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), eq(user)))
+                    .thenReturn(defaultServiceInfo);
+            if (user == 0) {
+                when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt()))
+                        .thenReturn(defaultServiceInfo);
+            }
+            PackageInfo defaultPackageInfo = new PackageInfo();
+            when(mMockPackageManagerAdapter.getPackageInfoAsUser(anyString(), anyInt(), eq(user)))
+                    .thenReturn(defaultPackageInfo);
+        } else {
+            when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), eq(user)))
+                    .thenReturn(null);
+            if (user == 0) {
+                when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt()))
+                        .thenThrow(new PackageManager.NameNotFoundException());
+            }
+            when(mMockPackageManagerAdapter.getPackageInfoAsUser(anyString(), anyInt(), eq(user)))
+                    .thenThrow(new PackageManager.NameNotFoundException());
+        }
     }
 
     private void verifyBind(int times) {
@@ -555,6 +592,100 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         captor.getValue().onNullBinding(mTileServiceComponentName);
         mExecutor.runAllReady();
         verify(mockContext).unbindService(captor.getValue());
+    }
+
+    @Test
+    public void testIsActive_user0_packageInstalled() throws Exception {
+        setPackageInstalledForUser(true, true, false, 0);
+        mUser = UserHandle.of(0);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor);
+
+        assertThat(manager.isActiveTile()).isTrue();
+    }
+
+    @Test
+    public void testIsActive_user10_packageInstalled_notForUser0() throws Exception {
+        setPackageInstalledForUser(true, true, false, 10);
+        setPackageInstalledForUser(false, false, false, 0);
+        mUser = UserHandle.of(10);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor);
+
+        assertThat(manager.isActiveTile()).isTrue();
+    }
+
+    @Test
+    public void testIsToggleable_user0_packageInstalled() throws Exception {
+        setPackageInstalledForUser(true, false, true, 0);
+        mUser = UserHandle.of(0);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor);
+
+        assertThat(manager.isToggleableTile()).isTrue();
+    }
+
+    @Test
+    public void testIsToggleable_user10_packageInstalled_notForUser0() throws Exception {
+        setPackageInstalledForUser(true, false, true, 10);
+        setPackageInstalledForUser(false, false, false, 0);
+        mUser = UserHandle.of(10);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor);
+
+        assertThat(manager.isToggleableTile()).isTrue();
+    }
+
+    @Test
+    public void testIsToggleableActive_installedForDifferentUser() throws Exception {
+        setPackageInstalledForUser(true, false, false, 10);
+        setPackageInstalledForUser(false, true, true, 0);
+        mUser = UserHandle.of(10);
+
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mWrappedContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mDeviceIdleController,
+                mExecutor);
+
+        assertThat(manager.isToggleableTile()).isFalse();
+        assertThat(manager.isActiveTile()).isFalse();
     }
 
     private void mockChangeEnabled(long changeId, boolean enabled) {
