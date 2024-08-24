@@ -376,7 +376,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -398,7 +399,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
             .build()
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test

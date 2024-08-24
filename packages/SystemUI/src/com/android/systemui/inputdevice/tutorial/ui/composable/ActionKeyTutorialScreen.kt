@@ -20,7 +20,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,7 +96,6 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
     val secondaryFixedDim = LocalAndroidColorScheme.current.secondaryFixedDim
     val onSecondaryFixed = LocalAndroidColorScheme.current.onSecondaryFixed
     val onSecondaryFixedVariant = LocalAndroidColorScheme.current.onSecondaryFixedVariant
-    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
     val dynamicProperties =
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".primaryFixedDim", primaryFixedDim),
@@ -106,11 +104,10 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
             rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant)
         )
     val screenColors =
-        remember(surfaceContainer, dynamicProperties) {
+        remember(dynamicProperties) {
             TutorialScreenConfig.Colors(
                 background = onSecondaryFixed,
-                successBackground = surfaceContainer,
-                title = primaryFixedDim,
+                title = secondaryFixedDim,
                 animationColors = dynamicProperties,
             )
         }

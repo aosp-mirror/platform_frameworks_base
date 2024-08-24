@@ -37,6 +37,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -50,6 +52,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.modifiers.height
 import com.android.compose.modifiers.padding
+import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -59,6 +62,7 @@ import com.android.systemui.media.dagger.MediaModule.QS_PANEL
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
+import com.android.systemui.qs.composefragment.ui.notificationScrimClip
 import com.android.systemui.qs.composefragment.viewmodel.QSFragmentComposeViewModel
 import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -100,6 +104,17 @@ constructor(
     private val qqsPositionOnRoot = Rect()
     private val composeViewPositionOnScreen = Rect()
 
+    // Inside object for namespacing
+    private val notificationScrimClippingParams =
+        object {
+            var isEnabled by mutableStateOf(false)
+            var leftInset by mutableStateOf(0)
+            var rightInset by mutableStateOf(0)
+            var top by mutableStateOf(0)
+            var bottom by mutableStateOf(0)
+            var radius by mutableStateOf(0)
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -126,7 +141,18 @@ constructor(
 
                     AnimatedVisibility(
                         visible = visible,
-                        modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                        modifier =
+                            Modifier.windowInsetsPadding(WindowInsets.navigationBars).thenIf(
+                                notificationScrimClippingParams.isEnabled
+                            ) {
+                                Modifier.notificationScrimClip(
+                                    notificationScrimClippingParams.leftInset,
+                                    notificationScrimClippingParams.top,
+                                    notificationScrimClippingParams.rightInset,
+                                    notificationScrimClippingParams.bottom,
+                                    notificationScrimClippingParams.radius,
+                                )
+                            }
                     ) {
                         AnimatedContent(targetState = qsState) {
                             when (it) {
@@ -280,7 +306,16 @@ constructor(
         cornerRadius: Int,
         visible: Boolean,
         fullWidth: Boolean
-    ) {}
+    ) {
+        notificationScrimClippingParams.isEnabled = visible
+        notificationScrimClippingParams.top = top
+        notificationScrimClippingParams.bottom = bottom
+        // Full width means that QS will show in the entire width allocated to it (for example
+        // phone) vs. showing in a narrower column (for example, tablet portrait).
+        notificationScrimClippingParams.leftInset = if (fullWidth) 0 else leftInset
+        notificationScrimClippingParams.rightInset = if (fullWidth) 0 else rightInset
+        notificationScrimClippingParams.radius = cornerRadius
+    }
 
     override fun isFullyCollapsed(): Boolean {
         return viewModel.qsExpansionValue <= 0f

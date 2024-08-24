@@ -443,4 +443,20 @@
     <!-- Telephony satellite gateway intent for handling carrier roaming to satellite is using ESOS messaging. -->
     <string name="config_satellite_carrier_roaming_esos_provisioned_intent_action" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_carrier_roaming_esos_provisioned_intent_action" />
+
+    <!-- The time duration in minutes to wait before retry validating a possible change
+         in satellite allowed region. The default value is 10 minutes. -->
+    <integer name="config_satellite_delay_minutes_before_retry_validating_possible_change_in_allowed_region">10</integer>
+    <java-symbol type="integer" name="config_satellite_delay_minutes_before_retry_validating_possible_change_in_allowed_region" />
+
+    <!-- The maximum retry count to validate a possible change in satellite allowed region.
+         The default value is 3 minutes. -->
+    <integer name="config_satellite_max_retry_count_for_validating_possible_change_in_allowed_region">3</integer>
+    <java-symbol type="integer" name="config_satellite_max_retry_count_for_validating_possible_change_in_allowed_region" />
+
+    <!-- The time duration in minutes for location query throttle interval.
+         The default value is 10 minutes. -->
+    <integer name="config_satellite_location_query_throttle_interval_minutes">10</integer>
+    <java-symbol type="integer" name="config_satellite_location_query_throttle_interval_minutes" />
+
 </resources>

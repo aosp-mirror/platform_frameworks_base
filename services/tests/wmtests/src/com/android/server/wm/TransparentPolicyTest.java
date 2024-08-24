@@ -322,9 +322,9 @@ public class TransparentPolicyTest extends WindowTestsBase {
                     a.checkTopActivityInSizeCompatMode(/* inScm */ true);
 
                     ta.launchTransparentActivityInTask();
-                    a.assertNotNullOnTopActivity(ActivityRecord::getCompatDisplayInsets);
+                    a.assertNotNullOnTopActivity(ActivityRecord::getAppCompatDisplayInsets);
                     a.applyToTopActivity(ActivityRecord::clearSizeCompatMode);
-                    a.assertNullOnTopActivity(ActivityRecord::getCompatDisplayInsets);
+                    a.assertNullOnTopActivity(ActivityRecord::getAppCompatDisplayInsets);
                 });
             });
         });

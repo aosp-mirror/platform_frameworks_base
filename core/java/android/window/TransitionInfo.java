@@ -1141,6 +1141,7 @@ public final class TransitionInfo implements Parcelable {
         // Customize activity transition animation
         private CustomActivityTransition mCustomActivityOpenTransition;
         private CustomActivityTransition mCustomActivityCloseTransition;
+        private int mUserId;
 
         private AnimationOptions(int type) {
             mType = type;
@@ -1159,6 +1160,7 @@ public final class TransitionInfo implements Parcelable {
             mAnimations = in.readInt();
             mCustomActivityOpenTransition = in.readTypedObject(CustomActivityTransition.CREATOR);
             mCustomActivityCloseTransition = in.readTypedObject(CustomActivityTransition.CREATOR);
+            mUserId = in.readInt();
         }
 
         /** Make basic customized animation for a package */
@@ -1283,6 +1285,14 @@ public final class TransitionInfo implements Parcelable {
             return options;
         }
 
+        public void setUserId(int userId) {
+            mUserId = userId;
+        }
+
+        public int getUserId() {
+            return mUserId;
+        }
+
         public int getType() {
             return mType;
         }
@@ -1349,6 +1359,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeInt(mAnimations);
             dest.writeTypedObject(mCustomActivityOpenTransition, flags);
             dest.writeTypedObject(mCustomActivityCloseTransition, flags);
+            dest.writeInt(mUserId);
         }
 
         @NonNull
@@ -1406,6 +1417,7 @@ public final class TransitionInfo implements Parcelable {
             if (mExitResId != DEFAULT_ANIMATION_RESOURCES_ID) {
                 sb.append(" exitResId=").append(mExitResId);
             }
+            sb.append(" mUserId=").append(mUserId);
             sb.append('}');
             return sb.toString();
         }

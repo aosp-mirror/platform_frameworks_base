@@ -838,14 +838,9 @@ public class Process {
     /**
      * Returns true if the current process is a 64-bit runtime.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean is64Bit() {
         return VMRuntime.getRuntime().is64Bit();
-    }
-
-    /** @hide */
-    public static final boolean is64Bit$ravenwood() {
-        return "amd64".equals(System.getProperty("os.arch"));
     }
 
     private static volatile ThreadLocal<SomeArgs> sIdentity$ravenwood;

@@ -2501,33 +2501,19 @@ public final class ShortcutInfo implements Parcelable {
         return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true, indent);
     }
 
-    private void addIndentOrComma(StringBuilder sb, String indent) {
-        if (indent != null) {
-            sb.append("\n  ");
-            sb.append(indent);
-        } else {
-            sb.append(", ");
-        }
+    /** @hide */
+    public String toSimpleString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(mId);
+        addReadableFlags(sb);
+        return sb.toString();
     }
 
-    private String toStringInner(boolean secure, boolean includeInternalData, String indent) {
-        final StringBuilder sb = new StringBuilder();
-
-        if (indent != null) {
-            sb.append(indent);
-        }
-
-        sb.append("ShortcutInfo {");
-
-        sb.append("id=");
-        sb.append(secure ? "***" : mId);
-
-        sb.append(", flags=0x");
-        sb.append(Integer.toHexString(mFlags));
+    private void addReadableFlags(StringBuilder sb) {
         sb.append(" [");
         if ((mFlags & FLAG_SHADOW) != 0) {
-            // Note the shadow flag isn't actually used anywhere and it's just for dumpsys, so
-            // we don't have an isXxx for this.
+            // Note the shadow flag isn't actually used anywhere and it's
+            // just for dumpsys, so we don't have an isXxx for this.
             sb.append("Sdw");
         }
         if (!isEnabled()) {
@@ -2576,7 +2562,32 @@ public final class ShortcutInfo implements Parcelable {
             sb.append("Hid-L");
         }
         sb.append("]");
+    }
 
+    private void addIndentOrComma(StringBuilder sb, String indent) {
+        if (indent != null) {
+            sb.append("\n  ");
+            sb.append(indent);
+        } else {
+            sb.append(", ");
+        }
+    }
+
+    private String toStringInner(boolean secure, boolean includeInternalData, String indent) {
+        final StringBuilder sb = new StringBuilder();
+
+        if (indent != null) {
+            sb.append(indent);
+        }
+
+        sb.append("ShortcutInfo {");
+
+        sb.append("id=");
+        sb.append(secure ? "***" : mId);
+
+        sb.append(", flags=0x");
+        sb.append(Integer.toHexString(mFlags));
+        addReadableFlags(sb);
         addIndentOrComma(sb, indent);
 
         sb.append("packageName=");

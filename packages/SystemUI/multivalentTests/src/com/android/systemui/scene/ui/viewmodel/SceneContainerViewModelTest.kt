@@ -33,6 +33,7 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
+import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -72,6 +73,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
+                logger = kosmos.sceneLogger,
                 motionEventHandlerReceiver = { motionEventHandler ->
                     this@SceneContainerViewModelTest.motionEventHandler = motionEventHandler
                 },

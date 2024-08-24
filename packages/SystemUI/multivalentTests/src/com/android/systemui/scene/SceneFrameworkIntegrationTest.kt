@@ -58,6 +58,7 @@ import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
+import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -133,6 +134,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
+                logger = kosmos.sceneLogger,
                 motionEventHandlerReceiver = {},
             )
             .apply { setTransitionState(transitionState) }
@@ -493,7 +495,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private fun getCurrentSceneInUi(): SceneKey {
         return when (val state = transitionState.value) {
             is ObservableTransitionState.Idle -> state.currentScene
-            is ObservableTransitionState.Transition -> state.fromScene
+            is ObservableTransitionState.Transition.ChangeCurrentScene -> state.fromScene
+            is ObservableTransitionState.Transition.ShowOrHideOverlay -> state.currentScene
+            is ObservableTransitionState.Transition.ReplaceOverlay -> state.currentScene
         }
     }
 

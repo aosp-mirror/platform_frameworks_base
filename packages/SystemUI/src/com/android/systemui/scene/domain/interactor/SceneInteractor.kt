@@ -28,8 +28,6 @@ import com.android.systemui.scene.domain.resolver.SceneResolver
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.util.kotlin.getValue
-import com.android.systemui.util.kotlin.pairwiseBy
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -83,20 +81,7 @@ constructor(
      * Note that during a transition between scenes, more than one scene might be rendered but only
      * one is considered the committed/current scene.
      */
-    val currentScene: StateFlow<SceneKey> =
-        repository.currentScene
-            .pairwiseBy(initialValue = repository.currentScene.value) { from, to ->
-                logger.logSceneChangeCommitted(
-                    from = from,
-                    to = to,
-                )
-                to
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = repository.currentScene.value,
-            )
+    val currentScene: StateFlow<SceneKey> = repository.currentScene
 
     /**
      * The current state of the transition.
@@ -124,7 +109,15 @@ constructor(
      */
     val transitioningTo: StateFlow<SceneKey?> =
         transitionState
-            .map { state -> (state as? ObservableTransitionState.Transition)?.toScene }
+            .map { state ->
+                when (state) {
+                    is ObservableTransitionState.Idle -> null
+                    is ObservableTransitionState.Transition.ChangeCurrentScene -> state.toScene
+                    is ObservableTransitionState.Transition.ShowOrHideOverlay,
+                    is ObservableTransitionState.Transition.ReplaceOverlay ->
+                        TODO("b/359173565: Handle overlay transitions")
+                }
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -234,14 +227,15 @@ constructor(
             return
         }
 
-        logger.logSceneChangeRequested(
+        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(resolvedScene, sceneState) }
+
+        logger.logSceneChanged(
             from = currentSceneKey,
             to = resolvedScene,
             reason = loggingReason,
             isInstant = false,
         )
 
-        onSceneAboutToChangeListener.forEach { it.onSceneAboutToChange(resolvedScene, sceneState) }
         repository.changeScene(resolvedScene, transitionKey)
     }
 
@@ -274,7 +268,7 @@ constructor(
             return
         }
 
-        logger.logSceneChangeRequested(
+        logger.logSceneChanged(
             from = currentSceneKey,
             to = resolvedScene,
             reason = loggingReason,

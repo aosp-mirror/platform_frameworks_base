@@ -5538,6 +5538,49 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void removeAndAddAutomaticZenRule_ifChangingComponent_isAllowedAndDoesNotRestore() {
+        // Start with a rule.
+        mZenModeHelper.mConfig.automaticRules.clear();
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setOwner(new ComponentName("first", "owner"))
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALL)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                ORIGIN_APP, "add it", CUSTOM_PKG_UID);
+
+        // User customizes it.
+        AutomaticZenRule userUpdate = new AutomaticZenRule.Builder(rule)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdate, ORIGIN_USER_IN_SYSTEMUI,
+                "userUpdate", SYSTEM_UID);
+
+        // App deletes it. It's preserved for a possible restoration.
+        mZenModeHelper.removeAutomaticZenRule(ruleId, ORIGIN_APP, "delete it",
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(0);
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(1);
+
+        // App adds it again, but this time with a different owner!
+        AutomaticZenRule readdingWithDifferentOwner = new AutomaticZenRule.Builder(rule)
+                .setOwner(new ComponentName("second", "owner"))
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .build();
+        String newRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                readdingWithDifferentOwner, ORIGIN_APP, "add it again", CUSTOM_PKG_UID);
+
+        // Verify that the rule was NOT restored:
+        assertThat(newRuleId).isNotEqualTo(ruleId);
+        AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(newRuleId);
+        assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
+        assertThat(finalRule.getOwner()).isEqualTo(new ComponentName("second", "owner"));
+
+        // Also, we discarded the "deleted rule" since we found it but decided not to use it.
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(0);
+    }
+
+    @Test
     @EnableFlags(FLAG_MODES_API)
     public void removeAutomaticZenRule_preservedForRestoringByPackageAndConditionId() {
         mContext.getTestablePermissions().setPermission(Manifest.permission.MANAGE_NOTIFICATIONS,

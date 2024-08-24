@@ -172,7 +172,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
-    static final boolean DEBUG_REBOOT = true;
+    static final boolean DEBUG_REBOOT = Build.IS_DEBUGGABLE;
 
     @VisibleForTesting
     static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day

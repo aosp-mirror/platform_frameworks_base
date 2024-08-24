@@ -34,11 +34,11 @@ public class VMRuntime {
     }
 
     public boolean is64Bit() {
-        return true;
+        return "amd64".equals(System.getProperty("os.arch"));
     }
 
     public static boolean is64BitAbi(String abi) {
-        return true;
+        return abi.contains("64");
     }
 
     public Object newUnpaddedArray(Class<?> componentType, int minLength) {

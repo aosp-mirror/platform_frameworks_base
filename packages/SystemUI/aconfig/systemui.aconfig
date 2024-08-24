@@ -1032,6 +1032,16 @@ flag {
 }
 
 flag {
+  name: "communal_edit_widgets_activity_finish_fix"
+  namespace: "systemui"
+  description: "finish edit widgets activity when stopping"
+  bug: "354725145"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
@@ -1080,6 +1090,13 @@ flag {
   namespace: "systemui"
   description: "Re-use created media drawables for media controls"
   bug: "358402034"
+}
+
+flag {
+  name: "media_controls_posts_optimization"
+  namespace: "systemui"
+  description: "Ignore duplicate media notifications posted"
+  bug: "358645640"
 }
 
 flag {
@@ -1356,3 +1373,14 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "face_message_defer_update"
+    namespace: "systemui"
+    description: "Only analyze the last n frames when determining whether to defer a face auth help message like low light"
+    bug: "351863611"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
