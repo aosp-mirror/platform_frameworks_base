@@ -115,21 +115,21 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                 .addWidget(
                     widgetId = 0,
                     componentName = defaultWidgets[0],
-                    priority = 3,
+                    rank = 0,
                     userSerialNumber = 0,
                 )
             verify(communalWidgetDao)
                 .addWidget(
                     widgetId = 1,
                     componentName = defaultWidgets[1],
-                    priority = 2,
+                    rank = 1,
                     userSerialNumber = 0,
                 )
             verify(communalWidgetDao)
                 .addWidget(
                     widgetId = 2,
                     componentName = defaultWidgets[2],
-                    priority = 1,
+                    rank = 2,
                     userSerialNumber = 0,
                 )
         }
@@ -150,7 +150,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                 .addWidget(
                     widgetId = anyInt(),
                     componentName = any(),
-                    priority = anyInt(),
+                    rank = anyInt(),
                     userSerialNumber = anyInt(),
                 )
         }

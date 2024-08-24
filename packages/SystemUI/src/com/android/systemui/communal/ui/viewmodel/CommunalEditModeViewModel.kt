@@ -125,24 +125,24 @@ constructor(
     override fun onAddWidget(
         componentName: ComponentName,
         user: UserHandle,
-        priority: Int,
+        rank: Int?,
         configurator: WidgetConfigurator?
     ) {
-        communalInteractor.addWidget(componentName, user, priority, configurator)
-        metricsLogger.logAddWidget(componentName.flattenToString(), priority)
+        communalInteractor.addWidget(componentName, user, rank, configurator)
+        metricsLogger.logAddWidget(componentName.flattenToString(), rank)
     }
 
     override fun onDeleteWidget(
         id: Int,
         componentName: ComponentName,
-        priority: Int,
+        rank: Int,
     ) {
         communalInteractor.deleteWidget(id)
-        metricsLogger.logRemoveWidget(componentName.flattenToString(), priority)
+        metricsLogger.logRemoveWidget(componentName.flattenToString(), rank)
     }
 
-    override fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) =
-        communalInteractor.updateWidgetOrder(widgetIdToPriorityMap)
+    override fun onReorderWidgets(widgetIdToRankMap: Map<Int, Int>) =
+        communalInteractor.updateWidgetOrder(widgetIdToRankMap)
 
     override fun onReorderWidgetStart() {
         // Clear selection status
