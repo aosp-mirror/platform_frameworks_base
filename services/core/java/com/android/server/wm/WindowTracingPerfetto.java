@@ -35,8 +35,7 @@ class WindowTracingPerfetto extends WindowTracing {
 
     private final AtomicInteger mCountSessionsOnFrame = new AtomicInteger();
     private final AtomicInteger mCountSessionsOnTransaction = new AtomicInteger();
-    private final WindowTracingDataSource mDataSource = new WindowTracingDataSource(
-            this::onStart, this::onStop);
+    private final WindowTracingDataSource mDataSource = new WindowTracingDataSource(this);
 
     WindowTracingPerfetto(WindowManagerService service, Choreographer choreographer) {
         this(service, choreographer, service.mGlobalLock);
@@ -156,7 +155,7 @@ class WindowTracingPerfetto extends WindowTracing {
         return mCountSessionsOnTransaction.get() > 0;
     }
 
-    private void onStart(WindowTracingDataSource.Config config) {
+    void onStart(WindowTracingDataSource.Config config) {
         if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
             mCountSessionsOnFrame.incrementAndGet();
         } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {
@@ -168,7 +167,7 @@ class WindowTracingPerfetto extends WindowTracing {
         log(WHERE_START_TRACING);
     }
 
-    private void onStop(WindowTracingDataSource.Config config) {
+    void onStop(WindowTracingDataSource.Config config) {
         if (config.mLogFrequency == WindowTracingLogFrequency.FRAME) {
             mCountSessionsOnFrame.decrementAndGet();
         } else if (config.mLogFrequency == WindowTracingLogFrequency.TRANSACTION) {

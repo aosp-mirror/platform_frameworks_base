@@ -54,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class CameraPowerStatsTest {
     @Rule(order = 0)
@@ -123,44 +124,41 @@ public class CameraPowerStatsTest {
                 .getEnergyConsumerIds(eq((int) EnergyConsumerType.CAMERA), any()))
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID});
 
-        CameraPowerStatsProcessor processor = new CameraPowerStatsProcessor(
-                mStatsRule.getPowerProfile(), mUidResolver);
-
-        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
+                () -> new CameraPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
 
         CameraPowerStatsCollector collector = new CameraPowerStatsCollector(mInjector);
         collector.addConsumer(
-                powerStats -> {
-                    processor.addPowerStats(stats, powerStats, mMonotonicClock.monotonicTime());
-                });
+                powerStats -> stats.addPowerStats(powerStats, mMonotonicClock.monotonicTime()));
         collector.setEnabled(true);
 
         // Establish a baseline
+        stats.start(0);
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 10000));
         collector.collectAndDeliverStats();
 
-        processor.noteStateChange(stats, buildHistoryItem(0, true, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
         // Turn the screen off after 2.5 seconds
         stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
 
-        processor.noteStateChange(stats, buildHistoryItem(6000, false, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
 
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 2_170_000));
         collector.collectAndDeliverStats();
 
-        processor.noteStateChange(stats, buildHistoryItem(7000, true, APP_UID2));
+        stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2));
 
         mStatsRule.setTime(11_000, 11_000);
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 3_610_000));
         collector.collectAndDeliverStats();
 
-        processor.finish(stats, 11_000);
+        stats.finish(11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
         BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
@@ -244,7 +242,7 @@ public class CameraPowerStatsTest {
     }
 
     private static PowerComponentAggregatedPowerStats createAggregatedPowerStats(
-            BinaryStatePowerStatsProcessor processor) {
+            Supplier<PowerStatsProcessor> processorSupplier) {
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CAMERA)
                 .trackDeviceStates(
@@ -254,12 +252,12 @@ public class CameraPowerStatsTest {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(processor);
+                .setProcessorSupplier(processorSupplier);
 
         AggregatedPowerStats aggregatedPowerStats = new AggregatedPowerStats(config);
         PowerComponentAggregatedPowerStats powerComponentStats =
                 aggregatedPowerStats.getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_CAMERA);
-        processor.start(powerComponentStats, 0);
+        powerComponentStats.start(0);
 
         powerComponentStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         powerComponentStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);

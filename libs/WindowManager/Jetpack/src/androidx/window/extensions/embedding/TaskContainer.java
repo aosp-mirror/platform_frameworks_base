@@ -32,6 +32,8 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -48,12 +50,14 @@ import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
 
+import com.android.window.flags.Flags;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /** Represents TaskFragments and split pairs below a Task. */
-class TaskContainer {
+class TaskContainer implements Parcelable {
     private static final String TAG = TaskContainer.class.getSimpleName();
 
     /** The unique task id. */
@@ -79,6 +83,9 @@ class TaskContainer {
 
     @NonNull
     private TaskFragmentParentInfo mInfo;
+
+    @NonNull
+    private SplitController mSplitController;
 
     /**
      * TaskFragments that the organizer has requested to be closed. They should be removed when
@@ -116,12 +123,14 @@ class TaskContainer {
     /**
      * The {@link TaskContainer} constructor
      *
-     * @param taskId         The ID of the Task, which must match {@link Activity#getTaskId()} with
-     *                       {@code activityInTask}.
-     * @param activityInTask The {@link Activity} in the Task with {@code taskId}. It is used to
-     *                       initialize the {@link TaskContainer} properties.
+     * @param taskId          The ID of the Task, which must match {@link Activity#getTaskId()} with
+     *                        {@code activityInTask}.
+     * @param activityInTask  The {@link Activity} in the Task with {@code taskId}. It is used to
+     *                        initialize the {@link TaskContainer} properties.
+     * @param splitController The {@link SplitController}.
      */
-    TaskContainer(int taskId, @NonNull Activity activityInTask) {
+    TaskContainer(int taskId, @NonNull Activity activityInTask,
+            @Nullable SplitController splitController) {
         if (taskId == INVALID_TASK_ID) {
             throw new IllegalArgumentException("Invalid Task id");
         }
@@ -136,6 +145,7 @@ class TaskContainer {
                 true /* visible */,
                 true /* hasDirectActivity */,
                 null /* decorSurface */);
+        mSplitController = splitController;
     }
 
     int getTaskId() {
@@ -571,6 +581,12 @@ class TaskContainer {
         // Update overlay container after split pin container since the overlay should be on top of
         // pin container.
         updateAlwaysOnTopOverlayIfNecessary();
+
+        // TODO(b/289875940): Making backup-restore as an opt-in solution, before the flag goes
+        //  to next-food.
+        if (Flags.aeBackStackRestore()) {
+            mSplitController.scheduleBackup();
+        }
     }
 
     private void updateAlwaysOnTopOverlayIfNecessary() {
@@ -663,6 +679,34 @@ class TaskContainer {
         }
         return activityStacks;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mTaskId);
+        // TODO(b/289875940)
+    }
+
+    protected TaskContainer(Parcel in) {
+        mTaskId = in.readInt();
+        // TODO(b/289875940)
+    }
+
+    public static final Creator<TaskContainer> CREATOR = new Creator<>() {
+        @Override
+        public TaskContainer createFromParcel(Parcel in) {
+            return new TaskContainer(in);
+        }
+
+        @Override
+        public TaskContainer[] newArray(int size) {
+            return new TaskContainer[size];
+        }
+    };
 
     /** A wrapper class which contains the information of {@link TaskContainer} */
     static final class TaskProperties {

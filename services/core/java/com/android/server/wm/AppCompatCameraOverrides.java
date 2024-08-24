@@ -217,7 +217,7 @@ class AppCompatCameraOverrides {
      */
     boolean isCameraCompatSplitScreenAspectRatioAllowed() {
         return mAppCompatConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
-                && !mActivityRecord.shouldCreateCompatDisplayInsets();
+                && !mActivityRecord.shouldCreateAppCompatDisplayInsets();
     }
 
     @FreeformCameraCompatMode

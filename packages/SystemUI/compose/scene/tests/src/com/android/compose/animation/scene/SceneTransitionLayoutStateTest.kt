@@ -478,7 +478,7 @@ class SceneTransitionLayoutStateTest {
                         overscroll(SceneB, Orientation.Vertical) { fade(TestElements.Foo) }
                     }
             )
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasNoOverscrollSpec()
 
         // overscroll for SceneA is NOT defined
@@ -510,7 +510,7 @@ class SceneTransitionLayoutStateTest {
                     }
             )
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasNoOverscrollSpec()
 
         // overscroll for SceneA is defined
@@ -539,7 +539,7 @@ class SceneTransitionLayoutStateTest {
                 sceneTransitions = transitions {}
             )
 
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasNoOverscrollSpec()
 
         // overscroll for SceneA is NOT defined
@@ -642,7 +642,7 @@ class SceneTransitionLayoutStateTest {
 
         // Transition to B.
         state.setTargetScene(SceneB, coroutineScope = this)
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasCurrentScene(SceneB)
 
         // Snap to C.

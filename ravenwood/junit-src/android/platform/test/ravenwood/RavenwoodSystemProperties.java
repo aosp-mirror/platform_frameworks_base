@@ -48,11 +48,13 @@ public class RavenwoodSystemProperties {
         switch (key) {
             case "gsm.version.baseband":
             case "no.such.thing":
+            case "qemu.sf.lcd_density":
             case "ro.bootloader":
             case "ro.debuggable":
             case "ro.hardware":
             case "ro.hw_timeout_multiplier":
             case "ro.odm.build.media_performance_class":
+            case "ro.sf.lcd_density":
             case "ro.treble.enabled":
             case "ro.vndk.version":
                 return true;

@@ -16,7 +16,6 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
@@ -67,7 +66,6 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
     val onTertiaryFixed = LocalAndroidColorScheme.current.onTertiaryFixed
     val onTertiaryFixedVariant = LocalAndroidColorScheme.current.onTertiaryFixedVariant
     val tertiaryFixedDim = LocalAndroidColorScheme.current.tertiaryFixedDim
-    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
     val dynamicProperties =
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".tertiaryFixedDim", tertiaryFixedDim),
@@ -76,10 +74,9 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
             rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant)
         )
     val screenColors =
-        remember(onTertiaryFixed, surfaceContainer, tertiaryFixedDim, dynamicProperties) {
+        remember(dynamicProperties) {
             TutorialScreenConfig.Colors(
                 background = onTertiaryFixed,
-                successBackground = surfaceContainer,
                 title = tertiaryFixedDim,
                 animationColors = dynamicProperties,
             )

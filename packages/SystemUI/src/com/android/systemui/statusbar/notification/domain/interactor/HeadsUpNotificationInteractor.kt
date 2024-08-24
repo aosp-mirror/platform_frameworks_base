@@ -148,6 +148,16 @@ constructor(
     fun snooze() {
         headsUpRepository.snooze()
     }
+
+    /** Unpin all currently pinned HUNs. */
+    fun unpinAll(userUnPinned: Boolean) {
+        headsUpRepository.unpinAll(userUnPinned)
+    }
+
+    /** Notifies that the current scene transition is idle. */
+    fun onTransitionIdle() {
+        headsUpRepository.releaseAfterExpansion()
+    }
 }
 
 class HeadsUpRowInteractor(repository: HeadsUpRowRepository)

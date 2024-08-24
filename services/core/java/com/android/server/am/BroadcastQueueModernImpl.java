@@ -929,9 +929,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // For ordered broadcast, check if the receivers for the new broadcast is a superset
             // of those for the previous one as skipping and removing only one of them could result
             // in an inconsistent state.
-            if (testRecord.ordered || testRecord.prioritized) {
+            if (testRecord.ordered) {
                 return containsAllReceivers(r, testRecord, recordsLookupCache);
-            } else if (testRecord.resultTo != null) {
+            } else if (testRecord.prioritized || testRecord.resultTo != null) {
                 return testRecord.getDeliveryState(testIndex) == DELIVERY_DEFERRED
                         ? r.containsReceiver(testRecord.receivers.get(testIndex))
                         : containsAllReceivers(r, testRecord, recordsLookupCache);

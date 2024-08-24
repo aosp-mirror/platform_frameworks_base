@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"هل تريد تسجيل محتوى الشاشة؟"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"تسجيل محتوى تطبيق واحد"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"تسجيل محتوى الشاشة بالكامل"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"أثناء تسجيل محتوى الشاشة بالكامل، يتم تسجيل كل المحتوى المعروض على شاشتك. لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"أثناء تسجيل محتوى تطبيق، يتم تسجيل أي محتوى يتم عرضه أو تشغيله في ذلك التطبيق. لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"تسجيل محتوى الشاشة"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"اختيار تطبيق لتسجيل محتواه"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"تسجيل الصوت"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"صوت الجهاز"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"الصوت من جهازك، مثلاً الموسيقى والمكالمات ونغمات الرنين"</string>
@@ -301,7 +294,7 @@
     <string name="quick_settings_modes_label" msgid="5407025818652750501">"الأوضاع ذات الأولوية"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"بلوتوث"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"لا يتوفر أي أجهزة مقترنة"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"انقر لربط جهاز أو إلغاء ربطه"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"انقر للاتصال بجهاز أو قطع الاتصال به"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"إقران جهاز جديد"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"عرض الكل"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"استخدام البلوتوث"</string>
@@ -315,6 +308,8 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"سيتم تفعيل البلوتوث صباح الغد"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"مشاركة الصوت"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"جارٍ مشاركة الصوت"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"مستوى طاقة البطارية <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"صوت"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"سماعة الرأس"</string>
@@ -535,8 +530,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"سيتمكن تطبيق \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" من الوصول إلى كل المحتوى المعروض على شاشتك أو الذي يتم تشغيله على جهازك أثناء التسجيل أو البثّ. ويشمل ذلك معلومات، مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"هل تريد بدء التسجيل أو البثّ؟"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ستتمكن الخدمة التي تقدّم هذه الوظيفة من الوصول إلى كل المحتوى المعروض على شاشتك أو الذي يتم تشغيله على جهازك أثناء التسجيل أو البثّ. ويشمل ذلك معلومات، مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"مشاركة محتوى تطبيق أو تسجيله"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"هل تريد مشاركة الشاشة مع تطبيق \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"؟"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"مشاركة تطبيق واحد"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"مشاركة الشاشة بأكملها"</string>
@@ -544,16 +538,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"أثناء مشاركة محتوى تطبيق، سيكون كل المحتوى المعروض أو الذي يتم تشغيله في ذلك التطبيق مرئيًا لتطبيق \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\". لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"مشاركة الشاشة"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"تم إيقاف هذا الخيار من خلال تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"اختيار تطبيق لمشاركة محتواه"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"هل تريد بث محتوى الشاشة؟"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"بث محتوى تطبيق واحد"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"بث محتوى الشاشة بالكامل"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"أثناء بث محتوى الشاشة بالكامل، سيكون كل المحتوى المعروض على شاشتك مرئيًا. لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"أثناء بث محتوى تطبيق، سيكون كل المحتوى المعروض أو الذي يتم تشغيله في ذلك التطبيق مرئيًا. لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"بث محتوى الشاشة"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"اختيار تطبيق لبث محتواه"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"هل تريد بدء المشاركة؟"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"‏أثناء المشاركة أو التسجيل أو البثّ، يمكن لنظام Android الوصول إلى كل المحتوى المعروض على شاشتك أو الذي يتم تشغيله على جهازك، لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"‏أثناء مشاركة محتوى تطبيق أو تسجيله أو بثّه، يمكن لنظام Android الوصول إلى كل المحتوى المعروض أو الذي يتم تشغيله في ذلك التطبيق، لذا يُرجى توخي الحذر بشأن المعلومات مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>

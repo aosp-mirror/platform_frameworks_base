@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.education.data.model.EduDeviceConnectionTime
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
@@ -102,6 +103,19 @@ class ContextualEducationRepositoryTest : SysuiTestCase() {
                 )
             underTest.updateGestureEduModel(BACK) { newModel }
             val model by collectLastValue(underTest.readGestureEduModelFlow(BACK))
+            assertThat(model).isEqualTo(newModel)
+        }
+
+    @Test
+    fun eduDeviceConnectionTimeDataChangedOnUpdate() =
+        testScope.runTest {
+            val newModel =
+                EduDeviceConnectionTime(
+                    keyboardFirstConnectionTime = kosmos.fakeEduClock.instant(),
+                    touchpadFirstConnectionTime = kosmos.fakeEduClock.instant(),
+                )
+            underTest.updateEduDeviceConnectionTime { newModel }
+            val model by collectLastValue(underTest.readEduDeviceConnectionTime())
             assertThat(model).isEqualTo(newModel)
         }
 

@@ -91,6 +91,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleRegistry;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
@@ -596,6 +597,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
 
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
+
     /**
      * Public constructor for CentralSurfaces.
      *
@@ -708,7 +711,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ActivityStarter activityStarter,
             BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
             GlanceableHubContainerController glanceableHubContainerController,
-            EmergencyGestureIntentFactory emergencyGestureIntentFactory
+            EmergencyGestureIntentFactory emergencyGestureIntentFactory,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -841,6 +845,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
         mLightRevealScrim = lightRevealScrim;
+
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
 
         if (PredictiveBackSysUiFlag.isEnabled()) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
@@ -1683,7 +1689,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         mNotificationShadeWindowController.setRequestTopUi(false, TAG);
                     }
                 }, /* isDozing= */ false, RippleShape.CIRCLE,
-                sUiEventLogger).show(animationDelay);
+                sUiEventLogger, mViewCaptureAwareWindowManager).show(animationDelay);
     }
 
     @Override

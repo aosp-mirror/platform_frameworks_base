@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,7 +29,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ClonePerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     static class CloneableObject implements Cloneable {
         public Object clone() throws CloneNotSupportedException {
@@ -1127,7 +1128,7 @@ public class ClonePerfTest {
     public void time_Object_clone() {
         try {
             CloneableObject o = new CloneableObject();
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            final BenchmarkState state = mBenchmarkRule.getState();
             while (state.keepRunning()) {
                 o.clone();
             }
@@ -1140,7 +1141,7 @@ public class ClonePerfTest {
     public void time_Object_manyFieldClone() {
         try {
             CloneableManyFieldObject o = new CloneableManyFieldObject();
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            final BenchmarkState state = mBenchmarkRule.getState();
             while (state.keepRunning()) {
                 o.clone();
             }
@@ -1153,7 +1154,7 @@ public class ClonePerfTest {
     public void time_Object_deepClone() {
         try {
             DeepCloneable o = new DeepCloneable();
-            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            final BenchmarkState state = mBenchmarkRule.getState();
             while (state.keepRunning()) {
                 o.clone();
             }
@@ -1165,7 +1166,7 @@ public class ClonePerfTest {
     @Test
     public void time_Array_clone() {
         int[] o = new int[32];
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             o.clone();
         }
@@ -1177,7 +1178,7 @@ public class ClonePerfTest {
         for (int i = 0; i < o.length / 2; ++i) {
             o[i] = new Object();
         }
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             o.clone();
         }
@@ -1189,7 +1190,7 @@ public class ClonePerfTest {
         for (int i = 0; i < o.length / 2; ++i) {
             o[i] = new Object();
         }
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             o.clone();
         }

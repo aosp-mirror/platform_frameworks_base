@@ -40,6 +40,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -117,11 +118,21 @@ public class InsetsAnimationControlImplTest {
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
         controls.put(ID_STATUS_BAR, topConsumer.getControl());
         controls.put(ID_NAVIGATION_BAR, navConsumer.getControl());
+        InsetsAnimationSpec spec = new InsetsAnimationSpec() {
+            @Override
+            public long getDurationMs(boolean hasZeroInsetsIme) {
+                return 10;
+            }
+            @Override
+            public Interpolator getInsetsInterpolator(boolean hasZeroInsetsIme) {
+                return new LinearInterpolator();
+            }
+        };
+
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
-                mMockController, 10 /* durationMs */, new LinearInterpolator(),
-                0 /* animationType */, 0 /* layoutInsetsDuringAnimation */, null /* translator */,
-                null /* statsToken */);
+                mMockController, spec /* insetsAnimationSpecCreator */, 0 /* animationType */,
+                0 /* layoutInsetsDuringAnimation */, null /* translator */, null /* statsToken */);
         mController.setReadyDispatched(true);
     }
 

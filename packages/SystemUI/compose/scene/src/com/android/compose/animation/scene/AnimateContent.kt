@@ -19,14 +19,14 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
-import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 internal fun CoroutineScope.animateContent(
-    transition: ContentState.Transition<*>,
+    transition: TransitionState.Transition,
     oneOffAnimation: OneOffAnimation,
     targetProgress: Float,
     startTransition: () -> Unit,

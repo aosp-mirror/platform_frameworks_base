@@ -21,6 +21,23 @@ flag {
 }
 
 flag {
+  name: "modes_ui_icons"
+  namespace: "systemui"
+  description: "Shows current Priority Mode icon in lockscreen, status bar, and QS; dependent on flags modes_api and modes_ui"
+  bug: "360399800"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "modes_ui_test"
+  namespace: "systemui"
+  description: "Guards new CTS tests for Modes; dependent on flags modes_api and modes_ui"
+  bug: "360862012"
+}
+
+flag {
   name: "api_tvextender"
   is_exported: true
   namespace: "systemui"

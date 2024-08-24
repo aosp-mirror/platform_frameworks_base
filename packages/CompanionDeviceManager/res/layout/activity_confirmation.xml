@@ -133,7 +133,8 @@
                 <LinearLayout
                     android:id="@+id/negative_multiple_devices_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
+                    android:layout_height="match_parent"
+                    android:padding="6dp"
                     android:gravity="center"
                     android:visibility="gone">
 

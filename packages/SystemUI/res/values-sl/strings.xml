@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Snemalnik zaslona"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obdelava videoposnetka zaslona"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Nenehno obveščanje o seji snemanja zaslona"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Želite posneti zaslon?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Snemanje ene aplikacije"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Snemanje celotnega zaslona"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Pri snemanju celotnega zaslona se posname vse, kar je prikazano na zaslonu. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Pri snemanju aplikacije se posname vse, kar je prikazano ali predvajano v tej aplikaciji. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Snemanje zaslona"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Izbira aplikacije za snemanje"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snemanje zvoka"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvok v napravi"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvoki v napravi, kot so glasba, klici in toni zvonjenja."</string>
@@ -315,6 +308,8 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth se bo vklopil jutri zjutraj"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Deli zvok"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Poteka deljenje zvoka"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvok"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalke z mikrofonom"</string>
@@ -535,8 +530,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bo imela dostop do vseh podatkov, ki so med snemanjem ali predvajanjem prikazani na vašem zaslonu ali se predvajajo iz vaše naprave. To vključuje podatke, kot so gesla, podrobnosti o plačilu, fotografije, sporočila in zvok, ki ga predvajate."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Želite začeti snemati ali predvajati?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Storitev, ki zagotavlja to funkcijo, bo imela dostop do vseh podatkov, ki so med snemanjem ali predvajanjem prikazani na vašem zaslonu ali se predvajajo iz vaše naprave. To vključuje podatke, kot so gesla, podrobnosti o plačilu, fotografije, sporočila in zvok, ki ga predvajate."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Deljenje ali snemanje aplikacije"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Želite deliti zaslon z aplikacijo <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Deli eno aplikacijo"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Deli celoten zaslon"</string>
@@ -544,16 +538,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Pri deljenju aplikacije je aplikaciji <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> vidno vse, kar je prikazano ali predvajano v tej aplikaciji. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Deli zaslon"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je onemogočila to možnost"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Izbira aplikacije za deljenje"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Želite predvajati vsebino zaslona?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Predvajanje vsebine ene aplikacije"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Predvajanje vsebine celotnega zaslona"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Pri predvajanju vsebine celotnega zaslona je vidno vse na zaslonu. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Pri predvajanju vsebine aplikacije je vidno vse, kar je prikazano ali predvajano v tej aplikaciji. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Predvajanje zaslona"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Izbira aplikacije za predvajanje"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Želite začeti deliti?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Pri deljenju, snemanju ali predvajanju ima Android dostop do vsega, kar je prikazano na zaslonu ali se predvaja v napravi. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Pri deljenju, snemanju ali predvajanju aplikacije ima Android dostop do vsega, kar je prikazano ali predvajano v tej aplikaciji, zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>

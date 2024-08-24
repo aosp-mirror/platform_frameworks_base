@@ -211,6 +211,7 @@ public class FuseAppLoop implements Handler.Callback {
                         if (mInstance != 0) {
                             native_replySimple(mInstance, unique, FUSE_OK);
                         }
+                        mCallbackMap.remove(checkInode(inode));
                         mBytesMap.stopUsing(inode);
                         recycleLocked(args);
                     }

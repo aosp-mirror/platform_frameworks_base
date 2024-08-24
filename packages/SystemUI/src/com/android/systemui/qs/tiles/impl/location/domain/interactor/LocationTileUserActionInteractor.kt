@@ -68,6 +68,7 @@ constructor(
                         Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

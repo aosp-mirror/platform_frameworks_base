@@ -251,6 +251,11 @@ final class AppCompatUtils {
         }
     }
 
+    static void offsetBounds(@NonNull Configuration inOutConfig, int offsetX, int offsetY) {
+        inOutConfig.windowConfiguration.getBounds().offset(offsetX, offsetY);
+        inOutConfig.windowConfiguration.getAppBounds().offset(offsetX, offsetY);
+    }
+
     private static void clearAppCompatTaskInfo(@NonNull AppCompatTaskInfo info) {
         info.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;

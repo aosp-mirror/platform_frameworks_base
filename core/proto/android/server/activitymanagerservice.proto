@@ -1045,7 +1045,7 @@ message AppsExitInfoProto {
     repeated Package packages = 2;
 }
 
-// sync with com.android.server.am.am.ProcessList.java
+// LINT.IfChange
 message AppsStartInfoProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -1064,4 +1064,6 @@ message AppsStartInfoProto {
         repeated User users = 2;
     }
     repeated Package packages = 2;
+    optional int64 monotonic_time = 3;
 }
+// LINT.ThenChange(/services/core/java/com/android/server/am/AppStartInfoTracker.java)

@@ -339,6 +339,13 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Flush the brightness update that has been made to the persistent data store.
+     */
+    public void saveBrightnessIfNeeded() {
+        mBrightnessSetting.saveIfNeeded();
+    }
+
+    /**
      * Sets the current screen brightness, and notifies the BrightnessSetting about the change.
      */
     public void updateScreenBrightnessSetting(float brightnessValue, float maxBrightness) {

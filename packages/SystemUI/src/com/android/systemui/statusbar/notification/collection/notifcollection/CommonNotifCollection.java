@@ -27,9 +27,6 @@ import java.util.Collection;
 /**
  * A notification collection that manages the list of {@link NotificationEntry}s that will be
  * rendered.
- *
- * TODO: (b/145659174) Once we fully migrate to {@link NotifPipeline}, we probably won't need this,
- * but having it for now makes it easy to switch between the two.
  */
 public interface CommonNotifCollection {
     /**

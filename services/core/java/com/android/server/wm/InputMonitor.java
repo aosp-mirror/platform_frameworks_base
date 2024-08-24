@@ -413,17 +413,12 @@ final class InputMonitor {
         // Request focus for the recents animation input consumer if an input consumer should
         // be applied for the window.
         if (recentsAnimationInputConsumer != null && focus != null) {
-            final RecentsAnimationController recentsAnimationController =
-                    mService.getRecentsAnimationController();
             // Apply recents input consumer when the focusing window is in recents animation.
-            final boolean shouldApplyRecentsInputConsumer = (recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(focus.mActivityRecord))
-                    // Shell transitions doesn't use RecentsAnimationController but we still
-                    // have carryover legacy logic that relies on the consumer.
-                    || (getWeak(mActiveRecentsActivity) != null && focus.inTransition()
+            final boolean shouldApplyRecentsInputConsumer =
+                    getWeak(mActiveRecentsActivity) != null && focus.inTransition()
                             // only take focus from the recents activity to avoid intercepting
                             // events before the gesture officially starts.
-                            && focus.isActivityTypeHomeOrRecents());
+                            && focus.isActivityTypeHomeOrRecents();
             if (shouldApplyRecentsInputConsumer) {
                 if (mInputFocus != recentsAnimationInputConsumer.mWindowHandle.token) {
                     requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
@@ -627,24 +622,6 @@ final class InputMonitor {
                 }
                 // Skip this window because it cannot possibly receive input.
                 return;
-            }
-
-            // This only works for legacy transitions.
-            final RecentsAnimationController recentsAnimationController =
-                    mService.getRecentsAnimationController();
-            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
-            if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
-                if (recentsAnimationController.updateInputConsumerForApp(
-                        mRecentsAnimationInputConsumer.mWindowHandle)) {
-                    final DisplayArea targetDA =
-                            recentsAnimationController.getTargetAppDisplayArea();
-                    if (targetDA != null) {
-                        mRecentsAnimationInputConsumer.reparent(mInputTransaction, targetDA);
-                        mRecentsAnimationInputConsumer.show(mInputTransaction, MAX_VALUE - 2);
-                        mAddRecentsAnimationInputConsumerHandle = false;
-                    }
-                }
             }
 
             if (w.inPinnedWindowingMode()) {

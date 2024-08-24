@@ -830,7 +830,6 @@
     <protected-broadcast android:name="android.intent.action.PROFILE_REMOVED" />
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_SENT_ACTION" />
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_DELIVERY_ACTION" />
-    <protected-broadcast android:name="com.android.internal.telephony.data.ACTION_RETRY" />
     <protected-broadcast android:name="android.companion.virtual.action.VIRTUAL_DEVICE_REMOVED" />
     <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_START_PREVIEW" />
     <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_STOP_PREVIEW" />
@@ -2617,7 +2616,8 @@
          @hide
     -->
     <permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.os.vibrator.vendor_vibration_effects" />
 
     <!-- @SystemApi Allows access to the vibrator state.
          <p>Protection level: signature
@@ -5605,12 +5605,13 @@
     <!-- This permission is required among systems services to always keep the
          binding with TvInputManagerService.
          <p>This should only be used by the OEM TvInputService.
+         @FlaggedApi("android.media.tv.flags.tif_unbind_inactive_tis")
          <p>Protection level: signature|privileged|vendorPrivileged
          @hide
     -->
     <permission android:name="android.permission.ALWAYS_BOUND_TV_INPUT"
         android:protectionLevel="signature|privileged|vendorPrivileged"
-        android:featureFlag="android.media.tv.flags.tis_always_bound_permission"/>
+        android:featureFlag="android.media.tv.flags.tif_unbind_inactive_tis"/>
 
     <!-- Must be required by a {@link android.media.tv.interactive.TvInteractiveAppService}
          to ensure that only the system can bind to it.

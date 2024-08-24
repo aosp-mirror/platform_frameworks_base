@@ -66,8 +66,7 @@ constructor(
                                         INTERACTION_JANK_TAG
                                     )
                                 )
-                                ?.let { dialogTransitionAnimator.show(dialog, it) }
-                                ?: dialog.show()
+                                ?.let { dialogTransitionAnimator.show(dialog, it) } ?: dialog.show()
                         } else {
                             dialog.show()
                         }
@@ -89,8 +88,10 @@ constructor(
                         Intent(Settings.ACTION_TEXT_READING_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
+
     companion object {
         private const val INTERACTION_JANK_TAG = "font_scaling"
     }

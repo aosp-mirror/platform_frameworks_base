@@ -16,9 +16,11 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.media.tv.flags.Flags;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -40,7 +42,7 @@ public final class TunerVersionChecker {
     /** @hide */
     @IntDef(prefix = "TUNER_VERSION_",
             value = {TUNER_VERSION_UNKNOWN, TUNER_VERSION_1_0, TUNER_VERSION_1_1,
-                    TUNER_VERSION_2_0})
+                    TUNER_VERSION_2_0, TUNER_VERSION_3_0, TUNER_VERSION_4_0})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TunerVersion {}
     /**
@@ -63,6 +65,11 @@ public final class TunerVersionChecker {
      * Tuner version 3.0.
      */
     public static final int TUNER_VERSION_3_0 = (3 << 16);
+    /**
+     * Tuner version 4.0.
+     */
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    public static final int TUNER_VERSION_4_0 = (4 << 16);
 
     /**
      * Get the current running Tuner version.

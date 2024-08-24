@@ -1777,8 +1777,8 @@ public class TelephonyManager {
 
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
-     * to indicate user to decide whether current SIM should be preferred for all
-     * data / voice / sms. {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
+     * to indicate the current SIM should be preferred for all data / voice / sms.
+     * {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
      * which subscription should be the default subscription.
      * @hide
      */
@@ -13928,7 +13928,10 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public void getCarrierRestrictionStatus(@NonNull Executor executor,
             @NonNull @CarrierRestrictionStatus
                     Consumer<Integer> resultListener) {

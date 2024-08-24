@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Экрандан видео жаздырып алуу"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экрандан жаздырылып алынган видео иштетилүүдө"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Экранды жаздырасызбы?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Бир колдонмону жаздыруу"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Бүтүндөй экранды жаздыруу"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Бүт экранды жаздырганда экранда көрүнүп турган нерселердин баары жаздырылат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Колдонмону жаздырганда ал колдонмодо көрсөтүлүп же ойнотулуп жаткан нерселер жаздырылат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Экранды жаздыруу"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Жаздыруу үчүн колдонмо тандоо"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жаздыруу"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Түзмөктөгү аудиолор"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Музыка, чалуулар жана шыңгырлар сыяктуу түзмөгүңүздөгү добуштар"</string>
@@ -315,6 +308,8 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth эртең таңда күйөт"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Чогуу угуу"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Чогуу угулууда"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -499,7 +494,7 @@
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Виджет кошуу"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Бүттү"</string>
     <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Виджеттерди кошуу"</string>
-    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Тандалма колдонмолордун виджеттерин планшеттин кулпусун ачпастан эле, ыкчам колдонуңуз."</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Планшет кулпуланып турса да, жакшы көргөн колдонмолордун виджеттери көрүнүп турат."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Бардык виджеттер кулпуланган экранда көрсөтүлсүнбү?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Параметрлерди ачуу"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Жумуш колдонмолорун иштетесизби?"</string>
@@ -511,10 +506,10 @@
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"виджетти алып салуу"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"тандалган виджетти жайгаштыруу"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Кулпуланган экрандагы виджеттер"</string>
-    <string name="communal_widget_picker_description" msgid="490515450110487871">"Планшетиңиз кулпуланган болсо да, кулпуланган экраныңыздан виджеттерди бардыгы көрө алат."</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Кулпуланган планшетте баарына көрүнүп турат."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"виджетти тандоодон чыгаруу"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Кулпуланган экрандагы виджеттер"</string>
-    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Колдонмону виджет аркылуу ачуу үчүн бул сиз экениңизди ырасташыңыз керек. Аларды планшетиңиз кулпуланып турса да, баары көрө аларын эске алыңыз. Айрым виджеттер кулпуланган экранда колдонууга арналган эмес жана аларды бул жерге кошуу кооптуу болушу мүмкүн."</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Колдонмону виджет аркылуу ачуу үчүн өзүңүздү ырасташыңыз керек. Алар кулпуланган планшетиңизде да көрүнүп турат. Кээ бир виджеттерди кулпуланган экранда колдоно албайсыз, андыктан аларды ал жерге кошпой эле койгонуңуз оң."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Түшүндүм"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Колдонуучуну которуу"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ылдый түшүүчү меню"</string>
@@ -535,8 +530,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Жаздырып же тышкы экранга чыгарып жатканда <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу экраныңыздагы бардык маалыматты же түзмөктө ойнотулуп жаткан нерселерди көрө алат. Буга сырсөздөр, төлөмдүн чоо-жайы, сүрөттөр, билдирүүлөр жана ойнотулган аудио кирет."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Жаздырып же тышкы экранга чыгарып жатканда кызмат көрсөтүүчү экраныңыздагы бардык маалыматты же түзмөктө ойнотулуп жаткан нерселерди көрө алат. Буга сырсөздөр, төлөмдүн чоо-жайы, сүрөттөр, билдирүүлөр жана ойнотулган аудио кирет."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Колдонмону бөлүшүү же жаздыруу"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Экранды <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> менен бөлүшөсүзбү?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Бир колдонмону бөлүшүү"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Толук экранды бөлүшүү"</string>
@@ -544,16 +538,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Колдонмону бөлүшкөндө ал колдонмодо көрсөтүлүп же ойнотулуп жаткан нерселер <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосуна көрүнөт. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Экранды бөлүшүү"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> бул параметрди өчүрүп койду"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Бөлүшүү үчүн колдонмо тандоо"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Экранды тышкы экранга чыгарасызбы?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Бир колдонмону тышкы экранга чыгаруу"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Бүтүндөй экранды тышкы экранга чыгаруу"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Бүтүндөй экранды тышкы экранга чыгарганда андагы бардык нерселер көрүнөт. Андыктан сырсөздөр, төлөмдүн чоо-жайы, билдирүүлөр, сүрөттөр, аудио жана видео сыяктуу нерселерди көрсөтүп албаңыз."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Колдонмону тышкы экранга чыгарганда ал колдонмодо көрсөтүлүп же ойнотулуп жаткан нерселер көрүнөт. Андыктан сырсөздөр, төлөмдүн чоо-жайы, билдирүүлөр, сүрөттөр, аудио жана видео сыяктуу нерселерди көрсөтүп албаңыз."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Тышкы экранга чыгаруу"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Тышкы экранга чыгаруу үчүн колдонмо тандоо"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Бөлүшүү башталсынбы?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Бөлүшүп, жаздырып же тышкы экранга чыгарып жатканда Android экраныңыздагы бардык маалыматты же түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Колдонмону бөлүшүп, жаздырып же тышкы экранга чыгарганда Android анда көрүнүп же ойноп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
@@ -604,7 +596,7 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Тармактын таржымалы"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"Тастыктоочу борбордун тастыктамасы"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Саясаттарды карап көрүү"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Эрежелерди карап көрүү"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Башкаруу элементтерин көрүү"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык.\n\nАдминистраторуңуз бул түзмөктөгү параметрлерди, корпоративдик ресурстарды пайдалануу мүмкүнчүлүгүн берген параметрлерди жана колдонмолорду, түзмөгүңүзгө байланыштуу маалыматтарды (мисалы, түзмөгүңүздүн жайгашкан жери сыяктуу) көзөмөлдөп башкара алат.\n\nТолугураак маалымат алуу үчүн IT администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> бул түзмөк менен байланышкан маалыматты көрүп, колдонмолорду башкарып, анын параметрлерин өзгөртө алат.\n\nЭгер суроолоруңуз болсо, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> уюмуна кайрылыңыз."</string>
@@ -1299,7 +1291,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"Эскертме жазуу"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Эскертме жазуу (<xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>)"</string>
-    <string name="audio_sharing_description" msgid="8849060142768870004">"Аудиону бөлүшүү"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"Чогуу угуу"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Кеңири таратуу"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда кабарлоо токтотулсунбу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Эгер <xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарласаңыз же аудионун чыгуусун өзгөртсөңүз, учурдагы кабарлоо токтотулат"</string>
@@ -1398,24 +1390,16 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Бүттү"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Артка кайтуу"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Кайтуу үчүн сенсордук тактанын каалаган жерин үч манжаңыз менен солго же оңго сүрүңүз.\n\nОшондой эле Action + ESC баскычтарынын айкалышын колдоно аласыз."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Азаматсыз!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"\"Артка\" жаңсоосу боюнча үйрөткүчтү бүтүрдүңүз."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Башкы бетке өтүү"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Каалаган убакта башкы экранга өтүү үчүн экранды үч манжаңыз менен ылдыйдан жогору карай сүрүңүз."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Сонун!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"\"Башкы бетке өтүү\" жаңсоосун үйрөндүңүз."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Аракет баскычы"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Бардык колдонмолоруңузду көрүү үчүн баскычтобуңуздагы аракет баскычын басыңыз"</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Куттуктайбыз!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Аракет баскычынын жаңсоосун аткардыңыз.\n\n+ / аракети бардык жеткиликтүү ыкчам баскычтарды көрсөтөт."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Баскычтоптун жарыгы"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ичинен %1$d-деңгээл"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Үйдөгү түзмөктөрдү тескөө"</string>

@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class SerializationPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static byte[] bytes(Object o) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
@@ -110,7 +110,7 @@ public class SerializationPerfTest {
     public void timeWriteNoObjects() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
         ObjectOutputStream out = new ObjectOutputStream(baos);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             out.reset();
             baos.reset();
@@ -121,7 +121,7 @@ public class SerializationPerfTest {
     private void readSingleObject(Object object) throws Exception {
         byte[] bytes = bytes(object);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             ObjectInputStream in = new ObjectInputStream(bais);
             in.readObject();
@@ -133,7 +133,7 @@ public class SerializationPerfTest {
     private void writeSingleObject(Object o) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
         ObjectOutputStream out = new ObjectOutputStream(baos);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             out.writeObject(o);
             out.reset();

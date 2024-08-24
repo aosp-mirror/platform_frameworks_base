@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.rollback"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_rollback"
     }
   ],
   "imports": [
