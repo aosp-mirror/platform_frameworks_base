@@ -1126,7 +1126,6 @@ public class ResourcesImpl {
     }
 
     @Nullable
-    @RavenwoodThrow(blockedBy = ComplexColor.class)
     ComplexColor loadComplexColor(Resources wrapper, @NonNull TypedValue value, int id,
             Resources.Theme theme) {
         if (TRACE_FOR_PRELOAD) {
@@ -1168,7 +1167,6 @@ public class ResourcesImpl {
     }
 
     @NonNull
-    @RavenwoodThrow(blockedBy = ColorStateList.class)
     ColorStateList loadColorStateList(Resources wrapper, TypedValue value, int id,
             Resources.Theme theme)
             throws NotFoundException {

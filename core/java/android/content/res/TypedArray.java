@@ -28,7 +28,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.StrictMode;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodReplace;
 import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -598,7 +597,6 @@ public class TypedArray implements AutoCloseable {
      *         not an integer color or color state list.
      */
     @Nullable
-    @RavenwoodThrow(blockedBy = ColorStateList.class)
     public ColorStateList getColorStateList(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");

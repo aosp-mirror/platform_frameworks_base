@@ -26,6 +26,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -143,6 +144,7 @@ import java.util.List;
  * @attr ref android.R.styleable#ColorStateListItem_color
  * @attr ref android.R.styleable#ColorStateListItem_lStar
  */
+@RavenwoodKeepWholeClass
 public class ColorStateList extends ComplexColor implements Parcelable {
     private static final String TAG = "ColorStateList";
 
