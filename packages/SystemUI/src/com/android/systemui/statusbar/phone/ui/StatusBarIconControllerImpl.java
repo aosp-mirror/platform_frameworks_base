@@ -18,16 +18,22 @@ package com.android.systemui.statusbar.phone.ui;
 
 import static com.android.systemui.statusbar.phone.ui.StatusBarIconList.Slot;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -221,19 +227,66 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
-    /** */
     @Override
     public void setIcon(String slot, int resourceId, CharSequence contentDescription) {
+        setResourceIconInternal(
+                slot,
+                Icon.createWithResource(mContext, resourceId),
+                /* preloadedIcon= */ null,
+                contentDescription,
+                StatusBarIcon.Type.SystemIcon);
+    }
+
+    @Override
+    public void setResourceIcon(String slot, @Nullable String resPackage,
+            @DrawableRes int iconResId, @Nullable Drawable preloadedIcon,
+            CharSequence contentDescription) {
+        if (!usesModeIcons()) {
+            Log.wtf("TAG",
+                    "StatusBarIconController.setResourceIcon() should not be called without "
+                            + "MODES_UI & MODES_UI_ICONS!");
+            // Fall back to old implementation, although it will not load the icon if it's from a
+            // different package.
+            setIcon(slot, iconResId, contentDescription);
+            return;
+        }
+
+        Icon icon = resPackage != null
+                ? Icon.createWithResource(resPackage, iconResId)
+                : Icon.createWithResource(mContext, iconResId);
+
+        setResourceIconInternal(
+                slot,
+                icon,
+                preloadedIcon,
+                contentDescription,
+                StatusBarIcon.Type.ResourceIcon);
+    }
+
+    private void setResourceIconInternal(String slot, Icon resourceIcon,
+            @Nullable Drawable preloadedIcon, CharSequence contentDescription,
+            StatusBarIcon.Type type) {
+        checkArgument(resourceIcon.getType() == Icon.TYPE_RESOURCE,
+                "Expected Icon of TYPE_RESOURCE, but got " + resourceIcon.getType());
+        String resPackage = resourceIcon.getResPackage();
+        if (TextUtils.isEmpty(resPackage)) {
+            resPackage = mContext.getPackageName();
+        }
+
         StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, 0);
         if (holder == null) {
-            StatusBarIcon icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
-                    Icon.createWithResource(mContext, resourceId), 0, 0,
-                    contentDescription, StatusBarIcon.Type.SystemIcon);
+            StatusBarIcon icon = new StatusBarIcon(UserHandle.SYSTEM, resPackage,
+                    resourceIcon, /* iconLevel= */ 0, /* number=*/ 0,
+                    contentDescription, type);
+            icon.preloadedIcon = preloadedIcon;
             holder = StatusBarIconHolder.fromIcon(icon);
             setIcon(slot, holder);
         } else {
-            holder.getIcon().icon = Icon.createWithResource(mContext, resourceId);
+            holder.getIcon().pkg = resPackage;
+            holder.getIcon().icon = resourceIcon;
             holder.getIcon().contentDescription = contentDescription;
+            holder.getIcon().type = type;
+            holder.getIcon().preloadedIcon = preloadedIcon;
             handleSet(slot, holder);
         }
     }
@@ -523,5 +576,10 @@ public class StatusBarIconControllerImpl implements Tunable,
         } else {
             return slot + EXTERNAL_SLOT_SUFFIX;
         }
+    }
+
+    private static boolean usesModeIcons() {
+        return android.app.Flags.modesApi() && android.app.Flags.modesUi()
+                && android.app.Flags.modesUiIcons();
     }
 }

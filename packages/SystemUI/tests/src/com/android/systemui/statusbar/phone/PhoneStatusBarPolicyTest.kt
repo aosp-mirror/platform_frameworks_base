@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.app.AlarmManager
+import android.app.AutomaticZenRule
 import android.app.NotificationManager
 import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResourcesManager
@@ -26,12 +27,14 @@ import android.os.UserManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
+import android.service.notification.SystemZenRules
 import android.service.notification.ZenModeConfig
 import android.telecom.TelecomManager
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -393,13 +396,45 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             statusBarPolicy.init()
             reset(iconController)
 
-            zenModeRepository.addMode(id = "Bedtime", active = true)
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setId("bedtime")
+                        .setName("Bedtime Mode")
+                        .setType(AutomaticZenRule.TYPE_BEDTIME)
+                        .setActive(true)
+                        .setPackage("some.package")
+                        .setIconResId(123)
+                        .build(),
+                    TestModeBuilder()
+                        .setId("other")
+                        .setName("Other Mode")
+                        .setType(AutomaticZenRule.TYPE_OTHER)
+                        .setActive(true)
+                        .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                        .setIconResId(456)
+                        .build(),
+                )
+            )
             runCurrent()
 
             verify(iconController).setIconVisibility(eq(ZEN_SLOT), eq(true))
-            verify(iconController).setIcon(eq(ZEN_SLOT), anyInt(), eq("Mode Bedtime"))
+            verify(iconController)
+                .setResourceIcon(
+                    eq(ZEN_SLOT),
+                    eq("some.package"),
+                    eq(123),
+                    eq(null),
+                    eq("Bedtime Mode")
+                )
 
-            zenModeRepository.deactivateMode("Bedtime")
+            zenModeRepository.deactivateMode("bedtime")
+            runCurrent()
+
+            verify(iconController)
+                .setResourceIcon(eq(ZEN_SLOT), eq(null), eq(456), eq(null), eq("Other Mode"))
+
+            zenModeRepository.deactivateMode("other")
             runCurrent()
 
             verify(iconController).setIconVisibility(eq(ZEN_SLOT), eq(false))
@@ -415,6 +450,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
         verify(iconController, never()).setIconVisibility(eq(ZEN_SLOT), any())
         verify(iconController, never()).setIcon(eq(ZEN_SLOT), anyInt(), any())
+        verify(iconController, never()).setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any())
     }
 
     @Test
@@ -429,6 +465,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
             verify(iconController, never()).setIconVisibility(eq(ZEN_SLOT), any())
             verify(iconController, never()).setIcon(eq(ZEN_SLOT), anyInt(), any())
+            verify(iconController, never())
+                .setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any())
         }
 
     @Test

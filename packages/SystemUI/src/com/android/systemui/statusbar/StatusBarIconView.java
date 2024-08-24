@@ -471,17 +471,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      */
     private Drawable getIcon(Context sysuiContext,
             Context context, StatusBarIcon statusBarIcon) {
-        int userId = statusBarIcon.user.getIdentifier();
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
-
-        // Try to load the monochrome app icon if applicable
-        Drawable icon = maybeGetMonochromeAppIcon(context, statusBarIcon);
-        // Otherwise, just use the icon normally
-        if (icon == null) {
-            icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
-        }
+        Drawable icon = loadDrawable(context, statusBarIcon);
 
         TypedValue typedValue = new TypedValue();
         sysuiContext.getResources().getValue(R.dimen.status_bar_icon_scale_factor,
@@ -506,6 +496,26 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
 
         return new ScalingDrawableWrapper(icon, scaleFactor);
+    }
+
+    @Nullable
+    private Drawable loadDrawable(Context context, StatusBarIcon statusBarIcon) {
+        if (usesModeIcons() && statusBarIcon.preloadedIcon != null) {
+            return statusBarIcon.preloadedIcon.mutate();
+        } else {
+            int userId = statusBarIcon.user.getIdentifier();
+            if (userId == UserHandle.USER_ALL) {
+                userId = UserHandle.USER_SYSTEM;
+            }
+
+            // Try to load the monochrome app icon if applicable
+            Drawable icon = maybeGetMonochromeAppIcon(context, statusBarIcon);
+            // Otherwise, just use the icon normally
+            if (icon == null) {
+                icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
+            }
+            return icon;
+        }
     }
 
     @Nullable
@@ -1019,5 +1029,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      */
     public boolean showsConversation() {
         return mShowsConversation;
+    }
+
+    private static boolean usesModeIcons() {
+        return android.app.Flags.modesApi() && android.app.Flags.modesUi()
+                && android.app.Flags.modesUiIcons();
     }
 }

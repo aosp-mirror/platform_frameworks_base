@@ -44,6 +44,7 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
+import com.android.settingslib.notification.modes.ZenIconLoader;
 import com.android.settingslib.notification.modes.ZenMode;
 import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -395,16 +396,24 @@ public class PhoneStatusBarPolicy
                 () -> mResources.getString(R.string.accessibility_managed_profile));
     }
 
-    private void onActiveModeChanged(@Nullable ZenMode zenMode) {
+    private void onActiveModeChanged(@Nullable ZenMode mode) {
         if (!usesModeIcons()) {
             Log.wtf(TAG, "onActiveModeChanged shouldn't be called if MODES_UI_ICONS is disabled");
             return;
         }
-        boolean visible = zenMode != null;
+        boolean visible = mode != null;
         if (visible) {
-            // TODO: b/360399800 - Get the drawable from the mode; this is a placeholder.
-            mIconController.setIcon(mSlotZen,
-                    com.android.internal.R.drawable.ic_zen_mode_type_immersive, zenMode.getName());
+            // TODO: b/360399800 - Get the resource id, package, and cached drawable from the mode;
+            //  this is a shortcut for testing (there should be no direct dependency on
+            //  ZenIconLoader here).
+            String resPackage = mode.isSystemOwned() ? null : mode.getRule().getPackageName();
+            int iconResId = mode.getRule().getIconResId();
+            if (iconResId == 0) {
+                iconResId = ZenIconLoader.getIconResourceIdFromType(mode.getType());
+            }
+
+            mIconController.setResourceIcon(mSlotZen, resPackage, iconResId,
+                    /* preloadedIcon= */ null, mode.getName());
         }
         if (visible != mZenVisible) {
             mIconController.setIconVisibility(mSlotZen, visible);
