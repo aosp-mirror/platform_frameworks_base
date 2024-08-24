@@ -41,10 +41,11 @@ constructor(
             if (Flags.modesApi() && Flags.modesUi() && Flags.modesUiIcons() && data.icon != null) {
                 icon = { data.icon }
             } else {
-                val defaultIconRes =
+                val iconRes =
                     if (data.isActivated) R.drawable.qs_dnd_icon_on else R.drawable.qs_dnd_icon_off
-                iconRes = defaultIconRes
-                icon = { resources.getDrawable(defaultIconRes, theme).asIcon() }
+                val icon = resources.getDrawable(iconRes, theme).asIcon()
+                this.iconRes = iconRes
+                this.icon = { icon }
             }
             activationState =
                 if (data.isActivated) {
