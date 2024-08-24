@@ -611,14 +611,14 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         )
         mMainExecutor.runAllReady()
         mService.onWakeUp()
-        verify(mDreamOverlayContainerViewController).wakeUp()
+        verify(mDreamOverlayContainerViewController).onWakeUp()
         verify(mDreamOverlayCallbackController).onWakeUp()
     }
 
     @Test
     fun testWakeUpBeforeStartDoesNothing() {
         mService.onWakeUp()
-        verify(mDreamOverlayContainerViewController, Mockito.never()).wakeUp()
+        verify(mDreamOverlayContainerViewController, Mockito.never()).onWakeUp()
     }
 
     @Test
