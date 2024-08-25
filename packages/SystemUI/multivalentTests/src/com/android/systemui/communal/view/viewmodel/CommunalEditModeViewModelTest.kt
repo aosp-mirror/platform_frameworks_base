@@ -150,8 +150,8 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             // Widgets available.
-            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
-            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             // Smartspace available.
             smartspaceRepository.setTimers(
@@ -212,8 +212,8 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             // Widgets available.
-            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
-            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             val communalContent by collectLastValue(underTest.communalContent)
 
@@ -227,7 +227,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             underTest.onDeleteWidget(
                 id = 0,
                 componentName = ComponentName("test_package", "test_class"),
-                priority = 30,
+                rank = 30,
             )
 
             // Only one widget and CTA tile remain.

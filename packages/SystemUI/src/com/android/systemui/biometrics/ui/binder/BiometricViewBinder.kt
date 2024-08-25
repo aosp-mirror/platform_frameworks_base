@@ -45,6 +45,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
+import com.android.systemui.biometrics.Utils.ellipsize
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
@@ -64,10 +65,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 private const val TAG = "BiometricViewBinder"
-private const val MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30
 
 /** Top-most view binder for BiometricPrompt views. */
 object BiometricViewBinder {
+    const val MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30
 
     /** Binds a Biometric Prompt View to a [PromptViewModel]. */
     @SuppressLint("ClickableViewAccessibility")
@@ -642,9 +643,6 @@ private fun BiometricModalities.asDefaultHelpMessage(context: Context): String =
         hasFingerprint -> context.getString(R.string.fingerprint_dialog_touch_sensor)
         else -> ""
     }
-
-private fun String.ellipsize(cutOffLength: Int) =
-    if (length <= cutOffLength) this else replaceRange(cutOffLength, length, "...")
 
 private fun Boolean.asVisibleOrGone(): Int = if (this) View.VISIBLE else View.GONE
 

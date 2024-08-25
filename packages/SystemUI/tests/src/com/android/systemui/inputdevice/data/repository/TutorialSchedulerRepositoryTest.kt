@@ -68,20 +68,23 @@ class TutorialSchedulerRepositoryTest : SysuiTestCase() {
     @Test
     fun connectKeyboard() =
         testScope.runTest {
-            val now = Instant.now().toEpochMilli()
-            underTest.updateConnectTime(KEYBOARD, now)
+            val now = Instant.now()
+            underTest.updateFirstConnectionTime(KEYBOARD, now)
 
             assertThat(underTest.wasEverConnected(KEYBOARD)).isTrue()
-            assertThat(underTest.connectTime(KEYBOARD)).isEqualTo(now)
+            assertThat(underTest.firstConnectionTime(KEYBOARD)!!.epochSecond)
+                .isEqualTo(now.epochSecond)
             assertThat(underTest.wasEverConnected(TOUCHPAD)).isFalse()
         }
 
     @Test
     fun launchKeyboard() =
         testScope.runTest {
-            underTest.updateLaunch(KEYBOARD)
+            val now = Instant.now()
+            underTest.updateLaunchTime(KEYBOARD, now)
 
             assertThat(underTest.isLaunched(KEYBOARD)).isTrue()
+            assertThat(underTest.launchTime(KEYBOARD)!!.epochSecond).isEqualTo(now.epochSecond)
             assertThat(underTest.isLaunched(TOUCHPAD)).isFalse()
         }
 }

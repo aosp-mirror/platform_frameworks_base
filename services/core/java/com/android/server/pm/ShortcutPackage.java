@@ -1850,9 +1850,17 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
+            if (ShortcutService.DEBUG_REBOOT) {
+                Slog.d(TAG, "Persisting shortcuts from "
+                    + getOwnerUserId() + "@" + getPackageName());
+            }
             for (int j = 0; j < size; j++) {
+                final ShortcutInfo si = mShortcuts.valueAt(j);
                 saveShortcut(
-                        out, mShortcuts.valueAt(j), forBackup, getPackageInfo().isBackupAllowed());
+                        out, si, forBackup, getPackageInfo().isBackupAllowed());
+                if (ShortcutService.DEBUG_REBOOT) {
+                    Slog.d(TAG, si.toSimpleString());
+                }
             }
 
             if (!forBackup) {

@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
@@ -402,6 +403,67 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NEW_PICKER_UI)
+    fun startButton_inPreviewMode_onPreviewQuickAffordanceSelected() =
+        testScope.runTest {
+            underTest.onPreviewSlotSelected(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START)
+            underTest.enablePreviewMode(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START, true)
+
+            repository.setKeyguardShowing(false)
+            val latest = collectLastValue(underTest.startButton)
+
+            val icon: Icon = mock()
+            val testConfig =
+                TestConfig(
+                    isVisible = true,
+                    isClickable = true,
+                    isActivated = true,
+                    icon = icon,
+                    canShowWhileLocked = false,
+                    intent = null,
+                    slotId = KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId(),
+                )
+            val defaultConfigKey =
+                setUpQuickAffordanceModel(
+                    position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                    testConfig = testConfig,
+                )
+
+            // Set up the quick access wallet config
+            val quickAccessWalletAffordanceConfigKey =
+                quickAccessWalletAffordanceConfig
+                    .apply {
+                        onTriggeredResult =
+                            KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
+                                intent = Intent("action"),
+                                canShowWhileLocked = false,
+                            )
+                        setState(
+                            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                                icon = icon,
+                                activationState = ActivationState.Active,
+                            )
+                        )
+                    }
+                    .let {
+                        KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId() +
+                            "::${quickAccessWalletAffordanceConfig.key}"
+                    }
+
+            // onPreviewQuickAffordanceSelected should trigger the override with the quick access
+            // wallet quick affordance
+            underTest.onPreviewQuickAffordanceSelected(
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
+                BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET,
+            )
+            Truth.assertThat(latest()?.configKey).isEqualTo(quickAccessWalletAffordanceConfigKey)
+
+            // onClearPreviewQuickAffordances should make the default quick affordance shows again
+            underTest.onClearPreviewQuickAffordances()
+            Truth.assertThat(latest()?.configKey).isEqualTo(defaultConfigKey)
+        }
+
+    @Test
     fun startButton_inPreviewMode_visibleEvenWhenKeyguardNotShowing() =
         testScope.runTest {
             underTest.onPreviewSlotSelected(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START)
@@ -445,7 +507,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun endButton_inHiglightedPreviewMode_dimmedWhenOtherIsSelected() =
+    fun endButton_inHighlightedPreviewMode_dimmedWhenOtherIsSelected() =
         testScope.runTest {
             underTest.onPreviewSlotSelected(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START)
             underTest.enablePreviewMode(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START, true)

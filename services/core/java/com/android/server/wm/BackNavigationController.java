@@ -283,8 +283,10 @@ class BackNavigationController {
                     // keyguard locked and activities are unable to show when locked.
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 }
-            } else if (currentTask.mAtmService.getLockTaskController().isTaskLocked(currentTask)) {
+            } else if (currentTask.mAtmService.getLockTaskController().isTaskLocked(currentTask)
+                    || currentTask.getWindowConfiguration().tasksAreFloating()) {
                 // Do not predict if current task is in task locked.
+                // Also, it is unable to play cross task animation for floating task.
                 backType = BackNavigationInfo.TYPE_CALLBACK;
             } else {
                 // Check back-to-home or cross-task

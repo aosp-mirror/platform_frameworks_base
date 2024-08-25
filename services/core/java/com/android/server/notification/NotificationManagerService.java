@@ -5675,7 +5675,7 @@ public class NotificationManagerService extends SystemService {
             // a "normal" rule, it must provide a CP/ConfigActivity too.
             if (android.app.Flags.modesApi()) {
                 boolean isImplicitRuleUpdateFromSystem = updateId != null
-                        && ZenModeHelper.isImplicitRuleId(updateId)
+                        && ZenModeConfig.isImplicitRuleId(updateId)
                         && isCallerSystemOrSystemUi();
                 if (!isImplicitRuleUpdateFromSystem
                         && rule.getOwner() == null

@@ -116,7 +116,7 @@
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"연결되었습니다(오디오 공유 지원). 배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"연결되었습니다(오디오 공유 지원). 왼쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"연결되었습니다(오디오 공유 지원). 오른쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
-    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"연결되었습니다(오디오 공유 지원)."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"연결됨(오디오 공유 지원)"</string>
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"사용 중(미디어 전용)"</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"오디오 공유 지원"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"사용 중(미디어 전용), 왼쪽만"</string>
@@ -127,7 +127,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"파일 전송"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"입력 장치"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"인터넷 액세스"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"연락처 및 통화 기록에 대한 액세스를 허용합니다."</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"연락처 및 통화 기록에 대한 액세스 허용"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"정보는 전화 알림 등에 사용됩니다."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"인터넷 연결 공유"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"문자 메시지"</string>

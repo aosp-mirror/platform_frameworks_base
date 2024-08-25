@@ -12,9 +12,6 @@
     {
       "name": "RavenwoodBivalentTest_device"
     },
-    {
-      "name": "RavenwoodResApkTest"
-    },
     // The sysui tests should match vendor/unbundled_google/packages/SystemUIGoogle/TEST_MAPPING
     {
       "name": "SystemUIGoogleTests",
@@ -56,6 +53,10 @@
     },
     {
       "name": "RavenwoodCoreTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodResApkTest",
       "host": true
     },
     {

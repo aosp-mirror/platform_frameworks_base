@@ -194,7 +194,8 @@ constructor(
                     packageManager,
                     uiEventLogger,
                     context,
-                    notificationManager
+                    notificationManager,
+                    logger
                 )
             )
             avalancheProvider.register()

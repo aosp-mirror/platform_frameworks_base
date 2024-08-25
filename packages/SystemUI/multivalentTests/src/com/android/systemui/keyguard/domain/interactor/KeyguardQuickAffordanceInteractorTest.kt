@@ -426,6 +426,64 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun quickAffordanceAlwaysVisible_withNonNullOverrideKeyguardQuickAffordanceId() =
+        testScope.runTest {
+            quickAccessWallet.setState(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon = ICON,
+                    activationState = ActivationState.Active,
+                )
+            )
+            homeControls.setState(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon = ICON,
+                    activationState = ActivationState.Active,
+                )
+            )
+
+            // The default case
+            val collectedValue =
+                collectLastValue(
+                    underTest.quickAffordanceAlwaysVisible(
+                        KeyguardQuickAffordancePosition.BOTTOM_START,
+                    )
+                )
+            assertThat(collectedValue())
+                .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
+            val visibleModel = collectedValue() as KeyguardQuickAffordanceModel.Visible
+            assertThat(visibleModel.configKey)
+                .isEqualTo(
+                    "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::${homeControls.key}"
+                )
+            assertThat(visibleModel.icon).isEqualTo(ICON)
+            assertThat(visibleModel.icon.contentDescription)
+                .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
+            assertThat(visibleModel.activationState).isEqualTo(ActivationState.Active)
+
+            // With override
+            val collectedValueWithOverride =
+                collectLastValue(
+                    underTest.quickAffordanceAlwaysVisible(
+                        position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                        overrideQuickAffordanceId =
+                            BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET,
+                    )
+                )
+            assertThat(collectedValueWithOverride())
+                .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
+            val visibleModelWithOverride =
+                collectedValueWithOverride() as KeyguardQuickAffordanceModel.Visible
+            assertThat(visibleModelWithOverride.configKey)
+                .isEqualTo(
+                    "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::${quickAccessWallet.key}"
+                )
+            assertThat(visibleModelWithOverride.icon).isEqualTo(ICON)
+            assertThat(visibleModelWithOverride.icon.contentDescription)
+                .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
+            assertThat(visibleModelWithOverride.activationState).isEqualTo(ActivationState.Active)
+        }
+
+    @Test
     fun select() =
         testScope.runTest {
             overrideResource(

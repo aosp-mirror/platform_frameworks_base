@@ -1804,7 +1804,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 // If on a rotation leash, the wallpaper token surface needs to be shown explicitly
                 // because shell only gets the leash and the wallpaper token surface is not allowed
                 // to be changed by non-transition logic until the transition is finished.
-                if (Flags.ensureWallpaperInTransitions() && wp.isVisibleRequested()
+                if (wp.mWmService.mFlags.mEnsureWallpaperInTransitions && wp.isVisibleRequested()
                         && wp.getFixedRotationLeash() != null) {
                     transaction.show(wp.mSurfaceControl);
                 }
@@ -2216,7 +2216,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wallpaper != null) {
                 if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
                     wallpaper.commitVisibility(showWallpaper);
-                } else if (Flags.ensureWallpaperInTransitions() && wallpaper.isVisible()
+                } else if (wallpaper.mWmService.mFlags.mEnsureWallpaperInTransitions
+                        && wallpaper.isVisible()
                         && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
                         && !wallpaperIsOwnTarget(wallpaper)) {
                     wallpaper.setVisibleRequested(false);
@@ -2934,7 +2935,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     // Use parent rotation because shell doesn't know the surface is rotated.
                     endRotation = parent.getWindowConfiguration().getRotation();
                 }
-            } else if (isWallpaper(target) && Flags.ensureWallpaperInTransitions()
+            } else if (isWallpaper(target) && target.mWmService.mFlags.mEnsureWallpaperInTransitions
                     && target.getRelativeDisplayRotation() != 0
                     && !target.mTransitionController.useShellTransitionsRotation()) {
                 // If the wallpaper is "fixed-rotated", shell is unaware of this, so use the

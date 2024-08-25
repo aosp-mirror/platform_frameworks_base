@@ -253,7 +253,7 @@ private fun SceneScope.QuickSettingsScene(
         val isScrollable =
             when (val state = layoutState.transitionState) {
                 is TransitionState.Idle -> true
-                is TransitionState.Transition -> state.fromScene == Scenes.QuickSettings
+                is TransitionState.Transition -> state.fromContent == Scenes.QuickSettings
             }
 
         LaunchedEffect(isCustomizing, scrollState) {

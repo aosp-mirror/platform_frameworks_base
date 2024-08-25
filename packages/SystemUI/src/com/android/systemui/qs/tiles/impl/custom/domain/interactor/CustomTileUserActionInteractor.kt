@@ -74,6 +74,7 @@ constructor(
                     click(action.expandable, data.tile.activityLaunchForClick)
                 is QSTileUserAction.LongClick ->
                     longClick(user, action.expandable, data.componentName, data.tile.state)
+                is QSTileUserAction.ToggleClick -> {}
             }
             qsTileLogger.logCustomTileUserActionDelivered(tileSpec)
         }

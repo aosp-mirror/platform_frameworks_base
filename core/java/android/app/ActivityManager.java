@@ -94,6 +94,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.RateLimitingCache;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
@@ -227,6 +228,14 @@ public class ActivityManager {
     }
 
     final ArrayMap<OnUidImportanceListener, MyUidObserver> mImportanceListeners = new ArrayMap<>();
+
+    /** Rate-Limiting Cache that allows no more than 400 calls to the service per second. */
+    private static final RateLimitingCache<List<RunningAppProcessInfo>> mRunningProcessesCache =
+            new RateLimitingCache<>(10, 4);
+
+    /** Rate-Limiting Cache that allows no more than 200 calls to the service per second. */
+    private static final RateLimitingCache<List<ProcessErrorStateInfo>> mErrorProcessesCache =
+            new RateLimitingCache<>(10, 2);
 
     /**
      * Map of callbacks that have registered for {@link UidFrozenStateChanged} events.
@@ -3680,6 +3689,16 @@ public class ActivityManager {
      * specified.
      */
     public List<ProcessErrorStateInfo> getProcessesInErrorState() {
+        if (Flags.rateLimitGetProcessesInErrorState()) {
+            return mErrorProcessesCache.get(() -> {
+                return getProcessesInErrorStateInternal();
+            });
+        } else {
+            return getProcessesInErrorStateInternal();
+        }
+    }
+
+    private List<ProcessErrorStateInfo> getProcessesInErrorStateInternal() {
         try {
             return getService().getProcessesInErrorState();
         } catch (RemoteException e) {
@@ -4213,6 +4232,16 @@ public class ActivityManager {
      * specified.
      */
     public List<RunningAppProcessInfo> getRunningAppProcesses() {
+        if (!Flags.rateLimitGetRunningAppProcesses()) {
+            return getRunningAppProcessesInternal();
+        } else {
+            return mRunningProcessesCache.get(() -> {
+                return getRunningAppProcessesInternal();
+            });
+        }
+    }
+
+    private List<RunningAppProcessInfo> getRunningAppProcessesInternal() {
         try {
             return getService().getRunningAppProcesses();
         } catch (RemoteException e) {

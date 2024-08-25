@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.os.UserHandle;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
@@ -70,6 +71,8 @@ public class DisplayNotificationManagerTest {
     private ArgumentCaptor<Integer> mNotifyNoteIdCaptor;
     @Captor
     private ArgumentCaptor<Notification> mNotifyAsUserNotificationCaptor;
+    @Captor
+    private ArgumentCaptor<UserHandle> mNotifyAsUserCaptor;
 
     /** Setup tests. */
     @Before
@@ -127,7 +130,8 @@ public class DisplayNotificationManagerTest {
         dnm.onDisplayPortLinkTrainingFailure();
         dnm.onCableNotCapableDisplayPort();
         dnm.onHighTemperatureExternalDisplayNotAllowed();
-        verify(mMockedNotificationManager, never()).notify(anyString(), anyInt(), any());
+        verify(mMockedNotificationManager, never()).notifyAsUser(anyString(), anyInt(), any(),
+                any());
     }
 
     @Test
@@ -175,10 +179,11 @@ public class DisplayNotificationManagerTest {
     }
 
     private void assertExpectedNotification() {
-        verify(mMockedNotificationManager).notify(
+        verify(mMockedNotificationManager).notifyAsUser(
                 mNotifyTagCaptor.capture(),
                 mNotifyNoteIdCaptor.capture(),
-                mNotifyAsUserNotificationCaptor.capture());
+                mNotifyAsUserNotificationCaptor.capture(),
+                mNotifyAsUserCaptor.capture());
         assertThat(mNotifyTagCaptor.getValue()).isEqualTo("DisplayNotificationManager");
         assertThat((int) mNotifyNoteIdCaptor.getValue()).isEqualTo(1);
         final var notification = mNotifyAsUserNotificationCaptor.getValue();
@@ -188,5 +193,7 @@ public class DisplayNotificationManagerTest {
         assertThat(notification.flags & FLAG_ONGOING_EVENT).isEqualTo(0);
         assertThat(notification.when).isEqualTo(0);
         assertThat(notification.getTimeoutAfter()).isEqualTo(30000L);
+        final var user = mNotifyAsUserCaptor.getValue();
+        assertThat(user).isEqualTo(UserHandle.CURRENT);
     }
 }

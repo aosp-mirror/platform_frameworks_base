@@ -163,6 +163,13 @@ object MediaControlViewBinder {
         if (viewModel.playTurbulenceNoise) {
             viewController.setUpTurbulenceNoise()
         }
+
+        // TODO: We don't need to refresh this state constantly, only if the state actually changed
+        // to something which might impact the measurement
+        // State refresh interferes with the translation animation, only run it if it's not running.
+        if (!viewController.metadataAnimationHandler.isRunning) {
+            viewController.refreshState()
+        }
     }
 
     private fun bindOutputSwitcherModel(

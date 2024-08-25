@@ -423,27 +423,22 @@ public final class AutofillManagerService
     @Nullable
     private AutofillManagerServiceImpl getServiceForUserWithLocalBinderIdentityLocked(int userId) {
         final long token = Binder.clearCallingIdentity();
-        AutofillManagerServiceImpl managerService = null;
         try {
-            managerService = getServiceForUserLocked(userId);
+            return getServiceForUserLocked(userId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        return managerService;
     }
 
     @GuardedBy("mLock")
     @Nullable
     private AutofillManagerServiceImpl peekServiceForUserWithLocalBinderIdentityLocked(int userId) {
         final long token = Binder.clearCallingIdentity();
-        AutofillManagerServiceImpl managerService = null;
         try {
-            managerService = peekServiceForUserLocked(userId);
+            return peekServiceForUserLocked(userId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-
-        return managerService;
     }
 
     @Override // from AbstractMasterSystemService

@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"บันทึกหน้าจอไหม"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"บันทึกแอปเดียว"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"บันทึกทั้งหน้าจอ"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ขณะบันทึกทั้งหน้าจอ ระบบจะบันทึกทุกสิ่งที่แสดงอยู่บนหน้าจอ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ขณะบันทึกแอป ระบบจะบันทึกทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"บันทึกหน้าจอ"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"เลือกแอปที่จะบันทึก"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"บันทึกเสียง"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"เสียงจากอุปกรณ์"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"เสียงจากอุปกรณ์ เช่น เพลง การโทร และเสียงเรียกเข้า"</string>
@@ -315,6 +308,8 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"บลูทูธจะเปิดพรุ่งนี้เช้า"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"แชร์เสียง"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"กำลังแชร์เสียง"</string>
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
@@ -535,8 +530,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"เริ่มบันทึกหรือแคสต์เลยไหม"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"บริการที่มีฟังก์ชันนี้จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"แชร์หรือบันทึกแอป"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"แชร์หน้าจอกับ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ไหม"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"แชร์แอปเดียว"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"แชร์ทั้งหน้าจอ"</string>
@@ -544,16 +538,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"เมื่อกำลังแชร์แอป <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะมองเห็นทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"แชร์หน้าจอ"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ปิดใช้ตัวเลือกนี้"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"เลือกแอปที่จะแชร์"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"แคสต์หน้าจอของคุณไหม"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"แคสต์แอปเดียว"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"แคสต์ทั้งหน้าจอ"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"เมื่อกำลังแคสต์ทั้งหน้าจอ ทุกสิ่งที่อยู่บนหน้าจอจะมองเห็นได้ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"เมื่อกำลังแคสต์แอป ทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าวจะมองเห็นได้ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"แคสต์หน้าจอ"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"เลือกแอปที่จะแคสต์"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"เริ่มแชร์เลยไหม"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"เมื่อกำลังแชร์ บันทึก หรือแคสต์ Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"เมื่อกำลังแชร์ บันทึก หรือแคสต์แอป Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
@@ -1398,24 +1390,16 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"เสร็จสิ้น"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ย้อนกลับ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"หากต้องการย้อนกลับ ให้ใช้ 3 นิ้วปัดไปทางซ้ายหรือขวาที่ใดก็ได้บนทัชแพด\n\nหรือใช้การดำเนินการแป้นพิมพ์ลัด + ESC ได้เช่นเดียวกัน"</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"เก่งมาก"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"คุณทำท่าทางสัมผัสเพื่อย้อนกลับเสร็จแล้ว"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ไปที่หน้าแรก"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ใช้ 3 นิ้วปัดขึ้นจากด้านล่างของหน้าจอเพื่อไปที่หน้าจอหลักได้ทุกเมื่อ"</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ดีมาก"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"คุณทำท่าทางสัมผัสเพื่อไปที่หน้าแรกเสร็จแล้ว"</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ปุ่มดำเนินการ"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"หากต้องการเข้าถึงแอป ให้กดปุ่มดำเนินการบนแป้นพิมพ์"</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ยินดีด้วย"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"คุณทำท่าทางสัมผัสสำหรับปุ่มดำเนินการเสร็จแล้ว\n\nการดำเนินการ + / จะแสดงแป้นพิมพ์ลัดทั้งหมดที่คุณมี"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ไฟแบ็กไลต์ของแป้นพิมพ์"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ระดับที่ %1$d จาก %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ระบบควบคุมอุปกรณ์สมาร์ทโฮม"</string>
