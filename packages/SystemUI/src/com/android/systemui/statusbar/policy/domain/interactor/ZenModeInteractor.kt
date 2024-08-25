@@ -92,7 +92,7 @@ constructor(
     }
 
     suspend fun getModeIcon(mode: ZenMode): Icon {
-        return mode.getIcon(context, iconLoader).await().asIcon()
+        return iconLoader.getIcon(context, mode).await().drawable().asIcon()
     }
 
     /**

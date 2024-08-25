@@ -20,6 +20,7 @@ import static android.app.AutomaticZenRule.TYPE_BEDTIME;
 import static android.app.AutomaticZenRule.TYPE_DRIVING;
 import static android.app.AutomaticZenRule.TYPE_IMMERSIVE;
 import static android.app.AutomaticZenRule.TYPE_OTHER;
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
 import static android.app.AutomaticZenRule.TYPE_THEATER;
 import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
@@ -30,14 +31,7 @@ import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import android.app.AutomaticZenRule;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.service.notification.Condition;
@@ -47,12 +41,9 @@ import android.service.notification.ZenPolicy;
 
 import com.android.internal.R;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -289,37 +280,97 @@ public class ZenModeTest {
     }
 
     @Test
-    public void getIcon_normalMode_loadsIconNormally() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
-        ZenMode mode = new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, false));
+    public void getIconKey_normalModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_BEDTIME)
+                .setPackage("some.package")
+                .setIconResId(123)
+                .build();
 
-        ListenableFuture<Drawable> unused = mode.getIcon(RuntimeEnvironment.getApplication(),
-                iconLoader);
+        ZenIcon.Key iconKey = mode.getIconKey();
 
-        verify(iconLoader).getIcon(any(), eq(ZEN_RULE));
+        assertThat(iconKey.resPackage()).isEqualTo("some.package");
+        assertThat(iconKey.resId()).isEqualTo(123);
     }
 
     @Test
-    public void getIcon_manualDnd_returnsFixedIcon() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
+    public void getIconKey_systemOwnedModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_SCHEDULE_CALENDAR)
+                .setPackage(PACKAGE_ANDROID)
+                .setIconResId(123)
+                .build();
 
-        ListenableFuture<Drawable> future = TestModeBuilder.MANUAL_DND_INACTIVE.getIcon(
-                RuntimeEnvironment.getApplication(), iconLoader);
+        ZenIcon.Key iconKey = mode.getIconKey();
 
-        assertThat(future.isDone()).isTrue();
-        verify(iconLoader, never()).getIcon(any(), any());
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(123);
     }
 
     @Test
-    public void getIcon_implicitMode_loadsIconNormally() {
-        ZenIconLoader iconLoader = mock(ZenIconLoader.class);
-        ZenMode mode = new ZenMode(IMPLICIT_RULE_ID, IMPLICIT_ZEN_RULE,
-                zenConfigRuleFor(IMPLICIT_ZEN_RULE, false));
+    public void getIconKey_implicitModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setId(ZenModeConfig.implicitRuleId("some.package"))
+                .setPackage("some.package")
+                .setIconResId(123)
+                .build();
 
-        ListenableFuture<Drawable> unused = mode.getIcon(RuntimeEnvironment.getApplication(),
-                iconLoader);
+        ZenIcon.Key iconKey = mode.getIconKey();
 
-        verify(iconLoader).getIcon(any(), eq(IMPLICIT_ZEN_RULE));
+        assertThat(iconKey.resPackage()).isEqualTo("some.package");
+        assertThat(iconKey.resId()).isEqualTo(123);
+    }
+
+    @Test
+    public void getIconKey_manualDnd_isDndIcon() {
+        ZenIcon.Key iconKey = TestModeBuilder.MANUAL_DND_INACTIVE.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_special_dnd);
+    }
+
+    @Test
+    public void getIconKey_normalModeWithoutCustomIcon_isModeTypeIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_BEDTIME)
+                .setPackage("some.package")
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_bedtime);
+    }
+
+    @Test
+    public void getIconKey_systemOwnedModeWithoutCustomIcon_isModeTypeIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_SCHEDULE_CALENDAR)
+                .setPackage(PACKAGE_ANDROID)
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_schedule_calendar);
+    }
+
+    @Test
+    public void getIconKey_implicitModeWithoutCustomIcon_isSpecialIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setId(ZenModeConfig.implicitRuleId("some.package"))
+                .setPackage("some_package")
+                .setType(TYPE_BEDTIME) // Type should be ignored.
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_unknown);
     }
 
     private static void assertUnparceledIsEqualToOriginal(String type, ZenMode original) {
