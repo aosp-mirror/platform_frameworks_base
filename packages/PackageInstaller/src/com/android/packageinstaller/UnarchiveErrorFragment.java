@@ -16,10 +16,12 @@
 
 package com.android.packageinstaller;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.BroadcastOptions;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.PendingIntent;
@@ -161,25 +163,31 @@ public class UnarchiveErrorFragment extends DialogFragment implements
             return;
         }
 
+        // Allow the error handling actvities to start in the background.
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setPendingIntentBackgroundActivityStartMode(
+                MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
         switch (mStatus) {
             case PackageInstaller.UNARCHIVAL_ERROR_USER_ACTION_NEEDED:
                 activity.startIntentSender(mExtraIntent.getIntentSender(), /* fillInIntent= */
-                        null, /* flagsMask= */ 0, FLAG_ACTIVITY_NEW_TASK, /* extraFlags= */ 0);
+                        null, /* flagsMask= */ 0, FLAG_ACTIVITY_NEW_TASK, /* extraFlags= */ 0,
+                        options.toBundle());
                 break;
             case PackageInstaller.UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE:
                 if (mExtraIntent != null) {
                     activity.startIntentSender(mExtraIntent.getIntentSender(), /* fillInIntent= */
-                            null, /* flagsMask= */ 0, FLAG_ACTIVITY_NEW_TASK, /* extraFlags= */ 0);
+                            null, /* flagsMask= */ 0, FLAG_ACTIVITY_NEW_TASK, /* extraFlags= */ 0,
+                            options.toBundle());
                 } else {
                     Intent intent = new Intent("android.intent.action.MANAGE_PACKAGE_STORAGE");
-                    startActivity(intent);
+                    startActivity(intent, options.toBundle());
                 }
                 break;
             case PackageInstaller.UNARCHIVAL_ERROR_INSTALLER_DISABLED:
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 Uri uri = Uri.fromParts("package", mInstallerPackageName, null);
                 intent.setData(uri);
-                startActivity(intent);
+                startActivity(intent, options.toBundle());
                 break;
             default:
                 // Do nothing. The rest of the dialogs are purely informational.

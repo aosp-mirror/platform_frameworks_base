@@ -121,6 +121,11 @@ public class FingerprintUpdateActiveUserClient extends StartUserClient<ISession,
             final int targetId = getTargetUserId();
             Slog.d(TAG, "Setting active user: " + targetId);
             HidlToAidlSessionAdapter sessionAdapter = (HidlToAidlSessionAdapter) getFreshDaemon();
+            if (sessionAdapter.getIBiometricsFingerprint() == null) {
+                Slog.e(TAG, "Failed to setActiveGroup: HIDL daemon is null.");
+                mCallback.onClientFinished(this, false /* success */);
+                return;
+            }
             sessionAdapter.setActiveGroup(targetId, mDirectory.getAbsolutePath());
             mAuthenticatorIds.put(targetId, mHasEnrolledBiometrics
                     ? sessionAdapter.getAuthenticatorIdForUpdateClient() : 0L);
