@@ -511,10 +511,12 @@ public class AmbientState implements Dumpable {
     }
 
     public int getTopPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mTopPadding;
     }
 
     public void setTopPadding(int topPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mTopPadding = topPadding;
     }
 
