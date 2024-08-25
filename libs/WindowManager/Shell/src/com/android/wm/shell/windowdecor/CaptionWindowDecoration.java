@@ -35,7 +35,6 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.util.Size;
 import android.view.Choreographer;
@@ -310,6 +309,9 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     }
 
     private void bindData(View rootView, RunningTaskInfo taskInfo) {
+        // Set up the tint first so that the drawable can be stylized when loaded.
+        setupCaptionColor(taskInfo);
+
         final boolean isFullscreen =
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         rootView.findViewById(R.id.maximize_window)
@@ -317,7 +319,16 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                         : R.drawable.decor_maximize_button_dark);
     }
 
-    void setCaptionColor(int captionColor) {
+    private void setupCaptionColor(RunningTaskInfo taskInfo) {
+        if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
+            setCaptionColor(Color.TRANSPARENT);
+        } else {
+            final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
+            setCaptionColor(statusBarColor);
+        }
+    }
+
+    private void setCaptionColor(int captionColor) {
         if (mResult.mRootView == null) {
             return;
         }
@@ -334,20 +345,16 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
 
         final View back = caption.findViewById(R.id.back_button);
-        final VectorDrawable backBackground = (VectorDrawable) back.getBackground();
-        backBackground.setTintList(buttonTintColor);
+        back.setBackgroundTintList(buttonTintColor);
 
         final View minimize = caption.findViewById(R.id.minimize_window);
-        final VectorDrawable minimizeBackground = (VectorDrawable) minimize.getBackground();
-        minimizeBackground.setTintList(buttonTintColor);
+        minimize.setBackgroundTintList(buttonTintColor);
 
         final View maximize = caption.findViewById(R.id.maximize_window);
-        final VectorDrawable maximizeBackground = (VectorDrawable) maximize.getBackground();
-        maximizeBackground.setTintList(buttonTintColor);
+        maximize.setBackgroundTintList(buttonTintColor);
 
         final View close = caption.findViewById(R.id.close_window);
-        final VectorDrawable closeBackground = (VectorDrawable) close.getBackground();
-        closeBackground.setTintList(buttonTintColor);
+        close.setBackgroundTintList(buttonTintColor);
     }
 
     boolean isHandlingDragResize() {

@@ -24,14 +24,19 @@ import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
 import android.tools.flicker.assertors.assertions.AppWindowHasSizeOfAtLeast
 import android.tools.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
+import android.tools.flicker.assertors.assertions.AppWindowIsVisibleAlways
+import android.tools.flicker.assertors.assertions.AppWindowMaintainsAspectRatioAlways
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtStart
+import android.tools.flicker.assertors.assertions.AppWindowRemainInsideDisplayBounds
+import android.tools.flicker.assertors.assertions.AppWindowReturnsToStartBoundsAndPosition
 import android.tools.flicker.assertors.assertions.LauncherWindowReplacesAppAsTopWindow
 import android.tools.flicker.config.AssertionTemplates
 import android.tools.flicker.config.FlickerConfigEntry
 import android.tools.flicker.config.ScenarioId
-import android.tools.flicker.config.desktopmode.Components
+import android.tools.flicker.config.desktopmode.Components.DESKTOP_MODE_APP
 import android.tools.flicker.config.desktopmode.Components.DESKTOP_WALLPAPER
+import android.tools.flicker.config.desktopmode.Components.NON_RESIZABLE_APP
 import android.tools.flicker.extractors.ITransitionMatcher
 import android.tools.flicker.extractors.ShellTransitionScenarioExtractor
 import android.tools.flicker.extractors.TaggedCujTransitionMatcher
@@ -62,13 +67,11 @@ class DesktopModeFlickerScenarios {
                 assertions =
                     AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
-                                AppLayerIsVisibleAlways(Components.DESKTOP_MODE_APP),
-                                AppWindowOnTopAtEnd(Components.DESKTOP_MODE_APP),
-                                AppWindowHasDesktopModeInitialBoundsAtTheEnd(
-                                    Components.DESKTOP_MODE_APP
-                                ),
-                                AppWindowBecomesVisible(DESKTOP_WALLPAPER)
-                            )
+                            AppLayerIsVisibleAlways(DESKTOP_MODE_APP),
+                            AppWindowOnTopAtEnd(DESKTOP_MODE_APP),
+                            AppWindowHasDesktopModeInitialBoundsAtTheEnd(DESKTOP_MODE_APP),
+                            AppWindowBecomesVisible(DESKTOP_WALLPAPER)
+                        )
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
@@ -97,11 +100,10 @@ class DesktopModeFlickerScenarios {
                 assertions =
                     AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
-                                AppWindowOnTopAtStart(Components.DESKTOP_MODE_APP),
-                                AppLayerIsVisibleAtStart(Components.DESKTOP_MODE_APP),
-                                AppLayerIsInvisibleAtEnd(Components.DESKTOP_MODE_APP),
-                            )
-                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                            AppWindowOnTopAtStart(DESKTOP_MODE_APP),
+                            AppLayerIsVisibleAtStart(DESKTOP_MODE_APP),
+                            AppLayerIsInvisibleAtEnd(DESKTOP_MODE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val CLOSE_LAST_APP =
@@ -125,10 +127,10 @@ class DesktopModeFlickerScenarios {
                 assertions =
                     AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
-                                AppWindowIsInvisibleAtEnd(Components.DESKTOP_MODE_APP),
-                                LauncherWindowReplacesAppAsTopWindow(Components.DESKTOP_MODE_APP),
-                                AppWindowIsInvisibleAtEnd(DESKTOP_WALLPAPER)
-                            )
+                            AppWindowIsInvisibleAtEnd(DESKTOP_MODE_APP),
+                            LauncherWindowReplacesAppAsTopWindow(DESKTOP_MODE_APP),
+                            AppWindowIsInvisibleAtEnd(DESKTOP_WALLPAPER)
+                        )
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
@@ -156,9 +158,28 @@ class DesktopModeFlickerScenarios {
                         )
                         .build(),
                 assertions =
-                    AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowHasSizeOfAtLeast(Components.DESKTOP_MODE_APP, 770, 700))
+                AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(AppWindowHasSizeOfAtLeast(DESKTOP_MODE_APP, 770, 700))
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val SNAP_RESIZE_WITH_DRAG_NON_RESIZABLE =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("SNAP_RESIZE_WITH_DRAG_NON_RESIZABLE"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_SNAP_RESIZE)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions = listOf(
+                    AppWindowIsVisibleAlways(NON_RESIZABLE_APP),
+                    AppWindowOnTopAtEnd(NON_RESIZABLE_APP),
+                    AppWindowRemainInsideDisplayBounds(NON_RESIZABLE_APP),
+                    AppWindowMaintainsAspectRatioAlways(NON_RESIZABLE_APP),
+                    AppWindowReturnsToStartBoundsAndPosition(NON_RESIZABLE_APP)
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }
 }

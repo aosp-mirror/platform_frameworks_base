@@ -166,6 +166,14 @@ java_library {
     jarjar_rules: ":ravenwood-services-jarjar-rules",
 }
 
+java_device_for_host {
+    name: "ravenwood-junit-impl-for-ravenizer",
+    libs: [
+        "ravenwood-junit-impl",
+    ],
+    visibility: [":__subpackages__"],
+}
+
 // Separated out from ravenwood-junit-impl since it needs to compile
 // against `module_current`
 java_library {

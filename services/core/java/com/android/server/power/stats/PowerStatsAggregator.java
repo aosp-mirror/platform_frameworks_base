@@ -46,6 +46,10 @@ public class PowerStatsAggregator {
         mHistory = history;
     }
 
+    public AggregatedPowerStatsConfig getConfig() {
+        return mAggregatedPowerStatsConfig;
+    }
+
     void setPowerComponentEnabled(int powerComponentId, boolean enabled) {
         synchronized (this) {
             if (mStats != null) {

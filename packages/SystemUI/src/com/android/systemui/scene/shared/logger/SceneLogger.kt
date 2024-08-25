@@ -43,7 +43,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logSceneChangeRequested(
+    fun logSceneChanged(
         from: SceneKey,
         to: SceneKey,
         reason: String,
@@ -60,28 +60,13 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             },
             messagePrinter = {
                 buildString {
-                    append("Scene change requested: $str1 → $str2")
+                    append("Scene changed: $str1 → $str2")
                     if (isInstant) {
                         append(" (instant)")
                     }
                     append(", reason: $str3")
                 }
             },
-        )
-    }
-
-    fun logSceneChangeCommitted(
-        from: SceneKey,
-        to: SceneKey,
-    ) {
-        logBuffer.log(
-            tag = TAG,
-            level = LogLevel.INFO,
-            messageInitializer = {
-                str1 = from.toString()
-                str2 = to.toString()
-            },
-            messagePrinter = { "Scene change committed: $str1 → $str2" },
         )
     }
 

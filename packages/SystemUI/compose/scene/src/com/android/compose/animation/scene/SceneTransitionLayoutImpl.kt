@@ -18,10 +18,12 @@ package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ApproachLayoutModifierNode
@@ -36,8 +38,11 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
+import androidx.compose.ui.zIndex
 import com.android.compose.animation.scene.content.Content
+import com.android.compose.animation.scene.content.Overlay
 import com.android.compose.animation.scene.content.Scene
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
@@ -59,7 +64,17 @@ internal class SceneTransitionLayoutImpl(
      *
      * TODO(b/317014852): Make this a normal MutableMap instead.
      */
-    internal val scenes = SnapshotStateMap<SceneKey, Scene>()
+    private val scenes = SnapshotStateMap<SceneKey, Scene>()
+
+    /**
+     * The map of [Overlays].
+     *
+     * Note: We lazily create this map to avoid instantiation an expensive SnapshotStateMap in the
+     * common case where there is no overlay in this layout.
+     */
+    private var _overlays: MutableMap<OverlayKey, Overlay>? = null
+    private val overlays
+        get() = _overlays ?: SnapshotStateMap<OverlayKey, Overlay>().also { _overlays = it }
 
     /**
      * The map of [Element]s.
@@ -118,7 +133,7 @@ internal class SceneTransitionLayoutImpl(
         private set
 
     init {
-        updateScenes(builder, layoutDirection)
+        updateContents(builder, layoutDirection)
 
         // DraggableHandlerImpl must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
@@ -151,22 +166,32 @@ internal class SceneTransitionLayoutImpl(
         return scenes[key] ?: error("Scene $key is not configured")
     }
 
+    internal fun sceneOrNull(key: SceneKey): Scene? = scenes[key]
+
+    internal fun overlay(key: OverlayKey): Overlay {
+        return overlays[key] ?: error("Overlay $key is not configured")
+    }
+
     internal fun content(key: ContentKey): Content {
         return when (key) {
             is SceneKey -> scene(key)
+            is OverlayKey -> overlay(key)
         }
     }
 
-    internal fun updateScenes(
+    internal fun updateContents(
         builder: SceneTransitionLayoutScope.() -> Unit,
         layoutDirection: LayoutDirection,
     ) {
-        // Keep a reference of the current scenes. After processing [builder], the scenes that were
-        // not configured will be removed.
+        // Keep a reference of the current contents. After processing [builder], the contents that
+        // were not configured will be removed.
         val scenesToRemove = scenes.keys.toMutableSet()
+        val overlaysToRemove =
+            if (_overlays == null) mutableSetOf() else overlays.keys.toMutableSet()
 
         // The incrementing zIndex of each scene.
         var zIndex = 0f
+        var overlaysDefined = false
 
         object : SceneTransitionLayoutScope {
                 override fun scene(
@@ -174,6 +199,8 @@ internal class SceneTransitionLayoutImpl(
                     userActions: Map<UserAction, UserActionResult>,
                     content: @Composable ContentScope.() -> Unit,
                 ) {
+                    require(!overlaysDefined) { "all scenes must be defined before overlays" }
+
                     scenesToRemove.remove(key)
 
                     val resolvedUserActions =
@@ -198,10 +225,42 @@ internal class SceneTransitionLayoutImpl(
 
                     zIndex++
                 }
+
+                override fun overlay(
+                    key: OverlayKey,
+                    alignment: Alignment,
+                    content: @Composable (ContentScope.() -> Unit)
+                ) {
+                    overlaysDefined = true
+                    overlaysToRemove.remove(key)
+
+                    val overlay = overlays[key]
+                    if (overlay != null) {
+                        // Update an existing overlay.
+                        overlay.content = content
+                        overlay.zIndex = zIndex
+                        overlay.alignment = alignment
+                    } else {
+                        // New overlay.
+                        overlays[key] =
+                            Overlay(
+                                key,
+                                this@SceneTransitionLayoutImpl,
+                                content,
+                                // TODO(b/353679003): Allow to specify user actions
+                                actions = emptyMap(),
+                                zIndex,
+                                alignment,
+                            )
+                    }
+
+                    zIndex++
+                }
             }
             .builder()
 
         scenesToRemove.forEach { scenes.remove(it) }
+        overlaysToRemove.forEach { overlays.remove(it) }
     }
 
     @Composable
@@ -219,8 +278,8 @@ internal class SceneTransitionLayoutImpl(
                 lookaheadScope = this
 
                 BackHandler()
-
-                scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }
+                Scenes()
+                Overlays()
             }
         }
     }
@@ -230,6 +289,11 @@ internal class SceneTransitionLayoutImpl(
         val targetSceneForBack =
             scene(state.transitionState.currentScene).userActions[Back.Resolved]?.toScene
         PredictiveBackHandler(state, coroutineScope, targetSceneForBack)
+    }
+
+    @Composable
+    private fun Scenes() {
+        scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }
     }
 
     private fun scenesToCompose(): List<Scene> {
@@ -247,16 +311,79 @@ internal class SceneTransitionLayoutImpl(
 
                 // Compose the new scene we are going to first.
                 transitions.fastForEachReversed { transition ->
-                    maybeAdd(transition.toScene)
-                    maybeAdd(transition.fromScene)
+                    when (transition) {
+                        is TransitionState.Transition.ChangeCurrentScene -> {
+                            maybeAdd(transition.toScene)
+                            maybeAdd(transition.fromScene)
+                        }
+                        is TransitionState.Transition.ShowOrHideOverlay ->
+                            maybeAdd(transition.fromOrToScene)
+                        is TransitionState.Transition.ReplaceOverlay -> {}
+                    }
                 }
+
+                // Make sure that the current scene is always composed.
+                maybeAdd(transitions.last().currentScene)
             }
         }
+    }
+
+    @Composable
+    private fun BoxScope.Overlays() {
+        val overlaysOrderedByZIndex = overlaysToComposeOrderedByZIndex()
+        if (overlaysOrderedByZIndex.isEmpty()) {
+            return
+        }
+
+        // We put the overlays inside a Box that is matching the layout size so that overlays are
+        // measured after all scenes and that their max size is the size of the layout without the
+        // overlays.
+        Box(Modifier.matchParentSize().zIndex(overlaysOrderedByZIndex.first().zIndex)) {
+            overlaysOrderedByZIndex.fastForEach { overlay ->
+                key(overlay.key) { overlay.Content(Modifier.align(overlay.alignment)) }
+            }
+        }
+    }
+
+    private fun overlaysToComposeOrderedByZIndex(): List<Overlay> {
+        if (_overlays == null) return emptyList()
+
+        val transitions = state.currentTransitions
+        return if (transitions.isEmpty()) {
+                state.transitionState.currentOverlays.map { overlay(it) }
+            } else {
+                buildList {
+                    val visited = mutableSetOf<OverlayKey>()
+                    fun maybeAdd(key: OverlayKey) {
+                        if (visited.add(key)) {
+                            add(overlay(key))
+                        }
+                    }
+
+                    transitions.fastForEach { transition ->
+                        when (transition) {
+                            is TransitionState.Transition.ChangeCurrentScene -> {}
+                            is TransitionState.Transition.ShowOrHideOverlay ->
+                                maybeAdd(transition.overlay)
+                            is TransitionState.Transition.ReplaceOverlay -> {
+                                maybeAdd(transition.fromOverlay)
+                                maybeAdd(transition.toOverlay)
+                            }
+                        }
+                    }
+
+                    // Make sure that all current overlays are composed.
+                    transitions.last().currentOverlays.forEach { maybeAdd(it) }
+                }
+            }
+            .sortedBy { it.zIndex }
     }
 
     internal fun setScenesTargetSizeForTest(size: IntSize) {
         scenes.values.forEach { it.targetSize = size }
     }
+
+    internal fun overlaysOrNullForTest(): Map<OverlayKey, Overlay>? = _overlays
 }
 
 private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutImpl) :
@@ -284,7 +411,8 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
 
         val width: Int
         val height: Int
-        val transition = layoutImpl.state.currentTransition
+        val transition =
+            layoutImpl.state.currentTransition as? TransitionState.Transition.ChangeCurrentScene
         if (transition == null) {
             width = placeable.width
             height = placeable.height

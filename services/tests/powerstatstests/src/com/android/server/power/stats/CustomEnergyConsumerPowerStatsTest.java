@@ -157,6 +157,7 @@ public class CustomEnergyConsumerPowerStatsTest {
     @Test
     public void processStats() throws Exception {
         AggregatedPowerStats aggregatedPowerStats = createAggregatedPowerStats();
+        aggregatedPowerStats.start(0);
         aggregatedPowerStats.setDeviceState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedPowerStats.setDeviceState(STATE_SCREEN, SCREEN_STATE_ON, 0);
         aggregatedPowerStats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND,

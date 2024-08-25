@@ -26,6 +26,7 @@ import com.android.settingslib.notification.data.repository.ZenModeRepository
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
 import java.time.Duration
 import javax.inject.Inject
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.map
 class ZenModeInteractor
 @Inject
 constructor(
+    private val context: Context,
     private val zenModeRepository: ZenModeRepository,
     private val notificationSettingsRepository: NotificationSettingsRepository,
 ) {
@@ -74,8 +76,38 @@ constructor(
 
     val modes: Flow<List<ZenMode>> = zenModeRepository.modes
 
-    suspend fun getModeIcon(mode: ZenMode, context: Context): Icon {
-        return Icon.Loaded(mode.getIcon(context, iconLoader).await(), contentDescription = null)
+    val activeModes: Flow<List<ZenMode>> =
+        modes.map { modes -> modes.filter { mode -> mode.isActive } }.distinctUntilChanged()
+
+    /** Flow returning the most prioritized of the active modes, if any. */
+    val mainActiveMode: Flow<ZenMode?> =
+        activeModes.map { modes -> getMainActiveMode(modes) }.distinctUntilChanged()
+
+    /**
+     * Given the list of modes (which may include zero or more currently active modes), returns the
+     * most prioritized of the active modes, if any.
+     */
+    private fun getMainActiveMode(modes: List<ZenMode>): ZenMode? {
+        return modes.sortedWith(ZenMode.PRIORITIZING_COMPARATOR).firstOrNull { it.isActive }
+    }
+
+    suspend fun getModeIcon(mode: ZenMode): Icon {
+        return mode.getIcon(context, iconLoader).await().asIcon()
+    }
+
+    suspend fun getLockscreenModeIcon(mode: ZenMode): Icon {
+        return mode.getLockscreenIcon(context, iconLoader).await().asIcon()
+    }
+
+    /**
+     * Given the list of modes (which may include zero or more currently active modes), returns an
+     * icon representing the active mode, if any (or, if multiple modes are active, to the most
+     * prioritized one). This icon is suitable for use in the status bar or lockscreen (uses the
+     * standard DND icon for implicit modes, instead of the launcher icon of the associated
+     * package).
+     */
+    suspend fun getActiveModeIcon(context: Context, modes: List<ZenMode>): Icon? {
+        return getMainActiveMode(modes)?.let { m -> getLockscreenModeIcon(m) }
     }
 
     fun activateMode(zenMode: ZenMode) {

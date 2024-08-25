@@ -39,6 +39,7 @@ import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_APP;
 import static android.service.notification.ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_ACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
+import static android.service.notification.ZenModeConfig.implicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -154,8 +155,6 @@ public class ZenModeHelper {
     private static final int RULE_INSTANCE_GRACE_PERIOD = 1000 * 60 * 60 * 72;
     static final int RULE_LIMIT_PER_PACKAGE = 100;
     private static final Duration DELETED_RULE_KEPT_FOR = Duration.ofDays(30);
-
-    private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
 
     private static final int MAX_ICON_RESOURCE_NAME_LENGTH = 1000;
 
@@ -486,7 +485,7 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
             populateZenRule(pkg, automaticZenRule, rule, origin, /* isNew= */ true);
-            rule = maybeRestoreRemovedRule(newConfig, rule, automaticZenRule, origin);
+            rule = maybeRestoreRemovedRule(newConfig, pkg, rule, automaticZenRule, origin);
             newConfig.automaticRules.put(rule.id, rule);
             maybeReplaceDefaultRule(newConfig, automaticZenRule);
 
@@ -499,7 +498,7 @@ public class ZenModeHelper {
     }
 
     @GuardedBy("mConfigLock")
-    private ZenRule maybeRestoreRemovedRule(ZenModeConfig config, ZenRule ruleToAdd,
+    private ZenRule maybeRestoreRemovedRule(ZenModeConfig config, String pkg, ZenRule ruleToAdd,
             AutomaticZenRule azrToAdd, @ConfigOrigin int origin) {
         if (!Flags.modesApi()) {
             return ruleToAdd;
@@ -523,10 +522,18 @@ public class ZenModeHelper {
         if (origin != ORIGIN_APP) {
             return ruleToAdd; // Okay to create anew.
         }
+        if (Flags.modesUi()) {
+            if (!Objects.equals(ruleToRestore.pkg, pkg)
+                    || !Objects.equals(ruleToRestore.component, azrToAdd.getOwner())) {
+                // Apps are not allowed to change the owner via updateAutomaticZenRule(). Thus, if
+                // they have to, delete+add is their only option.
+                return ruleToAdd;
+            }
+        }
 
         // "Preserve" the previous rule by considering the azrToAdd an update instead.
         // Only app-modifiable fields will actually be modified.
-        populateZenRule(ruleToRestore.pkg, azrToAdd, ruleToRestore, origin, /* isNew= */ false);
+        populateZenRule(pkg, azrToAdd, ruleToRestore, origin, /* isNew= */ false);
         return ruleToRestore;
     }
 
@@ -783,14 +790,6 @@ public class ZenModeHelper {
         return rule;
     }
 
-    private static String implicitRuleId(String forPackage) {
-        return IMPLICIT_RULE_ID_PREFIX + forPackage;
-    }
-
-    static boolean isImplicitRuleId(@NonNull String ruleId) {
-        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
-    }
-
     boolean removeAutomaticZenRule(String id, @ConfigOrigin int origin, String reason,
             int callingUid) {
         checkManageRuleOrigin("removeAutomaticZenRule", origin);
@@ -977,7 +976,16 @@ public class ZenModeHelper {
                         rule.setConditionOverride(OVERRIDE_DEACTIVATE);
                     }
                 }
+            } else if (origin == ORIGIN_USER_IN_APP && condition != null
+                    && condition.source == SOURCE_USER_ACTION) {
+                // Remove override and just apply the condition. Since the app is reporting that the
+                // user asked for it, by definition it knows that, and will adjust its automatic
+                // behavior accordingly -> no need to override.
+                rule.condition = condition;
+                rule.resetConditionOverride();
             } else {
+                // Update the condition, and check whether we can remove the override (if automatic
+                // and manual decisions agree).
                 rule.condition = condition;
                 rule.reconsiderConditionOverride();
             }

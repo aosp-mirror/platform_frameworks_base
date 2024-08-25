@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm.dex"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_pm_dex"
     },
     {
       "name": "DynamicCodeLoggerIntegrationTests"

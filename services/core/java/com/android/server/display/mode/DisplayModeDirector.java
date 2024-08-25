@@ -483,6 +483,7 @@ public class DisplayModeDirector {
                 /* attemptReadFromFeatureParams= */ true);
             mBrightnessObserver.updateBlockingZoneThresholds(displayDeviceConfig,
                 /* attemptReadFromFeatureParams= */ true);
+            mBrightnessObserver.loadIdleScreenRefreshRateConfigs(displayDeviceConfig);
             mBrightnessObserver.reloadLightSensor(displayDeviceConfig);
             mHbmObserver.setupHdrRefreshRates(displayDeviceConfig);
         }
@@ -1752,6 +1753,10 @@ public class DisplayModeDirector {
         private SparseArray<RefreshRateRange> mHighZoneRefreshRateForThermals;
         private int mRefreshRateInHighZone;
 
+        @Nullable
+        private List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
+                mIdleScreenRefreshRateTimeoutLuxThresholdPoints;
+
         @GuardedBy("mLock")
         private @Temperature.ThrottlingStatus int mThermalStatus = Temperature.THROTTLING_NONE;
 
@@ -1765,6 +1770,24 @@ public class DisplayModeDirector {
             mRefreshRateInHighZone = context.getResources().getInteger(
                     R.integer.config_fixedRefreshRateInHighZone);
             mVsyncLowLightBlockingVoteEnabled = flags.isVsyncLowLightVoteEnabled();
+            loadIdleScreenRefreshRateConfigs(/* displayDeviceConfig= */ null);
+        }
+
+        private void loadIdleScreenRefreshRateConfigs(DisplayDeviceConfig displayDeviceConfig) {
+            synchronized (mLock) {
+                if (!mDisplayManagerFlags.isIdleScreenConfigInSubscribingLightSensorEnabled()
+                        || displayDeviceConfig == null || displayDeviceConfig
+                        .getIdleScreenRefreshRateTimeoutLuxThresholdPoint().isEmpty()) {
+                    // Setting this to null will let surface flinger know that the idle timer is not
+                    // configured in the display configs
+                    mIdleScreenRefreshRateConfig = null;
+                    mIdleScreenRefreshRateTimeoutLuxThresholdPoints = null;
+                    return;
+                }
+                mIdleScreenRefreshRateTimeoutLuxThresholdPoints =
+                        displayDeviceConfig
+                                .getIdleScreenRefreshRateTimeoutLuxThresholdPoint();
+            }
         }
 
         /**
@@ -1813,9 +1836,17 @@ public class DisplayModeDirector {
             return mRefreshRateInLowZone;
         }
 
+        @Nullable
         @VisibleForTesting
         IdleScreenRefreshRateConfig getIdleScreenRefreshRateConfig() {
             return mIdleScreenRefreshRateConfig;
+        }
+
+        @Nullable
+        @VisibleForTesting
+        List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
+                getIdleScreenRefreshRateTimeoutLuxThresholdPoints() {
+            return mIdleScreenRefreshRateTimeoutLuxThresholdPoints;
         }
 
         private void loadLowBrightnessThresholds(@Nullable DisplayDeviceConfig displayDeviceConfig,
@@ -2212,12 +2243,11 @@ public class DisplayModeDirector {
                 mShouldObserveAmbientHighChange = false;
             }
 
-            if (mShouldObserveAmbientLowChange || mShouldObserveAmbientHighChange) {
+            if (shouldRegisterLightSensor()) {
                 Sensor lightSensor = getLightSensor();
 
                 if (lightSensor != null && lightSensor != mLightSensor) {
                     final Resources res = mContext.getResources();
-
                     mAmbientFilter = AmbientFilterFactory.createBrightnessFilter(TAG, res);
                     mLightSensor = lightSensor;
                 }
@@ -2443,8 +2473,8 @@ public class DisplayModeDirector {
             }
 
             boolean registerForThermals = false;
-            if ((mShouldObserveAmbientLowChange || mShouldObserveAmbientHighChange)
-                     && isDeviceActive() && !mLowPowerModeEnabled && mRefreshRateChangeable) {
+            if (shouldRegisterLightSensor() && isDeviceActive() && !mLowPowerModeEnabled
+                    && mRefreshRateChangeable) {
                 registerLightSensor();
                 registerForThermals = mLowZoneRefreshRateForThermals != null
                         || mHighZoneRefreshRateForThermals != null;
@@ -2461,6 +2491,17 @@ public class DisplayModeDirector {
                     mThermalStatus = Temperature.THROTTLING_NONE; // reset
                 }
             }
+        }
+
+        private boolean shouldRegisterLightSensor() {
+            return mShouldObserveAmbientLowChange || mShouldObserveAmbientHighChange
+                    || isIdleScreenRefreshRateConfigDefined();
+        }
+
+        private boolean isIdleScreenRefreshRateConfigDefined() {
+            return mDisplayManagerFlags.isIdleScreenConfigInSubscribingLightSensorEnabled()
+                    && mIdleScreenRefreshRateTimeoutLuxThresholdPoints != null
+                    && !mIdleScreenRefreshRateTimeoutLuxThresholdPoints.isEmpty();
         }
 
         private void registerLightSensor() {
@@ -2563,7 +2604,6 @@ public class DisplayModeDirector {
                     // is interrupted by a new sensor event.
                     mHandler.postDelayed(mInjectSensorEventRunnable, INJECT_EVENTS_INTERVAL_MS);
                 }
-
                 if (mDisplayManagerFlags.isIdleScreenRefreshRateTimeoutEnabled()) {
                     updateIdleScreenRefreshRate(mAmbientLux);
                 }
@@ -2628,24 +2668,15 @@ public class DisplayModeDirector {
         }
 
         private void updateIdleScreenRefreshRate(float ambientLux) {
-            List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
-                    idleScreenRefreshRateTimeoutLuxThresholdPoints;
-            synchronized (mLock) {
-                if (mDefaultDisplayDeviceConfig == null || mDefaultDisplayDeviceConfig
-                        .getIdleScreenRefreshRateTimeoutLuxThresholdPoint().isEmpty()) {
-                    // Setting this to null will let surface flinger know that the idle timer is not
-                    // configured in the display configs
-                    mIdleScreenRefreshRateConfig = null;
-                    return;
-                }
-
-                idleScreenRefreshRateTimeoutLuxThresholdPoints =
-                        mDefaultDisplayDeviceConfig
-                                .getIdleScreenRefreshRateTimeoutLuxThresholdPoint();
+            if (mIdleScreenRefreshRateTimeoutLuxThresholdPoints == null
+                    || mIdleScreenRefreshRateTimeoutLuxThresholdPoints.isEmpty()) {
+                mIdleScreenRefreshRateConfig = null;
+                return;
             }
+
             int newTimeout = -1;
             for (IdleScreenRefreshRateTimeoutLuxThresholdPoint point :
-                    idleScreenRefreshRateTimeoutLuxThresholdPoints) {
+                    mIdleScreenRefreshRateTimeoutLuxThresholdPoints) {
                 int newLux = point.getLux().intValue();
                 if (newLux <= ambientLux) {
                     newTimeout = point.getTimeout().intValue();

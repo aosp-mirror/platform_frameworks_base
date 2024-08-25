@@ -25,6 +25,7 @@ import com.android.settingslib.bluetooth.devicesettings.DeviceSetting
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingItem
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfig
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingFooterPreference
 import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreference
 import com.android.settingslib.bluetooth.devicesettings.ToggleInfo
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel
@@ -96,8 +97,7 @@ class DeviceSettingRepositoryImpl(
     private fun DeviceSettingsConfig.toModel(): DeviceSettingConfigModel =
         DeviceSettingConfigModel(
             mainItems = mainContentItems.map { it.toModel() },
-            moreSettingsItems = moreSettingsItems.map { it.toModel() },
-            moreSettingsPageFooter = moreSettingsFooter)
+            moreSettingsItems = moreSettingsItems.map { it.toModel() })
 
     private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel {
         return if (!TextUtils.isEmpty(preferenceKey)) {
@@ -151,6 +151,9 @@ class DeviceSettingRepositoryImpl(
                         }
                     },
                 )
+            is DeviceSettingFooterPreference -> DeviceSettingModel.FooterPreference(
+                cachedDevice = cachedDevice,
+                id = settingId, footerText = pref.footerText)
             else -> DeviceSettingModel.Unknown(cachedDevice, settingId)
         }
 

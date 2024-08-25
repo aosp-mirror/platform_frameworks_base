@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,7 +35,8 @@ import java.lang.reflect.Method;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class AnnotatedElementPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private Class<?> mType;
     private Field mField;
@@ -52,7 +53,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetTypeAnnotations() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mType.getAnnotations();
         }
@@ -60,7 +61,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetFieldAnnotations() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mField.getAnnotations();
         }
@@ -68,7 +69,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetMethodAnnotations() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mMethod.getAnnotations();
         }
@@ -76,7 +77,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetParameterAnnotations() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mMethod.getParameterAnnotations();
         }
@@ -84,7 +85,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetTypeAnnotation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mType.getAnnotation(Marker.class);
         }
@@ -92,7 +93,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetFieldAnnotation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mField.getAnnotation(Marker.class);
         }
@@ -100,7 +101,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetMethodAnnotation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mMethod.getAnnotation(Marker.class);
         }
@@ -108,7 +109,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeIsTypeAnnotationPresent() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mType.isAnnotationPresent(Marker.class);
         }
@@ -116,7 +117,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeIsFieldAnnotationPresent() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mField.isAnnotationPresent(Marker.class);
         }
@@ -124,7 +125,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeIsMethodAnnotationPresent() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             mMethod.isAnnotationPresent(Marker.class);
         }
@@ -134,7 +135,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetAllReturnsLargeAnnotation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasLargeAnnotation.class.getAnnotations();
         }
@@ -142,7 +143,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetAllReturnsSmallAnnotation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasSmallAnnotation.class.getAnnotations();
         }
@@ -150,7 +151,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetAllReturnsMarkerAnnotation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasMarkerAnnotation.class.getAnnotations();
         }
@@ -158,7 +159,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetAllReturnsNoAnnotation() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasNoAnnotations.class.getAnnotations();
         }
@@ -166,7 +167,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetAllReturnsThreeAnnotations() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasThreeAnnotations.class.getAnnotations();
         }
@@ -176,7 +177,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetAnnotationsOnSubclass() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             ExtendsHasThreeAnnotations.class.getAnnotations();
         }
@@ -184,7 +185,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetDeclaredAnnotationsOnSubclass() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             ExtendsHasThreeAnnotations.class.getDeclaredAnnotations();
         }
@@ -194,7 +195,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetDeclaredClasses() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             AnnotatedElementPerfTest.class.getDeclaredClasses();
         }
@@ -202,7 +203,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetDeclaringClass() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasSmallAnnotation.class.getDeclaringClass();
         }
@@ -211,7 +212,7 @@ public class AnnotatedElementPerfTest {
     @Test
     public void timeGetEnclosingClass() {
         Object anonymousClass = new Object() {};
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             anonymousClass.getClass().getEnclosingClass();
         }
@@ -220,7 +221,7 @@ public class AnnotatedElementPerfTest {
     @Test
     public void timeGetEnclosingConstructor() {
         Object anonymousClass = new Object() {};
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             anonymousClass.getClass().getEnclosingConstructor();
         }
@@ -229,7 +230,7 @@ public class AnnotatedElementPerfTest {
     @Test
     public void timeGetEnclosingMethod() {
         Object anonymousClass = new Object() {};
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             anonymousClass.getClass().getEnclosingMethod();
         }
@@ -237,7 +238,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetModifiers() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasSmallAnnotation.class.getModifiers();
         }
@@ -245,7 +246,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeGetSimpleName() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasSmallAnnotation.class.getSimpleName();
         }
@@ -254,7 +255,7 @@ public class AnnotatedElementPerfTest {
     @Test
     public void timeIsAnonymousClass() {
         Object anonymousClass = new Object() {};
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             anonymousClass.getClass().isAnonymousClass();
         }
@@ -262,7 +263,7 @@ public class AnnotatedElementPerfTest {
 
     @Test
     public void timeIsLocalClass() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             HasSmallAnnotation.class.isLocalClass();
         }

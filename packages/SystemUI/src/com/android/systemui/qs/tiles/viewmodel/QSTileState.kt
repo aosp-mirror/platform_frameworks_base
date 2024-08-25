@@ -105,6 +105,7 @@ data class QSTileState(
 
     enum class UserAction {
         CLICK,
+        TOGGLE_CLICK,
         LONG_CLICK,
     }
 

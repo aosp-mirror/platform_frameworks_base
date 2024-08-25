@@ -70,6 +70,7 @@ import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeF
 import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
+import static com.android.server.stats.pull.netstats.NetworkStatsUtils.fromPublicNetworkStats;
 
 import static libcore.io.IoUtils.closeQuietly;
 
@@ -210,7 +211,6 @@ import com.android.internal.os.SelectedProcessCpuThreadReader;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.net.module.util.NetworkStatsUtils;
 import com.android.role.RoleManagerLocal;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalManagerRegistry;
@@ -1587,14 +1587,14 @@ public class StatsPullAtomService extends SystemService {
                 getNetworkStatsManager().querySummary(template, startTime, endTime);
 
         final NetworkStats nonTaggedStats =
-                NetworkStatsUtils.fromPublicNetworkStats(queryNonTaggedStats);
+                fromPublicNetworkStats(queryNonTaggedStats);
         queryNonTaggedStats.close();
         if (!includeTags) return nonTaggedStats;
 
         final android.app.usage.NetworkStats queryTaggedStats =
                 getNetworkStatsManager().queryTaggedSummary(template, startTime, endTime);
         final NetworkStats taggedStats =
-                NetworkStatsUtils.fromPublicNetworkStats(queryTaggedStats);
+                fromPublicNetworkStats(queryTaggedStats);
         queryTaggedStats.close();
         return nonTaggedStats.add(taggedStats);
     }

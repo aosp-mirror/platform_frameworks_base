@@ -247,6 +247,21 @@ public class GenericWindowPolicyControllerTest {
     }
 
     @Test
+    public void addActivityPolicyPackageExemption_openBlockedOnVirtualDisplay_isBlocked() {
+        GenericWindowPolicyController gwpc = createGwpc();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+        gwpc.setActivityLaunchDefaultAllowed(true);
+        gwpc.addActivityPolicyExemption(BLOCKED_COMPONENT.getPackageName());
+
+        ActivityInfo activityInfo = getActivityInfo(
+                BLOCKED_COMPONENT.getPackageName(),
+                BLOCKED_COMPONENT.getClassName(),
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertActivityIsBlocked(gwpc, activityInfo);
+    }
+
+    @Test
     public void openNotAllowedComponentOnBlocklistVirtualDisplay_isBlocked() {
         GenericWindowPolicyController gwpc = createGwpcWithAllowedComponent(NONBLOCKED_COMPONENT);
         gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
@@ -265,6 +280,21 @@ public class GenericWindowPolicyControllerTest {
         gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
         gwpc.setActivityLaunchDefaultAllowed(false);
         gwpc.addActivityPolicyExemption(NONBLOCKED_COMPONENT);
+
+        ActivityInfo activityInfo = getActivityInfo(
+                BLOCKED_PACKAGE_NAME,
+                BLOCKED_PACKAGE_NAME,
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertActivityIsBlocked(gwpc, activityInfo);
+    }
+
+    @Test
+    public void addActivityPolicyPackageExemption_openNotAllowedOnVirtualDisplay_isBlocked() {
+        GenericWindowPolicyController gwpc = createGwpc();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+        gwpc.setActivityLaunchDefaultAllowed(false);
+        gwpc.addActivityPolicyExemption(NONBLOCKED_COMPONENT.getPackageName());
 
         ActivityInfo activityInfo = getActivityInfo(
                 BLOCKED_PACKAGE_NAME,
@@ -297,6 +327,21 @@ public class GenericWindowPolicyControllerTest {
         ActivityInfo activityInfo = getActivityInfo(
                 NONBLOCKED_APP_PACKAGE_NAME,
                 NONBLOCKED_APP_PACKAGE_NAME,
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertActivityCanBeLaunched(gwpc, activityInfo);
+    }
+
+    @Test
+    public void addActivityPolicyPackageExemption_openAllowedOnVirtualDisplay_startsActivity() {
+        GenericWindowPolicyController gwpc = createGwpc();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+        gwpc.setActivityLaunchDefaultAllowed(false);
+        gwpc.addActivityPolicyExemption(NONBLOCKED_COMPONENT.getPackageName());
+
+        ActivityInfo activityInfo = getActivityInfo(
+                NONBLOCKED_COMPONENT.getPackageName(),
+                NONBLOCKED_COMPONENT.getClassName(),
                 /* displayOnRemoteDevices */ true,
                 /* targetDisplayCategory */ null);
         assertActivityCanBeLaunched(gwpc, activityInfo);
@@ -374,6 +419,22 @@ public class GenericWindowPolicyControllerTest {
     }
 
     @Test
+    public void canActivityBeLaunched_blockedAppStreamingPackageExempt_isNeverBlocked() {
+        GenericWindowPolicyController gwpc = createGwpc();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+        gwpc.setActivityLaunchDefaultAllowed(true);
+        gwpc.addActivityPolicyExemption(BLOCKED_APP_STREAMING_COMPONENT.getPackageName());
+
+        ActivityInfo activityInfo = getActivityInfo(
+                BLOCKED_APP_STREAMING_COMPONENT.getPackageName(),
+                BLOCKED_APP_STREAMING_COMPONENT.getClassName(),
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+
+        assertActivityCanBeLaunched(gwpc, activityInfo);
+    }
+
+    @Test
     public void canActivityBeLaunched_blockedAppStreamingComponentNotAllowlisted_isNeverBlocked() {
         GenericWindowPolicyController gwpc = createGwpcWithAllowedComponent(NONBLOCKED_COMPONENT);
         gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
@@ -393,6 +454,22 @@ public class GenericWindowPolicyControllerTest {
         gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
         gwpc.setActivityLaunchDefaultAllowed(false);
         gwpc.addActivityPolicyExemption(NONBLOCKED_COMPONENT);
+
+        ActivityInfo activityInfo = getActivityInfo(
+                BLOCKED_APP_STREAMING_COMPONENT.getPackageName(),
+                BLOCKED_APP_STREAMING_COMPONENT.getClassName(),
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+
+        assertActivityCanBeLaunched(gwpc, activityInfo);
+    }
+
+    @Test
+    public void canActivityBeLaunched_blockedAppStreamingPAckageNotExempt_isNeverBlocked() {
+        GenericWindowPolicyController gwpc = createGwpc();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+        gwpc.setActivityLaunchDefaultAllowed(false);
+        gwpc.addActivityPolicyExemption(NONBLOCKED_COMPONENT.getPackageName());
 
         ActivityInfo activityInfo = getActivityInfo(
                 BLOCKED_APP_STREAMING_COMPONENT.getPackageName(),
@@ -754,6 +831,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
@@ -773,6 +851,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
@@ -793,6 +872,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
@@ -813,6 +893,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ Collections.singleton(blockedComponent),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
@@ -833,6 +914,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ false,
                 /* activityPolicyExemptions= */ Collections.singleton(allowedComponent),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
@@ -853,6 +935,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
@@ -873,6 +956,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ Collections.singleton(blockedComponent),
                 /* activityListener= */ mActivityListener,
@@ -893,6 +977,7 @@ public class GenericWindowPolicyControllerTest {
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
+                /* activityPolicyPackageExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ false,
                 /* crossTaskNavigationExemptions= */ Collections.singleton(allowedComponent),
                 /* activityListener= */ mActivityListener,

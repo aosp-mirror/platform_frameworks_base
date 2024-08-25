@@ -2217,7 +2217,6 @@ public class BubbleController implements ConfigurationChangeListener,
         // And since all children are removed, remove the summary.
         removeCallback.accept(-1);
 
-        // TODO: (b/145659174) remove references to mSuppressedGroupKeys once fully migrated
         mBubbleData.addSummaryToSuppress(summary.getStatusBarNotification().getGroupKey(),
                 summary.getKey());
     }

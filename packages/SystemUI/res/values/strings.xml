@@ -756,6 +756,8 @@
     <string name="quick_settings_bluetooth_audio_sharing_button">Share audio</string>
     <!-- QuickSettings: Bluetooth dialog audio sharing button text when sharing audio [CHAR LIMIT=50]-->
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing audio</string>
+    <!-- QuickSettings: Bluetooth dialog audio sharing button text accessibility label. Used as part of the string "Double tap to enter audio sharing settings". [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility">enter audio sharing settings</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -1103,6 +1105,9 @@
 
     <!-- Priority modes: label for an active mode [CHAR LIMIT=35] -->
     <string name="zen_mode_on">On</string>
+
+    <!-- Priority modes: label for an active mode, with details [CHAR LIMIT=10] -->
+    <string name="zen_mode_on_with_details">On • <xliff:g id="trigger_description" example="Mon-Fri, 23:00-7:00">%1$s</xliff:g></string>
 
     <!-- Priority modes: label for an inactive mode [CHAR LIMIT=35] -->
     <string name="zen_mode_off">Off</string>
@@ -1864,6 +1869,8 @@
 
     <!-- Text displayed indicating that the user is connected to a satellite signal. -->
     <string name="satellite_connected_carrier_text">Satellite SOS</string>
+    <!-- Text displayed indicating that the user might be able to use satellite SOS. -->
+    <string name="satellite_emergency_only_carrier_text">Emergency calls or SOS</string>
 
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>

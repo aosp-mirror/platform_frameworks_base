@@ -100,17 +100,20 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         private final WindowMagnifierCallback mWindowMagnifierCallback;
         private final SysUiState mSysUiState;
         private final SecureSettings mSecureSettings;
+        private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
         WindowMagnificationControllerSupplier(Context context, Handler handler,
                 WindowMagnifierCallback windowMagnifierCallback,
                 DisplayManager displayManager, SysUiState sysUiState,
-                SecureSettings secureSettings) {
+                SecureSettings secureSettings,
+                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
             super(displayManager);
             mContext = context;
             mHandler = handler;
             mWindowMagnifierCallback = windowMagnifierCallback;
             mSysUiState = sysUiState;
             mSecureSettings = secureSettings;
+            mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         }
 
         @Override
@@ -137,7 +140,8 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
                     mSecureSettings,
                     scvhSupplier,
                     new SfVsyncFrameCallbackProvider(),
-                    WindowManagerGlobal::getWindowSession);
+                    WindowManagerGlobal::getWindowSession,
+                    mViewCaptureAwareWindowManager);
         }
     }
 
@@ -267,7 +271,7 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         mA11yLogger = a11yLogger;
         mWindowMagnificationControllerSupplier = new WindowMagnificationControllerSupplier(context,
                 mHandler, mWindowMagnifierCallback,
-                displayManager, sysUiState, secureSettings);
+                displayManager, sysUiState, secureSettings, viewCaptureAwareWindowManager);
         mFullscreenMagnificationControllerSupplier = new FullscreenMagnificationControllerSupplier(
                 context, displayManager, mHandler, mExecutor, iWindowManager);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,

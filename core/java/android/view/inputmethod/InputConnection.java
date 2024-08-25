@@ -625,8 +625,7 @@ public interface InputConnection {
      *        the text you are providing so it is not possible to correctly
      *        specify locations there.
      * @param textAttribute The extra information about the text.
-     * @return true on success, false if the input connection is no longer
-     *
+     * @return true on success, false if the input connection is no longer valid.
      */
     default boolean setComposingText(@NonNull CharSequence text, int newCursorPosition,
             @Nullable TextAttribute textAttribute) {
@@ -753,7 +752,7 @@ public interface InputConnection {
      *        you are providing so it is not possible to correctly specify
      *        locations there.
      * @param textAttribute The extra information about the text.
-     * @return true on success, false if the input connection is no longer
+     * @return true on success, false if the input connection is no longer valid.
      */
     default boolean commitText(@NonNull CharSequence text, int newCursorPosition,
             @Nullable TextAttribute textAttribute) {

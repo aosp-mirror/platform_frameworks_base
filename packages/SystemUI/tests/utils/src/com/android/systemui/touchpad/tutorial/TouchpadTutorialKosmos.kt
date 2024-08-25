@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad.tutorial
 
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
@@ -24,5 +25,10 @@ import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGestures
 
 var Kosmos.touchpadGesturesInteractor: TouchpadGesturesInteractor by
     Kosmos.Fixture {
-        TouchpadGesturesInteractor(sysUiState, displayTracker, testScope.backgroundScope)
+        TouchpadGesturesInteractor(
+            sysUiState,
+            displayTracker,
+            testScope.backgroundScope,
+            inputDeviceTutorialLogger
+        )
     }

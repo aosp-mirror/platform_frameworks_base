@@ -112,6 +112,8 @@ import android.os.storage.VolumeInfo;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.provider.Settings;
+import android.ravenwood.annotation.RavenwoodKeepPartialClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -157,6 +159,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** @hide */
+@RavenwoodKeepPartialClass
 public class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
     private static final boolean DEBUG_ICONS = false;
@@ -2163,11 +2166,16 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @UnsupportedAppUsage
+    @RavenwoodReplace(reason = "<cinit> crashes due to unsupported class PropertyInvalidatedCache")
     static void configurationChanged() {
         synchronized (sSync) {
             sIconCache.clear();
             sStringCache.clear();
         }
+    }
+
+    private static void configurationChanged$ravenwood() {
+        /* no-op */
     }
 
     @UnsupportedAppUsage

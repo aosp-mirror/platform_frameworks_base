@@ -110,10 +110,13 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
     private final ArraySet<ComponentName> mActivityPolicyExemptions;
+    @NonNull
+    @GuardedBy("mGenericWindowPolicyControllerLock")
+    private final ArraySet<String> mActivityPolicyPackageExemptions;
     private final boolean mCrossTaskNavigationAllowedByDefault;
     @NonNull
     private final ArraySet<ComponentName> mCrossTaskNavigationExemptions;
-    @Nullable
+    @NonNull
     private final Object mGenericWindowPolicyControllerLock = new Object();
     @Nullable private final ActivityBlockedCallback mActivityBlockedCallback;
 
@@ -152,6 +155,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      *   or blocked.
      * @param activityPolicyExemptions The set of activities explicitly exempt from the default
      *   activity policy.
+     * @param activityPolicyPackageExemptions The set of packages whose activities are explicitly
+     *   exempt from the default activity policy.
      * @param crossTaskNavigationAllowedByDefault Whether cross task navigations are allowed by
      *   default or not.
      * @param crossTaskNavigationExemptions The set of components explicitly exempt from the default
@@ -176,6 +181,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull ArraySet<UserHandle> allowedUsers,
             boolean activityLaunchAllowedByDefault,
             @NonNull Set<ComponentName> activityPolicyExemptions,
+            @NonNull Set<String> activityPolicyPackageExemptions,
             boolean crossTaskNavigationAllowedByDefault,
             @NonNull Set<ComponentName> crossTaskNavigationExemptions,
             @Nullable ActivityListener activityListener,
@@ -190,6 +196,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mAllowedUsers = allowedUsers;
         mActivityLaunchAllowedByDefault = activityLaunchAllowedByDefault;
         mActivityPolicyExemptions = new ArraySet<>(activityPolicyExemptions);
+        mActivityPolicyPackageExemptions = new ArraySet<>(activityPolicyPackageExemptions);
         mCrossTaskNavigationAllowedByDefault = crossTaskNavigationAllowedByDefault;
         mCrossTaskNavigationExemptions = new ArraySet<>(crossTaskNavigationExemptions);
         mActivityBlockedCallback = activityBlockedCallback;
@@ -250,6 +257,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         synchronized (mGenericWindowPolicyControllerLock) {
             if (mActivityLaunchAllowedByDefault != activityLaunchDefaultAllowed) {
                 mActivityPolicyExemptions.clear();
+                mActivityPolicyPackageExemptions.clear();
             }
             mActivityLaunchAllowedByDefault = activityLaunchDefaultAllowed;
         }
@@ -264,6 +272,18 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
         synchronized (mGenericWindowPolicyControllerLock) {
             mActivityPolicyExemptions.remove(componentName);
+        }
+    }
+
+    void addActivityPolicyExemption(@NonNull String packageName) {
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mActivityPolicyPackageExemptions.add(packageName);
+        }
+    }
+
+    void removeActivityPolicyExemption(@NonNull String packageName) {
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mActivityPolicyPackageExemptions.remove(packageName);
         }
     }
 
@@ -343,13 +363,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                     + mDisplayCategories);
             return false;
         }
-        synchronized (mGenericWindowPolicyControllerLock) {
-            if (!isAllowedByPolicy(mActivityLaunchAllowedByDefault, mActivityPolicyExemptions,
-                    activityComponent)) {
-                logActivityLaunchBlocked("Activity launch disallowed by policy: "
-                        + activityComponent);
-                return false;
-            }
+        if (!isAllowedByPolicy(activityComponent)) {
+            logActivityLaunchBlocked("Activity launch disallowed by policy: "
+                    + activityComponent);
+            return false;
         }
         if (isNewTask && launchingFromDisplayId != DEFAULT_DISPLAY
                 && !isAllowedByPolicy(mCrossTaskNavigationAllowedByDefault,
@@ -473,6 +490,16 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         Counter.logIncrementWithUid(
                 "virtual_devices.value_activity_blocked_count",
                 mAttributionSource.getUid());
+    }
+
+    private boolean isAllowedByPolicy(ComponentName component) {
+        synchronized (mGenericWindowPolicyControllerLock) {
+            if (mActivityPolicyExemptions.contains(component)
+                    || mActivityPolicyPackageExemptions.contains(component.getPackageName())) {
+                return !mActivityLaunchAllowedByDefault;
+            }
+            return mActivityLaunchAllowedByDefault;
+        }
     }
 
     private static boolean isAllowedByPolicy(boolean allowedByDefault,

@@ -29,7 +29,6 @@ data class TutorialScreenConfig(
 
     data class Colors(
         val background: Color,
-        val successBackground: Color,
         val title: Color,
         val animationColors: LottieDynamicProperties
     )

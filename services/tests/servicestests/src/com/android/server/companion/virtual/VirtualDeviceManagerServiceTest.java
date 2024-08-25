@@ -62,7 +62,6 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
-import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
@@ -1686,7 +1685,6 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void openNonBlockedAppOnMirrorDisplay_flagEnabled_cannotBeLaunched() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
         when(mDisplayManagerInternalMock.getDisplayIdToMirror(anyInt()))
                 .thenReturn(Display.DEFAULT_DISPLAY);
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
@@ -1704,31 +1702,6 @@ public class VirtualDeviceManagerServiceTest {
                 /* isResultExpected = */ false, /* intentSender= */ null))
                 .isFalse();
         // Verify that BlockedAppStreamingActivity also doesn't launch for mirror displays.
-        Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
-                activityInfo, mAssociationInfo.getDisplayName());
-        verify(mContext, never()).startActivityAsUser(argThat(intent ->
-                intent.filterEquals(blockedAppIntent)), any(), any());
-    }
-
-    @Test
-    public void openNonBlockedAppOnMirrorDisplay_flagDisabled_launchesActivity() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
-        when(mDisplayManagerInternalMock.getDisplayIdToMirror(anyInt()))
-                .thenReturn(Display.DEFAULT_DISPLAY);
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
-                DISPLAY_ID_1);
-        doNothing().when(mContext).startActivityAsUser(any(), any(), any());
-
-        ActivityInfo activityInfo = getActivityInfo(
-                NONBLOCKED_APP_PACKAGE_NAME,
-                NONBLOCKED_APP_PACKAGE_NAME,
-                /* displayOnRemoteDevices */ true,
-                /* targetDisplayCategory */ null);
-        assertThat(gwpc.canActivityBeLaunched(activityInfo, null,
-                WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID_1, /* isNewTask= */ false,
-                /* isResultExpected = */ false, /* intentSender= */ null))
-                .isTrue();
         Intent blockedAppIntent = BlockedAppStreamingActivity.createIntent(
                 activityInfo, mAssociationInfo.getDisplayName());
         verify(mContext, never()).startActivityAsUser(argThat(intent ->

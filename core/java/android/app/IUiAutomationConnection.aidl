@@ -45,7 +45,7 @@ interface IUiAutomationConnection {
     void injectInputEventToInputFilter(in InputEvent event);
     void syncInputTransactions(boolean waitForAnimations);
     boolean setRotation(int rotation);
-    boolean takeScreenshot(in Rect crop, in ScreenCaptureListener listener);
+    boolean takeScreenshot(in Rect crop, in ScreenCaptureListener listener, int displayId);
     boolean takeSurfaceControlScreenshot(in SurfaceControl surfaceControl, in ScreenCaptureListener listener);
     boolean clearWindowContentFrameStats(int windowId);
     WindowContentFrameStats getWindowContentFrameStats(int windowId);

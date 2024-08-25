@@ -30,7 +30,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     override fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        priority: Int,
+        rank: Int?,
         configurator: WidgetConfigurator?
     ) {
         coroutineScope.launch {
@@ -38,7 +38,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
             val providerInfo = AppWidgetProviderInfo().apply { this.provider = provider }
             val configured = configurator?.configureWidget(id) ?: true
             if (configured) {
-                onConfigured(id, providerInfo, priority)
+                onConfigured(id, providerInfo, rank ?: -1)
             }
         }
     }
@@ -46,14 +46,14 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     fun addWidget(
         appWidgetId: Int,
         componentName: String = "pkg/cls",
-        priority: Int = 0,
+        rank: Int = 0,
         category: Int = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
         userId: Int = 0,
     ) {
         fakeDatabase[appWidgetId] =
             CommunalWidgetContentModel.Available(
                 appWidgetId = appWidgetId,
-                priority = priority,
+                rank = rank,
                 providerInfo =
                     AppWidgetProviderInfo().apply {
                         provider = ComponentName.unflattenFromString(componentName)!!
@@ -73,14 +73,14 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     fun addPendingWidget(
         appWidgetId: Int,
         componentName: String = "pkg/cls",
-        priority: Int = 0,
+        rank: Int = 0,
         icon: Bitmap? = null,
         userId: Int = 0,
     ) {
         fakeDatabase[appWidgetId] =
             CommunalWidgetContentModel.Pending(
                 appWidgetId = appWidgetId,
-                priority = priority,
+                rank = rank,
                 componentName = ComponentName.unflattenFromString(componentName)!!,
                 icon = icon,
                 user = UserHandle(userId),
@@ -97,8 +97,8 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
 
     override fun abortRestoreWidgets() {}
 
-    private fun onConfigured(id: Int, providerInfo: AppWidgetProviderInfo, priority: Int) {
+    private fun onConfigured(id: Int, providerInfo: AppWidgetProviderInfo, rank: Int) {
         _communalWidgets.value +=
-            listOf(CommunalWidgetContentModel.Available(id, providerInfo, priority))
+            listOf(CommunalWidgetContentModel.Available(id, providerInfo, rank))
     }
 }

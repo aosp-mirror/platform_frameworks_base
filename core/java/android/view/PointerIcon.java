@@ -556,12 +556,9 @@ public final class PointerIcon implements Parcelable {
                                 + "is a different type from the others. All frames should be the "
                                 + "same type.");
                     }
-                    if (drawableFrame.getIntrinsicWidth() != width ||
-                        drawableFrame.getIntrinsicHeight() != height) {
-                        throw new IllegalArgumentException("The bitmap size of " + i + "-th frame "
-                                + "is different. All frames should have the exact same size and "
-                                + "share the same hotspot.");
-                    }
+                    // TODO(b/361232935): Check when bitmap size of the ith frame is different
+                    // drawableFrame.getIntrinsicWidth() != width ||
+                    // drawableFrame.getIntrinsicHeight() != height
                     if (isVectorAnimation) {
                         drawableFrame = getBitmapDrawableFromVectorDrawable(resources,
                                 (VectorDrawable) drawableFrame, pointerScale);

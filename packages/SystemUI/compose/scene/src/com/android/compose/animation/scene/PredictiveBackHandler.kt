@@ -70,7 +70,7 @@ private class PredictiveBackTransition(
     val coroutineScope: CoroutineScope,
     fromScene: SceneKey,
     toScene: SceneKey,
-) : TransitionState.Transition(fromScene, toScene) {
+) : TransitionState.Transition.ChangeCurrentScene(fromScene, toScene) {
     override var currentScene by mutableStateOf(fromScene)
         private set
 
@@ -85,7 +85,7 @@ private class PredictiveBackTransition(
         get() = 0f // Currently, velocity is not exposed by predictive back API
 
     override val isInPreviewStage: Boolean
-        get() = progressAnimatable == null && previewTransformationSpec != null
+        get() = previewTransformationSpec != null && currentScene == fromScene
 
     override val progress: Float
         get() = progressAnimatable?.value ?: previewTransformationSpec?.let { 0f } ?: dragProgress

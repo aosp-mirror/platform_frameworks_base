@@ -24,13 +24,13 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +46,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -60,6 +59,7 @@ import com.airbnb.lottie.compose.LottieDynamicProperty
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
+import com.android.compose.modifiers.background
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.FINISHED
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.IN_PROGRESS
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NOT_STARTED
@@ -76,19 +76,11 @@ fun ActionTutorialContent(
     onDoneButtonClicked: () -> Unit,
     config: TutorialScreenConfig
 ) {
-    val animatedColor by
-        animateColorAsState(
-            targetValue =
-                if (actionState == FINISHED) config.colors.successBackground
-                else config.colors.background,
-            animationSpec = tween(durationMillis = 150, easing = LinearEasing),
-            label = "backgroundColor"
-        )
     Column(
         verticalArrangement = Arrangement.Center,
         modifier =
             Modifier.fillMaxSize()
-                .drawBehind { drawRect(animatedColor) }
+                .background(config.colors.background)
                 .padding(start = 48.dp, top = 124.dp, end = 48.dp, bottom = 48.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {

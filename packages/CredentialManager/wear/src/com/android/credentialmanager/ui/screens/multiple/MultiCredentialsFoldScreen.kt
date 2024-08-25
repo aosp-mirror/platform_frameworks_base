@@ -17,7 +17,6 @@
 package com.android.credentialmanager.ui.screens.multiple
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.fillMaxSize
 import com.android.credentialmanager.R
 import androidx.compose.ui.res.stringResource
@@ -40,6 +39,10 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.ui.components.BottomSpacer
 import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
+import com.android.credentialmanager.common.ui.components.WearButtonText
+import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
+import androidx.compose.ui.text.style.TextAlign
+import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 
 /**
  * Screen that shows multiple credentials to select from.
@@ -82,14 +85,25 @@ fun MultiCredentialsFoldScreen(
             credentials.forEach { credential: CredentialEntryInfo ->
                 item {
                     CredentialsScreenChip(
-                        label = credential.userName,
+                        primaryText =
+                        {
+                            WearButtonText(
+                                text = credential.userName,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2
+                            )
+                        },
                         onClick = { selectEntry(credential, false) },
-                        secondaryLabel =
-                        credential.credentialTypeDisplayName.ifEmpty {
-                            credential.providerDisplayName
+                        secondaryText = {
+                            WearSecondaryLabel(
+                                text = credential.credentialTypeDisplayName.ifEmpty {
+                                    credential.providerDisplayName
+                                },
+                                color = WearMaterialTheme.colors.onSurfaceVariant,
+                                maxLines = 1 // See b/359649621 for context
+                            )
                         },
                         icon = credential.icon,
-                        textAlign = TextAlign.Start
                     )
                     CredentialsScreenChipSpacer()
                 }
