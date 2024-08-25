@@ -30,6 +30,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.flags.FakeFeatureFlags
@@ -152,9 +153,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
-            }
+            FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         val keyguardInteractor = withDeps.keyguardInteractor
@@ -223,6 +222,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
                 broadcastDispatcher = broadcastDispatcher,
                 accessibilityManager = accessibilityManager,
                 pulsingGestureListener = kosmos.pulsingGestureListener,
+                faceAuthInteractor = kosmos.deviceEntryFaceAuthInteractor,
             )
         underTest =
             KeyguardBottomAreaViewModel(

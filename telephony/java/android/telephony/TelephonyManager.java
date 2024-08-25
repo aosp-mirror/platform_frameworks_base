@@ -1777,8 +1777,8 @@ public class TelephonyManager {
 
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
-     * to indicate user to decide whether current SIM should be preferred for all
-     * data / voice / sms. {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
+     * to indicate the current SIM should be preferred for all data / voice / sms.
+     * {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
      * which subscription should be the default subscription.
      * @hide
      */

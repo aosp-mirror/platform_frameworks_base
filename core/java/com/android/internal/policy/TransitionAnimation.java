@@ -49,7 +49,7 @@ import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Handler;
-import android.os.UserHandle;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.view.InflateException;
 import android.view.SurfaceControl;
@@ -187,44 +187,23 @@ public class TransitionAnimation {
         return createHiddenByKeyguardExit(mContext, mInterpolator, onWallpaper, toShade, subtle);
     }
 
-    /** Load keyguard unocclude animation for user. */
-    @Nullable
-    public Animation loadKeyguardUnoccludeAnimation(int userId) {
-        return loadDefaultAnimationRes(com.android.internal.R.anim.wallpaper_open_exit, userId);
-    }
-
-    /** Same as {@code loadKeyguardUnoccludeAnimation} for current user. */
     @Nullable
     public Animation loadKeyguardUnoccludeAnimation() {
-        return loadKeyguardUnoccludeAnimation(UserHandle.USER_CURRENT);
+        return loadDefaultAnimationRes(com.android.internal.R.anim.wallpaper_open_exit);
     }
 
-    /** Load voice activity open animation for user. */
-    @Nullable
-    public Animation loadVoiceActivityOpenAnimation(boolean enter, int userId) {
-        return loadDefaultAnimationRes(enter
-                ? com.android.internal.R.anim.voice_activity_open_enter
-                : com.android.internal.R.anim.voice_activity_open_exit, userId);
-    }
-
-    /** Same as {@code loadVoiceActivityOpenAnimation} for current user. */
     @Nullable
     public Animation loadVoiceActivityOpenAnimation(boolean enter) {
-        return loadVoiceActivityOpenAnimation(enter, UserHandle.USER_CURRENT);
-    }
-
-    /** Load voice activity exit animation for user. */
-    @Nullable
-    public Animation loadVoiceActivityExitAnimation(boolean enter, int userId) {
         return loadDefaultAnimationRes(enter
-                ? com.android.internal.R.anim.voice_activity_close_enter
-                : com.android.internal.R.anim.voice_activity_close_exit, userId);
+                ? com.android.internal.R.anim.voice_activity_open_enter
+                : com.android.internal.R.anim.voice_activity_open_exit);
     }
 
-    /** Same as {@code loadVoiceActivityExitAnimation} for current user. */
     @Nullable
     public Animation loadVoiceActivityExitAnimation(boolean enter) {
-        return loadVoiceActivityExitAnimation(enter, UserHandle.USER_CURRENT);
+        return loadDefaultAnimationRes(enter
+                ? com.android.internal.R.anim.voice_activity_close_enter
+                : com.android.internal.R.anim.voice_activity_close_exit);
     }
 
     @Nullable
@@ -232,17 +211,10 @@ public class TransitionAnimation {
         return loadAnimationRes(packageName, resId);
     }
 
-    /** Load cross profile app enter animation for user. */
-    @Nullable
-    public Animation loadCrossProfileAppEnterAnimation(int userId) {
-        return loadAnimationRes(DEFAULT_PACKAGE,
-                com.android.internal.R.anim.task_open_enter_cross_profile_apps, userId);
-    }
-
-    /** Same as {@code loadCrossProfileAppEnterAnimation} for current user. */
     @Nullable
     public Animation loadCrossProfileAppEnterAnimation() {
-        return loadCrossProfileAppEnterAnimation(UserHandle.USER_CURRENT);
+        return loadAnimationRes(DEFAULT_PACKAGE,
+                com.android.internal.R.anim.task_open_enter_cross_profile_apps);
     }
 
     @Nullable
@@ -258,11 +230,11 @@ public class TransitionAnimation {
                 appRect.height(), 0, null);
     }
 
-    /** Load animation by resource Id from specific package for user. */
+    /** Load animation by resource Id from specific package. */
     @Nullable
-    public Animation loadAnimationRes(String packageName, int resId, int userId) {
+    public Animation loadAnimationRes(String packageName, int resId) {
         if (ResourceId.isValid(resId)) {
-            AttributeCache.Entry ent = getCachedAnimations(packageName, resId, userId);
+            AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
             if (ent != null) {
                 return loadAnimationSafely(ent.context, resId, mTag);
             }
@@ -270,22 +242,10 @@ public class TransitionAnimation {
         return null;
     }
 
-    /** Same as {@code loadAnimationRes} for current user. */
-    @Nullable
-    public Animation loadAnimationRes(String packageName, int resId) {
-        return loadAnimationRes(packageName, resId, UserHandle.USER_CURRENT);
-    }
-
-    /** Load animation by resource Id from android package for user. */
-    @Nullable
-    public Animation loadDefaultAnimationRes(int resId, int userId) {
-        return loadAnimationRes(DEFAULT_PACKAGE, resId, userId);
-    }
-
-    /** Same as {@code loadDefaultAnimationRes} for current user. */
+    /** Load animation by resource Id from android package. */
     @Nullable
     public Animation loadDefaultAnimationRes(int resId) {
-        return loadAnimationRes(DEFAULT_PACKAGE, resId, UserHandle.USER_CURRENT);
+        return loadAnimationRes(DEFAULT_PACKAGE, resId);
     }
 
     /** Load animation by attribute Id from specific LayoutParams */
@@ -418,10 +378,10 @@ public class TransitionAnimation {
     }
 
     @Nullable
-    private AttributeCache.Entry getCachedAnimations(String packageName, int resId, int userId) {
+    private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
         if (mDebug) {
-            Slog.v(mTag, "Loading animations: package=" + packageName + " resId=0x"
-                    + Integer.toHexString(resId) + " for user=" + userId);
+            Slog.v(mTag, "Loading animations: package="
+                    + packageName + " resId=0x" + Integer.toHexString(resId));
         }
         if (packageName != null) {
             if ((resId & 0xFF000000) == 0x01000000) {
@@ -432,14 +392,9 @@ public class TransitionAnimation {
                         + packageName);
             }
             return AttributeCache.instance().get(packageName, resId,
-                    com.android.internal.R.styleable.WindowAnimation, userId);
+                    com.android.internal.R.styleable.WindowAnimation);
         }
         return null;
-    }
-
-    @Nullable
-    private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
-        return getCachedAnimations(packageName, resId, UserHandle.USER_CURRENT);
     }
 
     /** Returns window animation style ID from {@link LayoutParams} or from system in some cases */
