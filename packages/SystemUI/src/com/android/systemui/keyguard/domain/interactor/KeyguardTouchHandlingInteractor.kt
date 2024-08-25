@@ -27,6 +27,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -67,6 +68,7 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     private val accessibilityManager: AccessibilityManagerWrapper,
     private val pulsingGestureListener: PulsingGestureListener,
+    private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
 ) {
     /** Whether the long-press handling feature should be enabled. */
     val isLongPressHandlingEnabled: StateFlow<Boolean> =
@@ -129,7 +131,8 @@ constructor(
         }
     }
 
-    /** Notifies that the user has long-pressed on the lock screen.
+    /**
+     * Notifies that the user has long-pressed on the lock screen.
      *
      * @param isA11yAction: Whether the action was performed as an a11y action
      */
@@ -174,6 +177,7 @@ constructor(
     /** Notifies that the lockscreen has been clicked at position [x], [y]. */
     fun onClick(x: Float, y: Float) {
         pulsingGestureListener.onSingleTapUp(x, y)
+        faceAuthInteractor.onNotificationPanelClicked()
     }
 
     /** Notifies that the lockscreen has been double clicked. */
