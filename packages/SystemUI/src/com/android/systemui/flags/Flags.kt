@@ -337,10 +337,6 @@ object Flags {
     // TODO(b/278714186) Tracking Bug
     @JvmField
     val CLIPBOARD_IMAGE_TIMEOUT = unreleasedFlag("clipboard_image_timeout", teamfood = true)
-    // TODO(b/279405451): Tracking Bug
-    @JvmField
-    val CLIPBOARD_SHARED_TRANSITIONS =
-            unreleasedFlag("clipboard_shared_transitions", teamfood = true)
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")

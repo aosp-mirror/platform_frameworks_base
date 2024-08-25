@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.animation.scene.NestedScrollBehavior.DuringTransitionBetweenScenes
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeAlways
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeNoPreview
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeWithPreview
@@ -66,19 +65,19 @@ class DraggableHandlerTest {
         var layoutDirection = LayoutDirection.Rtl
             set(value) {
                 field = value
-                layoutImpl.updateScenes(scenesBuilder, layoutDirection)
+                layoutImpl.updateContents(scenesBuilder, layoutDirection)
             }
 
         var mutableUserActionsA = mapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
             set(value) {
                 field = value
-                layoutImpl.updateScenes(scenesBuilder, layoutDirection)
+                layoutImpl.updateContents(scenesBuilder, layoutDirection)
             }
 
         var mutableUserActionsB = mapOf(Swipe.Up to SceneC, Swipe.Down to SceneA)
             set(value) {
                 field = value
-                layoutImpl.updateScenes(scenesBuilder, layoutDirection)
+                layoutImpl.updateContents(scenesBuilder, layoutDirection)
             }
 
         private val scenesBuilder: SceneTransitionLayoutScope.() -> Unit = {
@@ -183,7 +182,7 @@ class DraggableHandlerTest {
             progress: Float? = null,
             isUserInputOngoing: Boolean? = null
         ): Transition {
-            val transition = assertThat(transitionState).isTransition()
+            val transition = assertThat(transitionState).isSceneTransition()
             currentScene?.let { assertThat(transition).hasCurrentScene(it) }
             fromScene?.let { assertThat(transition).hasFromScene(it) }
             toScene?.let { assertThat(transition).hasToScene(it) }
@@ -730,13 +729,6 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun flingAfterScroll_DuringTransitionBetweenScenes_doNothing() = runGestureTest {
-        flingAfterScroll(use = DuringTransitionBetweenScenes, idleAfterScroll = true)
-
-        assertIdle(currentScene = SceneA)
-    }
-
-    @Test
     fun flingAfterScroll_EdgeNoOverscroll_goToNextScene() = runGestureTest {
         flingAfterScroll(use = EdgeNoPreview, idleAfterScroll = false)
 
@@ -786,13 +778,6 @@ class DraggableHandlerTest {
         if (idleAfterScroll) assertIdle(SceneA) else assertTransition(SceneA)
 
         nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
-    }
-
-    @Test
-    fun flingAfterScrollStartedInScene_DuringTransitionBetweenScenes_doNothing() = runGestureTest {
-        flingAfterScrollStartedInScene(use = DuringTransitionBetweenScenes, idleAfterScroll = true)
-
-        assertIdle(currentScene = SceneA)
     }
 
     @Test
@@ -1090,7 +1075,7 @@ class DraggableHandlerTest {
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
 
         val dragController = onDragStarted(startedPosition = middle, overSlop = up(0.5f))
-        val transition = assertThat(transitionState).isTransition()
+        val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(0.5f)
@@ -1116,7 +1101,7 @@ class DraggableHandlerTest {
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
 
         val dragController = onDragStarted(startedPosition = middle, overSlop = down(0.5f))
-        val transition = assertThat(transitionState).isTransition()
+        val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneC)
         assertThat(transition).hasProgress(0.5f)
@@ -1142,7 +1127,7 @@ class DraggableHandlerTest {
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
 
         val dragController = onDragStarted(startedPosition = middle, overSlop = up(1.5f))
-        val transition = assertThat(transitionState).isTransition()
+        val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(1.5f)
@@ -1169,7 +1154,7 @@ class DraggableHandlerTest {
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
 
         val dragController = onDragStarted(startedPosition = middle, overSlop = down(1.5f))
-        val transition = assertThat(transitionState).isTransition()
+        val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneC)
         assertThat(transition).hasProgress(1.5f)
@@ -1197,7 +1182,7 @@ class DraggableHandlerTest {
 
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
         val dragController = onDragStarted(startedPosition = middle, overSlop = down(1f))
-        val transition = assertThat(transitionState).isTransition()
+        val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(-1f)
@@ -1225,7 +1210,7 @@ class DraggableHandlerTest {
 
         val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
         val dragController = onDragStarted(startedPosition = middle, overSlop = up(1f))
-        val transition = assertThat(transitionState).isTransition()
+        val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneC)
         assertThat(transition).hasProgress(-1f)
@@ -1282,12 +1267,12 @@ class DraggableHandlerTest {
     @Test
     fun interceptingTransitionReplacesCurrentTransition() = runGestureTest {
         val controller = onDragStarted(overSlop = up(fractionOfScreen = 0.5f))
-        val transition = assertThat(layoutState.transitionState).isTransition()
+        val transition = assertThat(layoutState.transitionState).isSceneTransition()
         controller.onDragStopped(velocity = 0f)
 
         // Intercept the transition.
         onDragStartedImmediately()
-        val newTransition = assertThat(layoutState.transitionState).isTransition()
+        val newTransition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(newTransition).isNotSameInstanceAs(transition)
         assertThat(newTransition.replacedTransition).isSameInstanceAs(transition)
     }

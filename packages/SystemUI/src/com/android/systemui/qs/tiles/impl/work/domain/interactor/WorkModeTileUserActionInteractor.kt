@@ -49,6 +49,7 @@ constructor(
                         )
                     }
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

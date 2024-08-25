@@ -867,8 +867,8 @@ public class TaskTests extends WindowTestsBase {
         // Without limiting to be inside the parent bounds, the out screen size should keep relative
         // to the input bounds.
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
-        final ActivityRecord.CompatDisplayInsets compatInsets =
-                new ActivityRecord.CompatDisplayInsets(
+        final AppCompatDisplayInsets compatInsets =
+                new AppCompatDisplayInsets(
                         display, activity, /* letterboxedContainerBounds */ null,
                         /* useOverrideInsets */ false);
         final TaskFragment.ConfigOverrideHint overrideHint = new TaskFragment.ConfigOverrideHint();

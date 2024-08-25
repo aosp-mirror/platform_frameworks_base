@@ -613,7 +613,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.mDisplayContent.shouldImeAttachedToApp());
 
         // Recompute the natural configuration without resolving size compat configuration.
-        mActivity.clearSizeCompatMode();
+        mActivity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         mActivity.onConfigurationChanged(mTask.getConfiguration());
         // It should keep non-attachable because the resolved bounds will be computed according to
         // the aspect ratio that won't match its parent bounds.
@@ -706,7 +706,7 @@ public class SizeCompatTests extends WindowTestsBase {
                         / originalBounds.width()));
 
         // Recompute the natural configuration in the new display.
-        mActivity.clearSizeCompatMode();
+        mActivity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         mActivity.ensureActivityConfiguration();
         // Because the display cannot rotate, the portrait activity will fit the short side of
         // display with keeping portrait bounds [200, 0 - 700, 1000] in center.
@@ -957,12 +957,12 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        assertTrue(activity.shouldCreateCompatDisplayInsets());
+        assertTrue(activity.shouldCreateAppCompatDisplayInsets());
 
         // The non-resizable activity should not be size compat because it is on a resizable task
         // in multi-window mode.
         mTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
         // Activity should not be sandboxed.
         assertMaxBoundsInheritDisplayAreaBounds();
 
@@ -971,7 +971,7 @@ public class SizeCompatTests extends WindowTestsBase {
         mTask.mDisplayContent.getDefaultTaskDisplayArea()
                 .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
         mTask.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
         // Activity should not be sandboxed.
         assertMaxBoundsInheritDisplayAreaBounds();
     }
@@ -986,7 +986,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */true,
                 RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -999,7 +999,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
                 RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertTrue(activity.shouldCreateCompatDisplayInsets());
+        assertTrue(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1012,7 +1012,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
                 RESIZE_MODE_RESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1026,7 +1026,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
                 RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1040,7 +1040,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
                 RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1054,7 +1054,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */true,
                 RESIZE_MODE_RESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertTrue(activity.shouldCreateCompatDisplayInsets());
+        assertTrue(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1068,7 +1068,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */true,
                 RESIZE_MODE_RESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        assertTrue(activity.shouldCreateCompatDisplayInsets());
+        assertTrue(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1090,7 +1090,7 @@ public class SizeCompatTests extends WindowTestsBase {
         doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
                 .when(activity.mAppCompatController.getAppCompatAspectRatioOverrides())
                 .getUserMinAspectRatioOverrideCode();
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1110,7 +1110,7 @@ public class SizeCompatTests extends WindowTestsBase {
         doReturn(true).when(
                 activity.mAppCompatController.getAppCompatAspectRatioOverrides())
                     .isSystemOverrideToFullscreenEnabled();
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
 
     @Test
@@ -1482,7 +1482,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // After changing the orientation to portrait the override should be applied.
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
 
         // The per-package override forces the activity into a 3:2 aspect ratio
         assertEquals(1200, activity.getBounds().height());
@@ -1511,7 +1511,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // After changing the orientation to portrait the override should be applied.
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
 
         // The per-package override forces the activity into a 3:2 aspect ratio
         assertEquals(1200, activity.getBounds().height());
@@ -1538,7 +1538,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // After changing the orientation to landscape the override shouldn't be applied.
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
 
         // The per-package override should have no effect
         assertEquals(1200, activity.getBounds().height());
@@ -3054,7 +3054,10 @@ public class SizeCompatTests extends WindowTestsBase {
                 false /* deferPause */);
 
         // App still in size compat, and the bounds don't change.
-        verify(mActivity, never()).clearSizeCompatMode();
+        final AppCompatSizeCompatModePolicy scmPolicy = mActivity.mAppCompatController
+                .getAppCompatSizeCompatModePolicy();
+        spyOn(scmPolicy);
+        verify(scmPolicy, never()).clearSizeCompatMode();
         assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
         assertDownScaled();
@@ -3256,7 +3259,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Activity max bounds are sandboxed since app may enter size compat mode.
         assertActivityMaxBoundsSandboxed();
         assertFalse(mActivity.inSizeCompatMode());
-        assertTrue(mActivity.shouldCreateCompatDisplayInsets());
+        assertTrue(mActivity.shouldCreateAppCompatDisplayInsets());
 
         // Resize display to half the width.
         resizeDisplay(mActivity.getDisplayContent(), 500, 1000);
@@ -3896,7 +3899,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
     private void recomputeNaturalConfigurationOfUnresizableActivity() {
         // Recompute the natural configuration of the non-resizable activity and the split screen.
-        mActivity.clearSizeCompatMode();
+        mActivity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
 
         // Draw letterbox.
         mActivity.setVisible(false);
@@ -4102,8 +4105,8 @@ public class SizeCompatTests extends WindowTestsBase {
         // To force config to update again but with the same landscape orientation.
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
-        assertTrue(activity.shouldCreateCompatDisplayInsets());
-        assertNotNull(activity.getCompatDisplayInsets());
+        assertTrue(activity.shouldCreateAppCompatDisplayInsets());
+        assertNotNull(activity.getAppCompatDisplayInsets());
         // Activity is not letterboxed for fixed orientation because orientation is respected
         // with insets, and should not be in size compat mode
         assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
@@ -4827,7 +4830,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(origDensity, mActivity.getConfiguration().densityDpi);
 
         // Activity should exit size compat with new density.
-        mActivity.clearSizeCompatMode();
+        mActivity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
 
         assertFitted();
         assertEquals(newDensity, mActivity.getConfiguration().densityDpi);
@@ -5013,7 +5016,7 @@ public class SizeCompatTests extends WindowTestsBase {
             activity.setRequestedOrientation(screenOrientation);
         }
         // Make sure to use the provided configuration to construct the size compat fields.
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         // Make sure the display configuration reflects the change of activity.
         if (activity.mDisplayContent.updateOrientation()) {

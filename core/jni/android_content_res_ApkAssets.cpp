@@ -428,7 +428,7 @@ static jlong NativeGetStringBlock(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) 
     return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
 }
 
-static jboolean NativeIsUpToDate(jlong ptr) {
+static jboolean NativeIsUpToDate(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
     auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
     auto apk_assets = scoped_apk_assets->get();
     return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;

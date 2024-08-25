@@ -1415,8 +1415,13 @@ final class InstallPackageHelper {
                                                 + " an sdk library <"
                                                 + parsedPackage.getSdkLibraryName() + ">"
                                                 + " without changing the versionMajor, but the"
-                                                + " targetSdkVersion or minSdkVersion has changed."
-                                );
+                                                + " targetSdkVersion or minSdkVersion has changed:"
+                                                + " Old targetSdkVersion: " + oldTargetSdk
+                                                + " new targetSdkVersion: " + newTargetSdk
+                                                + " Old minSdkVersion: " + oldMinSdk
+                                                + " new minSdkVersion: " + newMinSdk
+                                                + " versionMajor: " + newVersionMajor
+                                    );
                             }
                         }
                     }
@@ -2231,8 +2236,9 @@ final class InstallPackageHelper {
                 //  by apexd to be more accurate.
                 installRequest.setScannedPackageSettingFirstInstallTimeFromReplaced(
                         deletedPkgSetting, allUsers);
-                installRequest.setScannedPackageSettingLastUpdateTime(
-                        System.currentTimeMillis());
+                long currentTime = System.currentTimeMillis();
+                installRequest.setScannedPackageSettingLastUpdateTime(currentTime);
+                installRequest.setScannedPackageSettingFirstInstallTime(currentTime);
 
                 installRequest.getRemovedInfo().mBroadcastAllowList =
                         mPm.mAppsFilter.getVisibilityAllowList(mPm.snapshotComputer(),

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.app.AutomaticZenRule
 import android.app.NotificationManager.Policy
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION
@@ -216,5 +217,36 @@ class ZenModeInteractorTest : SysuiTestCase() {
             underTest.activateMode(manualDnd)
             assertThat(zenModeRepository.getModeActiveDuration(manualDnd.id))
                 .isEqualTo(Duration.ofMinutes(60))
+        }
+
+    @Test
+    fun mainActiveMode_returnsMainActiveMode() =
+        testScope.runTest {
+            val mainActiveMode by collectLastValue(underTest.mainActiveMode)
+
+            zenModeRepository.addMode(id = "Bedtime", type = AutomaticZenRule.TYPE_BEDTIME)
+            zenModeRepository.addMode(id = "Other", type = AutomaticZenRule.TYPE_OTHER)
+
+            runCurrent()
+            assertThat(mainActiveMode).isNull()
+
+            zenModeRepository.activateMode("Other")
+            runCurrent()
+            assertThat(mainActiveMode).isNotNull()
+            assertThat(mainActiveMode!!.id).isEqualTo("Other")
+
+            zenModeRepository.activateMode("Bedtime")
+            runCurrent()
+            assertThat(mainActiveMode).isNotNull()
+            assertThat(mainActiveMode!!.id).isEqualTo("Bedtime")
+
+            zenModeRepository.deactivateMode("Other")
+            runCurrent()
+            assertThat(mainActiveMode).isNotNull()
+            assertThat(mainActiveMode!!.id).isEqualTo("Bedtime")
+
+            zenModeRepository.deactivateMode("Bedtime")
+            runCurrent()
+            assertThat(mainActiveMode).isNull()
         }
 }

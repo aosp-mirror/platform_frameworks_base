@@ -20,6 +20,8 @@ import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
+import android.platform.test.flag.junit.RavenwoodFlagsValueProvider
+import android.platform.test.ravenwood.RavenwoodRule
 import android.util.SparseArray
 import androidx.core.util.forEach
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,15 +29,14 @@ import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.random.Random.Default.nextFloat
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
-import kotlin.math.ceil
-import kotlin.math.floor
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.IllegalStateException
-import kotlin.random.Random.Default.nextFloat
 
 /**
  * Unit tests for FontScaleConverterFactory. Note that some similar tests are in
@@ -46,7 +47,15 @@ import kotlin.random.Random.Default.nextFloat
 class FontScaleConverterFactoryTest {
 
     @get:Rule
-    val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+    val ravenwoodRule: RavenwoodRule = RavenwoodRule.Builder().build()
+
+    @get:Rule
+    val checkFlagsRule: CheckFlagsRule =
+        if (RavenwoodRule.isOnRavenwood()) {
+            RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
+        } else {
+            DeviceFlagsValueProvider.createCheckFlagsRule()
+        }
 
     private var defaultLookupTables: SparseArray<FontScaleConverter>? = null
 

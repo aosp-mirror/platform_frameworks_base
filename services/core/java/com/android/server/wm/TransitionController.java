@@ -52,8 +52,8 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.FgThread;
 import com.android.window.flags.Flags;
 

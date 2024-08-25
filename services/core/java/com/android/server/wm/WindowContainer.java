@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -2997,12 +2998,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Make sure display isn't a part of the transition already - needed for legacy transitions.
         if (mDisplayContent.inTransition()) return false;
 
-        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
-            // Screenshots are turned off when PiP is undergoing changes.
-            return !inPinnedWindowingMode() && getParent() != null
-                    && !getParent().inPinnedWindowingMode();
-        }
-        return true;
+        // Screenshots are turned off when PiP is undergoing changes.
+        return ActivityTaskManagerService.isPip2ExperimentEnabled() || !isPipChange();
+    }
+
+    /** Returns true if WC is pinned and undergoing changes. */
+    private boolean isPipChange() {
+        final boolean isExitingPip = this.asTaskFragment() != null
+                && mTransitionController.getWindowingModeAtStart(this) == WINDOWING_MODE_PINNED
+                && !inPinnedWindowingMode();
+
+        return isExitingPip || inPinnedWindowingMode()
+                || (getParent() != null && getParent().inPinnedWindowingMode());
     }
 
     /**

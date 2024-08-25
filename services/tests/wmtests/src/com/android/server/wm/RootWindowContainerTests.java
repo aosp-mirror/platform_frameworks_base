@@ -224,6 +224,22 @@ public class RootWindowContainerTests extends WindowTestsBase {
         activity1.idle = false;
         activity1.setVisibleRequested(false);
         assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(activity2.getTask()).build();
+        final ActivityRecord activity3 = new ActivityBuilder(mAtm).build();
+        taskFragment.addChild(activity3);
+        taskFragment.setVisibleRequested(true);
+        activity3.setState(RESUMED, "test");
+        activity3.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        activity3.idle = false;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity2.idle = false;
+        activity3.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
     }
 
     @Test

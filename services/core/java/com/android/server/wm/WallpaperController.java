@@ -59,7 +59,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -173,8 +172,8 @@ class WallpaperController {
                 && animatingContainer.getAnimation() != null
                 && animatingContainer.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = w.hasWallpaper() || animationWallpaper;
-        if (isRecentsTransitionTarget(w) || isBackNavigationTarget(w)) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
+        if (isBackNavigationTarget(w)) {
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found back animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             return true;
         } else if (hasWallpaper
@@ -199,15 +198,6 @@ class WallpaperController {
         }
         return false;
     };
-
-    private boolean isRecentsTransitionTarget(WindowState w) {
-        if (w.mTransitionController.isShellTransitionsEnabled()) {
-            return false;
-        }
-        // The window is either the recents activity or is in the task animating by the recents.
-        final RecentsAnimationController controller = mService.getRecentsAnimationController();
-        return controller != null && controller.isWallpaperVisible(w);
-    }
 
     private boolean isBackNavigationTarget(WindowState w) {
         // The window is in animating by back navigation and set to show wallpaper.
@@ -759,7 +749,7 @@ class WallpaperController {
 
     void collectTopWallpapers(Transition transition) {
         if (mFindResults.hasTopShowWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
@@ -767,7 +757,7 @@ class WallpaperController {
 
         }
         if (mFindResults.hasTopHideWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
@@ -927,12 +917,6 @@ class WallpaperController {
             mWallpaperDrawState = WALLPAPER_DRAW_TIMEOUT;
             if (DEBUG_WALLPAPER) {
                 Slog.v(TAG, "*** WALLPAPER DRAW TIMEOUT");
-            }
-
-            // If there was a pending recents animation, start the animation anyways (it's better
-            // to not see the wallpaper than for the animation to not start)
-            if (mService.getRecentsAnimationController() != null) {
-                mService.getRecentsAnimationController().startAnimation();
             }
 
             // If there was a pending back navigation animation that would show wallpaper, start

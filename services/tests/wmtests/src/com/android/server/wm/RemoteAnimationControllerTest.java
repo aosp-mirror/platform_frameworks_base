@@ -728,25 +728,6 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         }
     }
 
-    @Test
-    public void testNonAppTarget_notSendNavBar_controlledByRecents() throws Exception {
-        final RecentsAnimationController mockController =
-                mock(RecentsAnimationController.class);
-        doReturn(mockController).when(mWm).getRecentsAnimationController();
-        final int transit = TRANSIT_OLD_TASK_OPEN;
-        setupForNonAppTargetNavBar(transit, true);
-
-        final ArgumentCaptor<RemoteAnimationTarget[]> nonAppsCaptor =
-                ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
-        verify(mMockRunner).onAnimationStart(eq(transit),
-                any(), any(), nonAppsCaptor.capture(), any());
-        for (int i = 0; i < nonAppsCaptor.getValue().length; i++) {
-            if (nonAppsCaptor.getValue()[0].windowType == TYPE_NAVIGATION_BAR) {
-                fail("Non-app animation target must not contain navbar");
-            }
-        }
-    }
-
     @android.platform.test.annotations.RequiresFlagsDisabled(
             com.android.window.flags.Flags.FLAG_DO_NOT_SKIP_IME_BY_TARGET_VISIBILITY)
     @SetupWindows(addWindows = W_INPUT_METHOD)

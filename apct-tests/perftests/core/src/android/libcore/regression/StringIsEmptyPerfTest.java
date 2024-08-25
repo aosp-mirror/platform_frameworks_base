@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,12 +29,12 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class StringIsEmptyPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeIsEmpty_NonEmpty() {
         boolean result = true;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result &= !("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".isEmpty());
         }
@@ -44,7 +44,7 @@ public class StringIsEmptyPerfTest {
     @Test
     public void timeIsEmpty_Empty() {
         boolean result = true;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result &= ("".isEmpty());
         }
@@ -54,7 +54,7 @@ public class StringIsEmptyPerfTest {
     @Test
     public void timeLengthEqualsZero() {
         boolean result = true;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result &= !("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".length() == 0);
         }
@@ -64,7 +64,7 @@ public class StringIsEmptyPerfTest {
     @Test
     public void timeEqualsEmpty() {
         boolean result = true;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result &= !"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".equals("");
         }

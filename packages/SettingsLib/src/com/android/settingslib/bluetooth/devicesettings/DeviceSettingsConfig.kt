@@ -31,7 +31,6 @@ import android.os.Parcelable
 data class DeviceSettingsConfig(
     val mainContentItems: List<DeviceSettingItem>,
     val moreSettingsItems: List<DeviceSettingItem>,
-    val moreSettingsFooter: String,
     val extras: Bundle = Bundle.EMPTY,
 ) : Parcelable {
 
@@ -41,7 +40,6 @@ data class DeviceSettingsConfig(
         parcel.run {
             writeTypedList(mainContentItems)
             writeTypedList(moreSettingsItems)
-            writeString(moreSettingsFooter)
             writeBundle(extras)
         }
     }
@@ -61,7 +59,6 @@ data class DeviceSettingsConfig(
                                 arrayListOf<DeviceSettingItem>().also {
                                     readTypedList(it, DeviceSettingItem.CREATOR)
                                 },
-                            moreSettingsFooter = readString()!!,
                             extras = readBundle((Bundle::class.java.classLoader))!!,
                         )
                     }

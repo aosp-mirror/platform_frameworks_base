@@ -2,12 +2,7 @@
     "presubmit": [
         // Unit tests
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.compat"
-                }
-            ]
+            "name": "FrameworksServicesTests_android_server_compat"
         },
         // Tests for the TestRule
         {

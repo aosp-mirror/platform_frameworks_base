@@ -297,3 +297,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "typeface_redesign"
+  namespace: "text"
+  description: "Decouple variation settings, weight and style information from Typeface class"
+  bug: "361260253"
+}

@@ -22,12 +22,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.loader.ResourcesLoader;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.text.TextUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 /** @hide */
+@RavenwoodKeepWholeClass
 public final class ResourcesKey {
     @Nullable
     @UnsupportedAppUsage

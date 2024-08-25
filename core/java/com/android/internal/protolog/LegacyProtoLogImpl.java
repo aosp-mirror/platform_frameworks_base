@@ -29,6 +29,7 @@ import static com.android.internal.protolog.ProtoLogMessage.MESSAGE_HASH;
 import static com.android.internal.protolog.ProtoLogMessage.SINT64_PARAMS;
 import static com.android.internal.protolog.ProtoLogMessage.STR_PARAMS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ShellCommand;
 import android.os.SystemClock;
@@ -49,6 +50,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -417,6 +419,12 @@ public class LegacyProtoLogImpl implements IProtoLog {
         // In legacy logging we just enable an entire group at a time without more granular control,
         // so we ignore the level argument to this function.
         return group.isLogToLogcat() || (group.isLogToProto() && isProtoEnabled());
+    }
+
+    @Override
+    @NonNull
+    public List<IProtoLogGroup> getRegisteredGroups() {
+        return mLogGroups.values().stream().toList();
     }
 
     public void registerGroups(IProtoLogGroup... protoLogGroups) {

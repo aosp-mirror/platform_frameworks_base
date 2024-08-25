@@ -21,7 +21,14 @@ import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.ExecuteAppFunctionRequest;
 
 
- /** {@hide} */
+/**
+ * Defines the interface for the system server to request the execution of an app function within
+ * the app process.
+ *
+ * This interface is implemented by the app and exposed to the system server via a {@code Service}.
+ *
+ * @hide
+ */
 oneway interface IAppFunctionService {
     /**
      * Called by the system to execute a specific app function.

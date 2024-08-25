@@ -174,8 +174,7 @@ class AggregatedPowerStats {
 
     void start(long timestampMs) {
         for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats component = mPowerComponentStats.valueAt(i);
-            component.getConfig().getProcessor().start(component, timestampMs);
+            mPowerComponentStats.valueAt(i).start(timestampMs);
         }
     }
 
@@ -211,24 +210,23 @@ class AggregatedPowerStats {
             stats = new PowerComponentAggregatedPowerStats(this, powerComponent);
             stats.setPowerStatsDescriptor(powerStats.descriptor);
             stats.copyStatesFrom(mGenericPowerComponent);
+            stats.start(time);
             mPowerComponentStats.put(powerComponentId, stats);
         }
 
-        PowerStatsProcessor processor = stats.getConfig().getProcessor();
-        processor.addPowerStats(stats, powerStats, time);
+        stats.addPowerStats(powerStats, time);
     }
 
     public void noteStateChange(BatteryStats.HistoryItem item) {
         for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats stats = mPowerComponentStats.valueAt(i);
-            stats.getConfig().getProcessor().noteStateChange(stats, item);
+            mPowerComponentStats.valueAt(i).noteStateChange(item);
         }
     }
 
     void finish(long timestampMs) {
         for (int i = 0; i < mPowerComponentStats.size(); i++) {
             PowerComponentAggregatedPowerStats component = mPowerComponentStats.valueAt(i);
-            component.getConfig().getProcessor().finish(component, timestampMs);
+            component.finish(timestampMs);
         }
     }
 

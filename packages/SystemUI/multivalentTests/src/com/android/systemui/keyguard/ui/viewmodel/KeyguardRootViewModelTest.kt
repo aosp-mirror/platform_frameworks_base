@@ -360,6 +360,25 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         }
 
     @Test
+    fun alpha_transitionBetweenHubAndDream_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+
+            // Default value check
+            assertThat(alpha).isEqualTo(1f)
+
+            // Start transitioning between DREAM and HUB but don't finish.
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+                throughTransitionState = TransitionState.STARTED,
+            )
+
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
     @EnableSceneContainer
     fun alpha_transitionToHub_isZero_scene_container() =
         testScope.runTest {
@@ -482,6 +501,45 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
             shadeTestUtil.setQsExpansion(0.5f)
             // Alpha should remain unchanged instead of fading out
             assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
+    @DisableSceneContainer
+    fun alphaFromShadeExpansion_doesNotEmitWhenLockscreenToDreamTransitionRunning() =
+        testScope.runTest {
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            val alpha by collectLastValue(underTest.alpha(viewState))
+            shadeTestUtil.setQsExpansion(0f)
+
+            assertThat(alpha).isEqualTo(1f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.DREAMING,
+                        transitionState = TransitionState.STARTED,
+                        value = 0f,
+                    ),
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.DREAMING,
+                        transitionState = TransitionState.RUNNING,
+                        value = 0.1f,
+                    ),
+                ),
+                testScope,
+            )
+
+            val alphaBeforeExpansion = alpha
+            shadeTestUtil.setQsExpansion(0.5f)
+            // Alpha should remain unchanged instead of being affected by expansion.
+            assertThat(alpha).isEqualTo(alphaBeforeExpansion)
         }
 
     @Test

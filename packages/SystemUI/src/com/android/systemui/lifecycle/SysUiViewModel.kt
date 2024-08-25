@@ -18,12 +18,57 @@ package com.android.systemui.lifecycle
 
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.StateFactoryMarker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /** Base class for all System UI view-models. */
 abstract class SysUiViewModel : BaseActivatable() {
+
+    /**
+     * Returns a snapshot [State] that's kept up-to-date as long as the [SysUiViewModel] is active.
+     *
+     * @param source The upstream [StateFlow] to collect from; values emitted to it will be
+     *   automatically set on the returned [State].
+     */
+    @StateFactoryMarker
+    fun <T> hydratedStateOf(
+        source: StateFlow<T>,
+    ): State<T> {
+        return hydratedStateOf(
+            initialValue = source.value,
+            source = source,
+        )
+    }
+
+    /**
+     * Returns a snapshot [State] that's kept up-to-date as long as the [SysUiViewModel] is active.
+     *
+     * @param initialValue The first value to place on the [State]
+     * @param source The upstream [Flow] to collect from; values emitted to it will be automatically
+     *   set on the returned [State].
+     */
+    @StateFactoryMarker
+    fun <T> hydratedStateOf(
+        initialValue: T,
+        source: Flow<T>,
+    ): State<T> {
+        val mutableState = mutableStateOf(initialValue)
+        addChild(
+            object : BaseActivatable() {
+                override suspend fun onActivated(): Nothing {
+                    source.collect { mutableState.value = it }
+                    awaitCancellation()
+                }
+            }
+        )
+        return mutableState
+    }
 
     override suspend fun onActivated(): Nothing {
         awaitCancellation()

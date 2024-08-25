@@ -306,6 +306,12 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 || group.isLogToLogcat();
     }
 
+    @Override
+    @NonNull
+    public List<IProtoLogGroup> getRegisteredGroups() {
+        return mLogGroups.values().stream().toList();
+    }
+
     private void registerGroupsLocally(@NonNull IProtoLogGroup[] protoLogGroups) {
         final var groupsLoggingToLogcat = new ArrayList<String>();
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
@@ -431,15 +437,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
 
         Log.d(LOG_TAG, "Dumping viewer config to trace");
 
-        ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
-
-        if (pis == null) {
-            Slog.w(LOG_TAG, "Failed to get viewer input stream.");
-            return;
-        }
-
         mDataSource.trace(ctx -> {
             try {
+                ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
+
                 final ProtoOutputStream os = ctx.newTracePacket();
 
                 os.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());

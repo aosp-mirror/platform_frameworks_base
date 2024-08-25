@@ -1076,16 +1076,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void interceptPowerKeyUp(KeyEvent event, boolean canceled) {
         // Inform the StatusBar; but do not allow it to consume the event.
         sendSystemKeyToStatusBarAsync(event);
-
-        final boolean handled = canceled || mPowerKeyHandled;
-
-        if (!handled) {
-            if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) == 0) {
-                // Abort possibly stuck animations only when power key up without long press case.
-                mHandler.post(mWindowManagerFuncs::triggerAnimationFailsafe);
-            }
-        }
-
         finishPowerKeyPress();
     }
 
@@ -3422,7 +3412,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return handleHomeShortcuts(focusedToken, event);
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (firstDown) {
-                    toggleRecentApps();
+                    showRecentApps(false /* triggeredFromAltTab */);
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS);
                 }

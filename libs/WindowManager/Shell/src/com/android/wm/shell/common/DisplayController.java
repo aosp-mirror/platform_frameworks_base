@@ -211,7 +211,9 @@ public class DisplayController {
                     dr.mDisplayLayout.resizeTo(dr.mContext.getResources(),
                             new Size(endAbsBounds.width(), endAbsBounds.height()));
                 }
-                dr.mDisplayLayout.rotateTo(dr.mContext.getResources(), toRotation);
+                if (fromRotation != toRotation) {
+                    dr.mDisplayLayout.rotateTo(dr.mContext.getResources(), toRotation);
+                }
             }
 
             mChangeController.dispatchOnDisplayChange(

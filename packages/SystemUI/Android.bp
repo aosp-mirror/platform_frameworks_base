@@ -893,6 +893,7 @@ android_robolectric_test {
     ],
     static_libs: [
         "RoboTestLibraries",
+        "androidx.compose.runtime_runtime",
     ],
     libs: [
         "android.test.runner",
@@ -929,6 +930,7 @@ android_robolectric_test {
     ],
     static_libs: [
         "RoboTestLibraries",
+        "androidx.compose.runtime_runtime",
     ],
     libs: [
         "android.test.runner",

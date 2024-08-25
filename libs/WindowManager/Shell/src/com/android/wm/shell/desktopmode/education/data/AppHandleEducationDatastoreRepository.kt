@@ -22,12 +22,12 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
-import androidx.datastore.dataStore
 import androidx.datastore.dataStoreFile
 import com.android.framework.protobuf.InvalidProtocolBufferException
 import com.android.internal.annotations.VisibleForTesting
 import java.io.InputStream
 import java.io.OutputStream
+import java.time.Duration
 import kotlinx.coroutines.flow.first
 
 /**
@@ -57,6 +57,24 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
         Log.e(TAG, "Unable to read from datastore")
         WindowingEducationProto.getDefaultInstance()
       }
+
+  /**
+   * Updates [AppHandleEducation.appUsageStats] and
+   * [AppHandleEducation.appUsageStatsLastUpdateTimestampMillis] fields in datastore with
+   * [appUsageStats] and [appUsageStatsLastUpdateTimestamp].
+   */
+  suspend fun updateAppUsageStats(
+      appUsageStats: Map<String, Int>,
+      appUsageStatsLastUpdateTimestamp: Duration
+  ) {
+    val currentAppHandleProto = windowingEducationProto().appHandleEducation.toBuilder()
+    currentAppHandleProto
+        .putAllAppUsageStats(appUsageStats)
+        .setAppUsageStatsLastUpdateTimestampMillis(appUsageStatsLastUpdateTimestamp.toMillis())
+    dataStore.updateData { preferences: WindowingEducationProto ->
+      preferences.toBuilder().setAppHandleEducation(currentAppHandleProto).build()
+    }
+  }
 
   companion object {
     private const val TAG = "AppHandleEducationDatastoreRepository"

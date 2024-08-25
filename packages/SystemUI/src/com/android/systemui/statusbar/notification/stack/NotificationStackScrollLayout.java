@@ -1244,6 +1244,7 @@ public class NotificationStackScrollLayout
     @Override
     public void setHeadsUpTop(float headsUpTop) {
         mAmbientState.setHeadsUpTop(headsUpTop);
+        requestChildrenUpdate();
     }
 
     @Override
@@ -1487,7 +1488,14 @@ public class NotificationStackScrollLayout
 
     private float updateStackEndHeight() {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
-        float height = Math.max(0f, mAmbientState.getStackCutoff() - mAmbientState.getStackTop());
+        final float height;
+        if (mMaxDisplayedNotifications != -1) {
+            // The stack intrinsic height already contains the correct value when there is a limit
+            // in the max number of notifications (e.g. as in keyguard).
+            height = mIntrinsicContentHeight;
+        } else {
+            height = Math.max(0f, mAmbientState.getStackCutoff() - mAmbientState.getStackTop());
+        }
         mAmbientState.setStackEndHeight(height);
         return height;
     }
@@ -1556,6 +1564,12 @@ public class NotificationStackScrollLayout
         }
     }
 
+    @Override
+    public void setQsExpandFraction(float expandFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mAmbientState.setQsExpansionFraction(expandFraction);
+    }
+
     /**
      * Update the height of the panel.
      *
@@ -1591,7 +1605,7 @@ public class NotificationStackScrollLayout
             if (mShouldShowShelfOnly) {
                 stackHeight = getTopPadding() + mShelf.getIntrinsicHeight();
             } else if (mQsFullScreen) {
-                int stackStartPosition = mContentHeight - getTopPadding() + mIntrinsicPadding;
+                int stackStartPosition = mContentHeight - getTopPadding() + getIntrinsicPadding();
                 int stackEndPosition = mMaxTopPadding + mShelf.getIntrinsicHeight();
                 if (stackStartPosition <= stackEndPosition) {
                     stackHeight = stackEndPosition;
@@ -1721,6 +1735,19 @@ public class NotificationStackScrollLayout
         if (mTopHeadsUpRow == null) {
             return 0;
         }
+        ExpandableNotificationRow row = getTopHeadsUpRow();
+        return row.getPinnedHeadsUpHeight();
+    }
+
+    private int getTopHeadsUpIntrinsicHeight() {
+        if (mTopHeadsUpRow == null) {
+            return 0;
+        }
+        ExpandableNotificationRow row = getTopHeadsUpRow();
+        return row.getIntrinsicHeight();
+    }
+
+    private ExpandableNotificationRow getTopHeadsUpRow() {
         ExpandableNotificationRow row = mTopHeadsUpRow;
         if (row.isChildInGroup()) {
             final NotificationEntry groupSummary =
@@ -1729,7 +1756,7 @@ public class NotificationStackScrollLayout
                 row = groupSummary.getRow();
             }
         }
-        return row.getPinnedHeadsUpHeight();
+        return row;
     }
 
     /**
@@ -1763,7 +1790,7 @@ public class NotificationStackScrollLayout
         } else {
             appearPosition = mEmptyShadeView.getHeight();
         }
-        return appearPosition + (onKeyguard() ? getTopPadding() : mIntrinsicPadding);
+        return appearPosition + (onKeyguard() ? getTopPadding() : getIntrinsicPadding());
     }
 
     /**
@@ -1789,7 +1816,7 @@ public class NotificationStackScrollLayout
         } else {
             appearPosition = mEmptyShadeView.getHeight();
         }
-        return appearPosition + (onKeyguard() ? getTopPadding() : mIntrinsicPadding);
+        return appearPosition + (onKeyguard() ? getTopPadding() : getIntrinsicPadding());
     }
 
     private boolean isHeadsUpTransition() {
@@ -2492,9 +2519,9 @@ public class NotificationStackScrollLayout
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
         mContentHeight =
-                (int) (height + Math.max(mIntrinsicPadding, getTopPadding()) + mBottomPadding);
+                (int) (height + Math.max(getIntrinsicPadding(), getTopPadding()) + mBottomPadding);
         mScrollViewFields.setIntrinsicStackHeight(
-                (int) (mIntrinsicPadding + mIntrinsicContentHeight + footerIntrinsicHeight
+                (int) (getIntrinsicPadding() + mIntrinsicContentHeight + footerIntrinsicHeight
                         + mBottomPadding));
         updateScrollability();
         clampScrollPosition();
@@ -2511,7 +2538,12 @@ public class NotificationStackScrollLayout
 
     @Override
     public int getTopHeadsUpHeight() {
-        return getTopHeadsUpPinnedHeight();
+        return getTopHeadsUpIntrinsicHeight();
+    }
+
+    @Override
+    public int getHeadsUpInset() {
+        return mHeadsUpInset;
     }
 
     /**
@@ -4538,10 +4570,20 @@ public class NotificationStackScrollLayout
     }
 
     void setIntrinsicPadding(int intrinsicPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mIntrinsicPadding = intrinsicPadding;
     }
 
+    /**
+     * Distance from the top of the screen in, where notifications should start when fully expanded
+     * or in the LS.
+     *
+     * Always 0 with SceneContainer enabled.
+     */
     int getIntrinsicPadding() {
+        if (SceneContainerFlag.isEnabled()) {
+            return 0;
+        }
         return mIntrinsicPadding;
     }
 
@@ -5732,7 +5774,7 @@ public class NotificationStackScrollLayout
         return mDisallowScrollingInThisMotion;
     }
 
-    boolean isBeingDragged() {
+    public boolean isBeingDragged() {
         return mIsBeingDragged;
     }
 

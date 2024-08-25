@@ -23,6 +23,7 @@ import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
+import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.statusbar.connectivity.AccessPointController
@@ -36,6 +37,7 @@ class InternetTileUserActionInteractor
 constructor(
     @Main private val mainContext: CoroutineContext,
     private val internetDialogManager: InternetDialogManager,
+    private val wifiStateWorker: WifiStateWorker,
     private val accessPointController: AccessPointController,
     private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
 ) : QSTileUserActionInteractor<InternetTileModel> {
@@ -52,6 +54,11 @@ constructor(
                             action.expandable,
                         )
                     }
+                }
+                is QSTileUserAction.ToggleClick -> {
+                    // TODO(b/358352265): Figure out the correct action for the secondary click
+                    // Toggle Wifi
+                    wifiStateWorker.isWifiEnabled = !wifiStateWorker.isWifiEnabled
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(

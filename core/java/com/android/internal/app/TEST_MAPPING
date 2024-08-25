@@ -5,19 +5,7 @@
       "file_patterns": ["(/|^)SuspendedAppActivity\\.java"]
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-        "include-filter": "com.android.internal.app."
-        },
-        // Exclude currently failing tests from presubmit
-        {
-        "exclude-filter": "com.android.internal.app.IntentForwarderActivityTest"
-        },
-        {
-        "exclude-filter": "com.android.internal.app.WindowDecorActionBarTest"
-        }
-      ]
+      "name": "FrameworksCoreTests_internal_app"
     }
   ]
 }
