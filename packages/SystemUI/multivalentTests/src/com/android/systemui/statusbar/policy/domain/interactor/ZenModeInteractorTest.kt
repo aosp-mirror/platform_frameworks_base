@@ -220,33 +220,37 @@ class ZenModeInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun mainActiveMode_returnsMainActiveMode() =
+    fun activeModes_computesMainActiveMode() =
         testScope.runTest {
-            val mainActiveMode by collectLastValue(underTest.mainActiveMode)
+            val activeModes by collectLastValue(underTest.activeModes)
 
             zenModeRepository.addMode(id = "Bedtime", type = AutomaticZenRule.TYPE_BEDTIME)
             zenModeRepository.addMode(id = "Other", type = AutomaticZenRule.TYPE_OTHER)
 
             runCurrent()
-            assertThat(mainActiveMode).isNull()
+            assertThat(activeModes?.modeNames).hasSize(0)
+            assertThat(activeModes?.mainMode).isNull()
 
             zenModeRepository.activateMode("Other")
             runCurrent()
-            assertThat(mainActiveMode).isNotNull()
-            assertThat(mainActiveMode!!.id).isEqualTo("Other")
+            assertThat(activeModes?.modeNames).containsExactly("Mode Other")
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Other")
 
             zenModeRepository.activateMode("Bedtime")
             runCurrent()
-            assertThat(mainActiveMode).isNotNull()
-            assertThat(mainActiveMode!!.id).isEqualTo("Bedtime")
+            assertThat(activeModes?.modeNames)
+                .containsExactly("Mode Bedtime", "Mode Other")
+                .inOrder()
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Bedtime")
 
             zenModeRepository.deactivateMode("Other")
             runCurrent()
-            assertThat(mainActiveMode).isNotNull()
-            assertThat(mainActiveMode!!.id).isEqualTo("Bedtime")
+            assertThat(activeModes?.modeNames).containsExactly("Mode Bedtime")
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Bedtime")
 
             zenModeRepository.deactivateMode("Bedtime")
             runCurrent()
-            assertThat(mainActiveMode).isNull()
+            assertThat(activeModes?.modeNames).hasSize(0)
+            assertThat(activeModes?.mainMode).isNull()
         }
 }

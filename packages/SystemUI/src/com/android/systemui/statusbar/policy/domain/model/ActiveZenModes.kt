@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.impl.modes.domain.model
+package com.android.systemui.statusbar.policy.domain.model
 
-import com.android.systemui.common.shared.model.Icon
+import com.android.settingslib.notification.modes.ZenMode
 
-data class ModesTileModel(
-    val isActivated: Boolean,
-    val activeModes: List<String>,
-    val icon: Icon.Loaded,
-
-    /**
-     * Resource id corresponding to [icon]. Will only be present if it's know to correspond to a
-     * resource with a known id in SystemUI (such as resources from `android.R`,
-     * `com.android.internal.R`, or `com.android.systemui.res` itself).
-     */
-    val iconResId: Int? = null
-)
+/**
+ * Represents the list of [ZenMode] instances that are currently active.
+ *
+ * @property modeNames Names of all the active modes, sorted by their priority.
+ * @property mainMode The most prioritized active mode, if any modes active. Guaranteed to be
+ *   non-null if [modeNames] is not empty.
+ */
+data class ActiveZenModes(val modeNames: List<String>, val mainMode: ZenModeInfo?) {
+    fun isAnyActive(): Boolean = modeNames.isNotEmpty()
+}

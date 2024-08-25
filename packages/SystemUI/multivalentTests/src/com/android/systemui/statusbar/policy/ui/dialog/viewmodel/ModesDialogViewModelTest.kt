@@ -69,6 +69,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        // TODO: b/360399800 - Remove; ZenIconLoader should always use direct executor for tests
         ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
     }
 
