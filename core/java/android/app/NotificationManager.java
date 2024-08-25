@@ -393,7 +393,7 @@ public class NotificationManager {
      * changes.
      *
      * <p>This broadcast is only sent to registered receivers and receivers in packages that have
-     * been granted Do Not Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
+     * been granted Notification Policy access (see {@link #isNotificationPolicyAccessGranted()}).
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -1440,10 +1440,36 @@ public class NotificationManager {
      * Informs the notification manager that the state of an {@link AutomaticZenRule} has changed.
      * Use this method to put the system into Do Not Disturb mode or request that it exits Do Not
      * Disturb mode. The calling app must own the provided {@link android.app.AutomaticZenRule}.
-     * <p>
-     *     This method can be used in conjunction with or as a replacement to
-     *     {@link android.service.notification.ConditionProviderService#notifyCondition(Condition)}.
-     * </p>
+     *
+     * <p>This method can be used in conjunction with or as a replacement to
+     * {@link android.service.notification.ConditionProviderService#notifyCondition(Condition)}.
+     *
+     * <p>The condition change may be ignored if the user has activated or deactivated the rule
+     * manually -- the user can "override" the rule <em>this time</em>, with the rule resuming its
+     * normal operation for the next cycle. When this has happened, the supplied condition will be
+     * applied only once the automatic state is in agreement with the user-provided state. For
+     * example, assume that the {@link AutomaticZenRule} corresponds to a "Driving Mode" with
+     * automatic driving detection.
+     *
+     * <ol>
+     *     <li>App detects driving and notifies the system that the rule should be active, calling
+     *     this method with a {@link Condition} with {@link Condition#STATE_TRUE}).
+     *     <li>User deactivates ("snoozes") the rule for some reason. This overrides the
+     *     app-provided condition state.
+     *     <li>App is still detecting driving, so again calls with {@link Condition#STATE_TRUE}.
+     *     This is ignored by the system, as the user override prevails.
+     *     <li>Some time later, the app detects that driving stopped, so the rule should be
+     *     inactive, and calls with {@link Condition#STATE_FALSE}). This doesn't change the actual
+     *     rule state (it was already inactive due to the user's override), but clears the override.
+     *     <li>Some time later, the app detects that driving has started again, and notifies that
+     *     the rule should be active (calling with {@link Condition#STATE_TRUE} again). The rule is
+     *     activated.
+     * </ol>
+     *
+     * <p>Note that the behavior at step #3 is different if the app also specifies
+     * {@link Condition#SOURCE_USER_ACTION} as the {@link Condition#source} -- rule state updates
+     * coming from user actions are not ignored.
+     *
      * @param id The id of the rule whose state should change
      * @param condition The new state of this rule
      */
@@ -1627,7 +1653,7 @@ public class NotificationManager {
     }
 
     /**
-     * Checks the ability to modify notification do not disturb policy for the calling package.
+     * Checks the ability to modify Notification Policy for the calling package.
      *
      * <p>
      * Returns true if the calling package can modify notification policy.

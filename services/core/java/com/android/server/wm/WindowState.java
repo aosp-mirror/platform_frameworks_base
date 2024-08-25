@@ -1971,13 +1971,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * it must be drawn before allDrawn can become true.
      */
     boolean isInteresting() {
-        final RecentsAnimationController recentsAnimationController =
-                mWmService.getRecentsAnimationController();
         return mActivityRecord != null
                 && (!mActivityRecord.isFreezingScreen() || !mAppFreezing)
-                && mViewVisibility == View.VISIBLE
-                && (recentsAnimationController == null
-                         || recentsAnimationController.isInterestingForAllDrawn(this));
+                && mViewVisibility == View.VISIBLE;
     }
 
     /**
@@ -3002,7 +2998,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 resolvedConfig,
                 (mAttrs.privateFlags & PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE) != 0,
                 false /* hasFixedRotationTransform */,
-                false /* hasCompatDisplayInsets */);
+                false /* hasCompatDisplayInsets */,
+                null /* task */);
     }
 
     /**
@@ -5331,6 +5328,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyDims();
         }
         super.prepareSurfaces();
+    }
+
+    void updateSurfacePositionIfNeeded() {
+        if (mWindowFrames.mRelFrame.top == mWindowFrames.mLastRelFrame.top
+                && mWindowFrames.mRelFrame.left == mWindowFrames.mLastRelFrame.left) {
+            return;
+        }
+        updateSurfacePosition(getSyncTransaction());
     }
 
     @Override

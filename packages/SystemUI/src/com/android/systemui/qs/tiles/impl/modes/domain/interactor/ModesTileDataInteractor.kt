@@ -17,30 +17,28 @@
 package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import android.app.Flags
+import android.content.Context
 import android.os.UserHandle
-import com.android.settingslib.notification.data.repository.ZenModeRepository
+import com.android.app.tracing.coroutines.flow.map
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 
 class ModesTileDataInteractor
 @Inject
 constructor(
-    val zenModeRepository: ZenModeRepository,
+    val context: Context,
+    val zenModeInteractor: ZenModeInteractor,
     @Background val bgDispatcher: CoroutineDispatcher,
 ) : QSTileDataInteractor<ModesTileModel> {
-    private val activeModes =
-        zenModeRepository.modes
-            .map { modes -> modes.filter { mode -> mode.isActive }.map { it.name } }
-            .distinctUntilChanged()
 
     override fun tileData(
         user: UserHandle,
@@ -53,9 +51,19 @@ constructor(
      * TODO(b/299909989): Remove after the transition.
      */
     fun tileData() =
-        activeModes
-            .map { ModesTileModel(isActivated = it.isNotEmpty(), activeModes = it) }
+        zenModeInteractor.activeModes
+            .map { modes ->
+                ModesTileModel(
+                    isActivated = modes.isNotEmpty(),
+                    icon =
+                        if (Flags.modesApi() && Flags.modesUi() && Flags.modesUiIcons())
+                            zenModeInteractor.getActiveModeIcon(context, modes)
+                        else null,
+                    activeModes = modes.map { it.name }
+                )
+            }
             .flowOn(bgDispatcher)
+            .distinctUntilChanged()
 
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(Flags.modesUi())
 }

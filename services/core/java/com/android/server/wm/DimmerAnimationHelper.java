@@ -55,6 +55,10 @@ public class DimmerAnimationHelper {
 
         Change() {}
 
+        Change(@NonNull Change other) {
+            copyFrom(other);
+        }
+
         void copyFrom(@NonNull Change other) {
             mAlpha = other.mAlpha;
             mBlurRadius = other.mBlurRadius;
@@ -124,6 +128,9 @@ public class DimmerAnimationHelper {
      * {@link Change#setRequestedAppearance(float, int)}
      */
     void applyChanges(@NonNull SurfaceControl.Transaction t, @NonNull Dimmer.DimState dim) {
+        final Change startProperties = new Change(mCurrentProperties);
+        mCurrentProperties.copyFrom(mRequestedProperties);
+
         if (mRequestedProperties.mDimmingContainer == null) {
             Log.e(TAG, this + " does not have a dimming container. Have you forgotten to "
                     + "call adjustRelativeLayer?");
@@ -138,29 +145,26 @@ public class DimmerAnimationHelper {
 
         dim.ensureVisible(t);
         reparent(dim.mDimSurface,
-                mRequestedProperties.mGeometryParent != mCurrentProperties.mGeometryParent
+                startProperties.mGeometryParent != mRequestedProperties.mGeometryParent
                         ? mRequestedProperties.mGeometryParent.getSurfaceControl() : null,
                 mRequestedProperties.mDimmingContainer.getSurfaceControl(),
                 mRequestedProperties.mRelativeLayer, t);
 
-        if (!mCurrentProperties.hasSameVisualProperties(mRequestedProperties)) {
+        if (!startProperties.hasSameVisualProperties(mRequestedProperties)) {
             stopCurrentAnimation(dim.mDimSurface);
 
             if (dim.mSkipAnimation
                     // If the container doesn't change but requests a dim change, then it is
                     // directly providing us the animated values
-                    || (mRequestedProperties.hasSameDimmingContainer(mCurrentProperties)
+                    || (startProperties.hasSameDimmingContainer(mRequestedProperties)
                     && dim.isDimming())) {
                 ProtoLog.d(WM_DEBUG_DIMMER,
                         "%s skipping animation and directly setting alpha=%f, blur=%d",
-                        dim, mRequestedProperties.mAlpha,
+                        dim, startProperties.mAlpha,
                         mRequestedProperties.mBlurRadius);
-                mCurrentProperties.copyFrom(mRequestedProperties);
                 setCurrentAlphaBlur(dim.mDimSurface, t);
                 dim.mSkipAnimation = false;
             } else {
-                Change startProperties = mCurrentProperties;
-                mCurrentProperties.copyFrom(mRequestedProperties);
                 startAnimation(t, dim, startProperties, mRequestedProperties);
             }
         } else if (!dim.isDimming()) {

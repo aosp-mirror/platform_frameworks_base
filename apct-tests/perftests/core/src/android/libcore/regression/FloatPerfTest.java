@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class FloatPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private float mFloat = 1.2f;
     private int mInt = 1067030938;
@@ -37,7 +37,7 @@ public class FloatPerfTest {
     @Test
     public void timeFloatToIntBits() {
         int result = 123;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = Float.floatToIntBits(mFloat);
         }
@@ -49,7 +49,7 @@ public class FloatPerfTest {
     @Test
     public void timeFloatToRawIntBits() {
         int result = 123;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = Float.floatToRawIntBits(mFloat);
         }
@@ -61,7 +61,7 @@ public class FloatPerfTest {
     @Test
     public void timeIntBitsToFloat() {
         float result = 123.0f;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = Float.intBitsToFloat(mInt);
         }

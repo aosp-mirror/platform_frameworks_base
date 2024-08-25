@@ -16,6 +16,15 @@
 
 package com.android.companiondevicemanager;
 
+import static android.companion.CompanionDeviceManager.REASON_CANCELED;
+import static android.companion.CompanionDeviceManager.REASON_DISCOVERY_TIMEOUT;
+import static android.companion.CompanionDeviceManager.REASON_USER_REJECTED;
+import static android.companion.CompanionDeviceManager.RESULT_CANCELED;
+import static android.companion.CompanionDeviceManager.RESULT_DISCOVERY_TIMEOUT;
+import static android.companion.CompanionDeviceManager.RESULT_USER_REJECTED;
+
+import static java.util.Collections.unmodifiableMap;
+
 import android.annotation.NonNull;
 import android.annotation.StringRes;
 import android.content.Context;
@@ -31,6 +40,9 @@ import android.os.Parcel;
 import android.os.ResultReceiver;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.ArrayMap;
+
+import java.util.Map;
 
 /**
  * Utilities.
@@ -40,6 +52,17 @@ class Utils {
             "android.companion.vendor_icon";
     private static final String COMPANION_DEVICE_ACTIVITY_VENDOR_NAME =
             "android.companion.vendor_name";
+    // This map solely the common error messages that occur during the Association
+    // creation process.
+    static final Map<Integer, String> RESULT_CODE_TO_REASON;
+    static {
+        final Map<Integer, String> map = new ArrayMap<>();
+        map.put(RESULT_CANCELED, REASON_CANCELED);
+        map.put(RESULT_USER_REJECTED, REASON_USER_REJECTED);
+        map.put(RESULT_DISCOVERY_TIMEOUT, REASON_DISCOVERY_TIMEOUT);
+
+        RESULT_CODE_TO_REASON = unmodifiableMap(map);
+    }
 
     /**
      * Convert an instance of a "locally-defined" ResultReceiver to an instance of

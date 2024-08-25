@@ -240,6 +240,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             displayId, fromRotation, toRotation, newDisplayAreaInfo, t) -> {
+        if (fromRotation == toRotation) {
+            // OnDisplayChangingListener also gets triggered upon Display size changes;
+            // in PiP1, those are handled separately by OnDisplaysChangedListener callbacks.
+            return;
+        }
+
         if (mPipTransitionController.handleRotateDisplay(fromRotation, toRotation, t)) {
             return;
         }

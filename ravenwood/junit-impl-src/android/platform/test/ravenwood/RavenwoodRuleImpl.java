@@ -16,16 +16,23 @@
 
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
+
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityManager;
 import android.app.Instrumentation;
+import android.app.ResourcesManager;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -42,6 +49,8 @@ import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.Statement;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -55,6 +64,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class RavenwoodRuleImpl {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
@@ -89,7 +99,7 @@ public class RavenwoodRuleImpl {
                 sPendingUncaughtException.compareAndSet(null, throwable);
             };
 
-    public static void init(RavenwoodRule rule) {
+    public static void init(RavenwoodRule rule) throws IOException {
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(false);
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
@@ -119,7 +129,28 @@ public class RavenwoodRuleImpl {
             main = null;
         }
 
-        rule.mContext = new RavenwoodContext(rule.mPackageName, main);
+        // TODO This should be integrated into LoadedApk
+        final Supplier<Resources> resourcesSupplier = () -> {
+            final var resApkFile = new File(RAVENWOOD_RESOURCE_APK).getAbsoluteFile();
+            assertTrue(resApkFile.isFile());
+
+            final var res = resApkFile.getAbsolutePath();
+
+            final var emptyPaths = new String[0];
+
+            ResourcesManager.getInstance().initializeApplicationPaths(res, emptyPaths);
+
+            final var ret = ResourcesManager.getInstance().getResources(null, res,
+                    emptyPaths, emptyPaths, emptyPaths,
+                    emptyPaths, null, null,
+                    new DisplayAdjustments().getCompatibilityInfo(),
+                    RavenwoodRuleImpl.class.getClassLoader(), null);
+
+            assertNotNull(ret);
+            return ret;
+        };
+
+        rule.mContext = new RavenwoodContext(rule.mPackageName, main, resourcesSupplier);
         rule.mInstrumentation = new Instrumentation();
         rule.mInstrumentation.basicInit(rule.mContext);
         InstrumentationRegistry.registerInstance(rule.mInstrumentation, Bundle.EMPTY);
@@ -145,6 +176,9 @@ public class RavenwoodRuleImpl {
 
         InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
         rule.mInstrumentation = null;
+        if (rule.mContext != null) {
+            ((RavenwoodContext) rule.mContext).cleanUp();
+        }
         rule.mContext = null;
 
         if (rule.mProvideMainThread) {
@@ -160,6 +194,8 @@ public class RavenwoodRuleImpl {
         setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
         android.os.Binder.reset$ravenwood();
         android.os.Process.reset$ravenwood();
+
+        ResourcesManager.setInstance(null); // Better structure needed.
 
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(true);

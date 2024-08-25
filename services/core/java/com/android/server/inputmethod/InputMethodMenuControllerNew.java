@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.util.Slog;
@@ -115,7 +116,11 @@ final class InputMethodMenuControllerNew {
         final var selectedImi = selectedIndex >= 0 ? items.get(selectedIndex).mImi : null;
         final var languageSettingsIntent = selectedImi != null
                 ? selectedImi.createImeLanguageSettingsActivityIntent() : null;
-        final boolean hasLanguageSettingsButton = languageSettingsIntent != null;
+        final boolean isDeviceProvisioned = Settings.Global.getInt(
+                dialogWindowContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                0) != 0;
+        final boolean hasLanguageSettingsButton = languageSettingsIntent != null
+                && isDeviceProvisioned;
         if (hasLanguageSettingsButton) {
             final View buttonBar = contentView
                     .requireViewById(com.android.internal.R.id.button_bar);

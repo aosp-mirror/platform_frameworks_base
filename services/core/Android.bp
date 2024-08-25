@@ -233,6 +233,7 @@ java_library_static {
         "stats_flags_lib",
         "core_os_flags_lib",
         "connectivity_flags_lib",
+        "device_config_service_flags_java",
         "dreams_flags_lib",
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",

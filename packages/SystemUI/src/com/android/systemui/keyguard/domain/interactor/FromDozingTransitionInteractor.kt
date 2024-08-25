@@ -34,7 +34,6 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
@@ -155,12 +154,7 @@ constructor(
                         if (!SceneContainerFlag.isEnabled) {
                             startTransitionTo(KeyguardState.GLANCEABLE_HUB)
                         }
-                    } else if (
-                        powerInteractor.detailedWakefulness.value.lastWakeReason ==
-                            WakeSleepReason.POWER_BUTTON &&
-                            isCommunalAvailable &&
-                            dreamManager.canStartDreaming(true)
-                    ) {
+                    } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
                         // This case handles tapping the power button to transition through
                         // dream -> off -> hub.
                         if (!SceneContainerFlag.isEnabled) {
@@ -226,14 +220,7 @@ constructor(
                                     ownerReason = "waking from dozing"
                                 )
                             }
-                        } else if (
-                            powerInteractor.detailedWakefulness.value.lastWakeReason ==
-                                WakeSleepReason.POWER_BUTTON &&
-                                isCommunalAvailable &&
-                                dreamManager.canStartDreaming(true)
-                        ) {
-                            // This case handles tapping the power button to transition through
-                            // dream -> off -> hub.
+                        } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
                             if (!SceneContainerFlag.isEnabled) {
                                 transitionToGlanceableHub()
                             }

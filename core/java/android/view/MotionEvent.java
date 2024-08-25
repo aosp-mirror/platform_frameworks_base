@@ -128,7 +128,16 @@ import java.util.Objects;
  *             ev.getPointerId(p), ev.getX(p), ev.getY(p));
  *     }
  * }
- * </code></pre></p>
+ * </code></pre></p><p>
+ * Developers should keep in mind that it is especially important to consume all samples
+ * in a batched event when processing relative values that report changes since the last
+ * event or sample. Examples of such relative axes include {@link #AXIS_RELATIVE_X},
+ * {@link #AXIS_RELATIVE_Y}, and many of the axes prefixed with {@code AXIS_GESTURE_}.
+ * In these cases, developers should first consume all historical values using
+ * {@link #getHistoricalAxisValue(int, int)} and then consume the current values using
+ * {@link #getAxisValue(int)} like in the example above, as these relative values are
+ * not accumulated in a batched event.
+ * </p>
  *
  * <h3>Device Types</h3>
  * <p>
@@ -1117,6 +1126,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * the location but this axis reports the difference which allows the app to see
      * how the mouse is moved.
      * </ul>
+     * </p><p>
+     * These values are relative to the state from the last sample, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical samples.
      * </p>
      *
      * @see #getAxisValue(int, int)
@@ -1130,6 +1142,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Axis constant: The movement of y position of a motion event.
      * <p>
      * This is similar to {@link #AXIS_RELATIVE_X} but for y-axis.
+     * </p><p>
+     * These values are relative to the state from the last sample, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical samples.
      * </p>
      *
      * @see #getAxisValue(int, int)
@@ -1324,8 +1339,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * swipe gesture starts at X = 500 then moves to X = 400, this axis would have a value of
      * -0.1.
      * </ul>
-     * These values are relative to the state from the last event, not accumulated, so developers
-     * should make sure to process this axis value for all batched historical events.
+     * These values are relative to the state from the last sample, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical samples.
      * <p>
      * This axis is only set on the first pointer in a motion event.
      */
@@ -1345,8 +1360,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <li>For a touch pad, reports the distance that should be scrolled in the X axis as a result
      * of the user's two-finger scroll gesture, in display pixels.
      * </ul>
-     * These values are relative to the state from the last event, not accumulated, so developers
-     * should make sure to process this axis value for all batched historical events.
+     * These values are relative to the state from the last sample, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical samples.
      * <p>
      * This axis is only set on the first pointer in a motion event.
      */
@@ -1367,8 +1382,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * making a pinch gesture, as a proportion of the previous distance. For example, if the fingers
      * were 50 units apart and are now 52 units apart, the scale factor would be 1.04.
      * </ul>
-     * These values are relative to the state from the last event, not accumulated, so developers
-     * should make sure to process this axis value for all batched historical events.
+     * These values are relative to the state from the last sample, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical samples.
      * <p>
      * This axis is only set on the first pointer in a motion event.
      */

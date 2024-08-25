@@ -48,6 +48,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Build;
@@ -60,6 +62,7 @@ import android.telecom.TelecomManager;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -114,6 +117,12 @@ public class IntentForwarderActivity extends Activity  {
     protected void onDestroy() {
         super.onDestroy();
         mExecutorService.shutdown();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setMiniresolverPadding();
     }
 
     @Override
@@ -333,8 +342,7 @@ public class IntentForwarderActivity extends Activity  {
         icon.setImageDrawable(
                 getAppIcon(target, launchIntent, targetUserId, pmForTargetUser));
 
-        View buttonContainer = findViewById(R.id.button_bar_container);
-        buttonContainer.setPadding(0, 0, 0, buttonContainer.getPaddingBottom());
+        setMiniresolverPadding();
 
         ((TextView) findViewById(R.id.open_cross_profile)).setText(
                 resolverTitle);
@@ -673,6 +681,17 @@ public class IntentForwarderActivity extends Activity  {
         return android.os.Flags.allowPrivateProfile()
                 && android.multiuser.Flags.enablePrivateSpaceFeatures()
                 && android.multiuser.Flags.enablePrivateSpaceIntentRedirection();
+    }
+
+    private void setMiniresolverPadding() {
+        Insets systemWindowInsets =
+                getWindowManager().getCurrentWindowMetrics().getWindowInsets().getInsets(
+                        WindowInsets.Type.systemBars());
+
+        View buttonContainer = findViewById(R.id.button_bar_container);
+        buttonContainer.setPadding(0, 0, 0,
+                systemWindowInsets.bottom + getResources().getDimensionPixelOffset(
+                        R.dimen.resolver_button_bar_spacing));
     }
 
     @VisibleForTesting

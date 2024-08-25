@@ -98,16 +98,20 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
     // instead of VisualInterruptionDecisionProviderTestBase
     // because avalanche code is based on the suppression refactor.
 
+    private fun getAvalancheSuppressor() : AvalancheSuppressor {
+        return AvalancheSuppressor(
+            avalancheProvider, systemClock, settingsInteractor, packageManager,
+            uiEventLogger, context, notificationManager, logger
+        )
+    }
+
     @Test
     fun testAvalancheFilter_suppress_hasNotSeenEdu_showEduHun() {
         setAllowedEmergencyPkg(false)
         whenever(avalancheProvider.timeoutMs).thenReturn(20)
         whenever(avalancheProvider.startTime).thenReturn(whenAgo(10))
 
-        val avalancheSuppressor = AvalancheSuppressor(
-            avalancheProvider, systemClock, settingsInteractor, packageManager,
-            uiEventLogger, context, notificationManager
-        )
+        val avalancheSuppressor = getAvalancheSuppressor()
         avalancheSuppressor.hasSeenEdu = false
 
         withFilter(avalancheSuppressor) {
@@ -128,10 +132,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         whenever(avalancheProvider.timeoutMs).thenReturn(20)
         whenever(avalancheProvider.startTime).thenReturn(whenAgo(10))
 
-        val avalancheSuppressor = AvalancheSuppressor(
-            avalancheProvider, systemClock, settingsInteractor, packageManager,
-            uiEventLogger, context, notificationManager
-        )
+        val avalancheSuppressor = getAvalancheSuppressor()
         avalancheSuppressor.hasSeenEdu = true
 
         withFilter(avalancheSuppressor) {
@@ -151,8 +152,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -171,8 +171,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldNotHeadsUp(
@@ -191,8 +190,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -209,8 +207,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -227,8 +224,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -245,8 +241,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -263,8 +258,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -281,8 +275,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -300,8 +293,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -318,8 +310,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             assertFsiNotSuppressed()
         }
@@ -330,8 +321,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         avalancheProvider.startTime = whenAgo(10)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(
@@ -359,8 +349,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
         setAllowedEmergencyPkg(true)
 
         withFilter(
-            AvalancheSuppressor(avalancheProvider, systemClock, settingsInteractor, packageManager,
-                    uiEventLogger, context, notificationManager)
+            getAvalancheSuppressor()
         ) {
             ensurePeekState()
             assertShouldHeadsUp(

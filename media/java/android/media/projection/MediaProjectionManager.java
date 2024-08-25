@@ -64,7 +64,9 @@ import java.util.Map;
  *       holding, e.g. the {@link VirtualDisplay} and {@link Surface}. The MediaProjection may
  *       further no longer create any new {@link VirtualDisplay}s via {@link
  *       MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
- *       VirtualDisplay.Callback, Handler)}.
+ *       VirtualDisplay.Callback, Handler)}. Note that the `onStop()` callback can be a result of
+ *       the system stopping MediaProjection due to various reasons or the user stopping the
+ *       MediaProjection via UI affordances in system-level UI.
  *   <li>Start the screen capture session for media projection by calling {@link
  *       MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
  *       android.hardware.display.VirtualDisplay.Callback, Handler)}.

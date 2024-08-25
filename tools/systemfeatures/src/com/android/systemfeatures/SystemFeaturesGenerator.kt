@@ -32,6 +32,7 @@ import javax.lang.model.element.Modifier
  * <pre>
  *   <cmd> com.foo.RoSystemFeatures --readonly=true \
  *           --feature=WATCH:0 --feature=AUTOMOTIVE: --feature=VULKAN:9348
+ *           --feature-apis=WATCH,PC,LEANBACK
  * </pre>
  *
  * This generates a class that has the following signature:
@@ -45,12 +46,15 @@ import javax.lang.model.element.Modifier
  *     public static boolean hasFeatureAutomotive(Context context);
  *     @AssumeTrueForR8
  *     public static boolean hasFeatureVulkan(Context context);
+ *     public static boolean hasFeaturePc(Context context);
+ *     public static boolean hasFeatureLeanback(Context context);
  *     public static Boolean maybeHasFeature(String feature, int version);
  * }
  * </pre>
  */
 object SystemFeaturesGenerator {
     private const val FEATURE_ARG = "--feature="
+    private const val FEATURE_APIS_ARG = "--feature-apis="
     private const val READONLY_ARG = "--readonly="
     private val PACKAGEMANAGER_CLASS = ClassName.get("android.content.pm", "PackageManager")
     private val CONTEXT_CLASS = ClassName.get("android.content", "Context")
@@ -64,6 +68,15 @@ object SystemFeaturesGenerator {
         println(" Options:")
         println("  --readonly=true|false    Whether to encode features as build-time constants")
         println("  --feature=\$NAME:\$VER   A feature+version pair (blank version == disabled)")
+        println("                           This will always generate associated query APIs,")
+        println("                           adding to or replacing those from `--feature-apis=`.")
+        println("  --feature-apis=\$NAME_1,\$NAME_2")
+        println("                           A comma-separated set of features for which to always")
+        println("                           generate named query APIs. If a feature in this set is")
+        println("                           not explicitly defined via `--feature=`, then a simple")
+        println("                           runtime passthrough API will be generated, regardless")
+        println("                           of the `--readonly` flag. This allows decoupling the")
+        println("                           API surface from variations in device feature sets.")
     }
 
     /** Main entrypoint for build-time system feature codegen. */
@@ -76,17 +89,41 @@ object SystemFeaturesGenerator {
 
         var readonly = false
         var outputClassName: ClassName? = null
-        val features = mutableListOf<FeatureInfo>()
+        val featureArgs = mutableListOf<FeatureArg>()
+        // We could just as easily hardcode this list, as the static API surface should change
+        // somewhat infrequently, but this decouples the codegen from the framework completely.
+        val featureApiArgs = mutableSetOf<String>()
         for (arg in args) {
             when {
                 arg.startsWith(READONLY_ARG) ->
                     readonly = arg.substring(READONLY_ARG.length).toBoolean()
                 arg.startsWith(FEATURE_ARG) -> {
-                    features.add(parseFeatureArg(arg))
+                    featureArgs.add(parseFeatureArg(arg))
+                }
+                arg.startsWith(FEATURE_APIS_ARG) -> {
+                    featureApiArgs.addAll(
+                        arg.substring(FEATURE_APIS_ARG.length).split(",").map {
+                            parseFeatureName(it)
+                        }
+                    )
                 }
                 else -> outputClassName = ClassName.bestGuess(arg)
             }
         }
+
+        // First load in all of the feature APIs we want to generate. Explicit feature definitions
+        // will then override this set with the appropriate readonly and version value.
+        val features = mutableMapOf<String, FeatureInfo>()
+        featureApiArgs.associateByTo(
+            features,
+            { it },
+            { FeatureInfo(it, version = null, readonly = false) },
+        )
+        featureArgs.associateByTo(
+            features,
+            { it.name },
+            { FeatureInfo(it.name, it.version, readonly) },
+        )
 
         outputClassName
             ?: run {
@@ -100,8 +137,8 @@ object SystemFeaturesGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addJavadoc("@hide")
 
-        addFeatureMethodsToClass(classBuilder, readonly, features)
-        addMaybeFeatureMethodToClass(classBuilder, readonly, features)
+        addFeatureMethodsToClass(classBuilder, features.values)
+        addMaybeFeatureMethodToClass(classBuilder, features.values)
 
         // TODO(b/203143243): Add validation of build vs runtime values to ensure consistency.
         JavaFile.builder(outputClassName.packageName(), classBuilder.build())
@@ -115,12 +152,15 @@ object SystemFeaturesGenerator {
      *   * "--feature=WATCH:7" -> Feature enabled w/ version 7
      *   * "--feature=WATCH:"  -> Feature disabled
      */
-    private fun parseFeatureArg(arg: String): FeatureInfo {
+    private fun parseFeatureArg(arg: String): FeatureArg {
         val featureArgs = arg.substring(FEATURE_ARG.length).split(":")
-        val name = featureArgs[0].let { if (!it.startsWith("FEATURE_")) "FEATURE_$it" else it }
+        val name = parseFeatureName(featureArgs[0])
         val version = featureArgs.getOrNull(1)?.toIntOrNull()
-        return FeatureInfo(name, version)
+        return FeatureArg(name, version)
     }
+
+    private fun parseFeatureName(name: String): String =
+        if (name.startsWith("FEATURE_")) name else "FEATURE_$name"
 
     /*
      * Adds per-feature query methods to the class with the form:
@@ -129,8 +169,7 @@ object SystemFeaturesGenerator {
      */
     private fun addFeatureMethodsToClass(
         builder: TypeSpec.Builder,
-        readonly: Boolean,
-        features: List<FeatureInfo>
+        features: Collection<FeatureInfo>,
     ) {
         for (feature in features) {
             // Turn "FEATURE_FOO" into "hasFeatureFoo".
@@ -142,7 +181,7 @@ object SystemFeaturesGenerator {
                     .returns(Boolean::class.java)
                     .addParameter(CONTEXT_CLASS, "context")
 
-            if (readonly) {
+            if (feature.readonly) {
                 val featureEnabled = compareValues(feature.version, 0) >= 0
                 methodBuilder.addAnnotation(
                     if (featureEnabled) ASSUME_TRUE_CLASS else ASSUME_FALSE_CLASS
@@ -158,19 +197,17 @@ object SystemFeaturesGenerator {
             builder.addMethod(methodBuilder.build())
         }
 
-        if (!readonly) {
-            builder.addMethod(
-                MethodSpec.methodBuilder("hasFeatureFallback")
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                    .returns(Boolean::class.java)
-                    .addParameter(CONTEXT_CLASS, "context")
-                    .addParameter(String::class.java, "featureName")
-                    .addStatement(
-                        "return context.getPackageManager().hasSystemFeature(featureName, 0)"
-                    )
-                    .build()
-            )
-        }
+        // This is a trivial method, even if unused based on readonly-codegen, it does little harm
+        // to always include it.
+        builder.addMethod(
+            MethodSpec.methodBuilder("hasFeatureFallback")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(Boolean::class.java)
+                .addParameter(CONTEXT_CLASS, "context")
+                .addParameter(String::class.java, "featureName")
+                .addStatement("return context.getPackageManager().hasSystemFeature(featureName, 0)")
+                .build()
+        )
     }
 
     /*
@@ -185,8 +222,7 @@ object SystemFeaturesGenerator {
      */
     private fun addMaybeFeatureMethodToClass(
         builder: TypeSpec.Builder,
-        readonly: Boolean,
-        features: List<FeatureInfo>
+        features: Collection<FeatureInfo>,
     ) {
         val methodBuilder =
             MethodSpec.methodBuilder("maybeHasFeature")
@@ -196,16 +232,27 @@ object SystemFeaturesGenerator {
                 .addParameter(String::class.java, "featureName")
                 .addParameter(Int::class.java, "version")
 
-        if (readonly) {
-            methodBuilder.beginControlFlow("switch (featureName)")
-            for (feature in features) {
-                methodBuilder.addCode("case \$T.\$N: ", PACKAGEMANAGER_CLASS, feature.name)
-                if (feature.version != null) {
-                    methodBuilder.addStatement("return \$L >= version", feature.version)
-                } else {
-                    methodBuilder.addStatement("return false")
-                }
+        var hasSwitchBlock = false
+        for (feature in features) {
+            // We only return non-null results for queries against readonly-defined features.
+            if (!feature.readonly) {
+                continue
             }
+            if (!hasSwitchBlock) {
+                // As an optimization, only create the switch block if needed. Even an empty
+                // switch-on-string block can induce a hash, which we can avoid if readonly
+                // support is completely disabled.
+                hasSwitchBlock = true
+                methodBuilder.beginControlFlow("switch (featureName)")
+            }
+            methodBuilder.addCode("case \$T.\$N: ", PACKAGEMANAGER_CLASS, feature.name)
+            if (feature.version != null) {
+                methodBuilder.addStatement("return \$L >= version", feature.version)
+            } else {
+                methodBuilder.addStatement("return false")
+            }
+        }
+        if (hasSwitchBlock) {
             methodBuilder.addCode("default: ")
             methodBuilder.addStatement("break")
             methodBuilder.endControlFlow()
@@ -214,5 +261,7 @@ object SystemFeaturesGenerator {
         builder.addMethod(methodBuilder.build())
     }
 
-    private data class FeatureInfo(val name: String, val version: Int?)
+    private data class FeatureArg(val name: String, val version: Int?)
+
+    private data class FeatureInfo(val name: String, val version: Int?, val readonly: Boolean)
 }

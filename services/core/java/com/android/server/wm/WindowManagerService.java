@@ -32,6 +32,7 @@ import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PC;
@@ -245,7 +246,6 @@ import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
@@ -265,7 +265,6 @@ import android.view.IDisplayWindowListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedTaskListener;
-import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
 import android.view.IScrollCaptureResponseListener;
 import android.view.ISystemGestureExclusionListener;
@@ -680,7 +679,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private final SparseIntArray mOrientationMapping = new SparseIntArray();
 
     final AccessibilityController mAccessibilityController;
-    private RecentsAnimationController mRecentsAnimationController;
 
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
@@ -1158,17 +1156,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            // While running a recents animation, this will get called early because we show the
-            // recents animation target activity immediately when the animation starts. Defer the
-            // mLaunchTaskBehind updates until recents animation finishes.
-            if (atoken.mLaunchTaskBehind && !isRecentsAnimationTarget(atoken)) {
+            if (atoken.mLaunchTaskBehind) {
                 mAtmService.mTaskSupervisor.scheduleLaunchTaskBehindComplete(atoken.token);
                 atoken.mLaunchTaskBehind = false;
             } else {
                 atoken.updateReportedVisibilityLocked();
-                // We should also defer sending the finished callback until the recents animation
-                // successfully finishes.
-                if (atoken.mEnteringAnimation && !isRecentsAnimationTarget(atoken)) {
+                if (atoken.mEnteringAnimation) {
                     atoken.mEnteringAnimation = false;
                     if (atoken.attachedToProcess()) {
                         try {
@@ -3167,63 +3160,12 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     // TODO(multi-display): remove when no default display use case.
-    // (i.e. KeyguardController / RecentsAnimation)
+    // (i.e. KeyguardController)
     public void executeAppTransition() {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "executeAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
         getDefaultDisplayContentLocked().executeAppTransition();
-    }
-
-    void initializeRecentsAnimation(int targetActivityType,
-            IRecentsAnimationRunner recentsAnimationRunner,
-            RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId,
-            SparseBooleanArray recentTaskIds, ActivityRecord targetActivity) {
-        mRecentsAnimationController = new RecentsAnimationController(this, recentsAnimationRunner,
-                callbacks, displayId);
-        mRoot.getDisplayContent(displayId).mAppTransition.updateBooster();
-        mRecentsAnimationController.initialize(targetActivityType, recentTaskIds, targetActivity);
-    }
-
-    @VisibleForTesting
-    void setRecentsAnimationController(RecentsAnimationController controller) {
-        mRecentsAnimationController = controller;
-    }
-
-    RecentsAnimationController getRecentsAnimationController() {
-        return mRecentsAnimationController;
-    }
-
-    void cancelRecentsAnimation(
-            @RecentsAnimationController.ReorderMode int reorderMode, String reason) {
-        if (mRecentsAnimationController != null) {
-            // This call will call through to cleanupAnimation() below after the animation is
-            // canceled
-            mRecentsAnimationController.cancelAnimation(reorderMode, reason);
-        }
-    }
-
-
-    void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
-        if (mRecentsAnimationController != null) {
-            final RecentsAnimationController controller = mRecentsAnimationController;
-            mRecentsAnimationController = null;
-            controller.cleanupAnimation(reorderMode);
-            // TODO(multi-display): currently only default display support recents animation.
-            final DisplayContent dc = getDefaultDisplayContentLocked();
-            if (dc.mAppTransition.isTransitionSet()) {
-                dc.mSkipAppTransitionAnimation = true;
-            }
-            dc.forAllWindowContainers((wc) -> {
-                if (wc.isAnimating(TRANSITION, ANIMATION_TYPE_APP_TRANSITION)) {
-                    wc.cancelAnimation();
-                }
-            });
-        }
-    }
-
-    boolean isRecentsAnimationTarget(ActivityRecord r) {
-        return mRecentsAnimationController != null && mRecentsAnimationController.isTargetApp(r);
     }
 
     boolean isValidPictureInPictureAspectRatio(DisplayContent displayContent, float aspectRatio) {
@@ -3254,11 +3196,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void screenTurningOff(int displayId, ScreenOffListener listener) {
         mTaskSnapshotController.screenTurningOff(displayId, listener);
-    }
-
-    @Override
-    public void triggerAnimationFailsafe() {
-        mH.sendEmptyMessage(H.ANIMATION_FAILSAFE);
     }
 
     @Override
@@ -5651,7 +5588,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
         public static final int SET_HAS_OVERLAY_UI = 58;
-        public static final int ANIMATION_FAILSAFE = 60;
         public static final int RECOMPUTE_FOCUS = 61;
         public static final int ON_POINTER_DOWN_OUTSIDE_FOCUS = 62;
         public static final int WINDOW_STATE_BLAST_SYNC_TIMEOUT = 64;
@@ -5884,14 +5820,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 case SET_HAS_OVERLAY_UI: {
                     mAmInternal.setHasOverlayUi(msg.arg1, msg.arg2 == 1);
-                    break;
-                }
-                case ANIMATION_FAILSAFE: {
-                    synchronized (mGlobalLock) {
-                        if (mRecentsAnimationController != null) {
-                            mRecentsAnimationController.scheduleFailsafe();
-                        }
-                    }
                     break;
                 }
                 case RECOMPUTE_FOCUS: {
@@ -7035,10 +6963,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
                     pw.print(" transition="); pw.print(mTransitionAnimationScaleSetting);
                     pw.print(" animator="); pw.println(mAnimatorDurationScaleSetting);
-            if (mRecentsAnimationController != null) {
-                pw.print("  mRecentsAnimationController="); pw.println(mRecentsAnimationController);
-                mRecentsAnimationController.dump(pw, "    ");
-            }
         }
     }
 
@@ -7998,7 +7922,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             boolean allWindowsDrawn = false;
             synchronized (mGlobalLock) {
-                if (mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
+                if (displayId == DEFAULT_DISPLAY
+                        && mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
                     // Use the ready-to-play of transition as the signal.
                     return;
                 }
@@ -9024,14 +8949,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         clearPointerDownOutsideFocusRunnable();
 
-        // For embedded activity that is showing side-by-side with another activity, delay
-        // handling the touch-outside event to prevent focus rapid changes back-n-forth.
-        // Otherwise, handle the touch-outside event directly.
-        final WindowState w = t.getWindowState();
-        final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        if (mFocusedInputTarget != t && mFocusedInputTarget != null
-                && activity != null && activity.isEmbedded()
-                && activity.getTaskFragment().getAdjacentTaskFragment() != null) {
+        if (shouldDelayTouchOutside(t)) {
             mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
         } else if (!fromHandler) {
@@ -9044,6 +8962,33 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private boolean shouldDelayTouchOutside(InputTarget t) {
+        final WindowState w = t.getWindowState();
+        final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
+        final Task task = w != null ? w.getRootTask() : null;
+
+        final boolean isInputTargetNotFocused =
+                mFocusedInputTarget != t && mFocusedInputTarget != null;
+        if (!isInputTargetNotFocused) {
+            return false;
+        }
+
+        // For embedded activity that is showing side-by-side with another activity, delay
+        // handling the touch-outside event to prevent focus rapid changes back-n-forth.
+        final boolean shouldDelayTouchForEmbeddedActivity = activity != null
+                && activity.isEmbedded()
+                && activity.getTaskFragment().getAdjacentTaskFragment() != null;
+
+        // For cases when there are multiple freeform windows where non-top windows are blocking
+        // the gesture zones, delay handling the touch-outside event to prevent refocusing the
+        // the non-top windows during the gesture.
+        final boolean shouldDelayTouchForFreeform =
+                task != null && task.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+
+        // If non of the above cases are true, handle the touch-outside event directly.
+        return shouldDelayTouchForEmbeddedActivity || shouldDelayTouchForFreeform;
+    }
+
     private void handlePointerDownOutsideFocus(InputTarget t) {
         synchronized (mGlobalLock) {
             if (mPointerDownOutsideFocusRunnable != null
@@ -9052,17 +8997,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             clearPointerDownOutsideFocusRunnable();
-
-            if (mRecentsAnimationController != null
-                    && mRecentsAnimationController.getTargetAppMainWindow() == t) {
-                // If there is an active recents animation and touched window is the target,
-                // then ignore the touch. The target already handles touches using its own
-                // input monitor and we don't want to trigger any lifecycle changes from
-                // focusing another window.
-                // TODO(b/186770026): We should remove this once we support multiple resumed
-                //  activities while in overview
-                return;
-            }
 
             final WindowState w = t.getWindowState();
             if (w != null) {

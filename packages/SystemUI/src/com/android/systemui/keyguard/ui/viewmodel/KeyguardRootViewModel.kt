@@ -33,6 +33,8 @@ import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
@@ -45,6 +47,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.util.kotlin.BooleanFlowOperators.any
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
@@ -159,30 +162,26 @@ constructor(
 
     private val alphaOnShadeExpansion: Flow<Float> =
         combineTransform(
-                keyguardTransitionInteractor.isInTransition(
-                    edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
-                    edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
-                ),
-                keyguardTransitionInteractor.isInTransition(
-                    edge = Edge.create(from = Scenes.Bouncer, to = LOCKSCREEN),
-                    edgeWithoutSceneContainer =
-                        Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
+                anyOf(
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
+                        edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
+                    ),
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(from = Scenes.Bouncer, to = LOCKSCREEN),
+                        edgeWithoutSceneContainer =
+                            Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
+                    ),
+                    keyguardTransitionInteractor.isInTransition(
+                        Edge.create(from = LOCKSCREEN, to = DREAMING)
+                    ),
                 ),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) {
-                lockscreenToGoneTransitionRunning,
-                primaryBouncerToLockscreenTransitionRunning,
-                isOnLockscreen,
-                qsExpansion,
-                shadeExpansion ->
+            ) { disabledTransitionRunning, isOnLockscreen, qsExpansion, shadeExpansion ->
                 // Fade out quickly as the shade expands
-                if (
-                    isOnLockscreen &&
-                        !lockscreenToGoneTransitionRunning &&
-                        !primaryBouncerToLockscreenTransitionRunning
-                ) {
+                if (isOnLockscreen && !disabledTransitionRunning) {
                     val alpha =
                         1f -
                             MathUtils.constrainedMap(
@@ -198,29 +197,37 @@ constructor(
             .distinctUntilChanged()
 
     /**
-     * Keyguard should not show while the communal hub is fully visible. This check is added since
-     * at the moment, closing the notification shade will cause the keyguard alpha to be set back to
-     * 1. Also ensure keyguard is never visible when GONE.
+     * Keyguard states which should fully hide the keyguard.
+     *
+     * Note: [GONE] is not included as it is handled separately.
+     */
+    private val hiddenKeyguardStates = listOf(OCCLUDED, DREAMING, GLANCEABLE_HUB)
+
+    /**
+     * Keyguard should not show if fully transitioned into a hidden keyguard state or if
+     * transitioning between hidden states.
      */
     private val hideKeyguard: Flow<Boolean> =
-        combine(
-                communalInteractor.isIdleOnCommunal,
+        (hiddenKeyguardStates.map { state ->
                 keyguardTransitionInteractor
-                    .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                    .transitionValue(state)
                     .map { it == 1f }
-                    .onStart { emit(false) },
-                keyguardTransitionInteractor
-                    .transitionValue(OCCLUDED)
-                    .map { it == 1f }
-                    .onStart { emit(false) },
-                keyguardTransitionInteractor
-                    .transitionValue(KeyguardState.DREAMING)
-                    .map { it == 1f }
-                    .onStart { emit(false) },
-            ) { isIdleOnCommunal, isGone, isOccluded, isDreaming ->
-                isIdleOnCommunal || isGone || isOccluded || isDreaming
-            }
-            .distinctUntilChanged()
+                    .onStart { emit(false) }
+            } +
+                listOf(
+                    communalInteractor.isIdleOnCommunal,
+                    keyguardTransitionInteractor
+                        .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                        .map { it == 1f }
+                        .onStart { emit(false) },
+                    keyguardTransitionInteractor
+                        .isInTransitionWhere(
+                            fromStatePredicate = { hiddenKeyguardStates.contains(it) },
+                            toStatePredicate = { hiddenKeyguardStates.contains(it) },
+                        )
+                        .onStart { emit(false) },
+                ))
+            .any()
 
     /** Last point that the root view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition

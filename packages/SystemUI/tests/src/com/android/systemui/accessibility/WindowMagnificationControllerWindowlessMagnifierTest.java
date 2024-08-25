@@ -90,6 +90,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
@@ -144,6 +145,8 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
     private SurfaceControl.Transaction mTransaction;
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
     private long mWaitAnimationDuration;
     private long mWaitBounceEffectDuration;
@@ -240,7 +243,8 @@ public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiT
                         mSecureSettings,
                         scvhSupplier,
                         /* sfVsyncFrameProvider= */ null,
-                        /* globalWindowSessionSupplier= */ null);
+                        /* globalWindowSessionSupplier= */ null,
+                        mViewCaptureAwareWindowManager);
 
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));

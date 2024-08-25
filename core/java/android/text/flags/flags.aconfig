@@ -259,6 +259,16 @@ flag {
 }
 
 flag {
+  name: "dont_break_email_in_nobreak_tag"
+  namespace: "text"
+  description: "Prevent line break inside email."
+  bug: "350691716"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "handwriting_gesture_with_transformation"
   namespace: "text"
   description: "Fix handwriting gesture is not working when view has transformation."
@@ -286,4 +296,11 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "typeface_redesign"
+  namespace: "text"
+  description: "Decouple variation settings, weight and style information from Typeface class"
+  bug: "361260253"
 }

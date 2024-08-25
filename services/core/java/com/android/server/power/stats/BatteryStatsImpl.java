@@ -2131,13 +2131,13 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public LongSupplier getCallDurationSupplier() {
             return () -> mPhoneOnTimer.getTotalTimeLocked(mClock.elapsedRealtime() * 1000,
-                    STATS_SINCE_CHARGED);
+                    STATS_SINCE_CHARGED) / 1000;
         }
 
         @Override
         public LongSupplier getPhoneSignalScanDurationSupplier() {
             return () -> mPhoneSignalScanningTimer.getTotalTimeLocked(
-                    mClock.elapsedRealtime() * 1000, STATS_SINCE_CHARGED);
+                    mClock.elapsedRealtime() * 1000, STATS_SINCE_CHARGED) / 1000;
         }
     }
 
@@ -15487,7 +15487,8 @@ public class BatteryStatsImpl extends BatteryStats {
         final long txTimeMs = counter.getTxTimeCounters()[0].getCountLocked(which);
         final long totalControllerActivityTimeMs =
                 computeBatteryRealtime(mClock.elapsedRealtime() * 1000, which) / 1000;
-        final long sleepTimeMs = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + txTimeMs);
+        final long sleepTimeMs = Math.max(0,
+                totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + txTimeMs));
         final long energyConsumedMaMs = counter.getPowerCounter().getCountLocked(which);
         final long monitoredRailChargeConsumedMaMs =
                 counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which);

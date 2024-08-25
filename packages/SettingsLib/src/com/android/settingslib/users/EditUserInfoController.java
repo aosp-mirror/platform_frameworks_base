@@ -31,6 +31,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
@@ -126,9 +127,11 @@ public class EditUserInfoController {
      * @param activityStarter - ActivityStarter is called with appropriate intents and request
      *                        codes to take photo/choose photo/crop photo.
      */
-    public Dialog createDialog(Activity activity, ActivityStarter activityStarter,
-            @Nullable Drawable oldUserIcon, String defaultUserName,
-            BiConsumer<String, Drawable> successCallback, Runnable cancelCallback) {
+    public @NonNull Dialog createDialog(@NonNull Activity activity,
+            @NonNull ActivityStarter activityStarter, @Nullable Drawable oldUserIcon,
+            @Nullable String defaultUserName,
+            @Nullable BiConsumer<String, Drawable> successCallback,
+            @Nullable Runnable cancelCallback) {
         LayoutInflater inflater = LayoutInflater.from(activity);
         View content = inflater.inflate(R.layout.edit_user_info_dialog_content, null);
 

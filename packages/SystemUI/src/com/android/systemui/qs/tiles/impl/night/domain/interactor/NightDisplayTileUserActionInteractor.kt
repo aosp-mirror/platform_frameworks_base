@@ -55,6 +55,7 @@ constructor(
                         Intent(Settings.ACTION_NIGHT_DISPLAY_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 

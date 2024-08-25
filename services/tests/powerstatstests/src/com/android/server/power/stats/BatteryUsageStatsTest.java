@@ -173,14 +173,15 @@ public class BatteryUsageStatsTest {
         assertThat(dump).containsMatch(quote("(not on battery, screen off/doze)") + "\\s*"
                 + "cpu: 123 apps: 123 duration: 456ms");
         assertThat(dump).containsMatch(
-                "UID 271: 1200 fg: 1777 bg: 1888 fgs: 1999 cached: 123\\s*"
-                        + quote("screen=300 cpu=5787 (27s 99ms) cpu:fg=1777 (7s 771ms) "
+                "UID 271: 1200 fg: 1777 bg: 2388 fgs: 1999 cached: 123\\s*"
+                        + quote("screen=300 cpu=400 (600ms) cpu:fg=1777 (7s 771ms) "
                         + "cpu:bg=1888 (8s 881ms) cpu:fgs=1999 (9s 991ms) "
-                        + "cpu:cached=123 (456ms) FOO=500") + "\\s*"
+                        + "cpu:cached=123 (456ms) FOO=500 (800ms) FOO:bg=500 (800ms)") + "\\s*"
                         + quote("(on battery, screen on)") + "\\s*"
-                        + quote("cpu:fg=1777 (7s 771ms)"));
+                        + quote("cpu=1777 (7s 771ms) cpu:fg=1777 (7s 771ms) "
+                        + "FOO=500 (800ms) FOO:bg=500 (800ms)"));
         assertThat(dump).containsMatch("User 42: 30.0\\s*"
-                + quote("cpu=10.0 (30ms) FOO=20.0"));
+                + quote("cpu=10.0 (30ms) FOO=20.0 (40ms)"));
     }
 
     @Test
@@ -198,10 +199,10 @@ public class BatteryUsageStatsTest {
         assertThat(dump).contains("cpu: 20100 apps: 10100 duration: 20s 300ms");
         assertThat(dump).contains("FOO: 20200 apps: 10200 duration: 20s 400ms");
         assertThat(dump).containsMatch(
-                "UID 271: 1200 fg: 1777 bg: 1888 fgs: 1999 cached: 123\\s*"
-                        + quote("screen=300 cpu=5787 (600ms) cpu:fg=1777 (7s 771ms) "
+                "UID 271: 1200 fg: 1777 bg: 2388 fgs: 1999 cached: 123\\s*"
+                        + quote("screen=300 cpu=400 (600ms) cpu:fg=1777 (7s 771ms) "
                         + "cpu:bg=1888 (8s 881ms) cpu:fgs=1999 (9s 991ms) "
-                        + "cpu:cached=123 (456ms) FOO=500"));
+                        + "cpu:cached=123 (456ms) FOO=500 (800ms) FOO:bg=500 (800ms)"));
         assertThat(dump).containsMatch("User 42: 30.0\\s*"
                 + quote("cpu=10.0 (30ms) FOO=20.0"));
     }
@@ -225,25 +226,24 @@ public class BatteryUsageStatsTest {
                         .add(stats1)
                         .add(stats2)
                         .build();
-
         assertBatteryUsageStats(sum, 42345, 50, 2234, 4345, 1234, 1000, 5000, 5000);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
                 sum.getUidBatteryConsumers();
         for (UidBatteryConsumer uidBatteryConsumer : uidBatteryConsumers) {
             if (uidBatteryConsumer.getUid() == APP_UID1) {
-                assertUidBatteryConsumer(uidBatteryConsumer, 2124, null,
-                        5321, 6900, 532, 423, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 11772,
+                assertUidBatteryConsumer(uidBatteryConsumer, 1200 + 924, null,
+                        5321, 6900, 532, 423, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 400 + 345,
                         POWER_MODEL_UNDEFINED,
-                        956, 1167, 1478,
-                        true, 3554, 3776, 3998, 444, 3554, 15542, 3776, 17762, 3998, 19982,
+                        500 + 456, 1167, 1478,
+                        true, 3554, 4732, 3998, 444, 3554, 15542, 3776, 17762, 3998, 19982,
                         444, 1110);
             } else if (uidBatteryConsumer.getUid() == APP_UID2) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 1332, "bar",
-                        1111, 2220, 2, 333, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 5985,
+                        1111, 2220, 2, 333, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 444,
                         BatteryConsumer.POWER_MODEL_POWER_PROFILE,
                         555, 666, 777,
-                        true, 1777, 1888, 1999, 321, 1777, 7771, 1888, 8881, 1999, 9991,
+                        true, 1777, 2443, 1999, 321, 1777, 7771, 1888, 8881, 1999, 9991,
                         321, 654);
             } else {
                 fail("Unexpected UID " + uidBatteryConsumer.getUid());
@@ -291,9 +291,6 @@ public class BatteryUsageStatsTest {
         TypedXmlPullParser parser = Xml.newBinaryPullParser();
         parser.setInput(in, StandardCharsets.UTF_8.name());
         final BatteryUsageStats fromXml = BatteryUsageStats.createFromXml(parser);
-
-        System.out.println("stats = " + stats);
-        System.out.println("fromXml = " + fromXml);
         assertBatteryUsageStats1(fromXml, true);
     }
 
@@ -336,11 +333,11 @@ public class BatteryUsageStatsTest {
             builder.getOrCreateUserBatteryConsumerBuilder(USER_ID)
                     .setConsumedPower(
                             BatteryConsumer.POWER_COMPONENT_CPU, 10)
-                    .setConsumedPowerForCustomComponent(
+                    .setConsumedPower(
                             BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 20)
                     .setUsageDurationMillis(
                             BatteryConsumer.POWER_COMPONENT_CPU, 30)
-                    .setUsageDurationForCustomComponentMillis(
+                    .setUsageDurationMillis(
                             BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 40);
         }
         return builder;
@@ -405,11 +402,11 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.POWER_COMPONENT_SCREEN, screenPower, screenPowerModel)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU, cpuPower, cpuPowerModel)
-                .setConsumedPowerForCustomComponent(
+                .setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, customComponentPower)
                 .setUsageDurationMillis(
                         BatteryConsumer.POWER_COMPONENT_CPU, cpuDuration)
-                .setUsageDurationForCustomComponentMillis(
+                .setUsageDurationMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, customComponentDuration);
         if (builder.isProcessStateDataNeeded()) {
             final BatteryConsumer.Key cpuFgKey = builder.isScreenStateDataNeeded()
@@ -430,6 +427,15 @@ public class BatteryUsageStatsTest {
             final BatteryConsumer.Key cachedKey = uidBuilder.getKey(
                     BatteryConsumer.POWER_COMPONENT_CPU,
                     BatteryConsumer.PROCESS_STATE_CACHED);
+            final BatteryConsumer.Key customBgKey = builder.isScreenStateDataNeeded()
+                    ? uidBuilder.getKey(
+                            BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
+                            BatteryConsumer.PROCESS_STATE_BACKGROUND,
+                            BatteryConsumer.SCREEN_STATE_ON,
+                            BatteryConsumer.POWER_STATE_BATTERY)
+                    : uidBuilder.getKey(
+                            BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
+                            BatteryConsumer.PROCESS_STATE_BACKGROUND);
             uidBuilder
                     .setConsumedPower(cpuFgKey, cpuPowerForeground,
                             BatteryConsumer.POWER_MODEL_POWER_PROFILE)
@@ -442,7 +448,10 @@ public class BatteryUsageStatsTest {
                     .setUsageDurationMillis(cpuFgsKey, cpuDurationFgs)
                     .setConsumedPower(cachedKey, cpuPowerCached,
                             BatteryConsumer.POWER_MODEL_POWER_PROFILE)
-                    .setUsageDurationMillis(cachedKey, cpuDurationCached);
+                    .setUsageDurationMillis(cachedKey, cpuDurationCached)
+                    .setConsumedPower(customBgKey, customComponentPower,
+                            BatteryConsumer.POWER_MODEL_UNDEFINED)
+                    .setUsageDurationMillis(customBgKey, customComponentDuration);
         }
     }
 
@@ -456,12 +465,12 @@ public class BatteryUsageStatsTest {
                         .setConsumedPower(consumedPower)
                         .setConsumedPower(
                                 BatteryConsumer.POWER_COMPONENT_CPU, cpuPower)
-                        .setConsumedPowerForCustomComponent(
+                        .setConsumedPower(
                                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
                                 customComponentPower)
                         .setUsageDurationMillis(
                                 BatteryConsumer.POWER_COMPONENT_CPU, cpuDuration)
-                        .setUsageDurationForCustomComponentMillis(
+                        .setUsageDurationMillis(
                                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
                                 customComponentDuration);
         if (builder.isPowerStateDataNeeded() || builder.isScreenStateDataNeeded()) {
@@ -511,10 +520,10 @@ public class BatteryUsageStatsTest {
         for (UidBatteryConsumer uidBatteryConsumer : uidBatteryConsumers) {
             if (uidBatteryConsumer.getUid() == APP_UID1) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 1200, "foo",
-                        1000, 1500, 500, 300, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 5787,
+                        1000, 1500, 500, 300, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 400,
                         BatteryConsumer.POWER_MODEL_POWER_PROFILE,
                         500, 600, 800,
-                        true, 1777, 1888, 1999, 123, 1777, 7771, 1888, 8881, 1999, 9991, 123, 456);
+                        true, 1777, 2388, 1999, 123, 1777, 7771, 1888, 8881, 1999, 9991, 123, 456);
             } else {
                 fail("Unexpected UID " + uidBatteryConsumer.getUid());
             }
@@ -593,11 +602,11 @@ public class BatteryUsageStatsTest {
                 BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(cpuPower);
         assertThat(uidBatteryConsumer.getPowerModel(
                 BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(cpuPowerModel);
-        assertThat(uidBatteryConsumer.getConsumedPowerForCustomComponent(
+        assertThat(uidBatteryConsumer.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(customComponentPower);
         assertThat(uidBatteryConsumer.getUsageDurationMillis(
                 BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(cpuDuration);
-        assertThat(uidBatteryConsumer.getUsageDurationForCustomComponentMillis(
+        assertThat(uidBatteryConsumer.getUsageDurationMillis(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(
                 customComponentDuration);
         assertThat(uidBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
@@ -678,11 +687,11 @@ public class BatteryUsageStatsTest {
             int cpuDuration, int customComponentDuration) {
         assertThat(userBatteryConsumer.getConsumedPower(
                 BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(cpuPower);
-        assertThat(userBatteryConsumer.getConsumedPowerForCustomComponent(
+        assertThat(userBatteryConsumer.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(customComponentPower);
         assertThat(userBatteryConsumer.getUsageDurationMillis(
                 BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(cpuDuration);
-        assertThat(userBatteryConsumer.getUsageDurationForCustomComponentMillis(
+        assertThat(userBatteryConsumer.getUsageDurationMillis(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(
                 customComponentDuration);
         assertThat(userBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);
@@ -697,11 +706,11 @@ public class BatteryUsageStatsTest {
                 aggregateBatteryConsumerScopeAllApps);
         assertThat(appsBatteryConsumer.getConsumedPower(
                 BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(cpuPower);
-        assertThat(appsBatteryConsumer.getConsumedPowerForCustomComponent(
+        assertThat(appsBatteryConsumer.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(customComponentPower);
         assertThat(appsBatteryConsumer.getUsageDurationMillis(
                 BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(cpuDuration);
-        assertThat(appsBatteryConsumer.getUsageDurationForCustomComponentMillis(
+        assertThat(appsBatteryConsumer.getUsageDurationMillis(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(
                 customComponentDuration);
         assertThat(appsBatteryConsumer.getCustomPowerComponentCount()).isEqualTo(1);

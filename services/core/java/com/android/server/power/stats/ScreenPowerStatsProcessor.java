@@ -16,7 +16,7 @@
 
 package com.android.server.power.stats;
 
-import static android.os.BatteryConsumer.PROCESS_STATE_ANY;
+import static android.os.BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
 
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
@@ -197,7 +197,7 @@ public class ScreenPowerStatsProcessor extends PowerStatsProcessor {
             List<Integer> uids) {
         int[] uidStateValues = new int[stats.getConfig().getUidStateConfig().length];
         uidStateValues[STATE_SCREEN] = SCREEN_STATE_ON;
-        uidStateValues[STATE_PROCESS_STATE] = PROCESS_STATE_ANY;
+        uidStateValues[STATE_PROCESS_STATE] = PROCESS_STATE_UNSPECIFIED;
 
         for (int i = mPlan.uidStateEstimates.size() - 1; i >= 0; i--) {
             UidStateEstimate uidStateEstimate = mPlan.uidStateEstimates.get(i);

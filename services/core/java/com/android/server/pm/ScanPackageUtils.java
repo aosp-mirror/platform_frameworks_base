@@ -443,17 +443,16 @@ final class ScanPackageUtils {
 
         // Take care of first install / last update times.
         final long scanFileTime = getLastModifiedTime(parsedPackage);
-        final long existingFirstInstallTime = userId == UserHandle.USER_ALL
-                ? PackageStateUtils.getEarliestFirstInstallTime(pkgSetting.getUserStates())
-                : pkgSetting.readUserState(userId).getFirstInstallTimeMillis();
+        final long earliestFirstInstallTime =
+                PackageStateUtils.getEarliestFirstInstallTime((pkgSetting.getUserStates()));
         if (currentTime != 0) {
-            if (existingFirstInstallTime == 0) {
+            if (earliestFirstInstallTime == 0) {
                 pkgSetting.setFirstInstallTime(currentTime, userId)
                         .setLastUpdateTime(currentTime);
             } else if ((scanFlags & SCAN_UPDATE_TIME) != 0) {
                 pkgSetting.setLastUpdateTime(currentTime);
             }
-        } else if (existingFirstInstallTime == 0) {
+        } else if (earliestFirstInstallTime == 0) {
             // We need *something*.  Take time stamp of the file.
             pkgSetting.setFirstInstallTime(scanFileTime, userId)
                     .setLastUpdateTime(scanFileTime);

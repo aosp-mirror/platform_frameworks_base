@@ -20,6 +20,7 @@ import android.app.Activity
 import androidx.compose.runtime.Composable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.TouchpadTutorialScreensProvider
 import com.android.systemui.model.SysUiState
 import com.android.systemui.settings.DisplayTracker
@@ -53,9 +54,10 @@ interface TouchpadTutorialModule {
         fun touchpadGesturesInteractor(
             sysUiState: SysUiState,
             displayTracker: DisplayTracker,
-            @Background backgroundScope: CoroutineScope
+            @Background backgroundScope: CoroutineScope,
+            logger: InputDeviceTutorialLogger,
         ): TouchpadGesturesInteractor {
-            return TouchpadGesturesInteractor(sysUiState, displayTracker, backgroundScope)
+            return TouchpadGesturesInteractor(sysUiState, displayTracker, backgroundScope, logger)
         }
     }
 }

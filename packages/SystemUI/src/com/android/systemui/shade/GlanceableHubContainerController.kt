@@ -182,6 +182,16 @@ constructor(
     private var shadeShowingAndConsumingTouches = false
 
     /**
+     * True anytime the shade is processing user touches, regardless of expansion state.
+     *
+     * Based on [ShadeInteractor.isUserInteracting].
+     */
+    private var shadeConsumingTouches = false
+
+    /** True if the keyguard transition state is finished on [KeyguardState.LOCKSCREEN]. */
+    private var onLockscreen = false
+
+    /**
      * True if the shade ever fully expands and the user isn't interacting with it (aka finger on
      * screen dragging). In this case, the shade should handle all touch events until it has fully
      * collapsed.
@@ -338,6 +348,11 @@ constructor(
         )
         collectFlow(
             containerView,
+            keyguardTransitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
+            { onLockscreen = it }
+        )
+        collectFlow(
+            containerView,
             communalInteractor.isCommunalVisible,
             {
                 hubShowing = it
@@ -369,6 +384,7 @@ constructor(
                 ::Triple
             ),
             { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
+                shadeConsumingTouches = isUserInteracting
                 val expandedAndNotInteractive = isFullyExpanded && !isUserInteracting
 
                 // If we ever are fully expanded and not interacting, capture this state as we
@@ -497,10 +513,25 @@ constructor(
             return true
         }
         try {
+            // On the lock screen, our touch handlers are not active and we rely on the NSWVC's
+            // touch handling for gestures on blank areas, which can go up to show the bouncer or
+            // down to show the notification shade. We see the touches first and they are not
+            // consumed and cancelled like on the dream or hub so we have to gracefully ignore them
+            // if the shade or bouncer are handling them. This issue only applies to touches on the
+            // keyguard itself, once the bouncer or shade are fully open, our logic stops us from
+            // taking touches.
+            val touchTaken = onLockscreen && (shadeConsumingTouches || anyBouncerShowing)
+
+            // Only dispatch touches to communal if not already handled or the touch is ending,
+            // meaning the event is an up or cancel. This is necessary as the hub always receives at
+            // least the initial down even if the shade or bouncer end up handling the touch.
+            val dispatchToCommunal = !touchTaken || !isTrackingHubTouch
             var handled = false
-            communalContainerWrapper?.dispatchTouchEvent(ev) {
-                if (it) {
-                    handled = true
+            if (dispatchToCommunal) {
+                communalContainerWrapper?.dispatchTouchEvent(ev) {
+                    if (it) {
+                        handled = true
+                    }
                 }
             }
             return handled || hubShowing

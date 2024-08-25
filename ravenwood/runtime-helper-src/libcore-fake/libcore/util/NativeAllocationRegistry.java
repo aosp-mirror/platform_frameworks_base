@@ -15,7 +15,7 @@
  */
 package libcore.util;
 
-import com.android.ravenwood.common.RavenwoodRuntimeNative;
+import com.android.ravenwood.RavenwoodRuntimeNative;
 
 import java.lang.ref.Cleaner;
 import java.lang.ref.Reference;
