@@ -68,6 +68,13 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoNoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isNull();
         assertThat(RoNoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
         assertThat(RoNoFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
+
+        // Also ensure we fall back to the PackageManager for feature APIs without an accompanying
+        // versioned feature definition.
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)).thenReturn(true);
+        assertThat(RwFeatures.hasFeatureWatch(mContext)).isTrue();
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)).thenReturn(false);
+        assertThat(RwFeatures.hasFeatureWatch(mContext)).isFalse();
     }
 
     @Test
@@ -126,6 +133,16 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, -1)).isFalse();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isFalse();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 100)).isFalse();
+
+        // For feature APIs without an associated feature definition, conditional queries should
+        // report null, and explicit queries should report runtime-defined versions.
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_PC, 0)).thenReturn(true);
+        assertThat(RoFeatures.hasFeaturePc(mContext)).isTrue();
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_PC, 0)).thenReturn(false);
+        assertThat(RoFeatures.hasFeaturePc(mContext)).isFalse();
+        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_PC, -1)).isNull();
+        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_PC, 0)).isNull();
+        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_PC, 100)).isNull();
 
         // For undefined types, conditional queries should report null (unknown).
         assertThat(RoFeatures.maybeHasFeature("com.arbitrary.feature", -1)).isNull();

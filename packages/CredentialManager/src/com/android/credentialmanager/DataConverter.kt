@@ -45,8 +45,8 @@ import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreateCustomCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePublicKeyCredentialRequest
+import androidx.credentials.CredentialOption
 import androidx.credentials.PasswordCredential
-import androidx.credentials.PriorityHints
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.RemoteEntry
@@ -175,9 +175,9 @@ class GetFlowUtils {
                         "androidx.credentials.BUNDLE_KEY_TYPE_PRIORITY_VALUE",
                         when (option.type) {
                             PasswordCredential.TYPE_PASSWORD_CREDENTIAL ->
-                                PriorityHints.PRIORITY_PASSWORD_OR_SIMILAR
+                                CredentialOption.PRIORITY_PASSWORD_OR_SIMILAR
                             PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL -> 100
-                            else -> PriorityHints.PRIORITY_DEFAULT
+                            else -> CredentialOption.PRIORITY_DEFAULT
                         }
                 )
                 typePriorityMap[option.type] = priority
@@ -344,8 +344,8 @@ class CreateFlowUtils {
                 }
                 is CreateCustomCredentialRequest -> {
                     // TODO: directly use the display info once made public
-                    val displayInfo = CreateCredentialRequest.DisplayInfo
-                        .parseFromCredentialDataBundle(createCredentialRequest.credentialData)
+                    val displayInfo = CreateCredentialRequest.DisplayInfo.createFrom(
+                            createCredentialRequest.credentialData)
                         ?: return null
                     RequestDisplayInfo(
                         title = displayInfo.userId.toString(),

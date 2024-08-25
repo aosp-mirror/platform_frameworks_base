@@ -119,6 +119,13 @@
 -keep public class android.os.** { *; }
 -keep public class com.android.internal.util.** { *; }
 -keep public class com.android.modules.utils.build.** { *; }
+# Also suppress related duplicate type warnings for the above kept classes.
+-dontwarn android.gsi.**
+-dontwarn android.hidl.base.**
+-dontwarn android.hidl.manager.**
+-dontwarn android.os.**
+-dontwarn com.android.internal.util.**
+-dontwarn com.android.modules.utils.build.**
 
 # CoverageService guards optional jacoco class references with a runtime guard, so we can safely
 # suppress build-time warnings.
