@@ -418,6 +418,7 @@ constructor(
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
                     mainDispatcher,
+                    null,
                 )
         }
         rootView.addView(
