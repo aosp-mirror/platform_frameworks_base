@@ -70,12 +70,14 @@ import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.floatThat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -131,6 +133,9 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     private lateinit var bgExecutor: FakeExecutor
     private lateinit var mediaCarouselController: MediaCarouselController
 
+    private var originalResumeSetting =
+        Settings.Secure.getInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 1)
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -173,6 +178,15 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 eq(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE)),
                 settingsObserverCaptor.capture()
             )
+    }
+
+    @After
+    fun tearDown() {
+        Settings.Secure.putInt(
+            context.contentResolver,
+            Settings.Secure.MEDIA_CONTROLS_RESUME,
+            originalResumeSetting
+        )
     }
 
     @Test
@@ -899,6 +913,45 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         globalSettings.putFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
         settingsObserverCaptor.value!!.onChange(false)
         verify(panel).updateAnimatorDurationScale()
+    }
+
+    @Test
+    fun swipeToDismiss_pausedAndResumeOff_userInitiated() {
+        // When resumption is disabled, paused media should be dismissed after being swiped away
+        Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
+
+        val pausedMedia = DATA.copy(isPlaying = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, pausedMedia)
+        mediaCarouselController.onSwipeToDismiss()
+
+        // When it can be removed immediately on update
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(true)
+        val inactiveMedia = pausedMedia.copy(active = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, inactiveMedia)
+
+        // This is processed as a user-initiated dismissal
+        verify(debugLogger).logMediaRemoved(eq(PAUSED_LOCAL), eq(true))
+        verify(mediaDataManager).dismissMediaData(eq(PAUSED_LOCAL), anyLong(), eq(true))
+    }
+
+    @Test
+    fun swipeToDismiss_pausedAndResumeOff_delayed_userInitiated() {
+        // When resumption is disabled, paused media should be dismissed after being swiped away
+        Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
+        mediaCarouselController.updateHostVisibility = {}
+
+        val pausedMedia = DATA.copy(isPlaying = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, pausedMedia)
+        mediaCarouselController.onSwipeToDismiss()
+
+        // When it can't be removed immediately on update
+        whenever(visualStabilityProvider.isReorderingAllowed).thenReturn(false)
+        val inactiveMedia = pausedMedia.copy(active = false)
+        listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, inactiveMedia)
+        visualStabilityCallback.value.onReorderingAllowed()
+
+        // This is processed as a user-initiated dismissal
+        verify(mediaDataManager).dismissMediaData(eq(PAUSED_LOCAL), anyLong(), eq(true))
     }
 
     /**

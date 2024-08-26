@@ -114,7 +114,7 @@ class CommunalMediaRepositoryImplTest : SysuiTestCase() {
 
             // Change to media unavailable and notify the listener.
             whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(false)
-            mediaDataListenerCaptor.value.onMediaDataRemoved("key")
+            mediaDataListenerCaptor.value.onMediaDataRemoved("key", false)
             runCurrent()
 
             // Media active now returns false.

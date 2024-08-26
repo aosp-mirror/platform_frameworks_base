@@ -104,7 +104,7 @@ constructor(
                 updateViewVisibility()
             }
 
-            override fun onMediaDataRemoved(key: String) {
+            override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
                 updateViewVisibility()
             }
 

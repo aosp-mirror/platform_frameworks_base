@@ -61,6 +61,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.any
@@ -161,7 +162,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun removeUnknown() {
-        manager.onMediaDataRemoved("unknown")
+        manager.onMediaDataRemoved("unknown", false)
+        verify(listener, never()).onKeyRemoved(eq(KEY), anyBoolean())
     }
 
     @Test
@@ -173,7 +175,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun loadAndRemoveMediaData() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
-        manager.onMediaDataRemoved(KEY)
+        manager.onMediaDataRemoved(KEY, false)
         fakeBgExecutor.runAllReady()
         verify(lmm).unregisterCallback(any())
         verify(muteAwaitManager).stopListening()
@@ -389,9 +391,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun listenerReceivesKeyRemoved() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         // WHEN the notification is removed
-        manager.onMediaDataRemoved(KEY)
+        manager.onMediaDataRemoved(KEY, true)
         // THEN the listener receives key removed event
-        verify(listener).onKeyRemoved(eq(KEY))
+        verify(listener).onKeyRemoved(eq(KEY), eq(true))
     }
 
     @Test
