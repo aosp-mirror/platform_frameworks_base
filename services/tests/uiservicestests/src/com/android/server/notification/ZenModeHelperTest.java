@@ -2186,6 +2186,80 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void testReadXml_upgradeToModesUi_resetsImplicitRuleIcon() throws Exception {
+        setupZenConfig();
+        mZenModeHelper.mConfig.automaticRules.clear();
+
+        ZenRule implicitRuleWithModesUi = expectedImplicitRule("pkg",
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, POLICY, null);
+
+        // Add one implicit rule in the pre-MODES_UI configuration.
+        ZenRule implicitRuleBeforeModesUi = implicitRuleWithModesUi.copy();
+        implicitRuleBeforeModesUi.iconResName = "pkg_icon";
+        mZenModeHelper.mConfig.automaticRules.put(implicitRuleBeforeModesUi.id,
+                implicitRuleBeforeModesUi);
+        // Plus one other normal rule.
+        ZenRule anotherRule = newZenRule("other_pkg", Instant.now(), null);
+        anotherRule.id = "other_rule";
+        anotherRule.iconResName = "other_icon";
+        anotherRule.type = TYPE_IMMERSIVE;
+        mZenModeHelper.mConfig.automaticRules.put(anotherRule.id, anotherRule);
+
+        // Write with pre-modes-ui = (modes_api) version, then re-read.
+        ByteArrayOutputStream baos = writeXmlAndPurge(ZenModeConfig.XML_VERSION_MODES_API);
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        // Implicit rule was updated.
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(implicitRuleBeforeModesUi.id))
+                .isEqualTo(implicitRuleWithModesUi);
+
+        // The other rule was untouched.
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(anotherRule.id))
+                .isEqualTo(anotherRule);
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void testReadXml_onModesUi_implicitRulesUntouched() throws Exception {
+        setupZenConfig();
+        mZenModeHelper.mConfig.automaticRules.clear();
+
+        // Add one implicit rule already in its post-modes-UI configuration, also customized with
+        // an icon;
+        ZenRule implicitRuleWithModesUi = expectedImplicitRule("pkg",
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, POLICY, null);
+        implicitRuleWithModesUi.iconResName = "icon_chosen_by_user";
+        mZenModeHelper.mConfig.automaticRules.put(implicitRuleWithModesUi.id,
+                implicitRuleWithModesUi);
+
+        // Plus one other normal rule.
+        ZenRule anotherRule = newZenRule("other_pkg", Instant.now(), null);
+        anotherRule.id = "other_rule";
+        anotherRule.iconResName = "other_icon";
+        anotherRule.type = TYPE_IMMERSIVE;
+        mZenModeHelper.mConfig.automaticRules.put(anotherRule.id, anotherRule);
+
+        // Write with modes_ui version, then re-read.
+        ByteArrayOutputStream baos = writeXmlAndPurge(ZenModeConfig.XML_VERSION_MODES_UI);
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        // Both rules were untouched
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(implicitRuleWithModesUi.id))
+                .isEqualTo(implicitRuleWithModesUi);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(anotherRule.id))
+                .isEqualTo(anotherRule);
+    }
+
+    @Test
     public void testCountdownConditionSubscription() throws Exception {
         ZenModeConfig config = new ZenModeConfig();
         mZenModeHelper.mConfig = config;
@@ -6852,7 +6926,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule.zenPolicy = policy;
         rule.pkg = ownerPkg;
         rule.name = CUSTOM_APP_LABEL;
-        rule.iconResName = ICON_RES_NAME;
+        if (!Flags.modesUi()) {
+            rule.iconResName = ICON_RES_NAME;
+        }
         rule.triggerDescription = mContext.getString(R.string.zen_mode_implicit_trigger_description,
                 CUSTOM_APP_LABEL);
         rule.type = AutomaticZenRule.TYPE_OTHER;
