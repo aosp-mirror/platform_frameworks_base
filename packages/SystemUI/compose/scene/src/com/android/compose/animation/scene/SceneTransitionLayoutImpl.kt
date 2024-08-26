@@ -432,7 +432,7 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 val progress =
                     when {
                         overscrollSpec == null -> transition.progress
-                        overscrollSpec.scene == transition.toScene -> 1f
+                        overscrollSpec.content == transition.toScene -> 1f
                         else -> 0f
                     }
 
