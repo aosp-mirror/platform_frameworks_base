@@ -129,7 +129,6 @@ import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_R
 import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
@@ -2725,8 +2724,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.mTransitionController.mAnimatingExitWindows.add(win);
                         reason = "inTransition";
                     }
-                } else if (win.isAnimating(PARENTS | TRANSITION,
-                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+                } else if (win.isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_APP_TRANSITION)) {
                     // Already animating as part of a legacy app-transition.
                     reason = "inLegacyTransition";
                 }

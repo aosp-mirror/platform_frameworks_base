@@ -94,7 +94,6 @@ import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_PINNABLE;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.TaskProto.AFFINITY;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
@@ -2966,8 +2965,7 @@ class Task extends TaskFragment {
 
     /** Checking if self or its child tasks are animated by recents animation. */
     boolean isAnimatingByRecents() {
-        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS)
-                || mTransitionController.isTransientHide(this);
+        return mTransitionController.isTransientHide(this);
     }
 
     WindowState getTopVisibleAppMainWindow() {

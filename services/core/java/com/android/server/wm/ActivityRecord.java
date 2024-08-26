@@ -233,7 +233,6 @@ import static com.android.server.wm.StartingData.AFTER_TRANSACTION_COPY_TO_CLIEN
 import static com.android.server.wm.StartingData.AFTER_TRANSACTION_REMOVE_DIRECTLY;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskPersister.DEBUG;
@@ -5542,10 +5541,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         if (!mDisplayContent.mAppTransition.isTransitionSet()) {
-            // Defer committing visibility for non-home app which is animating by recents.
-            if (isActivityTypeHome() || !isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
-                return false;
-            }
+            return false;
         }
         if (mWaitForEnteringPinnedMode && mVisible == visible) {
             // If the visibility is not changed during enter PIP, we don't want to include it in
@@ -5699,8 +5695,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void postApplyAnimation(boolean visible, boolean fromTransition) {
         final boolean usingShellTransitions = mTransitionController.isShellTransitionsEnabled();
         final boolean delayed = !usingShellTransitions && isAnimating(PARENTS | CHILDREN,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
-                        | ANIMATION_TYPE_RECENTS);
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
         if (!delayed && !usingShellTransitions) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
@@ -5722,7 +5717,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // animation and aren't in RESUMED state. Otherwise, we'll update client visibility in
         // onAnimationFinished or activityStopped.
         if (visible || (mState != RESUMED && (usingShellTransitions || !isAnimating(
-                PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)))) {
+                PARENTS, ANIMATION_TYPE_APP_TRANSITION)))) {
             setClientVisible(visible);
         }
 
@@ -7700,7 +7695,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Ensure that the activity content is hidden when the decor surface is boosted to
                 // prevent UI redressing attack.
                 && !isDecorSurfaceBoosted)
-                || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS
+                || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION
                         | ANIMATION_TYPE_PREDICT_BACK);
 
         if (mSurfaceControl != null) {
