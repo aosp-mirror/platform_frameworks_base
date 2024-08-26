@@ -148,4 +148,8 @@ object Utils {
         draw(canvas)
         return bitmap
     }
+
+    @JvmStatic
+    fun String.ellipsize(cutOffLength: Int) =
+        if (length <= cutOffLength) this else replaceRange(cutOffLength, length, "...")
 }
