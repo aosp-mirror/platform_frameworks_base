@@ -114,7 +114,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds;
@@ -4303,7 +4302,7 @@ public class NotificationStackScrollLayout
                 // Resetting headsUpAnimatingAway on Shade expansion avoids delays caused by
                 // waiting for all child animations to finish.
                 // TODO(b/328390331) Do we need to reset this on QS expanded as well?
-                if (NotificationsHeadsUpRefactor.isEnabled()) {
+                if (SceneContainerFlag.isEnabled()) {
                     setHeadsUpAnimatingAway(false);
                 }
             } else {
@@ -4414,7 +4413,7 @@ public class NotificationStackScrollLayout
 
     void onChildAnimationFinished() {
         setAnimationRunning(false);
-        if (NotificationsHeadsUpRefactor.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             setHeadsUpAnimatingAway(false);
         }
         requestChildrenUpdate();
@@ -4960,7 +4959,7 @@ public class NotificationStackScrollLayout
     }
 
     public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
-        NotificationsHeadsUpRefactor.assertInLegacyMode();
+        SceneContainerFlag.assertInLegacyMode();
         ExpandableNotificationRow row = entry.getHeadsUpAnimationView();
         generateHeadsUpAnimation(row, isHeadsUp);
     }
@@ -5003,7 +5002,7 @@ public class NotificationStackScrollLayout
             mNeedsAnimation = true;
             if (!mIsExpanded && !mWillExpand && !isHeadsUp) {
                 row.setHeadsUpAnimatingAway(true);
-                if (NotificationsHeadsUpRefactor.isEnabled()) {
+                if (SceneContainerFlag.isEnabled()) {
                     setHeadsUpAnimatingAway(true);
                 }
             }
@@ -5197,7 +5196,7 @@ public class NotificationStackScrollLayout
         updateClipping();
     }
 
-    /** TODO(b/328390331) make this private, when {@link NotificationsHeadsUpRefactor} is removed */
+    /** TODO(b/328390331) make this private, when {@link SceneContainerFlag} is removed */
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         if (mHeadsUpAnimatingAway != headsUpAnimatingAway) {
             mHeadsUpAnimatingAway = headsUpAnimatingAway;

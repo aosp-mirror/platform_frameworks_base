@@ -139,13 +139,6 @@ flag {
 }
 
 flag {
-    name: "notifications_heads_up_refactor"
-    namespace: "systemui"
-    description: "Use HeadsUpInteractor to feed HUN updates to the NSSL."
-    bug: "325936094"
-}
-
-flag {
    name: "notification_transparent_header_fix"
    namespace: "systemui"
    description: "fix the transparent group header issue for async header inflation."
