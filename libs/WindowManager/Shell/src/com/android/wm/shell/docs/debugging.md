@@ -27,10 +27,13 @@ building to check the log state (is enabled) before printing the print format st
   traces in Winscope)
 
 ### Kotlin
+Kotlin protologging is supported but not as optimized as in Java.
 
-Protolog tool does not yet have support for Kotlin code (see [b/168581922](https://b.corp.google.com/issues/168581922)).
-For logging in Kotlin, use the [KtProtoLog](/libs/WindowManager/Shell/src/com/android/wm/shell/util/KtProtoLog.kt)
-class which has a similar API to the Java ProtoLog class.
+The Protolog tool does not yet have support for Kotlin code ([b/168581922](https://b.corp.google.com/issues/168581922)).
+
+What this implies is that ProtoLogs are not pre-processed to extract the static strings out when used in Kotlin. So,
+there is no memory gain when using ProtoLogging in Kotlin. The logs will still be traced to Perfetto, but with a subtly
+worse performance due to the additional string interning that needs to be done at run time instead of at build time.
 
 ### Enabling ProtoLog command line logging
 Run these commands to enable protologs (in logcat) for WM Core ([list of all core tags](/core/java/com/android/internal/protolog/ProtoLogGroup.java)):
