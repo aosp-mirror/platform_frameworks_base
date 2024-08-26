@@ -10128,6 +10128,24 @@ public class AudioManager {
 
     /**
      * @hide
+     * Blocks until permission updates have propagated through the audio system.
+     * Only useful in tests, where adoptShellPermissions can change the permission state of
+     * an app without the app being killed.
+     */
+    @TestApi
+    @SuppressWarnings("UnflaggedApi") // @TestApi without associated feature.
+    public void permissionUpdateBarrier() {
+        final IAudioService service = getService();
+        try {
+            service.permissionUpdateBarrier();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * @hide
      * Return the list of independent stream types for volume control.
      * A stream type is considered independent when the volume changes of that type do not
      * affect any other independent volume control stream type.
