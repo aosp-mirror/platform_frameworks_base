@@ -265,7 +265,6 @@ internal class SwipeAnimation<T : Content>(
         // TODO(b/317063114) The CoroutineScope should be removed.
         coroutineScope: CoroutineScope,
         initialVelocity: Float,
-        targetOffset: Float,
         targetContent: T,
     ): OffsetAnimation {
         val initialProgress = progress
@@ -276,6 +275,33 @@ internal class SwipeAnimation<T : Content>(
                 (targetContent == fromContent && initialProgress <= 0f)
         val skipAnimation =
             hasReachedTargetContent && !contentTransition.isWithinProgressRange(initialProgress)
+
+        val targetContent =
+            if (targetContent != currentContent && !canChangeContent(targetContent)) {
+                currentContent
+            } else {
+                targetContent
+            }
+
+        val targetOffset =
+            if (targetContent == fromContent) {
+                0f
+            } else {
+                val distance = distance()
+                check(distance != DistanceUnspecified) {
+                    "distance is equal to $DistanceUnspecified"
+                }
+                distance
+            }
+
+        // If the effective current content changed, it should be reflected right now in the
+        // current state, even before the settle animation is ongoing. That way all the
+        // swipeables and back handlers will be refreshed and the user can for instance quickly
+        // swipe vertically from A => B then horizontally from B => C, or swipe from A => B then
+        // immediately go back B => A.
+        if (targetContent != currentContent) {
+            currentContent = targetContent
+        }
 
         return startOffsetAnimation {
             val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
@@ -342,7 +368,28 @@ internal class SwipeAnimation<T : Content>(
         }
     }
 
-    fun snapToContent(content: T) {
+    private fun canChangeContent(targetContent: Content): Boolean {
+        val layoutState = layoutImpl.state
+        return when (val transition = contentTransition) {
+            is TransitionState.Transition.ChangeCurrentScene ->
+                layoutState.canChangeScene(targetContent.key as SceneKey)
+            is TransitionState.Transition.ShowOrHideOverlay -> {
+                if (targetContent.key == transition.overlay) {
+                    layoutState.canShowOverlay(transition.overlay)
+                } else {
+                    layoutState.canHideOverlay(transition.overlay)
+                }
+            }
+            is TransitionState.Transition.ReplaceOverlay -> {
+                val to = targetContent.key as OverlayKey
+                val from =
+                    if (to == transition.toOverlay) transition.fromOverlay else transition.toOverlay
+                layoutState.canReplaceOverlay(from, to)
+            }
+        }
+    }
+
+    private fun snapToContent(content: T) {
         cancelOffsetAnimation()
         check(currentContent == content)
         layoutImpl.state.finishTransition(contentTransition)
@@ -358,24 +405,11 @@ internal class SwipeAnimation<T : Content>(
         }
 
         // Animate to the current content.
-        val targetContent = currentContent
-        val targetOffset =
-            if (targetContent == fromContent) {
-                0f
-            } else {
-                val distance = distance()
-                check(distance != DistanceUnspecified) {
-                    "targetContent != fromContent but distance is unspecified"
-                }
-                distance
-            }
-
         val animation =
             animateOffset(
                 coroutineScope = layoutImpl.coroutineScope,
                 initialVelocity = 0f,
-                targetOffset = targetOffset,
-                targetContent = targetContent,
+                targetContent = currentContent,
             )
         check(offsetAnimation == animation)
         return animation.job

@@ -405,20 +405,10 @@ private class DragControllerImpl(
             return 0f
         }
 
-        fun animateTo(targetContent: T, targetOffset: Float) {
-            // If the effective current content changed, it should be reflected right now in the
-            // current state, even before the settle animation is ongoing. That way all the
-            // swipeables and back handlers will be refreshed and the user can for instance quickly
-            // swipe vertically from A => B then horizontally from B => C, or swipe from A => B then
-            // immediately go back B => A.
-            if (targetContent != swipeAnimation.currentContent) {
-                swipeAnimation.currentContent = targetContent
-            }
-
+        fun animateTo(targetContent: T) {
             swipeAnimation.animateOffset(
                 coroutineScope = draggableHandler.coroutineScope,
                 initialVelocity = velocity,
-                targetOffset = targetOffset,
                 targetContent = targetContent,
             )
         }
@@ -433,68 +423,29 @@ private class DragControllerImpl(
             // Compute the destination content (and therefore offset) to settle in.
             val offset = swipeAnimation.dragOffset
             val distance = swipeAnimation.distance()
-            var targetContent: Content
-            var targetOffset: Float
-            if (
-                distance != DistanceUnspecified &&
-                    shouldCommitSwipe(
-                        offset = offset,
-                        distance = distance,
-                        velocity = velocity,
-                        wasCommitted = swipeAnimation.currentContent == toContent,
-                        requiresFullDistanceSwipe = swipeAnimation.requiresFullDistanceSwipe,
-                    )
-            ) {
-                targetContent = toContent
-                targetOffset = distance
-            } else {
-                targetContent = fromContent
-                targetOffset = 0f
-            }
-
-            fun shouldChangeContent(): Boolean {
-                return when (val transition = swipeAnimation.contentTransition) {
-                    is TransitionState.Transition.ChangeCurrentScene ->
-                        layoutState.canChangeScene(targetContent.key as SceneKey)
-                    is TransitionState.Transition.ShowOrHideOverlay -> {
-                        if (targetContent.key == transition.overlay) {
-                            layoutState.canShowOverlay(transition.overlay)
-                        } else {
-                            layoutState.canHideOverlay(transition.overlay)
-                        }
-                    }
-                    is TransitionState.Transition.ReplaceOverlay -> {
-                        val to = targetContent.key as OverlayKey
-                        val from =
-                            if (to == transition.toOverlay) transition.fromOverlay
-                            else transition.toOverlay
-                        layoutState.canReplaceOverlay(from, to)
-                    }
+            val targetContent =
+                if (
+                    distance != DistanceUnspecified &&
+                        shouldCommitSwipe(
+                            offset = offset,
+                            distance = distance,
+                            velocity = velocity,
+                            wasCommitted = swipeAnimation.currentContent == toContent,
+                            requiresFullDistanceSwipe = swipeAnimation.requiresFullDistanceSwipe,
+                        )
+                ) {
+                    toContent
+                } else {
+                    fromContent
                 }
-            }
 
-            if (targetContent != swipeAnimation.currentContent && !shouldChangeContent()) {
-                // We wanted to change to a new scene but we are not allowed to, so we animate back
-                // to the current scene.
-                targetContent = swipeAnimation.currentContent
-                targetOffset =
-                    if (targetContent == fromContent) {
-                        0f
-                    } else {
-                        check(distance != DistanceUnspecified) {
-                            "distance is equal to $DistanceUnspecified"
-                        }
-                        distance
-                    }
-            }
-
-            animateTo(targetContent = targetContent, targetOffset = targetOffset)
+            animateTo(targetContent = targetContent)
         } else {
             // We are doing an overscroll preview animation between scenes.
             check(fromContent == swipeAnimation.currentContent) {
                 "canChangeContent is false but currentContent != fromContent"
             }
-            animateTo(targetContent = fromContent, targetOffset = 0f)
+            animateTo(targetContent = fromContent)
         }
 
         // The onStop animation consumes any remaining velocity.
