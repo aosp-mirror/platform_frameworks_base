@@ -1453,7 +1453,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Clean up input monitors (for recents)
             final DisplayContent dc =
                     mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
-            dc.getInputMonitor().setActiveRecents(null /* activity */, null /* layer */);
+            dc.getInputMonitor().setActiveRecents(null /* task */, null /* layer */);
             dc.getInputMonitor().updateInputWindowsLw(false /* force */);
         }
         if (mTransientLaunches != null) {
@@ -2249,7 +2249,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Recents has an input-consumer to grab input from the "live tile" app. Set that up here
         final InputConsumerImpl recentsAnimationInputConsumer =
                 dc.getInputMonitor().getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
-        ActivityRecord recentsActivity = null;
+        Task recentsTask = null;
         if (recentsAnimationInputConsumer != null) {
             // Find the top-most going-away task and the recents activity. The top-most
             // is used as layer reference while the recents is used for registering the consumer
@@ -2264,20 +2264,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final int activityType = taskInfo.topActivityType;
                 final boolean isRecents = activityType == ACTIVITY_TYPE_HOME
                         || activityType == ACTIVITY_TYPE_RECENTS;
-                if (isRecents && recentsActivity == null) {
-                    recentsActivity = task.getTopVisibleActivity();
+                if (isRecents && recentsTask == null) {
+                    recentsTask = task;
                 } else if (!isRecents && topNonRecentsTask == null) {
                     topNonRecentsTask = task;
                 }
             }
-            if (recentsActivity != null && topNonRecentsTask != null) {
+            if (recentsTask != null && topNonRecentsTask != null) {
                 recentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(
                         topNonRecentsTask.getBounds());
-                dc.getInputMonitor().setActiveRecents(recentsActivity, topNonRecentsTask);
+                dc.getInputMonitor().setActiveRecents(recentsTask, topNonRecentsTask);
             }
         }
 
-        if (recentsActivity == null) {
+        if (recentsTask == null) {
             // No recents activity on `dc`, its probably on a different display.
             return;
         }
