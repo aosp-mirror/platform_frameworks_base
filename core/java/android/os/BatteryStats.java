@@ -1997,6 +1997,8 @@ public abstract class BatteryStats {
                 STATE2_VIDEO_ON_FLAG | STATE2_FLASHLIGHT_FLAG | STATE2_CAMERA_FLAG
                 | STATE2_GPS_SIGNAL_QUALITY_MASK;
 
+        public static final int GNSS_SIGNAL_QUALITY_NONE = 2;
+
         @UnsupportedAppUsage
         public int states2;
 
@@ -2220,7 +2222,7 @@ public abstract class BatteryStats {
             modemRailChargeMah = 0;
             wifiRailChargeMah = 0;
             states = 0;
-            states2 = 0;
+            states2 = GNSS_SIGNAL_QUALITY_NONE << HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT;
             wakelockTag = null;
             wakeReasonTag = null;
             eventCode = EVENT_NONE;
