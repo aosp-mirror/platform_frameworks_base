@@ -218,6 +218,12 @@ constructor(
             }
             .stateIn(lifecycleScope, SharingStarted.WhileSubscribed(), QSExpansionState.QQS)
 
+    /**
+     * Accessibility action for collapsing/expanding QS. The provided runnable is responsible for
+     * determining the correct action based on the expansion state.
+     */
+    var collapseExpandAccessibilityAction: Runnable? = null
+
     @AssistedFactory
     interface Factory {
         fun create(lifecycleScope: LifecycleCoroutineScope): QSFragmentComposeViewModel
