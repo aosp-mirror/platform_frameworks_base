@@ -158,18 +158,20 @@ private fun insertAfter(item: LazyGridItemInfo, offset: Offset): Boolean {
     return item.span != 1 && offset.x > itemCenter.x
 }
 
+@Composable
 fun Modifier.dragAndDropTileSource(
     sizedTile: SizedTile<EditTileViewModel>,
     onTap: (TileSpec) -> Unit,
     onDoubleTap: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState
 ): Modifier {
+    val state by rememberUpdatedState(dragAndDropState)
     return dragAndDropSource {
         detectTapGestures(
             onTap = { onTap(sizedTile.tile.tileSpec) },
             onDoubleTap = { onDoubleTap(sizedTile.tile.tileSpec) },
             onLongPress = {
-                dragAndDropState.onStarted(sizedTile)
+                state.onStarted(sizedTile)
 
                 // The tilespec from the ClipData transferred isn't actually needed as we're moving
                 // a tile within the same application. We're using a custom MIME type to limit the
