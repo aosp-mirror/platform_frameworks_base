@@ -1154,7 +1154,7 @@ private fun WidgetContent(
                 .then(selectableModifier)
                 .thenIf(!viewModel.isEditMode && !model.inQuietMode) {
                     Modifier.pointerInput(Unit) {
-                        observeTaps { viewModel.onTapWidget(model.componentName, model.priority) }
+                        observeTaps { viewModel.onTapWidget(model.componentName, model.rank) }
                     }
                 }
                 .thenIf(!viewModel.isEditMode && model.inQuietMode) {
