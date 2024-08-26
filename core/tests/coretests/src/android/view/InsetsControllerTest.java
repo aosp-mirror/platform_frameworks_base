@@ -1022,7 +1022,7 @@ public class InsetsControllerTest {
     }
 
     @Test
-    public void testImeRequestedVisibleDuringPredictiveBackAnim() {
+    public void testImeRequestedVisibleDuringPredictiveBackAnimWithoutCallback() {
         prepareControls();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             // show ime as initial state
@@ -1047,6 +1047,42 @@ public class InsetsControllerTest {
 
             // verify that insets are requested visible during animation
             assertTrue(isRequestedVisible(mController, ime()));
+        });
+    }
+
+    @Test
+    public void testImeRequestedInvisibleDuringPredictiveBackAnimWithCallback() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // set WindowInsetsAnimationCallback on ViewRoot
+            mViewRoot.getView().setWindowInsetsAnimationCallback(
+                    new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+                        @Override
+                        public WindowInsets onProgress(
+                                @NonNull WindowInsets insets,
+                                @NonNull List<WindowInsetsAnimation> runningAnimations) {
+                            return insets;
+                        }
+                    });
+
+            // show ime as initial state
+            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            mController.cancelExistingAnimations(); // fast forward show animation
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // Verify that onReady is called (after next predraw)
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            verify(listener).onReady(notNull(), eq(ime()));
+
+            // verify that insets are requested invisible during animation
+            assertFalse(isRequestedVisible(mController, ime()));
         });
     }
 

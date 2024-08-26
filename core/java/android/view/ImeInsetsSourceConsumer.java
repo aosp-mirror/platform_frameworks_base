@@ -70,7 +70,14 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                         "ImeInsetsSourceConsumer#onAnimationFinished",
                         mController.getHost().getInputMethodManager(), null /* icProto */);
             }
-            boolean insetsChanged = super.onAnimationStateChanged(running);
+            boolean insetsChanged = false;
+            if (Flags.predictiveBackIme() && !running && isShowRequested()
+                    && mAnimationState == ANIMATION_STATE_HIDE) {
+                // A user controlled hide animation may have ended in the shown state (e.g.
+                // cancelled predictive back animation) -> Insets need to be reset to shown.
+                insetsChanged |= applyLocalVisibilityOverride();
+            }
+            insetsChanged |= super.onAnimationStateChanged(running);
             if (running && !isShowRequested()
                     && mController.isPredictiveBackImeHideAnimInProgress()) {
                 // IME predictive back animation switched from pre-commit to post-commit.
