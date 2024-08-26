@@ -16,6 +16,7 @@
 
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_EMPTY_RESOURCES_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 
 import static org.junit.Assert.assertNotNull;
@@ -96,10 +97,6 @@ public class RavenwoodRuleImpl {
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
-//        android.os.SystemProperties.init$ravenwood(
-//                rule.mSystemProperties.getValues(),
-//                rule.mSystemProperties.getKeyReadablePredicate(),
-//                rule.mSystemProperties.getKeyWritablePredicate());
         setSystemProperties(rule.mSystemProperties);
 
         ServiceManager.init$ravenwood();
@@ -118,11 +115,12 @@ public class RavenwoodRuleImpl {
 
         // TODO This should be integrated into LoadedApk
         final Supplier<Resources> resourcesSupplier = () -> {
-            final var resApkFile = new File(RAVENWOOD_RESOURCE_APK).getAbsoluteFile();
+            var resApkFile = new File(RAVENWOOD_RESOURCE_APK);
+            if (!resApkFile.isFile()) {
+                resApkFile = new File(RAVENWOOD_EMPTY_RESOURCES_APK);
+            }
             assertTrue(resApkFile.isFile());
-
-            final var res = resApkFile.getAbsolutePath();
-
+            final String res = resApkFile.getAbsolutePath();
             final var emptyPaths = new String[0];
 
             ResourcesManager.getInstance().initializeApplicationPaths(res, emptyPaths);
