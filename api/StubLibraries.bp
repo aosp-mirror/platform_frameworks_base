@@ -890,7 +890,7 @@ java_genrule {
     cmd: "rm -f $(genDir)/framework.aidl.merged && " +
         "for i in $(in); do " +
         "  rm -f $(genDir)/framework.aidl.tmp && " +
-        "  $(location sdkparcelables) $$i $(genDir)/framework.aidl.tmp && " +
+        "  $(location sdkparcelables) $$i $(genDir)/framework.aidl.tmp --guarantee_stable && " +
         "  cat $(genDir)/framework.aidl.tmp >> $(genDir)/framework.aidl.merged; " +
         "done && " +
         "sort -u $(genDir)/framework.aidl.merged > $(out)",
