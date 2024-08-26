@@ -44,7 +44,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj;
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
