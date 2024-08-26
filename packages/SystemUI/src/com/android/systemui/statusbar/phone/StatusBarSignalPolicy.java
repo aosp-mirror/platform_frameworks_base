@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.statusBarSignalPolicyRefactor;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
@@ -29,10 +31,12 @@ import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.CarrierConfigTracker;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,14 +65,13 @@ public class StatusBarSignalPolicy implements SignalCallback,
     private final Handler mHandler = Handler.getMain();
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final TunerService mTunerService;
+    private final JavaAdapter mJavaAdapter;
+    private final AirplaneModeInteractor mAirplaneModeInteractor;
 
     private boolean mHideAirplane;
     private boolean mHideMobile;
     private boolean mHideEthernet;
     private boolean mActivityEnabled;
-
-    // Track as little state as possible, and only for padding purposes
-    private boolean mIsAirplaneMode = false;
 
     private ArrayList<CallIndicatorIconState> mCallIndicatorStates = new ArrayList<>();
     private boolean mInitialized;
@@ -80,15 +83,19 @@ public class StatusBarSignalPolicy implements SignalCallback,
             CarrierConfigTracker carrierConfigTracker,
             NetworkController networkController,
             SecurityController securityController,
-            TunerService tunerService
+            TunerService tunerService,
+            JavaAdapter javaAdapter,
+            AirplaneModeInteractor airplaneModeInteractor
     ) {
         mContext = context;
 
         mIconController = iconController;
         mCarrierConfigTracker = carrierConfigTracker;
+        mJavaAdapter = javaAdapter;
         mNetworkController = networkController;
         mSecurityController = securityController;
         mTunerService = tunerService;
+        mAirplaneModeInteractor = airplaneModeInteractor;
 
         mSlotAirplane = mContext.getString(com.android.internal.R.string.status_bar_airplane);
         mSlotMobile   = mContext.getString(com.android.internal.R.string.status_bar_mobile);
@@ -109,6 +116,12 @@ public class StatusBarSignalPolicy implements SignalCallback,
         mTunerService.addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
         mNetworkController.addCallback(this);
         mSecurityController.addCallback(this);
+
+        if (statusBarSignalPolicyRefactor()) {
+            mJavaAdapter.alwaysCollectFlow(
+                    mAirplaneModeInteractor.isAirplaneMode(),
+                    this::updateAirplaneModeIcon);
+        }
     }
 
     public void destroy() {
@@ -222,19 +235,38 @@ public class StatusBarSignalPolicy implements SignalCallback,
 
     @Override
     public void setIsAirplaneMode(IconState icon) {
+        if (statusBarSignalPolicyRefactor()) {
+            return;
+        }
+
         if (DEBUG) {
             Log.d(TAG, "setIsAirplaneMode: "
                     + "icon = " + (icon == null ? "" : icon.toString()));
         }
-        mIsAirplaneMode = icon.visible && !mHideAirplane;
+        boolean isAirplaneMode = icon.visible && !mHideAirplane;
         int resId = icon.icon;
         String description = icon.contentDescription;
 
-        if (mIsAirplaneMode && resId > 0) {
+        if (isAirplaneMode && resId > 0) {
             mIconController.setIcon(mSlotAirplane, resId, description);
             mIconController.setIconVisibility(mSlotAirplane, true);
         } else {
             mIconController.setIconVisibility(mSlotAirplane, false);
+        }
+    }
+
+    public void updateAirplaneModeIcon(boolean isAirplaneModeOn) {
+        if (StatusBarSignalPolicyRefactor.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        boolean isAirplaneMode = isAirplaneModeOn && !mHideAirplane;
+        mIconController.setIconVisibility(mSlotAirplane, isAirplaneMode);
+        if (isAirplaneMode) {
+            mIconController.setIcon(
+                    mSlotAirplane,
+                    TelephonyIcons.FLIGHT_MODE_ICON,
+                    mContext.getString(R.string.accessibility_airplane_mode));
         }
     }
 
