@@ -497,6 +497,17 @@ public class QSTileImplTest extends SysuiTestCase {
         assertThat(mTile.mRefreshes).isEqualTo(1);
     }
 
+    @Test
+    public void testStaleTriggeredOnUserSwitch() {
+        mTile.clearRefreshes();
+
+        mTile.userSwitch(10);
+        mTestableLooper.processAllMessages();
+
+        assertFalse(mTile.isListening());
+        assertThat(mTile.mRefreshes).isEqualTo(1);
+    }
+
     private void assertEvent(UiEventLogger.UiEventEnum eventType,
             UiEventLoggerFake.FakeUiEvent fakeEvent) {
         assertEquals(eventType.getId(), fakeEvent.eventId);
