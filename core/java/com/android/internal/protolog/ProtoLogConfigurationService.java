@@ -70,9 +70,9 @@ import java.util.TreeMap;
  * <p>
  * This service is intended to run on the system server, such that it never gets frozen.
  */
-@SystemService(Context.PROTOLOG_SERVICE)
-public final class ProtoLogService extends IProtoLogService.Stub {
-    private static final String LOG_TAG = "ProtoLogService";
+@SystemService(Context.PROTOLOG_CONFIGURATION_SERVICE)
+public final class ProtoLogConfigurationService extends IProtoLogConfigurationService.Stub {
+    private static final String LOG_TAG = "ProtoLogConfigurationService";
 
     private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
             this::onTracingInstanceStart,
@@ -114,12 +114,12 @@ public final class ProtoLogService extends IProtoLogService.Stub {
 
     private final ViewerConfigFileTracer mViewerConfigFileTracer;
 
-    public ProtoLogService() {
-        this(ProtoLogService::dumpTransitionTraceConfig);
+    public ProtoLogConfigurationService() {
+        this(ProtoLogConfigurationService::dumpTransitionTraceConfig);
     }
 
     @VisibleForTesting
-    public ProtoLogService(@NonNull ViewerConfigFileTracer tracer) {
+    public ProtoLogConfigurationService(@NonNull ViewerConfigFileTracer tracer) {
         // Initialize the Perfetto producer and register the Perfetto ProtoLog datasource to be
         // receive the lifecycle callbacks of the datasource and write the viewer configs if and
         // when required to the datasource.
