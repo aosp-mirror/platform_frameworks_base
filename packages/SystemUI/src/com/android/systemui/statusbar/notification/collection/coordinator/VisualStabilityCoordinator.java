@@ -22,7 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -43,6 +44,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.SeenNotific
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.kotlin.BooleanFlowOperators;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.io.PrintWriter;
@@ -70,7 +72,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final VisibilityLocationProvider mVisibilityLocationProvider;
     private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final CommunalInteractor mCommunalInteractor;
+    private final CommunalSceneInteractor mCommunalSceneInteractor;
+    private final ShadeInteractor mShadeInteractor;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final VisualStabilityCoordinatorLogger mLogger;
 
@@ -110,7 +113,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             VisibilityLocationProvider visibilityLocationProvider,
             VisualStabilityProvider visualStabilityProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
-            CommunalInteractor communalInteractor,
+            CommunalSceneInteractor communalSceneInteractor,
+            ShadeInteractor shadeInteractor,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             VisualStabilityCoordinatorLogger logger) {
         mHeadsUpManager = headsUpManager;
@@ -122,7 +126,8 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
-        mCommunalInteractor = communalInteractor;
+        mCommunalSceneInteractor = communalSceneInteractor;
+        mShadeInteractor = shadeInteractor;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mLogger = logger;
 
@@ -141,7 +146,11 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                 this::onShadeOrQsClosingChanged);
         mJavaAdapter.alwaysCollectFlow(mShadeAnimationInteractor.isLaunchingActivity(),
                 this::onLaunchingActivityChanged);
-        mJavaAdapter.alwaysCollectFlow(mCommunalInteractor.isIdleOnCommunal(),
+        mJavaAdapter.alwaysCollectFlow(
+                BooleanFlowOperators.INSTANCE.allOf(
+                        mCommunalSceneInteractor.isIdleOnCommunal(),
+                        BooleanFlowOperators.INSTANCE.not(mShadeInteractor.isAnyFullyExpanded())
+                ),
                 this::onCommunalShowingChanged);
 
         if (SceneContainerFlag.isEnabled()) {
