@@ -233,6 +233,10 @@ public class ActivityManager {
     private static final RateLimitingCache<List<RunningAppProcessInfo>> mRunningProcessesCache =
             new RateLimitingCache<>(10, 4);
 
+    /** Rate-Limiting Cache that allows no more than 200 calls to the service per second. */
+    private static final RateLimitingCache<List<ProcessErrorStateInfo>> mErrorProcessesCache =
+            new RateLimitingCache<>(10, 2);
+
     /**
      * Map of callbacks that have registered for {@link UidFrozenStateChanged} events.
      * Will be called when a Uid has become frozen or unfrozen.
@@ -3685,6 +3689,16 @@ public class ActivityManager {
      * specified.
      */
     public List<ProcessErrorStateInfo> getProcessesInErrorState() {
+        if (Flags.rateLimitGetProcessesInErrorState()) {
+            return mErrorProcessesCache.get(() -> {
+                return getProcessesInErrorStateInternal();
+            });
+        } else {
+            return getProcessesInErrorStateInternal();
+        }
+    }
+
+    private List<ProcessErrorStateInfo> getProcessesInErrorStateInternal() {
         try {
             return getService().getProcessesInErrorState();
         } catch (RemoteException e) {

@@ -23,7 +23,6 @@ import static android.view.MotionEvent.ACTION_UP;
 
 import android.app.Activity;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -38,9 +37,7 @@ import android.widget.Magnifier;
 
 import com.android.egg.R;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.IntStream;
 
 public class PaintActivity extends Activity {
@@ -60,31 +57,28 @@ public class PaintActivity extends Activity {
     private View.OnClickListener buttonHandler = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            switch (view.getId()) {
-                case R.id.btnBrush:
-                    view.setSelected(true);
-                    hideToolbar(colors);
-                    toggleToolbar(brushes);
-                    break;
-                case R.id.btnColor:
-                    view.setSelected(true);
-                    hideToolbar(brushes);
-                    toggleToolbar(colors);
-                    break;
-                case R.id.btnClear:
-                    painting.clear();
-                    break;
-                case R.id.btnSample:
-                    sampling = true;
-                    view.setSelected(true);
-                    break;
-                case R.id.btnZen:
-                    painting.setZenMode(!painting.getZenMode());
-                    view.animate()
-                            .setStartDelay(200)
-                            .setInterpolator(new OvershootInterpolator())
-                            .rotation(painting.getZenMode() ? 0f : 90f);
-                    break;
+            // With non final fields in the R class we can't switch on the
+            // id since the case values are no longer constants.
+            int viewId = view.getId();
+            if (viewId == R.id.btnBrush) {
+                view.setSelected(true);
+                hideToolbar(colors);
+                toggleToolbar(brushes);
+            } else if (viewId == R.id.btnColor) {
+                view.setSelected(true);
+                hideToolbar(brushes);
+                toggleToolbar(colors);
+            } else if (viewId == R.id.btnClear) {
+                painting.clear();
+            } else if (viewId == R.id.btnSample) {
+                sampling = true;
+                view.setSelected(true);
+            } else if (viewId == R.id.btnZen) {
+                painting.setZenMode(!painting.getZenMode());
+                view.animate()
+                        .setStartDelay(200)
+                        .setInterpolator(new OvershootInterpolator())
+                        .rotation(painting.getZenMode() ? 0f : 90f);
             }
         }
     };
