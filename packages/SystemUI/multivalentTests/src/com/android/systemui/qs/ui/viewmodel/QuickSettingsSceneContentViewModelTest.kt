@@ -26,7 +26,6 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.media.controls.shared.model.MediaData
@@ -82,7 +81,6 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
                 footerActionsController = footerActionsController,
                 mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
             )
-        underTest.activateIn(testScope)
     }
 
     @Test

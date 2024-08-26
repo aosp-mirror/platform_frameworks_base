@@ -28,6 +28,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
@@ -61,7 +62,7 @@ constructor(
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
     private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
-) : ComposableScene {
+) : ExclusiveActivatable(), ComposableScene {
 
     override val key = Scenes.NotificationsShade
 
@@ -72,7 +73,7 @@ constructor(
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions
 
-    override suspend fun activate(): Nothing {
+    override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
     }
 

@@ -17,14 +17,8 @@
 package com.android.systemui.lifecycle
 
 import android.view.View
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -32,8 +26,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.Assert
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -157,51 +149,9 @@ class SysUiViewModelTest : SysuiTestCase() {
 
         assertThat(viewModel.isActivated).isTrue()
     }
-
-    @Test
-    fun hydratedStateOf() {
-        val keepAliveMutable = mutableStateOf(true)
-        val upstreamStateFlow = MutableStateFlow(true)
-        val upstreamFlow = upstreamStateFlow.map { !it }
-        composeRule.setContent {
-            val keepAlive by keepAliveMutable
-            if (keepAlive) {
-                val viewModel = rememberViewModel {
-                    FakeSysUiViewModel(
-                        upstreamFlow = upstreamFlow,
-                        upstreamStateFlow = upstreamStateFlow,
-                    )
-                }
-
-                Column {
-                    Text(
-                        "upstreamStateFlow=${viewModel.stateBackedByStateFlow}",
-                        Modifier.testTag("upstreamStateFlow")
-                    )
-                    Text(
-                        "upstreamFlow=${viewModel.stateBackedByFlow}",
-                        Modifier.testTag("upstreamFlow")
-                    )
-                }
-            }
-        }
-
-        composeRule.waitForIdle()
-        composeRule
-            .onNode(hasTestTag("upstreamStateFlow"))
-            .assertTextEquals("upstreamStateFlow=true")
-        composeRule.onNode(hasTestTag("upstreamFlow")).assertTextEquals("upstreamFlow=false")
-
-        composeRule.runOnUiThread { upstreamStateFlow.value = false }
-        composeRule.waitForIdle()
-        composeRule
-            .onNode(hasTestTag("upstreamStateFlow"))
-            .assertTextEquals("upstreamStateFlow=false")
-        composeRule.onNode(hasTestTag("upstreamFlow")).assertTextEquals("upstreamFlow=true")
-    }
 }
 
-private class FakeViewModel : SysUiViewModel() {
+private class FakeViewModel : SysUiViewModel, ExclusiveActivatable() {
     var isActivated = false
 
     override suspend fun onActivated(): Nothing {
