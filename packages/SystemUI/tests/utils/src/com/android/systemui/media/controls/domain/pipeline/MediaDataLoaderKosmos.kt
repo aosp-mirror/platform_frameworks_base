@@ -16,22 +16,26 @@
 
 package com.android.systemui.media.controls.domain.pipeline
 
-import com.android.systemui.concurrency.fakeExecutor
+import android.app.statusBarManager
+import android.content.testableContext
+import com.android.systemui.graphics.imageLoader
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
-import com.android.systemui.plugins.statusbar.statusBarStateController
-import com.android.systemui.util.time.systemClock
+import com.android.systemui.plugins.activityStarter
 
-val Kosmos.mediaTimeoutListener by
+val Kosmos.mediaDataLoader by
     Kosmos.Fixture {
-        MediaTimeoutListener(
-            mediaControllerFactory = fakeMediaControllerFactory,
-            mainExecutor = fakeExecutor,
-            logger = MediaTimeoutLogger(logcatLogBuffer("MediaTimeoutLogBuffer")),
-            statusBarStateController = statusBarStateController,
-            systemClock = systemClock,
-            mediaFlags = mediaFlags,
+        MediaDataLoader(
+            testableContext,
+            testDispatcher,
+            testScope,
+            activityStarter,
+            fakeMediaControllerFactory,
+            mediaFlags,
+            imageLoader,
+            statusBarManager
         )
     }

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.util
+package android.app
 
-import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.fakeMediaControllerFactory by
-    Kosmos.Fixture { FakeMediaControllerFactory(applicationContext) }
+val Kosmos.statusBarManager by Kosmos.Fixture { mock<StatusBarManager>() }
