@@ -140,6 +140,13 @@ void AutoBackendTextureRelease::releaseQueueOwnership(GrDirectContext* context) 
         return;
     }
 
+    if (!RenderThread::isCurrent()) {
+        // releaseQueueOwnership needs to run on RenderThread to prevent multithread calling
+        // setBackendTextureState will operate skia resource cache which need single owner
+        RenderThread::getInstance().queue().post([this, context]() { releaseQueueOwnership(context); });
+        return;
+    }
+
     LOG_ALWAYS_FATAL_IF(Properties::getRenderPipelineType() != RenderPipelineType::SkiaVulkan);
     if (mBackendTexture.isValid()) {
         // Passing in VK_IMAGE_LAYOUT_UNDEFINED means we keep the old layout.
