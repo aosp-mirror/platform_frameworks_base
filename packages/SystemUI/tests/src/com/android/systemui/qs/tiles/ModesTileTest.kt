@@ -25,7 +25,6 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.kosmos.testDispatcher
@@ -51,13 +50,11 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -73,15 +70,6 @@ class ModesTileTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val testDispatcher = kosmos.testDispatcher
-
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            // TODO: b/360399800 - Remove; ZenIconLoader should always use direct executor for tests
-            ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
-        }
-    }
 
     @Mock private lateinit var qsHost: QSHost
 

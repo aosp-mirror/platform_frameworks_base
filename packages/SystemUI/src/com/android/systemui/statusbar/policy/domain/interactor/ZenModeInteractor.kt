@@ -50,9 +50,8 @@ constructor(
     private val zenModeRepository: ZenModeRepository,
     private val notificationSettingsRepository: NotificationSettingsRepository,
     @Background private val bgDispatcher: CoroutineDispatcher,
+    private val iconLoader: ZenIconLoader,
 ) {
-    private val iconLoader: ZenIconLoader = ZenIconLoader.getInstance()
-
     val isZenModeEnabled: Flow<Boolean> =
         zenModeRepository.globalZenMode
             .map {
