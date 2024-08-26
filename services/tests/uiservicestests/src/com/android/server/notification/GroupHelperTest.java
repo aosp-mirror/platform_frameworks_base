@@ -2204,7 +2204,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
                 eq(expectedGroupKey_silent), anyInt(), eq(getNotificationAttributes(BASE_FLAGS)));
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
-                eq(expectedGroupKey_silent), eq(false));
+                eq(expectedGroupKey_silent), eq(true));
 
         // Check that the alerting section group is removed
         verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), eq(pkg),
@@ -2264,13 +2264,15 @@ public class GroupHelperTest extends UiServiceTestCase {
                 notificationList);
 
         // Check that channel1's notifications are moved to the silent section group
-        expectedSummaryAttr = new NotificationAttributes(BASE_FLAGS,
-                mSmallIcon, COLOR_DEFAULT, DEFAULT_VISIBILITY, DEFAULT_GROUP_ALERT,
-                "TEST_CHANNEL_ID1");
-        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
-                eq(expectedGroupKey_silent), anyInt(), eq(expectedSummaryAttr));
-        verify(mCallback, times(AUTOGROUP_AT_COUNT/2 + 1)).addAutoGroup(anyString(),
-                eq(expectedGroupKey_silent), eq(false));
+        // But not enough to auto-group => remove override group key
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+        for (NotificationRecord record: notificationList) {
+            if (record.getChannel().getId().equals(channel1.getId())) {
+                assertThat(record.getSbn().getOverrideGroupKey()).isNull();
+            }
+        }
 
         // Check that the alerting section group is not removed, only updated
         expectedSummaryAttr = new NotificationAttributes(BASE_FLAGS,
@@ -2343,13 +2345,67 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
                 eq(expectedGroupKey_silent), anyInt(), eq(getNotificationAttributes(BASE_FLAGS)));
         verify(mCallback, times(numSilentGroupNotifications)).addAutoGroup(anyString(),
-                eq(expectedGroupKey_silent), eq(false));
+                eq(expectedGroupKey_silent), eq(true));
 
         // Check that the alerting section group is removed
         verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), eq(pkg),
                 eq(expectedGroupKey_alerting));
         verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
                 any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testAutogroup_updateChannel_reachedMinAutogroupCount() {
+        final String pkg = "package";
+        final NotificationChannel channel1 = new NotificationChannel("TEST_CHANNEL_ID1",
+                "TEST_CHANNEL_ID1", IMPORTANCE_DEFAULT);
+        final NotificationChannel channel2 = new NotificationChannel("TEST_CHANNEL_ID2",
+                "TEST_CHANNEL_ID2", IMPORTANCE_LOW);
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        // Post notifications with different channels that would autogroup in different sections
+        NotificationRecord r;
+        // Not enough notifications to autogroup initially
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            if (i % 2 == 0) {
+                r = getNotificationRecord(pkg, i, String.valueOf(i),
+                    UserHandle.SYSTEM, null, false, channel1);
+            } else {
+                r = getNotificationRecord(pkg, i, String.valueOf(i),
+                    UserHandle.SYSTEM, null, false, channel2);
+            }
+            notificationList.add(r);
+            mGroupHelper.onNotificationPosted(r, false);
+        }
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+        Mockito.reset(mCallback);
+
+        // Update channel1's importance
+        final String expectedGroupKey_silent = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SilentSection", UserHandle.SYSTEM.getIdentifier());
+        channel1.setImportance(IMPORTANCE_LOW);
+        for (NotificationRecord record: notificationList) {
+            if (record.getChannel().getId().equals(channel1.getId())) {
+                record.updateNotificationChannel(channel1);
+            }
+        }
+        mGroupHelper.onChannelUpdated(UserHandle.SYSTEM.getIdentifier(), pkg, channel1,
+                notificationList);
+
+        // Check that channel1's notifications are moved to the silent section & autogroup all
+        NotificationAttributes expectedSummaryAttr = new NotificationAttributes(BASE_FLAGS,
+                mSmallIcon, COLOR_DEFAULT, DEFAULT_VISIBILITY, DEFAULT_GROUP_ALERT,
+                "TEST_CHANNEL_ID1");
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey_silent), eq(true));
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey_silent), anyInt(), eq(expectedSummaryAttr));
     }
 
     @Test
