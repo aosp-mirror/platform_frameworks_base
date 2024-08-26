@@ -74,6 +74,7 @@ import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1272,19 +1273,24 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             ComponentName openComponent = null;
             int tmpSize;
             int openTaskId = INVALID_TASK_ID;
+            WindowContainerToken openToken = null;
             for (int j = init.getChanges().size() - 1; j >= 0; --j) {
                 final TransitionInfo.Change change = init.getChanges().get(j);
                 if (change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
                     openComponent = findComponentName(change);
                     openTaskId = findTaskId(change);
+                    openToken = findToken(change);
                     if (change.hasFlags(FLAG_SHOW_WALLPAPER)) {
                         openShowWallpaper = true;
                     }
                     break;
                 }
             }
-            if (openComponent == null && openTaskId == INVALID_TASK_ID) {
-                // shouldn't happen.
+            if (openComponent == null && openTaskId == INVALID_TASK_ID && openToken == null) {
+                // This shouldn't happen, but if that happen, consume the initial transition anyway.
+                Log.e(TAG, "Unable to merge following transition, cannot find the gesture "
+                        + "animated target from the open transition=" + mOpenTransitionInfo);
+                mOpenTransitionInfo = null;
                 return;
             }
             // find first non-prepare open target
@@ -1315,7 +1321,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 boolean moveToTop = false;
                 for (int j = info.getChanges().size() - 1; j >= 0; --j) {
                     final TransitionInfo.Change change = info.getChanges().get(j);
-                    if (isSameChangeTarget(openComponent, openTaskId, change)) {
+                    if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
                         moveToTop = change.hasFlags(FLAG_MOVED_TO_TOP);
                         info.getChanges().remove(j);
                     } else if ((openShowWallpaper && change.hasFlags(FLAG_IS_WALLPAPER))
@@ -1329,7 +1335,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     for (int i = 0; i < tmpSize; ++i) {
                         final TransitionInfo.Change change = init.getChanges().get(i);
                         if (moveToTop) {
-                            if (isSameChangeTarget(openComponent, openTaskId, change)) {
+                            if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
                                 change.setFlags(change.getFlags() | FLAG_MOVED_TO_TOP);
                             }
                         }
@@ -1358,7 +1364,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 if (nonBackClose && nonBackOpen) {
                     for (int j = info.getChanges().size() - 1; j >= 0; --j) {
                         final TransitionInfo.Change change = info.getChanges().get(j);
-                        if (isSameChangeTarget(openComponent, openTaskId, change)) {
+                        if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
                             info.getChanges().remove(j);
                         } else if ((openShowWallpaper && change.hasFlags(FLAG_IS_WALLPAPER))) {
                             info.getChanges().remove(j);
@@ -1368,6 +1374,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
             ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation transition, merge pending "
                     + "transitions result=%s", info);
+            // Only handle one merge transition request.
+            mOpenTransitionInfo = null;
         }
 
         @Override
@@ -1378,7 +1386,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 mClosePrepareTransition = null;
             }
             // try to handle unexpected transition
-            mergePendingTransitions(info);
+            if (mOpenTransitionInfo != null) {
+                mergePendingTransitions(info);
+            }
 
             if (isNotGestureBackTransition(info) || shouldCancelAnimation(info)
                     || !mCloseTransitionRequested) {
@@ -1628,6 +1638,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         return false;
     }
 
+    private static WindowContainerToken findToken(TransitionInfo.Change change) {
+        return change.getContainer();
+    }
+
     private static ComponentName findComponentName(TransitionInfo.Change change) {
         final ComponentName componentName = change.getActivityComponent();
         if (componentName != null) {
@@ -1649,11 +1663,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private static boolean isSameChangeTarget(ComponentName topActivity, int taskId,
-            TransitionInfo.Change change) {
+            WindowContainerToken token, TransitionInfo.Change change) {
         final ComponentName openChange = findComponentName(change);
         final int firstTaskId = findTaskId(change);
+        final WindowContainerToken openToken = findToken(change);
         return (openChange != null && openChange == topActivity)
-                || (firstTaskId != INVALID_TASK_ID && firstTaskId == taskId);
+                || (firstTaskId != INVALID_TASK_ID && firstTaskId == taskId)
+                || (openToken != null && token == openToken);
     }
 
     private static boolean canBeTransitionTarget(TransitionInfo.Change change) {

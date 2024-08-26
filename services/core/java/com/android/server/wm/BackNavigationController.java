@@ -882,6 +882,7 @@ class BackNavigationController {
         } else {
             if (mAnimationHandler.mPrepareCloseTransition != null) {
                 Slog.e(TAG, "Gesture animation is applied on another transition?");
+                return;
             }
             mAnimationHandler.mPrepareCloseTransition = transition;
             if (!migratePredictToTransition) {
