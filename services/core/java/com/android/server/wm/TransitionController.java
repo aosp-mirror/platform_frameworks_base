@@ -52,8 +52,8 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.server.FgThread;
 import com.android.window.flags.Flags;
 
@@ -880,10 +880,10 @@ class TransitionController {
     }
 
     /** @see Transition#setOverrideAnimation */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options, ActivityRecord r,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setOverrideAnimation(options, startCallback, finishCallback);
+        mCollectingTransition.setOverrideAnimation(options, r, startCallback, finishCallback);
     }
 
     void setNoAnimation(WindowContainer wc) {
