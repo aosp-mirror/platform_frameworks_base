@@ -420,6 +420,7 @@ public class CarrierConfigManager {
      * <p>
      * Note: This requires the Telephony config_supports_telephony_audio_device overlay to be true
      * in order to work.
+     * @deprecated this functionality was never used and is no longer supported.
      * @hide
      */
     public static final String KEY_PLAY_CALL_RECORDING_TONE_BOOL = "play_call_recording_tone_bool";

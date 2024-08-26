@@ -14196,7 +14196,7 @@ package android.telecom {
     field public static final int CAPABILITY_EMERGENCY_PREFERRED = 8192; // 0x2000
     field public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 512; // 0x200
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
-    field public static final String EXTRA_PLAY_CALL_RECORDING_TONE = "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
+    field @Deprecated @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String EXTRA_PLAY_CALL_RECORDING_TONE = "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
     field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String EXTRA_SKIP_CALL_FILTERING = "android.telecom.extra.SKIP_CALL_FILTERING";
     field public static final String EXTRA_SORT_ORDER = "android.telecom.extra.SORT_ORDER";
   }
