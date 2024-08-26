@@ -31,7 +31,9 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
+import com.android.modules.expresslog.Counter;
 import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
@@ -54,6 +56,30 @@ public class HardeningEnforcer {
 
     final EventLogger mEventLogger = new EventLogger(LOG_NB_EVENTS,
             "Hardening enforcement");
+
+    // capacity = 4 for each of the focus request types
+    static final SparseArray<String> METRIC_COUNTERS_FOCUS_DENIAL = new SparseArray<>(4);
+    static final SparseArray<String> METRIC_COUNTERS_FOCUS_GRANT = new SparseArray<>(4);
+
+    static {
+        METRIC_COUNTERS_FOCUS_GRANT.put(AudioManager.AUDIOFOCUS_GAIN,
+                "media_audio.value_audio_focus_gain_granted");
+        METRIC_COUNTERS_FOCUS_GRANT.put(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+                "media_audio.value_audio_focus_gain_transient_granted");
+        METRIC_COUNTERS_FOCUS_GRANT.put(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                "media_audio.value_audio_focus_gain_transient_duck_granted");
+        METRIC_COUNTERS_FOCUS_GRANT.put(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
+                "media_audio.value_audio_focus_gain_transient_excl_granted");
+
+        METRIC_COUNTERS_FOCUS_DENIAL.put(AudioManager.AUDIOFOCUS_GAIN,
+                "media_audio.value_audio_focus_gain_appops_denial");
+        METRIC_COUNTERS_FOCUS_DENIAL.put(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
+                "media_audio.value_audio_focus_gain_transient_appops_denial");
+        METRIC_COUNTERS_FOCUS_DENIAL.put(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+                "media_audio.value_audio_focus_gain_transient_duck_appops_denial");
+        METRIC_COUNTERS_FOCUS_DENIAL.put(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
+                "media_audio.value_audio_focus_gain_transient_excl_appops_denial");
+    }
 
     /**
      * Matches calls from {@link AudioManager#setStreamVolume(int, int, int)}
@@ -141,27 +167,47 @@ public class HardeningEnforcer {
             packageName = getPackNameForUid(callingUid);
         }
 
+        boolean blocked = true;
         if (noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, callingUid, packageName, attributionTag)) {
             if (DEBUG) {
                 Slog.i(TAG, "blockFocusMethod pack:" + packageName + " NOT blocking");
             }
-            return false;
+            blocked = false;
         } else if (targetSdk < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             if (DEBUG) {
                 Slog.i(TAG, "blockFocusMethod pack:" + packageName + " NOT blocking due to sdk="
                         + targetSdk);
             }
+            blocked = false;
+        }
+
+        metricsLogFocusReq(blocked, durationHint, callingUid);
+
+        if (!blocked) {
             return false;
         }
 
         String errorMssg = "Focus request DENIED for uid:" + callingUid
                 + " clientId:" + clientId + " req:" + durationHint
                 + " procState:" + mActivityManager.getUidProcessState(callingUid);
-
-        // TODO metrics
         mEventLogger.enqueueAndSlog(errorMssg, EventLogger.Event.ALOGI, TAG);
 
         return true;
+    }
+
+    /*package*/ void metricsLogFocusReq(boolean blocked, int focusReq, int callingUid) {
+        final String metricId = blocked ? METRIC_COUNTERS_FOCUS_DENIAL.get(focusReq)
+                : METRIC_COUNTERS_FOCUS_GRANT.get(focusReq);
+        if (TextUtils.isEmpty(metricId)) {
+            Slog.e(TAG, "Bad string for focus metrics gain:" + focusReq + " blocked:" + blocked);
+            return;
+        }
+        try {
+            Counter.logIncrementWithUid(metricId, callingUid);
+        } catch (Exception e) {
+            Slog.e(TAG, "Counter error metricId:" + metricId + " for focus req:" + focusReq
+                    + " from uid:" + callingUid, e);
+        }
     }
 
     private String getPackNameForUid(int uid) {
