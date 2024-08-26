@@ -19,7 +19,6 @@ package android.util;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -33,7 +32,6 @@ import org.junit.runner.RunWith;
  * Tests for {@link StateSet}
  */
 @RunWith(AndroidJUnit4.class)
-@IgnoreUnderRavenwood(blockedBy = StateSet.class)
 public class StateSetTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
