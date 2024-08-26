@@ -875,7 +875,7 @@ public class NotificationStackScrollLayout
         y = (int) (mAmbientState.getStackY());
         drawDebugInfo(canvas, y, Color.CYAN, /* label= */ "mAmbientState.getStackY() = " + y);
 
-        y = (int) (mAmbientState.getStackY() + mAmbientState.getStackHeight());
+        y = (int) (mAmbientState.getStackY() + mAmbientState.getInterpolatedStackHeight());
         drawDebugInfo(canvas, y, Color.LTGRAY,
                 /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = " + y);
 
@@ -1124,11 +1124,13 @@ public class NotificationStackScrollLayout
 
     @Override
     public void addStackHeightChangedListener(@NonNull Runnable runnable) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mStackHeightChangedListeners.addIfAbsent(runnable);
     }
 
     @Override
     public void removeStackHeightChangedListener(@NonNull Runnable runnable) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mStackHeightChangedListeners.remove(runnable);
     }
 
@@ -1477,7 +1479,7 @@ public class NotificationStackScrollLayout
 
     @VisibleForTesting
     public void updateStackEndHeightAndStackHeight(float fraction) {
-        final float oldStackHeight = mAmbientState.getStackHeight();
+        final float oldStackHeight = mAmbientState.getInterpolatedStackHeight();
         if (SceneContainerFlag.isEnabled()) {
             final float endHeight;
             if (!shouldSkipHeightUpdate()) {
@@ -1485,20 +1487,20 @@ public class NotificationStackScrollLayout
             } else {
                 endHeight = mAmbientState.getStackEndHeight();
             }
-            updateStackHeight(endHeight, fraction);
+            updateInterpolatedStackHeight(endHeight, fraction);
         } else {
             if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
                 final float endHeight = updateStackEndHeight(
                         getHeight(), getEmptyBottomMarginInternal(), getTopPadding());
-                updateStackHeight(endHeight, fraction);
+                updateInterpolatedStackHeight(endHeight, fraction);
             } else {
                 // Always updateStackHeight to prevent jumps in the stack height when this fraction
                 // suddenly reapplies after a freeze.
                 final float endHeight = mAmbientState.getStackEndHeight();
-                updateStackHeight(endHeight, fraction);
+                updateInterpolatedStackHeight(endHeight, fraction);
             }
         }
-        if (oldStackHeight != mAmbientState.getStackHeight()) {
+        if (oldStackHeight != mAmbientState.getInterpolatedStackHeight()) {
             requestChildrenUpdate();
         }
     }
@@ -1532,7 +1534,7 @@ public class NotificationStackScrollLayout
     }
 
     @VisibleForTesting
-    public void updateStackHeight(float endHeight, float fraction) {
+    public void updateInterpolatedStackHeight(float endHeight, float fraction) {
         if (!newAodTransition()) {
             // During the (AOD<=>LS) transition where dozeAmount is changing,
             // apply dozeAmount to stack height instead of expansionFraction
@@ -1542,7 +1544,7 @@ public class NotificationStackScrollLayout
                 fraction = 1f - dozeAmount;
             }
         }
-        mAmbientState.setStackHeight(
+        mAmbientState.setInterpolatedStackHeight(
                 MathUtils.lerp(endHeight * StackScrollAlgorithm.START_FRACTION,
                         endHeight, fraction));
     }
@@ -2523,10 +2525,33 @@ public class NotificationStackScrollLayout
     }
 
     @VisibleForTesting
-    void updateContentHeight() {
+    void updateStackHeight() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+
+        final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
+        final int footerIntrinsicHeight =
+                mFooterView != null ? mFooterView.getIntrinsicHeight() : 0;
+        final int notificationsHeight = (int) mNotificationStackSizeCalculator.computeHeight(
+                /* notificationStackScrollLayout= */ this,
+                mMaxDisplayedNotifications,
+                shelfIntrinsicHeight
+        );
+        mIntrinsicContentHeight = notificationsHeight;
+        final int fullStackHeight = notificationsHeight + footerIntrinsicHeight + mBottomPadding;
+        if (mScrollViewFields.getIntrinsicStackHeight() != fullStackHeight) {
+            mScrollViewFields.setIntrinsicStackHeight(fullStackHeight);
+            notifyStackHeightChangedListeners();
+        }
+    }
+
+    private void updateContentHeight() {
+        if (SceneContainerFlag.isEnabled()) {
+            updateStackHeight();
+            return;
+        }
+
         final float scrimTopPadding = getScrimTopPaddingOrZero();
         final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
-        final int footerIntrinsicHeight = mFooterView != null ? mFooterView.getIntrinsicHeight() : 0;
         final float height =
                 (int) scrimTopPadding + (int) mNotificationStackSizeCalculator.computeHeight(
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
@@ -2537,19 +2562,15 @@ public class NotificationStackScrollLayout
         // state the maxPanelHeight and the contentHeight should be bigger
         mContentHeight =
                 (int) (height + Math.max(getIntrinsicPadding(), getTopPadding()) + mBottomPadding);
-        mScrollViewFields.setIntrinsicStackHeight(
-                (int) (getIntrinsicPadding() + mIntrinsicContentHeight + footerIntrinsicHeight
-                        + mBottomPadding));
         updateScrollability();
         clampScrollPosition();
         updateStackPosition();
         mAmbientState.setContentHeight(mContentHeight);
-
-        notifyStackHeightChangedListeners();
     }
 
     @Override
     public int getIntrinsicStackHeight() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0;
         return mScrollViewFields.getIntrinsicStackHeight();
     }
 

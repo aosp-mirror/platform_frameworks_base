@@ -246,23 +246,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackSizeCalculator.computeHeight(eq(mStackScroller), anyInt(), anyFloat()))
                 .thenReturn((float) stackHeight);
 
-        mStackScroller.updateContentHeight();
+        mStackScroller.updateStackHeight();
 
         assertThat(mStackScroller.getIntrinsicStackHeight()).isEqualTo(stackHeight);
-    }
-
-    @Test
-    @DisableSceneContainer
-    public void testIntrinsicStackHeight_includesTopScrimPadding() {
-        int stackHeight = 300;
-        int topScrimPadding = px(R.dimen.notification_side_paddings);
-        when(mStackSizeCalculator.computeHeight(eq(mStackScroller), anyInt(), anyFloat()))
-                .thenReturn((float) stackHeight);
-
-        mStackScroller.updateContentHeight();
-
-        assertThat(mStackScroller.getIntrinsicStackHeight())
-                .isEqualTo(stackHeight + topScrimPadding);
     }
 
     @Test
@@ -290,8 +276,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 endHeight * StackScrollAlgorithm.START_FRACTION,
                 endHeight, expansionFraction);
 
-        mStackScroller.updateStackHeight(endHeight, expansionFraction);
-        assertThat(mAmbientState.getStackHeight()).isEqualTo(expected);
+        mStackScroller.updateInterpolatedStackHeight(endHeight, expansionFraction);
+        assertThat(mAmbientState.getInterpolatedStackHeight()).isEqualTo(expected);
     }
 
     @Test
@@ -310,7 +296,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // THEN stackHeight and stackEndHeight are the same
         verify(mAmbientState).setStackEndHeight(stackEndHeight);
-        verify(mAmbientState).setStackHeight(stackEndHeight);
+        verify(mAmbientState).setInterpolatedStackHeight(stackEndHeight);
     }
 
     @Test
@@ -330,7 +316,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // THEN stackHeight is changed by the expansion frac
         verify(mAmbientState).setStackEndHeight(stackEndHeight);
-        verify(mAmbientState).setStackHeight(stackEndHeight * 0.75f);
+        verify(mAmbientState).setInterpolatedStackHeight(stackEndHeight * 0.75f);
     }
 
     @Test
@@ -350,7 +336,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // THEN stackHeight is measured from the stack top
         verify(mAmbientState).setStackEndHeight(stackEndHeight);
-        verify(mAmbientState).setStackHeight(stackEndHeight);
+        verify(mAmbientState).setInterpolatedStackHeight(stackEndHeight);
     }
 
     @Test
@@ -364,7 +350,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         clearInvocations(mAmbientState);
         mStackScroller.updateStackEndHeightAndStackHeight(1f);
 
-        verify(mAmbientState).setStackHeight(eq(300f));
+        verify(mAmbientState).setInterpolatedStackHeight(eq(300f));
     }
 
     @Test
@@ -377,7 +363,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         clearInvocations(mAmbientState);
         mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
         verify(mAmbientState, never()).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
+        verify(mAmbientState).setInterpolatedStackHeight(anyFloat());
     }
 
     @Test
@@ -392,14 +378,14 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         clearInvocations(mAmbientState);
         mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
         verify(mAmbientState, never()).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
+        verify(mAmbientState).setInterpolatedStackHeight(anyFloat());
 
         // Validate that when the animation ends the stackEndHeight is recalculated immediately
         clearInvocations(mAmbientState);
         mStackScroller.setPanelFlinging(false);
         verify(mAmbientState).setFlinging(eq(false));
         verify(mAmbientState).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
+        verify(mAmbientState).setInterpolatedStackHeight(anyFloat());
     }
 
     @Test
@@ -441,6 +427,73 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
+    public void setExpandFraction_fullyCollapsed() {
+        // Given: stack bounds are set
+        float expandFraction = 0.0f;
+        float stackTop = 100;
+        float stackCutoff = 1100;
+        float stackHeight = stackCutoff - stackTop;
+        mStackScroller.setStackTop(stackTop);
+        mStackScroller.setStackCutoff(stackCutoff);
+
+        // When: panel is fully collapsed
+        mStackScroller.setExpandFraction(expandFraction);
+
+        // Then
+        assertThat(mAmbientState.getExpansionFraction()).isEqualTo(expandFraction);
+        assertThat(mAmbientState.isExpansionChanging()).isFalse();
+        assertThat(mAmbientState.getStackEndHeight()).isEqualTo(stackHeight);
+        assertThat(mAmbientState.getInterpolatedStackHeight()).isEqualTo(
+                stackHeight * StackScrollAlgorithm.START_FRACTION);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void setExpandFraction_expanding() {
+        // Given: stack bounds are set
+        float expandFraction = 0.6f;
+        float stackTop = 100;
+        float stackCutoff = 1100;
+        float stackHeight = stackCutoff - stackTop;
+        mStackScroller.setStackTop(stackTop);
+        mStackScroller.setStackCutoff(stackCutoff);
+
+        // When: panel is expanding
+        mStackScroller.setExpandFraction(expandFraction);
+
+        // Then
+        assertThat(mAmbientState.getExpansionFraction()).isEqualTo(expandFraction);
+        assertThat(mAmbientState.isExpansionChanging()).isTrue();
+        assertThat(mAmbientState.getStackEndHeight()).isEqualTo(stackHeight);
+        assertThat(mAmbientState.getInterpolatedStackHeight()).isGreaterThan(
+                stackHeight * StackScrollAlgorithm.START_FRACTION);
+        assertThat(mAmbientState.getInterpolatedStackHeight()).isLessThan(stackHeight);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void setExpandFraction_fullyExpanded() {
+        // Given: stack bounds are set
+        float expandFraction = 1.0f;
+        float stackTop = 100;
+        float stackCutoff = 1100;
+        float stackHeight = stackCutoff - stackTop;
+        mStackScroller.setStackTop(stackTop);
+        mStackScroller.setStackCutoff(stackCutoff);
+
+        // When: panel is fully expanded
+        mStackScroller.setExpandFraction(expandFraction);
+
+        // Then
+        assertThat(mAmbientState.getExpansionFraction()).isEqualTo(expandFraction);
+        assertThat(mAmbientState.isExpansionChanging()).isFalse();
+        assertThat(mAmbientState.getStackEndHeight()).isEqualTo(stackHeight);
+        assertThat(mAmbientState.getInterpolatedStackHeight()).isEqualTo(stackHeight);
+    }
+
+    @Test
+    @DisableSceneContainer
     public void testSetExpandedHeight_listenerReceivedCallbacks() {
         final float expectedHeight = 0f;
 
@@ -467,6 +520,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void testSetExpandedHeight_withSplitShade_doesntInterpolateStackHeight() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
