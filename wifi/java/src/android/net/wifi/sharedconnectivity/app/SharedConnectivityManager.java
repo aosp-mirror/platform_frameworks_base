@@ -98,6 +98,18 @@ public class SharedConnectivityManager {
         }
 
         @Override
+        public void onServiceDisconnected() {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onServiceDisconnected());
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
         public void onHotspotNetworksUpdated(@NonNull List<HotspotNetwork> networks) {
             if (mCallback != null) {
                 final long token = Binder.clearCallingIdentity();
@@ -247,13 +259,13 @@ public class SharedConnectivityManager {
                 mService = null;
                 synchronized (mProxyDataLock) {
                     if (!mCallbackProxyCache.isEmpty()) {
-                        mCallbackProxyCache.keySet().forEach(
-                                SharedConnectivityClientCallback::onServiceDisconnected);
+                        mCallbackProxyCache.values().forEach(
+                                SharedConnectivityCallbackProxy::onServiceDisconnected);
                         mCallbackProxyCache.clear();
                     }
                     if (!mProxyMap.isEmpty()) {
-                        mProxyMap.keySet().forEach(
-                                SharedConnectivityClientCallback::onServiceDisconnected);
+                        mProxyMap.values().forEach(
+                                SharedConnectivityCallbackProxy::onServiceDisconnected);
                         mProxyMap.clear();
                     }
                 }

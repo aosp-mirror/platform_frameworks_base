@@ -57,7 +57,7 @@ constructor(
                     isActivated = modes.isNotEmpty(),
                     icon =
                         if (Flags.modesApi() && Flags.modesUi() && Flags.modesUiIcons())
-                            zenModeInteractor.getActiveModeIcon(context, modes)
+                            zenModeInteractor.getActiveModeIcon(modes)
                         else null,
                     activeModes = modes.map { it.name }
                 )

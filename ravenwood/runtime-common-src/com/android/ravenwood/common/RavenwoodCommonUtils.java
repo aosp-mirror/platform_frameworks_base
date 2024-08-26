@@ -42,11 +42,14 @@ public class RavenwoodCommonUtils {
 
     private static final boolean IS_ON_RAVENWOOD = RavenwoodDivergence.isOnRavenwood();
 
-    private static final String RAVEWOOD_RUNTIME_PATH = getRavenwoodRuntimePathInternal();
+    private static final String RAVENWOOD_RUNTIME_PATH = getRavenwoodRuntimePathInternal();
 
     public static final String RAVENWOOD_SYSPROP = "ro.is_on_ravenwood";
 
     public static final String RAVENWOOD_RESOURCE_APK = "ravenwood-res-apks/ravenwood-res.apk";
+
+    public static final String RAVENWOOD_EMPTY_RESOURCES_APK =
+            RAVENWOOD_RUNTIME_PATH + "ravenwood-data/ravenwood-empty-res.apk";
 
     // @GuardedBy("sLock")
     private static boolean sIntegrityChecked = false;
@@ -178,7 +181,7 @@ public class RavenwoodCommonUtils {
      */
     public static String getRavenwoodRuntimePath() {
         ensureOnRavenwood();
-        return RAVEWOOD_RUNTIME_PATH;
+        return RAVENWOOD_RUNTIME_PATH;
     }
 
     private static String getRavenwoodRuntimePathInternal() {

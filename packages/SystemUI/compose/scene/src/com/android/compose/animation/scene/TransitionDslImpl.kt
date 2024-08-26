@@ -107,7 +107,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     ): OverscrollSpec {
         val spec =
             OverscrollSpecImpl(
-                scene = scene,
+                content = scene,
                 orientation = orientation,
                 transformationSpec =
                     TransformationSpecImpl(

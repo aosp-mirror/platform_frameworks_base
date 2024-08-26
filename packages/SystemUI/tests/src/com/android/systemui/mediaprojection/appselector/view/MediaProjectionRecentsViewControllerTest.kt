@@ -29,8 +29,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.util.mockito.mock
+import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.splitscreen.SplitScreen
-import com.android.wm.shell.util.SplitBounds
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional

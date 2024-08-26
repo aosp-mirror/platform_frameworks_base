@@ -33,4 +33,6 @@ interface RichOngoingViewModelComponent {
     }
 
     fun createTimerViewModel(): TimerViewModel
+
+    fun createEnRouteViewModel(): EnRouteViewModel
 }

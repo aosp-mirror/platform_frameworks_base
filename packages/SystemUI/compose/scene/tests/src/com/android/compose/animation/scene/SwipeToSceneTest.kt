@@ -614,6 +614,7 @@ class SwipeToSceneTest {
                         from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
 
                         overscroll(SceneB, Orientation.Vertical) {
+                            progressConverter = ProgressConverter.linear()
                             translate(TestElements.Foo, x = { 20.dp.toPx() }, y = { 30.dp.toPx() })
                         }
                     }

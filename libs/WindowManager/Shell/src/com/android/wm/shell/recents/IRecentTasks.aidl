@@ -24,7 +24,7 @@ import android.os.Bundle;
 import android.view.IRecentsAnimationRunner;
 
 import com.android.wm.shell.recents.IRecentTasksListener;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 
 /**
  * Interface that is exposed to remote callers to fetch recent tasks.

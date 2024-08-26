@@ -73,6 +73,7 @@ import com.android.systemui.media.controls.data.repository.MediaDataRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager.Companion.isMediaNotification
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
+import com.android.systemui.media.controls.shared.MediaControlDrawables
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_SOURCE
 import com.android.systemui.media.controls.shared.model.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.shared.model.MediaAction
@@ -1043,14 +1044,13 @@ class MediaDataProcessor(
         val playOrPause =
             if (isConnectingState(state.state)) {
                 // Spinner needs to be animating to render anything. Start it here.
-                val drawable =
-                    context.getDrawable(com.android.internal.R.drawable.progress_small_material)
+                val drawable = MediaControlDrawables.getProgress(context)
                 (drawable as Animatable).start()
                 MediaAction(
                     drawable,
                     null, // no action to perform when clicked
                     context.getString(R.string.controls_media_button_connecting),
-                    context.getDrawable(R.drawable.ic_media_connecting_container),
+                    MediaControlDrawables.getConnecting(context),
                     // Specify a rebind id to prevent the spinner from restarting on later binds.
                     com.android.internal.R.drawable.progress_small_material
                 )
@@ -1143,23 +1143,23 @@ class MediaDataProcessor(
         return when (action) {
             PlaybackState.ACTION_PLAY -> {
                 MediaAction(
-                    context.getDrawable(R.drawable.ic_media_play),
+                    MediaControlDrawables.getPlayIcon(context),
                     { controller.transportControls.play() },
                     context.getString(R.string.controls_media_button_play),
-                    context.getDrawable(R.drawable.ic_media_play_container)
+                    MediaControlDrawables.getPlayBackground(context)
                 )
             }
             PlaybackState.ACTION_PAUSE -> {
                 MediaAction(
-                    context.getDrawable(R.drawable.ic_media_pause),
+                    MediaControlDrawables.getPauseIcon(context),
                     { controller.transportControls.pause() },
                     context.getString(R.string.controls_media_button_pause),
-                    context.getDrawable(R.drawable.ic_media_pause_container)
+                    MediaControlDrawables.getPauseBackground(context)
                 )
             }
             PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {
                 MediaAction(
-                    context.getDrawable(R.drawable.ic_media_prev),
+                    MediaControlDrawables.getPrevIcon(context),
                     { controller.transportControls.skipToPrevious() },
                     context.getString(R.string.controls_media_button_prev),
                     null
@@ -1167,7 +1167,7 @@ class MediaDataProcessor(
             }
             PlaybackState.ACTION_SKIP_TO_NEXT -> {
                 MediaAction(
-                    context.getDrawable(R.drawable.ic_media_next),
+                    MediaControlDrawables.getNextIcon(context),
                     { controller.transportControls.skipToNext() },
                     context.getString(R.string.controls_media_button_next),
                     null
@@ -1308,7 +1308,7 @@ class MediaDataProcessor(
                 .loadDrawable(context),
             action,
             context.getString(R.string.controls_media_resume),
-            context.getDrawable(R.drawable.ic_media_play_container)
+            MediaControlDrawables.getPlayBackground(context)
         )
     }
 
