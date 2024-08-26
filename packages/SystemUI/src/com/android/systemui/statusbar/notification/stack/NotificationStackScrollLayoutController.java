@@ -1409,6 +1409,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public float calculateAppearFraction(float height) {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.calculateAppearFraction(height);
     }
 

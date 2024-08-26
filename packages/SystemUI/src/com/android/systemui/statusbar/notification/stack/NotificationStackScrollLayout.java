@@ -1236,7 +1236,6 @@ public class NotificationStackScrollLayout
         if (mAmbientState.getStackTop() != stackTop) {
             mAmbientState.setStackTop(stackTop);
             onTopPaddingChanged(/* animate = */ isAddOrRemoveAnimationPending());
-            setExpandedHeight(mExpandedHeight);
         }
     }
 
@@ -1573,13 +1572,29 @@ public class NotificationStackScrollLayout
 
         // Update the expand progress between started/stopped events
         mAmbientState.setExpansionFraction(expandFraction);
-        // TODO(b/332577544): don't convert to height which then converts to the fraction again
-        setExpandedHeight(expandFraction * getHeight());
+
+        if (!shouldSkipHeightUpdate()) {
+            updateStackEndHeightAndStackHeight(expandFraction);
+            updateExpandedHeight(expandFraction);
+        }
 
         // expansion stopped event requires that the expandFraction has already been updated
         if (!nowExpanding && wasExpanding) {
             setCheckForLeaveBehind(false);
             onExpansionStopped();
+        }
+    }
+
+    private void updateExpandedHeight(float expandFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        float expandedHeight = expandFraction * getHeight();
+        setIsExpanded(expandedHeight > 0);
+
+        if (mExpandedHeight != expandedHeight) {
+            mExpandedHeight = expandedHeight;
+            updateAlgorithmHeightAndPadding();
+            requestChildrenUpdate();
+            notifyAppearChangedListeners();
         }
     }
 
@@ -1595,6 +1610,7 @@ public class NotificationStackScrollLayout
      * @param height the expanded height of the panel
      */
     public void setExpandedHeight(float height) {
+        SceneContainerFlag.assertInLegacyMode();
         final boolean skipHeightUpdate = shouldSkipHeightUpdate();
 
         updateStackPosition();
@@ -1726,6 +1742,7 @@ public class NotificationStackScrollLayout
      * Measured relative to the resting position.
      */
     private float getExpandTranslationStart() {
+        SceneContainerFlag.assertInLegacyMode();
         return -getTopPadding() + getMinExpansionHeight() - mShelf.getIntrinsicHeight();
     }
 
@@ -1734,6 +1751,7 @@ public class NotificationStackScrollLayout
      * Measured in absolute height.
      */
     private float getAppearStartPosition() {
+        SceneContainerFlag.assertInLegacyMode();
         if (isHeadsUpTransition()) {
             final NotificationSection firstVisibleSection = getFirstVisibleSection();
             final int pinnedHeight = firstVisibleSection != null
@@ -1789,6 +1807,7 @@ public class NotificationStackScrollLayout
      *    have the shelf on its own)
      */
     private float getAppearEndPosition() {
+        SceneContainerFlag.assertInLegacyMode();
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             return getAppearEndPositionLegacy();
         }
@@ -1849,7 +1868,7 @@ public class NotificationStackScrollLayout
      */
     @FloatRange(from = -1.0, to = 1.0)
     public float calculateAppearFraction(float height) {
-        if (isHeadsUpTransition()) {
+        if (isHeadsUpTransition() && !SceneContainerFlag.isEnabled()) {
             // HUN is a special case because fraction can go negative if swiping up. And for now
             // it must go negative as other pieces responsible for proper translation up assume
             // negative value for HUN going up.

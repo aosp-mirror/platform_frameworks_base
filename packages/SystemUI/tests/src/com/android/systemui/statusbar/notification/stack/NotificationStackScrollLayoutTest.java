@@ -429,7 +429,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     @EnableSceneContainer
     public void setExpandFraction_fullyCollapsed() {
-        // Given: stack bounds are set
+        // Given: NSSL has a height
+        when(mStackScroller.getHeight()).thenReturn(1200);
+        // And: stack bounds are set
         float expandFraction = 0.0f;
         float stackTop = 100;
         float stackCutoff = 1100;
@@ -446,12 +448,16 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertThat(mAmbientState.getStackEndHeight()).isEqualTo(stackHeight);
         assertThat(mAmbientState.getInterpolatedStackHeight()).isEqualTo(
                 stackHeight * StackScrollAlgorithm.START_FRACTION);
+        assertThat(mAmbientState.isShadeExpanded()).isFalse();
+        assertThat(mStackScroller.getExpandedHeight()).isZero();
     }
 
     @Test
     @EnableSceneContainer
     public void setExpandFraction_expanding() {
-        // Given: stack bounds are set
+        // Given: NSSL has a height
+        when(mStackScroller.getHeight()).thenReturn(1200);
+        // And: stack bounds are set
         float expandFraction = 0.6f;
         float stackTop = 100;
         float stackCutoff = 1100;
@@ -469,12 +475,17 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertThat(mAmbientState.getInterpolatedStackHeight()).isGreaterThan(
                 stackHeight * StackScrollAlgorithm.START_FRACTION);
         assertThat(mAmbientState.getInterpolatedStackHeight()).isLessThan(stackHeight);
+        assertThat(mStackScroller.getExpandedHeight()).isGreaterThan(0f);
+        assertThat(mAmbientState.isShadeExpanded()).isTrue();
     }
 
     @Test
     @EnableSceneContainer
     public void setExpandFraction_fullyExpanded() {
-        // Given: stack bounds are set
+        // Given: NSSL has a height
+        int viewHeight = 1200;
+        when(mStackScroller.getHeight()).thenReturn(viewHeight);
+        // And: stack bounds are set
         float expandFraction = 1.0f;
         float stackTop = 100;
         float stackCutoff = 1100;
@@ -490,6 +501,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertThat(mAmbientState.isExpansionChanging()).isFalse();
         assertThat(mAmbientState.getStackEndHeight()).isEqualTo(stackHeight);
         assertThat(mAmbientState.getInterpolatedStackHeight()).isEqualTo(stackHeight);
+        assertThat(mStackScroller.getExpandedHeight()).isEqualTo(viewHeight);
+        assertThat(mAmbientState.isShadeExpanded()).isTrue();
     }
 
     @Test
