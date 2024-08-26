@@ -17,7 +17,9 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.ObservableTransitionState.Idle
+import com.android.compose.animation.scene.ObservableTransitionState.Transition
+import com.android.compose.animation.scene.ObservableTransitionState.Transition.ChangeCurrentScene
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -66,36 +68,40 @@ constructor(
         activateFlowDumper()
     }
 
-    private fun expandFractionForScene(scene: SceneKey, shadeExpansion: Float): Float =
-        when (scene) {
+    private fun expandedInScene(scene: SceneKey): Boolean {
+        return when (scene) {
             Scenes.Lockscreen,
-            Scenes.QuickSettings -> 1f
-            else -> shadeExpansion
+            Scenes.Shade,
+            Scenes.QuickSettings -> true
+            else -> false
         }
+    }
 
-    private fun expandFractionForTransition(
-        state: ObservableTransitionState.Transition.ChangeCurrentScene,
+    private fun fullyExpandedDuringSceneChange(change: ChangeCurrentScene): Boolean {
+        // The lockscreen stack is visible during all transitions away from the lockscreen, so keep
+        // the stack expanded until those transitions finish.
+        return (expandedInScene(change.fromScene) && expandedInScene(change.toScene)) ||
+            change.isBetween({ it == Scenes.Lockscreen }, { true })
+    }
+
+    private fun expandFractionDuringSceneChange(
+        change: ChangeCurrentScene,
         shadeExpansion: Float,
-        shadeMode: ShadeMode,
         qsExpansion: Float,
-        quickSettingsScene: SceneKey
-    ): Float =
-        if (
-            state.isBetween({ it == Scenes.Lockscreen }, { it in SceneFamilies.NotifShade }) ||
-                state.isBetween({ it in SceneFamilies.NotifShade }, { it == quickSettingsScene })
-        ) {
+    ): Float {
+        return if (fullyExpandedDuringSceneChange(change)) {
             1f
-        } else if (
-            shadeMode != ShadeMode.Split &&
-                state.isBetween({ it in SceneFamilies.Home }, { it == quickSettingsScene })
-        ) {
+        } else if (change.isBetween({ it == Scenes.Gone }, { it in SceneFamilies.NotifShade })) {
+            shadeExpansion
+        } else if (change.isBetween({ it == Scenes.Gone }, { it == Scenes.QuickSettings })) {
             // during QS expansion, increase fraction at same rate as scrim alpha,
             // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
             (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA - EXPANSION_FOR_DELAYED_STACK_FADE_IN)
                 .coerceIn(0f, 1f)
         } else {
-            shadeExpansion
+            0f
         }
+    }
 
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
@@ -109,21 +115,17 @@ constructor(
                 shadeInteractor.qsExpansion,
                 sceneInteractor.transitionState,
                 sceneInteractor.resolveSceneFamily(SceneFamilies.QuickSettings),
-            ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
+            ) { shadeExpansion, _, qsExpansion, transitionState, _ ->
                 when (transitionState) {
-                    is ObservableTransitionState.Idle ->
-                        expandFractionForScene(transitionState.currentScene, shadeExpansion)
-                    is ObservableTransitionState.Transition.ChangeCurrentScene ->
-                        expandFractionForTransition(
+                    is Idle -> if (expandedInScene(transitionState.currentScene)) 1f else 0f
+                    is ChangeCurrentScene ->
+                        expandFractionDuringSceneChange(
                             transitionState,
                             shadeExpansion,
-                            shadeMode,
                             qsExpansion,
-                            quickSettingsScene
                         )
-                    is ObservableTransitionState.Transition.ShowOrHideOverlay,
-                    is ObservableTransitionState.Transition.ReplaceOverlay ->
-                        TODO("b/359173565: Handle overlay transitions")
+                    is Transition.ShowOrHideOverlay,
+                    is Transition.ReplaceOverlay -> TODO("b/359173565: Handle overlay transitions")
                 }
             }
             .distinctUntilChanged()
@@ -134,9 +136,7 @@ constructor(
 
     val shouldResetStackTop: Flow<Boolean> =
         sceneInteractor.transitionState
-            .mapNotNull { state ->
-                state is ObservableTransitionState.Idle && state.currentScene == Scenes.Gone
-            }
+            .mapNotNull { state -> state is Idle && state.currentScene == Scenes.Gone }
             .distinctUntilChanged()
             .dumpWhileCollecting("shouldResetStackTop")
 
@@ -241,7 +241,7 @@ constructor(
     }
 }
 
-private fun ObservableTransitionState.Transition.ChangeCurrentScene.isBetween(
+private fun ChangeCurrentScene.isBetween(
     a: (SceneKey) -> Boolean,
     b: (SceneKey) -> Boolean
 ): Boolean = (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))
