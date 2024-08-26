@@ -830,61 +830,19 @@ public class GroupHelper {
                 }
             }
 
+            // The list of notification operations required after the channel update
             final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
 
-            final Set<FullyQualifiedGroupKey> oldGroups =
-                    new HashSet<>(mAggregatedNotifications.keySet());
-            for (FullyQualifiedGroupKey oldFullAggKey : oldGroups) {
-                // Only check aggregate groups that match the same userId & packageName
-                if (pkgName.equals(oldFullAggKey.pkg) && userId == oldFullAggKey.userId) {
-                    final ArrayMap<String, NotificationAttributes> notificationsInAggGroup =
-                            mAggregatedNotifications.get(oldFullAggKey);
-                    if (notificationsInAggGroup == null) {
-                        continue;
-                    }
+            // Check any already auto-grouped notifications that may need to be re-grouped
+            // after the channel update
+            notificationsToMove.addAll(
+                    getAutogroupedNotificationsMoveOps(userId, pkgName,
+                        notificationsToCheck));
 
-                    FullyQualifiedGroupKey newFullAggregateGroupKey = null;
-                    for (String key : notificationsInAggGroup.keySet()) {
-                        if (notificationsToCheck.get(key) != null) {
-                            // check if section changes
-                            NotificationSectioner sectioner = getSection(
-                                    notificationsToCheck.get(key));
-                            if (sectioner == null) {
-                                continue;
-                            }
-                            newFullAggregateGroupKey = new FullyQualifiedGroupKey(userId, pkgName,
-                                    sectioner);
-                            if (!oldFullAggKey.equals(newFullAggregateGroupKey)) {
-                                if (DEBUG) {
-                                    Log.i(TAG, "Change section on channel update: " + key);
-                                }
-                                notificationsToMove.add(
-                                        new NotificationMoveOp(notificationsToCheck.get(key),
-                                            oldFullAggKey, newFullAggregateGroupKey));
-                            }
-                        }
-                    }
-
-                    if (newFullAggregateGroupKey != null) {
-                        // Add any notifications left ungrouped to the new section
-                        ArrayMap<String, NotificationAttributes> ungrouped =
-                            mUngroupedAbuseNotifications.get(newFullAggregateGroupKey);
-                        if (ungrouped != null) {
-                            for (NotificationRecord r : notificationList) {
-                                if (ungrouped.containsKey(r.getKey())) {
-                                    if (DEBUG) {
-                                        Log.i(TAG, "Add previously ungrouped: " + r);
-                                    }
-                                    notificationsToMove.add(
-                                        new NotificationMoveOp(r, null, newFullAggregateGroupKey));
-                                }
-                            }
-                            //Cleanup mUngroupedAbuseNotifications
-                            mUngroupedAbuseNotifications.remove(newFullAggregateGroupKey);
-                        }
-                    }
-                }
-            }
+            // Check any ungrouped notifications that may need to be auto-grouped
+            // after the channel update
+            notificationsToMove.addAll(
+                    getUngroupedNotificationsMoveOps(userId, pkgName, notificationsToCheck));
 
             // Batch move to new section
             if (!notificationsToMove.isEmpty()) {
@@ -894,10 +852,103 @@ public class GroupHelper {
     }
 
     @GuardedBy("mAggregatedNotifications")
+    private List<NotificationMoveOp> getAutogroupedNotificationsMoveOps(int userId, String pkgName,
+            ArrayMap<String, NotificationRecord> notificationsToCheck) {
+        final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
+        final Set<FullyQualifiedGroupKey> oldGroups =
+                new HashSet<>(mAggregatedNotifications.keySet());
+        // Move auto-grouped updated notifications from the old groups to the new groups (section)
+        for (FullyQualifiedGroupKey oldFullAggKey : oldGroups) {
+            // Only check aggregate groups that match the same userId & packageName
+            if (pkgName.equals(oldFullAggKey.pkg) && userId == oldFullAggKey.userId) {
+                final ArrayMap<String, NotificationAttributes> notificationsInAggGroup =
+                        mAggregatedNotifications.get(oldFullAggKey);
+                if (notificationsInAggGroup == null) {
+                    continue;
+                }
+
+                FullyQualifiedGroupKey newFullAggregateGroupKey = null;
+                for (String key : notificationsInAggGroup.keySet()) {
+                    if (notificationsToCheck.get(key) != null) {
+                        // check if section changes
+                        NotificationSectioner sectioner = getSection(notificationsToCheck.get(key));
+                        if (sectioner == null) {
+                            continue;
+                        }
+                        newFullAggregateGroupKey = new FullyQualifiedGroupKey(userId, pkgName,
+                                sectioner);
+                        if (!oldFullAggKey.equals(newFullAggregateGroupKey)) {
+                            if (DEBUG) {
+                                Log.i(TAG, "Change section on channel update: " + key);
+                            }
+                            notificationsToMove.add(
+                                    new NotificationMoveOp(notificationsToCheck.get(key),
+                                        oldFullAggKey, newFullAggregateGroupKey));
+                            notificationsToCheck.remove(key);
+                        }
+                    }
+                }
+            }
+        }
+        return notificationsToMove;
+    }
+
+    @GuardedBy("mAggregatedNotifications")
+    private List<NotificationMoveOp> getUngroupedNotificationsMoveOps(int userId, String pkgName,
+            final ArrayMap<String, NotificationRecord> notificationsToCheck) {
+        final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
+        // Move any remaining ungrouped updated notifications from the old ungrouped list
+        // to the new ungrouped section list, if necessary
+        if (!notificationsToCheck.isEmpty()) {
+            final Set<FullyQualifiedGroupKey> oldUngroupedSectionKeys =
+                    new HashSet<>(mUngroupedAbuseNotifications.keySet());
+            for (FullyQualifiedGroupKey oldFullAggKey : oldUngroupedSectionKeys) {
+                // Only check aggregate groups that match the same userId & packageName
+                if (pkgName.equals(oldFullAggKey.pkg) && userId == oldFullAggKey.userId) {
+                    final ArrayMap<String, NotificationAttributes> ungroupedOld =
+                            mUngroupedAbuseNotifications.get(oldFullAggKey);
+                    if (ungroupedOld == null) {
+                        continue;
+                    }
+
+                    FullyQualifiedGroupKey newFullAggregateGroupKey = null;
+                    final Set<String> ungroupedKeys = new HashSet<>(ungroupedOld.keySet());
+                    for (String key : ungroupedKeys) {
+                        NotificationRecord record = notificationsToCheck.get(key);
+                        if (record != null) {
+                            // check if section changes
+                            NotificationSectioner sectioner = getSection(record);
+                            if (sectioner == null) {
+                                continue;
+                            }
+                            newFullAggregateGroupKey = new FullyQualifiedGroupKey(userId, pkgName,
+                                    sectioner);
+                            if (!oldFullAggKey.equals(newFullAggregateGroupKey)) {
+                                if (DEBUG) {
+                                    Log.i(TAG, "Change ungrouped section: " + key);
+                                }
+                                notificationsToMove.add(
+                                        new NotificationMoveOp(record, oldFullAggKey,
+                                            newFullAggregateGroupKey));
+                                notificationsToCheck.remove(key);
+                                //Remove from previous ungrouped list
+                                ungroupedOld.remove(key);
+                            }
+                        }
+                    }
+                    mUngroupedAbuseNotifications.put(oldFullAggKey, ungroupedOld);
+                }
+            }
+        }
+        return notificationsToMove;
+    }
+
+    @GuardedBy("mAggregatedNotifications")
     private void moveNotificationsToNewSection(final int userId, final String pkgName,
             final List<NotificationMoveOp> notificationsToMove) {
         record GroupUpdateOp(FullyQualifiedGroupKey groupKey, NotificationRecord record,
                              boolean hasSummary) { }
+        // Bundled operations to apply to groups affected by the channel update
         ArrayMap<FullyQualifiedGroupKey, GroupUpdateOp> groupsToUpdate = new ArrayMap<>();
 
         for (NotificationMoveOp moveOp: notificationsToMove) {
@@ -923,35 +974,36 @@ public class GroupHelper {
                 // Only add once, for triggering notification
                 if (!groupsToUpdate.containsKey(oldFullAggregateGroupKey)) {
                     groupsToUpdate.put(oldFullAggregateGroupKey,
-                            new GroupUpdateOp(oldFullAggregateGroupKey, record, true));
+                        new GroupUpdateOp(oldFullAggregateGroupKey, record, true));
                 }
             }
 
-            // Add/update aggregate summary for new group
+            // Add moved notifications to the ungrouped list for new group and do grouping
+            // after all notifications have been handled
             if (newFullAggregateGroupKey != null) {
                 final ArrayMap<String, NotificationAttributes> newAggregatedNotificationsAttrs =
                         mAggregatedNotifications.getOrDefault(newFullAggregateGroupKey,
                             new ArrayMap<>());
-                boolean newGroupExists = !newAggregatedNotificationsAttrs.isEmpty();
-                newAggregatedNotificationsAttrs.put(record.getKey(),
-                        new NotificationAttributes(record.getFlags(),
-                            record.getNotification().getSmallIcon(),
-                            record.getNotification().color,
-                            record.getNotification().visibility,
-                            record.getNotification().getGroupAlertBehavior(),
-                            record.getChannel().getId()));
-                mAggregatedNotifications.put(newFullAggregateGroupKey,
-                        newAggregatedNotificationsAttrs);
+                boolean hasSummary = !newAggregatedNotificationsAttrs.isEmpty();
+                ArrayMap<String, NotificationAttributes> ungrouped =
+                        mUngroupedAbuseNotifications.getOrDefault(newFullAggregateGroupKey,
+                            new ArrayMap<>());
+                ungrouped.put(record.getKey(), new NotificationAttributes(
+                        record.getFlags(),
+                        record.getNotification().getSmallIcon(),
+                        record.getNotification().color,
+                        record.getNotification().visibility,
+                        record.getNotification().getGroupAlertBehavior(),
+                        record.getChannel().getId()));
+                mUngroupedAbuseNotifications.put(newFullAggregateGroupKey, ungrouped);
+
+                record.setOverrideGroupKey(null);
 
                 // Only add once, for triggering notification
                 if (!groupsToUpdate.containsKey(newFullAggregateGroupKey)) {
                     groupsToUpdate.put(newFullAggregateGroupKey,
-                            new GroupUpdateOp(newFullAggregateGroupKey, record, newGroupExists));
+                        new GroupUpdateOp(newFullAggregateGroupKey, record, hasSummary));
                 }
-
-                // Add notification to new group. do not request resort
-                record.setOverrideGroupKey(null);
-                mCallback.addAutoGroup(record.getKey(), newFullAggregateGroupKey.toString(), false);
             }
         }
 
@@ -959,18 +1011,26 @@ public class GroupHelper {
         for (FullyQualifiedGroupKey groupKey : groupsToUpdate.keySet()) {
             final ArrayMap<String, NotificationAttributes> aggregatedNotificationsAttrs =
                     mAggregatedNotifications.getOrDefault(groupKey, new ArrayMap<>());
-            if (aggregatedNotificationsAttrs.isEmpty()) {
-                mCallback.removeAutoGroupSummary(userId, pkgName, groupKey.toString());
-                mAggregatedNotifications.remove(groupKey);
-            } else {
-                NotificationRecord triggeringNotification = groupsToUpdate.get(groupKey).record;
-                boolean hasSummary = groupsToUpdate.get(groupKey).hasSummary;
+            final ArrayMap<String, NotificationAttributes> ungrouped =
+                    mUngroupedAbuseNotifications.getOrDefault(groupKey, new ArrayMap<>());
+
+            NotificationRecord triggeringNotification = groupsToUpdate.get(groupKey).record;
+            boolean hasSummary = groupsToUpdate.get(groupKey).hasSummary;
+            //Group needs to be created/updated
+            if (ungrouped.size() >= mAutoGroupAtCount
+                    || (hasSummary && !aggregatedNotificationsAttrs.isEmpty())) {
                 NotificationSectioner sectioner = getSection(triggeringNotification);
                 if (sectioner == null) {
                     continue;
                 }
-                updateAggregateAppGroup(groupKey, triggeringNotification.getKey(), hasSummary,
-                        sectioner.mSummaryId);
+                aggregateUngroupedNotifications(groupKey, triggeringNotification.getKey(),
+                        ungrouped, hasSummary, sectioner.mSummaryId);
+            } else {
+                // Remove empty groups
+                if (aggregatedNotificationsAttrs.isEmpty() && hasSummary) {
+                    mCallback.removeAutoGroupSummary(userId, pkgName, groupKey.toString());
+                    mAggregatedNotifications.remove(groupKey);
+                }
             }
         }
     }
