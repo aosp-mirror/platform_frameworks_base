@@ -12518,6 +12518,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  -p: dump also private dirty memory usage.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("  --local: only collect details locally, don't call process.");
+                pw.println("  --logstats: dump native allocator stats to log");
                 pw.println("  --package: interpret process arg as package, dumping all");
                 pw.println("             processes that have loaded that package.");
                 pw.println("  --checkin: dump data for a checkin");
