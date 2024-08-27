@@ -19,16 +19,6 @@ flag {
 }
 
 flag {
-    name: "do_not_skip_ime_by_target_visibility"
-    namespace: "windowing_frontend"
-    description: "Avoid window traversal missing IME"
-    bug: "339375944"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "apply_lifecycle_on_pip_change"
     namespace: "windowing_frontend"
     description: "Make pip activity lifecyle change with windowing mode"

@@ -36,7 +36,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.fail;
 
 import static org.junit.Assert.assertEquals;
@@ -725,51 +724,6 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             if (nonAppsCaptor.getValue()[0].windowType == TYPE_NAVIGATION_BAR) {
                 fail("Non-app animation target must not contain navbar");
             }
-        }
-    }
-
-    @android.platform.test.annotations.RequiresFlagsDisabled(
-            com.android.window.flags.Flags.FLAG_DO_NOT_SKIP_IME_BY_TARGET_VISIBILITY)
-    @SetupWindows(addWindows = W_INPUT_METHOD)
-    @Test
-    public void testLaunchRemoteAnimationWithoutImeBehind() {
-        final WindowState win1 = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin1");
-        final WindowState win2 = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin2");
-
-        // Simulating win1 has shown IME and being IME layering/input target
-        mDisplayContent.setImeLayeringTarget(win1);
-        mDisplayContent.setImeInputTarget(win1);
-        mImeWindow.mWinAnimator.hide(mDisplayContent.getPendingTransaction(), "test");
-        spyOn(mDisplayContent);
-        mImeWindow.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
-        makeWindowVisibleAndDrawn(mImeWindow);
-        assertTrue(mImeWindow.isOnScreen());
-        assertFalse(mImeWindow.isParentWindowHidden());
-
-        try {
-            // Simulating now win1 is being covered by the lockscreen which has no surface,
-            // and then launching an activity win2 with the remote animation
-            win1.mHasSurface = false;
-            win1.mActivityRecord.setVisibility(false);
-            mDisplayContent.mOpeningApps.add(win2.mActivityRecord);
-            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
-                    win2.mActivityRecord, new Point(50, 100), null,
-                    new Rect(50, 100, 150, 150), null, false).mAdapter;
-            adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
-                    mFinishedCallback);
-
-            mDisplayContent.applySurfaceChangesTransaction();
-            mController.goodToGo(TRANSIT_OLD_TASK_OPEN);
-            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
-
-            verify(mMockRunner).onAnimationStart(eq(TRANSIT_OLD_TASK_OPEN),
-                    any(), any(), any(), any());
-            // Verify the IME window won't apply surface change transaction with forAllImeWindows
-            verify(mDisplayContent, never()).forAllImeWindows(any(), eq(true));
-        } catch (Exception e) {
-            // no-op
-        } finally {
-            mDisplayContent.mOpeningApps.clear();
         }
     }
 
