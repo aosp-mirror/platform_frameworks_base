@@ -20,6 +20,7 @@ package com.android.systemui.shade.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
@@ -61,7 +62,7 @@ constructor(
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val sceneInteractor: SceneInteractor,
-) : SysUiViewModel() {
+) : SysUiViewModel, ExclusiveActivatable() {
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 

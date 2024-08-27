@@ -43,6 +43,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.Interpolators;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.annotation.Retention;
@@ -418,7 +419,7 @@ public class PipAnimationController {
         }
 
         SurfaceControl getContentOverlayLeash() {
-            return mContentOverlay == null ? null : mContentOverlay.mLeash;
+            return mContentOverlay == null ? null : mContentOverlay.getLeash();
         }
 
         void setColorContentOverlay(Context context) {

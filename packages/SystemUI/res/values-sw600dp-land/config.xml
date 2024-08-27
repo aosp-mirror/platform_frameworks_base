@@ -27,6 +27,8 @@
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">true</bool>
 
+    <bool name="config_use_large_screen_shade_header">true</bool>
+
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">2</integer>
 

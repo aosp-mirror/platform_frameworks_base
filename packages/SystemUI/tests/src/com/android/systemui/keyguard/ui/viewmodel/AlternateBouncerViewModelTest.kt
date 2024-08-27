@@ -21,7 +21,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -31,7 +30,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -64,31 +62,13 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onRemovedFromWindow() =
         testScope.runTest {
-            kosmos.primaryBouncerInteractor.setDismissAction(
-                mock(ActivityStarter.OnDismissAction::class.java),
-                {},
-            )
-            assertThat(kosmos.primaryBouncerInteractor.bouncerDismissAction).isNotNull()
-
-            val dismissCallback = mock(IKeyguardDismissCallback::class.java)
-            kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
             underTest.onRemovedFromWindow()
-
-            kosmos.fakeExecutor.runAllReady()
             verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
-            verify(dismissCallback).onDismissCancelled()
-            assertThat(kosmos.primaryBouncerInteractor.bouncerDismissAction).isNull()
         }
 
     @Test
     fun onBackRequested() =
         testScope.runTest {
-            kosmos.primaryBouncerInteractor.setDismissAction(
-                mock(ActivityStarter.OnDismissAction::class.java),
-                {},
-            )
-            assertThat(kosmos.primaryBouncerInteractor.bouncerDismissAction).isNotNull()
-
             val dismissCallback = mock(IKeyguardDismissCallback::class.java)
             kosmos.dismissCallbackRegistry.addCallback(dismissCallback)
 
@@ -96,7 +76,6 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
             kosmos.fakeExecutor.runAllReady()
             verify(statusBarKeyguardViewManager).hideAlternateBouncer(any())
             verify(dismissCallback).onDismissCancelled()
-            assertThat(kosmos.primaryBouncerInteractor.bouncerDismissAction).isNull()
         }
 
     @Test

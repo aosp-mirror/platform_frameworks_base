@@ -133,13 +133,13 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.TransitionUtil;
+import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.SplitBounds;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import dalvik.annotation.optimization.NeverCompile;

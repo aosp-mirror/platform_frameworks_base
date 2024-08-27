@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.row.domain.interactor
 
 import com.android.systemui.statusbar.notification.row.data.repository.NotificationRowRepository
+import com.android.systemui.statusbar.notification.row.shared.EnRouteContentModel
 import com.android.systemui.statusbar.notification.row.shared.TimerContentModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -26,4 +27,8 @@ class NotificationRowInteractor @Inject constructor(repository: NotificationRowR
     /** Content of a rich ongoing timer notification. */
     val timerContentModel: Flow<TimerContentModel> =
         repository.richOngoingContentModel.filterIsInstance<TimerContentModel>()
+
+    /** Content of a rich ongoing timer notification. */
+    val enRouteContentModel: Flow<EnRouteContentModel> =
+        repository.richOngoingContentModel.filterIsInstance<EnRouteContentModel>()
 }

@@ -1020,7 +1020,7 @@ class DraggableHandlerTest {
 
         // We scrolled down, under scene C there is nothing, so we can use the overscroll spec
         assertThat(layoutState.currentTransition?.currentOverscrollSpec).isNotNull()
-        assertThat(layoutState.currentTransition?.currentOverscrollSpec?.scene).isEqualTo(SceneC)
+        assertThat(layoutState.currentTransition?.currentOverscrollSpec?.content).isEqualTo(SceneC)
         val transition = layoutState.currentTransition
         assertThat(transition).isNotNull()
         assertThat(transition!!.progress).isEqualTo(-0.1f)

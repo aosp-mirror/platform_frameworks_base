@@ -18,75 +18,31 @@ package com.android.systemui.lifecycle
 
 import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.StateFactoryMarker
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-/** Base class for all System UI view-models. */
-abstract class SysUiViewModel : BaseActivatable() {
-
-    /**
-     * Returns a snapshot [State] that's kept up-to-date as long as the [SysUiViewModel] is active.
-     *
-     * @param source The upstream [StateFlow] to collect from; values emitted to it will be
-     *   automatically set on the returned [State].
-     */
-    @StateFactoryMarker
-    fun <T> hydratedStateOf(
-        source: StateFlow<T>,
-    ): State<T> {
-        return hydratedStateOf(
-            initialValue = source.value,
-            source = source,
-        )
-    }
-
-    /**
-     * Returns a snapshot [State] that's kept up-to-date as long as the [SysUiViewModel] is active.
-     *
-     * @param initialValue The first value to place on the [State]
-     * @param source The upstream [Flow] to collect from; values emitted to it will be automatically
-     *   set on the returned [State].
-     */
-    @StateFactoryMarker
-    fun <T> hydratedStateOf(
-        initialValue: T,
-        source: Flow<T>,
-    ): State<T> {
-        val mutableState = mutableStateOf(initialValue)
-        addChild(
-            object : BaseActivatable() {
-                override suspend fun onActivated(): Nothing {
-                    source.collect { mutableState.value = it }
-                    awaitCancellation()
-                }
-            }
-        )
-        return mutableState
-    }
-
-    override suspend fun onActivated(): Nothing {
-        awaitCancellation()
-    }
-}
+/** Defines interface for all System UI view-models. */
+interface SysUiViewModel
 
 /**
- * Returns a remembered [SysUiViewModel] of the type [T] that's automatically kept active until this
- * composable leaves the composition.
- *
- * If the [key] changes, the old [SysUiViewModel] is deactivated and a new one will be instantiated,
+ * Returns a remembered [SysUiViewModel] of the type [T]. If the returned instance is also an
+ * [Activatable], it's automatically kept active until this composable leaves the composition; if
+ * the [key] changes, the old [SysUiViewModel] is deactivated and a new one will be instantiated,
  * activated, and returned.
  */
 @Composable
 fun <T : SysUiViewModel> rememberViewModel(
     key: Any = Unit,
     factory: () -> T,
-): T = rememberActivated(key, factory)
+): T {
+    val instance = remember(key) { factory() }
+    if (instance is Activatable) {
+        LaunchedEffect(instance) { instance.activate() }
+    }
+    return instance
+}
 
 /**
  * Invokes [block] in a new coroutine with a new [SysUiViewModel] that is automatically activated
@@ -100,6 +56,8 @@ suspend fun <T : SysUiViewModel> View.viewModel(
 ): Nothing =
     repeatOnWindowLifecycle(minWindowLifecycleState) {
         val instance = factory()
-        launch { instance.activate() }
+        if (instance is Activatable) {
+            launch { instance.activate() }
+        }
         block(instance)
     }

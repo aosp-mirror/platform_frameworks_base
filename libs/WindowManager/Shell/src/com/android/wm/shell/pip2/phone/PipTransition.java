@@ -50,10 +50,10 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
-import com.android.wm.shell.pip.PipContentOverlay;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.pip2.animation.PipEnterExitAnimator;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 

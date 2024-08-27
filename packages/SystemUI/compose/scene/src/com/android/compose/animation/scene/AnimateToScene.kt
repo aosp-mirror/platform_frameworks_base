@@ -166,11 +166,11 @@ private fun CoroutineScope.animateToScene(
         }
 
     animateContent(
+        layoutState = layoutState,
         transition = transition,
         oneOffAnimation = oneOffAnimation,
         targetProgress = targetProgress,
-        startTransition = { layoutState.startTransition(transition, chain) },
-        finishTransition = { layoutState.finishTransition(transition) },
+        chain = chain,
     )
 
     return transition

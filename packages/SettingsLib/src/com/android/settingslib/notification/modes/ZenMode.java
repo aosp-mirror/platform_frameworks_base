@@ -286,30 +286,12 @@ public class ZenMode implements Parcelable {
 
     /**
      * Returns the mode icon -- which can be either app-provided (via {@code addAutomaticZenRule}),
-     * user-chosen (via the icon picker in Settings), the app's launcher icon for implicit rules
-     * (in its monochrome variant, if available), or a default icon based on the mode type.
+     * user-chosen (via the icon picker in Settings), or a default icon based on the mode type.
      */
     @NonNull
     public ListenableFuture<Drawable> getIcon(@NonNull Context context,
             @NonNull ZenIconLoader iconLoader) {
         if (mKind == Kind.MANUAL_DND) {
-            return Futures.immediateFuture(requireNonNull(
-                    context.getDrawable(R.drawable.ic_do_not_disturb_on_24dp)));
-        }
-
-        return iconLoader.getIcon(context, mRule);
-    }
-
-    /**
-     * Returns an alternative mode icon. The difference with {@link #getIcon} is that it's the
-     * basic DND icon not only for Manual DND, but also for <em>implicit rules</em>. As such, it's
-     * suitable for places where showing the launcher icon of an app could be confusing, such as
-     * the status bar or lockscreen.
-     */
-    @NonNull
-    public ListenableFuture<Drawable> getLockscreenIcon(@NonNull Context context,
-            @NonNull ZenIconLoader iconLoader) {
-        if (mKind == Kind.MANUAL_DND || mKind == Kind.IMPLICIT) {
             return Futures.immediateFuture(requireNonNull(
                     context.getDrawable(R.drawable.ic_do_not_disturb_on_24dp)));
         }

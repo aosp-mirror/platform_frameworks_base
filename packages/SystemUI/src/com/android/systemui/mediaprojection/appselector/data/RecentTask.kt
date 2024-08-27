@@ -20,7 +20,7 @@ import android.annotation.ColorInt
 import android.annotation.UserIdInt
 import android.app.ActivityManager.RecentTaskInfo
 import android.content.ComponentName
-import com.android.wm.shell.util.SplitBounds
+import com.android.wm.shell.shared.split.SplitBounds
 
 data class RecentTask(
     val taskId: Int,

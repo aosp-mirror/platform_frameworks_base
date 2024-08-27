@@ -310,9 +310,10 @@ internal class ElementNode(
 
         val transition = elementState as? TransitionState.Transition
 
-        // If this element is not supposed to be laid out now because the other content of its
-        // transition is overscrolling, then lay out the element normally and don't place it.
-        val overscrollScene = transition?.currentOverscrollSpec?.scene
+        // If this element is not supposed to be laid out now, either because it is not part of any
+        // ongoing transition or the other content of its transition is overscrolling, then lay out
+        // the element normally and don't place it.
+        val overscrollScene = transition?.currentOverscrollSpec?.content
         val isOtherSceneOverscrolling = overscrollScene != null && overscrollScene != content.key
         if (isOtherSceneOverscrolling) {
             return doNotPlace(measurable, constraints)
@@ -845,7 +846,7 @@ internal fun shouldPlaceOrComposeSharedElement(
     transition: TransitionState.Transition,
 ): Boolean {
     // If we are overscrolling, only place/compose the element in the overscrolling scene.
-    val overscrollScene = transition.currentOverscrollSpec?.scene
+    val overscrollScene = transition.currentOverscrollSpec?.content
     if (overscrollScene != null) {
         return content == overscrollScene
     }
@@ -1184,7 +1185,7 @@ private inline fun <T> computeValue(
     val currentContent = currentContentState.content
     if (transition is TransitionState.HasOverscrollProperties) {
         val overscroll = transition.currentOverscrollSpec
-        if (overscroll?.scene == currentContent) {
+        if (overscroll?.content == currentContent) {
             val elementSpec =
                 overscroll.transformationSpec.transformations(element.key, currentContent)
             val propertySpec = transformation(elementSpec) ?: return currentValue()
@@ -1210,7 +1211,7 @@ private inline fun <T> computeValue(
             // TODO(b/290184746): Make sure that we don't overflow transformations associated to a
             // range.
             val directionSign = if (transition.isUpOrLeft) -1 else 1
-            val isToContent = overscroll.scene == transition.toContent
+            val isToContent = overscroll.content == transition.toContent
             val linearProgress = transition.progress.let { if (isToContent) it - 1f else it }
             val progressConverter =
                 overscroll.progressConverter
