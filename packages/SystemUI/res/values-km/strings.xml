@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ប៊្លូធូសនឹងបើកនៅព្រឹកស្អែក"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ស្ដាប់សំឡេងរួមគ្នា"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"កំពុងស្ដាប់សំឡេងរួមគ្នា"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"បញ្ចូលការកំណត់ការស្ដាប់សំឡេងរួមគ្នា"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"ថ្ម <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"សំឡេង"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"កាស"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"រួចរាល់"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ការកំណត់"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"បើក"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"បើក • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"បិទ"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"រៀបចំ"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"គ្រប់គ្រង​នៅ​ក្នុង​ការកំណត់"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ផ្កាយរណប មានការតភ្ជាប់ល្អ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ផ្កាយរណប អាចតភ្ជាប់បាន"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ការប្រកាសអាសន្នតាមផ្កាយរណប"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"កម្រងព័ត៌មានការងារ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ល្អសម្រាប់អ្នកប្រើមួយចំនួន តែមិនសម្រាប់គ្រប់គ្នាទេ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"កម្មវិធីសម្រួល UI ប្រព័ន្ធផ្តល់ជូនអ្នកនូវមធ្យោបាយបន្ថែមទៀតដើម្បីកែសម្រួល និងប្តូរចំណុចប្រទាក់អ្នកប្រើ Android តាមបំណង។ លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>

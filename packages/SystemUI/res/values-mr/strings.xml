@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ब्लूटूथ उद्या सकाळी सुरू होईल"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ऑडिओ शेअर करा"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ऑडिओ शेअर करत आहे"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ऑडिओ शेअरिंग सेटिंग्ज एंटर करा"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बॅटरी"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ऑडिओ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
@@ -392,7 +391,7 @@
     <string name="user_interface" msgid="3712869377953950887">"यूझर इंटरफेस"</string>
     <string name="thermal" msgid="6758074791325414831">"थर्मल"</string>
     <string name="custom" msgid="3337456985275158299">"कस्टम"</string>
-    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"मागाच्या कस्टम सेटिंग्ज"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"ट्रेससाठी कस्टम सेटिंग्ज"</string>
     <string name="restore_default" msgid="5259420807486239755">"डीफॉल्ट रिस्टोअर करा"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"एकहाती मोड"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"श्रवणयंत्रे"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"पूर्ण झाले"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"सेटिंग्ज"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"सुरू आहे"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"सुरू • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"बंद आहे"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"सेट करा"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"सेटिंग्जमध्ये व्यवस्थापित करा"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"सॅटेलाइट, चांगले कनेक्शन"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"सॅटेलाइट, कनेक्शन उपलब्ध"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"सॅटेलाइट SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाईल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"सर्वांसाठी नाही तर काहींसाठी मजेदार असू शकते"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनर आपल्‍याला Android यूझर इंटरफेस ट्विक आणि कस्टमाइझ करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरू ठेवा."</string>

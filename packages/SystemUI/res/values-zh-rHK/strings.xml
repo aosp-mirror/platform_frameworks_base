@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"藍牙將於明天上午開啟"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"分享音訊"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"正在分享音訊"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"輸入音訊分享功能設定"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳機"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"完成"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"設定"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"開啟"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"開 • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"關閉"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"設定"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"在「設定」中管理"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"衛星，連線質素好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛星，可以連線"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"緊急衛星連接"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"工作設定檔"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"這只是測試版本，並不包含完整功能"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"使用者介面調諧器讓你以更多方法修改和自訂 Android 使用者介面。但請小心，這些實驗功能可能會在日後發佈時更改、分拆或消失。"</string>
