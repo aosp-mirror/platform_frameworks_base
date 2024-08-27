@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,8 +47,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -99,7 +100,6 @@ import com.android.systemui.notifications.ui.composable.NotificationScrollingSta
 import com.android.systemui.notifications.ui.composable.NotificationStackCutoffGuideline
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.BrightnessMirror
-import com.android.systemui.qs.ui.composable.QSMediaMeasurePolicy
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQQS
@@ -266,13 +266,14 @@ private fun SceneScope.SingleShade(
     shadeSession: SaveableSession,
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
+    val cutoutInsets = WindowInsets.Companion.displayCutout
     val isLandscape = LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
     val usingCollapsedLandscapeMedia =
         Utils.useCollapsedMediaInLandscape(LocalContext.current.resources)
     val isExpanded = !usingCollapsedLandscapeMedia || !isLandscape
     mediaHost.expansion = if (isExpanded) EXPANDED else COLLAPSED
 
-    val maxNotifScrimTop = remember { mutableStateOf(0f) }
+    var maxNotifScrimTop by remember { mutableIntStateOf(0) }
     val tileSquishiness by
         animateSceneFloatAsState(
             value = 1f,
@@ -298,6 +299,24 @@ private fun SceneScope.SingleShade(
             viewModel.qsSceneAdapter,
         )
     }
+    val shadeMeasurePolicy =
+        remember(mediaInRow) {
+            SingleShadeMeasurePolicy(
+                isMediaInRow = mediaInRow,
+                mediaOffset = { mediaOffset.roundToPx() },
+                onNotificationsTopChanged = { maxNotifScrimTop = it },
+                mediaZIndex = {
+                    if (MediaContentPicker.shouldElevateMedia(layoutState)) 1f else 0f
+                },
+                cutoutInsetsProvider = {
+                    if (cutoutLocation == CutoutLocation.CENTER) {
+                        null
+                    } else {
+                        cutoutInsets
+                    }
+                }
+            )
+        }
 
     Box(
         modifier =
@@ -315,101 +334,54 @@ private fun SceneScope.SingleShade(
                     .background(colorResource(R.color.shade_scrim_background_dark)),
         )
         Layout(
-            contents =
-                listOf(
-                    {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .thenIf(isEmptySpaceClickable) {
-                                        Modifier.clickable(
-                                            onClick = { viewModel.onEmptySpaceClicked() }
-                                        )
-                                    }
-                                    .thenIf(cutoutLocation != CutoutLocation.CENTER) {
-                                        Modifier.displayCutoutPadding()
-                                    },
-                        ) {
-                            CollapsedShadeHeader(
-                                viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                                createTintedIconManager = createTintedIconManager,
-                                createBatteryMeterViewController = createBatteryMeterViewController,
-                                statusBarIconController = statusBarIconController,
-                            )
-
-                            val content: @Composable () -> Unit = {
-                                Box(
-                                    Modifier.element(QuickSettings.Elements.QuickQuickSettings)
-                                        .layoutId(QSMediaMeasurePolicy.LayoutId.QS)
-                                ) {
-                                    QuickSettings(
-                                        viewModel.qsSceneAdapter,
-                                        { viewModel.qsSceneAdapter.qqsHeight },
-                                        isSplitShade = false,
-                                        squishiness = { tileSquishiness },
-                                    )
-                                }
-
-                                ShadeMediaCarousel(
-                                    isVisible = isMediaVisible,
-                                    mediaHost = mediaHost,
-                                    mediaOffsetProvider = mediaOffsetProvider,
-                                    modifier =
-                                        Modifier.layoutId(QSMediaMeasurePolicy.LayoutId.Media),
-                                    carouselController = mediaCarouselController,
-                                )
-                            }
-                            val landscapeQsMediaMeasurePolicy = remember {
-                                QSMediaMeasurePolicy(
-                                    { viewModel.qsSceneAdapter.qqsHeight },
-                                    { mediaOffset.roundToPx() },
-                                )
-                            }
-                            if (mediaInRow) {
-                                Layout(
-                                    content = content,
-                                    measurePolicy = landscapeQsMediaMeasurePolicy,
-                                )
-                            } else {
-                                content()
-                            }
-                        }
-                    },
-                    {
-                        NotificationScrollingStack(
-                            shadeSession = shadeSession,
-                            stackScrollView = notificationStackScrollView,
-                            viewModel = notificationsPlaceholderViewModel,
-                            maxScrimTop = { maxNotifScrimTop.value },
-                            shadeMode = ShadeMode.Single,
-                            shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
-                            onEmptySpaceClick =
-                                viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
-                        )
-                    },
+            modifier =
+                Modifier.thenIf(isEmptySpaceClickable) {
+                    Modifier.clickable { viewModel.onEmptySpaceClicked() }
+                },
+            content = {
+                CollapsedShadeHeader(
+                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
+                    createTintedIconManager = createTintedIconManager,
+                    createBatteryMeterViewController = createBatteryMeterViewController,
+                    statusBarIconController = statusBarIconController,
+                    modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
                 )
-        ) { measurables, constraints ->
-            check(measurables.size == 2)
-            check(measurables[0].size == 1)
-            check(measurables[1].size == 1)
 
-            val quickSettingsPlaceable = measurables[0][0].measure(constraints)
-            val notificationsPlaceable = measurables[1][0].measure(constraints)
+                Box(
+                    Modifier.element(QuickSettings.Elements.QuickQuickSettings)
+                        .layoutId(SingleShadeMeasurePolicy.LayoutId.QuickSettings)
+                ) {
+                    QuickSettings(
+                        viewModel.qsSceneAdapter,
+                        { viewModel.qsSceneAdapter.qqsHeight },
+                        isSplitShade = false,
+                        squishiness = { tileSquishiness },
+                    )
+                }
 
-            maxNotifScrimTop.value = quickSettingsPlaceable.height.toFloat()
+                ShadeMediaCarousel(
+                    isVisible = isMediaVisible,
+                    isInRow = mediaInRow,
+                    mediaHost = mediaHost,
+                    mediaOffsetProvider = mediaOffsetProvider,
+                    carouselController = mediaCarouselController,
+                    modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media),
+                )
 
-            layout(constraints.maxWidth, constraints.maxHeight) {
-                val qsZIndex =
-                    if (MediaContentPicker.shouldElevateMedia(layoutState)) {
-                        1f
-                    } else {
-                        0f
-                    }
-                quickSettingsPlaceable.placeRelative(x = 0, y = 0, zIndex = qsZIndex)
-                notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
-            }
-        }
+                NotificationScrollingStack(
+                    shadeSession = shadeSession,
+                    stackScrollView = notificationStackScrollView,
+                    viewModel = notificationsPlaceholderViewModel,
+                    maxScrimTop = { maxNotifScrimTop.toFloat() },
+                    shadeMode = ShadeMode.Single,
+                    shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+                    onEmptySpaceClick =
+                        viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
+                    modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Notifications),
+                )
+            },
+            measurePolicy = shadeMeasurePolicy,
+        )
         Box(
             modifier =
                 Modifier.align(Alignment.BottomCenter)
@@ -596,6 +568,7 @@ private fun SceneScope.SplitShade(
 
                             ShadeMediaCarousel(
                                 isVisible = isMediaVisible,
+                                isInRow = false,
                                 mediaHost = mediaHost,
                                 mediaOffsetProvider = mediaOffsetProvider,
                                 modifier =
@@ -653,6 +626,7 @@ private fun SceneScope.SplitShade(
 @Composable
 private fun SceneScope.ShadeMediaCarousel(
     isVisible: Boolean,
+    isInRow: Boolean,
     mediaHost: MediaHost,
     carouselController: MediaCarouselController,
     mediaOffsetProvider: ShadeMediaOffsetProvider,
@@ -664,7 +638,7 @@ private fun SceneScope.ShadeMediaCarousel(
         mediaHost = mediaHost,
         carouselController = carouselController,
         offsetProvider =
-            if (MediaContentPicker.shouldElevateMedia(layoutState)) {
+            if (isInRow || MediaContentPicker.shouldElevateMedia(layoutState)) {
                 null
             } else {
                 { mediaOffsetProvider.offset }
