@@ -25,6 +25,7 @@ import com.android.systemui.Flags.FLAG_STATUS_BAR_RON_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.commandline.commandRegistry
@@ -99,6 +100,22 @@ class DemoRonChipViewModelTest : SysuiTestCase() {
             )
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Text::class.java)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
+    fun chip_supportsColor() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            commandRegistry.onShellCommand(
+                pw,
+                arrayOf("demo-ron", "-p", "com.android.systemui", "-c", "#434343")
+            )
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+                .isInstanceOf(ColorsModel.Custom::class.java)
         }
 
     @Test

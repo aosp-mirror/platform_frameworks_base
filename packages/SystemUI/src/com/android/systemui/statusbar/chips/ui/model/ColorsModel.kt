@@ -39,6 +39,24 @@ sealed interface ColorsModel {
             Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorPrimary)
     }
 
+    /**
+     * The chip should have the given background color, and text color that matches dark/light
+     * theme.
+     */
+    data class Custom(val backgroundColorInt: Int) : ColorsModel {
+        override fun background(context: Context): ColorStateList =
+            ColorStateList.valueOf(backgroundColorInt)
+
+        // TODO(b/361346412): When dark theme changes, the chip should automatically re-render with
+        // the right text color. Right now, it has the right text color when the chip is first
+        // created but the color doesn't update if dark theme changes.
+        override fun text(context: Context) =
+            Utils.getColorAttrDefaultColor(
+                context,
+                com.android.internal.R.attr.materialColorOnSurface,
+            )
+    }
+
     /** The chip should have a red background with white text. */
     data object Red : ColorsModel {
         override fun background(context: Context): ColorStateList {

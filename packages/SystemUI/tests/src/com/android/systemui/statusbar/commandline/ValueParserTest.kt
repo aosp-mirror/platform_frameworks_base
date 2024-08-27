@@ -40,6 +40,15 @@ class ValueParserTest : SysuiTestCase() {
     }
 
     @Test
+    fun parseColor() {
+        assertThat(Type.Color.parseValue("#434343").isSuccess).isTrue()
+        assertThat(Type.Color.parseValue("#aa123456").isSuccess).isTrue()
+        assertThat(Type.Color.parseValue("red").isSuccess).isTrue()
+
+        assertThat(Type.Color.parseValue("not a color").isFailure).isTrue()
+    }
+
+    @Test
     fun mapToComplexType() {
         val parseSquare = Type.Int.map { Rect(it, it, it, it) }
 
