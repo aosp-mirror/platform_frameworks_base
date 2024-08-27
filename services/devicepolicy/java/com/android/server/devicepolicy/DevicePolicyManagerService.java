@@ -7137,9 +7137,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // If there is a profile owner, redirect to that; otherwise query the device owner.
         ComponentName aliasChooser = getProfileOwnerAsUser(caller.getUserId());
-        boolean isDoUser = Flags.headlessSingleUserFixes()
-                ? caller.getUserId() == getDeviceOwnerUserId()
-                : caller.getUserHandle().isSystem();
+        boolean isDoUser = caller.getUserId() == getDeviceOwnerUserId();
         if (aliasChooser == null && isDoUser) {
             synchronized (getLockObject()) {
                 final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
@@ -8149,7 +8147,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // First check whether the admin is allowed to wipe the device/user/profile.
             final String restriction;
             boolean shouldFactoryReset = userId == UserHandle.USER_SYSTEM;
-            if (Flags.headlessSingleUserFixes() && getHeadlessDeviceOwnerModeForDeviceOwner()
+            if (getHeadlessDeviceOwnerModeForDeviceOwner()
                     == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
                 shouldFactoryReset = userId == getMainUserId();
             }
@@ -8173,8 +8171,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 adminPackage,
                 userId)) {
             // Legacy mode
-            wipeDevice = Flags.headlessSingleUserFixes()
-                    && getHeadlessDeviceOwnerModeForDeviceOwner()
+            wipeDevice = getHeadlessDeviceOwnerModeForDeviceOwner()
                     == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER ? isMainUser : isSystemUser;
         } else {
             // Explicit behaviour
@@ -18620,8 +18617,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Backup service has to be enabled on the main user in order for it to be enabled on
         // secondary users.
-        if (Flags.headlessSingleUserFixes() && isDeviceOwner(caller)
-                && getHeadlessDeviceOwnerModeForDeviceOwner()
+        if (isDeviceOwner(caller) && getHeadlessDeviceOwnerModeForDeviceOwner()
                 == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
             toggleBackupServiceActive(UserHandle.USER_SYSTEM, enabled);
         }
