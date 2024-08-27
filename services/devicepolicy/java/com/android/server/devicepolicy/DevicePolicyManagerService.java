@@ -871,6 +871,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 EXEMPT_FROM_POWER_RESTRICTIONS, OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS);
     }
 
+    private static final Set<String> METERED_DATA_RESTRICTION_EXEMPT_ROLES =
+            new ArraySet<>();
+    static {
+        // TODO(b/362545319): reference role name from role manager once it's exposed.
+        final String roleDeviceLockController =
+                "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
+        METERED_DATA_RESTRICTION_EXEMPT_ROLES.add(roleDeviceLockController);
+        METERED_DATA_RESTRICTION_EXEMPT_ROLES.add(RoleManager.ROLE_FINANCED_DEVICE_KIOSK);
+    }
+
     /**
      * Admin apps targeting Android S+ may not use
      * {@link android.app.admin.DevicePolicyManager#setPasswordQuality} to set password quality
@@ -1957,6 +1967,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         boolean userManagerIsHeadlessSystemUserMode() {
             return UserManager.isHeadlessSystemUserMode();
+        }
+
+        List<String> roleManagerGetRoleHoldersAsUser(String role, UserHandle userHandle) {
+            return getRoleManager().getRoleHoldersAsUser(role, userHandle);
         }
 
         @SuppressWarnings("AndroidFrameworkPendingIntentMutability")
@@ -17920,15 +17934,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
     }
 
+    private Set<String> getMeteredDataRestrictionExemptPackages(int userId) {
+        final Set<String> exemptPkgs = new ArraySet<>();
+        for (String role: METERED_DATA_RESTRICTION_EXEMPT_ROLES) {
+            String pkg = getRoleHolderPackageNameOnUser(role, userId);
+            if (pkg != null) {
+                exemptPkgs.add(pkg);
+            }
+        }
+
+        return exemptPkgs;
+    }
+
     private List<String> removeInvalidPkgsForMeteredDataRestriction(
             int userId, List<String> pkgNames) {
+        final Set<String> exemptRolePkgs = getMeteredDataRestrictionExemptPackages(userId);
         synchronized (getLockObject()) {
             final Set<String> activeAdmins = getActiveAdminPackagesLocked(userId);
             final List<String> excludedPkgs = new ArrayList<>();
             for (int i = pkgNames.size() - 1; i >= 0; --i) {
                 final String pkgName = pkgNames.get(i);
-                // If the package is an active admin, don't restrict it.
-                if (activeAdmins.contains(pkgName)) {
+                // If the package is an active admin or exempt role, don't restrict it.
+                if (activeAdmins.contains(pkgName) || exemptRolePkgs.contains(pkgName)) {
                     excludedPkgs.add(pkgName);
                     continue;
                 }
@@ -21839,8 +21866,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     @Nullable
     private String getRoleHolderPackageNameOnUser(String role, int userId) {
-        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
-
         // Clear calling identity as the RoleManager APIs require privileged permissions.
         return mInjector.binderWithCleanCallingIdentity(() -> {
             List<UserInfo> users;
@@ -21852,7 +21877,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             for (UserInfo user : users) {
                 List<String> roleHolders =
-                        roleManager.getRoleHoldersAsUser(role, user.getUserHandle());
+                        mInjector.roleManagerGetRoleHoldersAsUser(role, user.getUserHandle());
                 if (!roleHolders.isEmpty()) {
                     return roleHolders.get(0);
                 }
