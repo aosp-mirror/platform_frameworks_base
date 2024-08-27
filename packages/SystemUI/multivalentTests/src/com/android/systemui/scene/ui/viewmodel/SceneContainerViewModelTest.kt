@@ -237,7 +237,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             sceneInteractor.setVisible(false, "reason")
             runCurrent()
             assertThat(underTest.isVisible).isFalse()
-            sceneInteractor.onRemoteUserInteractionStarted("reason")
+            sceneInteractor.onRemoteUserInputStarted("reason")
             runCurrent()
             assertThat(underTest.isVisible).isTrue()
 

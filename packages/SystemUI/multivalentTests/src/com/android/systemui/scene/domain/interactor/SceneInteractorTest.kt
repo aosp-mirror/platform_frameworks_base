@@ -401,10 +401,10 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.setVisible(false, "reason")
             val isVisible by collectLastValue(underTest.isVisible)
             assertThat(isVisible).isFalse()
-            underTest.onRemoteUserInteractionStarted("reason")
+            underTest.onRemoteUserInputStarted("reason")
             assertThat(isVisible).isTrue()
 
-            underTest.onUserInteractionFinished()
+            underTest.onUserInputFinished()
 
             assertThat(isVisible).isFalse()
         }

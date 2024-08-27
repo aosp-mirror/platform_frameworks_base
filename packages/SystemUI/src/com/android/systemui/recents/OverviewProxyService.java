@@ -230,7 +230,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         // If scene framework is enabled, set the scene container window to
                         // visible and let the touch "slip" into that window.
                         if (SceneContainerFlag.isEnabled()) {
-                            mSceneInteractor.get().onRemoteUserInteractionStarted("launcher swipe");
+                            mSceneInteractor.get().onRemoteUserInputStarted("launcher swipe");
                         } else {
                             mShadeViewControllerLazy.get().startInputFocusTransfer();
                         }
@@ -266,7 +266,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 if (SceneContainerFlag.isEnabled()) {
                     int action = event.getActionMasked();
                     if (action == ACTION_DOWN) {
-                        mSceneInteractor.get().onRemoteUserInteractionStarted(
+                        mSceneInteractor.get().onRemoteUserInputStarted(
                                 "trackpad swipe");
                     } else if (action == ACTION_UP) {
                         mSceneInteractor.get().changeScene(

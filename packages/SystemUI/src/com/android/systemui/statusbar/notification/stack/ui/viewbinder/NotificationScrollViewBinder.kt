@@ -36,6 +36,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 /** Binds the [NotificationScrollView]. */
@@ -98,13 +99,18 @@ constructor(
                     .filter { it }
                     .collect { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
             }
+            launch {
+                viewModel.shouldCloseGuts.filter { it }.collect { view.closeGutsOnSceneTouch() }
+            }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
                 view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
+                view.setCurrentGestureInGutsConsumer(viewModel.currentGestureInGutsConsumer)
                 DisposableHandle {
                     view.setSyntheticScrollConsumer(null)
                     view.setCurrentGestureOverscrollConsumer(null)
+                    view.setCurrentGestureInGutsConsumer(null)
                 }
             }
         }
