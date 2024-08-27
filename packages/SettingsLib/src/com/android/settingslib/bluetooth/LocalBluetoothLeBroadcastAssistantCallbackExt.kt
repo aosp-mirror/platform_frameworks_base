@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothLeBroadcastAssistant
 import android.bluetooth.BluetoothLeBroadcastMetadata
@@ -81,5 +82,9 @@ val LocalBluetoothLeBroadcastAssistant.onSourceConnectedOrRemoved: Flow<Unit>
             ConcurrentUtils.DIRECT_EXECUTOR,
             callback,
         )
-        awaitClose { unregisterServiceCallBack(callback) }
+        awaitClose {
+            if (BluetoothAdapter.getDefaultAdapter()?.isEnabled == true) {
+                unregisterServiceCallBack(callback)
+            }
+        }
     }
