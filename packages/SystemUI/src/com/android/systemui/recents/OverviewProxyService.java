@@ -883,11 +883,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             return;
         }
         mHandler.removeCallbacks(mConnectionRunnable);
+
+        // Avoid creating TouchInteractionService because the System user in HSUM mode does not
+        // interact with UI elements
+        UserHandle currentUser = UserHandle.of(mUserTracker.getUserId());
+        if (UserManager.isHeadlessSystemUserMode() && currentUser.isSystem()) {
+            Log.w(TAG_OPS,
+                    "Skipping connection to TouchInteractionService for the System user in HSUM "
+                            + "mode.");
+            return;
+        }
         try {
             mBound = mContext.bindServiceAsUser(mQuickStepIntent,
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    UserHandle.of(mUserTracker.getUserId()));
+                    currentUser);
         } catch (SecurityException e) {
             Log.e(TAG_OPS, "Unable to bind because of security error", e);
         }
