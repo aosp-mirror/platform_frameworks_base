@@ -30,13 +30,17 @@ import com.android.compose.animation.scene.TestScenes.SceneD
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.animation.scene.transition.link.StateLink
+import com.android.compose.animation.scene.transition.seekToScene
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.TestTransition
 import com.android.compose.test.runMonotonicClockTest
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -659,5 +663,76 @@ class SceneTransitionLayoutStateTest {
         state.snapToScene(SceneC)
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentScene(SceneC)
+    }
+
+    @Test
+    fun seekToScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+        val progress = Channel<Float>()
+
+        val job =
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                state.seekToScene(SceneB, progress.consumeAsFlow())
+            }
+
+        val transition = assertThat(state.transitionState).isSceneTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        assertThat(transition).hasProgress(0f)
+
+        // Change progress.
+        progress.send(0.4f)
+        assertThat(transition).hasProgress(0.4f)
+
+        // Close the channel normally to confirm the transition.
+        progress.close()
+        job.join()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneB)
+    }
+
+    @Test
+    fun seekToScene_cancelled() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+        val progress = Channel<Float>()
+
+        val job =
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                state.seekToScene(SceneB, progress.consumeAsFlow())
+            }
+
+        val transition = assertThat(state.transitionState).isSceneTransition()
+        assertThat(transition).hasFromScene(SceneA)
+        assertThat(transition).hasToScene(SceneB)
+        assertThat(transition).hasProgress(0f)
+
+        // Change progress.
+        progress.send(0.4f)
+        assertThat(transition).hasProgress(0.4f)
+
+        // Close the channel with a CancellationException to cancel the transition.
+        progress.close(CancellationException())
+        job.join()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneA)
+    }
+
+    @Test
+    fun seekToScene_interrupted() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+        val progress = Channel<Float>()
+
+        val job =
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                state.seekToScene(SceneB, progress.consumeAsFlow())
+            }
+
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Start a new transition, interrupting the seek transition.
+        state.setTargetScene(SceneB, coroutineScope = this)
+
+        // The previous job is cancelled and does not infinitely collect the progress.
+        job.join()
     }
 }
