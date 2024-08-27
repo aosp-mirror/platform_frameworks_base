@@ -51,7 +51,7 @@ class SysUiViewModelTest : SysuiTestCase() {
         composeRule.setContent {
             val keepAlive by keepAliveMutable
             if (keepAlive) {
-                rememberViewModel {
+                rememberViewModel("test") {
                     FakeSysUiViewModel(
                         onActivation = { isActive = true },
                         onDeactivation = { isActive = false },
@@ -69,21 +69,25 @@ class SysUiViewModelTest : SysuiTestCase() {
         var isActive2 = false
         composeRule.setContent {
             val key by keyMutable
-            rememberViewModel(key) {
-                when (key) {
-                    1 ->
-                        FakeSysUiViewModel(
-                            onActivation = { isActive1 = true },
-                            onDeactivation = { isActive1 = false },
-                        )
-                    2 ->
-                        FakeSysUiViewModel(
-                            onActivation = { isActive2 = true },
-                            onDeactivation = { isActive2 = false },
-                        )
-                    else -> error("unsupported key $key")
+            // Need to explicitly state the type to avoid a weird issue where the factory seems to
+            // return Unit instead of FakeSysUiViewModel. It might be an issue with the compose
+            // compiler.
+            val unused: FakeSysUiViewModel =
+                rememberViewModel("test", key) {
+                    when (key) {
+                        1 ->
+                            FakeSysUiViewModel(
+                                onActivation = { isActive1 = true },
+                                onDeactivation = { isActive1 = false },
+                            )
+                        2 ->
+                            FakeSysUiViewModel(
+                                onActivation = { isActive2 = true },
+                                onDeactivation = { isActive2 = false },
+                            )
+                        else -> error("unsupported key $key")
+                    }
                 }
-            }
         }
         assertThat(isActive1).isTrue()
         assertThat(isActive2).isFalse()
@@ -106,7 +110,7 @@ class SysUiViewModelTest : SysuiTestCase() {
         composeRule.setContent {
             val keepAlive by keepAliveMutable
             if (keepAlive) {
-                rememberViewModel {
+                rememberViewModel("test") {
                     FakeSysUiViewModel(
                         onActivation = { isActive = true },
                         onDeactivation = { isActive = false },
@@ -130,6 +134,7 @@ class SysUiViewModelTest : SysuiTestCase() {
         val viewModel = FakeViewModel()
         backgroundScope.launch {
             view.viewModel(
+                traceName = "test",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = { viewModel },
             ) {
