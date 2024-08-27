@@ -43,7 +43,7 @@ sealed interface ObservableTransitionState {
     fun currentScene(): Flow<SceneKey> {
         return when (this) {
             is Idle -> flowOf(currentScene)
-            is Transition.ChangeCurrentScene -> currentScene
+            is Transition.ChangeScene -> currentScene
             is Transition.ShowOrHideOverlay -> flowOf(currentScene)
             is Transition.ReplaceOverlay -> flowOf(currentScene)
         }
@@ -94,7 +94,7 @@ sealed interface ObservableTransitionState {
                 .trimMargin()
 
         /** A transition animating between [fromScene] and [toScene]. */
-        class ChangeCurrentScene(
+        class ChangeScene(
             override val fromScene: SceneKey,
             override val toScene: SceneKey,
             val currentScene: Flow<SceneKey>,
@@ -174,8 +174,8 @@ sealed interface ObservableTransitionState {
                 previewProgress: Flow<Float> = flowOf(0f),
                 isInPreviewStage: Flow<Boolean> = flowOf(false),
                 currentOverlays: Flow<Set<OverlayKey>> = flowOf(emptySet()),
-            ): ChangeCurrentScene {
-                return ChangeCurrentScene(
+            ): ChangeScene {
+                return ChangeScene(
                     fromScene,
                     toScene,
                     currentScene,
@@ -210,8 +210,8 @@ fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTrans
     return snapshotFlow {
             when (val state = transitionState) {
                 is TransitionState.Idle -> ObservableTransitionState.Idle(state.currentScene)
-                is TransitionState.Transition.ChangeCurrentScene -> {
-                    ObservableTransitionState.Transition.ChangeCurrentScene(
+                is TransitionState.Transition.ChangeScene -> {
+                    ObservableTransitionState.Transition.ChangeScene(
                         fromScene = state.fromScene,
                         toScene = state.toScene,
                         currentScene = snapshotFlow { state.currentScene },

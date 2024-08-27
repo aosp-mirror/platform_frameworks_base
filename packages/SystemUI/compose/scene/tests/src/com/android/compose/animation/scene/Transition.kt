@@ -42,9 +42,9 @@ fun transition(
     orientation: Orientation = Orientation.Horizontal,
     onFinish: ((TransitionState.Transition) -> Job)? = null,
     replacedTransition: TransitionState.Transition? = null,
-): TransitionState.Transition.ChangeCurrentScene {
+): TransitionState.Transition.ChangeScene {
     return object :
-        TransitionState.Transition.ChangeCurrentScene(from, to, replacedTransition),
+        TransitionState.Transition.ChangeScene(from, to, replacedTransition),
         TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()

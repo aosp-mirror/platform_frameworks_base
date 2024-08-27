@@ -118,7 +118,7 @@ constructor(
         get() =
             when (this) {
                 is ObservableTransitionState.Idle -> currentScene.canBeOccluded
-                is ObservableTransitionState.Transition.ChangeCurrentScene ->
+                is ObservableTransitionState.Transition.ChangeScene ->
                     fromScene.canBeOccluded && toScene.canBeOccluded
                 is ObservableTransitionState.Transition.ReplaceOverlay,
                 is ObservableTransitionState.Transition.ShowOrHideOverlay ->

@@ -75,7 +75,7 @@ sealed interface TransitionState {
         val replacedTransition: Transition? = null,
     ) : TransitionState {
         /** A transition animating between [fromScene] and [toScene]. */
-        abstract class ChangeCurrentScene(
+        abstract class ChangeScene(
             /** The scene this transition is starting from. Can't be the same as toScene */
             val fromScene: SceneKey,
 

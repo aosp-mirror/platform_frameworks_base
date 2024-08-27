@@ -378,7 +378,7 @@ internal class SceneTransitionLayoutImpl(
                 // Compose the new scene we are going to first.
                 transitions.fastForEachReversed { transition ->
                     when (transition) {
-                        is TransitionState.Transition.ChangeCurrentScene -> {
+                        is TransitionState.Transition.ChangeScene -> {
                             maybeAdd(transition.toScene)
                             maybeAdd(transition.fromScene)
                         }
@@ -428,7 +428,7 @@ internal class SceneTransitionLayoutImpl(
 
                     transitions.fastForEach { transition ->
                         when (transition) {
-                            is TransitionState.Transition.ChangeCurrentScene -> {}
+                            is TransitionState.Transition.ChangeScene -> {}
                             is TransitionState.Transition.ShowOrHideOverlay ->
                                 maybeAdd(transition.overlay)
                             is TransitionState.Transition.ReplaceOverlay -> {
@@ -484,7 +484,7 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
         val width: Int
         val height: Int
         val transition =
-            layoutImpl.state.currentTransition as? TransitionState.Transition.ChangeCurrentScene
+            layoutImpl.state.currentTransition as? TransitionState.Transition.ChangeScene
         if (transition == null) {
             width = placeable.width
             height = placeable.height
