@@ -3633,6 +3633,7 @@ package android.view {
 
   public static final class Display.Mode implements android.os.Parcelable {
     ctor public Display.Mode(int, int, float);
+    method public boolean isSynthetic();
     method public boolean matches(int, int, float);
   }
 
