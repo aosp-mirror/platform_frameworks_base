@@ -18,7 +18,6 @@ package android.app.admin;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.flags.Flags;
 import android.os.Parcel;
 
 import java.util.Objects;
@@ -30,9 +29,7 @@ public final class StringPolicyValue extends PolicyValue<String> {
 
     public StringPolicyValue(@NonNull String value) {
         super(value);
-        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            PolicySizeVerifier.enforceMaxStringLength(value, "policyValue");
-        }
+        PolicySizeVerifier.enforceMaxStringLength(value, "policyValue");
     }
 
     private StringPolicyValue(Parcel source) {
