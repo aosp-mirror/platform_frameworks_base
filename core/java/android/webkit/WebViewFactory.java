@@ -208,7 +208,7 @@ public final class WebViewFactory {
         public MissingWebViewPackageException(Exception e) { super(e); }
     }
 
-    private static boolean isWebViewSupported() {
+    static boolean isWebViewSupported() {
         // No lock; this is a benign race as Boolean's state is final and the PackageManager call
         // will always return the same value.
         if (sWebViewSupported == null) {
