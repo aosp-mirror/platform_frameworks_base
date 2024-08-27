@@ -88,6 +88,7 @@ constructor(
         keyguardState: KeyguardState? = null,
     ) {
         applicationScope.launch("$TAG#changeScene") {
+            if (currentScene.value == newScene) return@launch
             logger.logSceneChangeRequested(
                 from = currentScene.value,
                 to = newScene,
@@ -108,6 +109,7 @@ constructor(
     ) {
         applicationScope.launch("$TAG#snapToScene") {
             delay(delayMillis)
+            if (currentScene.value == newScene) return@launch
             logger.logSceneChangeRequested(
                 from = currentScene.value,
                 to = newScene,
