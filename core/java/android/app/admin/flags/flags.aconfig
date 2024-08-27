@@ -105,6 +105,7 @@ flag {
   bug: "289520697"
 }
 
+# Fully rolled out and must not be used.
 flag {
   name: "security_log_v2_enabled"
   is_exported: true
