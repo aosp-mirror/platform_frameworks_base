@@ -1373,6 +1373,16 @@ flag {
 }
 
 flag {
+    name: "notify_password_text_view_user_activity_in_background"
+    namespace: "systemui"
+    description: "Decide whether to notify the user activity in password text view, to power manager in the background thread."
+    bug: "346882515"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "face_message_defer_update"
     namespace: "systemui"
     description: "Only analyze the last n frames when determining whether to defer a face auth help message like low light"

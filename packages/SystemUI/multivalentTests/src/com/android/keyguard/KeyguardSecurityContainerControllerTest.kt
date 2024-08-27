@@ -154,6 +154,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var postureController: DevicePostureController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
 
     @Captor
     private lateinit var swipeListenerArgumentCaptor:
@@ -240,6 +241,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
                 null,
+                mUserActivityNotifier
             )
 
         kosmos = testKosmos()
