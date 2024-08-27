@@ -546,6 +546,16 @@ public final class SatelliteManager {
     public static final int EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911 = 2;
 
     /**
+     * This intent will be broadcasted if there are any change to list of subscriber informations.
+     * This intent will be sent only to the app with component defined in
+     * config_satellite_carrier_roaming_esos_provisioned_class and package defined in
+     * config_satellite_gateway_service_package
+     * @hide
+     */
+    public static final String ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED =
+            "android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
+
+    /**
      * Request to enable or disable the satellite modem and demo mode.
      * If satellite modem and cellular modem cannot work concurrently,
      * then this will disable the cellular modem if satellite modem is enabled,
