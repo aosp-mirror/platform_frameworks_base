@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -30,12 +30,13 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class StringIterationPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeStringIteration0() {
         String s = "hello, world!";
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             char ch;
             for (int i = 0; i < s.length(); ++i) {
@@ -47,7 +48,7 @@ public class StringIterationPerfTest {
     @Test
     public void timeStringIteration1() {
         String s = "hello, world!";
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             char ch;
             for (int i = 0, length = s.length(); i < length; ++i) {
@@ -59,7 +60,7 @@ public class StringIterationPerfTest {
     @Test
     public void timeStringIteration2() {
         String s = "hello, world!";
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             char ch;
             char[] chars = s.toCharArray();
@@ -72,7 +73,7 @@ public class StringIterationPerfTest {
     @Test
     public void timeStringToCharArray() {
         String s = "hello, world!";
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             char[] chars = s.toCharArray();
         }

@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -30,7 +30,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class FieldAccessPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule
+    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private static class Inner {
         public int mPublicInnerIntVal;
@@ -47,7 +48,7 @@ public class FieldAccessPerfTest {
     @Test
     public void timeField() {
         int result = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = mIntVal;
         }
@@ -56,7 +57,7 @@ public class FieldAccessPerfTest {
     @Test
     public void timeFieldFinal() {
         int result = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = mFinalIntVal;
         }
@@ -65,7 +66,7 @@ public class FieldAccessPerfTest {
     @Test
     public void timeFieldStatic() {
         int result = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = sStaticIntVal;
         }
@@ -74,7 +75,7 @@ public class FieldAccessPerfTest {
     @Test
     public void timeFieldStaticFinal() {
         int result = 0;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = FINAL_INT_VAL;
         }
@@ -84,7 +85,7 @@ public class FieldAccessPerfTest {
     public void timeFieldCached() {
         int result = 0;
         int cachedIntVal = this.mIntVal;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = cachedIntVal;
         }
@@ -94,7 +95,7 @@ public class FieldAccessPerfTest {
     public void timeFieldPrivateInnerClassPublicField() {
         int result = 0;
         Inner inner = new Inner();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = inner.mPublicInnerIntVal;
         }
@@ -104,7 +105,7 @@ public class FieldAccessPerfTest {
     public void timeFieldPrivateInnerClassProtectedField() {
         int result = 0;
         Inner inner = new Inner();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = inner.mProtectedInnerIntVal;
         }
@@ -114,7 +115,7 @@ public class FieldAccessPerfTest {
     public void timeFieldPrivateInnerClassPrivateField() {
         int result = 0;
         Inner inner = new Inner();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = inner.mPrivateInnerIntVal;
         }
@@ -124,7 +125,7 @@ public class FieldAccessPerfTest {
     public void timeFieldPrivateInnerClassPackageField() {
         int result = 0;
         Inner inner = new Inner();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result = inner.mPackageInnerIntVal;
         }
