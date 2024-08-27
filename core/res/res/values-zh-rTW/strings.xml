@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"返回"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"切換輸入法"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"開啟輸入法挑選器"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"設定"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>

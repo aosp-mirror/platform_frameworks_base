@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ආපසු"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ආදාන ක්‍රමය මාරු කිරීම"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ආදාන ක්‍රම තෝරකය විවෘත කරන්න"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"සැකසීම්"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ආචයනය ඉඩ ප්‍රමාණය අඩු වී ඇත"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"සමහර පද්ධති කාර්යයන් ක්‍රියා නොකරනු ඇත"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"පද්ධතිය සඳහා ප්‍රමාණවත් ඉඩ නොමැත. ඔබට 250MB නිදහස් ඉඩක් තිබෙන ඔබට තිබෙන බව සහතික කරගෙන නැවත උත්සාහ කරන්න."</string>
