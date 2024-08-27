@@ -1251,7 +1251,7 @@ public class TransitionTests extends WindowTestsBase {
         final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
         app.mTransitionController.requestStartTransition(transition, app.getTask(),
                 null /* remoteTransition */, null /* displayChange */);
-        transition.collectExistenceChange(app.getTask());
+        app.mTransitionController.collectExistenceChange(app.getTask());
         mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
@@ -1416,8 +1416,7 @@ public class TransitionTests extends WindowTestsBase {
         activity1.setVisibleRequested(false);
         activity2.setVisibleRequested(true);
 
-        final ActionChain chain = ActionChain.testFinish(null);
-        openTransition.finishTransition(chain);
+        openTransition.finishTransition();
 
         // We finished the openTransition. Even though activity1 is visibleRequested=false, since
         // the closeTransition animation hasn't played yet, make sure that we didn't commit
@@ -1430,7 +1429,7 @@ public class TransitionTests extends WindowTestsBase {
         // normally.
         mWm.mSyncEngine.abort(closeTransition.getSyncId());
 
-        closeTransition.finishTransition(chain);
+        closeTransition.finishTransition();
 
         assertFalse(activity1.isVisible());
         assertTrue(activity2.isVisible());
@@ -1450,7 +1449,7 @@ public class TransitionTests extends WindowTestsBase {
         activity1.setState(ActivityRecord.State.INITIALIZING, "test");
         activity1.mLaunchTaskBehind = true;
         mWm.mSyncEngine.abort(noChangeTransition.getSyncId());
-        noChangeTransition.finishTransition(chain);
+        noChangeTransition.finishTransition();
         assertTrue(activity1.mLaunchTaskBehind);
     }
 
@@ -1469,7 +1468,7 @@ public class TransitionTests extends WindowTestsBase {
         // We didn't call abort on the transition itself, so it will still run onTransactionReady
         // normally.
         mWm.mSyncEngine.abort(transition1.getSyncId());
-        transition1.finishTransition(ActionChain.testFinish(transition1));
+        transition1.finishTransition();
 
         verify(transitionEndedListener).run();
 
@@ -1531,7 +1530,7 @@ public class TransitionTests extends WindowTestsBase {
 
         verify(taskSnapshotController, times(1)).recordSnapshot(eq(task2));
 
-        controller.finishTransition(ActionChain.testFinish(openTransition));
+        controller.finishTransition(openTransition);
 
         // We are now going to simulate closing task1 to return back to (open) task2.
         final Transition closeTransition = createTestTransition(TRANSIT_CLOSE, controller);
@@ -1596,7 +1595,7 @@ public class TransitionTests extends WindowTestsBase {
         doReturn(true).when(task1).isTranslucentForTransition();
         assertFalse(controller.canApplyDim(task1));
 
-        controller.finishTransition(ActionChain.testFinish(closeTransition));
+        controller.finishTransition(closeTransition);
         assertTrue(wasInFinishingTransition[0]);
         assertFalse(calledListenerOnOtherDisplay[0]);
         assertNull(controller.mFinishingTransition);
@@ -1652,7 +1651,7 @@ public class TransitionTests extends WindowTestsBase {
         // to avoid the latency to resume the current top, i.e. appB.
         assertTrue(controller.isTransientVisible(taskRecent));
         // The recent is paused after the transient transition is finished.
-        controller.finishTransition(ActionChain.testFinish(transition));
+        controller.finishTransition(transition);
         assertFalse(controller.isTransientVisible(taskRecent));
     }
 

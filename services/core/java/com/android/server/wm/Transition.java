@@ -181,7 +181,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     final @TransitionType int mType;
     private int mSyncId = -1;
     private @TransitionFlags int mFlags;
-    final TransitionController mController;
+    private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
     private final Token mToken;
 
@@ -328,9 +328,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * instead of immediately when the configuration changes.
      */
     ArrayList<ActivityRecord> mConfigAtEndActivities = null;
-
-    /** The current head of the chain of actions related to this transition. */
-    ActionChain mChainHead = null;
 
     @VisibleForTesting
     Transition(@TransitionType int type, @TransitionFlags int flags,
@@ -1210,13 +1207,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * The transition has finished animating and is ready to finalize WM state. This should not
      * be called directly; use {@link TransitionController#finishTransition} instead.
      */
-    void finishTransition(@NonNull ActionChain chain) {
+    void finishTransition() {
         if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER) && mIsPlayerEnabled) {
             asyncTraceEnd(System.identityHashCode(this));
-        }
-        if (!chain.isFinishing()) {
-            throw new IllegalStateException("Can't finish on a non-finishing transition "
-                    + chain.mTransition);
         }
         mLogger.mFinishTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mLoggerHandler.post(mLogger::logOnFinish);
@@ -2170,7 +2163,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mFinishTransaction != null) {
             mFinishTransaction.apply();
         }
-        mController.finishTransition(mController.mAtm.mChainTracker.startFinish("clean-up", this));
+        mController.finishTransition(this);
     }
 
     private void cleanUpInternal() {
@@ -3384,11 +3377,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
         return false;
-    }
-
-    void recordChain(@NonNull ActionChain chain) {
-        chain.mPrevious = mChainHead;
-        mChainHead = chain;
     }
 
     @VisibleForTesting

@@ -795,7 +795,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowOrganizerController mWindowOrganizerController;
     TaskOrganizerController mTaskOrganizerController;
     TaskFragmentOrganizerController mTaskFragmentOrganizerController;
-    ActionChain.Tracker mChainTracker;
 
     @Nullable
     private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
@@ -870,7 +869,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
         mWindowOrganizerController = new WindowOrganizerController(this);
-        mChainTracker = new ActionChain.Tracker(this);
         mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
         mTaskFragmentOrganizerController =
                 mWindowOrganizerController.mTaskFragmentOrganizerController;
