@@ -157,6 +157,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    private void dispatchImeRequested(int displayId, boolean isRequested) {
+        synchronized (mPositionProcessors) {
+            for (ImePositionProcessor pp : mPositionProcessors) {
+                pp.onImeRequested(displayId, isRequested);
+            }
+        }
+    }
+
     @ImePositionProcessor.ImeAnimationFlags
     private int dispatchStartPositioning(int displayId, int hiddenTop, int shownTop,
             boolean show, boolean isFloating, SurfaceControl.Transaction t) {
@@ -398,6 +406,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         public void setImeInputTargetRequestedVisibility(boolean visible) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
                 mImeRequestedVisible = visible;
+                dispatchImeRequested(mDisplayId, mImeRequestedVisible);
+
                 // In the case that the IME becomes visible, but we have the control with leash
                 // already (e.g., when focussing an editText in activity B, while and editText in
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
@@ -446,6 +456,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
+            // TODO(b/353463205): For hide: this still has the statsToken from the previous show
+            //  request
             final var statsToken = mImeSourceControl.getImeStatsToken();
 
             startAnimation(show, forceRestart, statsToken);
@@ -703,6 +715,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 IME_ANIMATION_NO_ALPHA,
         })
         @interface ImeAnimationFlags {
+        }
+
+        /**
+         * Called when the IME was requested by an app
+         *
+         * @param isRequested {@code true} if the IME was requested to be visible
+         */
+        default void onImeRequested(int displayId, boolean isRequested) {
         }
 
         /**

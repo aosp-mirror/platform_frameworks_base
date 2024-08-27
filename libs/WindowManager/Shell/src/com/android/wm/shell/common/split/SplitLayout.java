@@ -1106,6 +1106,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         default void onDoubleTappedDivider() {
         }
 
+        /**
+         * Sets the excludedInsetsTypes for the IME in the root WindowContainer.
+         */
+        void setExcludeImeInsets(boolean exclude);
+
         /** Returns split position of the token. */
         @SplitPosition
         int getSplitItemPosition(WindowContainerToken token);
@@ -1305,6 +1310,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
 
         @Override
+        public void onImeRequested(int displayId, boolean isRequested) {
+            if (displayId != mDisplayId) return;
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "IME was set to requested=%s",
+                    isRequested);
+            mSplitLayoutHandler.setExcludeImeInsets(true);
+        }
+
+        @Override
         public int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
                 boolean showing, boolean isFloating, SurfaceControl.Transaction t) {
             if (displayId != mDisplayId || !mInitialized) {
@@ -1356,6 +1369,12 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             setDividerInteractive(!mImeShown || !mHasImeFocus || isFloating, true,
                     "onImeStartPositioning");
 
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (mImeShown) {
+                    mSplitLayoutHandler.setExcludeImeInsets(false);
+                }
+            }
+
             return mTargetYOffset != mLastYOffset ? IME_ANIMATION_NO_ALPHA : 0;
         }
 
@@ -1374,6 +1393,16 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                     "Split IME animation ending, canceled=%b", cancel);
             onProgress(1.0f);
             mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                if (!mImeShown) {
+                    // The IME hide animation is started immediately and at that point, the IME
+                    // insets are not yet set to hidden. Therefore only resetting the
+                    // excludedTypes at the end of the animation. Note: InsetsPolicy will only
+                    // set the IME height to zero, when it is visible. When it becomes invisible,
+                    // we dispatch the insets (the height there is zero as well)
+                    mSplitLayoutHandler.setExcludeImeInsets(false);
+                }
+            }
         }
 
         @Override
