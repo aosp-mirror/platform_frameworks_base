@@ -23,7 +23,7 @@
     <string name="dialog_dismiss_button" msgid="989567669882005067">"Stäng"</string>
     <string name="dialog_continue_button" msgid="8630290044077052145">"Fortsätt"</string>
     <string name="dialog_sign_in_options_button" msgid="448002958902615054">"Inloggningsalternativ"</string>
-    <string name="sign_in_options_title" msgid="6720572645638986680">"Inloggningsalternativ"</string>
+    <string name="sign_in_options_title" msgid="6720572645638986680">"Inloggnings­alternativ"</string>
     <string name="provider_list_title" msgid="6803918216129492212">"Hantera inloggningar"</string>
     <string name="choose_sign_in_title" msgid="3616025924746872202">"Välj en inloggning"</string>
     <string name="choose_passkey_title" msgid="8459270617632817465">"Välj nyckel"</string>
