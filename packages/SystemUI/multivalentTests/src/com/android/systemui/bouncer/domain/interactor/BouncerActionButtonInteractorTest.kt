@@ -30,8 +30,6 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
-import com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
@@ -89,8 +87,6 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
         whenever(emergencyAffordanceManager.needsEmergencyAffordance())
             .thenReturn(needsEmergencyAffordance)
         whenever(telecomManager.isInCall).thenReturn(false)
-
-        kosmos.fakeFeatureFlagsClassic.set(REFACTOR_GETCURRENTUSER, true)
 
         kosmos.fakeTelephonyRepository.setHasTelephonyRadio(true)
 

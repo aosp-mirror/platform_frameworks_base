@@ -175,10 +175,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         emergencyAffordanceManager = kosmos.emergencyAffordanceManager
         whenever(emergencyAffordanceManager.needsEmergencyAffordance()).thenReturn(true)
 
-        kosmos.fakeFeatureFlagsClassic.apply {
-            set(Flags.NEW_NETWORK_SLICE_UI, false)
-            set(Flags.REFACTOR_GETCURRENTUSER, true)
-        }
+        kosmos.fakeFeatureFlagsClassic.apply { set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
         mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
         mobileConnectionsRepository.isAnySimSecure.value = false
