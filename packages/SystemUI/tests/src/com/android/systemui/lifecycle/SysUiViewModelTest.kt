@@ -156,7 +156,7 @@ class SysUiViewModelTest : SysuiTestCase() {
     }
 }
 
-private class FakeViewModel : SysUiViewModel, ExclusiveActivatable() {
+private class FakeViewModel : ExclusiveActivatable() {
     var isActivated = false
 
     override suspend fun onActivated(): Nothing {

@@ -20,7 +20,6 @@ import android.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printCollection
 import java.io.PrintWriter

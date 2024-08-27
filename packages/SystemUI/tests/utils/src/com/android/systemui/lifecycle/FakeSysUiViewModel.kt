@@ -26,9 +26,9 @@ import kotlinx.coroutines.flow.flowOf
 class FakeSysUiViewModel(
     private val onActivation: () -> Unit = {},
     private val onDeactivation: () -> Unit = {},
-    private val upstreamFlow: Flow<Boolean> = flowOf(true),
-    private val upstreamStateFlow: StateFlow<Boolean> = MutableStateFlow(true).asStateFlow(),
-) : SysUiViewModel, ExclusiveActivatable() {
+    upstreamFlow: Flow<Boolean> = flowOf(true),
+    upstreamStateFlow: StateFlow<Boolean> = MutableStateFlow(true).asStateFlow(),
+) : ExclusiveActivatable() {
 
     var activationCount = 0
     var cancellationCount = 0
