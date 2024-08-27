@@ -19,6 +19,7 @@ package com.android.systemui.qs.composefragment
 import android.annotation.SuppressLint
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.IndentingPrintWriter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,8 +42,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
@@ -59,7 +60,9 @@ import com.android.compose.modifiers.height
 import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.Dumpable
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -76,6 +79,10 @@ import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.qs.ui.composable.ShadeBody
 import com.android.systemui.res.R
 import com.android.systemui.util.LifecycleFragment
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printSection
+import com.android.systemui.util.println
+import java.io.PrintWriter
 import java.util.function.Consumer
 import javax.inject.Inject
 import javax.inject.Named
@@ -91,9 +98,10 @@ class QSFragmentCompose
 @Inject
 constructor(
     private val qsFragmentComposeViewModelFactory: QSFragmentComposeViewModel.Factory,
+    private val dumpManager: DumpManager,
     @Named(QUICK_QS_PANEL) private val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) private val qsMediaHost: MediaHost,
-) : LifecycleFragment(), QS {
+) : LifecycleFragment(), QS, Dumpable {
 
     private val scrollListener = MutableStateFlow<QS.ScrollListener?>(null)
     private val heightListener = MutableStateFlow<QS.HeightListener?>(null)
@@ -118,7 +126,23 @@ constructor(
             var top by mutableStateOf(0)
             var bottom by mutableStateOf(0)
             var radius by mutableStateOf(0)
+
+            fun dump(pw: IndentingPrintWriter) {
+                pw.printSection("NotificationScrimClippingParams") {
+                    pw.println("isEnabled", isEnabled)
+                    pw.println("leftInset", "${leftInset}px")
+                    pw.println("rightInset", "${rightInset}px")
+                    pw.println("top", "${top}px")
+                    pw.println("bottom", "${bottom}px")
+                    pw.println("radius", "${radius}px")
+                }
+            }
         }
+
+    override fun onStart() {
+        super.onStart()
+        registerDumpable()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -343,11 +367,11 @@ constructor(
     }
 
     override fun getHeaderTop(): Int {
-        return viewModel.qqsHeaderHeight.value
+        return qqsPositionOnRoot.top
     }
 
     override fun getHeaderBottom(): Int {
-        return headerTop + qqsHeight.value
+        return qqsPositionOnRoot.bottom
     }
 
     override fun getHeaderLeft(): Int {
@@ -358,7 +382,7 @@ constructor(
         outBounds.set(qqsPositionOnRoot)
         view?.getBoundsOnScreen(composeViewPositionOnScreen)
             ?: run { composeViewPositionOnScreen.setEmpty() }
-        qqsPositionOnRoot.offset(composeViewPositionOnScreen.left, composeViewPositionOnScreen.top)
+        outBounds.offset(composeViewPositionOnScreen.left, composeViewPositionOnScreen.top)
     }
 
     override fun isHeaderShown(): Boolean {
@@ -404,37 +428,29 @@ constructor(
             onDispose { qqsVisible.value = false }
         }
         Column(modifier = Modifier.sysuiResTag("quick_qs_panel")) {
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .onPlaced { coordinates ->
+                            val (leftFromRoot, topFromRoot) = coordinates.positionInRoot().round()
+                            qqsPositionOnRoot.set(
+                                leftFromRoot,
+                                topFromRoot,
+                                leftFromRoot + coordinates.size.width,
+                                topFromRoot + coordinates.size.height,
+                            )
+                        }
+                        .onSizeChanged { size -> qqsHeight.value = size.height }
+                        .padding(top = { qqsPadding })
+            ) {
                 val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
                 if (qsEnabled) {
                     QuickQuickSettings(
                         viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel,
                         modifier =
-                            Modifier.onGloballyPositioned { coordinates ->
-                                    val (leftFromRoot, topFromRoot) =
-                                        coordinates.positionInRoot().round()
-                                    val (width, height) = coordinates.size
-                                    qqsPositionOnRoot.set(
-                                        leftFromRoot,
-                                        topFromRoot,
-                                        leftFromRoot + width,
-                                        topFromRoot + height
-                                    )
-                                }
-                                .layout { measurable, constraints ->
-                                    val placeable = measurable.measure(constraints)
-                                    qqsHeight.value = placeable.height
-
-                                    layout(placeable.width, placeable.height) {
-                                        placeable.place(0, 0)
-                                    }
-                                }
-                                .padding(top = { qqsPadding })
-                                .collapseExpandSemanticAction(
-                                    stringResource(
-                                        id = R.string.accessibility_quick_settings_expand
-                                    )
-                                )
+                            Modifier.collapseExpandSemanticAction(
+                                stringResource(id = R.string.accessibility_quick_settings_expand)
+                            )
                     )
                 }
             }
@@ -486,6 +502,44 @@ constructor(
             }
         } ?: this
     }
+
+    private fun registerDumpable() {
+        val instanceId = instanceProvider.getNextId()
+        // Add an instanceId because the system may have more than 1 of these when re-inflating and
+        // DumpManager doesn't like repeated identifiers. Also, put it first because DumpHandler
+        // matches by end.
+        val stringId = "$instanceId-QSFragmentCompose"
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                try {
+                    dumpManager.registerNormalDumpable(stringId, this@QSFragmentCompose)
+                    awaitCancellation()
+                } finally {
+                    dumpManager.unregisterDumpable(stringId)
+                }
+            }
+        }
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.asIndenting().run {
+            notificationScrimClippingParams.dump(this)
+            printSection("QQS positioning") {
+                println("qqsHeight", "${headerHeight}px")
+                println("qqsTop", "${headerTop}px")
+                println("qqsBottom", "${headerBottom}px")
+                println("qqsLeft", "${headerLeft}px")
+                println("qqsPositionOnRoot", qqsPositionOnRoot)
+                val rect = Rect()
+                getHeaderBoundsOnScreen(rect)
+                println("qqsPositionOnScreen", rect)
+            }
+            println("QQS visible", qqsVisible.value)
+            if (::viewModel.isInitialized) {
+                printSection("View Model") { viewModel.dump(this@run, args) }
+            }
+        }
+    }
 }
 
 private fun View.setBackPressedDispatcher() {
@@ -526,3 +580,12 @@ private suspend inline fun <Listener : Any, Data> setListenerJob(
         }
     }
 }
+
+private val instanceProvider =
+    object {
+        private var currentId = 0
+
+        fun getNextId(): Int {
+            return currentId++
+        }
+    }

@@ -21,6 +21,7 @@ import android.graphics.Rect
 import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleCoroutineScope
+import com.android.systemui.Dumpable
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -34,10 +35,14 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printSection
+import com.android.systemui.util.println
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.io.PrintWriter
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -62,7 +67,7 @@ constructor(
     private val configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
-) {
+) : Dumpable {
     val footerActionsViewModel =
         footerActionsViewModelFactory.create(lifecycleScope).also {
             lifecycleScope.launch { footerActionsController.init() }
@@ -227,6 +232,30 @@ constructor(
      * determining the correct action based on the expansion state.
      */
     var collapseExpandAccessibilityAction: Runnable? = null
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.asIndenting().run {
+            printSection("Quick Settings state") {
+                println("isQSExpanded", isQSExpanded)
+                println("isQSVisible", isQSVisible)
+                println("isQSEnabled", qsEnabled.value)
+                println("isCustomizing", containerViewModel.editModeViewModel.isEditing.value)
+            }
+            printSection("Expansion state") {
+                println("qsExpansion", qsExpansionValue)
+                println("panelExpansionFraction", panelExpansionFractionValue)
+                println("squishinessFraction", squishinessFractionValue)
+                println("expansionState", expansionState.value)
+            }
+            printSection("Shade state") {
+                println("stackOverscrolling", stackScrollerOverscrollingValue)
+                println("statusBarState", StatusBarState.toString(statusBarState.value))
+                println("isSmallScreen", isSmallScreenValue)
+                println("heightOverride", "${heightOverrideValue}px")
+                println("qqsHeaderHeight", "${qqsHeaderHeight.value}px")
+            }
+        }
+    }
 
     @AssistedFactory
     interface Factory {
