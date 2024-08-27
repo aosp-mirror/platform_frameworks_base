@@ -19,6 +19,8 @@ package com.android.systemui.scene.shared.model
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
@@ -26,7 +28,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 
 class FakeScene(
     override val key: SceneKey,
-) : Scene {
+) : ExclusiveActivatable(), Scene {
     var isDestinationScenesBeingCollected = false
 
     private val destinationScenesChannel = Channel<Map<UserAction, UserActionResult>>()
@@ -36,6 +38,10 @@ class FakeScene(
             .receiveAsFlow()
             .onStart { isDestinationScenesBeingCollected = true }
             .onCompletion { isDestinationScenesBeingCollected = false }
+
+    override suspend fun onActivated(): Nothing {
+        awaitCancellation()
+    }
 
     suspend fun setDestinationScenes(value: Map<UserAction, UserActionResult>) {
         destinationScenesChannel.send(value)

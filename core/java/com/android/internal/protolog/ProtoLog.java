@@ -63,6 +63,9 @@ public class ProtoLog {
      * @param groups The ProtoLog groups that will be used in the process.
      */
     public static void init(IProtoLogGroup... groups) {
+        // These tracing instances are only used when we cannot or do not preprocess the source
+        // files to extract out the log strings. Otherwise, the trace calls are replaced with calls
+        // directly to the generated tracing implementations.
         if (android.tracing.Flags.perfettoProtologTracing()) {
             synchronized (sInitLock) {
                 if (sProtoLogInstance != null) {
@@ -76,8 +79,6 @@ public class ProtoLog {
                 sProtoLogInstance = new PerfettoProtoLogImpl(groups);
             }
         } else {
-            // The first call to ProtoLog is likely to flip REQUIRE_PROTOLOGTOOL, which is when this
-            // static block will be executed before REQUIRE_PROTOLOGTOOL is actually set.
             sProtoLogInstance = new LogcatOnlyProtoLogImpl();
         }
     }

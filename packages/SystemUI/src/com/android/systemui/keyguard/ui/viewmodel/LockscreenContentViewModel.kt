@@ -24,6 +24,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
@@ -59,7 +60,7 @@ constructor(
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
-) : SysUiViewModel() {
+) : SysUiViewModel, ExclusiveActivatable() {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
     val isUdfpsVisible: Boolean

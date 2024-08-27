@@ -1235,6 +1235,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isBelowLastNotification(float x, float y) {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.isBelowLastNotification(x, y);
     }
 
@@ -1328,6 +1329,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public int getTopPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView.getTopPadding();
     }
 

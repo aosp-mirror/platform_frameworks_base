@@ -12,7 +12,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.util.SplitBounds;
+import com.android.wm.shell.shared.split.SplitBounds;
 
 import org.junit.Before;
 import org.junit.Test;

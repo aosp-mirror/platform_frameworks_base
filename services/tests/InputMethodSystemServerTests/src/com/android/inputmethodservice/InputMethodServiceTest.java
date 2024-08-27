@@ -33,11 +33,15 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
@@ -56,6 +60,7 @@ import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -88,6 +93,9 @@ public class InputMethodServiceTest {
     private InputMethodServiceWrapper mInputMethodService;
     private String mInputMethodId;
     private boolean mShowImeWithHardKeyboardEnabled;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -155,7 +163,13 @@ public class InputMethodServiceTest {
                 () -> assertThat(mUiDevice.pressHome()).isTrue(),
                 true /* expected */,
                 false /* inputViewStarted */);
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
     }
 
     /**
@@ -182,8 +196,13 @@ public class InputMethodServiceTest {
 
     /**
      * This checks the result of calling IMS#requestShowSelf and IMS#requestHideSelf.
+     *
+     * With the refactor in b/298172246, all calls to IMMS#{show,hide}MySoftInputLocked
+     * will be just apply the requested visibility (by using the callback). Therefore, we will
+     * lose flags like HIDE_IMPLICIT_ONLY.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowHideSelf() throws Exception {
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -375,8 +394,13 @@ public class InputMethodServiceTest {
     /**
      * This checks that an implicit show request when the IME is not previously shown,
      * and it should be shown in fullscreen mode, results in the IME not being shown.
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * SHOW_IMPLICIT.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputImplicitly_fullScreenMode() throws Exception {
         setShowImeWithHardKeyboard(true /* enabled */);
 
@@ -425,8 +449,13 @@ public class InputMethodServiceTest {
     /**
      * This checks that an implicit show request when a hard keyboard is connected,
      * results in the IME not being shown.
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * SHOW_IMPLICIT.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputImplicitly_withHardKeyboard() throws Exception {
         setShowImeWithHardKeyboard(false /* enabled */);
 
@@ -484,8 +513,13 @@ public class InputMethodServiceTest {
      * This checks that an implicit show request followed by connecting a hard keyboard
      * and a configuration change, does not trigger IMS#onFinishInputView,
      * but results in the IME being hidden.
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * SHOW_IMPLICIT.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputImplicitly_thenConfigurationChanged() throws Exception {
         setShowImeWithHardKeyboard(false /* enabled */);
 
@@ -567,8 +601,13 @@ public class InputMethodServiceTest {
      * This checks that a forced show request directly followed by an explicit show request,
      * and then a hide not always request, still results in the IME being shown
      * (i.e. the explicit show request retains the forced state).
+     *
+     * With the refactor in b/298172246, all calls from InputMethodManager#{show,hide}SoftInput
+     * will be redirected to InsetsController#{show,hide}. Therefore, we will lose flags like
+     * HIDE_NOT_ALWAYS.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testShowSoftInputForced_testShowSoftInputExplicitly_thenHideSoftInputNotAlways()
             throws Exception {
         setShowImeWithHardKeyboard(true /* enabled */);
@@ -734,7 +773,13 @@ public class InputMethodServiceTest {
         backButtonUiObject.click();
         mInstrumentation.waitForIdleSync();
 
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
     }
 
     /**
@@ -766,7 +811,13 @@ public class InputMethodServiceTest {
         backButtonUiObject.longClick();
         mInstrumentation.waitForIdleSync();
 
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
     }
 
     /**
@@ -848,7 +899,13 @@ public class InputMethodServiceTest {
         assertWithMessage("Input Method Switcher Menu is shown")
                 .that(isInputMethodPickerShown(imm))
                 .isTrue();
-        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        if (Flags.refactorInsetsController()) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        }
 
         // Hide the Picker menu before finishing.
         mUiDevice.pressBack();

@@ -55,7 +55,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
 
-            assertThat(underTest.isActive).isFalse()
             assertThat(actions).isEmpty()
         }
 
@@ -66,7 +65,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
             underTest.activateIn(testScope)
             runCurrent()
 
-            assertThat(underTest.isActive).isTrue()
             assertThat(actions).isEmpty()
         }
 
@@ -76,7 +74,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
             val actions by collectLastValue(underTest.actions)
             underTest.activateIn(testScope)
             runCurrent()
-            assertThat(underTest.isActive).isTrue()
 
             val expected1 =
                 mapOf(
@@ -116,7 +113,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
 
             job.cancel()
             runCurrent()
-            assertThat(underTest.isActive).isFalse()
             assertThat(actions).isEmpty()
         }
 

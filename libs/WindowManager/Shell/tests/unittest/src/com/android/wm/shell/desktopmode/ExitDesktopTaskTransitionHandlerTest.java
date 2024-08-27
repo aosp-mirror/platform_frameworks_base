@@ -48,7 +48,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;

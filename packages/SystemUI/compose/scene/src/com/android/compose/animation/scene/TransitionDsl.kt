@@ -523,8 +523,8 @@ fun interface ProgressConverter {
     fun convert(progress: Float): Float
 
     companion object {
-        /** Keeps scrolling linearly */
-        val Default = linear()
+        /** Starts linearly with some resistance and slowly approaches to 0.2f */
+        val Default = tanh(maxProgress = 0.2f, tilt = 3f)
 
         /**
          * The scroll stays linear, with [factor] you can control how much resistance there is.

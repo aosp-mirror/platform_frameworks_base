@@ -28,7 +28,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.media.controls.data.repository.mediaDataRepository
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaDataProvider
-import com.android.systemui.media.controls.util.mediaControllerFactory
+import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.media.controls.util.mediaUiEventLogger
 import com.android.systemui.plugins.activityStarter
@@ -46,7 +46,7 @@ val Kosmos.mediaDataProcessor by
             uiExecutor = fakeExecutor,
             foregroundExecutor = fakeExecutor,
             handler = fakeExecutorHandler,
-            mediaControllerFactory = mediaControllerFactory,
+            mediaControllerFactory = fakeMediaControllerFactory,
             broadcastDispatcher = broadcastDispatcher,
             dumpManager = dumpManager,
             activityStarter = activityStarter,

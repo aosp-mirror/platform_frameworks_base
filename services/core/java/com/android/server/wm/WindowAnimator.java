@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -218,8 +217,8 @@ public class WindowAnimator {
     private void updateRunningExpensiveAnimationsLegacy() {
         final boolean runningExpensiveAnimations =
                 mService.mRoot.isAnimating(TRANSITION | CHILDREN /* flags */,
-                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_SCREEN_ROTATION
-                                | ANIMATION_TYPE_RECENTS /* typesToCheck */);
+                        ANIMATION_TYPE_APP_TRANSITION
+                                | ANIMATION_TYPE_SCREEN_ROTATION /* typesToCheck */);
         if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
             mService.mSnapshotController.setPause(true);
             mTransaction.setEarlyWakeupStart();
