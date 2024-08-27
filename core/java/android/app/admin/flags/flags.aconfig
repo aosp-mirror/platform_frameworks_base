@@ -68,13 +68,6 @@ flag {
 }
 
 flag {
-  name: "permission_migration_for_zero_trust_impl_enabled"
-  namespace: "enterprise"
-  description: "(Implementation) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
-  bug: "289520697"
-}
-
-flag {
   name: "device_theft_api_enabled"
   is_exported: true
   namespace: "enterprise"
