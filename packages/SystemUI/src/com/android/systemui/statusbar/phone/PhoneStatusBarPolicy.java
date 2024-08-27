@@ -44,6 +44,8 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
+import com.android.settingslib.notification.modes.ZenIconLoader;
+import com.android.settingslib.notification.modes.ZenMode;
 import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -78,6 +80,7 @@ import com.android.systemui.statusbar.policy.RotationLockController.RotationLock
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.DateFormatUtil;
@@ -99,7 +102,6 @@ public class PhoneStatusBarPolicy
                 CommandQueue.Callbacks,
                 RotationLockControllerCallback,
                 Listener,
-                ZenModeController.Callback,
                 DeviceProvisionedListener,
                 KeyguardStateController.Callback,
                 PrivacyItemController.Callback,
@@ -161,6 +163,7 @@ public class PhoneStatusBarPolicy
     private final RecordingController mRecordingController;
     private final RingerModeTracker mRingerModeTracker;
     private final PrivacyLogger mPrivacyLogger;
+    private final ZenModeInteractor mZenModeInteractor;
 
     private boolean mZenVisible;
     private boolean mVibrateVisible;
@@ -193,6 +196,7 @@ public class PhoneStatusBarPolicy
             PrivacyItemController privacyItemController,
             PrivacyLogger privacyLogger,
             ConnectedDisplayInteractor connectedDisplayInteractor,
+            ZenModeInteractor zenModeInteractor,
             JavaAdapter javaAdapter
     ) {
         mIconController = iconController;
@@ -224,6 +228,7 @@ public class PhoneStatusBarPolicy
         mTelecomManager = telecomManager;
         mRingerModeTracker = ringerModeTracker;
         mPrivacyLogger = privacyLogger;
+        mZenModeInteractor = zenModeInteractor;
         mJavaAdapter = javaAdapter;
 
         mSlotCast = resources.getString(com.android.internal.R.string.status_bar_cast);
@@ -355,7 +360,13 @@ public class PhoneStatusBarPolicy
         mBluetooth.addCallback(this);
         mProvisionedController.addCallback(this);
         mCurrentUserSetup = mProvisionedController.isCurrentUserSetup();
-        mZenController.addCallback(this);
+        if (usesModeIcons()) {
+            // Note that we're not fully replacing ZenModeController with ZenModeInteractor, so
+            // we listen for the extra event here but still add the ZMC callback.
+            mJavaAdapter.alwaysCollectFlow(mZenModeInteractor.getMainActiveMode(),
+                    this::onActiveModeChanged);
+        }
+        mZenController.addCallback(mZenControllerCallback);
         if (!Flags.statusBarScreenSharingChips()) {
             // If the flag is enabled, the cast icon is handled in the new screen sharing chips
             // instead of here so we don't need to listen for events here.
@@ -385,15 +396,44 @@ public class PhoneStatusBarPolicy
                 () -> mResources.getString(R.string.accessibility_managed_profile));
     }
 
-    @Override
-    public void onZenChanged(int zen) {
-        updateVolumeZen();
+    private void onActiveModeChanged(@Nullable ZenMode mode) {
+        if (!usesModeIcons()) {
+            Log.wtf(TAG, "onActiveModeChanged shouldn't be called if MODES_UI_ICONS is disabled");
+            return;
+        }
+        boolean visible = mode != null;
+        if (visible) {
+            // TODO: b/360399800 - Get the resource id, package, and cached drawable from the mode;
+            //  this is a shortcut for testing (there should be no direct dependency on
+            //  ZenIconLoader here).
+            String resPackage = mode.isSystemOwned() ? null : mode.getRule().getPackageName();
+            int iconResId = mode.getRule().getIconResId();
+            if (iconResId == 0) {
+                iconResId = ZenIconLoader.getIconResourceIdFromType(mode.getType());
+            }
+
+            mIconController.setResourceIcon(mSlotZen, resPackage, iconResId,
+                    /* preloadedIcon= */ null, mode.getName());
+        }
+        if (visible != mZenVisible) {
+            mIconController.setIconVisibility(mSlotZen, visible);
+            mZenVisible = visible;
+        }
     }
 
-    @Override
-    public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
-        updateVolumeZen();
-    }
+    // TODO: b/308591859 - Should be removed and use the ZenModeInteractor only.
+    private final ZenModeController.Callback mZenControllerCallback =
+            new ZenModeController.Callback() {
+                @Override
+                public void onZenChanged(int zen) {
+                    updateVolumeZen();
+                }
+
+                @Override
+                public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
+                    updateVolumeZen();
+                }
+            };
 
     private void updateAlarm() {
         final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
@@ -417,14 +457,23 @@ public class PhoneStatusBarPolicy
         return mResources.getString(R.string.accessibility_quick_settings_alarm, dateString);
     }
 
-    private final void updateVolumeZen() {
+    private void updateVolumeZen() {
+        int zen = mZenController.getZen();
+        if (!usesModeIcons()) {
+            updateZenIcon(zen);
+        }
+        updateRingerAndAlarmIcons(zen);
+    }
+
+    private void updateZenIcon(int zen) {
+        if (usesModeIcons()) {
+            Log.wtf(TAG, "updateZenIcon shouldn't be called if MODES_UI_ICONS is enabled");
+            return;
+        }
+
         boolean zenVisible = false;
         int zenIconId = 0;
         String zenDescription = null;
-
-        boolean vibrateVisible = false;
-        boolean muteVisible = false;
-        int zen = mZenController.getZen();
 
         if (DndTile.isVisible(mSharedPreferences) || DndTile.isCombinedIcon(mSharedPreferences)) {
             zenVisible = zen != Global.ZEN_MODE_OFF;
@@ -440,7 +489,21 @@ public class PhoneStatusBarPolicy
             zenDescription = mResources.getString(R.string.interruption_level_priority);
         }
 
-        if (!ZenModeConfig.isZenOverridingRinger(zen, mZenController.getConsolidatedPolicy())) {
+        if (zenVisible) {
+            mIconController.setIcon(mSlotZen, zenIconId, zenDescription);
+        }
+        if (zenVisible != mZenVisible) {
+            mIconController.setIconVisibility(mSlotZen, zenVisible);
+            mZenVisible = zenVisible;
+        }
+    }
+
+    private void updateRingerAndAlarmIcons(int zen) {
+        boolean vibrateVisible = false;
+        boolean muteVisible = false;
+
+        NotificationManager.Policy consolidatedPolicy = mZenController.getConsolidatedPolicy();
+        if (!ZenModeConfig.isZenOverridingRinger(zen, consolidatedPolicy)) {
             final Integer ringerModeInternal =
                     mRingerModeTracker.getRingerModeInternal().getValue();
             if (ringerModeInternal != null) {
@@ -450,14 +513,6 @@ public class PhoneStatusBarPolicy
                     muteVisible = true;
                 }
             }
-        }
-
-        if (zenVisible) {
-            mIconController.setIcon(mSlotZen, zenIconId, zenDescription);
-        }
-        if (zenVisible != mZenVisible) {
-            mIconController.setIconVisibility(mSlotZen, zenVisible);
-            mZenVisible = zenVisible;
         }
 
         if (vibrateVisible != mVibrateVisible) {
@@ -887,5 +942,10 @@ public class PhoneStatusBarPolicy
         }
 
         mIconController.setIconVisibility(mSlotConnectedDisplay, visible);
+    }
+
+    private static boolean usesModeIcons() {
+        return android.app.Flags.modesApi() && android.app.Flags.modesUi()
+                && android.app.Flags.modesUiIcons();
     }
 }

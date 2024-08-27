@@ -30,6 +30,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaControlInteractor
+import com.android.systemui.media.controls.shared.MediaControlDrawables
 import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaControlModel
@@ -284,9 +285,9 @@ class MediaControlViewModel(
             },
             cancelTextBackground =
                 if (model.isDismissible) {
-                    applicationContext.getDrawable(R.drawable.qs_media_outline_button)
+                    MediaControlDrawables.getOutline(applicationContext)
                 } else {
-                    applicationContext.getDrawable(R.drawable.qs_media_solid_button)
+                    MediaControlDrawables.getSolid(applicationContext)
                 },
             onSettingsClicked = {
                 logger.logLongPressSettings(model.uid, model.packageName, model.instanceId)

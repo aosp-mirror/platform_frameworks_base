@@ -2145,8 +2145,22 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldSleepActivities() {
-        final Task task = getRootTask();
-        return task != null && task.shouldSleepActivities();
+        final DisplayContent dc = mDisplayContent;
+        if (dc == null) {
+            return mAtmService.isSleepingLocked();
+        }
+        if (!dc.isSleeping()) {
+            return false;
+        }
+        // In case the unlocking order is keyguard-going-away -> screen-turning-on (display is
+        // sleeping by screen-off-token which may be notified to release from power manager's
+        // thread), keep the activities resume-able to avoid extra activity lifecycle when
+        // performing keyguard-going-away. This only applies to default display because currently
+        // the per-display keyguard-going-away state is assigned from a global signal.
+        if (!dc.isDefaultDisplay || !dc.isKeyguardGoingAway()) {
+            return true;
+        }
+        return !shouldBeVisible(null /* starting */);
     }
 
     @Override

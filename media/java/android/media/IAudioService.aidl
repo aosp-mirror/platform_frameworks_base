@@ -101,6 +101,8 @@ interface IAudioService {
 
     oneway void portEvent(in int portId, in int event, in @nullable PersistableBundle extras);
 
+    void permissionUpdateBarrier();
+
     // Java-only methods below.
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
 

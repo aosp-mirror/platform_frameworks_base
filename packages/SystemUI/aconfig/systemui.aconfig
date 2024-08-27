@@ -1384,3 +1384,13 @@ flag {
     }
 }
 
+flag {
+    name: "media_load_metadata_via_media_data_loader"
+    namespace: "systemui"
+    description: "Use MediaDataLoader for loading media metadata with better threading"
+    bug: "358350077"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

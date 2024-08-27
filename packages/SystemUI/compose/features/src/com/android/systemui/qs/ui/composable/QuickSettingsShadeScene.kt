@@ -43,6 +43,7 @@ import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileGrid
@@ -74,7 +75,7 @@ constructor(
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
-) : ComposableScene {
+) : ExclusiveActivatable(), ComposableScene {
 
     override val key = Scenes.QuickSettingsShade
 
@@ -84,6 +85,10 @@ constructor(
 
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions
+
+    override suspend fun onActivated(): Nothing {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(

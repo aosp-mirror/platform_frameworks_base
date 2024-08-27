@@ -318,7 +318,7 @@ class MaximizeMenu(
             rootView.setOnTouchListener { _, event ->
                 if (event.actionMasked == ACTION_OUTSIDE) {
                     onOutsideTouchListener?.invoke()
-                    false
+                    return@setOnTouchListener false
                 }
                 true
             }

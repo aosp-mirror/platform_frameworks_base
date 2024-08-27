@@ -94,7 +94,6 @@ import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_PINNABLE;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.TaskProto.AFFINITY;
 import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.CREATED_BY_ORGANIZER;
@@ -2966,8 +2965,7 @@ class Task extends TaskFragment {
 
     /** Checking if self or its child tasks are animated by recents animation. */
     boolean isAnimatingByRecents() {
-        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS)
-                || mTransitionController.isTransientHide(this);
+        return mTransitionController.isTransientHide(this);
     }
 
     WindowState getTopVisibleAppMainWindow() {
@@ -6194,26 +6192,6 @@ class Task extends TaskFragment {
     void executeAppTransition(ActivityOptions options) {
         mDisplayContent.executeAppTransition();
         ActivityOptions.abort(options);
-    }
-
-    boolean shouldSleepActivities() {
-        final DisplayContent display = mDisplayContent;
-        final boolean isKeyguardGoingAway = (mDisplayContent != null)
-                ? mDisplayContent.isKeyguardGoingAway()
-                : mRootWindowContainer.getDefaultDisplay().isKeyguardGoingAway();
-
-        // Do not sleep activities in this root task if we're marked as focused and the keyguard
-        // is in the process of going away.
-        if (isKeyguardGoingAway && isFocusedRootTaskOnDisplay()
-                // Avoid resuming activities on secondary displays since we don't want bubble
-                // activities to be resumed while bubble is still collapsed.
-                // TODO(b/113840485): Having keyguard going away state for secondary displays.
-                && display != null
-                && display.isDefaultDisplay) {
-            return false;
-        }
-
-        return display != null ? display.isSleeping() : mAtmService.isSleepingLocked();
     }
 
     private Rect getRawBounds() {
