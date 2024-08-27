@@ -50,6 +50,7 @@ flag {
      name: "activity_control_api"
      description: "Enable APIs for fine grained activity policy, fallback and callbacks"
      bug: "333443509"
+     is_exported: true
 }
 
 flag {
