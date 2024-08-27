@@ -47,7 +47,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -133,12 +132,10 @@ constructor(
             launch {
                 mobileIconsInteractor.filteredSubscriptions
                     .map { list -> list.map { it.subscriptionId } }
-                    .collectLatest { _mobileSubIds.value = it }
+                    .collect { _mobileSubIds.value = it }
             }
 
-            launch {
-                shadeInteractor.isQsEnabled.map { !it }.collectLatest { _isDisabled.value = it }
-            }
+            launch { shadeInteractor.isQsEnabled.map { !it }.collect { _isDisabled.value = it } }
 
             awaitCancellation()
         }

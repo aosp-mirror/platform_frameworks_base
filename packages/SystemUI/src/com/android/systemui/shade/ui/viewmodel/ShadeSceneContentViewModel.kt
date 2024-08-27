@@ -36,12 +36,10 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Models UI state used to render the content of the shade scene.
@@ -76,11 +74,9 @@ constructor(
     private val footerActionsControllerInitialized = AtomicBoolean(false)
 
     override suspend fun onActivated(): Nothing {
-        deviceEntryInteractor.isDeviceEntered.collectLatest { isDeviceEntered ->
+        deviceEntryInteractor.isDeviceEntered.collect { isDeviceEntered ->
             _isEmptySpaceClickable.value = !isDeviceEntered
         }
-
-        awaitCancellation()
     }
 
     /**

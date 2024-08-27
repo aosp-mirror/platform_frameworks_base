@@ -34,7 +34,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -85,9 +84,7 @@ constructor(
         coroutineScope {
             launch { super.onActivated() }
             launch {
-                selectedDotSet
-                    .map { it.toList() }
-                    .collectLatest { selectedDotList.value = it.toList() }
+                selectedDotSet.map { it.toList() }.collect { selectedDotList.value = it.toList() }
             }
             awaitCancellation()
         }

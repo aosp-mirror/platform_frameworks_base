@@ -29,7 +29,6 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Models UI state and handles user input for the overlay shade UI, which shows a shade as an
@@ -47,7 +46,7 @@ constructor(private val sceneInteractor: SceneInteractor, shadeInteractor: Shade
     val panelAlignment = shadeInteractor.shadeAlignment
 
     override suspend fun onActivated(): Nothing {
-        sceneInteractor.resolveSceneFamily(SceneFamilies.Home).collectLatest { sceneKey ->
+        sceneInteractor.resolveSceneFamily(SceneFamilies.Home).collect { sceneKey ->
             _backgroundScene.value = sceneKey
         }
         awaitCancellation()
