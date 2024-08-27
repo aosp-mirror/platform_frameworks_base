@@ -51,10 +51,10 @@ constructor(
     /** The scene that should be rendered. */
     val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
-    private val hydrator = Hydrator()
+    private val hydrator = Hydrator("SceneContainerViewModel.hydrator")
 
     /** Whether the container is visible. */
-    val isVisible: Boolean by hydrator.hydratedStateOf(sceneInteractor.isVisible)
+    val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
 
     override suspend fun onActivated(): Nothing {
         try {

@@ -33,10 +33,18 @@ class FakeSysUiViewModel(
     var activationCount = 0
     var cancellationCount = 0
 
-    private val hydrator = Hydrator()
+    private val hydrator = Hydrator("test")
     val stateBackedByFlow: Boolean by
-        hydrator.hydratedStateOf(initialValue = true, source = upstreamFlow)
-    val stateBackedByStateFlow: Boolean by hydrator.hydratedStateOf(source = upstreamStateFlow)
+        hydrator.hydratedStateOf(
+            traceName = "test",
+            initialValue = true,
+            source = upstreamFlow,
+        )
+    val stateBackedByStateFlow: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "test",
+            source = upstreamStateFlow,
+        )
 
     override suspend fun onActivated(): Nothing {
         activationCount++
