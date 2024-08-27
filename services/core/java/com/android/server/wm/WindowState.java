@@ -1705,18 +1705,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTaskFragment() : null;
     }
 
-    @Nullable Task getRootTask() {
-        final Task task = getTask();
-        if (task != null) {
-            return task.getRootTask();
-        }
-        // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
-        // associate them with some root task to enable dimming.
-        final DisplayContent dc = getDisplayContent();
-        return mAttrs.type >= FIRST_SYSTEM_WINDOW
-                && dc != null ? dc.getDefaultTaskDisplayArea().getRootHomeTask() : null;
-    }
-
     /**
      * Retrieves the visible bounds of the window.
      * @param bounds The rect which gets the bounds.
@@ -2571,10 +2559,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final Task rootTask = getRootTask();
-        if (rootTask != null && !rootTask.isFocusable()) {
-            // Ignore when the root task shouldn't receive input event.
-            // (i.e. the minimized root task in split screen mode.)
+        final Task task = getTask();
+        if (task != null && !task.isFocusable()) {
+            // The task can be set as non-focusable, e.g. swapping split-screen sides.
             return false;
         }
 
@@ -2600,7 +2587,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         // Don't allow transient-launch activities to take IME.
-        if (rootTask != null && mActivityRecord != null
+        if (task != null && mActivityRecord != null
                 && mTransitionController.isTransientLaunch(mActivityRecord)) {
             return false;
         }
@@ -2786,11 +2773,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // means we need to intercept touches outside of that window. The dim layer
                 // user associated with the window (task or root task) will give us the good
                 // bounds, as they would be used to display the dim layer.
-                final TaskFragment taskFragment = getTaskFragment();
+                final TaskFragment taskFragment = mActivityRecord.getTaskFragment();
                 if (taskFragment != null) {
                     taskFragment.getDimBounds(mTmpRect);
-                } else if (getRootTask() != null) {
-                    getRootTask().getDimBounds(mTmpRect);
                 }
             }
         }
@@ -3935,14 +3920,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    private int getRootTaskId() {
-        final Task rootTask = getRootTask();
-        if (rootTask == null) {
-            return INVALID_TASK_ID;
-        }
-        return rootTask.mTaskId;
-    }
-
     public void registerFocusObserver(IWindowFocusObserver observer) {
         synchronized (mWmService.mGlobalLock) {
             if (mFocusCallbacks == null) {
@@ -4078,7 +4055,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(DISPLAY_ID, getDisplayId());
-        proto.write(STACK_ID, getRootTaskId());
+        int rootTaskId = INVALID_TASK_ID;
+        final Task task = getTask();
+        if (task != null) {
+            rootTaskId = task.getRootTaskId();
+        }
+        proto.write(STACK_ID, rootTaskId);
         mAttrs.dumpDebug(proto, ATTRIBUTES);
         mGivenContentInsets.dumpDebug(proto, GIVEN_CONTENT_INSETS);
         mWindowFrames.dumpDebug(proto, WINDOW_FRAMES);
@@ -4136,8 +4118,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         pw.print(prefix + "mDisplayId=" + getDisplayId());
-        if (getRootTask() != null) {
-            pw.print(" rootTaskId=" + getRootTaskId());
+        final Task task = getTask();
+        if (task != null) {
+            pw.print(" taskId=" + task.mTaskId);
         }
         pw.println(" mSession=" + mSession
                 + " mClient=" + mClient.asBinder());
