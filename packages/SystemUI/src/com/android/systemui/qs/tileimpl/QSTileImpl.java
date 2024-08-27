@@ -350,6 +350,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId, 0).sendToTarget();
+        postStale();
     }
 
     public void destroy() {
