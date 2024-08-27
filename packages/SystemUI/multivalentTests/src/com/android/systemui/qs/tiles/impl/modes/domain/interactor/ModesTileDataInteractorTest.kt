@@ -24,6 +24,7 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.coroutines.collectValues
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.policy.data.repository.fakeZenModeReposito
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toCollection
@@ -61,6 +63,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
             addOverride(com.android.internal.R.drawable.ic_zen_mode_type_bedtime, BEDTIME_DRAWABLE)
             addOverride(com.android.internal.R.drawable.ic_zen_mode_type_driving, DRIVING_DRAWABLE)
         }
+        ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
     }
 
     @EnableFlags(Flags.FLAG_MODES_UI)
