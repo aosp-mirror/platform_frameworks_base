@@ -120,7 +120,7 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
     private int mScreenState;
 
     @GuardedBy("this")
-    private int[] mPerDisplayScreenStates = null;
+    private int[] mPerDisplayScreenStates;
 
     @GuardedBy("this")
     private boolean mUseLatestStates = true;
@@ -244,6 +244,7 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             }
             synchronized (mStats) {
                 mStats.initEnergyConsumerStatsLocked(supportedStdBuckets, customBucketNames);
+                mPerDisplayScreenStates = new int[mStats.getDisplayCount()];
             }
         }
     }
@@ -491,6 +492,12 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                                 onBatteryScreenOff, screenState, displayScreenStates,
                                 useLatestStates);
                     } finally {
+                        if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
+                            synchronized (mStats) {
+                                // This helps mStats deal with ignoring data from prior to resets.
+                                mStats.informThatAllExternalStatsAreFlushed();
+                            }
+                        }
                         if (DEBUG) {
                             Slog.d(TAG, "end updateExternalStatsSync");
                         }
@@ -768,7 +775,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
         // WiFi and Modem state are updated without the mStats lock held, because they
         // do some network stats retrieval before internally grabbing the mStats lock.
-
         if (wifiInfo != null) {
             if (wifiInfo.isValid()) {
                 final long wifiChargeUC =
@@ -790,11 +796,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                     NetworkStatsManager.class);
             mStats.noteModemControllerActivity(modemInfo, mobileRadioChargeUC, elapsedRealtime,
                     uptime, networkStatsManager);
-        }
-
-        if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
-            // This helps mStats deal with ignoring data from prior to resets.
-            mStats.informThatAllExternalStatsAreFlushed();
         }
     }
 
