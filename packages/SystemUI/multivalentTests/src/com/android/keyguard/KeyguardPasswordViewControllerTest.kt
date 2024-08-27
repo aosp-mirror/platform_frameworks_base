@@ -131,6 +131,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
+                null,
             )
     }
 

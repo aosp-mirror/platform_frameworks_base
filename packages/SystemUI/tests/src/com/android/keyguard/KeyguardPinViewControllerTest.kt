@@ -149,7 +149,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
             featureFlags,
             mSelectedUserInteractor,
             uiEventLogger,
-            keyguardKeyboardInteractor
+            keyguardKeyboardInteractor,
+            null,
         )
     }
 

@@ -96,7 +96,8 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
                 emergencyButtonController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
-                keyguardKeyboardInteractor
+                keyguardKeyboardInteractor,
+                null,
             )
         underTest.init()
     }

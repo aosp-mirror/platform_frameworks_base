@@ -117,7 +117,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
                 mEmergencyButtonController, mFalsingCollector, featureFlags,
-                mSelectedUserInteractor, keyguardKeyboardInteractor) {
+                mSelectedUserInteractor, keyguardKeyboardInteractor, null) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
