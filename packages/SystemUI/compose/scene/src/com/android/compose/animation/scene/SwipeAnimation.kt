@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -40,6 +41,7 @@ internal fun createSwipeAnimation(
     result: UserActionResult,
     isUpOrLeft: Boolean,
     orientation: Orientation,
+    distance: Float = DistanceUnspecified,
 ): SwipeAnimation<*> {
     fun <T : Content> swipeAnimation(fromContent: T, toContent: T): SwipeAnimation<T> {
         return SwipeAnimation(
@@ -50,6 +52,7 @@ internal fun createSwipeAnimation(
             orientation = orientation,
             isUpOrLeft = isUpOrLeft,
             requiresFullDistanceSwipe = result.requiresFullDistanceSwipe,
+            lastDistance = distance,
         )
     }
 
@@ -147,7 +150,13 @@ internal class SwipeAnimation<T : Content>(
             // Important: If we are going to return early because distance is equal to 0, we should
             // still make sure we read the offset before returning so that the calling code still
             // subscribes to the offset value.
-            val offset = offsetAnimation?.animatable?.value ?: dragOffset
+            val animatable = offsetAnimation?.animatable
+            val offset =
+                when {
+                    animatable != null -> animatable.value
+                    contentTransition.previewTransformationSpec != null -> 0f
+                    else -> dragOffset
+                }
 
             return computeProgress(offset)
         }
@@ -171,6 +180,15 @@ internal class SwipeAnimation<T : Content>(
             val velocityInDistanceUnit = animatable.velocity
             return velocityInDistanceUnit / distance.absoluteValue
         }
+
+    val previewProgress: Float
+        get() = computeProgress(dragOffset)
+
+    val previewProgressVelocity: Float
+        get() = 0f
+
+    val isInPreviewStage: Boolean
+        get() = contentTransition.previewTransformationSpec != null && currentContent == fromContent
 
     override var bouncingContent: ContentKey? = null
 
@@ -266,6 +284,7 @@ internal class SwipeAnimation<T : Content>(
         coroutineScope: CoroutineScope,
         initialVelocity: Float,
         targetContent: T,
+        spec: SpringSpec<Float>? = null,
     ): OffsetAnimation {
         val initialProgress = progress
         // Skip the animation if we have already reached the target content and the overscroll does
@@ -304,7 +323,9 @@ internal class SwipeAnimation<T : Content>(
         }
 
         return startOffsetAnimation {
-            val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
+            val startProgress =
+                if (contentTransition.previewTransformationSpec != null) 0f else dragOffset
+            val animatable = Animatable(startProgress, OffsetVisibilityThreshold)
             val isTargetGreater = targetOffset > animatable.value
             val startedWhenOvercrollingTargetContent =
                 if (targetContent == fromContent) initialProgress < 0f else initialProgress > 1f
@@ -325,7 +346,8 @@ internal class SwipeAnimation<T : Content>(
 
                         try {
                             val swipeSpec =
-                                contentTransition.transformationSpec.swipeSpec
+                                spec
+                                    ?: contentTransition.transformationSpec.swipeSpec
                                     ?: layoutImpl.state.transitions.defaultSwipeSpec
                             animatable.animateTo(
                                 targetValue = targetOffset,
@@ -471,6 +493,15 @@ private class ChangeCurrentSceneSwipeTransition(
     override val progressVelocity: Float
         get() = swipeAnimation.progressVelocity
 
+    override val previewProgress: Float
+        get() = swipeAnimation.previewProgress
+
+    override val previewProgressVelocity: Float
+        get() = swipeAnimation.previewProgressVelocity
+
+    override val isInPreviewStage: Boolean
+        get() = swipeAnimation.isInPreviewStage
+
     override val isInitiatedByUserInput: Boolean = true
 
     override val isUserInputOngoing: Boolean
@@ -519,6 +550,15 @@ private class ShowOrHideOverlaySwipeTransition(
     override val progressVelocity: Float
         get() = swipeAnimation.progressVelocity
 
+    override val previewProgress: Float
+        get() = swipeAnimation.previewProgress
+
+    override val previewProgressVelocity: Float
+        get() = swipeAnimation.previewProgressVelocity
+
+    override val isInPreviewStage: Boolean
+        get() = swipeAnimation.isInPreviewStage
+
     override val isInitiatedByUserInput: Boolean = true
 
     override val isUserInputOngoing: Boolean
@@ -560,6 +600,15 @@ private class ReplaceOverlaySwipeTransition(
 
     override val progressVelocity: Float
         get() = swipeAnimation.progressVelocity
+
+    override val previewProgress: Float
+        get() = swipeAnimation.previewProgress
+
+    override val previewProgressVelocity: Float
+        get() = swipeAnimation.previewProgressVelocity
+
+    override val isInPreviewStage: Boolean
+        get() = swipeAnimation.isInPreviewStage
 
     override val isInitiatedByUserInput: Boolean = true
 

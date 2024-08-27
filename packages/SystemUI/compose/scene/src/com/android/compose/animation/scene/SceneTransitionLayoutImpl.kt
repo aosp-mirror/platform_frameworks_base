@@ -353,19 +353,8 @@ internal class SceneTransitionLayoutImpl(
 
     @Composable
     private fun BackHandler() {
-        val targetSceneForBack =
-            when (val result = contentForUserActions().userActions[Back.Resolved]) {
-                null -> null
-                is UserActionResult.ChangeScene -> result.toScene
-                is UserActionResult.ShowOverlay,
-                is UserActionResult.HideOverlay,
-                is UserActionResult.ReplaceByOverlay -> {
-                    // TODO(b/353679003): Support overlay transitions when going back
-                    null
-                }
-            }
-
-        PredictiveBackHandler(state, coroutineScope, targetSceneForBack)
+        val result = contentForUserActions().userActions[Back.Resolved]
+        PredictiveBackHandler(layoutImpl = this, result = result)
     }
 
     @Composable
