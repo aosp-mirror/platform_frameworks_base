@@ -8083,6 +8083,7 @@ package android.media.tv.tuner {
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @Nullable String, int);
     method public int applyFrontend(@NonNull android.media.tv.tuner.frontend.FrontendInfo);
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @RequiresPermission(allOf={"android.permission.TUNER_RESOURCE_ACCESS", "android.permission.ACCESS_TV_TUNER"}) public int applyFrontendByType(int);
     method public int cancelScanning();
     method public int cancelTuning();
     method public void clearOnTuneEventListener();
