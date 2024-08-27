@@ -92,8 +92,11 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.firstValue
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -420,6 +423,47 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         )
         mMainExecutor.runAllReady()
         assertThat(mService.shouldShowComplications()).isTrue()
+    }
+
+    @Test
+    fun testDeferredResetRespondsToAnimationEnd() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            true /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        whenever(mStateController.areExitAnimationsRunning()).thenReturn(true)
+        clearInvocations(mStateController, mTouchMonitor)
+
+        // Starting a dream will cause it to end first.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            true /*shouldShowComplication*/
+        )
+
+        mMainExecutor.runAllReady()
+
+        verifyZeroInteractions(mTouchMonitor)
+
+        val captor = ArgumentCaptor.forClass(DreamOverlayStateController.Callback::class.java)
+        verify(mStateController).addCallback(captor.capture())
+
+        whenever(mStateController.areExitAnimationsRunning()).thenReturn(false)
+
+        captor.firstValue.onStateChanged()
+
+        // Should only be called once since it should be null during the second reset.
+        verify(mTouchMonitor).destroy()
     }
 
     @Test

@@ -219,16 +219,122 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
     };
 
-    private final DreamOverlayStateController.Callback mExitAnimationFinishedCallback =
-            new DreamOverlayStateController.Callback() {
-                @Override
-                public void onStateChanged() {
-                    if (!mStateController.areExitAnimationsRunning()) {
-                        mStateController.removeCallback(mExitAnimationFinishedCallback);
-                        resetCurrentDreamOverlayLocked();
+    /**
+     * {@link ResetHandler} protects resetting {@link DreamOverlayService} by making sure reset
+     * requests are processed before subsequent actions proceed. Requests themselves are also
+     * ordered between each other as well to ensure actions are correctly sequenced.
+     */
+    private final class ResetHandler {
+        @FunctionalInterface
+        interface Callback {
+            void onComplete();
+        }
+
+        private record Info(Callback callback, String source) {}
+
+        private final ArrayList<Info> mPendingCallbacks = new ArrayList<>();
+
+        DreamOverlayStateController.Callback mStateCallback =
+                new DreamOverlayStateController.Callback() {
+                    @Override
+                    public void onStateChanged() {
+                        process(true);
                     }
+                };
+
+        /**
+         * Called from places where there is no need to wait for the reset to complete. This still
+         * will defer the reset until it is okay to reset and also sequences the request with
+         * others.
+         */
+        public void reset(String source) {
+            reset(()-> {}, source);
+        }
+
+        /**
+         * Invoked to request a reset with a callback that will fire after reset if it is deferred.
+         *
+         * @return {@code true} if the reset happened immediately, {@code false} if it was deferred
+         * and will fire later, invoking the callback.
+         */
+        public boolean reset(Callback callback, String source) {
+            // Always add listener pre-emptively
+            if (mPendingCallbacks.isEmpty()) {
+                mStateController.addCallback(mStateCallback);
+            }
+
+            final Info info = new Info(callback, source);
+            mPendingCallbacks.add(info);
+            process(false);
+
+            boolean processed = !mPendingCallbacks.contains(info);
+
+            if (!processed) {
+                Log.d(TAG, "delayed resetting from: " + source);
+            }
+
+            return processed;
+        }
+
+        private void resetInternal() {
+            // This ensures the container view of the current dream is removed before
+            // the controller is potentially reset.
+            removeContainerViewFromParentLocked();
+
+            if (mStarted && mWindow != null) {
+                try {
+                    mWindow.clearContentView();
+                    mWindowManager.removeView(mWindow.getDecorView());
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Error removing decor view when resetting overlay", e);
                 }
-            };
+            }
+
+            mStateController.setOverlayActive(false);
+            mStateController.setLowLightActive(false);
+            mStateController.setEntryAnimationsFinished(false);
+
+            if (mDreamOverlayContainerViewController != null) {
+                mDreamOverlayContainerViewController.destroy();
+                mDreamOverlayContainerViewController = null;
+            }
+
+            if (mTouchMonitor != null) {
+                mTouchMonitor.destroy();
+                mTouchMonitor = null;
+            }
+
+            mWindow = null;
+
+            // Always unregister the any set DreamActivity from being blocked from gestures.
+            mGestureInteractor.removeGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                    GestureInteractor.Scope.Global);
+
+            mStarted = false;
+        }
+
+        private boolean canReset() {
+            return !mStateController.areExitAnimationsRunning();
+        }
+
+        private void process(boolean fromDelayedCallback) {
+            while (canReset() && !mPendingCallbacks.isEmpty()) {
+                final Info callbackInfo = mPendingCallbacks.removeFirst();
+                resetInternal();
+                callbackInfo.callback.onComplete();
+
+                if (fromDelayedCallback) {
+                    Log.d(TAG, "reset overlay (delayed) for " + callbackInfo.source);
+                }
+            }
+
+            if (mPendingCallbacks.isEmpty()) {
+                mStateController.removeCallback(mStateCallback);
+            }
+        }
+    }
+
+    private final ResetHandler mResetHandler = new ResetHandler();
 
     private final DreamOverlayStateController mStateController;
 
@@ -342,10 +448,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mExecutor.execute(() -> {
             setLifecycleStateLocked(Lifecycle.State.DESTROYED);
-
-            resetCurrentDreamOverlayLocked();
-
             mDestroyed = true;
+            mResetHandler.reset("destroying");
         });
 
         mDispatcher.onServicePreSuperOnDestroy();
@@ -385,7 +489,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             // Reset the current dream overlay before starting a new one. This can happen
             // when two dreams overlap (briefly, for a smoother dream transition) and both
             // dreams are bound to the dream overlay service.
-            resetCurrentDreamOverlayLocked();
+            if (!mResetHandler.reset(() -> onStartDream(layoutParams),
+                    "starting with dream already started")) {
+                return;
+            }
         }
 
         mDreamOverlayContainerViewController =
@@ -397,7 +504,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         // If we are not able to add the overlay window, reset the overlay.
         if (!addOverlayWindowLocked(layoutParams)) {
-            resetCurrentDreamOverlayLocked();
+            mResetHandler.reset("couldn't add window while starting");
             return;
         }
 
@@ -435,7 +542,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     @Override
     public void onEndDream() {
-        resetCurrentDreamOverlayLocked();
+        mResetHandler.reset("ending dream");
     }
 
     @Override
@@ -565,47 +672,5 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
         Log.w(TAG, "Removing dream overlay container view parent!");
         parentView.removeView(containerView);
-    }
-
-    private void resetCurrentDreamOverlayLocked() {
-        if (mStateController.areExitAnimationsRunning()) {
-            mStateController.addCallback(mExitAnimationFinishedCallback);
-            return;
-        }
-
-        // This ensures the container view of the current dream is removed before
-        // the controller is potentially reset.
-        removeContainerViewFromParentLocked();
-
-        if (mStarted && mWindow != null) {
-            try {
-                mWindow.clearContentView();
-                mWindowManager.removeView(mWindow.getDecorView());
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "Error removing decor view when resetting overlay", e);
-            }
-        }
-
-        mStateController.setOverlayActive(false);
-        mStateController.setLowLightActive(false);
-        mStateController.setEntryAnimationsFinished(false);
-
-        if (mDreamOverlayContainerViewController != null) {
-            mDreamOverlayContainerViewController.destroy();
-            mDreamOverlayContainerViewController = null;
-        }
-
-        if (mTouchMonitor != null) {
-            mTouchMonitor.destroy();
-            mTouchMonitor = null;
-        }
-
-        mWindow = null;
-
-        // Always unregister the any set DreamActivity from being blocked from gestures.
-        mGestureInteractor.removeGestureBlockedMatcher(DREAM_TYPE_MATCHER,
-                GestureInteractor.Scope.Global);
-
-        mStarted = false;
     }
 }
