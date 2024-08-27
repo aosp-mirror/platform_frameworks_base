@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,9 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.textclassifier.TextClassification;
@@ -47,9 +51,12 @@ import android.view.textclassifier.TextClassification;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.verification.VerificationMode;
 
 /**
  * TextViewTest tests {@link TextView}.
@@ -85,6 +92,10 @@ public class TextViewContextMenuTest {
     }
 
     private SelectionActionModeHelper mMockHelper;
+
+    @ClassRule public static final SetFlagsRule.ClassRule SET_FLAGS_CLASS_RULE =
+            new SetFlagsRule.ClassRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = SET_FLAGS_CLASS_RULE.createSetFlagsRule();
 
     @Before
     public void setUp() {
@@ -234,6 +245,7 @@ public class TextViewContextMenuTest {
     }
 
     @Test
+    @DisableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
     public void testAutofillMenuItemEnabledWhenNoTextSelected() {
         ContextMenu menu = mock(ContextMenu.class);
         MenuItem mockMenuItem = newMockMenuItem();
@@ -254,6 +266,7 @@ public class TextViewContextMenuTest {
     }
 
     @Test
+    @DisableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
     public void testAutofillMenuItemNotEnabledWhenTextSelected() {
         ContextMenu menu = mock(ContextMenu.class);
         MenuItem mockMenuItem = newMockMenuItem();
@@ -270,5 +283,148 @@ public class TextViewContextMenuTest {
 
         verify(menu).add(anyInt(), eq(TextView.ID_AUTOFILL), anyInt(), anyInt());
         verify(mockAutofillMenuItem).setEnabled(false);
+    }
+
+    private interface EditTextSetup {
+        void run(EditText et);
+    }
+
+    private void verifyMenuItemNotAdded(EditTextSetup setup, int id, VerificationMode times) {
+        ContextMenu menu = mock(ContextMenu.class);
+        MenuItem mockMenuItem = newMockMenuItem();
+        when(menu.add(anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(mockMenuItem);
+        EditText et = spy(new EditText(getInstrumentation().getContext()));
+        setup.run(et);
+        Editor editor = new Editor(et);
+        editor.setTextContextMenuItems(menu);
+        verify(menu, times).add(anyInt(), eq(id), anyInt(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuUndoNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canUndo(),
+                TextView.ID_UNDO, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuUndoAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canUndo(), TextView.ID_UNDO,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuRedoNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canRedo(), TextView.ID_REDO,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuRedoAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canRedo(), TextView.ID_REDO,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCutNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canCut(), TextView.ID_CUT,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCutAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canCut(), TextView.ID_CUT,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCopyNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canCopy(), TextView.ID_COPY,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuCopyAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canCopy(), TextView.ID_COPY,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canPaste(), TextView.ID_PASTE,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canPaste(), TextView.ID_PASTE,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteAsPlaintextNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canPasteAsPlainText(),
+                        TextView.ID_PASTE_AS_PLAIN_TEXT, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuPasteAsPlaintextAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canPasteAsPlainText(),
+                        TextView.ID_PASTE_AS_PLAIN_TEXT, times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuSelectAllNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canSelectAllText(),
+                        TextView.ID_SELECT_ALL, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuSelectAllAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canSelectAllText(),
+                        TextView.ID_SELECT_ALL, times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuShareNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canShare(), TextView.ID_SHARE,
+                never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuShareAddedWhenAvailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(true).when(spy).canShare(), TextView.ID_SHARE,
+                times(1));
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuAutofillNotAddedWhenUnavailable() {
+        verifyMenuItemNotAdded((spy) -> doReturn(false).when(spy).canRequestAutofill(),
+                TextView.ID_AUTOFILL, never());
+    }
+
+    @Test
+    @EnableFlags(com.android.text.flags.Flags.FLAG_CONTEXT_MENU_HIDE_UNAVAILABLE_ITEMS)
+    public void testContextMenuAutofillNotAddedWhenUnavailableBecauseTextSelected() {
+        verifyMenuItemNotAdded((spy) -> {
+            doReturn(true).when(spy).canRequestAutofill();
+            doReturn("test").when(spy).getSelectedText();
+        }, TextView.ID_AUTOFILL, never());
     }
 }
