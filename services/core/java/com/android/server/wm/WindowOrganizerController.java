@@ -1329,7 +1329,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 Rect entryBounds = hop.getBounds();
                 mService.mRootWindowContainer.moveActivityToPinnedRootTask(
                         pipActivity, null /* launchIntoPipHostActivity */,
-                        "moveActivityToPinnedRootTask", null /* transition */, entryBounds);
+                        "moveActivityToPinnedRootTask", entryBounds);
 
                 if (pipActivity.isState(PAUSING) && pipActivity.mPauseSchedulePendingForPip) {
                     // Continue the pausing process. This must be done after moving PiP activity to
