@@ -20,11 +20,13 @@ import static com.android.systemui.classifier.FalsingModule.IS_FOLDABLE_DEVICE;
 
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.util.DisplayMetrics;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -281,6 +283,9 @@ public class FalsingDataProvider {
     }
 
     public boolean isFromTrackpad() {
+        if (Flags.nonTouchscreenDevicesBypassFalsing()) {
+            return false;
+        }
         if (mRecentMotionEvents.isEmpty()) {
             return false;
         }
@@ -288,6 +293,25 @@ public class FalsingDataProvider {
         int classification = mRecentMotionEvents.get(0).getClassification();
         return classification == MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE
                 || classification == MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
+    }
+
+    /**
+     * returns {@code true} if the device supports Touchscreen, {@code false} otherwise. Defaults to
+     * {@code true} if the device is {@code null}
+     */
+    public boolean isTouchScreenSource() {
+        if (!Flags.nonTouchscreenDevicesBypassFalsing()) {
+            return true;
+        }
+        if (mRecentMotionEvents.isEmpty()) {
+            return true;
+        }
+        InputDevice device = mRecentMotionEvents.get(mRecentMotionEvents.size() - 1).getDevice();
+        if (device != null) {
+            return device.supportsSource(InputDevice.SOURCE_TOUCHSCREEN);
+        } else {
+            return true;
+        }
     }
 
     private void recalculateData() {
