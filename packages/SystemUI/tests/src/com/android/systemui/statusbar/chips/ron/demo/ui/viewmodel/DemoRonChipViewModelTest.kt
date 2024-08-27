@@ -89,6 +89,20 @@ class DemoRonChipViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
+    fun chip_hasText_shownWithText() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            commandRegistry.onShellCommand(
+                pw,
+                arrayOf("demo-ron", "-p", "com.android.systemui", "-t", "test")
+            )
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Text::class.java)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_hasHideArg_hidden() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)

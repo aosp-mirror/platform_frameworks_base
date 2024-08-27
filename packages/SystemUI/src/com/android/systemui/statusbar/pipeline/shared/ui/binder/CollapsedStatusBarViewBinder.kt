@@ -252,10 +252,13 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                 chipTextView.text = chipModel.secondsUntilStarted.toString()
                 chipTextView.visibility = View.VISIBLE
 
-                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
-                // [Chronometer.start].
-                chipTimeView.stop()
-                chipTimeView.visibility = View.GONE
+                chipTimeView.hide()
+            }
+            is OngoingActivityChipModel.Shown.Text -> {
+                chipTextView.text = chipModel.text
+                chipTextView.visibility = View.VISIBLE
+
+                chipTimeView.hide()
             }
             is OngoingActivityChipModel.Shown.Timer -> {
                 ChipChronometerBinder.bind(chipModel.startTimeMs, chipTimeView)
@@ -265,12 +268,16 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
             }
             is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipTextView.visibility = View.GONE
-                // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
-                // [Chronometer.start].
-                chipTimeView.stop()
-                chipTimeView.visibility = View.GONE
+                chipTimeView.hide()
             }
         }
+    }
+
+    private fun ChipChronometer.hide() {
+        // The Chronometer should be stopped to prevent leaks -- see b/192243808 and
+        // [Chronometer.start].
+        this.stop()
+        this.visibility = View.GONE
     }
 
     private fun updateChipPadding(
@@ -371,6 +378,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
             }
             is OngoingActivityChipModel.Shown.Timer,
+            is OngoingActivityChipModel.Shown.Text,
             is OngoingActivityChipModel.Shown.IconOnly -> {
                 chipView.accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_NONE
             }

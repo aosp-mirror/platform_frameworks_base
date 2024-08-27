@@ -89,6 +89,16 @@ sealed class OngoingActivityChipModel {
         ) : Shown(icon = null, colors, onClickListener = null) {
             override val logName = "Shown.Countdown"
         }
+
+        /** This chip shows the specified [text] in the chip. */
+        data class Text(
+            override val icon: ChipIcon,
+            override val colors: ColorsModel,
+            // TODO(b/361346412): Enforce a max length requirement?
+            val text: String,
+        ) : Shown(icon, colors, onClickListener = null) {
+            override val logName = "Shown.Text"
+        }
     }
 
     /** Represents an icon to show on the chip. */

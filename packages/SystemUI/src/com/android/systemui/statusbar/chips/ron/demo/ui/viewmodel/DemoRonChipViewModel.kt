@@ -41,8 +41,16 @@ import kotlinx.coroutines.flow.asStateFlow
  * adb commands sent by the user.
  *
  * Example adb commands:
- * - To show a chip with the SysUI icon: adb shell cmd statusbar demo-ron -p com.android.systemui
- * - To hide the chip: adb shell cmd statusbar demo-ron --hide
+ *
+ * To show a chip with the SysUI icon and custom text:
+ * ```
+ * adb shell cmd statusbar demo-ron -p com.android.systemui -t 10min
+ * ```
+ *
+ * To hide the chip:
+ * ```
+ * adb shell cmd statusbar demo-ron --hide
+ * ```
  *
  * See [DemoRonCommand] for more information on the adb command spec.
  */
@@ -68,6 +76,14 @@ constructor(
                 longName = "packageName",
                 shortName = "p",
                 description = "The package name for the demo RON app",
+                valueParser = Type.String,
+            )
+
+        private val text: String? by
+            param(
+                longName = "text",
+                shortName = "t",
+                description = "Text to display in the chip",
                 valueParser = Type.String,
             )
 
@@ -97,29 +113,46 @@ constructor(
                 return
             }
 
+            val appIcon = getAppIcon(currentPackageName)
+            if (appIcon == null) {
+                pw.println("Package $currentPackageName could not be found")
+                return
+            }
+
+            val currentText = text
+            if (currentText != null) {
+                _chip.value =
+                    OngoingActivityChipModel.Shown.Text(
+                        icon = appIcon,
+                        // TODO(b/361346412): Include a demo with a custom color theme.
+                        colors = ColorsModel.Themed,
+                        text = currentText,
+                    )
+            } else {
+                _chip.value =
+                    OngoingActivityChipModel.Shown.Timer(
+                        icon = appIcon,
+                        // TODO(b/361346412): Include a demo with a custom color theme.
+                        colors = ColorsModel.Themed,
+                        startTimeMs = systemClock.elapsedRealtime(),
+                        onClickListener = null,
+                    )
+            }
+        }
+
+        private fun getAppIcon(packageName: String): OngoingActivityChipModel.ChipIcon? {
             lateinit var iconDrawable: Drawable
             try {
                 // Note: For the real implementation, we should check if applicationInfo exists
                 // before fetching the icon, so that we either don't show the chip or show a good
                 // backup icon in case the app info can't be found for some reason.
-                iconDrawable = packageManager.getApplicationIcon(currentPackageName)
+                iconDrawable = packageManager.getApplicationIcon(packageName)
             } catch (e: NameNotFoundException) {
-                pw.println("Package $currentPackageName could not be found")
-                return
+                return null
             }
-
-            _chip.value =
-                // TODO(b/361346412): Include a demo for text like "10min".
-                OngoingActivityChipModel.Shown.Timer(
-                    icon =
-                        OngoingActivityChipModel.ChipIcon.FullColorAppIcon(
-                            Icon.Loaded(drawable = iconDrawable, contentDescription = null),
-                        ),
-                    // TODO(b/361346412): Include a demo with a custom color theme.
-                    colors = ColorsModel.Themed,
-                    startTimeMs = systemClock.elapsedRealtime(),
-                    onClickListener = null,
-                )
+            return OngoingActivityChipModel.ChipIcon.FullColorAppIcon(
+                Icon.Loaded(drawable = iconDrawable, contentDescription = null),
+            )
         }
     }
 }
