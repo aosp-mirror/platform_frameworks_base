@@ -50,8 +50,7 @@ public final class AppFunctionManager {
      * Creates an instance.
      *
      * @param mService An interface to the backing service.
-     * @param context A {@link Context}.
-     *
+     * @param context  A {@link Context}.
      * @hide
      */
     public AppFunctionManager(IAppFunctionManager service, Context context) {
@@ -108,8 +107,8 @@ public final class AppFunctionManager {
                             } catch (RuntimeException e) {
                                 // Ideally shouldn't happen since errors are wrapped into the
                                 // response, but we catch it here for additional safety.
-                                callback.accept(new ExecuteAppFunctionResponse.Builder(
-                                        getResultCode(e), e.getMessage()).build());
+                                callback.accept(ExecuteAppFunctionResponse.newFailure(
+                                        getResultCode(e), e.getMessage(), /*extras=*/ null));
                             }
                         }
                     });

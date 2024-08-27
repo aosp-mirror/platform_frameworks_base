@@ -94,36 +94,39 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             targetUser = mCallerValidator.verifyTargetUserHandle(
                     requestInternal.getUserHandle(), validatedCallingPackage);
         } catch (SecurityException exception) {
-            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
-                    getExceptionMessage(exception)).build());
+            safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse
+                    .newFailure(ExecuteAppFunctionResponse.RESULT_DENIED,
+                            exception.getMessage(),
+                            /*extras=*/  null));
             return;
         }
 
         // TODO(b/354956319): Add and honor the new enterprise policies.
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
-            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse.Builder(
+            safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse.newFailure(
                     ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                    "Cannot run on a device with a device owner or from the managed profile."
-            ).build());
+                    "Cannot run on a device with a device owner or from the managed profile.",
+                    /*extras=*/  null
+            ));
             return;
         }
 
         String targetPackageName = requestInternal.getClientRequest().getTargetPackageName();
         if (TextUtils.isEmpty(targetPackageName)) {
-            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse.Builder(
+            safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse.newFailure(
                     ExecuteAppFunctionResponse.RESULT_INVALID_ARGUMENT,
-                    "Target package name cannot be empty."
-            ).build());
+                    "Target package name cannot be empty.",
+                    /*extras=*/  null
+            ));
             return;
         }
 
         if (!mCallerValidator.verifyCallerCanExecuteAppFunction(
                 validatedCallingPackage, targetPackageName)) {
-            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                    .Builder(ExecuteAppFunctionResponse.RESULT_DENIED,
-                    "Caller does not have permission to execute the appfunction")
-                    .build());
+            safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse
+                    .newFailure(ExecuteAppFunctionResponse.RESULT_DENIED,
+                            "Caller does not have permission to execute the appfunction",
+                            /*extras=*/  null));
             return;
         }
 
@@ -131,10 +134,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                 targetPackageName,
                 targetUser);
         if (serviceIntent == null) {
-            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse.Builder(
+            safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse.newFailure(
                     ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                    "Cannot find the target service."
-            ).build());
+                    "Cannot find the target service.",
+                    /*extras=*/  null
+            ));
             return;
         }
         bindAppFunctionServiceUnchecked(requestInternal, serviceIntent, targetUser,
@@ -171,9 +175,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                     }
                             );
                         } catch (Exception e) {
-                            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                    .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
-                                    getExceptionMessage(e)).build());
+                            safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse
+                                    .newFailure(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
+                                            e.getMessage(),
+                                            /*extras=*/  null));
                             serviceUsageCompleteListener.onCompleted();
                         }
                     }
@@ -181,33 +186,32 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     @Override
                     public void onFailedToConnect() {
                         Slog.e(TAG, "Failed to connect to service");
-                        safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse
-                                .Builder(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
-                                "Failed to connect to AppFunctionService").build());
+                        safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse
+                                .newFailure(ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
+                                        "Failed to connect to AppFunctionService",
+                                        /*extras=*/  null));
                     }
 
                     @Override
                     public void onTimedOut() {
                         Slog.e(TAG, "Timed out");
                         safeExecuteAppFunctionCallback.onResult(
-                                new ExecuteAppFunctionResponse.Builder(
+                                ExecuteAppFunctionResponse.newFailure(
                                         ExecuteAppFunctionResponse.RESULT_TIMED_OUT,
-                                        "Binding to AppFunctionService timed out."
-                                ).build());
+                                        "Binding to AppFunctionService timed out.",
+                                        /*extras=*/  null
+                                ));
                     }
                 }
         );
 
         if (!bindServiceResult) {
             Slog.e(TAG, "Failed to bind to the AppFunctionService");
-            safeExecuteAppFunctionCallback.onResult(new ExecuteAppFunctionResponse.Builder(
+            safeExecuteAppFunctionCallback.onResult(ExecuteAppFunctionResponse.newFailure(
                     ExecuteAppFunctionResponse.RESULT_TIMED_OUT,
-                    "Failed to bind the AppFunctionService."
-            ).build());
+                    "Failed to bind the AppFunctionService.",
+                    /*extras=*/  null
+            ));
         }
-    }
-
-    private String getExceptionMessage(Exception exception) {
-        return exception.getMessage() == null ? "" : exception.getMessage();
     }
 }

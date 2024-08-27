@@ -162,6 +162,55 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
     }
 
     /**
+     * Returns a successful response.
+     *
+     * @param resultDocument The return value of the executed function.
+     * @param extras         The additional metadata data relevant to this function execution
+     *                       response.
+     */
+    @NonNull
+    @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static ExecuteAppFunctionResponse newSuccess(@NonNull GenericDocument resultDocument,
+                                                        @Nullable Bundle extras) {
+        Objects.requireNonNull(resultDocument);
+        Bundle actualExtras = getActualExtras(extras);
+        GenericDocumentWrapper resultDocumentWrapper = new GenericDocumentWrapper(resultDocument);
+
+        return new ExecuteAppFunctionResponse(
+                resultDocumentWrapper, actualExtras, RESULT_OK, /*errorMessage=*/null);
+    }
+
+    /**
+     * Returns a failure response.
+     *
+     * @param resultCode   The result code of the app function execution.
+     * @param extras       The additional metadata data relevant to this function execution
+     *                     response.
+     * @param errorMessage The error message associated with the result, if any.
+     */
+    @NonNull
+    @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static ExecuteAppFunctionResponse newFailure(@ResultCode int resultCode,
+                                                        @Nullable String errorMessage,
+                                                        @Nullable Bundle extras) {
+        if (resultCode == RESULT_OK) {
+            throw new IllegalArgumentException("resultCode must not be RESULT_OK");
+        }
+        Bundle actualExtras = getActualExtras(extras);
+        GenericDocumentWrapper emptyWrapper = new GenericDocumentWrapper(
+                new GenericDocument.Builder<>("", "", "").build());
+        return new ExecuteAppFunctionResponse(
+                emptyWrapper, actualExtras, resultCode, errorMessage);
+    }
+
+    private static Bundle getActualExtras(@Nullable Bundle extras) {
+        if (extras == null) {
+            return Bundle.EMPTY;
+        }
+        return extras;
+    }
+
+    /**
      * Returns a generic document containing the return value of the executed function.
      *
      * <p>The {@link #PROPERTY_RETURN_VALUE} key can be used to obtain the return value.</p>
@@ -249,65 +298,5 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {
-    }
-
-    /**
-     * The builder for creating {@link ExecuteAppFunctionResponse} instances.
-     */
-    @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
-    public static final class Builder {
-        @NonNull
-        private GenericDocument mResultDocument =
-                new GenericDocument.Builder<>("", "", "").build();
-        @NonNull
-        private Bundle mExtras = Bundle.EMPTY;
-        private int mResultCode;
-        @Nullable
-        private String mErrorMessage;
-
-        /**
-         * Creates a new builder for {@link ExecuteAppFunctionResponse}.
-         */
-        private Builder() {
-        }
-
-        /**
-         * Creates a new builder for {@link ExecuteAppFunctionResponse} to build a success response
-         * with a result code of {@link #RESULT_OK} and a resultDocument.
-         */
-        public Builder(@NonNull GenericDocument resultDocument) {
-            Objects.requireNonNull(resultDocument);
-            mResultDocument = resultDocument;
-            mResultCode = RESULT_OK;
-        }
-
-        /**
-         * Creates a new builder for {@link ExecuteAppFunctionResponse} to build an error response
-         * with a result code and an error message.
-         */
-        public Builder(@ResultCode int resultCode,
-                       @NonNull String errorMessage) {
-            mResultCode = resultCode;
-            mErrorMessage = Objects.requireNonNull(errorMessage);
-        }
-
-        /**
-         * Sets the extras of the app function execution.
-         */
-        @NonNull
-        public Builder setExtras(@NonNull Bundle extras) {
-            mExtras = Objects.requireNonNull(extras);
-            return this;
-        }
-
-        /**
-         * Builds the {@link ExecuteAppFunctionResponse} instance.
-         */
-        @NonNull
-        public ExecuteAppFunctionResponse build() {
-            return new ExecuteAppFunctionResponse(
-                    new GenericDocumentWrapper(mResultDocument),
-                    mExtras, mResultCode, mErrorMessage);
-        }
     }
 }
