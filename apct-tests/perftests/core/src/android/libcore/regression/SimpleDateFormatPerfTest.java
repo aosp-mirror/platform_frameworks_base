@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -37,11 +37,11 @@ import java.util.Date;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class SimpleDateFormatPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void time_createFormatWithTimeZone() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd z");
         }
@@ -50,7 +50,7 @@ public class SimpleDateFormatPerfTest {
     @Test
     public void time_parseWithTimeZoneShort() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd z");
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             sdf.parse("2000.01.01 PST");
         }
@@ -59,7 +59,7 @@ public class SimpleDateFormatPerfTest {
     @Test
     public void time_parseWithTimeZoneLong() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd zzzz");
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             sdf.parse("2000.01.01 Pacific Standard Time");
         }
@@ -68,7 +68,7 @@ public class SimpleDateFormatPerfTest {
     @Test
     public void time_parseWithoutTimeZone() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             sdf.parse("2000.01.01");
         }
@@ -76,7 +76,7 @@ public class SimpleDateFormatPerfTest {
 
     @Test
     public void time_createAndParseWithTimeZoneShort() throws ParseException {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd z");
             sdf.parse("2000.01.01 PST");
@@ -85,7 +85,7 @@ public class SimpleDateFormatPerfTest {
 
     @Test
     public void time_createAndParseWithTimeZoneLong() throws ParseException {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd zzzz");
             sdf.parse("2000.01.01 Pacific Standard Time");
@@ -95,7 +95,7 @@ public class SimpleDateFormatPerfTest {
     @Test
     public void time_formatWithTimeZoneShort() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd z");
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             sdf.format(new Date());
         }
@@ -104,7 +104,7 @@ public class SimpleDateFormatPerfTest {
     @Test
     public void time_formatWithTimeZoneLong() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd zzzz");
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             sdf.format(new Date());
         }

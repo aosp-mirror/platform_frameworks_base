@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class StrictMathPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private final double mDouble = 1.2;
     private final float mFloat = 1.2f;
@@ -74,7 +74,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAbsD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.abs(mDouble);
         }
@@ -82,7 +82,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAbsF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.abs(mFloat);
         }
@@ -90,7 +90,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAbsI() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.abs(mInt);
         }
@@ -98,7 +98,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAbsL() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.abs(mLong);
         }
@@ -106,7 +106,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAcos() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.acos(mDouble);
         }
@@ -114,7 +114,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAsin() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.asin(mDouble);
         }
@@ -122,7 +122,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAtan() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.atan(mDouble);
         }
@@ -130,7 +130,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeAtan2() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.atan2(3, 4);
         }
@@ -138,7 +138,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeCbrt() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.cbrt(mDouble);
         }
@@ -146,7 +146,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeCeilOverInterestingValues() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             for (int i = 0; i < CEIL_DOUBLES.length; ++i) {
                 StrictMath.ceil(CEIL_DOUBLES[i]);
@@ -156,7 +156,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeCopySignD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.copySign(mDouble, mDouble);
         }
@@ -164,7 +164,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeCopySignF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.copySign(mFloat, mFloat);
         }
@@ -172,7 +172,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeCos() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.cos(mDouble);
         }
@@ -180,7 +180,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeCosh() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.cosh(mDouble);
         }
@@ -188,7 +188,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeExp() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.exp(mDouble);
         }
@@ -196,7 +196,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeExpm1() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.expm1(mDouble);
         }
@@ -204,7 +204,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeFloorOverInterestingValues() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             for (int i = 0; i < FLOOR_DOUBLES.length; ++i) {
                 StrictMath.floor(FLOOR_DOUBLES[i]);
@@ -214,7 +214,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeGetExponentD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.getExponent(mDouble);
         }
@@ -222,7 +222,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeGetExponentF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.getExponent(mFloat);
         }
@@ -230,7 +230,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeHypot() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.hypot(mDouble, mDouble);
         }
@@ -238,7 +238,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeIEEEremainder() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.IEEEremainder(mDouble, mDouble);
         }
@@ -246,7 +246,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeLog() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.log(mDouble);
         }
@@ -254,7 +254,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeLog10() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.log10(mDouble);
         }
@@ -262,7 +262,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeLog1p() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.log1p(mDouble);
         }
@@ -270,7 +270,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMaxD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.max(mDouble, mDouble);
         }
@@ -278,7 +278,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMaxF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.max(mFloat, mFloat);
         }
@@ -286,7 +286,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMaxI() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.max(mInt, mInt);
         }
@@ -294,7 +294,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMaxL() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.max(mLong, mLong);
         }
@@ -302,7 +302,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMinD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.min(mDouble, mDouble);
         }
@@ -310,7 +310,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMinF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.min(mFloat, mFloat);
         }
@@ -318,7 +318,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMinI() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.min(mInt, mInt);
         }
@@ -326,7 +326,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeMinL() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.min(mLong, mLong);
         }
@@ -334,7 +334,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeNextAfterD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.nextAfter(mDouble, mDouble);
         }
@@ -342,7 +342,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeNextAfterF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.nextAfter(mFloat, mFloat);
         }
@@ -350,7 +350,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeNextUpD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.nextUp(mDouble);
         }
@@ -358,7 +358,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeNextUpF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.nextUp(mFloat);
         }
@@ -366,7 +366,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timePow() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.pow(mDouble, mDouble);
         }
@@ -374,7 +374,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeRandom() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.random();
         }
@@ -382,7 +382,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeRint() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.rint(mDouble);
         }
@@ -390,7 +390,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeRoundD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.round(mDouble);
         }
@@ -398,7 +398,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeRoundF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.round(mFloat);
         }
@@ -406,7 +406,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeScalbD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.scalb(mDouble, 5);
         }
@@ -414,7 +414,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeScalbF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.scalb(mFloat, 5);
         }
@@ -422,7 +422,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeSignumD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.signum(mDouble);
         }
@@ -430,7 +430,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeSignumF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.signum(mFloat);
         }
@@ -438,7 +438,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeSin() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.sin(mDouble);
         }
@@ -446,7 +446,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeSinh() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.sinh(mDouble);
         }
@@ -454,7 +454,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeSqrt() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.sqrt(mDouble);
         }
@@ -462,7 +462,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeTan() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.tan(mDouble);
         }
@@ -470,7 +470,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeTanh() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.tanh(mDouble);
         }
@@ -478,7 +478,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeToDegrees() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.toDegrees(mDouble);
         }
@@ -486,7 +486,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeToRadians() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.toRadians(mDouble);
         }
@@ -494,7 +494,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeUlpD() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.ulp(mDouble);
         }
@@ -502,7 +502,7 @@ public class StrictMathPerfTest {
 
     @Test
     public void timeUlpF() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StrictMath.ulp(mFloat);
         }
