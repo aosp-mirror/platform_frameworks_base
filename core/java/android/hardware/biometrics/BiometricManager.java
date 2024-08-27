@@ -399,7 +399,7 @@ public class BiometricManager {
     @RequiresPermission(TEST_BIOMETRIC)
     public BiometricTestSession createTestSession(int sensorId) {
         try {
-            return new BiometricTestSession(mContext, getSensorProperties(), sensorId,
+            return new BiometricTestSession(mContext, sensorId,
                     (context, sensorId1, callback) -> mService
                             .createTestSession(sensorId1, callback, context.getOpPackageName()));
         } catch (RemoteException e) {
