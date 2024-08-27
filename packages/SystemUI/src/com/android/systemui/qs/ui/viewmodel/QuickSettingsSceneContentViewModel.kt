@@ -44,7 +44,7 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     val mediaCarouselInteractor: MediaCarouselInteractor,
-) : SysUiViewModel() {
+) : SysUiViewModel {
 
     val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasAnyMediaOrRecommendation
 

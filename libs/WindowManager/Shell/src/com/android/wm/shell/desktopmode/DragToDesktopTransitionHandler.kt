@@ -22,13 +22,15 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
+import android.os.SystemProperties
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CLOSE
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
-import androidx.dynamicanimation.animation.SpringForce
+import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.dynamicanimation.animation.SpringForce
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
 import com.android.internal.jank.InteractionJankMonitor
@@ -893,13 +895,10 @@ constructor(
     ) {
 
     private val positionSpringConfig =
-        PhysicsAnimator.SpringConfig(
-            SpringForce.STIFFNESS_LOW,
-            SpringForce.DAMPING_RATIO_LOW_BOUNCY
-        )
+        PhysicsAnimator.SpringConfig(POSITION_SPRING_STIFFNESS, POSITION_SPRING_DAMPING_RATIO)
 
     private val sizeSpringConfig =
-        PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_NO_BOUNCY)
+        PhysicsAnimator.SpringConfig(SIZE_SPRING_STIFFNESS, SIZE_SPRING_DAMPING_RATIO)
 
     /**
      * @return layers in order:
@@ -929,7 +928,7 @@ constructor(
         finishTransaction.hide(homeLeash)
         // Setup freeform tasks before animation
         state.freeformTaskChanges.forEach { change ->
-            val startScale = DRAG_TO_DESKTOP_FREEFORM_TASK_INITIAL_SCALE
+            val startScale = FREEFORM_TASKS_INITIAL_SCALE
             val startX =
                 change.endAbsBounds.left + change.endAbsBounds.width() * (1 - startScale) / 2
             val startY =
@@ -994,9 +993,22 @@ constructor(
                     (animBounds.width() - startBounds.width()).toFloat() /
                         (endBounds.width() - startBounds.width())
                 val animScale = startScale + animFraction * (1 - startScale)
-                // Freeform animation starts 50% in the animation
-                val freeformAnimFraction = max(animFraction - 0.5f, 0f) * 2f
-                val freeformStartScale = DRAG_TO_DESKTOP_FREEFORM_TASK_INITIAL_SCALE
+                // Freeform animation starts with freeform animation offset relative to the commit
+                // animation and plays until the commit animation ends. For instance:
+                // - if the freeform animation offset is `0.0` the freeform tasks animate alongside
+                // - if the freeform animation offset is `0.6` the freeform tasks will
+                //   start animating at 60% fraction of the commit animation and will complete when
+                //   the commit animation fraction is 100%.
+                // - if the freeform animation offset is `1.0` then freeform tasks will appear
+                //   without animation after commit animation finishes.
+                val freeformAnimFraction =
+                    if (FREEFORM_TASKS_ANIM_OFFSET != 1f) {
+                        max(animFraction - FREEFORM_TASKS_ANIM_OFFSET, 0f) /
+                            (1f - FREEFORM_TASKS_ANIM_OFFSET)
+                    } else {
+                        0f
+                    }
+                val freeformStartScale = FREEFORM_TASKS_INITIAL_SCALE
                 val freeformAnimScale =
                     freeformStartScale + freeformAnimFraction * (1 - freeformStartScale)
                 tx.apply {
@@ -1032,10 +1044,53 @@ constructor(
     }
 
     companion object {
+        /** The freeform tasks initial scale when committing the drag-to-desktop gesture. */
+        private val FREEFORM_TASKS_INITIAL_SCALE =
+            propertyValue("freeform_tasks_initial_scale", scale = 100f, default = 0.9f)
+
+        /** The freeform tasks animation offset relative to the whole animation duration. */
+        private val FREEFORM_TASKS_ANIM_OFFSET =
+            propertyValue("freeform_tasks_anim_offset", scale = 100f, default = 0.5f)
+
+        /** The spring force stiffness used to place the window into the final position. */
+        private val POSITION_SPRING_STIFFNESS =
+            propertyValue("position_stiffness", default = SpringForce.STIFFNESS_LOW)
+
+        /** The spring force damping ratio used to place the window into the final position. */
+        private val POSITION_SPRING_DAMPING_RATIO =
+            propertyValue(
+                "position_damping_ratio",
+                scale = 100f,
+                default = SpringForce.DAMPING_RATIO_LOW_BOUNCY
+            )
+
+        /** The spring force stiffness used to resize the window into the final bounds. */
+        private val SIZE_SPRING_STIFFNESS =
+            propertyValue("size_stiffness", default = SpringForce.STIFFNESS_LOW)
+
+        /** The spring force damping ratio used to resize the window into the final bounds. */
+        private val SIZE_SPRING_DAMPING_RATIO =
+            propertyValue(
+                "size_damping_ratio",
+                scale = 100f,
+                default = SpringForce.DAMPING_RATIO_NO_BOUNCY
+            )
+
+        /** Drag to desktop transition system properties group. */
+        @VisibleForTesting
+        const val SYSTEM_PROPERTIES_GROUP = "persist.wm.debug.desktop_transitions.drag_to_desktop"
+
         /**
-         * The initial scale of the freeform tasks in the animation to commit the drag-to-desktop
-         * gesture.
+         * Drag to desktop transition system property value with [name].
+         *
+         * @param scale an optional scale to apply to the value read from the system property.
+         * @param default a default value to return if the system property isn't set.
          */
-        private const val DRAG_TO_DESKTOP_FREEFORM_TASK_INITIAL_SCALE = 0.9f
+        @VisibleForTesting
+        fun propertyValue(name: String, scale: Float = 1f, default: Float = 0f): Float =
+            SystemProperties.getInt(
+                /* key= */ "$SYSTEM_PROPERTIES_GROUP.$name",
+                /* def= */ (default * scale).toInt()
+            ) / scale
     }
 }

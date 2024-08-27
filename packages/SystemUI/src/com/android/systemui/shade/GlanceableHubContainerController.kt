@@ -17,7 +17,6 @@
 package com.android.systemui.shade
 
 import android.content.Context
-import android.graphics.Insets
 import android.graphics.Rect
 import android.os.PowerManager
 import android.os.SystemClock
@@ -26,13 +25,14 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
@@ -40,7 +40,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Flags
-import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
@@ -55,6 +54,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalTouchLog
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -91,8 +93,10 @@ constructor(
     @Communal private val dataSourceDelegator: SceneDataSourceDelegator,
     private val notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
     private val keyguardMediaController: KeyguardMediaController,
-    private val lockscreenSmartspaceController: LockscreenSmartspaceController
+    private val lockscreenSmartspaceController: LockscreenSmartspaceController,
+    @CommunalTouchLog logBuffer: LogBuffer,
 ) : LifecycleOwner {
+    private val logger = Logger(logBuffer, "GlanceableHubContainerController")
 
     private class CommunalWrapper(context: Context) : FrameLayout(context) {
         private val consumers: MutableSet<Consumer<Boolean>> = ArraySet()
@@ -141,6 +145,17 @@ constructor(
      * open or being opened.
      */
     private var isTrackingHubTouch = false
+
+    /**
+     * True if a touch gesture on the lock screen has been consumed by the shade/bouncer and thus
+     * should be ignored by the hub.
+     *
+     * This is necessary on the lock screen as gestures on an empty spot go through special touch
+     * handling logic in [NotificationShadeWindowViewController] that decides if they should go to
+     * the shade or bouncer. Once the shade or bouncer are moving, we don't get the typical cancel
+     * event so to play nice, we ignore touches once we see the shade or bouncer are opening.
+     */
+    private var touchTakenByKeyguardGesture = false
 
     /**
      * True if the hub UI is fully open, meaning it should receive touch input.
@@ -206,6 +221,21 @@ constructor(
      */
     private var isDreaming = false
 
+    /** Observes and logs state when the lifecycle that controls the [touchMonitor] updates. */
+    private val touchLifecycleLogger: LifecycleObserver = LifecycleEventObserver { _, event ->
+        logger.d({
+            "Touch handler lifecycle changed to $str1. hubShowing: $bool1, " +
+                "shadeShowingAndConsumingTouches: $bool2, " +
+                "anyBouncerShowing: $bool3, inEditModeTransition: $bool4"
+        }) {
+            str1 = event.toString()
+            bool1 = hubShowing
+            bool2 = shadeShowingAndConsumingTouches
+            bool3 = anyBouncerShowing
+            bool4 = inEditModeTransition
+        }
+    }
+
     /** Returns a flow that tracks whether communal hub is available. */
     fun communalAvailable(): Flow<Boolean> =
         anyOf(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
@@ -268,6 +298,7 @@ constructor(
                     init()
                 }
         }
+        lifecycleRegistry.addObserver(touchLifecycleLogger)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
 
         communalContainerView = containerView
@@ -288,21 +319,13 @@ constructor(
             // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
             // occluded.
             lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                // Avoid adding exclusion to end/start edges to allow back gestures.
-                val insets =
-                    if (glanceableHubBackGesture()) {
-                        containerView.rootWindowInsets.getInsets(WindowInsets.Type.systemGestures())
-                    } else {
-                        Insets.NONE
-                    }
-
                 val ltr = containerView.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
                 val backGestureInset =
                     Rect(
-                        if (ltr) 0 else insets.left,
                         0,
-                        if (ltr) insets.right else containerView.right,
+                        0,
+                        if (ltr) 0 else containerView.right,
                         containerView.bottom,
                     )
 
@@ -318,9 +341,9 @@ constructor(
                             // Only allow swipe up to bouncer and swipe down to shade in the very
                             // top/bottom to avoid conflicting with widgets in the hub grid.
                             Rect(
-                                insets.left,
+                                0,
                                 topEdgeSwipeRegionWidth,
-                                containerView.right - insets.right,
+                                containerView.right,
                                 containerView.bottom - bottomEdgeSwipeRegionWidth
                             ),
                             // Disable back gestures on the left side of the screen, to avoid
@@ -328,6 +351,9 @@ constructor(
                             backGestureInset
                         )
                     }
+                logger.d({ "Insets updated: $str1" }) {
+                    str1 = containerView.systemGestureExclusionRects.toString()
+                }
             }
         }
 
@@ -343,6 +369,9 @@ constructor(
             ),
             {
                 anyBouncerShowing = it
+                if (hubShowing) {
+                    logger.d({ "New value for anyBouncerShowing: $bool1" }) { bool1 = it }
+                }
                 updateTouchHandlingState()
             }
         )
@@ -396,7 +425,13 @@ constructor(
                 // If the shade reaches full expansion without interaction, then we should allow it
                 // to consume touches rather than handling it here until it disappears.
                 shadeShowingAndConsumingTouches =
-                    userNotInteractiveAtShadeFullyExpanded || expandedAndNotInteractive
+                    (userNotInteractiveAtShadeFullyExpanded || expandedAndNotInteractive).also {
+                        if (it != shadeShowingAndConsumingTouches && hubShowing) {
+                            logger.d({ "New value for shadeShowingAndConsumingTouches: $bool1" }) {
+                                bool1 = it
+                            }
+                        }
+                    }
                 updateTouchHandlingState()
             }
         )
@@ -404,6 +439,7 @@ constructor(
 
         communalContainerWrapper = CommunalWrapper(containerView.context)
         communalContainerWrapper?.addView(communalContainerView)
+        logger.d("Hub container initialized")
         return communalContainerWrapper!!
     }
 
@@ -446,6 +482,10 @@ constructor(
             (it.parent as ViewGroup).removeView(it)
             communalContainerWrapper = null
         }
+
+        lifecycleRegistry.removeObserver(touchLifecycleLogger)
+
+        logger.d("Hub container disposed")
     }
 
     /**
@@ -463,15 +503,20 @@ constructor(
         // In the case that we are handling full swipes on the lockscreen, are on the lockscreen,
         // and the touch is within the horizontal notification band on the screen, do not process
         // the touch.
-        if (
-            !hubShowing &&
-                (!notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y) ||
-                    keyguardMediaController.isWithinMediaViewBounds(ev.x.toInt(), ev.y.toInt()) ||
-                    lockscreenSmartspaceController.isWithinSmartspaceBounds(
-                        ev.x.toInt(),
-                        ev.y.toInt()
-                    ))
-        ) {
+        val touchOnNotifications =
+            !notificationStackScrollLayoutController.isBelowLastNotification(ev.x, ev.y)
+        val touchOnUmo = keyguardMediaController.isWithinMediaViewBounds(ev.x.toInt(), ev.y.toInt())
+        val touchOnSmartspace =
+            lockscreenSmartspaceController.isWithinSmartspaceBounds(ev.x.toInt(), ev.y.toInt())
+        if (!hubShowing && (touchOnNotifications || touchOnUmo || touchOnSmartspace)) {
+            logger.d({
+                "Lockscreen touch ignored: touchOnNotifications: $bool1, touchOnUmo: $bool2, " +
+                    "touchOnSmartspace: $bool3"
+            }) {
+                bool1 = touchOnNotifications
+                bool2 = touchOnUmo
+                bool3 = touchOnSmartspace
+            }
             return false
         }
 
@@ -487,12 +532,56 @@ constructor(
         val hubOccluded = anyBouncerShowing || shadeShowingAndConsumingTouches
 
         if ((isDown || isMove) && !hubOccluded) {
+            if (isDown) {
+                logger.d({
+                    "Touch started. x: $int1, y: $int2, hubShowing: $bool1, isDreaming: $bool2, " +
+                        "onLockscreen: $bool3"
+                }) {
+                    int1 = ev.x.toInt()
+                    int2 = ev.y.toInt()
+                    bool1 = hubShowing
+                    bool2 = isDreaming
+                    bool3 = onLockscreen
+                }
+            }
             isTrackingHubTouch = true
         }
 
         if (isTrackingHubTouch) {
+            // On the lock screen, our touch handlers are not active and we rely on the NSWVC's
+            // touch handling for gestures on blank areas, which can go up to show the bouncer or
+            // down to show the notification shade. We see the touches first and they are not
+            // consumed and cancelled like on the dream or hub so we have to gracefully ignore them
+            // if the shade or bouncer are handling them. This issue only applies to touches on the
+            // keyguard itself, once the bouncer or shade are fully open, our logic stops us from
+            // taking touches.
+            touchTakenByKeyguardGesture =
+                (onLockscreen && (shadeConsumingTouches || anyBouncerShowing)).also {
+                    if (it != touchTakenByKeyguardGesture && it) {
+                        logger.d(
+                            "Lock screen touch consumed by shade or bouncer, ignoring " +
+                                "subsequent touches"
+                        )
+                    }
+                }
             if (isUp || isCancel) {
+                logger.d({
+                    val endReason = if (bool1) "up" else "cancel"
+                    "Touch ended with $endReason. x: $int1, y: $int2, " +
+                        "shadeConsumingTouches: $bool2, anyBouncerShowing: $bool3"
+                }) {
+                    int1 = ev.x.toInt()
+                    int2 = ev.y.toInt()
+                    bool1 = isUp
+                    bool2 = shadeConsumingTouches
+                    bool3 = anyBouncerShowing
+                }
                 isTrackingHubTouch = false
+
+                // Clear out touch taken state to ensure the up/cancel event still gets dispatched
+                // to the hub. This is necessary as the hub always receives at least the initial
+                // down even if the shade or bouncer end up handling the touch.
+                touchTakenByKeyguardGesture = false
             }
             return dispatchTouchEvent(ev)
         }
@@ -513,21 +602,8 @@ constructor(
             return true
         }
         try {
-            // On the lock screen, our touch handlers are not active and we rely on the NSWVC's
-            // touch handling for gestures on blank areas, which can go up to show the bouncer or
-            // down to show the notification shade. We see the touches first and they are not
-            // consumed and cancelled like on the dream or hub so we have to gracefully ignore them
-            // if the shade or bouncer are handling them. This issue only applies to touches on the
-            // keyguard itself, once the bouncer or shade are fully open, our logic stops us from
-            // taking touches.
-            val touchTaken = onLockscreen && (shadeConsumingTouches || anyBouncerShowing)
-
-            // Only dispatch touches to communal if not already handled or the touch is ending,
-            // meaning the event is an up or cancel. This is necessary as the hub always receives at
-            // least the initial down even if the shade or bouncer end up handling the touch.
-            val dispatchToCommunal = !touchTaken || !isTrackingHubTouch
             var handled = false
-            if (dispatchToCommunal) {
+            if (!touchTakenByKeyguardGesture) {
                 communalContainerWrapper?.dispatchTouchEvent(ev) {
                     if (it) {
                         handled = true

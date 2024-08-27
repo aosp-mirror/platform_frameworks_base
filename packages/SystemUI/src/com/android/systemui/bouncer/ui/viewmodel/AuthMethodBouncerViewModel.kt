@@ -21,6 +21,7 @@ import com.android.app.tracing.coroutines.flow.collectLatest
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.SysUiViewModel
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
@@ -39,7 +40,7 @@ sealed class AuthMethodBouncerViewModel(
      * being able to attempt to unlock the device.
      */
     val isInputEnabled: StateFlow<Boolean>,
-) : SysUiViewModel() {
+) : SysUiViewModel, ExclusiveActivatable() {
 
     private val _animateFailure = MutableStateFlow(false)
     /**

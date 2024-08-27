@@ -614,11 +614,6 @@ constructor(
         _firstVisibleItemOffset = firstVisibleItemOffset
     }
 
-    fun resetScrollPosition() {
-        _firstVisibleItemIndex = 0
-        _firstVisibleItemOffset = 0
-    }
-
     val firstVisibleItemIndex: Int
         get() = _firstVisibleItemIndex
 

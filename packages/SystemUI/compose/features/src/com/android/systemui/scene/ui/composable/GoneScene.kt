@@ -26,6 +26,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.qs.ui.composable.QuickSettings
@@ -50,7 +51,7 @@ constructor(
     private val notificationStackScrolLView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val viewModelFactory: GoneSceneActionsViewModel.Factory,
-) : ComposableScene {
+) : ExclusiveActivatable(), ComposableScene {
     override val key = Scenes.Gone
 
     private val actionsViewModel: GoneSceneActionsViewModel by lazy { viewModelFactory.create() }
@@ -58,7 +59,7 @@ constructor(
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions
 
-    override suspend fun activate(): Nothing {
+    override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
     }
 

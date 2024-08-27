@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import static android.os.vibrator.Flags.FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -192,6 +194,11 @@ public class VibratorManagerServiceTest {
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
     private final SparseArray<VibrationEffect>  mHapticFeedbackVibrationMap = new SparseArray<>();
+    private final SparseArray<VibrationEffect>  mHapticFeedbackVibrationMapSourceRotary =
+            new SparseArray<>();
+    private final SparseArray<VibrationEffect>  mHapticFeedbackVibrationMapSourceTouchScreen =
+            new SparseArray<>();
+
     private final List<HalVibration> mPendingVibrations = new ArrayList<>();
 
     private VibratorManagerService mService;
@@ -339,8 +346,10 @@ public class VibratorManagerServiceTest {
                     @Override
                     HapticFeedbackVibrationProvider createHapticFeedbackVibrationProvider(
                             Resources resources, VibratorInfo vibratorInfo) {
-                        return new HapticFeedbackVibrationProvider(
-                                resources, vibratorInfo, mHapticFeedbackVibrationMap);
+                        return new HapticFeedbackVibrationProvider(resources, vibratorInfo,
+                                new HapticFeedbackCustomization(mHapticFeedbackVibrationMap,
+                                        mHapticFeedbackVibrationMapSourceRotary,
+                                        mHapticFeedbackVibrationMapSourceTouchScreen));
                     }
 
                     @Override
@@ -1475,6 +1484,60 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void performHapticFeedbackForInputDevice_doesNotRequireVibrateOrBypassPermissions()
+            throws Exception {
+        // Deny permissions that would have been required for regular vibrations, and check that
+        // the vibration proceed as expected to verify that haptic feedback does not need these
+        // permissions.
+        denyPermission(android.Manifest.permission.VIBRATE);
+        denyPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        denyPermission(android.Manifest.permission.MODIFY_PHONE_STATE);
+        denyPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING);
+        // Flag override to enable the scroll feedback constants to bypass interruption policies.
+        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
+        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
+        mHapticFeedbackVibrationMapSourceRotary.put(
+                HapticFeedbackConstants.SCROLL_TICK,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        mHapticFeedbackVibrationMapSourceTouchScreen.put(
+                HapticFeedbackConstants.DRAG_START,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_TICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vibrationByRotary =
+                performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                        service, HapticFeedbackConstants.SCROLL_TICK, /* inputDeviceId= */ 0,
+                        InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ true);
+        HalVibration vibrationByTouchScreen =
+                performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                        service, HapticFeedbackConstants.DRAG_START, /* inputDeviceId= */ 0,
+                        InputDevice.SOURCE_TOUCHSCREEN, /* always= */ true);
+
+        List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
+        // 2 haptics: 1 by rotary + 1 by touch screen
+        assertEquals(2, playedSegments.size());
+        // Verify feedback by rotary input
+        PrebakedSegment segmentByRotary = (PrebakedSegment) playedSegments.get(0);
+        assertEquals(VibrationEffect.EFFECT_CLICK, segmentByRotary.getEffectId());
+        VibrationAttributes attrsByRotary = vibrationByRotary.callerInfo.attrs;
+        assertEquals(VibrationAttributes.USAGE_HARDWARE_FEEDBACK, attrsByRotary.getUsage());
+        assertTrue(attrsByRotary.isFlagSet(
+                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
+        assertTrue(attrsByRotary.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
+        // Verify feedback by touch screen input
+        PrebakedSegment segmentByTouchScreen = (PrebakedSegment) playedSegments.get(1);
+        assertEquals(VibrationEffect.EFFECT_TICK, segmentByTouchScreen.getEffectId());
+        VibrationAttributes attrsByTouchScreen = vibrationByTouchScreen.callerInfo.attrs;
+        assertEquals(VibrationAttributes.USAGE_TOUCH, attrsByTouchScreen.getUsage());
+        assertTrue(attrsByRotary.isFlagSet(
+                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
+        assertTrue(attrsByRotary.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
+    }
+
+    @Test
     public void performHapticFeedback_restrictedConstantsWithoutPermission_doesNotVibrate()
             throws Exception {
         // Deny permission to vibrate with restricted constants
@@ -1498,6 +1561,42 @@ public class VibratorManagerServiceTest {
 
         performHapticFeedbackAndWaitUntilFinished(
                 service, HapticFeedbackConstants.BIOMETRIC_CONFIRM, /* always= */ false);
+
+        List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
+        assertEquals(1, playedSegments.size());
+        PrebakedSegment segment = (PrebakedSegment) playedSegments.get(0);
+        assertEquals(VibrationEffect.EFFECT_CLICK, segment.getEffectId());
+    }
+
+    @Test
+    public void performHapticFeedbackForInputDevice_restrictedConstantsWithoutPermission_doesNotVibrate()
+            throws Exception {
+        // Deny permission to vibrate with restricted constants
+        denyPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
+        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
+        // Public constant, no permission required
+        mHapticFeedbackVibrationMapSourceRotary.put(
+                HapticFeedbackConstants.CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        // Hidden system-only constant, permission required
+        mHapticFeedbackVibrationMapSourceTouchScreen.put(
+                HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setSupportedEffects(
+                VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_HEAVY_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        // This vibrates.
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                        service, HapticFeedbackConstants.CONFIRM, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ false);
+        // This doesn't.
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                        service, HapticFeedbackConstants.BIOMETRIC_CONFIRM, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_TOUCHSCREEN, /* always= */ false);
 
         List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
         assertEquals(1, playedSegments.size());
@@ -1539,33 +1638,95 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void performHapticFeedbackForInputDevice_restrictedConstantsWithPermission_playsVibration()
+            throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
+        // Grant permission to vibrate with restricted constants
+        grantPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS);
+        // Public constant, no permission required
+        mHapticFeedbackVibrationMapSourceRotary.put(
+                HapticFeedbackConstants.CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        // Hidden system-only constant, permission required
+        mHapticFeedbackVibrationMapSourceTouchScreen.put(
+                HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setSupportedEffects(
+                VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_HEAVY_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                service, HapticFeedbackConstants.CONFIRM, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ false);
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                service, HapticFeedbackConstants.BIOMETRIC_CONFIRM, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_TOUCHSCREEN, /* always= */ false);
+
+        List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
+        assertEquals(2, playedSegments.size());
+        assertEquals(VibrationEffect.EFFECT_CLICK,
+                ((PrebakedSegment) playedSegments.get(0)).getEffectId());
+        assertEquals(VibrationEffect.EFFECT_HEAVY_CLICK,
+                ((PrebakedSegment) playedSegments.get(1)).getEffectId());
+    }
+
+    @Test
     public void performHapticFeedback_doesNotVibrateWhenVibratorInfoNotReady() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
+        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
         denyPermission(android.Manifest.permission.VIBRATE);
         mHapticFeedbackVibrationMap.put(
                 HapticFeedbackConstants.KEYBOARD_TAP,
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+        mHapticFeedbackVibrationMapSourceRotary.put(
+                HapticFeedbackConstants.KEYBOARD_TAP,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_THUD));
+        mHapticFeedbackVibrationMapSourceTouchScreen.put(
+                HapticFeedbackConstants.KEYBOARD_TAP,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
         fakeVibrator.setVibratorInfoLoadSuccessful(false);
-        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_TICK,
+                VibrationEffect.EFFECT_THUD);
         VibratorManagerService service = createService();
 
+        // performHapticFeedback.
         performHapticFeedbackAndWaitUntilFinished(
                 service, HapticFeedbackConstants.KEYBOARD_TAP, /* always= */ true);
+        // performHapticFeedbackForInputDevice.
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                service, HapticFeedbackConstants.KEYBOARD_TAP, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ true);
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                service, HapticFeedbackConstants.KEYBOARD_TAP, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_TOUCHSCREEN, /* always= */ true);
 
         assertTrue(fakeVibrator.getAllEffectSegments().isEmpty());
     }
 
     @Test
     public void performHapticFeedback_doesNotVibrateForInvalidConstant() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SCROLL_FEEDBACK_API);
+        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
         denyPermission(android.Manifest.permission.VIBRATE);
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
 
         // These are bad haptic feedback IDs, so expect no vibration played.
+        // Test performHapticFeedback
         performHapticFeedbackAndWaitUntilFinished(service, /* constant= */ -1, /* always= */ false);
         performHapticFeedbackAndWaitUntilFinished(
                 service, HapticFeedbackConstants.NO_HAPTICS, /* always= */ true);
+        // Test performHapticFeedbackForInputDevice
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                service, /* constant= */ -1, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ true);
+        performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                service, /* constant= */ -1, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_TOUCHSCREEN, /* always= */ true);
 
         assertTrue(mVibratorProviders.get(1).getAllEffectSegments().isEmpty());
     }
@@ -1577,6 +1738,17 @@ public class VibratorManagerServiceTest {
         HalVibration vibration =
                 performHapticFeedbackAndWaitUntilFinished(
                         service, HapticFeedbackConstants.SCROLL_TICK, /* always= */ true);
+
+        assertTrue(vibration.callerToken == service);
+    }
+
+    @Test
+    public void performHapticFeedbackForInputDevice_usesServiceAsToken() throws Exception {
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vibration = performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+                service, HapticFeedbackConstants.SCROLL_TICK, /* inputDeviceId= */ 0,
+                InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ true);
 
         assertTrue(vibration.callerToken == service);
     }
@@ -2752,6 +2924,21 @@ public class VibratorManagerServiceTest {
             int constant, boolean always) throws InterruptedException {
         HalVibration vib = service.performHapticFeedbackInternal(UID, Context.DEVICE_ID_DEFAULT,
                 PACKAGE_NAME, constant, "some reason", service,
+                always ? HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING : 0 /* flags */,
+                0 /* privFlags */);
+        if (vib != null) {
+            vib.waitForEnd();
+        }
+
+        return vib;
+    }
+
+    private HalVibration performHapticFeedbackForInputDeviceAndWaitUntilFinished(
+            VibratorManagerService service, int constant, int inputDeviceId, int inputSource,
+            boolean always) throws InterruptedException {
+        HalVibration vib = service.performHapticFeedbackForInputDeviceInternal(UID,
+                Context.DEVICE_ID_DEFAULT, PACKAGE_NAME, constant, inputDeviceId, inputSource,
+                "some reason", service,
                 always ? HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING : 0 /* flags */,
                 0 /* privFlags */);
         if (vib != null) {

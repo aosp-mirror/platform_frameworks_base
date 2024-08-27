@@ -39,6 +39,9 @@ android_ravenwood_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
 
+        "junit-params",
+        "platform-parametric-runner-lib",
+
         // To make sure it won't cause VerifyError (b/324063814)
         "platformprotosnano",
     ],
@@ -64,6 +67,9 @@ android_test {
         "androidx.annotation_annotation",
         "androidx.test.ext.junit",
         "androidx.test.rules",
+
+        "junit-params",
+        "platform-parametric-runner-lib",
 
         "ravenwood-junit",
     ],

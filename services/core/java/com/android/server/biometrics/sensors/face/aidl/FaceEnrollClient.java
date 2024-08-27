@@ -60,7 +60,6 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.face.FaceService;
-import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -85,6 +84,7 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
     private final int mMaxTemplatesPerUser;
     private final boolean mDebugConsent;
     private final @android.hardware.face.FaceEnrollOptions.EnrollReason int mEnrollReason;
+    private final BiometricUtils<Face> mBiometricUtils;
 
     private final ClientMonitorCallback mPreviewHandleDeleterCallback =
             new ClientMonitorCallback() {
@@ -107,7 +107,8 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             int maxTemplatesPerUser, boolean debugConsent,
             android.hardware.face.FaceEnrollOptions options,
-            @NonNull AuthenticationStateListeners authenticationStateListeners) {
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
+            @NonNull BiometricUtils<Face> biometricUtils) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, opPackageName, utils,
                 timeoutSec, sensorId, false /* shouldVibrate */, logger, biometricContext,
                 BiometricFaceConstants.reasonToMetric(options.getEnrollReason()));
@@ -122,6 +123,7 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
         mDebugConsent = debugConsent;
         mDisabledFeatures = disabledFeatures;
         mPreviewSurface = previewSurface;
+        mBiometricUtils = biometricUtils;
         Slog.w(TAG, "EnrollOptions "
                 + android.hardware.face.FaceEnrollOptions.enrollReasonToString(
                         options.getEnrollReason()));
@@ -144,7 +146,7 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
     @Override
     protected boolean hasReachedEnrollmentLimit() {
-        return FaceUtils.getInstance(getSensorId()).getBiometricsForUser(getContext(),
+        return mBiometricUtils.getBiometricsForUser(getContext(),
                 getTargetUserId()).size() >= mMaxTemplatesPerUser;
     }
 

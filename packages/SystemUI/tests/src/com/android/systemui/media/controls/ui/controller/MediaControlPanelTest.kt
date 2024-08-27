@@ -70,6 +70,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -84,7 +85,6 @@ import com.android.systemui.media.controls.ui.view.GutsViewHolder
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.monet.ColorScheme
@@ -141,6 +141,7 @@ private const val APP_NAME = "APP_NAME"
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableSceneContainer
 public class MediaControlPanelTest : SysuiTestCase() {
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
@@ -233,9 +234,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recProgressBar1: SeekBar
     @Mock private lateinit var recProgressBar2: SeekBar
     @Mock private lateinit var recProgressBar3: SeekBar
-    private var shouldShowBroadcastButton: Boolean = false
     @Mock private lateinit var globalSettings: GlobalSettings
-    @Mock private lateinit var mediaFlags: MediaFlags
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -254,7 +253,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
             .thenReturn(applicationInfo)
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
         context.setMockPackageManager(packageManager)
-        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
 
         player =
             object :
@@ -278,7 +276,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     lockscreenUserManager,
                     broadcastDialogController,
                     globalSettings,
-                    mediaFlags,
                 ) {
                 override fun loadAnimator(
                     animId: Int,

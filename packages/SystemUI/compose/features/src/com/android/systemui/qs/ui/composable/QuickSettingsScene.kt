@@ -81,6 +81,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
@@ -129,7 +130,7 @@ constructor(
     private val statusBarIconController: StatusBarIconController,
     private val mediaCarouselController: MediaCarouselController,
     @Named(MediaModule.QS_PANEL) private val mediaHost: MediaHost,
-) : ComposableScene {
+) : ExclusiveActivatable(), ComposableScene {
     override val key = Scenes.QuickSettings
 
     private val actionsViewModel: QuickSettingsSceneActionsViewModel by lazy {
@@ -139,7 +140,7 @@ constructor(
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions
 
-    override suspend fun activate(): Nothing {
+    override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
     }
 
