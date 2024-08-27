@@ -289,8 +289,7 @@ public class Chronometer extends TextView {
 
     private synchronized void updateText(long now) {
         mNow = now;
-        long seconds = mCountDown ? mBase - now : now - mBase;
-        seconds /= 1000;
+        long seconds = Math.round((mCountDown ? mBase - now - 499 : now - mBase) / 1000f);
         boolean negative = false;
         if (seconds < 0) {
             seconds = -seconds;
@@ -348,9 +347,19 @@ public class Chronometer extends TextView {
     };
 
     private void postTickOnNextSecond() {
-        long nowMillis = SystemClock.elapsedRealtime();
-        int millis = (int) ((nowMillis - mBase) % 1000);
-        postDelayed(mTickRunnable, 1000 - millis);
+        long nowMillis = mNow;
+        long delayMillis;
+        if (mCountDown) {
+            delayMillis = (mBase - nowMillis) % 1000;
+            if (delayMillis <= 0) {
+                delayMillis += 1000;
+            }
+        } else {
+            delayMillis = 1000 - (Math.abs(nowMillis - mBase) % 1000);
+        }
+        // Aim for 1 millisecond into the next second so we don't update exactly on the second
+        delayMillis++;
+        postDelayed(mTickRunnable, delayMillis);
     }
 
     void dispatchChronometerTick() {
