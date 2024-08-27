@@ -231,16 +231,6 @@ flag {
 }
 
 flag {
-  name: "dmrh_set_app_restrictions"
-  namespace: "enterprise"
-  description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
-  bug: "328758346"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "allow_screen_brightness_control_on_cope"
   namespace: "enterprise"
   description: "Allow COPE admin to control screen brightness and timeout."
