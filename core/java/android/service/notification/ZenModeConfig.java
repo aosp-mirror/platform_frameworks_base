@@ -241,10 +241,11 @@ public class ZenModeConfig implements Parcelable {
     // ZenModeConfig XML versions distinguishing key changes.
     public static final int XML_VERSION_ZEN_UPGRADE = 8;
     public static final int XML_VERSION_MODES_API = 11;
+    public static final int XML_VERSION_MODES_UI = 12;
 
-    // TODO: b/310620812 - Update XML_VERSION and update default_zen_config.xml accordingly when
-    //       modes_api is inlined.
-    private static final int XML_VERSION = 10;
+    // TODO: b/310620812, b/344831624 - Update XML_VERSION and update default_zen_config.xml
+    //  accordingly when modes_api / modes_ui are inlined.
+    private static final int XML_VERSION_PRE_MODES = 10;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
@@ -952,7 +953,13 @@ public class ZenModeConfig implements Parcelable {
     }
 
     public static int getCurrentXmlVersion() {
-        return Flags.modesApi() ? XML_VERSION_MODES_API : XML_VERSION;
+        if (Flags.modesUi()) {
+            return XML_VERSION_MODES_UI;
+        } else if (Flags.modesApi()) {
+            return XML_VERSION_MODES_API;
+        } else {
+            return XML_VERSION_PRE_MODES;
+        }
     }
 
     public static ZenModeConfig readXml(TypedXmlPullParser parser)
@@ -2607,7 +2614,7 @@ public class ZenModeConfig implements Parcelable {
         @AutomaticZenRule.Type
         public int type = AutomaticZenRule.TYPE_UNKNOWN;
         public String triggerDescription;
-        public String iconResName;
+        @Nullable public String iconResName;
         public boolean allowManualInvocation;
         @AutomaticZenRule.ModifiableField public int userModifiedFields;
         @ZenPolicy.ModifiableField public int zenPolicyUserModifiedFields;

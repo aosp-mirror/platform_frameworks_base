@@ -22,6 +22,7 @@ import android.content.Context
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.row.shared.EnRouteContentModel
 import com.android.systemui.statusbar.notification.row.shared.IconModel
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingNotificationFlag
@@ -68,12 +69,13 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         builder: Notification.Builder,
         systemUIContext: Context,
         packageContext: Context
-    ): RichOngoingContentModel? =
+    ): RichOngoingContentModel? {
+        val sbn = entry.sbn
+        val notification = sbn.notification
+        val icon = IconModel(notification.smallIcon)
+
         try {
-            val sbn = entry.sbn
-            val notification = sbn.notification
-            val icon = IconModel(notification.smallIcon)
-            if (sbn.packageName == "com.google.android.deskclock") {
+            return if (sbn.packageName == "com.google.android.deskclock") {
                 when (notification.channelId) {
                     "Timers v2" -> {
                         parseTimerNotification(notification, icon)
@@ -87,11 +89,14 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
                         null
                     }
                 }
+            } else if (builder.style is Notification.EnRouteStyle) {
+                parseEnRouteNotification(notification, icon)
             } else null
         } catch (e: Exception) {
             Log.e("RONs", "Error parsing RON", e)
-            null
+            return null
         }
+    }
 
     /**
      * FOR PROTOTYPING ONLY: create a RON TimerContentModel using the time information available
@@ -198,5 +203,16 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         return Duration.ofHours(hour.toLong())
             .plusMinutes(minute.toLong())
             .plusSeconds(second.toLong())
+    }
+
+    private fun parseEnRouteNotification(
+        notification: Notification,
+        icon: IconModel,
+    ): EnRouteContentModel {
+        return EnRouteContentModel(
+            smallIcon = icon,
+            title = notification.extras.getCharSequence(Notification.EXTRA_TITLE),
+            text = notification.extras.getCharSequence(Notification.EXTRA_TEXT),
+        )
     }
 }

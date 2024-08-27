@@ -3443,7 +3443,7 @@ package android.companion.virtual {
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.ActivityPolicyExemption> CREATOR;
   }
 
-  public static final class ActivityPolicyExemption.Builder {
+  @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public static final class ActivityPolicyExemption.Builder {
     ctor public ActivityPolicyExemption.Builder();
     method @NonNull public android.companion.virtual.ActivityPolicyExemption build();
     method @NonNull public android.companion.virtual.ActivityPolicyExemption.Builder setComponentName(@NonNull android.content.ComponentName);

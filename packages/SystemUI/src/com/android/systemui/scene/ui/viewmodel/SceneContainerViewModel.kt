@@ -24,6 +24,8 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -32,7 +34,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -45,7 +46,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val logger: SceneLogger,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
-) : SysUiViewModel() {
+) : SysUiViewModel, ExclusiveActivatable() {
     /**
      * Keys of all scenes in the container.
      *
@@ -57,8 +58,10 @@ constructor(
     /** The scene that should be rendered. */
     val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
+    private val hydrator = Hydrator()
+
     /** Whether the container is visible. */
-    val isVisible: Boolean by hydratedStateOf(sceneInteractor.isVisible)
+    val isVisible: Boolean by hydrator.hydratedStateOf(sceneInteractor.isVisible)
 
     override suspend fun onActivated(): Nothing {
         try {
@@ -75,7 +78,8 @@ constructor(
                     }
                 }
             )
-            awaitCancellation()
+
+            hydrator.activate()
         } finally {
             // Clears the previously-sent MotionEventHandler so the owner of the view-model releases
             // their reference to it.

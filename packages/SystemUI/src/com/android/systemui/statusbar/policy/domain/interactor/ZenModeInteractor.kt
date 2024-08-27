@@ -95,10 +95,6 @@ constructor(
         return mode.getIcon(context, iconLoader).await().asIcon()
     }
 
-    suspend fun getLockscreenModeIcon(mode: ZenMode): Icon {
-        return mode.getLockscreenIcon(context, iconLoader).await().asIcon()
-    }
-
     /**
      * Given the list of modes (which may include zero or more currently active modes), returns an
      * icon representing the active mode, if any (or, if multiple modes are active, to the most
@@ -106,8 +102,8 @@ constructor(
      * standard DND icon for implicit modes, instead of the launcher icon of the associated
      * package).
      */
-    suspend fun getActiveModeIcon(context: Context, modes: List<ZenMode>): Icon? {
-        return getMainActiveMode(modes)?.let { m -> getLockscreenModeIcon(m) }
+    suspend fun getActiveModeIcon(modes: List<ZenMode>): Icon? {
+        return getMainActiveMode(modes)?.let { m -> getModeIcon(m) }
     }
 
     fun activateMode(zenMode: ZenMode) {

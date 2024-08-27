@@ -96,6 +96,8 @@ internal sealed class Content(
                 .approachLayout(
                     isMeasurementApproachInProgress = { layoutImpl.state.isTransitioning() }
                 ) { measurable, constraints ->
+                    // TODO(b/353679003): Use the ModifierNode API to set this *before* the approach
+                    // pass is started.
                     targetSize = lookaheadSize
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) { placeable.place(0, 0) }

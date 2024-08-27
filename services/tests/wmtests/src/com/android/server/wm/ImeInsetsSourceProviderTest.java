@@ -24,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.graphics.PixelFormat;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 
 import androidx.test.filters.SmallTest;
@@ -72,6 +74,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
      * Checks that scheduling with all the state set and manually triggering the show does succeed.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme() {
         final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
         makeWindowVisibleAndDrawn(ime);
@@ -99,6 +102,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
      * all the state becomes available.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme_noInitialState() {
         final WindowState target = createWindow(null, TYPE_APPLICATION, "app");
 
@@ -126,6 +130,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
      * does continue and succeed when the runnable is started.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme_delayedAfterPrepareSurfaces() {
         final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
         makeWindowVisibleAndDrawn(ime);
@@ -158,6 +163,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
      * when the surface placement happens.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme_delayedSurfacePlacement() {
         final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
         makeWindowVisibleAndDrawn(ime);

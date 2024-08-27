@@ -49,7 +49,6 @@ import static com.android.server.wm.WindowManagerService.LOGTAG_INPUT_FOCUS;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.Nullable;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
@@ -111,7 +110,7 @@ final class InputMonitor {
      * draw the live-tile above the recents activity, we also need to provide that activity as a
      * z-layering reference so that we can place the recents input consumer above it.
      */
-    private WeakReference<ActivityRecord> mActiveRecentsActivity = null;
+    private WeakReference<Task> mActiveRecentsTask = null;
     private WeakReference<Task> mActiveRecentsLayerRef = null;
 
     private class UpdateInputWindows implements Runnable {
@@ -388,13 +387,13 @@ final class InputMonitor {
 
     /**
      * Inform InputMonitor when recents is active so it can enable the recents input consumer.
-     * @param activity The active recents activity. {@code null} means recents is not active.
+     * @param task The active recents task. {@code null} means recents is not active.
      * @param layer A task whose Z-layer is used as a reference for how to sort the consumer.
      */
-    void setActiveRecents(@Nullable ActivityRecord activity, @Nullable Task layer) {
-        final boolean clear = activity == null;
-        final boolean wasActive = mActiveRecentsActivity != null && mActiveRecentsLayerRef != null;
-        mActiveRecentsActivity = clear ? null : new WeakReference<>(activity);
+    void setActiveRecents(@Nullable Task task, @Nullable Task layer) {
+        final boolean clear = task == null;
+        final boolean wasActive = mActiveRecentsTask != null && mActiveRecentsLayerRef != null;
+        mActiveRecentsTask = clear ? null : new WeakReference<>(task);
         mActiveRecentsLayerRef = clear ? null : new WeakReference<>(layer);
         if (clear && wasActive) {
             setUpdateInputWindowsNeededLw();
@@ -415,7 +414,7 @@ final class InputMonitor {
         if (recentsAnimationInputConsumer != null && focus != null) {
             // Apply recents input consumer when the focusing window is in recents animation.
             final boolean shouldApplyRecentsInputConsumer =
-                    getWeak(mActiveRecentsActivity) != null && focus.inTransition()
+                    getWeak(mActiveRecentsTask) != null && focus.inTransition()
                             // only take focus from the recents activity to avoid intercepting
                             // events before the gesture officially starts.
                             && focus.isActivityTypeHomeOrRecents();
@@ -564,7 +563,6 @@ final class InputMonitor {
         private boolean mAddRecentsAnimationInputConsumerHandle;
 
         private boolean mInDrag;
-        private final Rect mTmpRect = new Rect();
 
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
@@ -581,18 +579,15 @@ final class InputMonitor {
 
             resetInputConsumers(mInputTransaction);
             // Update recents input consumer layer if active
-            final ActivityRecord activeRecents = getWeak(mActiveRecentsActivity);
+            final Task activeRecents = getWeak(mActiveRecentsTask);
             if (mAddRecentsAnimationInputConsumerHandle && activeRecents != null
                     && activeRecents.getSurfaceControl() != null) {
                 WindowContainer layer = getWeak(mActiveRecentsLayerRef);
                 layer = layer != null ? layer : activeRecents;
                 // Handle edge-case for SUW where windows don't exist yet
                 if (layer.getSurfaceControl() != null) {
-                    final WindowState targetAppMainWindow = activeRecents.findMainWindow();
-                    if (targetAppMainWindow != null) {
-                        targetAppMainWindow.getBounds(mTmpRect);
-                        mRecentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
-                    }
+                    mRecentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(
+                            activeRecents.getBounds());
                     mRecentsAnimationInputConsumer.show(mInputTransaction, layer);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }

@@ -16,6 +16,7 @@
 
 package com.android.internal.statusbar;
 
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -23,7 +24,18 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+/**
+ * Representation of an icon that should appear in the status bar.
+ *
+ * <p>This includes notifications, conversations, and icons displayed on the right side (e.g.
+ * Wifi, Vibration/Silence, Priority Modes, etc).
+ *
+ * <p>This class is {@link Parcelable} but the {@link #preloadedIcon} is not (and will be lost if
+ * the object is copied through parcelling). If {@link #preloadedIcon} is supplied, it must match
+ * the {@link #icon} resource/bitmap.
+ */
 public class StatusBarIcon implements Parcelable {
     public enum Type {
         // Notification: the sender avatar for important conversations
@@ -34,7 +46,9 @@ public class StatusBarIcon implements Parcelable {
         // Notification: the small icon from the notification
         NotifSmallIcon,
         // The wi-fi, cellular or battery icon.
-        SystemIcon
+        SystemIcon,
+        // Some other icon, corresponding to a resource (possibly in a different package).
+        ResourceIcon
     }
 
     public UserHandle user;
@@ -45,6 +59,13 @@ public class StatusBarIcon implements Parcelable {
     public int number;
     public CharSequence contentDescription;
     public Type type;
+
+    /**
+     * Optional {@link Drawable} corresponding to {@link #icon}. This field is not parcelable, so
+     * will be lost if the object is sent to a different process. If you set it, make sure to
+     * <em>also</em> set {@link #icon} pointing to the corresponding resource.
+     */
+    @Nullable public Drawable preloadedIcon;
 
     public StatusBarIcon(UserHandle user, String resPackage, Icon icon, int iconLevel, int number,
             CharSequence contentDescription, Type type) {
@@ -88,6 +109,7 @@ public class StatusBarIcon implements Parcelable {
         StatusBarIcon that = new StatusBarIcon(this.user, this.pkg, this.icon,
                 this.iconLevel, this.number, this.contentDescription, this.type);
         that.visible = this.visible;
+        that.preloadedIcon = this.preloadedIcon;
         return that;
     }
 

@@ -89,6 +89,7 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
                                 PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT)
                         .build();
         register(params);
+        Log.i(TAG, "Registered with perfetto service");
     }
 
     @Override

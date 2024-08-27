@@ -140,6 +140,10 @@ constructor(
      */
     val editActivityShowing: StateFlow<Boolean> = _editActivityShowing.asStateFlow()
 
+    private val _selectedKey: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    val selectedKey: StateFlow<String?> = _selectedKey.asStateFlow()
+
     /** Whether communal features are enabled. */
     val isCommunalEnabled: StateFlow<Boolean> = communalSettingsInteractor.isCommunalEnabled
 
@@ -177,6 +181,10 @@ constructor(
             delay(DISCLAIMER_RESET_MILLIS)
             _isDisclaimerDismissed.value = false
         }
+    }
+
+    fun setSelectedKey(key: String?) {
+        _selectedKey.value = key
     }
 
     /** Whether to show communal when exiting the occluded state. */
@@ -345,11 +353,10 @@ constructor(
 
     /** Show the widget editor Activity. */
     fun showWidgetEditor(
-        preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {
         communalSceneInteractor.setEditModeState(EditModeState.STARTING)
-        editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
+        editWidgetsActivityStarter.startActivity(shouldOpenWidgetPickerOnStart)
     }
 
     /**

@@ -79,6 +79,7 @@ internal constructor(
             // NOTE: NotificationEntry.isClearable will internally check group children to ensure
             //  the group itself definitively clearable.
             val isClearable = !isSensitiveContentProtectionActive && entry.isClearable
+                    && !entry.isSensitive.value
             when {
                 isSilent && isClearable -> hasClearableSilentNotifs = true
                 isSilent && !isClearable -> hasNonClearableSilentNotifs = true
