@@ -310,10 +310,8 @@ public class WindowStateTests extends WindowTestsBase {
         // Simulate the window is in split screen root task.
         final Task rootTask = createTask(mDisplayContent,
                 WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        spyOn(appWindow);
-        spyOn(rootTask);
         rootTask.setFocusable(false);
-        doReturn(rootTask).when(appWindow).getRootTask();
+        appWindow.mActivityRecord.reparent(rootTask, 0 /* position */, "test");
 
         // Make sure canBeImeTarget is false;
         assertFalse(appWindow.canBeImeTarget());
@@ -1035,7 +1033,7 @@ public class WindowStateTests extends WindowTestsBase {
                 mDisplayContent,
                 "SystemDialog", true);
         mDisplayContent.setImeLayeringTarget(mAppWindow);
-        mAppWindow.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        mAppWindow.getTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         makeWindowVisible(mImeWindow);
         systemDialogWindow.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
         assertTrue(systemDialogWindow.needsRelativeLayeringToIme());

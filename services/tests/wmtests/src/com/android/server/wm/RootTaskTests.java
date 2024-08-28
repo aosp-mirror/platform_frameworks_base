@@ -1420,20 +1420,4 @@ public class RootTaskTests extends WindowTestsBase {
         verify(mSupervisor).startSpecificActivity(any(), eq(false) /* andResume */,
                 anyBoolean());
     }
-
-    private void verifyShouldSleepActivities(boolean focusedRootTask,
-            boolean keyguardGoingAway, boolean displaySleeping, boolean isDefaultDisplay,
-            boolean expected) {
-        final Task task = new TaskBuilder(mSupervisor).build();
-        final DisplayContent display = mock(DisplayContent.class);
-        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
-        display.isDefaultDisplay = isDefaultDisplay;
-
-        task.mDisplayContent = display;
-        doReturn(keyguardGoingAway).when(display).isKeyguardGoingAway();
-        doReturn(displaySleeping).when(display).isSleeping();
-        doReturn(focusedRootTask).when(task).isFocusedRootTaskOnDisplay();
-
-        assertEquals(expected, task.shouldSleepActivities());
-    }
 }
