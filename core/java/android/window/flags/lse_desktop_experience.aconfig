@@ -115,6 +115,16 @@ flag {
 }
 
 flag {
+    name: "respect_orientation_change_for_unresizeable"
+    namespace: "lse_desktop_experience"
+    description: "Whether to resize task to respect requested orientation change of unresizeable activity"
+    bug: "353338503"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_camera_compat_for_desktop_windowing"
     namespace: "lse_desktop_experience"
     description: "Whether to apply Camera Compat treatment to fixed-orientation apps in desktop windowing mode"
