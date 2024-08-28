@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.communal.dagger.CommunalModule.Companion.LAUNCHER_PACKAGE
 import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -81,6 +82,7 @@ constructor(
     @Application private val context: Context,
     private val accessibilityManager: AccessibilityManager,
     private val packageManager: PackageManager,
+    @Named(LAUNCHER_PACKAGE) private val launcherPackage: String,
 ) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
 
     private val logger = Logger(logBuffer, "CommunalEditModeViewModel")
@@ -185,7 +187,6 @@ constructor(
     /** Launch the widget picker activity using the given {@link ActivityResultLauncher}. */
     suspend fun onOpenWidgetPicker(
         resources: Resources,
-        packageManager: PackageManager,
         activityLauncher: ActivityResultLauncher<Intent>
     ): Boolean =
         withContext(backgroundDispatcher) {
@@ -196,7 +197,7 @@ constructor(
                 ) {
                     it.providerInfo
                 }
-            getWidgetPickerActivityIntent(resources, packageManager, excludeList)?.let {
+            getWidgetPickerActivityIntent(resources, excludeList)?.let {
                 try {
                     activityLauncher.launch(it)
                     return@withContext true
@@ -209,18 +210,10 @@ constructor(
 
     private fun getWidgetPickerActivityIntent(
         resources: Resources,
-        packageManager: PackageManager,
         excludeList: ArrayList<AppWidgetProviderInfo>
     ): Intent? {
-        val packageName =
-            getLauncherPackageName(packageManager)
-                ?: run {
-                    Log.e(TAG, "Couldn't resolve launcher package name")
-                    return@getWidgetPickerActivityIntent null
-                }
-
         return Intent(Intent.ACTION_PICK).apply {
-            setPackage(packageName)
+            setPackage(launcherPackage)
             putExtra(
                 EXTRA_DESIRED_WIDGET_WIDTH,
                 resources.getDimensionPixelSize(R.dimen.communal_widget_picker_desired_width)
@@ -245,16 +238,6 @@ constructor(
             )
             putParcelableArrayListExtra(EXTRA_ADDED_APP_WIDGETS_KEY, excludeList)
         }
-    }
-
-    private fun getLauncherPackageName(packageManager: PackageManager): String? {
-        return packageManager
-            .resolveActivity(
-                Intent(Intent.ACTION_MAIN).also { it.addCategory(Intent.CATEGORY_HOME) },
-                PackageManager.MATCH_DEFAULT_ONLY
-            )
-            ?.activityInfo
-            ?.packageName
     }
 
     /** Sets whether edit mode is currently open */

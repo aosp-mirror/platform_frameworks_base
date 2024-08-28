@@ -270,11 +270,7 @@ constructor(
 
     private fun onOpenWidgetPicker() {
         lifecycleScope.launch {
-            communalViewModel.onOpenWidgetPicker(
-                resources,
-                packageManager,
-                addWidgetActivityLauncher
-            )
+            communalViewModel.onOpenWidgetPicker(resources, addWidgetActivityLauncher)
         }
     }
 
