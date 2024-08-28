@@ -1616,7 +1616,6 @@ public class NotificationStackScrollLayout
         float translationY;
         float appearFraction = 1.0f;
         boolean appearing = calculateAppearFraction(height) < 1;
-        mAmbientState.setAppearing(appearing);
         if (!appearing) {
             translationY = 0;
             if (mShouldShowShelfOnly) {
