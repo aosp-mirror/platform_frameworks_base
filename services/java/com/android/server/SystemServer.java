@@ -106,7 +106,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
-import com.android.internal.protolog.ProtoLogService;
+import com.android.internal.protolog.ProtoLogConfigurationService;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -256,6 +256,7 @@ import com.android.server.stats.bootstrap.StatsBootstrapAtomService;
 import com.android.server.stats.pull.StatsPullAtomService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.supervision.SupervisionService;
 import com.android.server.systemcaptions.SystemCaptionsManagerService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.testharness.TestHarnessModeService;
@@ -1092,8 +1093,9 @@ public final class SystemServer implements Dumpable {
 
         // Orchestrates some ProtoLogging functionality.
         if (android.tracing.Flags.clientSideProtoLogging()) {
-            t.traceBegin("StartProtoLogService");
-            ServiceManager.addService(Context.PROTOLOG_SERVICE, new ProtoLogService());
+            t.traceBegin("StartProtoLogConfigurationService");
+            ServiceManager.addService(
+                    Context.PROTOLOG_CONFIGURATION_SERVICE, new ProtoLogConfigurationService());
             t.traceEnd();
         }
 
@@ -1596,6 +1598,12 @@ public final class SystemServer implements Dumpable {
                     new RoleServicePlatformHelperImpl(mSystemContext));
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
+
+            if (android.app.supervision.flags.Flags.supervisionApi()) {
+                t.traceBegin("StartSupervisionService");
+                mSystemServiceManager.startService(SupervisionService.Lifecycle.class);
+                t.traceEnd();
+            }
 
             if (!isTv) {
                 t.traceBegin("StartVibratorManagerService");

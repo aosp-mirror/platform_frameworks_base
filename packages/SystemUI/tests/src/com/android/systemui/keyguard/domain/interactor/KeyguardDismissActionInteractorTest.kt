@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
@@ -62,26 +63,19 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val testScope = kosmos.testScope
 
-    private lateinit var dismissInteractorWithDependencies:
-        KeyguardDismissInteractorFactory.WithDependencies
+    private lateinit var dismissInteractor: KeyguardDismissInteractor
     private lateinit var underTest: KeyguardDismissActionInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dismissInteractorWithDependencies =
-            KeyguardDismissInteractorFactory.create(
-                context = context,
-                testScope = testScope,
-                keyguardRepository = keyguardRepository,
-            )
-
+        dismissInteractor = kosmos.keyguardDismissInteractor
         underTest =
             KeyguardDismissActionInteractor(
                 repository = keyguardRepository,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
-                dismissInteractor = dismissInteractorWithDependencies.interactor,
+                dismissInteractor = dismissInteractor,
                 applicationScope = testScope.backgroundScope,
                 sceneInteractor = kosmos.sceneInteractor,
                 deviceEntryInteractor = kosmos.deviceEntryInteractor,
@@ -166,9 +160,7 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                     willAnimateOnLockscreen = true,
                 )
             )
-            dismissInteractorWithDependencies.bouncerRepository.setKeyguardAuthenticatedBiometrics(
-                true
-            )
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(true)
             assertThat(executeDismissAction).isEqualTo(onDismissAction)
         }
 
@@ -307,8 +299,7 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
     @Test
     fun setKeyguardDone() =
         testScope.runTest {
-            val keyguardDoneTiming by
-                collectLastValue(dismissInteractorWithDependencies.interactor.keyguardDone)
+            val keyguardDoneTiming by collectLastValue(dismissInteractor.keyguardDone)
             runCurrent()
 
             underTest.setKeyguardDone(KeyguardDone.LATER)

@@ -40,7 +40,7 @@ import com.android.internal.protolog.IProtoLogClient;
  *
  * {@hide}
  */
-interface IProtoLogService {
+interface IProtoLogConfigurationService {
     interface IRegisterClientArgs {
         String[] getGroups();
         boolean[] getGroupsDefaultLogcatStatus();

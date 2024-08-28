@@ -17,7 +17,6 @@
 package android.app.admin;
 
 import static android.app.admin.flags.Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
@@ -50,7 +49,6 @@ public final class DevicePolicyIdentifiers {
     /**
      * String identifier for {@link DevicePolicyManager#setSecurityLoggingEnabled}.
      */
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     public static final String SECURITY_LOGGING_POLICY = "securityLogging";
 
     /**
@@ -58,7 +56,6 @@ public final class DevicePolicyIdentifiers {
      *
      * @hide
      */
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @SystemApi
     public static final String AUDIT_LOGGING_POLICY = "auditLogging";
 

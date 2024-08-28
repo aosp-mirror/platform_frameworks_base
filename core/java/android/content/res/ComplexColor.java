@@ -18,13 +18,14 @@ package android.content.res;
 
 import android.annotation.ColorInt;
 import android.content.res.Resources.Theme;
-import android.graphics.Color;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 /**
  * Defines an abstract class for the complex color information, like
  * {@link android.content.res.ColorStateList} or {@link android.content.res.GradientColor}
  * @hide
  */
+@RavenwoodKeepWholeClass
 public abstract class ComplexColor {
     private int mChangingConfigurations;
 

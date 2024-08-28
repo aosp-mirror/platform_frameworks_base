@@ -12158,7 +12158,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 opts.dumpProto = true;
             } else if ("--logstats".equals(opt)) {
                 opts.mDumpAllocatorStats = true;
-            } else if ("-h".equals(opt)) {
+            } else if ("-h".equals(opt) || "--help".equals(opt)) {
                 pw.println("meminfo dump options: [-a] [-d] [-c] [-s] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
                 pw.println("  -d: include dalvik details.");
@@ -12168,10 +12168,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  -p: dump also private dirty memory usage.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("  --local: only collect details locally, don't call process.");
+                pw.println("  --logstats: dump native allocator stats to log");
                 pw.println("  --package: interpret process arg as package, dumping all");
                 pw.println("             processes that have loaded that package.");
                 pw.println("  --checkin: dump data for a checkin");
                 pw.println("  --proto: dump data to proto");
+                pw.println("  --logstats: log native allocator statistics.");
+                pw.println("  --unreachable: dump unreachable native memory with libmemunreachable.");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
                 return;

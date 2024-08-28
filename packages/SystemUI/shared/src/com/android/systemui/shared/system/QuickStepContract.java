@@ -342,8 +342,7 @@ public class QuickStepContract {
         // the keyguard)
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
                 || (sysuiStateFlags & SYSUI_STATE_DIALOG_SHOWING) != 0
-                || (sysuiStateFlags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0
-                || (sysuiStateFlags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
+                || (sysuiStateFlags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0) {
             return false;
         }
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {

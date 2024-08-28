@@ -68,7 +68,6 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
@@ -104,6 +103,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
@@ -179,6 +179,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private float mFraction = -1f;
     private boolean mTracking = false;
     private boolean mBouncerShowingOverDream;
+    private int mAttemptsToShowBouncer = 0;
+    private DelayableExecutor mExecutor;
 
     private final PrimaryBouncerExpansionCallback mExpansionCallback =
             new PrimaryBouncerExpansionCallback() {
@@ -315,8 +317,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastScreenOffAnimationPlaying;
     private float mQsExpansion;
 
-    private FeatureFlags mFlags;
-
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
     private boolean mIsBackAnimationEnabled;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
@@ -399,9 +399,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             JavaAdapter javaAdapter,
             Lazy<SceneInteractor> sceneInteractorLazy,
             StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor,
+            @Main DelayableExecutor executor,
             Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy
     ) {
         mContext = context;
+        mExecutor = executor;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mConfigurationController = configurationController;
@@ -711,13 +713,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * {@link #needsFullscreenBouncer()}.
      */
     protected void showBouncerOrKeyguard(boolean hideBouncerWhenShowing, boolean isFalsingReset) {
-        boolean isDozing = mDozing;
-        if (Flags.simPinRaceConditionOnRestart()) {
-            KeyguardState toState = mKeyguardTransitionInteractor.getTransitionState().getValue()
-                    .getTo();
-            isDozing = mDozing || toState == KeyguardState.DOZING || toState == KeyguardState.AOD;
-        }
-        if (needsFullscreenBouncer() && !isDozing) {
+        if (needsFullscreenBouncer() && !mDozing) {
             // The keyguard might be showing (already). So we need to hide it.
             if (!primaryBouncerIsShowing()) {
                 if (SceneContainerFlag.isEnabled()) {
@@ -727,9 +723,22 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 } else {
                     if (Flags.simPinRaceConditionOnRestart()) {
                         if (mPrimaryBouncerInteractor.show(/* isScrimmed= */ true)) {
+                            mAttemptsToShowBouncer = 0;
                             mCentralSurfaces.hideKeyguard();
                         } else {
-                            mCentralSurfaces.showKeyguard();
+                            if (mAttemptsToShowBouncer > 6) {
+                                mAttemptsToShowBouncer = 0;
+                                Log.e(TAG, "Too many failed attempts to show bouncer, showing "
+                                        + "keyguard instead");
+                                mCentralSurfaces.showKeyguard();
+                            } else {
+                                Log.v(TAG, "Failed to show bouncer, attempt #: "
+                                        + mAttemptsToShowBouncer++);
+                                mExecutor.executeDelayed(() ->
+                                        showBouncerOrKeyguard(hideBouncerWhenShowing,
+                                            isFalsingReset),
+                                        500);
+                            }
                         }
                     } else {
                         mCentralSurfaces.hideKeyguard();
@@ -1872,6 +1881,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 mSelectedUserInteractor.getSelectedUserId());
         return mode == KeyguardSecurityModel.SecurityMode.SimPin
                 || mode == KeyguardSecurityModel.SecurityMode.SimPuk;
+    }
+
+    @VisibleForTesting
+    void setAttemptsToShowBouncer(int attempts) {
+        mAttemptsToShowBouncer = attempts;
     }
 
     /**

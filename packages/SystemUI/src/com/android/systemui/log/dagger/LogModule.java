@@ -618,6 +618,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for communal touch-handling logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalTouchLog
+    public static LogBuffer provideCommunalTouchLogBuffer(LogBufferFactory factory) {
+        return factory.create("CommunalTouchLog", 250);
+    }
+
+    /**
      * Provides a {@link TableLogBuffer} for communal-related logs.
      */
     @Provides

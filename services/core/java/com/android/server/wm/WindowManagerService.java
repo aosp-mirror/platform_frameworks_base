@@ -8949,7 +8949,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final ActivityRecord touchedApp = t.getActivityRecord();
         if (touchedApp != null && touchedApp.getTask() != null) {
             final ActivityRecord top = touchedApp.getTask().topRunningActivity();
-            if (top != touchedApp && top.getTaskFragment().getBounds().contains(
+            if (top != null && top != touchedApp && top.getTaskFragment().getBounds().contains(
                     touchedApp.getTaskFragment().getBounds())) {
                 // This is a special case where the pointer-down-outside focus on an Activity that's
                 // entirely occluded by the task top running activity, this is possible if the

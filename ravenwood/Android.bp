@@ -211,6 +211,7 @@ java_library {
     libs: [
         "junit",
         "flag-junit",
+        "framework-annotations-lib",
     ],
     visibility: ["//visibility:public"],
 }

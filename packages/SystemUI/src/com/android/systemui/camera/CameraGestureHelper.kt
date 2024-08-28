@@ -120,7 +120,7 @@ constructor(
                         Intent.FLAG_ACTIVITY_NEW_TASK,
                         null,
                         activityOptions.toBundle(),
-                        selectedUserInteractor.getSelectedUserId(true),
+                        selectedUserInteractor.getSelectedUserId(),
                     )
                 } catch (e: RemoteException) {
                     Log.w("CameraGestureHelper", "Unable to start camera activity", e)

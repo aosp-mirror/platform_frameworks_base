@@ -115,7 +115,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logRemoteUserInteractionStarted(
+    fun logRemoteUserInputStarted(
         reason: String,
     ) {
         logBuffer.log(
@@ -126,7 +126,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logUserInteractionFinished() {
+    fun logUserInputFinished() {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,

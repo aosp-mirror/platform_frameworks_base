@@ -81,6 +81,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 /**
@@ -1261,7 +1262,7 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public final IBinder onBind(Intent intent) {
         if (mDebug) Slog.v(mTag, "onBind() intent = " + intent);
-        mDreamServiceWrapper = new DreamServiceWrapper();
+        mDreamServiceWrapper = new DreamServiceWrapper(new WeakReference<>(this));
         final ComponentName overlayComponent = intent.getParcelableExtra(
                 EXTRA_DREAM_OVERLAY_COMPONENT, ComponentName.class);
 
@@ -1631,7 +1632,8 @@ public class DreamService extends Service implements Window.Callback {
             i.setComponent(mInjector.getDreamActivityComponent());
             i.setPackage(mInjector.getDreamPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-            DreamActivity.setCallback(i, new DreamActivityCallbacks(mDreamToken));
+            DreamActivity.setCallback(i,
+                    new DreamActivityCallbacks(mDreamToken, new WeakReference<>(this)));
             final ServiceInfo serviceInfo = mInjector.getServiceInfo();
             final CharSequence title = fetchDreamLabel(mInjector.getPackageManager(),
                     mInjector.getResources(), serviceInfo, isPreviewMode);
@@ -1845,22 +1847,37 @@ public class DreamService extends Service implements Window.Callback {
      * uses it to control the DreamService. It is also used to receive callbacks from the
      * DreamActivity.
      */
-    final class DreamServiceWrapper extends IDreamService.Stub {
+    static final class DreamServiceWrapper extends IDreamService.Stub {
+        final WeakReference<DreamService> mService;
+
+        DreamServiceWrapper(WeakReference<DreamService> service) {
+            mService = service;
+        }
+
+        private void post(Consumer<DreamService> consumer) {
+            final DreamService service = mService.get();
+
+            if (service == null) {
+                return;
+            }
+
+            service.mHandler.post(() -> consumer.accept(service));
+        }
+
         @Override
         public void attach(final IBinder dreamToken, final boolean canDoze,
                 final boolean isPreviewMode, IRemoteCallback started) {
-            mHandler.post(
-                    () -> DreamService.this.attach(dreamToken, canDoze, isPreviewMode, started));
+            post(dreamService -> dreamService.attach(dreamToken, canDoze, isPreviewMode, started));
         }
 
         @Override
         public void detach() {
-            mHandler.post(DreamService.this::detach);
+            post(DreamService::detach);
         }
 
         @Override
         public void wakeUp() {
-            mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
+            post(dreamService -> dreamService.wakeUp(true /*fromSystem*/));
         }
 
         @Override
@@ -1868,48 +1885,70 @@ public class DreamService extends Service implements Window.Callback {
             if (!dreamHandlesBeingObscured()) {
                 return;
             }
-
-            mHandler.post(DreamService.this::comeToFront);
+            post(DreamService::comeToFront);
         }
+    }
+
+    private void onActivityCreated(DreamActivity activity, IBinder dreamToken) {
+        if (dreamToken != mDreamToken || mFinished) {
+            Slog.d(TAG, "DreamActivity was created after the dream was finished or "
+                    + "a new dream started, finishing DreamActivity");
+            if (!activity.isFinishing()) {
+                activity.finishAndRemoveTask();
+            }
+            return;
+        }
+        if (mActivity != null) {
+            Slog.w(TAG, "A DreamActivity has already been started, "
+                    + "finishing latest DreamActivity");
+            if (!activity.isFinishing()) {
+                activity.finishAndRemoveTask();
+            }
+            return;
+        }
+
+        mActivity = activity;
+        onWindowCreated(activity.getWindow());
+    }
+
+    private void onActivityDestroyed() {
+        mActivity = null;
+        mWindow = null;
+        detach();
     }
 
     /** @hide */
     @VisibleForTesting
-    public final class DreamActivityCallbacks extends Binder {
+    public static final class DreamActivityCallbacks extends Binder {
         private final IBinder mActivityDreamToken;
+        private WeakReference<DreamService> mService;
 
-        DreamActivityCallbacks(IBinder token) {
+        DreamActivityCallbacks(IBinder token, WeakReference<DreamService> service)  {
             mActivityDreamToken = token;
+            mService = service;
         }
 
         /** Callback when the {@link DreamActivity} has been created */
         public void onActivityCreated(DreamActivity activity) {
-            if (mActivityDreamToken != mDreamToken || mFinished) {
-                Slog.d(TAG, "DreamActivity was created after the dream was finished or "
-                        + "a new dream started, finishing DreamActivity");
-                if (!activity.isFinishing()) {
-                    activity.finishAndRemoveTask();
-                }
-                return;
-            }
-            if (mActivity != null) {
-                Slog.w(TAG, "A DreamActivity has already been started, "
-                        + "finishing latest DreamActivity");
-                if (!activity.isFinishing()) {
-                    activity.finishAndRemoveTask();
-                }
+            final DreamService service = mService.get();
+
+            if (service == null) {
                 return;
             }
 
-            mActivity = activity;
-            onWindowCreated(activity.getWindow());
+            service.onActivityCreated(activity, mActivityDreamToken);
         }
 
         /** Callback when the {@link DreamActivity} has been destroyed */
         public void onActivityDestroyed() {
-            mActivity = null;
-            mWindow = null;
-            detach();
+            final DreamService service = mService.get();
+
+            if (service == null) {
+                return;
+            }
+
+            service.onActivityDestroyed();
+            mService = null;
         }
     }
 

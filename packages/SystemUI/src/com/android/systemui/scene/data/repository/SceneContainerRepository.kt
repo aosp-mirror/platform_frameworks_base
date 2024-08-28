@@ -56,7 +56,10 @@ constructor(
      *
      * For more information see the logic in `SceneInteractor` that mutates this.
      */
-    val isRemoteUserInteractionOngoing = MutableStateFlow(false)
+    val isRemoteUserInputOngoing = MutableStateFlow(false)
+
+    /** Whether there's ongoing user input on the scene container Composable hierarchy */
+    val isSceneContainerUserInputOngoing = MutableStateFlow(false)
 
     private val defaultTransitionState = ObservableTransitionState.Idle(config.initialSceneKey)
     private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
