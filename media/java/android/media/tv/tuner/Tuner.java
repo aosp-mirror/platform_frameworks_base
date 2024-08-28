@@ -2533,16 +2533,19 @@ public class Tuner implements AutoCloseable  {
     /**
      * Request a frontend by frontend type.
      *
-     * <p> This API is used if the applications want to select a frontend with desired type when
-     * there are multiple frontends of the same type is there before {@link tune}. The applied
-     * frontend will be one of the not in-use frontend. If all frontends are in-use, this API will
-     * reclaim and apply the frontend owned by the lowest priority client if current client has
-     * higher priority. Otherwise, this API will not apply any frontend and return
-     * {@link #RESULT_UNAVAILABLE}.
+     * <p> This API is used (before {@link #tune(FrontendSettings)}) if the applications want to
+     * select a frontend of a particular type for {@link #tune(FrontendSettings)} when there are
+     * multiple frontends of the same type present, allowing the system to select which one is
+     * applied. The applied frontend will be one of the not-in-use frontends. If all frontends are
+     * in-use, this API will reclaim and apply the frontend owned by the lowest priority client if
+     * current client has higher priority. Otherwise, this API will not apply any frontend and
+     * return {@link #RESULT_UNAVAILABLE}.
      *
      * @param desiredFrontendType the Type of the desired fronted. Should be one of
      *                            {@link android.media.tv.tuner.frontend.FrontendSettings.Type}
      * @return result status of open operation.
+     * @see #applyFrontend(FrontendInfo)
+     * @see #tune(FrontendSettings)
      */
     @Result
     @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
