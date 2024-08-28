@@ -360,6 +360,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         }
 
     @Test
+    @DisableSceneContainer
     fun alpha_transitionBetweenHubAndDream_isZero() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha(viewState))
