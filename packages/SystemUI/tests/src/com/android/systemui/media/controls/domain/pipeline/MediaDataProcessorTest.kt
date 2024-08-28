@@ -61,7 +61,6 @@ import com.android.systemui.flags.Flags.MEDIA_REMOTE_RESUME
 import com.android.systemui.flags.Flags.MEDIA_RESUME_PROGRESS
 import com.android.systemui.flags.Flags.MEDIA_RETAIN_RECOMMENDATIONS
 import com.android.systemui.flags.Flags.MEDIA_RETAIN_SESSIONS
-import com.android.systemui.flags.Flags.MEDIA_SESSION_ACTIONS
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -337,7 +336,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(validRecommendationList)
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(SMARTSPACE_CREATION_TIME)
         whenever(mediaSmartspaceTarget.expiryTimeMillis).thenReturn(SMARTSPACE_EXPIRY_TIME)
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, false)
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, false)
         fakeFeatureFlags.set(MEDIA_RESUME_PROGRESS, false)
         fakeFeatureFlags.set(MEDIA_REMOTE_RESUME, false)
@@ -1679,7 +1677,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testPlaybackActions_noState_usesNotification() {
         val desc = "Notification Action"
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         whenever(controller.playbackState).thenReturn(null)
 
         val notifWithAction =
@@ -1713,7 +1710,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testPlaybackActions_hasPrevNext() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         val stateActions =
             PlaybackState.ACTION_PLAY or
                 PlaybackState.ACTION_SKIP_TO_PREVIOUS or
@@ -1757,7 +1753,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testPlaybackActions_noPrevNext_usesCustom() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4", "custom 5")
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         customDesc.forEach {
@@ -1789,7 +1784,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun testPlaybackActions_connecting() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder =
             PlaybackState.Builder()
@@ -1810,7 +1804,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
     fun postWithPlaybackActions_drawablesReused() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
         whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
         val stateActions =
@@ -1844,7 +1837,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_DRAWABLES_REUSE)
     fun postWithPlaybackActions_drawablesNotReused() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
         whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
         val stateActions =
@@ -1878,7 +1870,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testPlaybackActions_reservedSpace() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         val stateActions = PlaybackState.ACTION_PLAY
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         customDesc.forEach {
@@ -1916,7 +1907,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun testPlaybackActions_playPause_hasButton() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         val stateActions = PlaybackState.ACTION_PLAY_PAUSE
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         whenever(controller.playbackState).thenReturn(stateBuilder.build())
@@ -2015,7 +2005,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun testPlaybackState_PauseWhenFlagTrue_keyExists_callsListener() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         val state = PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 1f).build()
         whenever(controller.playbackState).thenReturn(state)
 
@@ -2236,7 +2225,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testRetain_sessionPlayer_notifRemoved_doesNotChange() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         addPlaybackStateAction()
 
         // When a media control with PlaybackState actions is added, times out,
@@ -2256,7 +2244,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testRetain_sessionPlayer_sessionDestroyed_setToResume() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         addPlaybackStateAction()
 
         // When a media control with PlaybackState actions is added, times out,
@@ -2290,7 +2277,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testRetain_sessionPlayer_destroyedWhileActive_noResume_fullyRemoved() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         addPlaybackStateAction()
 
         // When a media control using session actions is added, and then the session is destroyed
@@ -2310,7 +2296,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testRetain_sessionPlayer_canResume_destroyedWhileActive_setToResume() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         addPlaybackStateAction()
 
         // When a media control using session actions and that does allow resumption is added,
@@ -2343,7 +2328,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun testSessionPlayer_sessionDestroyed_noResume_fullyRemoved() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         addPlaybackStateAction()
 
         // When a media control with PlaybackState actions is added, times out,
@@ -2370,7 +2354,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun testSessionPlayer_destroyedWhileActive_noResume_fullyRemoved() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         addPlaybackStateAction()
 
         // When a media control using session actions is added, and then the session is destroyed
@@ -2389,7 +2372,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun testSessionPlayer_canResume_destroyedWhileActive_setToResume() {
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
         addPlaybackStateAction()
 
         // When a media control using session actions and that does allow resumption is added,
@@ -2423,7 +2405,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun testSessionDestroyed_noNotificationKey_stillRemoved() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
-        fakeFeatureFlags.set(MEDIA_SESSION_ACTIONS, true)
 
         // When a notiifcation is added and then removed before it is fully processed
         mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)

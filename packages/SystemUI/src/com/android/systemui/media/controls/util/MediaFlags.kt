@@ -29,9 +29,8 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClass
      * Check whether media control actions should be based on PlaybackState instead of notification
      */
     fun areMediaSessionActionsEnabled(packageName: String, user: UserHandle): Boolean {
-        val enabled = StatusBarManager.useMediaSessionActionsForApp(packageName, user)
         // Allow global override with flag
-        return enabled || featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS)
+        return StatusBarManager.useMediaSessionActionsForApp(packageName, user)
     }
 
     /**
