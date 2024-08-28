@@ -25,9 +25,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.IntSize
-import com.android.compose.animation.scene.content.Content
-import com.android.compose.animation.scene.content.Overlay
-import com.android.compose.animation.scene.content.Scene
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import kotlin.math.absoluteValue
@@ -37,30 +34,95 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 internal fun createSwipeAnimation(
-    layoutImpl: SceneTransitionLayoutImpl,
+    layoutState: MutableSceneTransitionLayoutStateImpl,
+    animationScope: CoroutineScope,
     result: UserActionResult,
     isUpOrLeft: Boolean,
     orientation: Orientation,
-    distance: Float = DistanceUnspecified,
+    distance: Float,
 ): SwipeAnimation<*> {
-    fun <T : Content> swipeAnimation(fromContent: T, toContent: T): SwipeAnimation<T> {
+    return createSwipeAnimation(
+        layoutState,
+        animationScope,
+        result,
+        isUpOrLeft,
+        orientation,
+        distance = { distance },
+        contentForUserActions = {
+            error("Computing contentForUserActions requires a SceneTransitionLayoutImpl")
+        },
+    )
+}
+
+internal fun createSwipeAnimation(
+    layoutImpl: SceneTransitionLayoutImpl,
+    animationScope: CoroutineScope,
+    result: UserActionResult,
+    isUpOrLeft: Boolean,
+    orientation: Orientation,
+    distance: Float = DistanceUnspecified
+): SwipeAnimation<*> {
+    var lastDistance = distance
+
+    fun distance(animation: SwipeAnimation<*>): Float {
+        if (lastDistance != DistanceUnspecified) {
+            return lastDistance
+        }
+
+        val absoluteDistance =
+            with(animation.contentTransition.transformationSpec.distance ?: DefaultSwipeDistance) {
+                layoutImpl.userActionDistanceScope.absoluteDistance(
+                    layoutImpl.content(animation.fromContent).targetSize,
+                    orientation,
+                )
+            }
+
+        if (absoluteDistance <= 0f) {
+            return DistanceUnspecified
+        }
+
+        val distance = if (isUpOrLeft) -absoluteDistance else absoluteDistance
+        lastDistance = distance
+        return distance
+    }
+
+    return createSwipeAnimation(
+        layoutImpl.state,
+        animationScope,
+        result,
+        isUpOrLeft,
+        orientation,
+        distance = ::distance,
+        contentForUserActions = { layoutImpl.contentForUserActions().key },
+    )
+}
+
+private fun createSwipeAnimation(
+    layoutState: MutableSceneTransitionLayoutStateImpl,
+    animationScope: CoroutineScope,
+    result: UserActionResult,
+    isUpOrLeft: Boolean,
+    orientation: Orientation,
+    distance: (SwipeAnimation<*>) -> Float,
+    contentForUserActions: () -> ContentKey,
+): SwipeAnimation<*> {
+    fun <T : ContentKey> swipeAnimation(fromContent: T, toContent: T): SwipeAnimation<T> {
         return SwipeAnimation(
-            layoutImpl = layoutImpl,
+            layoutState = layoutState,
+            animationScope = animationScope,
             fromContent = fromContent,
             toContent = toContent,
-            userActionDistanceScope = layoutImpl.userActionDistanceScope,
             orientation = orientation,
             isUpOrLeft = isUpOrLeft,
             requiresFullDistanceSwipe = result.requiresFullDistanceSwipe,
-            lastDistance = distance,
+            distance = distance,
         )
     }
 
-    val layoutState = layoutImpl.state
     return when (result) {
         is UserActionResult.ChangeScene -> {
-            val fromScene = layoutImpl.scene(layoutState.currentScene)
-            val toScene = layoutImpl.scene(result.toScene)
+            val fromScene = layoutState.currentScene
+            val toScene = result.toScene
             ChangeSceneSwipeTransition(
                     layoutState = layoutState,
                     swipeAnimation = swipeAnimation(fromContent = fromScene, toContent = toScene),
@@ -70,12 +132,12 @@ internal fun createSwipeAnimation(
                 .swipeAnimation
         }
         is UserActionResult.ShowOverlay -> {
-            val fromScene = layoutImpl.scene(layoutState.currentScene)
-            val overlay = layoutImpl.overlay(result.overlay)
+            val fromScene = layoutState.currentScene
+            val overlay = result.overlay
             ShowOrHideOverlaySwipeTransition(
                     layoutState = layoutState,
-                    _fromOrToScene = fromScene,
-                    _overlay = overlay,
+                    fromOrToScene = fromScene,
+                    overlay = overlay,
                     swipeAnimation = swipeAnimation(fromContent = fromScene, toContent = overlay),
                     key = result.transitionKey,
                     replacedTransition = null,
@@ -83,12 +145,12 @@ internal fun createSwipeAnimation(
                 .swipeAnimation
         }
         is UserActionResult.HideOverlay -> {
-            val toScene = layoutImpl.scene(layoutState.currentScene)
-            val overlay = layoutImpl.overlay(result.overlay)
+            val toScene = layoutState.currentScene
+            val overlay = result.overlay
             ShowOrHideOverlaySwipeTransition(
                     layoutState = layoutState,
-                    _fromOrToScene = toScene,
-                    _overlay = overlay,
+                    fromOrToScene = toScene,
+                    overlay = overlay,
                     swipeAnimation = swipeAnimation(fromContent = overlay, toContent = toScene),
                     key = result.transitionKey,
                     replacedTransition = null,
@@ -96,8 +158,14 @@ internal fun createSwipeAnimation(
                 .swipeAnimation
         }
         is UserActionResult.ReplaceByOverlay -> {
-            val fromOverlay = layoutImpl.contentForUserActions() as Overlay
-            val toOverlay = layoutImpl.overlay(result.overlay)
+            val fromOverlay =
+                when (val contentForUserActions = contentForUserActions()) {
+                    is SceneKey ->
+                        error("ReplaceByOverlay can only be called when an overlay is shown")
+                    is OverlayKey -> contentForUserActions
+                }
+
+            val toOverlay = result.overlay
             ReplaceOverlaySwipeTransition(
                     layoutState = layoutState,
                     swipeAnimation =
@@ -127,15 +195,15 @@ internal fun createSwipeAnimation(old: SwipeAnimation<*>): SwipeAnimation<*> {
 }
 
 /** A helper class that contains the main logic for swipe transitions. */
-internal class SwipeAnimation<T : Content>(
-    val layoutImpl: SceneTransitionLayoutImpl,
+internal class SwipeAnimation<T : ContentKey>(
+    val layoutState: MutableSceneTransitionLayoutStateImpl,
+    val animationScope: CoroutineScope,
     val fromContent: T,
     val toContent: T,
-    private val userActionDistanceScope: UserActionDistanceScope,
     override val orientation: Orientation,
     override val isUpOrLeft: Boolean,
     val requiresFullDistanceSwipe: Boolean,
-    private var lastDistance: Float = DistanceUnspecified,
+    private val distance: (SwipeAnimation<T>) -> Float,
     currentContent: T = fromContent,
     dragOffset: Float = 0f,
 ) : TransitionState.HasOverscrollProperties {
@@ -200,17 +268,8 @@ internal class SwipeAnimation<T : Content>(
     val isUserInputOngoing: Boolean
         get() = offsetAnimation == null
 
-    override val overscrollScope: OverscrollScope =
-        object : OverscrollScope {
-            override val density: Float
-                get() = layoutImpl.density.density
-
-            override val fontScale: Float
-                get() = layoutImpl.density.fontScale
-
-            override val absoluteDistance: Float
-                get() = distance().absoluteValue
-        }
+    override val absoluteDistance: Float
+        get() = distance().absoluteValue
 
     /** Whether [finish] was called on this animation. */
     var isFinishing = false
@@ -219,14 +278,14 @@ internal class SwipeAnimation<T : Content>(
     constructor(
         other: SwipeAnimation<T>
     ) : this(
-        layoutImpl = other.layoutImpl,
+        layoutState = other.layoutState,
+        animationScope = other.animationScope,
         fromContent = other.fromContent,
         toContent = other.toContent,
-        userActionDistanceScope = other.userActionDistanceScope,
         orientation = other.orientation,
         isUpOrLeft = other.isUpOrLeft,
         requiresFullDistanceSwipe = other.requiresFullDistanceSwipe,
-        lastDistance = other.lastDistance,
+        distance = other.distance,
         currentContent = other.currentContent,
         dragOffset = other.dragOffset,
     )
@@ -239,27 +298,7 @@ internal class SwipeAnimation<T : Content>(
      * transition when the distance depends on the size or position of an element that is composed
      * in the content we are going to.
      */
-    fun distance(): Float {
-        if (lastDistance != DistanceUnspecified) {
-            return lastDistance
-        }
-
-        val absoluteDistance =
-            with(contentTransition.transformationSpec.distance ?: DefaultSwipeDistance) {
-                userActionDistanceScope.absoluteDistance(
-                    fromContent.targetSize,
-                    orientation,
-                )
-            }
-
-        if (absoluteDistance <= 0f) {
-            return DistanceUnspecified
-        }
-
-        val distance = if (isUpOrLeft) -absoluteDistance else absoluteDistance
-        lastDistance = distance
-        return distance
-    }
+    fun distance(): Float = distance(this)
 
     /** Ends any previous [offsetAnimation] and runs the new [animation]. */
     private fun startOffsetAnimation(animation: () -> OffsetAnimation): OffsetAnimation {
@@ -279,8 +318,6 @@ internal class SwipeAnimation<T : Content>(
     }
 
     fun animateOffset(
-        // TODO(b/317063114) The CoroutineScope should be removed.
-        coroutineScope: CoroutineScope,
         initialVelocity: Float,
         targetContent: T,
         spec: SpringSpec<Float>? = null,
@@ -329,7 +366,7 @@ internal class SwipeAnimation<T : Content>(
             val startedWhenOvercrollingTargetContent =
                 if (targetContent == fromContent) initialProgress < 0f else initialProgress > 1f
             val job =
-                coroutineScope
+                animationScope
                     // Important: We start atomically to make sure that we start the coroutine even
                     // if it is cancelled right after it is launched, so that snapToContent() is
                     // correctly called. Otherwise, this transition will never be stopped and we
@@ -347,7 +384,7 @@ internal class SwipeAnimation<T : Content>(
                             val swipeSpec =
                                 spec
                                     ?: contentTransition.transformationSpec.swipeSpec
-                                    ?: layoutImpl.state.transitions.defaultSwipeSpec
+                                    ?: layoutState.transitions.defaultSwipeSpec
                             animatable.animateTo(
                                 targetValue = targetOffset,
                                 animationSpec = swipeSpec,
@@ -370,7 +407,7 @@ internal class SwipeAnimation<T : Content>(
                                         }
 
                                     if (isBouncing) {
-                                        bouncingContent = targetContent.key
+                                        bouncingContent = targetContent
 
                                         // Immediately stop this transition if we are bouncing on a
                                         // content that does not bounce.
@@ -389,20 +426,19 @@ internal class SwipeAnimation<T : Content>(
         }
     }
 
-    private fun canChangeContent(targetContent: Content): Boolean {
-        val layoutState = layoutImpl.state
+    private fun canChangeContent(targetContent: ContentKey): Boolean {
         return when (val transition = contentTransition) {
             is TransitionState.Transition.ChangeScene ->
-                layoutState.canChangeScene(targetContent.key as SceneKey)
+                layoutState.canChangeScene(targetContent as SceneKey)
             is TransitionState.Transition.ShowOrHideOverlay -> {
-                if (targetContent.key == transition.overlay) {
+                if (targetContent == transition.overlay) {
                     layoutState.canShowOverlay(transition.overlay)
                 } else {
                     layoutState.canHideOverlay(transition.overlay)
                 }
             }
             is TransitionState.Transition.ReplaceOverlay -> {
-                val to = targetContent.key as OverlayKey
+                val to = targetContent as OverlayKey
                 val from =
                     if (to == transition.toOverlay) transition.fromOverlay else transition.toOverlay
                 layoutState.canReplaceOverlay(from, to)
@@ -413,7 +449,7 @@ internal class SwipeAnimation<T : Content>(
     private fun snapToContent(content: T) {
         cancelOffsetAnimation()
         check(currentContent == content)
-        layoutImpl.state.finishTransition(contentTransition)
+        layoutState.finishTransition(contentTransition)
     }
 
     fun finish(): Job {
@@ -426,12 +462,7 @@ internal class SwipeAnimation<T : Content>(
         }
 
         // Animate to the current content.
-        val animation =
-            animateOffset(
-                coroutineScope = layoutImpl.coroutineScope,
-                initialVelocity = 0f,
-                targetContent = currentContent,
-            )
+        val animation = animateOffset(initialVelocity = 0f, targetContent = currentContent)
         check(offsetAnimation == animation)
         return animation.job
     }
@@ -459,13 +490,13 @@ private object DefaultSwipeDistance : UserActionDistance {
 
 private class ChangeSceneSwipeTransition(
     val layoutState: MutableSceneTransitionLayoutStateImpl,
-    val swipeAnimation: SwipeAnimation<Scene>,
+    val swipeAnimation: SwipeAnimation<SceneKey>,
     override val key: TransitionKey?,
     replacedTransition: ChangeSceneSwipeTransition?,
 ) :
     TransitionState.Transition.ChangeScene(
-        swipeAnimation.fromContent.key,
-        swipeAnimation.toContent.key,
+        swipeAnimation.fromContent,
+        swipeAnimation.toContent,
         replacedTransition,
     ),
     TransitionState.HasOverscrollProperties by swipeAnimation {
@@ -484,7 +515,7 @@ private class ChangeSceneSwipeTransition(
     }
 
     override val currentScene: SceneKey
-        get() = swipeAnimation.currentContent.key
+        get() = swipeAnimation.currentContent
 
     override val progress: Float
         get() = swipeAnimation.progress
@@ -511,17 +542,17 @@ private class ChangeSceneSwipeTransition(
 
 private class ShowOrHideOverlaySwipeTransition(
     val layoutState: MutableSceneTransitionLayoutStateImpl,
-    val swipeAnimation: SwipeAnimation<Content>,
-    val _overlay: Overlay,
-    val _fromOrToScene: Scene,
+    val swipeAnimation: SwipeAnimation<ContentKey>,
+    overlay: OverlayKey,
+    fromOrToScene: SceneKey,
     override val key: TransitionKey?,
     replacedTransition: ShowOrHideOverlaySwipeTransition?,
 ) :
     TransitionState.Transition.ShowOrHideOverlay(
-        _overlay.key,
-        _fromOrToScene.key,
-        swipeAnimation.fromContent.key,
-        swipeAnimation.toContent.key,
+        overlay,
+        fromOrToScene,
+        swipeAnimation.fromContent,
+        swipeAnimation.toContent,
         replacedTransition,
     ),
     TransitionState.HasOverscrollProperties by swipeAnimation {
@@ -530,8 +561,8 @@ private class ShowOrHideOverlaySwipeTransition(
     ) : this(
         layoutState = other.layoutState,
         swipeAnimation = SwipeAnimation(other.swipeAnimation),
-        _overlay = other._overlay,
-        _fromOrToScene = other._fromOrToScene,
+        overlay = other.overlay,
+        fromOrToScene = other.fromOrToScene,
         key = other.key,
         replacedTransition = other,
     )
@@ -541,7 +572,7 @@ private class ShowOrHideOverlaySwipeTransition(
     }
 
     override val isEffectivelyShown: Boolean
-        get() = swipeAnimation.currentContent == _overlay
+        get() = swipeAnimation.currentContent == overlay
 
     override val progress: Float
         get() = swipeAnimation.progress
@@ -568,13 +599,13 @@ private class ShowOrHideOverlaySwipeTransition(
 
 private class ReplaceOverlaySwipeTransition(
     val layoutState: MutableSceneTransitionLayoutStateImpl,
-    val swipeAnimation: SwipeAnimation<Overlay>,
+    val swipeAnimation: SwipeAnimation<OverlayKey>,
     override val key: TransitionKey?,
     replacedTransition: ReplaceOverlaySwipeTransition?,
 ) :
     TransitionState.Transition.ReplaceOverlay(
-        swipeAnimation.fromContent.key,
-        swipeAnimation.toContent.key,
+        swipeAnimation.fromContent,
+        swipeAnimation.toContent,
         replacedTransition,
     ),
     TransitionState.HasOverscrollProperties by swipeAnimation {
@@ -592,7 +623,7 @@ private class ReplaceOverlaySwipeTransition(
     }
 
     override val effectivelyShownOverlay: OverlayKey
-        get() = swipeAnimation.currentContent.key
+        get() = swipeAnimation.currentContent
 
     override val progress: Float
         get() = swipeAnimation.progress

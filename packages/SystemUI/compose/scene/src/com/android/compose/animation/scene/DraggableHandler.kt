@@ -109,7 +109,7 @@ internal class DraggableHandlerImpl(
         // Only intercept the current transition if one of the 2 swipes results is also a transition
         // between the same pair of contents.
         val swipes = computeSwipes(startedPosition, pointersDown = 1)
-        val fromContent = swipeAnimation.currentContent
+        val fromContent = layoutImpl.content(swipeAnimation.currentContent)
         val (upOrLeft, downOrRight) = swipes.computeSwipesResults(fromContent)
         val currentScene = layoutImpl.state.currentScene
         val contentTransition = swipeAnimation.contentTransition
@@ -145,7 +145,9 @@ internal class DraggableHandlerImpl(
             // We need to recompute the swipe results since this is a new gesture, and the
             // fromScene.userActions may have changed.
             val swipes = oldDragController.swipes
-            swipes.updateSwipesResults(fromContent = oldSwipeAnimation.fromContent)
+            swipes.updateSwipesResults(
+                fromContent = layoutImpl.content(oldSwipeAnimation.fromContent)
+            )
 
             // A new gesture should always create a new SwipeAnimation. This way there cannot be
             // different gestures controlling the same transition.
@@ -155,8 +157,10 @@ internal class DraggableHandlerImpl(
 
         val swipes = computeSwipes(startedPosition, pointersDown)
         val fromContent = layoutImpl.contentForUserActions()
+
+        swipes.updateSwipesResults(fromContent)
         val result =
-            swipes.findUserActionResult(fromContent, overSlop, updateSwipesResults = true)
+            swipes.findUserActionResult(overSlop)
                 // As we were unable to locate a valid target scene, the initial SwipeAnimation
                 // cannot be defined. Consequently, a simple NoOp Controller will be returned.
                 ?: return NoOpDragController
@@ -188,7 +192,13 @@ internal class DraggableHandlerImpl(
                 else -> error("Unknown result $result ($upOrLeftResult $downOrRightResult)")
             }
 
-        return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation)
+        return createSwipeAnimation(
+            layoutImpl,
+            layoutImpl.coroutineScope,
+            result,
+            isUpOrLeft,
+            orientation
+        )
     }
 
     private fun computeSwipes(startedPosition: Offset?, pointersDown: Int): Swipes {
@@ -291,7 +301,7 @@ private class DragControllerImpl(
         return onDrag(delta, swipeAnimation)
     }
 
-    private fun <T : Content> onDrag(delta: Float, swipeAnimation: SwipeAnimation<T>): Float {
+    private fun <T : ContentKey> onDrag(delta: Float, swipeAnimation: SwipeAnimation<T>): Float {
         if (delta == 0f || !isDrivingTransition || swipeAnimation.isFinishing) {
             return 0f
         }
@@ -304,12 +314,12 @@ private class DragControllerImpl(
         fun hasReachedToSceneUpOrLeft() =
             distance < 0 &&
                 desiredOffset <= distance &&
-                swipes.upOrLeftResult?.toContent(layoutState.currentScene) == toContent.key
+                swipes.upOrLeftResult?.toContent(layoutState.currentScene) == toContent
 
         fun hasReachedToSceneDownOrRight() =
             distance > 0 &&
                 desiredOffset >= distance &&
-                swipes.downOrRightResult?.toContent(layoutState.currentScene) == toContent.key
+                swipes.downOrRightResult?.toContent(layoutState.currentScene) == toContent
 
         // Considering accelerated swipe: Change fromContent in the case where the user quickly
         // swiped multiple times in the same direction to accelerate the transition from A => B then
@@ -321,7 +331,7 @@ private class DragControllerImpl(
             swipeAnimation.currentContent == toContent &&
                 (hasReachedToSceneUpOrLeft() || hasReachedToSceneDownOrRight())
 
-        val fromContent: Content
+        val fromContent: ContentKey
         val currentTransitionOffset: Float
         val newOffset: Float
         val consumedDelta: Float
@@ -357,12 +367,10 @@ private class DragControllerImpl(
 
         swipeAnimation.dragOffset = currentTransitionOffset
 
-        val result =
-            swipes.findUserActionResult(
-                fromContent = fromContent,
-                directionOffset = newOffset,
-                updateSwipesResults = hasReachedToContent
-            )
+        if (hasReachedToContent) {
+            swipes.updateSwipesResults(draggableHandler.layoutImpl.content(fromContent))
+        }
+        val result = swipes.findUserActionResult(directionOffset = newOffset)
 
         if (result == null) {
             onStop(velocity = delta, canChangeContent = true)
@@ -371,7 +379,7 @@ private class DragControllerImpl(
 
         val needNewTransition =
             hasReachedToContent ||
-                result.toContent(layoutState.currentScene) != swipeAnimation.toContent.key ||
+                result.toContent(layoutState.currentScene) != swipeAnimation.toContent ||
                 result.transitionKey != swipeAnimation.contentTransition.key
 
         if (needNewTransition) {
@@ -390,7 +398,7 @@ private class DragControllerImpl(
         return onStop(velocity, canChangeContent, swipeAnimation)
     }
 
-    private fun <T : Content> onStop(
+    private fun <T : ContentKey> onStop(
         velocity: Float,
         canChangeContent: Boolean,
 
@@ -407,7 +415,6 @@ private class DragControllerImpl(
 
         fun animateTo(targetContent: T) {
             swipeAnimation.animateOffset(
-                coroutineScope = draggableHandler.coroutineScope,
                 initialVelocity = velocity,
                 targetContent = targetContent,
             )
@@ -518,6 +525,14 @@ internal class Swipes(
         return upOrLeftResult to downOrRightResult
     }
 
+    /**
+     * Update the swipes results.
+     *
+     * Usually we don't want to update them while doing a drag, because this could change the target
+     * content (jump cutting) to a different content, when some system state changed the targets the
+     * background. However, an update is needed any time we calculate the targets for a new
+     * fromContent.
+     */
     fun updateSwipesResults(fromContent: Content) {
         val (upOrLeftResult, downOrRightResult) = computeSwipesResults(fromContent)
 
@@ -526,31 +541,17 @@ internal class Swipes(
     }
 
     /**
-     * Returns the [UserActionResult] from [fromContent] in the direction of [directionOffset].
+     * Returns the [UserActionResult] in the direction of [directionOffset].
      *
-     * @param fromContent the content from which we look for the target
      * @param directionOffset signed float that indicates the direction. Positive is down or right
      *   negative is up or left.
-     * @param updateSwipesResults whether the swipe results should be updated to the current values
-     *   held in the user actions map. Usually we don't want to update them while doing a drag,
-     *   because this could change the target content (jump cutting) to a different content, when
-     *   some system state changed the targets the background. However, an update is needed any time
-     *   we calculate the targets for a new fromContent.
      * @return null when there are no targets in either direction. If one direction is null and you
      *   drag into the null direction this function will return the opposite direction, assuming
      *   that the users intention is to start the drag into the other direction eventually. If
      *   [directionOffset] is 0f and both direction are available, it will default to
      *   [upOrLeftResult].
      */
-    fun findUserActionResult(
-        fromContent: Content,
-        directionOffset: Float,
-        updateSwipesResults: Boolean,
-    ): UserActionResult? {
-        if (updateSwipesResults) {
-            updateSwipesResults(fromContent)
-        }
-
+    fun findUserActionResult(directionOffset: Float): UserActionResult? {
         return when {
             upOrLeftResult == null && downOrRightResult == null -> null
             (directionOffset < 0f && upOrLeftResult != null) || downOrRightResult == null ->

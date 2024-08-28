@@ -21,7 +21,6 @@ import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
-import com.android.compose.animation.scene.content.Content
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -43,6 +42,7 @@ internal fun PredictiveBackHandler(
         val animation =
             createSwipeAnimation(
                 layoutImpl,
+                layoutImpl.coroutineScope,
                 result,
                 isUpOrLeft = false,
                 // Note that the orientation does not matter here given that it's only used to
@@ -55,7 +55,7 @@ internal fun PredictiveBackHandler(
     }
 }
 
-private suspend fun <T : Content> animate(
+private suspend fun <T : ContentKey> animate(
     layoutImpl: SceneTransitionLayoutImpl,
     animation: SwipeAnimation<T>,
     progress: Flow<BackEventCompat>,
@@ -68,7 +68,6 @@ private suspend fun <T : Content> animate(
         }
 
         animation.animateOffset(
-            layoutImpl.coroutineScope,
             initialVelocity = 0f,
             targetContent = targetContent,
 

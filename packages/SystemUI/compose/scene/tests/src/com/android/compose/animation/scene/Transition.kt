@@ -69,12 +69,7 @@ fun transition(
         override val isUpOrLeft: Boolean = isUpOrLeft
         override val bouncingContent: ContentKey? = bouncingContent
         override val orientation: Orientation = orientation
-        override val overscrollScope: OverscrollScope =
-            object : OverscrollScope {
-                override val density: Float = 1f
-                override val fontScale: Float = 1f
-                override val absoluteDistance = 0f
-            }
+        override val absoluteDistance = 0f
 
         override fun finish(): Job {
             val onFinish =
