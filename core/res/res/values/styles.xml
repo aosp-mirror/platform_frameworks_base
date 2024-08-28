@@ -1535,7 +1535,7 @@ please see styles_device_defaults.xml.
     <!-- @hide -->
     <style name="PointerIconVectorStyleStrokeBlack">
         <item name="pointerIconVectorStroke">@color/black</item>
-        <item name="pointerIconVectorStrokeInverse">@color/white</item>
+        <item name="pointerIconVectorStrokeInverse">@color/black</item>
     </style>
 
     <!-- @hide -->
