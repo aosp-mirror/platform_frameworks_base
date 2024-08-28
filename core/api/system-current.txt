@@ -1422,7 +1422,7 @@ package android.app.admin {
     field public static final int STATUS_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
     field public static final int STATUS_HAS_DEVICE_OWNER = 1; // 0x1
     field public static final int STATUS_HAS_PAIRED = 8; // 0x8
-    field @FlaggedApi("android.app.admin.flags.headless_device_owner_single_user_enabled") public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17; // 0x11
+    field public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17; // 0x11
     field public static final int STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED = 16; // 0x10
     field public static final int STATUS_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
     field public static final int STATUS_NONSYSTEM_USER_EXISTS = 5; // 0x5
@@ -3694,9 +3694,11 @@ package android.companion.virtual.sensor {
     method public int getMinDelay();
     method @NonNull public String getName();
     method public float getPower();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") public int getReportingMode();
     method public float getResolution();
     method public int getType();
     method @Nullable public String getVendor();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") public boolean isWakeUpSensor();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.sensor.VirtualSensorConfig> CREATOR;
   }
@@ -3710,8 +3712,10 @@ package android.companion.virtual.sensor {
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setMaximumRange(float);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setMinDelay(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setPower(float);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setReportingMode(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setResolution(float);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setVendor(@Nullable String);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setWakeUpSensor(boolean);
   }
 
   public interface VirtualSensorDirectChannelCallback {
@@ -11156,6 +11160,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener) throws java.io.IOException;
     method @Deprecated @RequiresPermission(android.Manifest.permission.RECOVERY) public static void rebootAndApply(@NonNull android.content.Context, @NonNull String, @NonNull String) throws java.io.IOException;
     method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static int rebootAndApply(@NonNull android.content.Context, @NonNull String, boolean) throws java.io.IOException;
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @RequiresPermission(android.Manifest.permission.RECOVERY) public static void rebootPromptAndWipeUserData(@NonNull android.content.Context, @NonNull String) throws java.io.IOException;
     method @RequiresPermission(allOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootWipeAb(android.content.Context, java.io.File, String) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void scheduleUpdateOnBoot(android.content.Context, java.io.File) throws java.io.IOException;
     method @Deprecated public static boolean verifyPackageCompatibility(java.io.File) throws java.io.IOException;

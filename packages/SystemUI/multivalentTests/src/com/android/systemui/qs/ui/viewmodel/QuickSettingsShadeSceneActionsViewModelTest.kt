@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -75,7 +76,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Down)).isNull()
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -88,7 +90,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             lockDevice()
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
@@ -100,7 +103,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             lockDevice()
             unlockDevice()
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Down)).isNull()
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -113,7 +117,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
 
-            assertThat(actions?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Up)).isNull()
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -127,7 +132,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             lockDevice()
             unlockDevice()
 
-            assertThat(actions?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Up)).isNull()
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -143,7 +149,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
 
@@ -159,7 +166,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
@@ -168,7 +176,8 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
 
-            assertThat(actions?.get(Back)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Back) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
         }
 
     @Test

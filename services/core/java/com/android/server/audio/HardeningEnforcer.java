@@ -155,14 +155,14 @@ public class HardeningEnforcer {
      * Checks whether the call in the current thread should be allowed or blocked
      * @param focusMethod name of the method to check, for logging purposes
      * @param clientId id of the requester
-     * @param durationHint focus type being requested
+     * @param focusReqType focus type being requested
      * @param attributionTag attribution of the caller
      * @param targetSdk target SDK of the caller
      * @return false if the method call is allowed, true if it should be a no-op
      */
     @SuppressWarnings("AndroidFrameworkCompatChange")
     protected boolean blockFocusMethod(int callingUid, int focusMethod, @NonNull String clientId,
-            int durationHint, @NonNull String packageName, String attributionTag, int targetSdk) {
+            int focusReqType, @NonNull String packageName, String attributionTag, int targetSdk) {
         if (packageName.isEmpty()) {
             packageName = getPackNameForUid(callingUid);
         }
@@ -181,14 +181,14 @@ public class HardeningEnforcer {
             blocked = false;
         }
 
-        metricsLogFocusReq(blocked, durationHint, callingUid);
+        metricsLogFocusReq(blocked, focusReqType, callingUid);
 
         if (!blocked) {
             return false;
         }
 
         String errorMssg = "Focus request DENIED for uid:" + callingUid
-                + " clientId:" + clientId + " req:" + durationHint
+                + " clientId:" + clientId + " req:" + focusReqType
                 + " procState:" + mActivityManager.getUidProcessState(callingUid);
         mEventLogger.enqueueAndSlog(errorMssg, EventLogger.Event.ALOGI, TAG);
 

@@ -94,7 +94,6 @@ public class AmbientState implements Dumpable {
     private boolean mIsSmallScreen;
     private boolean mPulsing;
     private float mHideAmount;
-    private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
     /**
@@ -718,14 +717,6 @@ public class AmbientState implements Dumpable {
         return mHideAmount != 0;
     }
 
-    public void setAppearing(boolean appearing) {
-        mAppearing = appearing;
-    }
-
-    public boolean isAppearing() {
-        return mAppearing;
-    }
-
     public void setPulseHeight(float height) {
         if (height != mPulseHeight) {
             mPulseHeight = height;
@@ -856,7 +847,6 @@ public class AmbientState implements Dumpable {
         pw.println("mFractionToShade=" + mFractionToShade);
         pw.println("mHideAmount=" + mHideAmount);
         pw.println("mAppearFraction=" + mAppearFraction);
-        pw.println("mAppearing=" + mAppearing);
         pw.println("mExpansionFraction=" + mExpansionFraction);
         pw.println("mQsExpansionFraction=" + mQsExpansionFraction);
         pw.println("mExpandingVelocity=" + mExpandingVelocity);

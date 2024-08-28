@@ -435,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎‏‏‏‎‎‎‏‏‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‎‏‎‎‏‏‎‎Done‎‏‎‎‏‎"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‏‏‎‎‏‎‏‏‏‎‏‎‏‏‎‏‎‎‏‎‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎Settings‎‏‎‎‏‎"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‏‏‎‎‏‎‏‎‎‎‎‏‎‎‏‎‎‎‏‎‏‎‎‏‏‏‎‎‏‏‏‏‏‎On‎‏‎‎‏‎"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‎‏‏‎‏‏‎‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎‎‎‎‎‎‎‎‏‎‏‏‎‏‎‎‏‎‎‏‎On • ‎‏‎‎‏‏‎<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‎‎‎‏‏‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‏‏‎‏‎‏‏‎‏‎‎‎‎‎‎‏‎‏‎‏‏‎‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎Off‎‏‎‎‏‎"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‎‎‎‎‏‎‎‏‎‏‎‎‏‎‏‎‏‏‏‎‏‎‎‎‎‎‎Set up‎‏‎‎‏‎"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‎‎‎‏‏‎‏‏‏‏‎‎‎‏‏‏‏‎‎‎‏‏‎‏‏‏‏‏‎‎‏‏‏‏‏‎‏‎‎‏‏‎‏‎‎‏‎‎‎‎Manage in settings‎‏‎‎‏‎"</string>
@@ -717,6 +718,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‎‏‏‎‏‎‎‎‎‏‎‎‏‎‎‏‎‎‏‏‎‎‎‏‎‎‎‏‎‏‏‎‏‎‎‎‏‎‎‎‎‎‏‏‏‎‎‏‎‎‎‎‎Satellite, good connection‎‏‎‎‏‎"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‏‎‎‏‎‏‏‎‏‎‏‎‎‎‎‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‎‏‏‏‎‏‏‎‎‏‏‏‏‏‎‏‎‏‏‏‎‏‎Satellite, connection available‎‏‎‎‏‎"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‎‏‎‎‏‎‏‎‎‎‏‎‏‎‏‎‎‏‎‎‎‎‎‏‎‏‎‏‎‎‎‎‎‎‏‏‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‏‎‏‎Satellite SOS‎‏‎‎‏‎"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‎Emergency calls or SOS‎‏‎‎‏‎"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‎‎‏‏‎‎‏‎‏‎‎‎‎‏‏‎‎‏‏‏‏‎‏‎‎‏‏‏‏‎‎‎‏‎‎‏‏‎‎‎Work profile‎‏‎‎‏‎"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‏‎‎‏‏‏‏‏‏‎‎‎‎‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‎‏‎‎‏‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‎‏‏‎Fun for some but not for all‎‏‎‎‏‎"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‏‎‏‏‏‎‏‎‎‏‎‏‎‎‏‎‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎System UI Tuner gives you extra ways to tweak and customize the Android user interface. These experimental features may change, break, or disappear in future releases. Proceed with caution.‎‏‎‎‏‎"</string>

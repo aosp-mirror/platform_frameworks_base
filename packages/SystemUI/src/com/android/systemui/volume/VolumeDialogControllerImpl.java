@@ -68,6 +68,7 @@ import androidx.lifecycle.Observer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.settingslib.volume.MediaSessions;
 import com.android.systemui.Dumpable;
+import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
@@ -153,6 +154,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final KeyguardManager mKeyguardManager;
     private final ActivityManager mActivityManager;
     private final UserTracker mUserTracker;
+    private final VolumeControllerAdapter mVolumeControllerAdapter;
     protected C mCallbacks = new C();
     private final State mState = new State();
     protected final MediaSessionsCallbacks mMediaSessionsCallbacksW;
@@ -197,6 +199,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             NotificationManager notificationManager,
             VibratorHelper vibrator,
             IAudioService iAudioService,
+            VolumeControllerAdapter volumeControllerAdapter,
             AccessibilityManager accessibilityManager,
             PackageManager packageManager,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -233,6 +236,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mVibrator = vibrator;
         mHasVibrator = mVibrator.hasVibrator();
         mAudioService = iAudioService;
+        mVolumeControllerAdapter = volumeControllerAdapter;
         mKeyguardManager = keyguardManager;
         mActivityManager = activityManager;
         mUserTracker = userTracker;
@@ -259,10 +263,14 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     protected void setVolumeController() {
-        try {
-            mAudio.setVolumeController(mVolumeController);
-        } catch (SecurityException e) {
-            Log.w(TAG, "Unable to set the volume controller", e);
+        if (Flags.useVolumeController()) {
+            mVolumeControllerAdapter.collectToController(mVolumeController);
+        } else {
+            try {
+                mAudio.setVolumeController(mVolumeController);
+            } catch (SecurityException e) {
+                Log.w(TAG, "Unable to set the volume controller", e);
+            }
         }
     }
 
@@ -384,7 +392,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public void notifyVisible(boolean visible) {
-        mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
+        if (Flags.useVolumeController()) {
+            mVolumeControllerAdapter.notifyVolumeControllerVisible(visible);
+        } else {
+            mWorker.obtainMessage(W.NOTIFY_VISIBLE, visible ? 1 : 0, 0).sendToTarget();
+        }
     }
 
     public void userActivity() {

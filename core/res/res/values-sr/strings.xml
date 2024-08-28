@@ -1196,8 +1196,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Промените метод уноса"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Отвори бирач метода уноса"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Подешавања"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Меморијски простор је на измаку"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Неке системске функције можда не функционишу"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Нема довољно меморијског простора за систем. Уверите се да имате 250 MB слободног простора и поново покрените."</string>

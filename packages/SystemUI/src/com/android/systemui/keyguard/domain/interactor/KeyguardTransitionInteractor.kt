@@ -22,14 +22,16 @@ import android.util.Log
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.UNDEFINED
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -66,7 +68,6 @@ class KeyguardTransitionInteractor
 @Inject
 constructor(
     @Application val scope: CoroutineScope,
-    private val keyguardRepository: KeyguardRepository,
     private val repository: KeyguardTransitionRepository,
     private val fromLockscreenTransitionInteractor: dagger.Lazy<FromLockscreenTransitionInteractor>,
     private val fromPrimaryBouncerTransitionInteractor:
@@ -126,8 +127,10 @@ constructor(
             repository.transitions
                 .filter { it.transitionState != TransitionState.CANCELED }
                 .collect { step ->
-                    getTransitionValueFlow(step.from).emit(1f - step.value)
-                    getTransitionValueFlow(step.to).emit(step.value)
+                    val value =
+                        if (step.transitionState == TransitionState.FINISHED) 1f else step.value
+                    getTransitionValueFlow(step.from).emit(1f - value)
+                    getTransitionValueFlow(step.to).emit(value)
                 }
         }
 
@@ -183,8 +186,14 @@ constructor(
         }
     }
 
-    fun transition(edge: Edge, edgeWithoutSceneContainer: Edge): Flow<TransitionStep> {
-        return transition(if (SceneContainerFlag.isEnabled) edge else edgeWithoutSceneContainer)
+    fun transition(edge: Edge, edgeWithoutSceneContainer: Edge? = null): Flow<TransitionStep> {
+        return transition(
+            if (SceneContainerFlag.isEnabled || edgeWithoutSceneContainer == null) {
+                edge
+            } else {
+                edgeWithoutSceneContainer
+            }
+        )
     }
 
     /** Given an [edge], return a Flow to collect only relevant [TransitionStep]s. */
@@ -250,10 +259,10 @@ constructor(
     }
 
     fun transitionValue(
-        scene: SceneKey,
+        scene: SceneKey? = null,
         stateWithoutSceneContainer: KeyguardState,
     ): Flow<Float> {
-        return if (SceneContainerFlag.isEnabled) {
+        return if (SceneContainerFlag.isEnabled && scene != null) {
             sceneInteractor.transitionProgress(scene)
         } else {
             transitionValue(stateWithoutSceneContainer)
@@ -296,12 +305,6 @@ constructor(
             .map { step -> step.from }
             .buffer(2, BufferOverflow.DROP_OLDEST)
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
-
-    /** Which keyguard state to use when the device goes to sleep. */
-    val asleepKeyguardState: StateFlow<KeyguardState> =
-        keyguardRepository.isAodAvailable
-            .map { aodAvailable -> if (aodAvailable) AOD else DOZING }
-            .stateIn(scope, SharingStarted.Eagerly, DOZING)
 
     /**
      * The last [KeyguardState] to which we [TransitionState.FINISHED] a transition.
@@ -410,7 +413,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-            .stateIn(scope, SharingStarted.Eagerly, KeyguardState.OFF)
+            .stateIn(scope, SharingStarted.Eagerly, OFF)
 
     val isInTransition =
         combine(
@@ -438,8 +441,8 @@ constructor(
                 fromAlternateBouncerTransitionInteractor.get().dismissAlternateBouncer()
             AOD -> fromAodTransitionInteractor.get().dismissAod()
             DOZING -> fromDozingTransitionInteractor.get().dismissFromDozing()
-            KeyguardState.OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
-            KeyguardState.GONE ->
+            OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
+            GONE ->
                 Log.i(
                     TAG,
                     "Already transitioning to GONE; ignoring startDismissKeyguardTransition."

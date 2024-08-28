@@ -20,6 +20,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -141,10 +142,6 @@ constructor(
     private val communalSceneInteractor: CommunalSceneInteractor,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
-    // TODO(b/349784682): Transform deprecated states for Flexiglass
-    private val statesForConstrainedNotifications: Set<KeyguardState> =
-        setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
-    private val statesForHiddenKeyguard: Set<KeyguardState> = setOf(GONE, OCCLUDED)
 
     /**
      * Is either shade/qs expanded? This intentionally does not use the [ShadeInteractor] version,
@@ -217,14 +214,16 @@ constructor(
 
     /** If the user is visually on one of the unoccluded lockscreen states. */
     val isOnLockscreen: Flow<Boolean> =
-        combine(
-                keyguardTransitionInteractor.finishedKeyguardState.map {
-                    statesForConstrainedNotifications.contains(it)
-                },
+        anyOf(
+                keyguardTransitionInteractor.isFinishedIn(AOD),
+                keyguardTransitionInteractor.isFinishedIn(DOZING),
+                keyguardTransitionInteractor.isFinishedIn(ALTERNATE_BOUNCER),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Bouncer,
+                    stateWithoutSceneContainer = PRIMARY_BOUNCER
+                ),
                 keyguardTransitionInteractor.transitionValue(LOCKSCREEN).map { it > 0f },
-            ) { constrainedNotificationState, transitioningToOrFromLockscreen ->
-                constrainedNotificationState || transitioningToOrFromLockscreen
-            }
+            )
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -250,9 +249,10 @@ constructor(
     /** If the user is visually on the glanceable hub or transitioning to/from it */
     private val isOnGlanceableHub: Flow<Boolean> =
         combine(
-                keyguardTransitionInteractor.finishedKeyguardState.map { state ->
-                    state == GLANCEABLE_HUB
-                },
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Communal,
+                    stateWithoutSceneContainer = GLANCEABLE_HUB
+                ),
                 anyOf(
                     keyguardTransitionInteractor.isInTransition(
                         edge = Edge.create(to = Scenes.Communal),
@@ -424,32 +424,19 @@ constructor(
             .onStart { emit(1f) }
             .dumpWhileCollecting("alphaForShadeAndQsExpansion")
 
-    private fun toFlowArray(
-        states: Set<KeyguardState>,
-        flow: (KeyguardState) -> Flow<Boolean>
-    ): Array<Flow<Boolean>> {
-        return states.map { flow(it) }.toTypedArray()
-    }
-
     private val isTransitioningToHiddenKeyguard: Flow<Boolean> =
         flow {
                 while (currentCoroutineContext().isActive) {
                     emit(false)
                     // Ensure states are inactive to start
-                    allOf(
-                            *toFlowArray(statesForHiddenKeyguard) { state ->
-                                keyguardTransitionInteractor.transitionValue(state).map { it == 0f }
-                            }
-                        )
-                        .first { it }
+                    allOf(isNotOnState(OCCLUDED), isNotOnState(GONE, Scenes.Gone)).first { it }
                     // Wait for a qualifying transition to begin
                     anyOf(
-                            *toFlowArray(statesForHiddenKeyguard) { state ->
-                                keyguardTransitionInteractor
-                                    .transition(Edge.create(to = state))
-                                    .map { it.value > 0f && it.transitionState == RUNNING }
-                                    .onStart { emit(false) }
-                            }
+                            transitionToIsRunning(Edge.create(to = OCCLUDED)),
+                            transitionToIsRunning(
+                                edge = Edge.create(to = Scenes.Gone),
+                                edgeWithoutSceneContainer = Edge.create(to = GONE)
+                            )
                         )
                         .first { it }
                     emit(true)
@@ -458,13 +445,7 @@ constructor(
                     // it is considered safe to reset alpha to 1f for HUNs.
                     combine(
                             keyguardInteractor.statusBarState,
-                            allOf(
-                                *toFlowArray(statesForHiddenKeyguard) { state ->
-                                    keyguardTransitionInteractor.transitionValue(state).map {
-                                        it == 0f
-                                    }
-                                }
-                            )
+                            allOf(isNotOnState(OCCLUDED), isNotOnState(GONE, Scenes.Gone))
                         ) { statusBarState, stateIsReversed ->
                             statusBarState == SHADE || stateIsReversed
                         }
@@ -472,6 +453,17 @@ constructor(
                 }
             }
             .dumpWhileCollecting("isTransitioningToHiddenKeyguard")
+
+    private fun isNotOnState(stateWithoutSceneContainer: KeyguardState, scene: SceneKey? = null) =
+        keyguardTransitionInteractor
+            .transitionValue(scene = scene, stateWithoutSceneContainer = stateWithoutSceneContainer)
+            .map { it == 0f }
+
+    private fun transitionToIsRunning(edge: Edge, edgeWithoutSceneContainer: Edge? = null) =
+        keyguardTransitionInteractor
+            .transition(edge = edge, edgeWithoutSceneContainer = edgeWithoutSceneContainer)
+            .map { it.value > 0f && it.transitionState == RUNNING }
+            .onStart { emit(false) }
 
     val panelAlpha = keyguardInteractor.panelAlpha
 

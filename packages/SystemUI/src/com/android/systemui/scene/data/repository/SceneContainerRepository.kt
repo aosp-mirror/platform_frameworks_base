@@ -18,7 +18,9 @@
 
 package com.android.systemui.scene.data.repository
 
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
@@ -43,10 +45,26 @@ class SceneContainerRepository
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    private val config: SceneContainerConfig,
+    config: SceneContainerConfig,
     private val dataSource: SceneDataSource,
 ) {
+    /**
+     * The keys of all scenes and overlays in the container.
+     *
+     * They will be sorted in z-order such that the last one is the one that should be rendered on
+     * top of all previous ones.
+     */
+    val allContentKeys: List<ContentKey> = config.sceneKeys + config.overlayKeys
+
     val currentScene: StateFlow<SceneKey> = dataSource.currentScene
+
+    /**
+     * The current set of overlays to be shown (may be empty).
+     *
+     * Note that during a transition between overlays, a different set of overlays may be rendered -
+     * but only the ones in this set are considered the current overlays.
+     */
+    val currentOverlays: StateFlow<Set<OverlayKey>> = dataSource.currentOverlays
 
     private val _isVisible = MutableStateFlow(true)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
@@ -56,7 +74,10 @@ constructor(
      *
      * For more information see the logic in `SceneInteractor` that mutates this.
      */
-    val isRemoteUserInteractionOngoing = MutableStateFlow(false)
+    val isRemoteUserInputOngoing = MutableStateFlow(false)
+
+    /** Whether there's ongoing user input on the scene container Composable hierarchy */
+    val isSceneContainerUserInputOngoing = MutableStateFlow(false)
 
     private val defaultTransitionState = ObservableTransitionState.Idle(config.initialSceneKey)
     private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
@@ -68,16 +89,6 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = defaultTransitionState,
             )
-
-    /**
-     * Returns the keys to all scenes in the container.
-     *
-     * The scenes will be sorted in z-order such that the last one is the one that should be
-     * rendered on top of all previous ones.
-     */
-    fun allSceneKeys(): List<SceneKey> {
-        return config.sceneKeys
-    }
 
     fun changeScene(
         toScene: SceneKey,
@@ -94,6 +105,48 @@ constructor(
     ) {
         dataSource.snapToScene(
             toScene = toScene,
+        )
+    }
+
+    /**
+     * Request to show [overlay] so that it animates in from [currentScene] and ends up being
+     * visible on screen.
+     *
+     * After this returns, this overlay will be included in [currentOverlays]. This does nothing if
+     * [overlay] is already shown.
+     */
+    fun showOverlay(overlay: OverlayKey, transitionKey: TransitionKey? = null) {
+        dataSource.showOverlay(
+            overlay = overlay,
+            transitionKey = transitionKey,
+        )
+    }
+
+    /**
+     * Request to hide [overlay] so that it animates out to [currentScene] and ends up *not* being
+     * visible on screen.
+     *
+     * After this returns, this overlay will not be included in [currentOverlays]. This does nothing
+     * if [overlay] is already hidden.
+     */
+    fun hideOverlay(overlay: OverlayKey, transitionKey: TransitionKey? = null) {
+        dataSource.hideOverlay(
+            overlay = overlay,
+            transitionKey = transitionKey,
+        )
+    }
+
+    /**
+     * Replace [from] by [to] so that [from] ends up not being visible on screen and [to] ends up
+     * being visible.
+     *
+     * This throws if [from] is not currently shown or if [to] is already shown.
+     */
+    fun replaceOverlay(from: OverlayKey, to: OverlayKey, transitionKey: TransitionKey? = null) {
+        dataSource.replaceOverlay(
+            from = from,
+            to = to,
+            transitionKey = transitionKey,
         )
     }
 

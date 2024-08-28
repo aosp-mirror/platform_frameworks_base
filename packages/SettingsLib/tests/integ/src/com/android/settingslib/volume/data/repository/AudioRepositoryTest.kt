@@ -44,6 +44,7 @@ import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -111,6 +112,7 @@ class AudioRepositoryTest {
                 testScope.testScheduler,
                 testScope.backgroundScope,
                 logger,
+                true,
             )
     }
 
@@ -261,13 +263,34 @@ class AudioRepositoryTest {
     @Test
     fun getBluetoothAudioDeviceCategory() {
         testScope.runTest {
-            `when`(audioManager.getBluetoothAudioDeviceCategory("12:34:56:78")).thenReturn(
-                AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
+            `when`(audioManager.getBluetoothAudioDeviceCategory("12:34:56:78"))
+                .thenReturn(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
 
             val category = underTest.getBluetoothAudioDeviceCategory("12:34:56:78")
             runCurrent()
 
             assertThat(category).isEqualTo(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES)
+        }
+    }
+
+    @Test
+    fun useVolumeControllerDisabled_setVolumeController_notCalled() {
+        testScope.runTest {
+            underTest =
+                AudioRepositoryImpl(
+                    eventsReceiver,
+                    audioManager,
+                    contentResolver,
+                    testScope.testScheduler,
+                    testScope.backgroundScope,
+                    logger,
+                    false,
+                )
+
+            underTest.volumeControllerEvents.launchIn(backgroundScope)
+            runCurrent()
+
+            verify(audioManager, never()).volumeController = any()
         }
     }
 

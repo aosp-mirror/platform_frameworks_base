@@ -24,6 +24,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -87,7 +88,10 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pin
             )
 
-            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(
+                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                )
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -102,7 +106,10 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
             )
             setDeviceEntered(true)
 
-            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(
+                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                )
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -117,7 +124,10 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
             )
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
 
-            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(
+                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                )
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -133,7 +143,10 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(
+                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                )
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -150,7 +163,10 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.toScene)
+            assertThat(
+                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                )
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -182,7 +198,11 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             kosmos.shadeStartable.start()
             val actions by collectLastValue(underTest.actions)
-            assertThat(actions?.get(Swipe(SwipeDirection.Down))?.toScene).isNull()
+            assertThat(
+                    (actions?.get(Swipe(SwipeDirection.Down)) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                )
+                .isNull()
         }
 
     @Test
@@ -191,7 +211,10 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             kosmos.shadeStartable.start()
             val actions by collectLastValue(underTest.actions)
-            assertThat(actions?.get(Swipe(SwipeDirection.Down))?.toScene)
+            assertThat(
+                    (actions?.get(Swipe(SwipeDirection.Down)) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                )
                 .isEqualTo(Scenes.QuickSettings)
         }
 

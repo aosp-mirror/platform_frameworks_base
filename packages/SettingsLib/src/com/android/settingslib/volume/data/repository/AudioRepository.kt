@@ -22,9 +22,12 @@ import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.AudioDeviceCategory
 import android.media.AudioManager.OnCommunicationDeviceChangedListener
+import android.media.IVolumeController
 import android.provider.Settings
+import android.util.Log
 import androidx.concurrent.futures.DirectExecutor
 import com.android.internal.util.ConcurrentUtils
+import com.android.settingslib.volume.data.model.VolumeControllerEvent
 import com.android.settingslib.volume.shared.AudioLogger
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
@@ -36,10 +39,13 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
@@ -73,6 +79,11 @@ interface AudioRepository {
      */
     val communicationDevice: StateFlow<AudioDeviceInfo?>
 
+    /** Events from [AudioManager.setVolumeController] */
+    val volumeControllerEvents: Flow<VolumeControllerEvent>
+
+    fun init()
+
     /** State of the [AudioStream]. */
     fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel>
 
@@ -90,8 +101,9 @@ interface AudioRepository {
     suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
 
     /** Gets audio device category. */
-    @AudioDeviceCategory
-    suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int
+    @AudioDeviceCategory suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int
+
+    suspend fun notifyVolumeControllerVisible(isVisible: Boolean)
 }
 
 class AudioRepositoryImpl(
@@ -101,8 +113,10 @@ class AudioRepositoryImpl(
     private val backgroundCoroutineContext: CoroutineContext,
     private val coroutineScope: CoroutineScope,
     private val logger: AudioLogger,
+    shouldUseVolumeController: Boolean,
 ) : AudioRepository {
 
+    private val volumeController = ProducingVolumeController()
     private val streamSettingNames: Map<AudioStream, String> =
         mapOf(
             AudioStream(AudioManager.STREAM_VOICE_CALL) to Settings.System.VOLUME_VOICE,
@@ -116,12 +130,19 @@ class AudioRepositoryImpl(
             AudioStream(AudioManager.STREAM_ASSISTANT) to Settings.System.VOLUME_ASSISTANT,
         )
 
+    override val volumeControllerEvents: Flow<VolumeControllerEvent> =
+        if (shouldUseVolumeController) {
+            volumeController.events
+        } else {
+            emptyFlow()
+        }
+
     override val mode: StateFlow<Int> =
         callbackFlow {
-            val listener = AudioManager.OnModeChangedListener { newMode -> trySend(newMode) }
-            audioManager.addOnModeChangedListener(ConcurrentUtils.DIRECT_EXECUTOR, listener)
-            awaitClose { audioManager.removeOnModeChangedListener(listener) }
-        }
+                val listener = AudioManager.OnModeChangedListener { newMode -> trySend(newMode) }
+                audioManager.addOnModeChangedListener(ConcurrentUtils.DIRECT_EXECUTOR, listener)
+                awaitClose { audioManager.removeOnModeChangedListener(listener) }
+            }
             .onStart { emit(audioManager.mode) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), audioManager.mode)
@@ -141,14 +162,14 @@ class AudioRepositoryImpl(
     override val communicationDevice: StateFlow<AudioDeviceInfo?>
         get() =
             callbackFlow {
-                val listener = OnCommunicationDeviceChangedListener { trySend(Unit) }
-                audioManager.addOnCommunicationDeviceChangedListener(
-                    ConcurrentUtils.DIRECT_EXECUTOR,
-                    listener,
-                )
+                    val listener = OnCommunicationDeviceChangedListener { trySend(Unit) }
+                    audioManager.addOnCommunicationDeviceChangedListener(
+                        ConcurrentUtils.DIRECT_EXECUTOR,
+                        listener,
+                    )
 
-                awaitClose { audioManager.removeOnCommunicationDeviceChangedListener(listener) }
-            }
+                    awaitClose { audioManager.removeOnCommunicationDeviceChangedListener(listener) }
+                }
                 .filterNotNull()
                 .map { audioManager.communicationDevice }
                 .onStart { emit(audioManager.communicationDevice) }
@@ -159,20 +180,30 @@ class AudioRepositoryImpl(
                     audioManager.communicationDevice,
                 )
 
+    override fun init() {
+        try {
+            audioManager.volumeController = volumeController
+        } catch (error: SecurityException) {
+            Log.wtf("AudioManager", "Unable to set the volume controller", error)
+        }
+    }
+
     override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> {
         return merge(
-            audioManagerEventsReceiver.events.filter {
-                if (it is StreamAudioManagerEvent) {
-                    it.audioStream == audioStream
-                } else {
-                    true
-                }
-            },
-            volumeSettingChanges(audioStream),
-        )
+                audioManagerEventsReceiver.events.filter {
+                    if (it is StreamAudioManagerEvent) {
+                        it.audioStream == audioStream
+                    } else {
+                        true
+                    }
+                },
+                volumeSettingChanges(audioStream),
+                volumeControllerEvents.filter { it is VolumeControllerEvent.VolumeChanged },
+            )
             .conflate()
             .map { getCurrentAudioStream(audioStream) }
             .onStart { emit(getCurrentAudioStream(audioStream)) }
+            .distinctUntilChanged()
             .onEach { logger.onVolumeUpdateReceived(audioStream, it) }
             .flowOn(backgroundCoroutineContext)
     }
@@ -228,6 +259,12 @@ class AudioRepositoryImpl(
         }
     }
 
+    override suspend fun notifyVolumeControllerVisible(isVisible: Boolean) {
+        withContext(backgroundCoroutineContext) {
+            audioManager.notifyVolumeControllerVisible(volumeController, isVisible)
+        }
+    }
+
     private fun getMinVolume(stream: AudioStream): Int =
         try {
             audioManager.getStreamMinVolume(stream.value)
@@ -251,5 +288,47 @@ class AudioRepositoryImpl(
             contentResolver.registerContentObserver(uri, false, observer)
             awaitClose { contentResolver.unregisterContentObserver(observer) }
         }
+    }
+}
+
+private class ProducingVolumeController : IVolumeController.Stub() {
+
+    private val mutableEvents = MutableSharedFlow<VolumeControllerEvent>(extraBufferCapacity = 32)
+    val events = mutableEvents.asSharedFlow()
+
+    override fun displaySafeVolumeWarning(flags: Int) {
+        mutableEvents.tryEmit(VolumeControllerEvent.DisplaySafeVolumeWarning(flags))
+    }
+
+    override fun volumeChanged(streamType: Int, flags: Int) {
+        mutableEvents.tryEmit(VolumeControllerEvent.VolumeChanged(streamType, flags))
+    }
+
+    override fun masterMuteChanged(flags: Int) {
+        mutableEvents.tryEmit(VolumeControllerEvent.MasterMuteChanged(flags))
+    }
+
+    override fun setLayoutDirection(layoutDirection: Int) {
+        mutableEvents.tryEmit(VolumeControllerEvent.SetLayoutDirection(layoutDirection))
+    }
+
+    override fun dismiss() {
+        mutableEvents.tryEmit(VolumeControllerEvent.Dismiss)
+    }
+
+    override fun setA11yMode(mode: Int) {
+        mutableEvents.tryEmit(VolumeControllerEvent.SetA11yMode(mode))
+    }
+
+    override fun displayCsdWarning(
+        csdWarning: Int,
+        displayDurationMs: Int,
+    ) {
+        mutableEvents.tryEmit(
+            VolumeControllerEvent.DisplayCsdWarning(
+                csdWarning,
+                displayDurationMs,
+            )
+        )
     }
 }

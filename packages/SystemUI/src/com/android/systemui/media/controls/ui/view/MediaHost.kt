@@ -44,6 +44,7 @@ class MediaHost(
     lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
         private set
+
     private var visibleChangedListeners: ArraySet<(Boolean) -> Unit> = ArraySet()
 
     private val tmpLocationOnScreen: IntArray = intArrayOf(0, 0)
@@ -287,6 +288,15 @@ class MediaHost(
                 changedListener?.invoke()
             }
 
+        override var disablePagination: Boolean = false
+            set(value) {
+                if (field == value) {
+                    return
+                }
+                field = value
+                changedListener?.invoke()
+            }
+
         private var lastDisappearHash = disappearParameters.hashCode()
 
         /** A listener for all changes. This won't be copied over when invoking [copy] */
@@ -303,6 +313,7 @@ class MediaHost(
             mediaHostState.visible = visible
             mediaHostState.disappearParameters = disappearParameters.deepCopy()
             mediaHostState.falsingProtectionNeeded = falsingProtectionNeeded
+            mediaHostState.disablePagination = disablePagination
             return mediaHostState
         }
 
@@ -331,6 +342,9 @@ class MediaHost(
             if (!disappearParameters.equals(other.disappearParameters)) {
                 return false
             }
+            if (disablePagination != other.disablePagination) {
+                return false
+            }
             return true
         }
 
@@ -342,6 +356,7 @@ class MediaHost(
             result = 31 * result + showsOnlyActiveMedia.hashCode()
             result = 31 * result + if (visible) 1 else 2
             result = 31 * result + disappearParameters.hashCode()
+            result = 31 * result + disablePagination.hashCode()
             return result
         }
     }
@@ -399,6 +414,12 @@ interface MediaHostState {
      * propagated
      */
     var disappearParameters: DisappearParameters
+
+    /**
+     * Whether pagination should be disabled for this host, meaning that when there are multiple
+     * media sessions, only the first one will appear.
+     */
+    var disablePagination: Boolean
 
     /** Get a copy of this view state, deepcopying all appropriate members */
     fun copy(): MediaHostState

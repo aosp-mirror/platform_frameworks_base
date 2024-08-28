@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ಹಿಂದಕ್ಕೆ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ಇನ್‌ಪುಟ್ ವಿಧಾನವನ್ನು ಬದಲಿಸಿ"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ಇನ್‌ಪುಟ್ ವಿಧಾನದ ಪಿಕರ್ ಅನ್ನು ತೆರೆಯಿರಿ"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ಸಿಸ್ಟಂನಲ್ಲಿ ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆಯಿಲ್ಲ. ನೀವು 250MB ನಷ್ಟು ಖಾಲಿ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುವಿರಾ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ ಹಾಗೂ ಮರುಪ್ರಾರಂಭಿಸಿ."</string>

@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"El Bluetooth se activará mañana a la mañana"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Compartir audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Compartiendo audio"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ingresar la configuración de uso compartido de audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculares"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Listo"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Configuración"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Activado"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Sí • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivado"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurar"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Administrar en configuración"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satélite, buena conexión"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, conexión disponible"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS por satélite"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunas personas"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El sintonizador de IU del sistema te brinda más formas para editar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, dejar de funcionar o no incluirse en futuras versiones. Procede con precaución."</string>

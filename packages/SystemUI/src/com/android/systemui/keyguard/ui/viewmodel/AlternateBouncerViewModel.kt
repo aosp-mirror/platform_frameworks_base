@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
@@ -41,6 +42,7 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     alternateBouncerInteractor: Lazy<AlternateBouncerInteractor>,
+    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
 ) {
     // When we're fully transitioned to the AlternateBouncer, the alpha of the scrim should be:
     private val alternateBouncerScrimAlpha = .66f
@@ -73,5 +75,6 @@ constructor(
     fun onBackRequested() {
         statusBarKeyguardViewManager.hideAlternateBouncer(false)
         dismissCallbackRegistry.notifyDismissCancelled()
+        primaryBouncerInteractor.setDismissAction(null, null)
     }
 }

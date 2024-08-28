@@ -31,6 +31,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -47,14 +48,6 @@ constructor(
     private val logger: SceneLogger,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : SysUiViewModel, ExclusiveActivatable() {
-    /**
-     * Keys of all scenes in the container.
-     *
-     * The scenes will be sorted in z-order such that the last one is the one that should be
-     * rendered on top of all previous ones.
-     */
-    val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
-
     /** The scene that should be rendered. */
     val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
@@ -97,7 +90,9 @@ constructor(
     }
 
     /**
-     * Notifies that a [MotionEvent] is first seen at the top of the scene container UI.
+     * Notifies that a [MotionEvent] is first seen at the top of the scene container UI. This
+     * includes gestures on [SharedNotificationContainer] as well as the Composable scene container
+     * hierarchy.
      *
      * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
      */
@@ -108,8 +103,18 @@ constructor(
             event.actionMasked == MotionEvent.ACTION_UP ||
                 event.actionMasked == MotionEvent.ACTION_CANCEL
         ) {
-            sceneInteractor.onUserInteractionFinished()
+            sceneInteractor.onUserInputFinished()
         }
+    }
+
+    /**
+     * Notifies that a scene container user interaction has begun.
+     *
+     * This is a user interaction that has reached the Composable hierarchy of the scene container,
+     * rather than being handled by [SharedNotificationContainer].
+     */
+    fun onSceneContainerUserInputStarted() {
+        sceneInteractor.onSceneContainerUserInputStarted()
     }
 
     /**
@@ -174,8 +179,20 @@ constructor(
         actionResultMap: Map<UserAction, UserActionResult>,
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
-            sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
-                actionResult.copy(toScene = it)
+            when (actionResult) {
+                is UserActionResult.ChangeScene -> {
+                    sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
+                        toScene ->
+                        UserActionResult(
+                            toScene = toScene,
+                            transitionKey = actionResult.transitionKey,
+                            requiresFullDistanceSwipe = actionResult.requiresFullDistanceSwipe,
+                        )
+                    }
+                }
+                is UserActionResult.ShowOverlay,
+                is UserActionResult.HideOverlay,
+                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
             } ?: actionResult
         }
     }

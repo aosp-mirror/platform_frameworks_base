@@ -18,6 +18,7 @@ package com.android.systemui.volume
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.volume.data.repository.audioRepository
 
-val Kosmos.volumeControllerCollector by
-    Kosmos.Fixture { VolumeControllerCollector(applicationCoroutineScope) }
+val Kosmos.volumeControllerAdapter by
+    Kosmos.Fixture { VolumeControllerAdapter(applicationCoroutineScope, audioRepository) }

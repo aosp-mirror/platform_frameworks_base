@@ -127,6 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"開啟選單"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"畫面最大化"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"貼齊畫面"</string>
-    <!-- no translation found for desktop_mode_non_resizable_snap_text (1049800446363800707) -->
-    <skip />
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"這個應用程式無法調整大小"</string>
 </resources>

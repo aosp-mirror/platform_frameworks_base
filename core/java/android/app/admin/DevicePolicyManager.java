@@ -59,7 +59,6 @@ import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
@@ -2988,7 +2987,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17;
 
     /**

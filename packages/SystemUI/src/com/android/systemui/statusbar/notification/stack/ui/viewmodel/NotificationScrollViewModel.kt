@@ -136,6 +136,9 @@ constructor(
     val qsExpandFraction: Flow<Float> =
         shadeInteractor.qsExpansion.dumpWhileCollecting("qsExpandFraction")
 
+    /** Whether we should close any open notification guts. */
+    val shouldCloseGuts: Flow<Boolean> = stackAppearanceInteractor.shouldCloseGuts
+
     val shouldResetStackTop: Flow<Boolean> =
         sceneInteractor.transitionState
             .mapNotNull { state -> state is Idle && state.currentScene == Scenes.Gone }
@@ -201,6 +204,10 @@ constructor(
      */
     val currentGestureOverscrollConsumer: (Boolean) -> Unit =
         stackAppearanceInteractor::setCurrentGestureOverscroll
+
+    /** Receives whether the current touch gesture is inside any open guts. */
+    val currentGestureInGutsConsumer: (Boolean) -> Unit =
+        stackAppearanceInteractor::setCurrentGestureInGuts
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =

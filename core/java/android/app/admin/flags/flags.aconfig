@@ -125,13 +125,6 @@ flag {
 }
 
 flag {
-  name: "dumpsys_policy_engine_migration_enabled"
-  namespace: "enterprise"
-  description: "Update DumpSys to include information about migrated APIs in DPE"
-  bug: "304999634"
-}
-
-flag {
     name: "allow_querying_profile_type"
     is_exported: true
     namespace: "enterprise"
@@ -180,6 +173,7 @@ flag {
   bug: "295301164"
 }
 
+# Fully rolled out and must not be used.
 flag {
   name: "headless_device_owner_single_user_enabled"
   is_exported: true
@@ -203,26 +197,6 @@ flag {
   bug: "329424312"
   metadata {
       purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "power_exemption_bg_usage_fix"
-  namespace: "enterprise"
-  description: "Ensure aps with EXEMPT_FROM_POWER_RESTRICTIONS can execute in the background"
-  bug: "333379020"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "disallow_user_control_bg_usage_fix"
-  namespace: "enterprise"
-  description: "Make DPM.setUserControlDisabledPackages() ensure background usage is allowed"
-  bug: "326031059"
-  metadata {
-    purpose: PURPOSE_BUGFIX
   }
 }
 

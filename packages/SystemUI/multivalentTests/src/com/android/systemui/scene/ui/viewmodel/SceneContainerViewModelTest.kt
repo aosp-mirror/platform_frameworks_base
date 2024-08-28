@@ -32,7 +32,6 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
-import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -49,6 +48,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer
@@ -111,11 +111,6 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             runCurrent()
             assertThat(underTest.isVisible).isTrue()
         }
-
-    @Test
-    fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys).isEqualTo(kosmos.sceneKeys)
-    }
 
     @Test
     fun sceneTransition() =
@@ -237,7 +232,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             sceneInteractor.setVisible(false, "reason")
             runCurrent()
             assertThat(underTest.isVisible).isFalse()
-            sceneInteractor.onRemoteUserInteractionStarted("reason")
+            sceneInteractor.onRemoteUserInputStarted("reason")
             runCurrent()
             assertThat(underTest.isVisible).isTrue()
 

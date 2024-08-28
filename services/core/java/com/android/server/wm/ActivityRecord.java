@@ -353,6 +353,7 @@ import android.window.SplashScreen;
 import android.window.SplashScreenView;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
+import android.window.TransitionInfo;
 import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
 import android.window.WindowOnBackInvokedDispatcher;
@@ -5034,7 +5035,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // controller but don't clear the animation information from the options since they
                 // need to be sent to the animating activity.
                 mTransitionController.setOverrideAnimation(
-                        AnimationOptions.makeSceneTransitionAnimOptions(), null, null);
+                        TransitionInfo.AnimationOptions.makeSceneTransitionAnimOptions(), this,
+                        null, null);
                 return;
             }
             applyOptionsAnimation(mPendingOptions, intent);
@@ -5157,7 +5159,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (options != null) {
-            mTransitionController.setOverrideAnimation(options, startCallback, finishCallback);
+            mTransitionController.setOverrideAnimation(options, this, startCallback,
+                    finishCallback);
         }
     }
 
@@ -5890,6 +5893,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mAtmService.updateBatteryStats(this, false);
                 }
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
+                idle = false;
                 // Fall through.
             case DESTROYING:
                 if (app != null && !app.hasActivities()) {

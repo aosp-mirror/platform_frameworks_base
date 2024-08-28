@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public class ProtologPerfTest {
+public class ProtoLogPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Parameters(name="logToProto_{0}_logToLogcat_{1}")
@@ -49,7 +49,7 @@ public class ProtologPerfTest {
     private final boolean mLogToProto;
     private final boolean mLogToLogcat;
 
-    public ProtologPerfTest(boolean logToProto, boolean logToLogcat) {
+    public ProtoLogPerfTest(boolean logToProto, boolean logToLogcat) {
         mLogToProto = logToProto;
         mLogToLogcat = logToLogcat;
     }

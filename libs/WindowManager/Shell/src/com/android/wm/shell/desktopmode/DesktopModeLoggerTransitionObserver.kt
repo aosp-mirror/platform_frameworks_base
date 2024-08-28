@@ -22,6 +22,7 @@ import android.app.TaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.os.IBinder
+import android.os.SystemProperties
 import android.os.Trace
 import android.util.SparseArray
 import android.view.SurfaceControl
@@ -51,8 +52,6 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
-
-const val VISIBLE_TASKS_COUNTER_NAME = "DESKTOP_MODE_VISIBLE_TASKS"
 
 /**
  * A [Transitions.TransitionObserver] that observes transitions and the proposed changes to log
@@ -307,6 +306,8 @@ class DesktopModeLoggerTransitionObserver(
                         VISIBLE_TASKS_COUNTER_NAME,
                         postTransitionVisibleFreeformTasks.size().toLong()
                     )
+                    SystemProperties.set(VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+                        postTransitionVisibleFreeformTasks.size().toString())
                 }
                 // old tasks that were resized or repositioned
                 // TODO(b/347935387): Log changes only once they are stable.
@@ -326,6 +327,8 @@ class DesktopModeLoggerTransitionObserver(
                     VISIBLE_TASKS_COUNTER_NAME,
                     postTransitionVisibleFreeformTasks.size().toLong()
                 )
+                SystemProperties.set(VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+                    postTransitionVisibleFreeformTasks.size().toString())
             }
         }
     }
@@ -430,5 +433,13 @@ class DesktopModeLoggerTransitionObserver(
     private fun TransitionInfo.isExitToRecentsTransition(): Boolean {
         return this.type == WindowManager.TRANSIT_TO_FRONT &&
             this.flags == WindowManager.TRANSIT_FLAG_IS_RECENTS
+    }
+
+    companion object {
+        @VisibleForTesting
+        const val VISIBLE_TASKS_COUNTER_NAME = "desktop_mode_visible_tasks"
+        @VisibleForTesting
+        const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY =
+            "debug.tracing." + VISIBLE_TASKS_COUNTER_NAME
     }
 }

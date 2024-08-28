@@ -1392,6 +1392,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
             // Handle the commit transition if this handler is running the open transition.
             finishCallback.onTransitionFinished(null);
+            t.apply();
             if (mCloseTransitionRequested) {
                 if (mApps == null || mApps.length == 0) {
                     if (mQueuedTransition == null) {
