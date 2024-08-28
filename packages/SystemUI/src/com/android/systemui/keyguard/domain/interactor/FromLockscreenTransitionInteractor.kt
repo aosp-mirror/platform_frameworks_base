@@ -334,7 +334,7 @@ constructor(
             listenForSleepTransition(
                 modeOnCanceledFromStartedStep = { startedStep ->
                     if (
-                        transitionInteractor.asleepKeyguardState.value == KeyguardState.AOD &&
+                        keyguardInteractor.asleepKeyguardState.value == KeyguardState.AOD &&
                             startedStep.from == KeyguardState.AOD
                     ) {
                         TransitionModeOnCanceled.REVERSE

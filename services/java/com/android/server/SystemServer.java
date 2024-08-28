@@ -106,7 +106,9 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogConfigurationService;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -1098,6 +1100,10 @@ public final class SystemServer implements Dumpable {
                     Context.PROTOLOG_CONFIGURATION_SERVICE, new ProtoLogConfigurationService());
             t.traceEnd();
         }
+
+        t.traceBegin("InitializeProtoLog");
+        ProtoLog.init(ProtoLogGroup.values());
+        t.traceEnd();
 
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and
         // possibly others in the future. b/135010838.

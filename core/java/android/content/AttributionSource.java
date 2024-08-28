@@ -734,7 +734,7 @@ public final class AttributionSource implements Parcelable {
         @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
         public @NonNull Builder setDeviceId(int deviceId) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x12;
+            mBuilderFieldsSet |= 0x20;
             mAttributionSourceState.deviceId = deviceId;
             return this;
         }
@@ -744,7 +744,7 @@ public final class AttributionSource implements Parcelable {
          */
         public @NonNull Builder setNext(@Nullable AttributionSource value) {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x20;
+            mBuilderFieldsSet |= 0x40;
             mAttributionSourceState.next = (value != null) ? new AttributionSourceState[]
                     {value.mAttributionSourceState} : mAttributionSourceState.next;
             return this;
@@ -759,7 +759,7 @@ public final class AttributionSource implements Parcelable {
             if (value == null) {
                 throw new IllegalArgumentException("Null AttributionSource not permitted.");
             }
-            mBuilderFieldsSet |= 0x20;
+            mBuilderFieldsSet |= 0x40;
             mAttributionSourceState.next =
                     new AttributionSourceState[]{value.mAttributionSourceState};
             return this;
@@ -768,7 +768,7 @@ public final class AttributionSource implements Parcelable {
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull AttributionSource build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x40; // Mark builder used
+            mBuilderFieldsSet |= 0x80; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x2) == 0) {
                 mAttributionSourceState.pid = Process.INVALID_PID;
@@ -782,10 +782,10 @@ public final class AttributionSource implements Parcelable {
             if ((mBuilderFieldsSet & 0x10) == 0) {
                 mAttributionSourceState.renouncedPermissions = null;
             }
-            if ((mBuilderFieldsSet & 0x12) == 0) {
+            if ((mBuilderFieldsSet & 0x20) == 0) {
                 mAttributionSourceState.deviceId = Context.DEVICE_ID_DEFAULT;
             }
-            if ((mBuilderFieldsSet & 0x20) == 0) {
+            if ((mBuilderFieldsSet & 0x40) == 0) {
                 mAttributionSourceState.next = null;
             }
 
@@ -799,7 +799,7 @@ public final class AttributionSource implements Parcelable {
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x40) != 0) {
+            if ((mBuilderFieldsSet & 0x80) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }

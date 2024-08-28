@@ -68,6 +68,8 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
@@ -170,6 +172,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final Lazy<ShadeController> mShadeController;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
     private final Lazy<DeviceEntryInteractor> mDeviceEntryInteractorLazy;
+    private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     private Job mListenForAlternateBouncerTransitionSteps = null;
     private Job mListenForKeyguardAuthenticatedBiometricsHandled = null;
@@ -400,7 +403,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             Lazy<SceneInteractor> sceneInteractorLazy,
             StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor,
             @Main DelayableExecutor executor,
-            Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy
+            Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy,
+            DismissCallbackRegistry dismissCallbackRegistry
     ) {
         mContext = context;
         mExecutor = executor;
@@ -437,6 +441,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mSceneInteractorLazy = sceneInteractorLazy;
         mStatusBarKeyguardViewManagerInteractor = statusBarKeyguardViewManagerInteractor;
         mDeviceEntryInteractorLazy = deviceEntryInteractorLazy;
+        mDismissCallbackRegistry = dismissCallbackRegistry;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -994,6 +999,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
             if (!SceneContainerFlag.isEnabled() && hideBouncerWhenShowing) {
                 hideAlternateBouncer(true);
+                mDismissCallbackRegistry.notifyDismissCancelled();
+                mPrimaryBouncerInteractor.setDismissAction(null, null);
             }
             mKeyguardUpdateManager.sendKeyguardReset();
             updateStates();

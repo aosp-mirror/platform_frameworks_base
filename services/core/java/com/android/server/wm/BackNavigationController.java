@@ -1203,7 +1203,7 @@ class BackNavigationController {
         }
 
         void markWindowHasDrawn(ActivityRecord activity) {
-            if (!mComposed || mWaitTransition || mOpenAnimAdaptor.mPreparedOpenTransition == null
+            if (!mComposed || mWaitTransition
                     || mOpenAnimAdaptor.mRequestedStartingSurfaceId == INVALID_TASK_ID) {
                 return;
             }
@@ -1214,6 +1214,10 @@ class BackNavigationController {
                     next.mAppWindowDrawn = true;
                 }
                 allWindowDrawn &= next.mAppWindowDrawn;
+            }
+            // Do not remove until transition ready.
+            if (!activity.isVisible()) {
+                return;
             }
             if (allWindowDrawn) {
                 mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
@@ -1287,6 +1291,14 @@ class BackNavigationController {
             mStartingSurfaceTargetMatch = true;
 
             if (mOpenAnimAdaptor.mRequestedStartingSurfaceId == INVALID_TASK_ID) {
+                return;
+            }
+            boolean allWindowDrawn = true;
+            for (int i = mOpenAnimAdaptor.mAdaptors.length - 1; i >= 0; --i) {
+                final BackWindowAnimationAdaptor next = mOpenAnimAdaptor.mAdaptors[i];
+                allWindowDrawn &= next.mAppWindowDrawn;
+            }
+            if (!allWindowDrawn) {
                 return;
             }
             final SurfaceControl startingSurface = mOpenAnimAdaptor.mStartingSurface;

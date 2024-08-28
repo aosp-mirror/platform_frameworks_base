@@ -3047,6 +3047,41 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testMultipleCancelOfLifetimeExtendedSendsOneUpdate() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(null);
+        notif.getSbn().getNotification().flags =
+                Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(notif);
+        final StatusBarNotification sbn = notif.getSbn();
+
+        assertThat(mBinderService.getActiveNotifications(sbn.getPackageName()).length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+
+        // Send two cancelations.
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, sbn.getTag(), sbn.getId(),
+                sbn.getUserId());
+        waitForIdle();
+        mBinderService.cancelNotificationWithTag(mPkg, mPkg, sbn.getTag(), sbn.getId(),
+                sbn.getUserId());
+        waitForIdle();
+
+        assertThat(mBinderService.getActiveNotifications(sbn.getPackageName()).length).isEqualTo(1);
+        assertThat(mService.getNotificationRecordCount()).isEqualTo(1);
+
+        // Checks that only one post update is sent.
+        verify(mWorkerHandler, times(1))
+                .post(any(NotificationManagerService.PostNotificationRunnable.class));
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(captor.capture(), any(),
+                anyBoolean());
+        assertThat(captor.getValue().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
+                FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public void testCancelAllClearsLifetimeExtended() throws Exception {
         final NotificationRecord notif = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
@@ -6419,12 +6454,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public void testStats_DirectReplyLifetimeExtendedPostsUpdate() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        // Marks the notification as having already been lifetime extended and canceled.
         r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        r.setCanceledAfterLifetimeExtension(true);
+        r.setPostSilently(true);
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
         waitForIdle();
 
+        // At the moment prepareNotifyPostedLocked is called on the listeners,
+        // verify that FLAG_ONLY_ALERT_ONCE and shouldPostSilently are set, regardless of initial
+        // values.
+        doAnswer(
+                invocation -> {
+                    int flags = ((NotificationRecord) invocation.getArgument(0))
+                            .getSbn().getNotification().flags;
+                    assertThat(flags & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                    boolean shouldPostSilently = ((NotificationRecord) invocation.getArgument(0))
+                            .shouldPostSilently();
+                    assertThat(shouldPostSilently).isTrue();
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
+
+        // Checks that the record gets marked as a direct reply having occurred.
         assertThat(mService.getNotificationRecord(r.getKey()).getStats().hasDirectReplied())
                 .isTrue();
         // Checks that a post update is sent.
@@ -6437,9 +6491,65 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+        // FLAG_ONLY_ALERT_ONCE was not present on the original notification, so it's not here.
         assertThat(captor.getValue().getNotification().flags
-                & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                & FLAG_ONLY_ALERT_ONCE).isEqualTo(0);
         assertThat(captor.getValue().shouldPostSilently()).isTrue();
+        assertThat(captor.getValue().isCanceledAfterLifetimeExtension()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testStats_DirectReplyLifetimeExtendedPostsUpdate_RestorePostSilently()
+            throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        // Marks the notification as having already been lifetime extended and canceled.
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        r.setPostSilently(false);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
+        waitForIdle();
+
+        // Checks that a post update is sent with shouldPostSilently set to true.
+        doAnswer(
+                invocation -> {
+                    boolean shouldPostSilently = ((NotificationRecord) invocation.getArgument(0))
+                            .shouldPostSilently();
+                    assertThat(shouldPostSilently).isTrue();
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
+
+        // Checks that shouldPostSilently is restored to its false state afterward.
+        assertThat(mService.getNotificationRecord(r.getKey()).shouldPostSilently()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testStats_DirectReplyLifetimeExtendedPostsUpdate_RestoreOnlyAlertOnceFlag()
+            throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        // Marks the notification as having already been lifetime extended and canceled.
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
+        waitForIdle();
+
+        // Checks that a post update is sent with FLAG_ONLY_ALERT_ONCE set to true.
+        doAnswer(
+                invocation -> {
+                    int flags = ((NotificationRecord) invocation.getArgument(0))
+                            .getSbn().getNotification().flags;
+                    assertThat(flags & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
+
+        // Checks that the flag is removed afterward.
+        assertThat(mService.getNotificationRecord(r.getKey()).getSbn().getNotification().flags
+                & FLAG_ONLY_ALERT_ONCE).isEqualTo(0);
     }
 
     @Test
@@ -6476,6 +6586,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 anyBoolean());
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
+        assertThat(captor.getValue().isCanceledAfterLifetimeExtension()).isFalse();
         assertThat(captor.getValue()
                 .getNotification().extras.getCharSequence(Notification.EXTRA_TITLE).toString())
                 .isEqualTo("new title");
@@ -9143,17 +9254,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final int replyIndex = 2;
         final String reply = "Hello";
         final boolean modifiedBeforeSending = true;
-        final boolean generatedByAssistant = true;
 
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
-        r.setSuggestionsGeneratedByAssistant(generatedByAssistant);
+        r.getSbn().getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+        r.setSuggestionsGeneratedByAssistant(true);
+        r.setCanceledAfterLifetimeExtension(true);
+        r.setPostSilently(true);
         mService.addNotification(r);
 
         mService.mNotificationDelegate.onNotificationSmartReplySent(
                 r.getKey(), replyIndex, reply, NOTIFICATION_LOCATION_UNKNOWN,
                 modifiedBeforeSending);
         waitForIdle();
+
+        // At the moment prepareNotifyPostedLocked is called on the listeners,
+        // verify that FLAG_ONLY_ALERT_ONCE and shouldPostSilently are set, regardless of initial
+        // values.
+        doAnswer(
+                invocation -> {
+                    int flags = ((NotificationRecord) invocation.getArgument(0))
+                            .getSbn().getNotification().flags;
+                    assertThat(flags & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+                    boolean shouldPostSilently = ((NotificationRecord) invocation.getArgument(0))
+                            .shouldPostSilently();
+                    assertThat(shouldPostSilently).isTrue();
+                    return null;
+                }
+        ).when(mListeners).prepareNotifyPostedLocked(any(), any(), anyBoolean());
 
         // Checks that a post update is sent.
         verify(mWorkerHandler, times(1))
@@ -9165,8 +9293,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+        // Flag was present before, so it's set afterward
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
+        // Should post silently was set before, so it's set afterward.
         assertThat(captor.getValue().shouldPostSilently()).isTrue();
     }
 

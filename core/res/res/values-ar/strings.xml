@@ -1199,8 +1199,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"رجوع"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تبديل أسلوب الإدخال"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"فتح أداة اختيار أسلوب الإدخال"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"الإعدادات"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>

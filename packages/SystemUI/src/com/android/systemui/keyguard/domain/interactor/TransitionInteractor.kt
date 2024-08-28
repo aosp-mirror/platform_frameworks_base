@@ -211,7 +211,7 @@ sealed class TransitionInteractor(
             .map(modeOnCanceledFromStartedStep)
             .collect { modeOnCanceled ->
                 startTransitionTo(
-                    toState = transitionInteractor.asleepKeyguardState.value,
+                    toState = keyguardInteractor.asleepKeyguardState.value,
                     modeOnCanceled = modeOnCanceled,
                     ownerReason = "Sleep transition triggered"
                 )

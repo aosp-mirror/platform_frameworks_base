@@ -51,7 +51,7 @@ import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.scenetransition.lockscreenSceneTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
@@ -551,8 +551,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     fun switchToAOD_whenAvailable_whenDeviceSleepsLocked() =
         testScope.runTest {
             kosmos.lockscreenSceneTransitionInteractor.start()
-            val asleepState by
-                collectLastValue(kosmos.keyguardTransitionInteractor.asleepKeyguardState)
+            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
             val currentTransitionInfo by
                 collectLastValue(kosmos.keyguardTransitionRepository.currentTransitionInfoInternal)
             val transitionState =
@@ -584,8 +583,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     fun switchToDozing_whenAodUnavailable_whenDeviceSleepsLocked() =
         testScope.runTest {
             kosmos.lockscreenSceneTransitionInteractor.start()
-            val asleepState by
-                collectLastValue(kosmos.keyguardTransitionInteractor.asleepKeyguardState)
+            val asleepState by collectLastValue(kosmos.keyguardInteractor.asleepKeyguardState)
             val currentTransitionInfo by
                 collectLastValue(kosmos.keyguardTransitionRepository.currentTransitionInfoInternal)
             val transitionState =

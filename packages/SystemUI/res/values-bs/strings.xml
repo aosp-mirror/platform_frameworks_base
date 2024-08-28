@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth će se uključiti sutra ujutro"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Dijeli zvuk"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Dijeljenje zvuka"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ulazak u postavke dijeljenja zvuka"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> baterije"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalice"</string>
@@ -381,8 +380,8 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Snimanje ekrana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Započnite"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavite"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Zabilježite problem"</string>
-    <string name="qs_record_issue_start" msgid="2979831312582567056">"Pokrenite"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Snimite problem"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"Pokreni"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Zaustavite"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Izvještaj o grešci"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Koji dio uređaja je imao problem?"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Gotovo"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Postavke"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Uključeno"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Uključeno • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Isključeno"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Postavite"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Upravljajte opcijom u postavkama"</string>
@@ -673,7 +673,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Prostorni zvuk"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Isključi"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fiksno"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Praćenje glave"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Praćenje položaja glave"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Dodirnite da promijenite način rada zvuka zvona"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"isključite zvuk"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"uključite zvuk"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, dobra veza"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, veza je dostupna"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Hitna pomoć putem satelita"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Radni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Podešavač za korisnički interfejs sistema vam omogućava dodatne načine da podesite i prilagodite Androidov interfejs. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>

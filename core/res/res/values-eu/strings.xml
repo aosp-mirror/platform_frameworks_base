@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Atzera"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Aldatu idazketa-metodoa"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Ireki idazketa-metodoaren hautatzailea"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Ezarpenak"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>
@@ -1335,7 +1334,7 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"Alarma-soinuak"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"Jakinarazpen-soinuak"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"Ezezaguna"</string>
-    <string name="wifi_available_sign_in" msgid="381054692557675237">"Hasi saioa Wi-Fi sarean"</string>
+    <string name="wifi_available_sign_in" msgid="381054692557675237">"Hasi saioa wifi-sarean"</string>
     <string name="network_available_sign_in" msgid="1520342291829283114">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />

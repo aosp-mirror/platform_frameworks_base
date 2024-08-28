@@ -31,7 +31,7 @@ public class DeviceSettingFooterPreference extends DeviceSettingPreference imple
     DeviceSettingFooterPreference(
             @NonNull String footerText,
             Bundle extras) {
-        super(DeviceSettingType.DEVICE_SETTING_TYPE_MULTI_TOGGLE);
+        super(DeviceSettingType.DEVICE_SETTING_TYPE_FOOTER);
         mFooterText = footerText;
         mExtras = extras;
     }

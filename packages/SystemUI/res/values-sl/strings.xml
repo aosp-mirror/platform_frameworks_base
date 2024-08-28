@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth se bo vklopil jutri zjutraj"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Deli zvok"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Poteka deljenje zvoka"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"odpiranje nastavitev deljenja zvoka"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvok"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalke z mikrofonom"</string>
@@ -390,7 +389,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Snemanje zaslona"</string>
     <string name="performance" msgid="6552785217174378320">"Učinkovitost delovanja"</string>
     <string name="user_interface" msgid="3712869377953950887">"Uporabniški vmesnik"</string>
-    <string name="thermal" msgid="6758074791325414831">"Toplotno"</string>
+    <string name="thermal" msgid="6758074791325414831">"Toplota"</string>
     <string name="custom" msgid="3337456985275158299">"Po meri"</string>
     <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Nastavitve sledi po meri"</string>
     <string name="restore_default" msgid="5259420807486239755">"Obnovi privzeto"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Končano"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Nastavitve"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Vklopljeno"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Vklopljeno • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Izklopljeno"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Nastavitev"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Upravljanje v nastavitvah"</string>
@@ -673,7 +673,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Prostorski zvok"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Izklopljeno"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fiksno"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Spremljanje položaja glave"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Spremljanje premikov glave"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Dotaknite se, če želite spremeniti način zvonjenja."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"izklop zvoka"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"vklop zvoka"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, dobra povezava"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, povezava je na voljo"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS prek satelita"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Delovni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabavno za nekatere, a ne za vse"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Uglaševalnik uporabniškega vmesnika sistema vam omogoča dodatne načine za spreminjanje in prilagajanje uporabniškega vmesnika Android. Te poskusne funkcije lahko v prihodnjih izdajah kadar koli izginejo, se spremenijo ali pokvarijo. Bodite previdni."</string>

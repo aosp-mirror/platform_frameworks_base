@@ -71,16 +71,9 @@ prebuilt_fonts_xml {
     },
 }
 
-// TODO(nona): Change this to use generate_font_fallback to be able to generate XML from
-//             per family JSON config
-prebuilt_fonts_xml {
+prebuilt_etc {
     name: "font_fallback.xml",
-    src: "font_fallback.xml",
-    soong_config_variables: {
-        use_var_font: {
-            src: "font_fallback_cjkvf.xml",
-        },
-    },
+    src: ":generate_font_fallback",
 }
 
 /////////////////////////////////

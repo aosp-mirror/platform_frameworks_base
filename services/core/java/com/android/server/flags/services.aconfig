@@ -45,3 +45,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "consolidate_battery_change_events"
+    description: "Optimize battery status updates by delivering only the most recent battery information"
+    bug: "361334584"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -16,28 +16,24 @@
 
 package com.android.settingslib.notification.modes;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.Futures.immediateFuture;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
-import static java.util.Objects.requireNonNull;
-
-import android.annotation.DrawableRes;
-import android.annotation.Nullable;
-import android.app.AutomaticZenRule;
 import android.content.Context;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
-import android.service.notification.SystemZenRules;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -54,7 +50,7 @@ public class ZenIconLoader {
     @Nullable // Until first usage
     private static ZenIconLoader sInstance;
 
-    private final LruCache<String, Drawable> mCache;
+    private final LruCache<ZenIcon.Key, Drawable> mCache;
     private final ListeningExecutorService mBackgroundExecutor;
 
     public static ZenIconLoader getInstance() {
@@ -64,90 +60,85 @@ public class ZenIconLoader {
         return sInstance;
     }
 
+    /** Replaces the singleton instance of {@link ZenIconLoader} by the provided one. */
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public static void setInstance(@Nullable ZenIconLoader instance) {
+        sInstance = instance;
+    }
+
     private ZenIconLoader() {
         this(Executors.newFixedThreadPool(4));
     }
 
     @VisibleForTesting
-    ZenIconLoader(ExecutorService backgroundExecutor) {
+    public ZenIconLoader(ExecutorService backgroundExecutor) {
         mCache = new LruCache<>(50);
         mBackgroundExecutor =
                 MoreExecutors.listeningDecorator(backgroundExecutor);
     }
 
+    /**
+     * Loads the {@link Drawable} corresponding to a {@link ZenMode} in a background thread, and
+     * caches it for future calls.
+     *
+     * <p>The {@link ZenIcon#drawable()} will always correspond to the resource indicated by
+     * {@link ZenIcon#key()}. In turn, this will match the value of {@link ZenMode#getIconKey()}
+     * for the supplied mode -- except for the rare case where the mode has an apparently valid
+     * drawable resource id that we fail to load for some reason, thus needing a "fallback" icon.
+     */
     @NonNull
-    ListenableFuture<Drawable> getIcon(Context context, @NonNull AutomaticZenRule rule) {
-        if (rule.getIconResId() == 0) {
-            return Futures.immediateFuture(getFallbackIcon(context, rule.getType()));
-        }
+    public ListenableFuture<ZenIcon> getIcon(@NonNull Context context, @NonNull ZenMode mode) {
+        ZenIcon.Key key = mode.getIconKey();
 
-        return FluentFuture.from(loadIcon(context, rule.getPackageName(), rule.getIconResId()))
-                .transform(icon ->
-                                icon != null ? icon : getFallbackIcon(context, rule.getType()),
-                        MoreExecutors.directExecutor());
+        return FluentFuture.from(loadIcon(context, key, /* useMonochromeIfPresent= */ true))
+                .transformAsync(drawable ->
+                        drawable != null
+                            ? immediateFuture(new ZenIcon(key, drawable))
+                            : getFallbackIcon(context, mode),
+                mBackgroundExecutor);
+    }
+
+    private ListenableFuture<ZenIcon> getFallbackIcon(Context context, ZenMode mode) {
+        ZenIcon.Key key = ZenIconKeys.forType(mode.getType());
+        return FluentFuture.from(loadIcon(context, key, /* useMonochromeIfPresent= */ false))
+                .transform(drawable -> {
+                    checkNotNull(drawable, "Couldn't load DEFAULT icon for mode %s!", mode);
+                    return new ZenIcon(key, drawable);
+                },
+                directExecutor());
     }
 
     @NonNull
-    private ListenableFuture</* @Nullable */ Drawable> loadIcon(Context context, String pkg,
-            int iconResId) {
-        String cacheKey = pkg + ":" + iconResId;
+    private ListenableFuture</* @Nullable */ Drawable> loadIcon(Context context,
+            ZenIcon.Key key, boolean useMonochromeIfPresent) {
         synchronized (mCache) {
-            Drawable cachedValue = mCache.get(cacheKey);
+            Drawable cachedValue = mCache.get(key);
             if (cachedValue != null) {
                 return immediateFuture(cachedValue != MISSING ? cachedValue : null);
             }
         }
 
         return FluentFuture.from(mBackgroundExecutor.submit(() -> {
-            if (TextUtils.isEmpty(pkg) || SystemZenRules.PACKAGE_ANDROID.equals(pkg)) {
-                return context.getDrawable(iconResId);
+            if (TextUtils.isEmpty(key.resPackage())) {
+                return context.getDrawable(key.resId());
             } else {
-                Context appContext = context.createPackageContext(pkg, 0);
-                Drawable appDrawable = appContext.getDrawable(iconResId);
-                return getMonochromeIconIfPresent(appDrawable);
+                Context appContext = context.createPackageContext(key.resPackage(), 0);
+                Drawable appDrawable = appContext.getDrawable(key.resId());
+                return useMonochromeIfPresent
+                        ? getMonochromeIconIfPresent(appDrawable)
+                        : appDrawable;
             }
         })).catching(Exception.class, ex -> {
             // If we cannot resolve the icon, then store MISSING in the cache below, so
             // we don't try again.
-            Log.e(TAG, "Error while loading icon " + cacheKey, ex);
+            Log.e(TAG, "Error while loading mode icon " + key, ex);
             return null;
-        }, MoreExecutors.directExecutor()).transform(drawable -> {
+        }, directExecutor()).transform(drawable -> {
             synchronized (mCache) {
-                mCache.put(cacheKey, drawable != null ? drawable : MISSING);
+                mCache.put(key, drawable != null ? drawable : MISSING);
             }
             return drawable;
-        }, MoreExecutors.directExecutor());
-    }
-
-    private static Drawable getFallbackIcon(Context context, int ruleType) {
-        int iconResIdFromType = getIconResourceIdFromType(ruleType);
-        return requireNonNull(context.getDrawable(iconResIdFromType));
-    }
-
-    /** Return the default icon resource associated to a {@link AutomaticZenRule.Type} */
-    @DrawableRes
-    public static int getIconResourceIdFromType(@AutomaticZenRule.Type int ruleType) {
-        return switch (ruleType) {
-            case AutomaticZenRule.TYPE_UNKNOWN ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_unknown;
-            case AutomaticZenRule.TYPE_OTHER ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_other;
-            case AutomaticZenRule.TYPE_SCHEDULE_TIME ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_schedule_time;
-            case AutomaticZenRule.TYPE_SCHEDULE_CALENDAR ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_schedule_calendar;
-            case AutomaticZenRule.TYPE_BEDTIME ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_bedtime;
-            case AutomaticZenRule.TYPE_DRIVING ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_driving;
-            case AutomaticZenRule.TYPE_IMMERSIVE ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_immersive;
-            case AutomaticZenRule.TYPE_THEATER ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_theater;
-            case AutomaticZenRule.TYPE_MANAGED ->
-                    com.android.internal.R.drawable.ic_zen_mode_type_managed;
-            default -> com.android.internal.R.drawable.ic_zen_mode_type_unknown;
-        };
+        }, directExecutor());
     }
 
     private static Drawable getMonochromeIconIfPresent(Drawable icon) {
