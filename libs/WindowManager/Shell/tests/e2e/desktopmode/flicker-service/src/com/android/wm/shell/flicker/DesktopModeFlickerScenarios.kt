@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker
 
 import android.tools.flicker.AssertionInvocationGroup
+import android.tools.flicker.assertors.assertions.AppLayerIncreasesInSize
 import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
@@ -24,6 +25,9 @@ import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
 import android.tools.flicker.assertors.assertions.AppWindowCoversLeftHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowCoversRightHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
+import android.tools.flicker.assertors.assertions.AppWindowHasMaxBoundsInOnlyOneDimension
+import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayHeight
+import android.tools.flicker.assertors.assertions.AppWindowHasMaxDisplayWidth
 import android.tools.flicker.assertors.assertions.AppWindowHasSizeOfAtLeast
 import android.tools.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowIsVisibleAlways
@@ -242,6 +246,43 @@ class DesktopModeFlickerScenarios {
                     AppWindowMaintainsAspectRatioAlways(NON_RESIZABLE_APP),
                     AppWindowReturnsToStartBoundsAndPosition(NON_RESIZABLE_APP)
                 ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val MAXIMIZE_APP =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("MAXIMIZE_APP"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(
+                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            AppWindowHasMaxDisplayHeight(DESKTOP_MODE_APP),
+                            AppWindowHasMaxDisplayWidth(DESKTOP_MODE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val MAXIMIZE_APP_NON_RESIZABLE =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("MAXIMIZE_APP_NON_RESIZABLE"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions =
+                AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(
+                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                            AppWindowMaintainsAspectRatioAlways(DESKTOP_MODE_APP),
+                            AppWindowHasMaxBoundsInOnlyOneDimension(DESKTOP_MODE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }
 }
