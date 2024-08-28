@@ -4755,6 +4755,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    boolean mayBeLaunchingApp() {
+        return (mPowerModeReasons & POWER_MODE_REASON_START_ACTIVITY) != 0;
+    }
+
     void startPowerMode(@PowerModeReason int reason) {
         final int prevReasons = mPowerModeReasons;
         mPowerModeReasons |= reason;
