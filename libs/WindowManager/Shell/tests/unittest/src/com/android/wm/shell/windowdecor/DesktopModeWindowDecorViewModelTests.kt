@@ -79,6 +79,7 @@ import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter
@@ -167,6 +168,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
     @Mock private lateinit var mockTasksLimiter: DesktopTasksLimiter
     @Mock private lateinit var mockFreeformTaskTransitionStarter: FreeformTaskTransitionStarter
+    @Mock private lateinit var mockActivityOrientationChangeHandler:
+            DesktopActivityOrientationChangeHandler
     private lateinit var spyContext: TestableContext
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -220,7 +223,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockRootTaskDisplayAreaOrganizer,
                 windowDecorByTaskIdSpy,
                 mockInteractionJankMonitor,
-                Optional.of(mockTasksLimiter)
+                Optional.of(mockTasksLimiter),
+                Optional.of(mockActivityOrientationChangeHandler)
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
