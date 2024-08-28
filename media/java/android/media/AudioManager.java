@@ -4567,8 +4567,8 @@ public class AudioManager {
      *     when the request is flagged with {@link #AUDIOFOCUS_FLAG_DELAY_OK}.
      * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
      *     requesting audio focus.
-     * @param durationHint use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
-     *      is temporary, and focus will be abandonned shortly. Examples of transient requests are
+     * @param focusReqType use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
+     *      is temporary, and focus will be abandoned shortly. Examples of transient requests are
      *      for the playback of driving directions, or notifications sounds.
      *      Use {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} to indicate also that it's ok for
      *      the previous focus owner to keep playing if it ducks its audio output.
@@ -4593,13 +4593,13 @@ public class AudioManager {
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public int requestAudioFocus(OnAudioFocusChangeListener l,
             @NonNull AudioAttributes requestAttributes,
-            int durationHint,
+            int focusReqType,
             int flags) throws IllegalArgumentException {
         if (flags != (flags & AUDIOFOCUS_FLAGS_APPS)) {
             throw new IllegalArgumentException("Invalid flags 0x"
                     + Integer.toHexString(flags).toUpperCase());
         }
-        return requestAudioFocus(l, requestAttributes, durationHint,
+        return requestAudioFocus(l, requestAttributes, focusReqType,
                 flags & AUDIOFOCUS_FLAGS_APPS,
                 null /* no AudioPolicy*/);
     }
@@ -4614,7 +4614,7 @@ public class AudioManager {
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
      * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
      *     requesting audio focus.
-     * @param durationHint see the description of the same parameter in
+     * @param focusReqType see the description of the same parameter in
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
      * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK},
      *     {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}, and {@link #AUDIOFOCUS_FLAG_LOCK}.
@@ -4636,14 +4636,14 @@ public class AudioManager {
     })
     public int requestAudioFocus(OnAudioFocusChangeListener l,
             @NonNull AudioAttributes requestAttributes,
-            int durationHint,
+            int focusReqType,
             int flags,
             AudioPolicy ap) throws IllegalArgumentException {
         // parameter checking
         if (requestAttributes == null) {
             throw new IllegalArgumentException("Illegal null AudioAttributes argument");
         }
-        if (!AudioFocusRequest.isValidFocusGain(durationHint)) {
+        if (!AudioFocusRequest.isValidFocusGain(focusReqType)) {
             throw new IllegalArgumentException("Invalid duration hint");
         }
         if (flags != (flags & AUDIOFOCUS_FLAGS_SYSTEM)) {
@@ -4664,7 +4664,7 @@ public class AudioManager {
                     "Illegal null audio policy when locking audio focus");
         }
 
-        final AudioFocusRequest afr = new AudioFocusRequest.Builder(durationHint)
+        final AudioFocusRequest afr = new AudioFocusRequest.Builder(focusReqType)
                 .setOnAudioFocusChangeListenerInt(l, null /* no Handler for this legacy API */)
                 .setAudioAttributes(requestAttributes)
                 .setAcceptsDelayedFocusGain((flags & AUDIOFOCUS_FLAG_DELAY_OK)
@@ -5025,16 +5025,16 @@ public class AudioManager {
      * to identify this use case.
      * @param streamType use STREAM_RING for focus requests when ringing, VOICE_CALL for
      *    the establishment of the call
-     * @param durationHint the type of focus request. AUDIOFOCUS_GAIN_TRANSIENT is recommended so
+     * @param focusReqType the type of focus request. AUDIOFOCUS_GAIN_TRANSIENT is recommended so
      *    media applications resume after a call
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void requestAudioFocusForCall(int streamType, int durationHint) {
+    public void requestAudioFocusForCall(int streamType, int focusReqType) {
         final IAudioService service = getService();
         try {
             service.requestAudioFocus(new AudioAttributes.Builder()
                         .setInternalLegacyStreamType(streamType).build(),
-                    durationHint, mICallBack, null,
+                    focusReqType, mICallBack, null,
                     AudioSystem.IN_VOICE_COMM_FOCUS_ID,
                     getContext().getOpPackageName(),
                     getContext().getAttributionTag(),
