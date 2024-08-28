@@ -78,7 +78,6 @@ constructor(
     private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
-    private val flags: ComposeBouncerFlags,
 ) : ExclusiveActivatable() {
     /**
      * A message shown when the user has attempted the wrong credential too many times and now must
@@ -96,7 +95,7 @@ constructor(
     val message: MutableStateFlow<MessageViewModel?> = MutableStateFlow(null)
 
     override suspend fun onActivated(): Nothing {
-        if (!flags.isComposeBouncerOrSceneContainerEnabled()) {
+        if (!ComposeBouncerFlags.isComposeBouncerOrSceneContainerEnabled()) {
             return awaitCancellation()
         }
 

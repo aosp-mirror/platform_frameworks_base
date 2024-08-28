@@ -25,7 +25,6 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
-import com.android.systemui.bouncer.shared.flag.composeBouncerFlags
 import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -55,7 +54,6 @@ val Kosmos.bouncerSceneContentViewModel by Fixture {
         authenticationInteractor = authenticationInteractor,
         devicePolicyManager = devicePolicyManager,
         bouncerMessageViewModelFactory = bouncerMessageViewModelFactory,
-        flags = composeBouncerFlags,
         userSwitcher = userSwitcherViewModel,
         actionButtonInteractor = bouncerActionButtonInteractor,
         pinViewModelFactory = pinBouncerViewModelFactory,

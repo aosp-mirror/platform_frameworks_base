@@ -29,7 +29,6 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -57,7 +56,6 @@ constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     private val devicePolicyManager: DevicePolicyManager,
     private val bouncerMessageViewModelFactory: BouncerMessageViewModel.Factory,
-    private val flags: ComposeBouncerFlags,
     private val userSwitcher: UserSwitcherViewModel,
     private val actionButtonInteractor: BouncerActionButtonInteractor,
     private val pinViewModelFactory: PinBouncerViewModel.Factory,

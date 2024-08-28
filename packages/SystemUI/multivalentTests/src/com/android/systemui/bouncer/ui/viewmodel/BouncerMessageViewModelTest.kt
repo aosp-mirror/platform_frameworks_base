@@ -19,9 +19,11 @@ package com.android.systemui.bouncer.ui.viewmodel
 import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricFaceConstants
 import android.hardware.fingerprint.FingerprintManager
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -35,7 +37,6 @@ import com.android.systemui.biometrics.data.repository.fakeFacePropertyRepositor
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
-import com.android.systemui.bouncer.shared.flag.fakeComposeBouncerFlags
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
@@ -71,6 +72,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(Flags.FLAG_COMPOSE_BOUNCER)
 class BouncerMessageViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -82,7 +84,6 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         kosmos.fakeUserRepository.setUserInfos(listOf(PRIMARY_USER))
-        kosmos.fakeComposeBouncerFlags.composeBouncerEnabled = true
         overrideResource(
             R.array.config_face_acquire_device_entry_ignorelist,
             intArrayOf(ignoreHelpMessageId)
