@@ -571,15 +571,6 @@ constructor(
         }
 
         applicationScope.launch {
-            sceneInteractor.currentScene
-                .map { it == Scenes.Bouncer }
-                .distinctUntilChanged()
-                .collect { isBouncerShowing ->
-                    windowController.setBouncerShowing(isBouncerShowing)
-                }
-        }
-
-        applicationScope.launch {
             occlusionInteractor.invisibleDueToOcclusion.collect { invisibleDueToOcclusion ->
                 windowController.setKeyguardOccluded(invisibleDueToOcclusion)
             }
