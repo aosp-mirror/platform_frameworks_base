@@ -28,7 +28,10 @@ data class ModeTileViewModel(
     val icon: Icon,
     val text: String,
     val subtext: String,
+    val subtextDescription: String, // version of subtext without "on"/"off" for screen readers
     val enabled: Boolean,
+    val stateDescription: String, // "on"/"off" state of the tile, for screen readers
     val onClick: () -> Unit,
     val onLongClick: () -> Unit,
+    val onLongClickLabel: String, // for screen readers
 )
