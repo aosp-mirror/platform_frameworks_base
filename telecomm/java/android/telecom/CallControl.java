@@ -39,7 +39,10 @@ import java.util.concurrent.Executor;
 
 /**
  * CallControl provides client side control of a call.  Each Call will get an individual CallControl
- * instance in which the client can alter the state of the associated call.
+ * instance in which the client can alter the state of the associated call.  Outgoing and incoming
+ * calls should move to active (via {@link CallControl#setActive(Executor, OutcomeReceiver)} or
+ * answered (via {@link CallControl#answer(int, Executor, OutcomeReceiver)} before 60 seconds.  If
+ * the new call is not moved to active or answered before 60 seconds, the call will be disconnected.
  *
  * <p>
  * Each method is Transactional meaning that it can succeed or fail. If a transaction succeeds,
