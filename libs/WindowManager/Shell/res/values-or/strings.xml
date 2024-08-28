@@ -66,7 +66,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ତଳ ବାମକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ତଳ ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"ମେନୁକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
-    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"ମେନୁକୁ ସଂକୁଚିତ କରନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"ମେନୁକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"ବାମକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ବିସ୍ତାର କରନ୍ତୁ"</string>
@@ -127,6 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"ମେନୁ ଖୋଲନ୍ତୁ"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"ସ୍କ୍ରିନକୁ ବଡ଼ କରନ୍ତୁ"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"ସ୍କ୍ରିନକୁ ସ୍ନାପ କରନ୍ତୁ"</string>
-    <!-- no translation found for desktop_mode_non_resizable_snap_text (1049800446363800707) -->
-    <skip />
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ଏହି ଆପକୁ ରିସାଇଜ କରାଯାଇପାରିବ ନାହିଁ"</string>
 </resources>

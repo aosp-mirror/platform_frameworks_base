@@ -8977,9 +8977,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private boolean shouldDelayTouchOutside(InputTarget t) {
-        final WindowState w = t.getWindowState();
-        final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        final Task task = w != null ? w.getRootTask() : null;
+        final ActivityRecord activity = t.getActivityRecord();
+        final Task task = activity != null ? activity.getTask() : null;
 
         final boolean isInputTargetNotFocused =
                 mFocusedInputTarget != t && mFocusedInputTarget != null;

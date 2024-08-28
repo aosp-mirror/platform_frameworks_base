@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth wordt morgenochtend aangezet"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Audio delen"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Audio delen"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"instellingen voor audio delen openen"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batterijniveau"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -381,7 +380,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Schermopname"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppen"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Probleem vastleggen"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Probleem opnemen"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Starten"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Stoppen"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Bugrapport"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Klaar"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Instellingen"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Aan"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Aan • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Uit"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Instellen"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Beheren via instellingen"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelliet, goede verbinding"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelliet, verbinding beschikbaar"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via satelliet"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Werkprofiel"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Leuk voor sommige gebruikers, maar niet voor iedereen"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Met Systeem-UI-tuner beschikt u over extra manieren om de Android-gebruikersinterface aan te passen. Deze experimentele functies kunnen veranderen, vastlopen of verdwijnen in toekomstige releases. Ga voorzichtig verder."</string>

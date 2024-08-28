@@ -20,9 +20,9 @@ import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Handler;
 import android.util.Log;
 
+import com.android.settingslib.volume.data.repository.AudioRepository;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.tiles.DndTile;
@@ -39,23 +39,26 @@ public class VolumeUI implements CoreStartable, ConfigurationController.Configur
     private static final String TAG = "VolumeUI";
     private static boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final Handler mHandler = new Handler();
-
     private boolean mEnabled;
     private final Context mContext;
     private VolumeDialogComponent mVolumeComponent;
     private AudioSharingInteractor mAudioSharingInteractor;
+    private AudioRepository mAudioRepository;
 
     @Inject
-    public VolumeUI(Context context, VolumeDialogComponent volumeDialogComponent,
+    public VolumeUI(Context context,
+            VolumeDialogComponent volumeDialogComponent,
+            AudioRepository audioRepository,
             AudioSharingInteractor audioSharingInteractor) {
         mContext = context;
         mVolumeComponent = volumeDialogComponent;
+        mAudioRepository = audioRepository;
         mAudioSharingInteractor = audioSharingInteractor;
     }
 
     @Override
     public void start() {
+        mAudioRepository.init();
         boolean enableVolumeUi = mContext.getResources().getBoolean(R.bool.enable_volume_ui);
         boolean enableSafetyWarning =
                 mContext.getResources().getBoolean(R.bool.enable_safety_warning);
@@ -77,7 +80,8 @@ public class VolumeUI implements CoreStartable, ConfigurationController.Configur
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
-        pw.print("mEnabled="); pw.println(mEnabled);
+        pw.print("mEnabled=");
+        pw.println(mEnabled);
         if (!mEnabled) return;
         mVolumeComponent.dump(pw, args);
     }

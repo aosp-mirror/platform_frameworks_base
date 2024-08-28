@@ -35,7 +35,9 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.media.controls.util.MediaFeatureFlag
 import com.android.systemui.media.dialog.MediaOutputDialogManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper
@@ -46,6 +48,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.ColorUpdateLogger
+import com.android.systemui.statusbar.notification.ConversationNotificationManager
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -69,6 +72,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartActionInflaterImpl
 import com.android.systemui.statusbar.policy.SmartReplyConstants
@@ -84,6 +88,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.wmshell.BubblesManager
 import java.util.Optional
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertTrue
@@ -128,19 +133,19 @@ class ExpandableNotificationRowBuilder(
         dependency.injectMockDependency(NotificationShadeWindowController::class.java)
         dependency.injectMockDependency(MediaOutputDialogManager::class.java)
 
-        mMockLogger = Mockito.mock(ExpandableNotificationRowLogger::class.java)
-        mStatusBarStateController = Mockito.mock(StatusBarStateController::class.java)
-        mKeyguardBypassController = Mockito.mock(KeyguardBypassController::class.java)
+        mMockLogger = Mockito.mock(ExpandableNotificationRowLogger::class.java, STUB_ONLY)
+        mStatusBarStateController = Mockito.mock(StatusBarStateController::class.java, STUB_ONLY)
+        mKeyguardBypassController = Mockito.mock(KeyguardBypassController::class.java, STUB_ONLY)
         mGroupMembershipManager = GroupMembershipManagerImpl()
-        mSmartReplyController = Mockito.mock(SmartReplyController::class.java)
+        mSmartReplyController = Mockito.mock(SmartReplyController::class.java, STUB_ONLY)
 
         val dumpManager = DumpManager()
         mGroupExpansionManager = GroupExpansionManagerImpl(dumpManager, mGroupMembershipManager)
-        mHeadsUpManager = Mockito.mock(HeadsUpManager::class.java)
+        mHeadsUpManager = Mockito.mock(HeadsUpManager::class.java, STUB_ONLY)
         mIconManager =
             IconManager(
-                Mockito.mock(CommonNotifCollection::class.java),
-                Mockito.mock(LauncherApps::class.java),
+                Mockito.mock(CommonNotifCollection::class.java, STUB_ONLY),
+                Mockito.mock(LauncherApps::class.java, STUB_ONLY),
                 IconBuilder(context),
                 mTestScope,
                 mBgCoroutineContext,
@@ -173,7 +178,7 @@ class ExpandableNotificationRowBuilder(
                 }
             )
         val remoteViewsFactories = getNotifRemoteViewsFactoryContainer(featureFlags)
-        val remoteInputManager = Mockito.mock(NotificationRemoteInputManager::class.java)
+        val remoteInputManager = Mockito.mock(NotificationRemoteInputManager::class.java, STUB_ONLY)
         val smartReplyStateInflater =
             SmartReplyStateInflaterImpl(
                 constants = mSmartReplyConstants,
@@ -183,7 +188,8 @@ class ExpandableNotificationRowBuilder(
                 smartRepliesInflater =
                     SmartReplyInflaterImpl(
                         constants = mSmartReplyConstants,
-                        keyguardDismissUtil = mock(),
+                        keyguardDismissUtil =
+                            Mockito.mock(KeyguardDismissUtil::class.java, STUB_ONLY),
                         remoteInputManager = remoteInputManager,
                         smartReplyController = mSmartReplyController,
                         context = context
@@ -191,7 +197,7 @@ class ExpandableNotificationRowBuilder(
                 smartActionsInflater =
                     SmartActionInflaterImpl(
                         constants = mSmartReplyConstants,
-                        activityStarter = mock(),
+                        activityStarter = Mockito.mock(ActivityStarter::class.java, STUB_ONLY),
                         smartReplyController = mSmartReplyController,
                         headsUpManager = mHeadsUpManager
                     )
@@ -206,41 +212,42 @@ class ExpandableNotificationRowBuilder(
             }
         val conversationProcessor =
             ConversationNotificationProcessor(
-                mock(),
-                mock(),
+                Mockito.mock(LauncherApps::class.java, STUB_ONLY),
+                Mockito.mock(ConversationNotificationManager::class.java, STUB_ONLY),
             )
+
         mContentBinder =
             if (NotificationRowContentBinderRefactor.isEnabled)
                 NotificationRowContentBinderImpl(
-                    mock(),
+                    Mockito.mock(NotifRemoteViewCache::class.java, STUB_ONLY),
                     remoteInputManager,
                     conversationProcessor,
-                    mock(),
-                    mock(),
-                    mock(),
+                    Mockito.mock(RichOngoingNotificationContentExtractor::class.java, STUB_ONLY),
+                    Mockito.mock(RichOngoingNotificationViewInflater::class.java, STUB_ONLY),
+                    Mockito.mock(Executor::class.java, STUB_ONLY),
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,
-                    mock(),
-                    mock(),
+                    Mockito.mock(HeadsUpStyleProvider::class.java, STUB_ONLY),
+                    Mockito.mock(NotificationRowContentBinderLogger::class.java, STUB_ONLY),
                 )
             else
                 NotificationContentInflater(
-                    mock(),
+                    Mockito.mock(NotifRemoteViewCache::class.java, STUB_ONLY),
                     remoteInputManager,
                     conversationProcessor,
-                    mock(),
-                    mock(),
+                    Mockito.mock(MediaFeatureFlag::class.java, STUB_ONLY),
+                    Mockito.mock(Executor::class.java, STUB_ONLY),
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,
-                    mock(),
-                    mock(),
+                    Mockito.mock(HeadsUpStyleProvider::class.java, STUB_ONLY),
+                    Mockito.mock(NotificationRowContentBinderLogger::class.java, STUB_ONLY),
                 )
         mContentBinder.setInflateSynchronously(true)
         mBindStage =
             RowContentBindStage(
                 mContentBinder,
-                mock(),
-                mock(),
+                Mockito.mock(NotifInflationErrorManager::class.java, STUB_ONLY),
+                Mockito.mock(RowContentBindStageLogger::class.java, STUB_ONLY),
             )
 
         val collection = Mockito.mock(CommonNotifCollection::class.java)
@@ -248,7 +255,7 @@ class ExpandableNotificationRowBuilder(
         mBindPipeline =
             NotifBindPipeline(
                 collection,
-                Mockito.mock(NotifBindPipelineLogger::class.java),
+                Mockito.mock(NotifBindPipelineLogger::class.java, STUB_ONLY),
                 NotificationEntryProcessorFactoryExecutorImpl(mMainExecutor),
             )
         mBindPipeline.setStage(mBindStage)
@@ -256,9 +263,11 @@ class ExpandableNotificationRowBuilder(
         val collectionListenerCaptor = ArgumentCaptor.forClass(NotifCollectionListener::class.java)
         Mockito.verify(collection).addCollectionListener(collectionListenerCaptor.capture())
         mBindPipelineEntryListener = collectionListenerCaptor.value
-        mPeopleNotificationIdentifier = Mockito.mock(PeopleNotificationIdentifier::class.java)
+        mPeopleNotificationIdentifier =
+            Mockito.mock(PeopleNotificationIdentifier::class.java, STUB_ONLY)
         mOnUserInteractionCallback = Mockito.mock(OnUserInteractionCallback::class.java)
-        mDismissibilityProvider = Mockito.mock(NotificationDismissibilityProvider::class.java)
+        mDismissibilityProvider =
+            Mockito.mock(NotificationDismissibilityProvider::class.java, STUB_ONLY)
         val mFutureDismissalRunnable = Mockito.mock(Runnable::class.java)
         whenever(
                 mOnUserInteractionCallback.registerFutureDismissal(
@@ -320,7 +329,10 @@ class ExpandableNotificationRowBuilder(
         //  set, but we do not want to override an existing value that is needed by a specific test.
 
         val rowInflaterTask =
-            RowInflaterTask(mFakeSystemClock, Mockito.mock(RowInflaterTaskLogger::class.java))
+            RowInflaterTask(
+                mFakeSystemClock,
+                Mockito.mock(RowInflaterTaskLogger::class.java, STUB_ONLY)
+            )
         val row = rowInflaterTask.inflateSynchronously(context, null, entry)
 
         entry.row = row
@@ -329,7 +341,7 @@ class ExpandableNotificationRowBuilder(
         mBindPipeline.manageRow(entry, row)
         row.initialize(
             entry,
-            Mockito.mock(RemoteInputViewSubcomponent.Factory::class.java),
+            Mockito.mock(RemoteInputViewSubcomponent.Factory::class.java, STUB_ONLY),
             APP_NAME,
             entry.key,
             mMockLogger,
@@ -338,23 +350,23 @@ class ExpandableNotificationRowBuilder(
             mGroupExpansionManager,
             mHeadsUpManager,
             mBindStage,
-            Mockito.mock(OnExpandClickListener::class.java),
-            Mockito.mock(CoordinateOnClickListener::class.java),
+            Mockito.mock(OnExpandClickListener::class.java, STUB_ONLY),
+            Mockito.mock(CoordinateOnClickListener::class.java, STUB_ONLY),
             FalsingManagerFake(),
             mStatusBarStateController,
             mPeopleNotificationIdentifier,
             mOnUserInteractionCallback,
-            Optional.of(Mockito.mock(BubblesManager::class.java)),
-            Mockito.mock(NotificationGutsManager::class.java),
+            Optional.of(Mockito.mock(BubblesManager::class.java, STUB_ONLY)),
+            Mockito.mock(NotificationGutsManager::class.java, STUB_ONLY),
             mDismissibilityProvider,
-            Mockito.mock(MetricsLogger::class.java),
-            Mockito.mock(NotificationChildrenContainerLogger::class.java),
-            Mockito.mock(ColorUpdateLogger::class.java),
+            Mockito.mock(MetricsLogger::class.java, STUB_ONLY),
+            Mockito.mock(NotificationChildrenContainerLogger::class.java, STUB_ONLY),
+            Mockito.mock(ColorUpdateLogger::class.java, STUB_ONLY),
             mSmartReplyConstants,
             mSmartReplyController,
             featureFlags,
-            Mockito.mock(IStatusBarService::class.java),
-            Mockito.mock(UiEventLogger::class.java)
+            Mockito.mock(IStatusBarService::class.java, STUB_ONLY),
+            Mockito.mock(UiEventLogger::class.java, STUB_ONLY)
         )
         row.setAboveShelfChangedListener { aboveShelf: Boolean -> }
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags)
@@ -380,6 +392,8 @@ class ExpandableNotificationRowBuilder(
 
         private val Notification.isConversationStyleNotification
             get() = extras.getBoolean(IS_CONVERSATION_FLAG, false)
+
+        private val STUB_ONLY = Mockito.withSettings().stubOnly()
 
         fun markAsConversation(builder: Notification.Builder) {
             builder.addExtras(bundleOf(IS_CONVERSATION_FLAG to true))

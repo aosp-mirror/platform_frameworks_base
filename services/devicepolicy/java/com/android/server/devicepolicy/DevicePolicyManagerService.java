@@ -20666,9 +20666,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     // have OP_RUN_ANY_IN_BACKGROUND app op and won't execute in the background. The
                     // code below grants that app op, and once the exemption is in place, the user
                     // won't be able to disable background usage anymore.
-                    if (Flags.powerExemptionBgUsageFix()
-                            && exemption == EXEMPT_FROM_POWER_RESTRICTIONS
-                            && newMode == MODE_ALLOWED) {
+                    if (exemption == EXEMPT_FROM_POWER_RESTRICTIONS && newMode == MODE_ALLOWED) {
                         setBgUsageAppOp(appOpsMgr, appInfo);
                     }
                 }

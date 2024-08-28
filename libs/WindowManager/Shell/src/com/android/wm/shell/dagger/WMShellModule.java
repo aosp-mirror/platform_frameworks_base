@@ -59,6 +59,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
+import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
@@ -237,7 +238,8 @@ public abstract class WMShellModule {
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
             MultiInstanceHelper multiInstanceHelper,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter) {
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -259,7 +261,8 @@ public abstract class WMShellModule {
                     interactionJankMonitor,
                     genericLinksParser,
                     multiInstanceHelper,
-                    desktopTasksLimiter);
+                    desktopTasksLimiter,
+                    desktopActivityOrientationHandler);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -673,6 +676,24 @@ public abstract class WMShellModule {
     @DynamicOverride
     static DesktopModeTaskRepository provideDesktopModeTaskRepository() {
         return new DesktopModeTaskRepository();
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopActivityOrientationChangeHandler> provideActivityOrientationHandler(
+            Context context,
+            ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            TaskStackListenerImpl taskStackListener,
+            ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
+            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository
+    ) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            return Optional.of(new DesktopActivityOrientationChangeHandler(
+                    context, shellInit, shellTaskOrganizer, taskStackListener,
+                    toggleResizeDesktopTaskTransitionHandler, desktopModeTaskRepository));
+        }
+        return Optional.empty();
     }
 
     @WMSingleton

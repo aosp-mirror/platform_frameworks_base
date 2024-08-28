@@ -14,6 +14,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -29,7 +30,6 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -73,8 +73,8 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(context.user).thenReturn(UserHandle.SYSTEM)
-        `when`(context.createContextAsUser(ArgumentMatchers.any(), anyInt())).thenReturn(context)
+        whenever(context.user).thenReturn(UserHandle.SYSTEM)
+        whenever(context.createContextAsUser(ArgumentMatchers.any(), anyInt())).thenReturn(context)
     }
 
     @Test
@@ -94,7 +94,7 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
         tracker.addCallback(callback, executor)
         val profileID = tracker.userId + 10
 
-        `when`(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
+        whenever(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
             val id = invocation.getArgument<Int>(0)
             val info = UserInfo(id, "", UserInfo.FLAG_FULL)
             val infoProfile =

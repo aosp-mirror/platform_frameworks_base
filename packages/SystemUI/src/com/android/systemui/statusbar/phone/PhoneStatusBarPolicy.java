@@ -44,7 +44,6 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
-import com.android.settingslib.notification.modes.ZenIconLoader;
 import com.android.settingslib.notification.modes.ZenMode;
 import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -404,13 +403,9 @@ public class PhoneStatusBarPolicy
         boolean visible = mode != null;
         if (visible) {
             // TODO: b/360399800 - Get the resource id, package, and cached drawable from the mode;
-            //  this is a shortcut for testing (there should be no direct dependency on
-            //  ZenIconLoader here).
-            String resPackage = mode.isSystemOwned() ? null : mode.getRule().getPackageName();
-            int iconResId = mode.getRule().getIconResId();
-            if (iconResId == 0) {
-                iconResId = ZenIconLoader.getIconResourceIdFromType(mode.getType());
-            }
+            //  this is a shortcut for testing.
+            String resPackage = mode.getIconKey().resPackage();
+            int iconResId = mode.getIconKey().resId();
 
             mIconController.setResourceIcon(mSlotZen, resPackage, iconResId,
                     /* preloadedIcon= */ null, mode.getName());

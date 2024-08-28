@@ -190,7 +190,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                     IProtoLogConfigurationService.Stub.asInterface(ServiceManager.getService(
                             PROTOLOG_CONFIGURATION_SERVICE));
             Objects.requireNonNull(mProtoLogConfigurationService,
-                    "ServiceManager returned a null ProtoLog service");
+                    "ServiceManager returned a null ProtoLog Configuration Service");
 
             try {
                 var args = new ProtoLogConfigurationService.RegisterClientArgs();

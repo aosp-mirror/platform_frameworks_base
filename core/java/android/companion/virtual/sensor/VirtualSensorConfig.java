@@ -17,7 +17,13 @@
 package android.companion.virtual.sensor;
 
 
+import static android.hardware.Sensor.REPORTING_MODE_CONTINUOUS;
+import static android.hardware.Sensor.REPORTING_MODE_ONE_SHOT;
+import static android.hardware.Sensor.REPORTING_MODE_ON_CHANGE;
+import static android.hardware.Sensor.REPORTING_MODE_SPECIAL_TRIGGER;
+
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,6 +36,8 @@ import android.hardware.SensorDirectChannel;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 
@@ -70,6 +78,17 @@ public final class VirtualSensorConfig implements Parcelable {
     private final int mMaxDelay;
 
     private final int mFlags;
+
+    /** @hide */
+    @IntDef(prefix = "REPORTING_MODE_", value = {
+            REPORTING_MODE_CONTINUOUS,
+            REPORTING_MODE_ON_CHANGE,
+            REPORTING_MODE_ONE_SHOT,
+            REPORTING_MODE_SPECIAL_TRIGGER
+    })
+
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ReportingMode {}
 
     private VirtualSensorConfig(int type, @NonNull String name, @Nullable String vendor,
             float maximumRange, float resolution, float power, int minDelay, int maxDelay,
@@ -240,7 +259,7 @@ public final class VirtualSensorConfig implements Parcelable {
      * @see Sensor#getReportingMode()
      */
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
-    public int getReportingMode() {
+    public @ReportingMode int getReportingMode() {
         return ((mFlags & REPORTING_MODE_MASK) >> REPORTING_MODE_SHIFT);
     }
 
@@ -442,11 +461,11 @@ public final class VirtualSensorConfig implements Parcelable {
          */
         @FlaggedApi(Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
         @NonNull
-        public VirtualSensorConfig.Builder setReportingMode(int reportingMode) {
-            if (reportingMode != Sensor.REPORTING_MODE_CONTINUOUS
-                    && reportingMode != Sensor.REPORTING_MODE_ON_CHANGE
-                    && reportingMode != Sensor.REPORTING_MODE_ONE_SHOT
-                    && reportingMode != Sensor.REPORTING_MODE_SPECIAL_TRIGGER) {
+        public VirtualSensorConfig.Builder setReportingMode(@ReportingMode int reportingMode) {
+            if (reportingMode != REPORTING_MODE_CONTINUOUS
+                    && reportingMode != REPORTING_MODE_ON_CHANGE
+                    && reportingMode != REPORTING_MODE_ONE_SHOT
+                    && reportingMode != REPORTING_MODE_SPECIAL_TRIGGER) {
                 throw new IllegalArgumentException("Invalid reporting mode: " + reportingMode);
             }
             mFlags |= reportingMode << REPORTING_MODE_SHIFT;

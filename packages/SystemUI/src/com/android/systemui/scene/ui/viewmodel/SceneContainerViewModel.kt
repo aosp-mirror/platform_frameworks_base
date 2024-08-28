@@ -48,14 +48,6 @@ constructor(
     private val logger: SceneLogger,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : SysUiViewModel, ExclusiveActivatable() {
-    /**
-     * Keys of all scenes in the container.
-     *
-     * The scenes will be sorted in z-order such that the last one is the one that should be
-     * rendered on top of all previous ones.
-     */
-    val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
-
     /** The scene that should be rendered. */
     val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
@@ -187,8 +179,20 @@ constructor(
         actionResultMap: Map<UserAction, UserActionResult>,
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
-            sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
-                actionResult.copy(toScene = it)
+            when (actionResult) {
+                is UserActionResult.ChangeScene -> {
+                    sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
+                        toScene ->
+                        UserActionResult(
+                            toScene = toScene,
+                            transitionKey = actionResult.transitionKey,
+                            requiresFullDistanceSwipe = actionResult.requiresFullDistanceSwipe,
+                        )
+                    }
+                }
+                is UserActionResult.ShowOverlay,
+                is UserActionResult.HideOverlay,
+                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
             } ?: actionResult
         }
     }

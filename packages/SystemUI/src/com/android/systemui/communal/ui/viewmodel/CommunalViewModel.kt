@@ -254,6 +254,7 @@ constructor(
             expandedMatchesParentHeight = true
             showsOnlyActiveMedia = false
             falsingProtectionNeeded = false
+            disablePagination = true
             init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
         }
     }

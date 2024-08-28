@@ -20,9 +20,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.provider.Settings
 import android.view.accessibility.AccessibilityEvent
@@ -72,7 +70,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.never
@@ -141,6 +138,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 context,
                 accessibilityManager,
                 packageManager,
+                WIDGET_PICKER_PACKAGE_NAME,
             )
     }
 
@@ -259,18 +257,8 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Test
     fun onOpenWidgetPicker_launchesWidgetPickerActivity() {
         testScope.runTest {
-            whenever(packageManager.resolveActivity(any(), anyInt())).then {
-                ResolveInfo().apply {
-                    activityInfo = ActivityInfo().apply { packageName = WIDGET_PICKER_PACKAGE_NAME }
-                }
-            }
-
             val success =
-                underTest.onOpenWidgetPicker(
-                    testableResources.resources,
-                    packageManager,
-                    activityResultLauncher
-                )
+                underTest.onOpenWidgetPicker(testableResources.resources, activityResultLauncher)
 
             verify(activityResultLauncher).launch(any())
             assertTrue(success)
@@ -278,38 +266,14 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onOpenWidgetPicker_launcherActivityNotResolved_doesNotLaunchWidgetPickerActivity() {
-        testScope.runTest {
-            whenever(packageManager.resolveActivity(any(), anyInt())).thenReturn(null)
-
-            val success =
-                underTest.onOpenWidgetPicker(
-                    testableResources.resources,
-                    packageManager,
-                    activityResultLauncher
-                )
-
-            verify(activityResultLauncher, never()).launch(any())
-            assertFalse(success)
-        }
-    }
-
-    @Test
     fun onOpenWidgetPicker_activityLaunchThrowsException_failure() {
         testScope.runTest {
-            whenever(packageManager.resolveActivity(any(), anyInt())).then {
-                ResolveInfo().apply {
-                    activityInfo = ActivityInfo().apply { packageName = WIDGET_PICKER_PACKAGE_NAME }
-                }
-            }
-
             whenever(activityResultLauncher.launch(any()))
                 .thenThrow(ActivityNotFoundException::class.java)
 
             val success =
                 underTest.onOpenWidgetPicker(
                     testableResources.resources,
-                    packageManager,
                     activityResultLauncher,
                 )
 

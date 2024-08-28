@@ -16,7 +16,9 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
@@ -51,6 +53,7 @@ import kotlinx.coroutines.flow.stateIn
  * other feature modules should depend on and call into this class when their parts of the
  * application state change.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class SceneInteractor
 @Inject
@@ -76,12 +79,28 @@ constructor(
     private val onSceneAboutToChangeListener = mutableSetOf<OnSceneAboutToChangeListener>()
 
     /**
+     * The keys of all scenes and overlays in the container.
+     *
+     * They will be sorted in z-order such that the last one is the one that should be rendered on
+     * top of all previous ones.
+     */
+    val allContentKeys: List<ContentKey> = repository.allContentKeys
+
+    /**
      * The current scene.
      *
      * Note that during a transition between scenes, more than one scene might be rendered but only
      * one is considered the committed/current scene.
      */
     val currentScene: StateFlow<SceneKey> = repository.currentScene
+
+    /**
+     * The current set of overlays to be shown (may be empty).
+     *
+     * Note that during a transition between overlays, a different set of overlays may be rendered -
+     * but only the ones in this set are considered the current overlays.
+     */
+    val currentOverlays: StateFlow<Set<OverlayKey>> = repository.currentOverlays
 
     /**
      * The current state of the transition.
@@ -192,16 +211,6 @@ constructor(
         }
     }
 
-    /**
-     * Returns the keys of all scenes in the container.
-     *
-     * The scenes will be sorted in z-order such that the last one is the one that should be
-     * rendered on top of all previous ones.
-     */
-    fun allSceneKeys(): List<SceneKey> {
-        return repository.allSceneKeys()
-    }
-
     fun registerSceneStateProcessor(processor: OnSceneAboutToChangeListener) {
         onSceneAboutToChangeListener.add(processor)
     }
@@ -281,6 +290,105 @@ constructor(
         )
 
         repository.snapToScene(resolvedScene)
+    }
+
+    /**
+     * Request to show [overlay] so that it animates in from [currentScene] and ends up being
+     * visible on screen.
+     *
+     * After this returns, this overlay will be included in [currentOverlays]. This does nothing if
+     * [overlay] is already shown.
+     *
+     * @param overlay The overlay to be shown
+     * @param loggingReason The reason why the transition is requested, for logging purposes
+     * @param transitionKey The transition key for this animated transition
+     */
+    @JvmOverloads
+    fun showOverlay(
+        overlay: OverlayKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+    ) {
+        if (!validateOverlayChange(to = overlay, loggingReason = loggingReason)) {
+            return
+        }
+
+        logger.logOverlayChangeRequested(
+            to = overlay,
+            reason = loggingReason,
+        )
+
+        repository.showOverlay(
+            overlay = overlay,
+            transitionKey = transitionKey,
+        )
+    }
+
+    /**
+     * Request to hide [overlay] so that it animates out to [currentScene] and ends up *not* being
+     * visible on screen.
+     *
+     * After this returns, this overlay will not be included in [currentOverlays]. This does nothing
+     * if [overlay] is already hidden.
+     *
+     * @param overlay The overlay to be hidden
+     * @param loggingReason The reason why the transition is requested, for logging purposes
+     * @param transitionKey The transition key for this animated transition
+     */
+    @JvmOverloads
+    fun hideOverlay(
+        overlay: OverlayKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+    ) {
+        if (!validateOverlayChange(from = overlay, loggingReason = loggingReason)) {
+            return
+        }
+
+        logger.logOverlayChangeRequested(
+            from = overlay,
+            reason = loggingReason,
+        )
+
+        repository.hideOverlay(
+            overlay = overlay,
+            transitionKey = transitionKey,
+        )
+    }
+
+    /**
+     * Replace [from] by [to] so that [from] ends up not being visible on screen and [to] ends up
+     * being visible.
+     *
+     * This throws if [from] is not currently shown or if [to] is already shown.
+     *
+     * @param from The overlay to be hidden, if any
+     * @param to The overlay to be shown, if any
+     * @param loggingReason The reason why the transition is requested, for logging purposes
+     * @param transitionKey The transition key for this animated transition
+     */
+    @JvmOverloads
+    fun replaceOverlay(
+        from: OverlayKey,
+        to: OverlayKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+    ) {
+        if (!validateOverlayChange(from = from, to = to, loggingReason = loggingReason)) {
+            return
+        }
+
+        logger.logOverlayChangeRequested(
+            from = from,
+            to = to,
+            reason = loggingReason,
+        )
+
+        repository.replaceOverlay(
+            from = from,
+            to = to,
+            transitionKey = transitionKey,
+        )
     }
 
     /**
@@ -388,7 +496,7 @@ constructor(
         to: SceneKey,
         loggingReason: String,
     ): Boolean {
-        if (!repository.allSceneKeys().contains(to)) {
+        if (to !in repository.allContentKeys) {
             return false
         }
 
@@ -407,6 +515,34 @@ constructor(
         }
 
         return from != to
+    }
+
+    /**
+     * Validates that the given overlay change is allowed.
+     *
+     * Will throw a runtime exception for illegal states.
+     *
+     * @param from The overlay to be hidden, if any
+     * @param to The overlay to be shown, if any
+     * @param loggingReason The reason why the transition is requested, for logging purposes
+     * @return `true` if the scene change is valid; `false` if it shouldn't happen
+     */
+    private fun validateOverlayChange(
+        from: OverlayKey? = null,
+        to: OverlayKey? = null,
+        loggingReason: String,
+    ): Boolean {
+        check(from != null || to != null) {
+            "No overlay key provided for requested change." +
+                " Current transition state is ${transitionState.value}." +
+                " Logging reason for overlay change was: $loggingReason"
+        }
+
+        val isFromValid = (from == null) || (from in currentOverlays.value)
+        val isToValid =
+            (to == null) || (to !in currentOverlays.value && to in repository.allContentKeys)
+
+        return isFromValid && isToValid && from != to
     }
 
     /** Returns a flow indicating if the currently visible scene can be resolved from [family]. */

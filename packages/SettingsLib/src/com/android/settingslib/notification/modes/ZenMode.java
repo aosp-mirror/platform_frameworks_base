@@ -20,9 +20,9 @@ import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
 import static android.app.AutomaticZenRule.TYPE_SCHEDULE_TIME;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
-import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.ZenModeConfig.tryParseCountdownConditionId;
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
@@ -36,7 +36,6 @@ import android.annotation.SuppressLint;
 import android.app.AutomaticZenRule;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -50,12 +49,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.R;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -275,28 +270,32 @@ public class ZenMode implements Parcelable {
     }
 
     /**
-     * Returns an icon "key" that is guaranteed to be different if the icon is different. Note that
-     * the inverse is not true, i.e. two keys can be different and the icon still be visually the
-     * same.
+     * Returns the {@link ZenIcon.Key} corresponding to the icon resource for this mode. This can be
+     * either app-provided (via {@link AutomaticZenRule#setIconResId}, user-chosen (via the icon
+     * picker in Settings), or a default icon based on the mode {@link Kind} and {@link #getType}.
      */
     @NonNull
-    public String getIconKey() {
-        return mRule.getType() + ":" + mRule.getPackageName() + ":" + mRule.getIconResId();
-    }
-
-    /**
-     * Returns the mode icon -- which can be either app-provided (via {@code addAutomaticZenRule}),
-     * user-chosen (via the icon picker in Settings), or a default icon based on the mode type.
-     */
-    @NonNull
-    public ListenableFuture<Drawable> getIcon(@NonNull Context context,
-            @NonNull ZenIconLoader iconLoader) {
-        if (mKind == Kind.MANUAL_DND) {
-            return Futures.immediateFuture(requireNonNull(
-                    context.getDrawable(R.drawable.ic_do_not_disturb_on_24dp)));
+    public ZenIcon.Key getIconKey() {
+        if (isManualDnd()) {
+            return ZenIconKeys.MANUAL_DND;
         }
-
-        return iconLoader.getIcon(context, mRule);
+        if (mRule.getIconResId() != 0) {
+            if (isSystemOwned()) {
+                // System-owned rules can only have system icons.
+                return ZenIcon.Key.forSystemResource(mRule.getIconResId());
+            } else {
+                // Technically, the icon of an app-provided rule could be a system icon if the
+                // user chose one with the picker. However, we cannot know for sure.
+                return new ZenIcon.Key(mRule.getPackageName(), mRule.getIconResId());
+            }
+        } else {
+            // Using a default icon (which is always a system icon).
+            if (mKind == Kind.IMPLICIT) {
+                return ZenIconKeys.IMPLICIT_MODE_DEFAULT;
+            } else {
+                return ZenIconKeys.forType(getType());
+            }
+        }
     }
 
     @NonNull

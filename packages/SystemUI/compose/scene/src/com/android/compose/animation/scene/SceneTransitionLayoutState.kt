@@ -183,6 +183,12 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
  *   commits a transition to a new scene because of a [UserAction]. If [canChangeScene] returns
  *   `true`, then the gesture will be committed and we will animate to the other scene. Otherwise,
  *   the gesture will be cancelled and we will animate back to the current scene.
+ * @param canShowOverlay whether we should commit a user action that will result in showing the
+ *   given overlay.
+ * @param canHideOverlay whether we should commit a user action that will result in hiding the given
+ *   overlay.
+ * @param canReplaceOverlay whether we should commit a user action that will result in replacing
+ *   `from` overlay by `to` overlay.
  * @param stateLinks the [StateLink] connecting this [SceneTransitionLayoutState] to other
  *   [SceneTransitionLayoutState]s.
  */
@@ -191,6 +197,9 @@ fun MutableSceneTransitionLayoutState(
     transitions: SceneTransitions = SceneTransitions.Empty,
     initialOverlays: Set<OverlayKey> = emptySet(),
     canChangeScene: (SceneKey) -> Boolean = { true },
+    canShowOverlay: (OverlayKey) -> Boolean = { true },
+    canHideOverlay: (OverlayKey) -> Boolean = { true },
+    canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
     stateLinks: List<StateLink> = emptyList(),
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ): MutableSceneTransitionLayoutState {
@@ -199,6 +208,9 @@ fun MutableSceneTransitionLayoutState(
         transitions,
         initialOverlays,
         canChangeScene,
+        canShowOverlay,
+        canHideOverlay,
+        canReplaceOverlay,
         stateLinks,
         enableInterruptions,
     )
@@ -210,6 +222,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override var transitions: SceneTransitions = transitions {},
     initialOverlays: Set<OverlayKey> = emptySet(),
     internal val canChangeScene: (SceneKey) -> Boolean = { true },
+    internal val canShowOverlay: (OverlayKey) -> Boolean = { true },
+    internal val canHideOverlay: (OverlayKey) -> Boolean = { true },
+    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ ->
+        true
+    },
     private val stateLinks: List<StateLink> = emptyList(),
 
     // TODO(b/290930950): Remove this flag.

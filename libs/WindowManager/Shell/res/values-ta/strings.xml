@@ -127,6 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"மெனுவைத் திற"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"திரையைப் பெரிதாக்கு"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"திரையை ஸ்னாப் செய்"</string>
-    <!-- no translation found for desktop_mode_non_resizable_snap_text (1049800446363800707) -->
-    <skip />
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"இந்த ஆப்ஸின் அளவை மாற்ற முடியாது"</string>
 </resources>

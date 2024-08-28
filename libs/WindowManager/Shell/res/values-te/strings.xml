@@ -127,6 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"మెనూను తెరవండి"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"స్క్రీన్ సైజ్‌ను పెంచండి"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"స్క్రీన్‌ను స్నాప్ చేయండి"</string>
-    <!-- no translation found for desktop_mode_non_resizable_snap_text (1049800446363800707) -->
-    <skip />
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ఈ యాప్ సైజ్‌ను మార్చడం సాధ్యపడదు"</string>
 </resources>

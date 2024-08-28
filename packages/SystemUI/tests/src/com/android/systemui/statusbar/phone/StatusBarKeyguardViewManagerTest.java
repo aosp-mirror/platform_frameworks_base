@@ -83,6 +83,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -171,6 +172,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private DeviceEntryInteractor mDeviceEntryInteractor;
     @Mock private SceneInteractor mSceneInteractor;
+    @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
@@ -242,7 +244,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),
                         mExecutor,
-                        () -> mDeviceEntryInteractor) {
+                        () -> mDeviceEntryInteractor,
+                        mDismissCallbackRegistry) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -765,7 +768,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),
                         mExecutor,
-                        () -> mDeviceEntryInteractor) {
+                        () -> mDeviceEntryInteractor,
+                        mDismissCallbackRegistry) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -777,7 +781,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void testResetHideBouncerWhenShowing_alternateBouncerHides() {
+        reset(mDismissCallbackRegistry);
+        reset(mPrimaryBouncerInteractor);
+
         // GIVEN the keyguard is showing
         reset(mAlternateBouncerInteractor);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
@@ -785,8 +793,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         // WHEN SBKV is reset with hideBouncerWhenShowing=true
         mStatusBarKeyguardViewManager.reset(true);
 
-        // THEN alternate bouncer is hidden
+        // THEN alternate bouncer is hidden and dismiss actions reset
         verify(mAlternateBouncerInteractor).hide();
+        verify(mDismissCallbackRegistry).notifyDismissCancelled();
+        verify(mPrimaryBouncerInteractor).setDismissAction(eq(null), eq(null));
     }
 
     @Test
