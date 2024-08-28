@@ -132,6 +132,7 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.flags.Flags;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
 import java.io.IOException;
@@ -9975,6 +9976,7 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
             ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
+            ALLOWED_NETWORK_TYPES_REASON_TEST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -10011,6 +10013,14 @@ public class TelephonyManager {
      */
     @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
+     * To indicate allowed network type change is requested by Testing purpose, should be default to
+     * {@link #getAllNetworkTypesBitmask} when done testing.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_NETWORK_TYPES_REASON_TEST = 4;
 
     /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
@@ -10118,6 +10128,8 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
                 return true;
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST:
+                return TelephonyUtils.IS_DEBUGGABLE;
         }
         return false;
     }
