@@ -31,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.UserAction
@@ -57,12 +59,18 @@ import kotlinx.coroutines.flow.collectLatest
  *   and only the scenes on this container. In other words: (a) there should be no scene in this map
  *   that is not in the configuration for this container and (b) all scenes in the configuration
  *   must have entries in this map.
+ * @param overlayByKey Mapping of [Overlay] by [OverlayKey], ordered by z-order such that the last
+ *   overlay is rendered on top of all other overlays. It's critical that this map contains exactly
+ *   and only the overlays on this container. In other words: (a) there should be no overlay in this
+ *   map that is not in the configuration for this container and (b) all overlays in the
+ *   configuration must have entries in this map.
  * @param modifier A modifier.
  */
 @Composable
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
     sceneByKey: Map<SceneKey, ComposableScene>,
+    overlayByKey: Map<OverlayKey, Overlay>,
     initialSceneKey: SceneKey,
     dataSourceDelegator: SceneDataSourceDelegator,
     modifier: Modifier = Modifier,
@@ -89,16 +97,19 @@ fun SceneContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
-    val userActionsBySceneKey: MutableMap<SceneKey, Map<UserAction, UserActionResult>> = remember {
-        mutableStateMapOf()
-    }
+    val userActionsByContentKey: MutableMap<ContentKey, Map<UserAction, UserActionResult>> =
+        remember {
+            mutableStateMapOf()
+        }
+    // TODO(b/359173565): Add overlay user actions when the API is final.
     LaunchedEffect(currentSceneKey) {
         try {
             sceneByKey[currentSceneKey]?.destinationScenes?.collectLatest { userActions ->
-                userActionsBySceneKey[currentSceneKey] = viewModel.resolveSceneFamilies(userActions)
+                userActionsByContentKey[currentSceneKey] =
+                    viewModel.resolveSceneFamilies(userActions)
             }
         } finally {
-            userActionsBySceneKey[currentSceneKey] = emptyMap()
+            userActionsByContentKey[currentSceneKey] = emptyMap()
         }
     }
 
@@ -115,7 +126,7 @@ fun SceneContainer(
             sceneByKey.forEach { (sceneKey, composableScene) ->
                 scene(
                     key = sceneKey,
-                    userActions = userActionsBySceneKey.getOrDefault(sceneKey, emptyMap())
+                    userActions = userActionsByContentKey.getOrDefault(sceneKey, emptyMap())
                 ) {
                     // Activate the scene.
                     LaunchedEffect(composableScene) { composableScene.activate() }
@@ -126,6 +137,15 @@ fun SceneContainer(
                             modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),
                         )
                     }
+                }
+            }
+            overlayByKey.forEach { (overlayKey, composableOverlay) ->
+                overlay(
+                    key = overlayKey,
+                    userActions = userActionsByContentKey.getOrDefault(overlayKey, emptyMap())
+                ) {
+                    // Render the overlay.
+                    with(composableOverlay) { this@overlay.Content(Modifier) }
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene
+package com.android.systemui.scene.ui
 
-import com.android.systemui.scene.shared.model.Scene
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.OverlayKey
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.ui.composable.Overlay
-import dagger.Module
-import dagger.Provides
-import dagger.multibindings.ElementsIntoSet
+import kotlinx.coroutines.awaitCancellation
 
-@Module
-object EmptySceneModule {
+class FakeOverlay(
+    override val key: OverlayKey,
+) : ExclusiveActivatable(), Overlay {
 
-    @Provides
-    @ElementsIntoSet
-    fun emptySceneSet(): Set<Scene> {
-        return emptySet()
-    }
+    @Composable override fun ContentScope.Content(modifier: Modifier) = Unit
 
-    @Provides
-    @ElementsIntoSet
-    fun emptyOverlaySet(): Set<Overlay> {
-        return emptySet()
+    override suspend fun onActivated(): Nothing {
+        awaitCancellation()
     }
 }
