@@ -20,4 +20,6 @@ import android.content.ClipData
 import android.graphics.drawable.Drawable
 
 /** A class to hold the [ClipData] for backlinks and the corresponding app's [Drawable] icon. */
-internal data class InternalBacklinksData(val clipData: ClipData, val appIcon: Drawable)
+internal data class InternalBacklinksData(val clipData: ClipData, val appIcon: Drawable) {
+    var displayLabel: String = clipData.description.label.toString()
+}
