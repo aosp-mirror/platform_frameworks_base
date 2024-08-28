@@ -1723,10 +1723,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testDestroyImmediately_hadApp_notFinishing() {
         final ActivityRecord activity = createActivityWithTask();
+        activity.idle = true;
         activity.finishing = false;
         activity.destroyImmediately("test");
 
         assertEquals(DESTROYED, activity.getState());
+        assertFalse(activity.idle);
     }
 
     /**

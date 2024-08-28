@@ -5895,6 +5895,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mAtmService.updateBatteryStats(this, false);
                 }
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
+                idle = false;
                 // Fall through.
             case DESTROYING:
                 if (app != null && !app.hasActivities()) {
