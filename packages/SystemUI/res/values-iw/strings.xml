@@ -150,12 +150,12 @@
     <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"‏מתבצעת כרגע פעולת Cast למכשיר בקרבת מקום"</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"‏הפסקת ה-Cast"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"סגירה"</string>
-    <string name="issuerecord_title" msgid="286627115110121849">"בעיה במכשיר ההקלטה"</string>
+    <string name="issuerecord_title" msgid="286627115110121849">"תיעוד של בעיה"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"מתבצע עיבוד של בעיית ההקלטה"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"התראה מתמשכת לסשן איסוף הבעיה"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"בעיית הקלטה"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"הבעיה בתהליך הקלטה"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"שיתוף"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"בעיית ההקלטה נשמרה"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"הקלטת הבעיה נשמרה"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"אפשר להקיש כדי להציג"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"שגיאה בשמירה של בעיית ההקלטה"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"שגיאה בהפעלה של בעיית ההקלטה"</string>
@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"‏חיבור ה-Bluetooth יופעל מחר בבוקר"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"שיתוף האודיו"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"מתבצע שיתוף של האודיו"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"להזנת הרשאות השיתוף של האודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"אודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"אוזניות"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"סיום"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"הגדרות"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"מצב מופעל"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"פועל • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"מצב מושבת"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"הגדרה"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"שינוי ב\'הגדרות\'"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"לוויין, חיבור באיכות טובה"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"לוויין, יש חיבור זמין"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"תקשורת לוויינית למצב חירום"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"פרופיל עבודה"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"מהנה בשביל חלק מהאנשים, אבל לא בשביל כולם"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏התכונה System UI Tuner מספקת לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, לא לעבוד כראוי או להיעלם בגרסאות עתידיות. יש להמשיך בזהירות."</string>

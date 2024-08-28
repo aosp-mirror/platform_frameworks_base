@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth se va activa mâine dimineață"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Trimite audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Se permite accesul la conținutul audio"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"accesa setările de permitere a accesului la audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Nivelul bateriei: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Căști"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Gata"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Setări"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Activat"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Activat • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Dezactivat"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurează"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gestionează în setări"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, conexiune bună"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, conexiune disponibilă"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS prin satelit"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil de serviciu"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Distractiv pentru unii, dar nu pentru toată lumea"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner oferă modalități suplimentare de a ajusta și a personaliza interfața de utilizare Android. Aceste funcții experimentale pot să se schimbe, să se blocheze sau să dispară din versiunile viitoare. Continuă cu prudență."</string>

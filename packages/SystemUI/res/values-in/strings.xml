@@ -123,7 +123,7 @@
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Merekam layar"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Merekam layar dan audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Tampilkan lokasi sentuhan pada layar"</string>
-    <string name="screenrecord_stop_label" msgid="72699670052087989">"Stop"</string>
+    <string name="screenrecord_stop_label" msgid="72699670052087989">"Berhenti"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Bagikan"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Rekaman layar disimpan"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Ketuk untuk melihat"</string>
@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth akan dinyalakan besok pagi"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Bagikan audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Berbagi audio"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"masuk ke setelan berbagi audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -381,16 +380,16 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Perekam layar"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Mulai"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Berhenti"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Mencatat Masalah"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rekam Masalah"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Mulai"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Berhenti"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Laporan Bug"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Hal apa yang terpengaruh?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Apa jenis masalah yang Anda alami pada perangkat?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Pilih jenis masalah"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Perekaman layar"</string>
     <string name="performance" msgid="6552785217174378320">"Performa"</string>
     <string name="user_interface" msgid="3712869377953950887">"Antarmuka Pengguna"</string>
-    <string name="thermal" msgid="6758074791325414831">"Termal"</string>
+    <string name="thermal" msgid="6758074791325414831">"Panas"</string>
     <string name="custom" msgid="3337456985275158299">"Kustom"</string>
     <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Setelan Rekaman Aktivitas Kustom"</string>
     <string name="restore_default" msgid="5259420807486239755">"Pulihkan Default"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Selesai"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Setelan"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Aktif"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Aktif • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Nonaktif"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Siapkan"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Kelola di setelan"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, koneksi baik"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, koneksi tersedia"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via Satelit"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil kerja"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Tidak semua orang menganggapnya baik"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Penyetel Antarmuka Pengguna Sistem memberikan cara tambahan untuk mengubah dan menyesuaikan antarmuka pengguna Android. Fitur eksperimental ini dapat berubah, rusak, atau menghilang dalam rilis di masa mendatang. Lanjutkan dengan hati-hati."</string>
@@ -786,7 +788,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stop"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Berhenti"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Next"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Previous"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rewind"</string>

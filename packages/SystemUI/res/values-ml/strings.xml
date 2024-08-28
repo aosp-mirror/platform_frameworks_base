@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth നാളെ രാവിലെ ഓണാകും"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ഓഡിയോ പങ്കിടുക"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ഓഡിയോ പങ്കിടുന്നു"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ഓഡിയോ പങ്കിടൽ ക്രമീകരണം നൽകുക"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ബാറ്ററി"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ഓഡിയോ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ഹെഡ്‌സെറ്റ്"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ശരി"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ക്രമീകരണം"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ഓണാണ്"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ഓണാണ് • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ഓഫാണ്"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"സജ്ജീകരിക്കുക"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ക്രമീകരണത്തിൽ മാനേജ് ചെയ്യുക"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"സാറ്റലൈറ്റ്, മികച്ച കണക്ഷൻ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"സാറ്റലൈറ്റ്, കണക്ഷൻ ലഭ്യമാണ്"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"സാറ്റലൈറ്റ് SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ചിലർക്ക് വിനോദം, എന്നാൽ എല്ലാവർക്കുമില്ല"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Android ഉപയോക്തൃ ഇന്റർഫേസ് ആവശ്യമുള്ള രീതിയിൽ മാറ്റുന്നതിനും ഇഷ്ടാനുസൃതമാക്കുന്നതിനും സിസ്റ്റം UI ട്യൂണർ നിങ്ങൾക്ക് അധിക വഴികൾ നൽകുന്നു. ഭാവി റിലീസുകളിൽ ഈ പരീക്ഷണാത്മക ഫീച്ചറുകൾ മാറ്റുകയോ നിർത്തുകയോ അപ്രത്യക്ഷമാവുകയോ ചെയ്തേക്കാം. ശ്രദ്ധയോടെ മുന്നോട്ടുപോകുക."</string>
