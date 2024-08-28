@@ -187,8 +187,20 @@ constructor(
         actionResultMap: Map<UserAction, UserActionResult>,
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
-            sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
-                actionResult.copy(toScene = it)
+            when (actionResult) {
+                is UserActionResult.ChangeScene -> {
+                    sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
+                        toScene ->
+                        UserActionResult(
+                            toScene = toScene,
+                            transitionKey = actionResult.transitionKey,
+                            requiresFullDistanceSwipe = actionResult.requiresFullDistanceSwipe,
+                        )
+                    }
+                }
+                is UserActionResult.ShowOverlay,
+                is UserActionResult.HideOverlay,
+                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
             } ?: actionResult
         }
     }

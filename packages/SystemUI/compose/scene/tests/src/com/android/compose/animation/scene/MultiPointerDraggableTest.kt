@@ -68,7 +68,7 @@ class MultiPointerDraggableTest {
             return delta
         }
 
-        override fun onStop(velocity: Float, canChangeScene: Boolean): Float {
+        override fun onStop(velocity: Float, canChangeContent: Boolean): Float {
             onStop.invoke(velocity)
             return velocity
         }
