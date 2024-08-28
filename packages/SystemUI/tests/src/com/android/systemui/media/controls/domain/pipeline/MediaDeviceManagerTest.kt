@@ -54,6 +54,7 @@ import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -125,6 +126,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     private lateinit var mediaData: MediaData
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
+    private val kosmos = testKosmos()
+
     @Before
     fun setUp() {
         fakeFgExecutor = FakeExecutor(FakeSystemClock())
@@ -141,6 +144,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
                 { localBluetoothManager },
                 fakeFgExecutor,
                 fakeBgExecutor,
+                kosmos.mediaDeviceLogger,
             )
         manager.addListener(listener)
 
