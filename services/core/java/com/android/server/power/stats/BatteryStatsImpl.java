@@ -15300,15 +15300,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHistory.writeHistoryItem(elapsedRealtimeMs, uptimeMs);
             }
         }
-        if (!onBattery &&
-                (status == BatteryManager.BATTERY_STATUS_FULL ||
-                        status == BatteryManager.BATTERY_STATUS_UNKNOWN)) {
-            // We don't record history while we are plugged in and fully charged
-            // (or when battery is not present).  The next time we are
-            // unplugged, history will be cleared.
-            mHistory.setHistoryRecordingEnabled(DEBUG);
-        }
-
         mLastLearnedBatteryCapacityUah = chargeFullUah;
         if (mMinLearnedBatteryCapacityUah == -1) {
             mMinLearnedBatteryCapacityUah = chargeFullUah;
