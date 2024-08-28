@@ -1144,6 +1144,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testOrientationBehind() {
+        assertNull(mDisplayContent.getLastOrientationSource());
         final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setScreenOrientation(getRotatedOrientation(mDisplayContent)).build();
         prev.setVisibleRequested(false);

@@ -1835,7 +1835,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mTransitionController.useShellTransitionsRotation()) {
             return ROTATION_UNDEFINED;
         }
-        final int activityOrientation = r.getOverrideOrientation();
+        int activityOrientation = r.getOverrideOrientation();
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM
                 || shouldIgnoreOrientationRequest(activityOrientation)) {
             return ROTATION_UNDEFINED;
@@ -1846,14 +1846,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     r /* boundary */, false /* includeBoundary */, true /* traverseTopToBottom */);
             if (nextCandidate != null) {
                 r = nextCandidate;
+                activityOrientation = r.getOverrideOrientation();
             }
         }
-        if (r.inMultiWindowMode() || r.getRequestedConfigurationOrientation(true /* forDisplay */)
-                == getConfiguration().orientation) {
+        if (r.inMultiWindowMode() || r.getRequestedConfigurationOrientation(true /* forDisplay */,
+                activityOrientation) == getConfiguration().orientation) {
             return ROTATION_UNDEFINED;
         }
         final int currentRotation = getRotation();
-        final int rotation = mDisplayRotation.rotationForOrientation(r.getRequestedOrientation(),
+        final int rotation = mDisplayRotation.rotationForOrientation(activityOrientation,
                 currentRotation);
         if (rotation == currentRotation) {
             return ROTATION_UNDEFINED;
