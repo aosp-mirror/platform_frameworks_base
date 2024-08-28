@@ -655,6 +655,7 @@ public final class AttributionSource implements Parcelable {
             mAttributionSourceState.token = current.getToken();
             mAttributionSourceState.renouncedPermissions =
                 current.mAttributionSourceState.renouncedPermissions;
+            mBuilderFieldsSet |= 0x2 | 0x4 | 0x8 | 0x10;
         }
 
         /**
