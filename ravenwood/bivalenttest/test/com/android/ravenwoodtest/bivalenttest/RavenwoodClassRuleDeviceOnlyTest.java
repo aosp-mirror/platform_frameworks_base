@@ -26,6 +26,10 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Test to ensure @DisabledOnRavenwood works. Note, now the DisabledOnRavenwood annotation
+ * is handled by the test runner, so it won't really need the class rule.
+ */
 @RunWith(AndroidJUnit4.class)
 @DisabledOnRavenwood
 public class RavenwoodClassRuleDeviceOnlyTest {
