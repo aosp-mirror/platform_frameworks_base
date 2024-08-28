@@ -3568,12 +3568,16 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
                     return;
                 }
-                try {
-                    mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
-                            mContext.getPackageName(),
-                            mSelectedUserInteractor.getSelectedUserId());
-                } catch (RemoteException e) {
-                    Log.d(TAG, "Failed to set disable flags: " + flags, e);
+
+                // Handled in StatusBarDisableFlagsInteractor.
+                if (!KeyguardWmStateRefactor.isEnabled()) {
+                    try {
+                        mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
+                                mContext.getPackageName(),
+                                mSelectedUserInteractor.getSelectedUserId());
+                    } catch (RemoteException e) {
+                        Log.d(TAG, "Failed to set disable flags: " + flags, e);
+                    }
                 }
             }
         }
