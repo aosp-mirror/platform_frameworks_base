@@ -22,6 +22,7 @@
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/jni_macros.h>
+#include <unicode/locid.h>
 #include <unicode/putil.h>
 #include <unicode/udata.h>
 
@@ -287,15 +288,33 @@ static void loadIcuData(string icuPath) {
 // First try specified in the system property ro.icu.data.path,
 // then fallback to java property icu.data.path
 static void loadIcuData() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
     string icuPath = base::GetProperty("ro.icu.data.path", "");
     if (!icuPath.empty()) {
         loadIcuData(icuPath);
     } else {
         // fallback to read from java.lang.System.getProperty
-        JNIEnv* env = AndroidRuntime::getJNIEnv();
         string icuPathFromJava = getJavaProperty(env, "icu.data.path");
         if (!icuPathFromJava.empty()) {
             loadIcuData(icuPathFromJava);
+        }
+    }
+
+    // Check for the ICU default locale property. In Libcore, the default ICU
+    // locale is set when ICU.setDefaultLocale is called, which is called by
+    // Libcore's implemenentation of Java's Locale.setDefault. The default
+    // locale is used in cases such as when ucol_open(NULL, ...) is called, for
+    // example in SQLite's 'COLLATE UNICODE'.
+    string icuLocaleDefault = getJavaProperty(env, "icu.locale.default");
+    if (!icuLocaleDefault.empty()) {
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(icuLocaleDefault.c_str(), status);
+        if (U_SUCCESS(status)) {
+            icu::Locale::setDefault(locale, status);
+        }
+        if (U_FAILURE(status)) {
+            fprintf(stderr, "Failed to set the ICU default locale to '%s' (error code %d)\n",
+                    icuLocaleDefault.c_str(), status);
         }
     }
 }
