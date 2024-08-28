@@ -41,26 +41,29 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     private final OperationContextExt mOperationContext;
 
     /**
-     * @param context    system_server context
-     * @param lazyDaemon pointer for lazy retrieval of the HAL
-     * @param token      a unique token for the client
-     * @param listener   recipient of related events (e.g. authentication)
-     * @param userId     target user id for operation
-     * @param owner      name of the client that owns this
-     * @param cookie     BiometricPrompt authentication cookie (to be moved into a subclass soon)
-     * @param sensorId   ID of the sensor that the operation should be requested of
-     * @param biometricLogger framework stats logger
+     * @param context          system_server context
+     * @param lazyDaemon       pointer for lazy retrieval of the HAL
+     * @param token            a unique token for the client
+     * @param listener         recipient of related events (e.g. authentication)
+     * @param userId           target user id for operation
+     * @param owner            name of the client that owns this
+     * @param cookie           BiometricPrompt authentication cookie (to be moved into a subclass
+     *                         soon)
+     * @param sensorId         ID of the sensor that the operation should be requested of
+     * @param biometricLogger  framework stats logger
      * @param biometricContext system context metadata
      */
     public HalClientMonitor(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId,
-            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            boolean isMandatoryBiometrics) {
         super(context, token, listener, userId, owner, cookie, sensorId,
                 biometricLogger, biometricContext);
         mLazyDaemon = lazyDaemon;
         int modality = listener != null ? listener.getModality() : BiometricAuthenticator.TYPE_NONE;
-        mOperationContext = new OperationContextExt(isBiometricPrompt(), modality);
+        mOperationContext = new OperationContextExt(isBiometricPrompt(), modality,
+                isMandatoryBiometrics);
     }
 
     @Nullable
