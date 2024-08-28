@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Quay lại"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Chuyển phương thức nhập"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Mở bộ chọn phương thức nhập"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Cài đặt"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Sắp hết dung lượng lưu trữ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Một số chức năng hệ thống có thể không hoạt động"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Không đủ bộ nhớ cho hệ thống. Đảm bảo bạn có 250 MB dung lượng trống và khởi động lại."</string>
