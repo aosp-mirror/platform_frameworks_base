@@ -484,12 +484,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     boolean canApplyDim(@NonNull Task task) {
         if (mTransientLaunches == null) return true;
         if (Flags.useTasksDimOnly()) {
-            WindowContainer<?> dimmerParent = task.getDimmerParent();
-            if (dimmerParent == null) {
-                return false;
-            }
-            // Always allow to dim if the host only affects its task.
-            if (dimmerParent.asTask() == task) {
+            if (task.isSuitableForDimming()) {
+                // Always allow to dim if the dimming occurs at task level (dim parented to task)
                 return true;
             }
         } else {

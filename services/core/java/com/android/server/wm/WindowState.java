@@ -5196,14 +5196,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Dimmer dimmer;
             WindowContainer<?> geometryParent = task;
             if (Flags.useTasksDimOnly()) {
-                if (task != null) {
-                    geometryParent = task.getDimmerParent();
-                    dimmer = task.mDimmer;
-                } else {
-                    RootDisplayArea displayArea = getRootDisplayArea();
-                    geometryParent = displayArea;
-                    dimmer = displayArea != null ? displayArea.getDimmer() : null;
-                }
+                geometryParent = getDimParent();
+                dimmer = getDimController();
                 if (dimmer == null) {
                     ProtoLog.e(WM_DEBUG_DIMMER, "WindowState %s does not have task or"
                             + " display area for dimming", this);
@@ -5219,6 +5213,26 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dimmer.adjustPosition(geometryParent,
                     this /* relativeParent */, -1 /* relativeLayer */);
         }
+    }
+
+    private Dimmer getDimController() {
+        Task task = getTask();
+        if (task != null) {
+            return task.mDimmer;
+        }
+        RootDisplayArea displayArea = getRootDisplayArea();
+        if (displayArea != null) {
+            return displayArea.getDimmer();
+        }
+        return null;
+    }
+
+    private WindowContainer<?> getDimParent() {
+        Task task = getTask();
+        if (task != null && task.isSuitableForDimming()) {
+            return task;
+        }
+        return getRootDisplayArea();
     }
 
     private boolean shouldDrawBlurBehind() {
