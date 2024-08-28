@@ -156,13 +156,13 @@ interface IAccessibilityManager {
     @EnforcePermission("INJECT_EVENTS")
     void injectInputEventToInputFilter(in InputEvent event);
 
-    @RequiresNoPermission
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
 
-    @RequiresNoPermission
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     boolean stopFlashNotificationSequence(String opPkg);
 
-    @RequiresNoPermission
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
 
     @RequiresNoPermission

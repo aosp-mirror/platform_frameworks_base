@@ -2049,9 +2049,7 @@ public final class AccessibilityManager {
      * {@link android.view.Display#DEFAULT_DISPLAY}, is or lower than
      * {@link android.view.Display#INVALID_DISPLAY}, or is already being proxy-ed.
      *
-     * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
-     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
+     * @throws SecurityException if the app does not hold the required permissions.
      *
      * @hide
      */
@@ -2079,9 +2077,7 @@ public final class AccessibilityManager {
      *
      * @return {@code true} if the proxy is successfully unregistered.
      *
-     * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
-     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
+     * @throws SecurityException if the app does not hold the required permissions.
      *
      * @hide
      */
@@ -2134,8 +2130,8 @@ public final class AccessibilityManager {
         try {
             return service.startFlashNotificationSequence(context.getOpPackageName(),
                     reason, mBinder);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while start flash notification sequence", re);
+        } catch (RemoteException | SecurityException e) {
+            Log.e(LOG_TAG, "Error while start flash notification sequence", e);
             return false;
         }
     }
@@ -2164,8 +2160,8 @@ public final class AccessibilityManager {
 
         try {
             return service.stopFlashNotificationSequence(context.getOpPackageName());
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while stop flash notification sequence", re);
+        } catch (RemoteException | SecurityException e) {
+            Log.e(LOG_TAG, "Error while stop flash notification sequence", e);
             return false;
         }
     }
@@ -2192,8 +2188,8 @@ public final class AccessibilityManager {
         try {
             return service.startFlashNotificationEvent(context.getOpPackageName(),
                     reason, reasonPkg);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while start flash notification event", re);
+        } catch (RemoteException | SecurityException e) {
+            Log.e(LOG_TAG, "Error while start flash notification event", e);
             return false;
         }
     }
