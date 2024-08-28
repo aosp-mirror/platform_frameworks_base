@@ -28,6 +28,7 @@ import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,6 +44,8 @@ import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.DeviceConfig;
 import android.util.Pair;
 
@@ -95,7 +98,9 @@ public class BackgroundActivityStartControllerExemptionTests {
     @Rule
     public final ExtendedMockitoRule extendedMockitoRule =
             new ExtendedMockitoRule.Builder(this).setStrictness(Strictness.LENIENT).build();
-
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
     TestableBackgroundActivityStartController mController;
     @Mock
     ActivityMetricsLogger mActivityMetricsLogger;
@@ -186,7 +191,7 @@ public class BackgroundActivityStartControllerExemptionTests {
         when(mAppOpsManager.checkOpNoThrow(
                 eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
                 anyInt(), anyString())).thenReturn(AppOpsManager.MODE_DEFAULT);
-        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt())).thenReturn(
+        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt(), any())).thenReturn(
                 BalVerdict.BLOCK);
     }
 
@@ -320,7 +325,7 @@ public class BackgroundActivityStartControllerExemptionTests {
         int realCallingPid = REGULAR_PID_2;
 
         // setup state
-        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt())).thenReturn(
+        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt(), any())).thenReturn(
                 new BalVerdict(BAL_ALLOW_FOREGROUND, false, "allowed"));
         when(mService.getBalAppSwitchesState()).thenReturn(APP_SWITCH_ALLOW);
 
@@ -357,7 +362,7 @@ public class BackgroundActivityStartControllerExemptionTests {
                 mService.getProcessController(eq(realCallingPid), eq(realCallingUid))).thenReturn(
                 mCallerApp);
         when(mService.getBalAppSwitchesState()).thenReturn(APP_SWITCH_ALLOW);
-        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt())).thenReturn(
+        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt(), any())).thenReturn(
                 new BalVerdict(BAL_ALLOW_FOREGROUND, false, "allowed"));
 
         // prepare call
@@ -404,9 +409,9 @@ public class BackgroundActivityStartControllerExemptionTests {
                 mService.getProcessController(eq(realCallingPid), eq(realCallingUid))).thenReturn(
                 mCallerApp);
         when(mService.getBalAppSwitchesState()).thenReturn(APP_SWITCH_ALLOW);
-        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt())).thenReturn(
+        when(mCallerApp.areBackgroundActivityStartsAllowed(anyInt(), any())).thenReturn(
                 BalVerdict.BLOCK);
-        when(otherProcess.areBackgroundActivityStartsAllowed(anyInt())).thenReturn(
+        when(otherProcess.areBackgroundActivityStartsAllowed(anyInt(), any())).thenReturn(
                 new BalVerdict(BAL_ALLOW_FOREGROUND, false, "allowed"));
 
         // prepare call

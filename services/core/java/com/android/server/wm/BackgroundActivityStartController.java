@@ -21,10 +21,10 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityOptions.BackgroundActivityStartMode;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -39,13 +39,14 @@ import static com.android.server.wm.ActivityStarter.ASM_RESTRICTIONS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
-import static com.android.window.flags.Flags.balImprovedMetrics;
 import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
+import static com.android.window.flags.Flags.balImprovedMetrics;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balRequireOptInSameUid;
 import static com.android.window.flags.Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid;
@@ -84,6 +85,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -106,6 +108,12 @@ public class BackgroundActivityStartController {
     private static final long ASM_GRACEPERIOD_TIMEOUT_MS = TIMEOUT_MS;
     private static final int ASM_GRACEPERIOD_MAX_REPEATS = 5;
     private static final int NO_PROCESS_UID = -1;
+
+    private static final BalCheckConfiguration BAL_CHECK_CONFIGURATION = new BalCheckConfiguration(
+            /* isCheckingForFgsStarts */ false,
+            /* checkVisibility */ true,
+            /* checkOtherExemptions */ true,
+            ACTIVITY_BG_START_GRACE_PERIOD_MS);
 
     static final String AUTO_OPT_IN_NOT_PENDING_INTENT = "notPendingIntent";
     static final String AUTO_OPT_IN_CALL_FOR_RESULT = "callForResult";
@@ -1021,7 +1029,7 @@ public class BackgroundActivityStartController {
         }
         // first check the original calling process
         final BalVerdict balAllowedForCaller = app
-                .areBackgroundActivityStartsAllowed(state.mAppSwitchState);
+                .areBackgroundActivityStartsAllowed(state.mAppSwitchState, BAL_CHECK_CONFIGURATION);
         if (balAllowedForCaller.allows()) {
             return balAllowedForCaller.withProcessInfo("callerApp process", app);
         } else {
@@ -1033,7 +1041,7 @@ public class BackgroundActivityStartController {
                     final WindowProcessController proc = uidProcesses.valueAt(i);
                     if (proc != app) {
                         BalVerdict balAllowedForUid = proc.areBackgroundActivityStartsAllowed(
-                                state.mAppSwitchState);
+                                state.mAppSwitchState, BAL_CHECK_CONFIGURATION);
                         if (balAllowedForUid.allows()) {
                             return balAllowedForUid.withProcessInfo("process", proc);
                         }
