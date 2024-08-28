@@ -50,7 +50,7 @@ class LockscreenContent(
     fun SceneScope.Content(
         modifier: Modifier = Modifier,
     ) {
-        val viewModel = rememberViewModel { viewModelFactory.create() }
+        val viewModel = rememberViewModel("LockscreenContent") { viewModelFactory.create() }
         val isContentVisible: Boolean by viewModel.isContentVisible.collectAsStateWithLifecycle()
         if (!isContentVisible) {
             // If the content isn't supposed to be visible, show a large empty box as it's needed
