@@ -165,25 +165,6 @@ public final class WatchdogRollbackLogger {
     }
 
     /**
-     * Logs that one or more apexd reverts have occurred, along with the crashing native process
-     * that caused apexd to revert during boot.
-     *
-     * @param context the context to use when determining the log packages
-     * @param failedPackageNames a list of names of packages which were reverted
-     * @param failingNativeProcess the crashing native process which caused a revert
-     */
-    public static void logApexdRevert(Context context, @NonNull List<String> failedPackageNames,
-            @NonNull String failingNativeProcess) {
-        Set<VersionedPackage> logPackages = getLogPackages(context, failedPackageNames);
-        for (VersionedPackage logPackage: logPackages) {
-            logEvent(logPackage,
-                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
-                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH_DURING_BOOT,
-                    failingNativeProcess);
-        }
-    }
-
-    /**
      * Log a Watchdog rollback event to statsd.
      *
      * @param logPackage the package to associate the rollback with.
