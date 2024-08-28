@@ -23,6 +23,7 @@ import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Gro
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.GROUP_ID;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LEVEL;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LOCATION;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE_ID;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_VIEWER_CONFIG;
@@ -446,6 +447,7 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
                 case (int) MESSAGE -> os.write(MESSAGE, pis.readString(MESSAGE));
                 case (int) LEVEL -> os.write(LEVEL, pis.readInt(LEVEL));
                 case (int) GROUP_ID -> os.write(GROUP_ID, pis.readInt(GROUP_ID));
+                case (int) LOCATION -> os.write(LOCATION, pis.readString(LOCATION));
                 default ->
                     throw new RuntimeException(
                             "Unexpected field id " + pis.getFieldNumber());
