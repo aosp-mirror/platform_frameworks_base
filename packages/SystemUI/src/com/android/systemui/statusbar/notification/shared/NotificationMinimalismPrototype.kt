@@ -17,23 +17,23 @@
 package com.android.systemui.statusbar.notification.shared
 
 import android.os.SystemProperties
-import com.android.systemui.Flags
+import com.android.server.notification.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the minimalism prototype flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object NotificationMinimalismPrototype {
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_MINIMALISM_PROTOTYPE
+    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_MINIMALISM
 
     /** A token used for dependency declaration */
     val token: FlagToken
         get() = FlagToken(FLAG_NAME, isEnabled)
 
-    /** Is the heads-up cycling animation enabled */
+    /** Is the notification minimalism enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationMinimalismPrototype()
+        get() = Flags.notificationMinimalism()
 
     /**
      * The prototype will (by default) use a promoter to ensure that the top unseen notification is
