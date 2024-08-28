@@ -1547,6 +1547,7 @@ public class RadioManager {
         private final int mSignalQuality;
         @Nullable private final RadioMetadata mMetadata;
         @NonNull private final Map<String, String> mVendorInfo;
+        @Nullable private final RadioAlert mAlert;
 
         /** @hide */
         public ProgramInfo(@NonNull ProgramSelector selector,
@@ -1568,6 +1569,8 @@ public class RadioManager {
             mSignalQuality = signalQuality;
             mMetadata = metadata;
             mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
+            // TODO(361348719): implement alert in the constructor
+            mAlert = null;
         }
 
         /**
@@ -1746,6 +1749,19 @@ public class RadioManager {
         }
 
         /**
+         * Get alert message.
+         *
+         * <p>Alert message can be sent from a radio station of technologies such as HD radio to
+         * the radio users for some emergency events.
+         *
+         * @return alert message if it exists, otherwise {@code null}
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_EMERGENCY_ALERT_SYSTEM)
+        @Nullable public RadioAlert getAlert() {
+            return mAlert;
+        }
+
+        /**
          * Signal quality (as opposed to the name) indication from 0 (no signal)
          * to 100 (excellent)
          * @return the signal quality indication.
@@ -1786,6 +1802,7 @@ public class RadioManager {
             mSignalQuality = in.readInt();
             mMetadata = in.readTypedObject(RadioMetadata.CREATOR);
             mVendorInfo = Utils.readStringMap(in);
+            mAlert = null;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<ProgramInfo> CREATOR
@@ -1825,8 +1842,8 @@ public class RadioManager {
                     + ", physicallyTunedTo=" + Objects.toString(mPhysicallyTunedTo)
                     + ", relatedContent=" + mRelatedContent.size()
                     + ", infoFlags=" + mInfoFlags
-                    + ", mSignalQuality=" + mSignalQuality
-                    + ", mMetadata=" + Objects.toString(mMetadata)
+                    + ", signalQuality=" + mSignalQuality
+                    + ", metadata=" + Objects.toString(mMetadata)
                     + "]";
         }
 

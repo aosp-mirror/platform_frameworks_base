@@ -6516,6 +6516,92 @@ package android.hardware.radio {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
   }
 
+  @FlaggedApi("android.hardware.radio.hd_radio_emergency_alert_system") public final class RadioAlert implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.AlertInfo> getInfoList();
+    method public int getMessageType();
+    method public int getStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CATEGORY_CBRNE = 10; // 0xa
+    field public static final int CATEGORY_ENV = 7; // 0x7
+    field public static final int CATEGORY_FIRE = 5; // 0x5
+    field public static final int CATEGORY_GEO = 0; // 0x0
+    field public static final int CATEGORY_HEALTH = 6; // 0x6
+    field public static final int CATEGORY_INFRA = 9; // 0x9
+    field public static final int CATEGORY_MET = 1; // 0x1
+    field public static final int CATEGORY_OTHER = 11; // 0xb
+    field public static final int CATEGORY_RESCUE = 4; // 0x4
+    field public static final int CATEGORY_SAFETY = 2; // 0x2
+    field public static final int CATEGORY_SECURITY = 3; // 0x3
+    field public static final int CATEGORY_TRANSPORT = 8; // 0x8
+    field public static final int CERTAINTY_LIKELY = 1; // 0x1
+    field public static final int CERTAINTY_OBSERVED = 0; // 0x0
+    field public static final int CERTAINTY_POSSIBLE = 2; // 0x2
+    field public static final int CERTAINTY_UNKNOWN = 4; // 0x4
+    field public static final int CERTAINTY_UNLIKELY = 3; // 0x3
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert> CREATOR;
+    field public static final int MESSAGE_TYPE_ALERT = 0; // 0x0
+    field public static final int MESSAGE_TYPE_CANCEL = 2; // 0x2
+    field public static final int MESSAGE_TYPE_UPDATE = 1; // 0x1
+    field public static final int SEVERITY_EXTREME = 0; // 0x0
+    field public static final int SEVERITY_MINOR = 3; // 0x3
+    field public static final int SEVERITY_MODERATE = 2; // 0x2
+    field public static final int SEVERITY_SEVERE = 1; // 0x1
+    field public static final int SEVERITY_UNKNOWN = 4; // 0x4
+    field public static final int STATUS_ACTUAL = 0; // 0x0
+    field public static final int STATUS_EXERCISE = 1; // 0x1
+    field public static final int STATUS_TEST = 2; // 0x2
+    field public static final int URGENCY_EXPECTED = 1; // 0x1
+    field public static final int URGENCY_FUTURE = 2; // 0x2
+    field public static final int URGENCY_IMMEDIATE = 0; // 0x0
+    field public static final int URGENCY_PAST = 3; // 0x3
+    field public static final int URGENCY_UNKNOWN = 4; // 0x4
+  }
+
+  public static final class RadioAlert.AlertArea implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.Geocode> getGeocodes();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.Polygon> getPolygons();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.AlertArea> CREATOR;
+  }
+
+  public static final class RadioAlert.AlertInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.AlertArea> getAreas();
+    method @NonNull public int[] getCategories();
+    method public int getCertainty();
+    method @NonNull public String getDescription();
+    method @Nullable public String getLanguage();
+    method public int getSeverity();
+    method public int getUrgency();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.AlertInfo> CREATOR;
+  }
+
+  public static final class RadioAlert.Coordinate implements android.os.Parcelable {
+    method public int describeContents();
+    method @FloatRange(from=-90.0, to=90.0) public double getLatitude();
+    method @FloatRange(from=-180.0, to=180.0) public double getLongitude();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.Coordinate> CREATOR;
+  }
+
+  public static final class RadioAlert.Geocode implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getValue();
+    method @NonNull public String getValueName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.Geocode> CREATOR;
+  }
+
+  public static final class RadioAlert.Polygon implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.hardware.radio.RadioAlert.Coordinate> getCoordinates();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioAlert.Polygon> CREATOR;
+  }
+
   public class RadioManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public void addAnnouncementListener(@NonNull java.util.Set<java.lang.Integer>, @NonNull android.hardware.radio.Announcement.OnListUpdatedListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RADIO) public void addAnnouncementListener(@NonNull java.util.concurrent.Executor, @NonNull java.util.Set<java.lang.Integer>, @NonNull android.hardware.radio.Announcement.OnListUpdatedListener);
@@ -6651,6 +6737,7 @@ package android.hardware.radio {
 
   public static class RadioManager.ProgramInfo implements android.os.Parcelable {
     method public int describeContents();
+    method @FlaggedApi("android.hardware.radio.hd_radio_emergency_alert_system") @Nullable public android.hardware.radio.RadioAlert getAlert();
     method @Deprecated public int getChannel();
     method @Nullable public android.hardware.radio.ProgramSelector.Identifier getLogicallyTunedTo();
     method public android.hardware.radio.RadioMetadata getMetadata();
