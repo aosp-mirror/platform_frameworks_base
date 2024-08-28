@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Tillbaka"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Byt inmatningsmetod"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Öppna inmatningsmetodsväljaren"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Inställningar"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Lagringsutrymmet börjar ta slut"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Det finns inte tillräckligt med utrymme för systemet. Kontrollera att du har ett lagringsutrymme på minst 250 MB och starta om."</string>

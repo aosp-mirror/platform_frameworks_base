@@ -27,7 +27,6 @@ val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
         KeyguardTransitionInteractor(
             scope = applicationCoroutineScope,
             repository = keyguardTransitionRepository,
-            keyguardRepository = keyguardRepository,
             fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
             fromPrimaryBouncerTransitionInteractor = { fromPrimaryBouncerTransitionInteractor },
             fromAodTransitionInteractor = { fromAodTransitionInteractor },

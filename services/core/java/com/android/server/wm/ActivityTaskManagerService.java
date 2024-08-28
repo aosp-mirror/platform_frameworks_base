@@ -795,6 +795,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowOrganizerController mWindowOrganizerController;
     TaskOrganizerController mTaskOrganizerController;
     TaskFragmentOrganizerController mTaskFragmentOrganizerController;
+    ActionChain.Tracker mChainTracker;
 
     @Nullable
     private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
@@ -869,6 +870,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
         mWindowOrganizerController = new WindowOrganizerController(this);
+        mChainTracker = new ActionChain.Tracker(this);
         mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
         mTaskFragmentOrganizerController =
                 mWindowOrganizerController.mTaskFragmentOrganizerController;
@@ -4753,6 +4755,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 wpc.updateAssetConfiguration(assetSeq);
             }
         }
+    }
+
+    boolean mayBeLaunchingApp() {
+        return (mPowerModeReasons & POWER_MODE_REASON_START_ACTIVITY) != 0;
     }
 
     void startPowerMode(@PowerModeReason int reason) {

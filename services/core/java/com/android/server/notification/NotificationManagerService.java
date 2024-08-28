@@ -1583,6 +1583,8 @@ public class NotificationManagerService extends SystemService {
                     // respond to direct replies with updates. So we need to update System UI
                     // immediately.
                     if (lifetimeExtensionRefactor()) {
+                        // We need to reset this to allow the notif to be updated again.
+                        r.setCanceledAfterLifetimeExtension(false);
                         maybeNotifySystemUiListenerLifetimeExtendedLocked(r,
                                 r.getSbn().getPackageName(), packageImportance);
                     }
@@ -1639,9 +1641,12 @@ public class NotificationManagerService extends SystemService {
                     // respond to direct replies with updates. So we need to update System UI
                     // immediately.
                     if (lifetimeExtensionRefactor()) {
+                        // We need to reset this to allow the notif to be updated again.
+                        r.setCanceledAfterLifetimeExtension(false);
                         maybeNotifySystemUiListenerLifetimeExtendedLocked(r,
                                 r.getSbn().getPackageName(), packageImportance);
                     }
+
                     r.recordSmartReplied();
                     LogMaker logMaker = r.getLogMaker()
                             .setCategory(MetricsEvent.SMART_REPLY_ACTION)
@@ -11741,17 +11746,37 @@ public class NotificationManagerService extends SystemService {
     private void maybeNotifySystemUiListenerLifetimeExtendedLocked(NotificationRecord record,
             String pkg, int packageImportance) {
         if (record != null && (record.getSbn().getNotification().flags
-                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0
+                && !record.isCanceledAfterLifetimeExtension()) {
             boolean isAppForeground = pkg != null && packageImportance == IMPORTANCE_FOREGROUND;
 
-            // Lifetime extended notifications don't need to alert on state change.
+            // Save the original Record's post silently value, so we can restore it after we send
+            // the SystemUI specific silent update.
+            boolean savedPostSilentlyState = record.shouldPostSilently();
+            boolean savedOnlyAlertOnceState = (record.getNotification().flags
+                    & FLAG_ONLY_ALERT_ONCE) > 0;
+            // Lifetime extended notifications don't need to alert on new state change.
             record.setPostSilently(true);
             // We also set FLAG_ONLY_ALERT_ONCE to avoid the notification from HUN-ing again.
             record.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
 
+            PostNotificationTracker tracker = mPostNotificationTrackerFactory.newTracker(null);
+            tracker.addCleanupRunnable(() -> {
+                synchronized (mNotificationLock) {
+                    // Mark that the notification has been updated due to cancelation, so it won't
+                    // be updated again if the app cancels multiple times.
+                    record.setCanceledAfterLifetimeExtension(true);
+                    // Set the post silently status to the record's previous value.
+                    record.setPostSilently(savedPostSilentlyState);
+                    // Remove FLAG_ONLY_ALERT_ONCE if the notification did not previously have it.
+                    if (!savedOnlyAlertOnceState) {
+                        record.getNotification().flags &= ~FLAG_ONLY_ALERT_ONCE;
+                    }
+                }
+            });
+
             mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
-                    record, isAppForeground, /* isAppProvided= */ false,
-                    mPostNotificationTrackerFactory.newTracker(null)));
+                    record, isAppForeground, /* isAppProvided= */ false, tracker));
         }
     }
 
@@ -13351,15 +13376,21 @@ public class NotificationManagerService extends SystemService {
         @ElapsedRealtimeLong private final long mStartTime;
         @Nullable private final WakeLock mWakeLock;
         private boolean mOngoing;
+        private final List<Runnable> mCleanupRunnables;
 
         @VisibleForTesting
         PostNotificationTracker(@Nullable WakeLock wakeLock) {
             mStartTime = SystemClock.elapsedRealtime();
             mWakeLock = wakeLock;
             mOngoing = true;
+            mCleanupRunnables = new ArrayList<Runnable>();
             if (DBG) {
                 Slog.d(TAG, "PostNotification: Started");
             }
+        }
+
+        void addCleanupRunnable(Runnable runnable) {
+            mCleanupRunnables.add(runnable);
         }
 
         @ElapsedRealtimeLong
@@ -13373,8 +13404,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Cancels the tracker (releasing the acquired WakeLock). Either {@link #finish} or
-         * {@link #cancel} (exclusively) should be called on this object before it's discarded.
+         * Cancels the tracker (releasing the acquired WakeLock) and runs any set cleanup runnables.
+         * Either {@link #finish} or {@link #cancel} (exclusively) should be called on this object
+         * before it's discarded.
          */
         void cancel() {
             if (!isOngoing()) {
@@ -13385,6 +13417,9 @@ public class NotificationManagerService extends SystemService {
             if (mWakeLock != null) {
                 Binder.withCleanCallingIdentity(() -> mWakeLock.release());
             }
+            for (Runnable r : mCleanupRunnables) {
+                r.run();
+            }
             if (DBG) {
                 long elapsedTime = SystemClock.elapsedRealtime() - mStartTime;
                 Slog.d(TAG, TextUtils.formatSimple("PostNotification: Abandoned after %d ms",
@@ -13393,9 +13428,10 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * Finishes the tracker (releasing the acquired WakeLock) and returns the time elapsed since
-         * the operation started, in milliseconds. Either {@link #finish} or {@link #cancel}
-         * (exclusively) should be called on this object before it's discarded.
+         * Finishes the tracker (releasing the acquired WakeLock), runs any set cleanup runnables,
+         * and returns the time elapsed since the operation started, in milliseconds.
+         * Either {@link #finish} or {@link #cancel} (exclusively) should be called on this object
+         * before it's discarded.
          */
         @DurationMillisLong
         long finish() {
@@ -13407,6 +13443,9 @@ public class NotificationManagerService extends SystemService {
             mOngoing = false;
             if (mWakeLock != null) {
                 Binder.withCleanCallingIdentity(() -> mWakeLock.release());
+            }
+            for (Runnable r : mCleanupRunnables) {
+                r.run();
             }
             if (DBG) {
                 Slog.d(TAG,

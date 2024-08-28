@@ -51,7 +51,7 @@ public abstract class DreamOverlayService extends Service {
      */
     private Executor mExecutor;
 
-    private boolean mCurrentRedirectToWake;
+    private Boolean mCurrentRedirectToWake;
 
     // An {@link IDreamOverlayClient} implementation that identifies itself when forwarding
     // requests to the {@link DreamOverlayService}
@@ -134,7 +134,7 @@ public abstract class DreamOverlayService extends Service {
         mExecutor.execute(() -> {
             endDreamInternal(mCurrentClient);
             mCurrentClient = client;
-            if (Flags.dreamWakeRedirect()) {
+            if (Flags.dreamWakeRedirect() && mCurrentRedirectToWake != null) {
                 mCurrentClient.redirectWake(mCurrentRedirectToWake);
             }
 

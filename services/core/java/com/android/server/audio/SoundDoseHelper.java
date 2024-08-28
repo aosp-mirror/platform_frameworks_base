@@ -900,8 +900,10 @@ public class SoundDoseHelper {
 
         try {
             if (!isAbsoluteVolume) {
-                mLogger.enqueue(
-                        SoundDoseEvent.getAbsVolumeAttenuationEvent(/*attenuation=*/0.f, device));
+                if (mSafeMediaVolumeDevices.indexOfKey(device) >= 0) {
+                    mLogger.enqueue(SoundDoseEvent.getAbsVolumeAttenuationEvent(/*attenuation=*/0.f,
+                            device));
+                }
                 // remove any possible previous attenuation
                 soundDose.updateAttenuation(/* attenuationDB= */0.f, device);
 
@@ -912,8 +914,12 @@ public class SoundDoseHelper {
                     && safeDevicesContains(device)) {
                 float attenuationDb = -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
                         (newIndex + 5) / 10, device);
-                mLogger.enqueue(
-                        SoundDoseEvent.getAbsVolumeAttenuationEvent(attenuationDb, device));
+
+                if (mSafeMediaVolumeDevices.indexOfKey(device) >= 0) {
+                    mLogger.enqueue(
+                            SoundDoseEvent.getAbsVolumeAttenuationEvent(attenuationDb, device));
+                }
+
                 soundDose.updateAttenuation(attenuationDb, device);
             }
         } catch (RemoteException e) {

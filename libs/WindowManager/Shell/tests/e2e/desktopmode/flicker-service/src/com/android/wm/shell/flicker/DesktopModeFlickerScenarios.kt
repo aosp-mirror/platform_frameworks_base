@@ -21,6 +21,8 @@ import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
 import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
+import android.tools.flicker.assertors.assertions.AppWindowCoversLeftHalfScreenAtEnd
+import android.tools.flicker.assertors.assertions.AppWindowCoversRightHalfScreenAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
 import android.tools.flicker.assertors.assertions.AppWindowHasSizeOfAtLeast
 import android.tools.flicker.assertors.assertions.AppWindowIsInvisibleAtEnd
@@ -51,21 +53,21 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("END_DRAG_TO_DESKTOP"),
                 extractor =
-                    ShellTransitionScenarioExtractor(
-                        transitionMatcher =
-                            object : ITransitionMatcher {
-                                override fun findAll(
-                                    transitions: Collection<Transition>
-                                ): Collection<Transition> {
-                                    return transitions.filter {
-                                        // TODO(351168217) Use jank CUJ to extract a longer trace
-                                        it.type == TransitionType.DESKTOP_MODE_END_DRAG_TO_DESKTOP
-                                    }
-                                }
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            return transitions.filter {
+                                // TODO(351168217) Use jank CUJ to extract a longer trace
+                                it.type == TransitionType.DESKTOP_MODE_END_DRAG_TO_DESKTOP
                             }
-                    ),
+                        }
+                    }
+                ),
                 assertions =
-                    AssertionTemplates.COMMON_ASSERTIONS +
+                AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
                             AppLayerIsVisibleAlways(DESKTOP_MODE_APP),
                             AppWindowOnTopAtEnd(DESKTOP_MODE_APP),
@@ -81,24 +83,24 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("CLOSE_APP"),
                 extractor =
-                    ShellTransitionScenarioExtractor(
-                        transitionMatcher =
-                            object : ITransitionMatcher {
-                                override fun findAll(
-                                    transitions: Collection<Transition>
-                                ): Collection<Transition> {
-                                    // In case there are multiple windows closing, filter out the
-                                    // last window closing. It should use the CLOSE_LAST_APP
-                                    // scenario below.
-                                    return transitions
-                                        .filter { it.type == TransitionType.CLOSE }
-                                        .sortedByDescending { it.id }
-                                        .drop(1)
-                                }
-                            }
-                    ),
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            // In case there are multiple windows closing, filter out the
+                            // last window closing. It should use the CLOSE_LAST_APP
+                            // scenario below.
+                            return transitions
+                                .filter { it.type == TransitionType.CLOSE }
+                                .sortedByDescending { it.id }
+                                .drop(1)
+                        }
+                    }
+                ),
                 assertions =
-                    AssertionTemplates.COMMON_ASSERTIONS +
+                AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
                             AppWindowOnTopAtStart(DESKTOP_MODE_APP),
                             AppLayerIsVisibleAtStart(DESKTOP_MODE_APP),
@@ -110,22 +112,22 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("CLOSE_LAST_APP"),
                 extractor =
-                    ShellTransitionScenarioExtractor(
-                        transitionMatcher =
-                            object : ITransitionMatcher {
-                                override fun findAll(
-                                    transitions: Collection<Transition>
-                                ): Collection<Transition> {
-                                    val lastTransition =
-                                        transitions
-                                            .filter { it.type == TransitionType.CLOSE }
-                                            .maxByOrNull { it.id }!!
-                                    return listOf(lastTransition)
-                                }
-                            }
-                    ),
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            val lastTransition =
+                                transitions
+                                    .filter { it.type == TransitionType.CLOSE }
+                                    .maxByOrNull { it.id }!!
+                            return listOf(lastTransition)
+                        }
+                    }
+                ),
                 assertions =
-                    AssertionTemplates.COMMON_ASSERTIONS +
+                AssertionTemplates.COMMON_ASSERTIONS +
                         listOf(
                             AppWindowIsInvisibleAtEnd(DESKTOP_MODE_APP),
                             LauncherWindowReplacesAppAsTopWindow(DESKTOP_MODE_APP),
@@ -138,12 +140,12 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("CORNER_RESIZE"),
                 extractor =
-                    TaggedScenarioExtractorBuilder()
-                        .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
-                        .setTransitionMatcher(
-                            TaggedCujTransitionMatcher(associatedTransitionRequired = false)
-                        )
-                        .build(),
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS
             )
 
@@ -151,15 +153,75 @@ class DesktopModeFlickerScenarios {
             FlickerConfigEntry(
                 scenarioId = ScenarioId("CORNER_RESIZE_TO_MINIMUM_SIZE"),
                 extractor =
-                    TaggedScenarioExtractorBuilder()
-                        .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
-                        .setTransitionMatcher(
-                            TaggedCujTransitionMatcher(associatedTransitionRequired = false)
-                        )
-                        .build(),
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
                         listOf(AppWindowHasSizeOfAtLeast(DESKTOP_MODE_APP, 770, 700))
+                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val SNAP_RESIZE_LEFT_WITH_BUTTON =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("SNAP_RESIZE_LEFT_WITH_BUTTON"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_SNAP_RESIZE)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(AppWindowCoversLeftHalfScreenAtEnd(DESKTOP_MODE_APP))
+                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val SNAP_RESIZE_RIGHT_WITH_BUTTON =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("SNAP_RESIZE_RIGHT_WITH_BUTTON"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_SNAP_RESIZE)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(AppWindowCoversRightHalfScreenAtEnd(DESKTOP_MODE_APP))
+                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val SNAP_RESIZE_LEFT_WITH_DRAG =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("SNAP_RESIZE_LEFT_WITH_DRAG"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_SNAP_RESIZE)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(AppWindowCoversLeftHalfScreenAtEnd(DESKTOP_MODE_APP))
+                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val SNAP_RESIZE_RIGHT_WITH_DRAG =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("SNAP_RESIZE_RIGHT_WITH_DRAG"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_SNAP_RESIZE)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(AppWindowCoversRightHalfScreenAtEnd(DESKTOP_MODE_APP))
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 

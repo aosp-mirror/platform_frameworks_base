@@ -28,6 +28,7 @@ import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreference
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreferenceState
 import com.android.settingslib.bluetooth.devicesettings.DeviceInfo
 import com.android.settingslib.bluetooth.devicesettings.DeviceSetting
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingHelpPreference
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingItem
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingState
@@ -246,6 +247,28 @@ class DeviceSettingRepositoryTest {
     }
 
     @Test
+    fun getDeviceSetting_helpPreference_success() {
+        testScope.runTest {
+            `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
+            `when`(settingProviderService2.registerDeviceSettingsListener(any(), any())).then {
+                    input ->
+                input
+                    .getArgument<IDeviceSettingsListener>(1)
+                    .onDeviceSettingsChanged(listOf(DEVICE_SETTING_HELP))
+            }
+            var setting: DeviceSettingModel? = null
+
+            underTest
+                .getDeviceSetting(cachedDevice, DEVICE_SETTING_ID_HELP)
+                .onEach { setting = it }
+                .launchIn(backgroundScope)
+            runCurrent()
+
+            assertDeviceSetting(setting!!, DEVICE_SETTING_HELP)
+        }
+    }
+
+    @Test
     fun getDeviceSetting_noConfig_returnNull() {
         testScope.runTest {
             `when`(settingProviderService1.registerDeviceSettingsListener(any(), any())).then {
@@ -359,6 +382,12 @@ class DeviceSettingRepositoryTest {
                     assertToggle(actual.toggles[i], pref.toggleInfos[i])
                 }
             }
+            is DeviceSettingModel.HelpPreference -> {
+                assertThat(serviceResponse.preference)
+                    .isInstanceOf(DeviceSettingHelpPreference::class.java)
+                val pref = serviceResponse.preference as DeviceSettingHelpPreference
+                assertThat(actual.intent).isSameInstanceAs(pref.intent)
+            }
             else -> {}
         }
     }
@@ -418,7 +447,7 @@ class DeviceSettingRepositoryTest {
                 CONFIG_SERVICE_INTENT_ACTION +
                 "</DEVICE_SETTINGS_CONFIG_ACTION>"
         val DEVICE_INFO = DeviceInfo.Builder().setBluetoothAddress(BLUETOOTH_ADDRESS).build()
-
+        const val DEVICE_SETTING_ID_HELP = 12345
         val DEVICE_SETTING_ITEM_1 =
             DeviceSettingItem(
                 DeviceSettingId.DEVICE_SETTING_ID_HEADER,
@@ -428,6 +457,12 @@ class DeviceSettingRepositoryTest {
         val DEVICE_SETTING_ITEM_2 =
             DeviceSettingItem(
                 DeviceSettingId.DEVICE_SETTING_ID_ANC,
+                SETTING_PROVIDER_SERVICE_PACKAGE_NAME_2,
+                SETTING_PROVIDER_SERVICE_CLASS_NAME_2,
+                SETTING_PROVIDER_SERVICE_INTENT_ACTION_2)
+        val DEVICE_SETTING_HELP_ITEM =
+            DeviceSettingItem(
+                DEVICE_SETTING_ID_HELP,
                 SETTING_PROVIDER_SERVICE_PACKAGE_NAME_2,
                 SETTING_PROVIDER_SERVICE_CLASS_NAME_2,
                 SETTING_PROVIDER_SERVICE_INTENT_ACTION_2)
@@ -460,10 +495,15 @@ class DeviceSettingRepositoryTest {
                                 .build())
                         .build())
                 .build()
+        val DEVICE_SETTING_HELP = DeviceSetting.Builder()
+            .setSettingId(DEVICE_SETTING_ID_HELP)
+            .setPreference(DeviceSettingHelpPreference.Builder().setIntent(Intent()).build())
+            .build()
         val DEVICE_SETTING_CONFIG =
             DeviceSettingsConfig(
                 listOf(DEVICE_SETTING_ITEM_1),
                 listOf(DEVICE_SETTING_ITEM_2),
+                DEVICE_SETTING_HELP_ITEM,
             )
     }
 }

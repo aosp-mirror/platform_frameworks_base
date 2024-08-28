@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth включится завтра утром"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Отправить аудио"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Отправка аудио"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"перейти в настройки передачи аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудиоустройство"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Готово"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Настройки"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Включено"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Вкл. • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Отключено"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Настроить"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Открыть настройки"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Спутниковая связь, хорошее качество соединения"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Доступно соединение по спутниковой связи"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Спутниковый SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Рабочий профиль"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Внимание!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner позволяет настраивать интерфейс устройства Android по вашему вкусу. В будущем эта экспериментальная функция может измениться, перестать работать или исчезнуть."</string>

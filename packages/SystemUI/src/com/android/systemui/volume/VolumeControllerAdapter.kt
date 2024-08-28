@@ -17,7 +17,8 @@
 package com.android.systemui.volume
 
 import android.media.IVolumeController
-import com.android.settingslib.media.data.repository.VolumeControllerEvent
+import com.android.settingslib.volume.data.model.VolumeControllerEvent
+import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -29,17 +30,17 @@ import kotlinx.coroutines.launch
  * [com.android.settingslib.volume.data.repository.AudioRepository.volumeControllerEvents] and the
  * old code that uses [IVolumeController] interface directly.
  */
-class VolumeControllerCollector
+class VolumeControllerAdapter
 @Inject
-constructor(@Application private val coroutineScope: CoroutineScope) {
+constructor(
+    @Application private val coroutineScope: CoroutineScope,
+    private val audioRepository: AudioRepository,
+) {
 
     /** Collects [Flow] of [VolumeControllerEvent] into [IVolumeController]. */
-    fun collectToController(
-        eventsFlow: Flow<VolumeControllerEvent>,
-        controller: IVolumeController
-    ) =
+    fun collectToController(controller: IVolumeController) {
         coroutineScope.launch {
-            eventsFlow.collect { event ->
+            audioRepository.volumeControllerEvents.collect { event ->
                 when (event) {
                     is VolumeControllerEvent.VolumeChanged ->
                         controller.volumeChanged(event.streamType, event.flags)
@@ -56,4 +57,9 @@ constructor(@Application private val coroutineScope: CoroutineScope) {
                 }
             }
         }
+    }
+
+    fun notifyVolumeControllerVisible(isVisible: Boolean) {
+        coroutineScope.launch { audioRepository.notifyVolumeControllerVisible(isVisible) }
+    }
 }

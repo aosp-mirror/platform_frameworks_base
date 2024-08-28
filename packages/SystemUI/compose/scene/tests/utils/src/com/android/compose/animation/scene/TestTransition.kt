@@ -200,8 +200,8 @@ fun ComposeContentTestRule.testReplaceOverlayTransition(
         transitionLayout = { state ->
             SceneTransitionLayout(state) {
                 scene(currentScene) { currentSceneContent() }
-                overlay(from, fromAlignment) { fromContent() }
-                overlay(to, toAlignment) { toContent() }
+                overlay(from, alignment = fromAlignment) { fromContent() }
+                overlay(to, alignment = toAlignment) { toContent() }
             }
         },
         changeState = { state -> state.replaceOverlay(from, to, animationScope = this) },

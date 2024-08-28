@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"မနက်ဖြန်နံနက်တွင် ဘလူးတုသ် ပွင့်ပါမည်"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"အသံမျှဝေရန်"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"အသံမျှဝေနေသည်"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"အော်ဒီယို မျှဝေခြင်း ဆက်တင်များ ထည့်ရန်"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ဘက်ထရီ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"အသံ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"မိုက်ခွက်ပါနားကြပ်"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ပြီးပြီ"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ဆက်တင်များ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ဖွင့်"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ဖွင့် • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ပိတ်"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"စနစ်ထည့်သွင်းရန်"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ဆက်တင်များတွင် စီမံရန်"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ဂြိုဟ်တု၊ ချိတ်ဆက်မှု ကောင်းသည်"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ဂြိုဟ်တု၊ ချိတ်ဆက်မှု ရနိုင်သည်"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"အလုပ် ပရိုဖိုင်"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"အချို့သူများ အတွက် ပျော်စရာ ဖြစ်ပေမဲ့ အားလုံး အတွက် မဟုတ်ပါ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"စနစ် UI Tuner က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းရန်နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ အနာဂတ်ဗားရှင်းများတွင် ဤစမ်းသပ်အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ပျက်စီး သို့မဟုတ် ပျောက်ကွယ်သွားနိုင်သည်။ သတိဖြင့် ရှေ့ဆက်ပါ။"</string>
@@ -1391,7 +1393,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ပြန်သွားရန်"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"နောက်ပြန်သွားရန် တာ့ချ်ပက်ပေါ်ရှိ မည်သည့်နေရာ၌မဆို လက်သုံးချောင်းဖြင့် ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ။\n\n၎င်းအတွက် လက်ကွက်ဖြတ်လမ်း Action + ESC ကိုလည်း သုံးနိုင်သည်။"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"တော်ပါပေသည်။"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"နောက်ဆုတ်လက်ဟန် အပြီးသတ်လိုက်ပါပြီ။"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"နောက်သို့လက်ဟန် အပြီးသတ်လိုက်ပါပြီ"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ပင်မစာမျက်နှာသို့ သွားရန်"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ပင်မစာမျက်နှာသို့ အချိန်မရွေးသွားရန် စခရင်အောက်ခြေမှ အပေါ်သို့ လက်သုံးချောင်းဖြင့် ပွတ်ဆွဲပါ။"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ကောင်းသည်။"</string>

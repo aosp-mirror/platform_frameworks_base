@@ -35,6 +35,7 @@ import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.res.R
 import com.android.systemui.util.animation.MeasurementInput
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 object MediaCarousel {
     object Elements {
@@ -46,6 +47,7 @@ object MediaCarousel {
     }
 }
 
+@ExperimentalCoroutinesApi
 @Composable
 fun SceneScope.MediaCarousel(
     isVisible: Boolean,
@@ -54,7 +56,7 @@ fun SceneScope.MediaCarousel(
     carouselController: MediaCarouselController,
     offsetProvider: (() -> IntOffset)? = null,
 ) {
-    if (!isVisible) {
+    if (!isVisible || carouselController.isLockedAndHidden()) {
         return
     }
 

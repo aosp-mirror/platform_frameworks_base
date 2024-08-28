@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth se zapne zítra ráno."</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Sdílet zvuk"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Zvuk se sdílí"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"přejdete do nastavení sdílení zvuku"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Sluchátka"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Hotovo"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Nastavení"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Zapnuto"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Zapnuto • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Vypnuto"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Nastavit"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Spravovat v nastavení"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, dobré připojení"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, připojení je k dispozici"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS přes satelit"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Pracovní profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zábava, která není pro každého"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Nástroj na ladění uživatelského rozhraní systému vám nabízí další způsoby, jak si vyladit a přizpůsobit uživatelské rozhraní Android. Tyto experimentální funkce mohou v dalších verzích chybět, nefungovat nebo být změněny. Postupujte proto prosím opatrně."</string>

@@ -1196,8 +1196,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Voltar"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Mudar o método de entrada"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Abrir o seletor de método de entrada"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Configurações"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Pouco espaço de armazenamento"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Algumas funções do sistema podem não funcionar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Não há armazenamento suficiente para o sistema. Certifique-se de ter 250 MB de espaço livre e reinicie."</string>
@@ -1403,7 +1402,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB ativado"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo conectado como Webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Acessório USB conectado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para conferir mais opções."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toque para mais opções."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Carregando dispositivo conectado. Toque para ver mais opções."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
