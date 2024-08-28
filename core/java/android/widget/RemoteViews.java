@@ -1089,6 +1089,13 @@ public class RemoteViews implements Parcelable, Filter {
             return (SET_REMOTE_ADAPTER_TAG + "_" + viewId);
         }
 
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            for (RemoteViews remoteViews : list) {
+                remoteViews.visitUris(visitor);
+            }
+        }
+
         int viewTypeCount;
         ArrayList<RemoteViews> list;
     }
@@ -1290,6 +1297,14 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public String getUniqueKey() {
             return (SET_REMOTE_ADAPTER_TAG + "_" + viewId);
+        }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
+            if (items != null) {
+              items.visitUris(visitor);
+            }
         }
     }
 
@@ -7273,6 +7288,15 @@ public class RemoteViews implements Parcelable, Filter {
                         mViews.toArray(new RemoteViews[0]),
                         mHasStableIds,
                         Math.max(mViewTypeCount, 1));
+            }
+        }
+
+        /**
+         * See {@link RemoteViews#visitUris(Consumer)}.
+         */
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            for (RemoteViews view : mViews) {
+                view.visitUris(visitor);
             }
         }
     }

@@ -189,6 +189,9 @@ public final class Person implements Parcelable {
      */
     public void visitUris(@NonNull Consumer<Uri> visitor) {
         visitor.accept(getIconUri());
+        if (mUri != null && !mUri.isEmpty()) {
+            visitor.accept(Uri.parse(mUri));
+        }
     }
 
     /** Builder for the immutable {@link Person} class. */
