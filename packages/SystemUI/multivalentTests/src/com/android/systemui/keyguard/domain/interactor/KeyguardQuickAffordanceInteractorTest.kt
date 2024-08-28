@@ -61,7 +61,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,6 +80,10 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
+
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var userTracker: UserTracker
@@ -90,11 +94,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
     @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
 
-    private val kosmos = testKosmos()
-
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
-    private val testScope = kosmos.testScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var homeControls: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWallet: FakeKeyguardQuickAffordanceConfig
@@ -170,7 +171,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = testScope.backgroundScope,
                         backgroundDispatcher = kosmos.testDispatcher,
-                        secureSettings = FakeSettings(),
+                        secureSettings = settings,
                         selectionsManager = localUserSelectionManager,
                     ),
                 configs = setOf(homeControls, quickAccessWallet, qrCodeScanner),
