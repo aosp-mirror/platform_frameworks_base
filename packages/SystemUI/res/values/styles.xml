@@ -192,11 +192,10 @@
 
     <style name="TextAppearance.AuthCredential.LogoDescription" parent="TextAppearance.Material3.LabelLarge" >
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-        <item name="android:ellipsize">marquee</item>
         <item name="android:gravity">@integer/biometric_dialog_text_gravity</item>
-        <item name="android:marqueeRepeatLimit">1</item>
-        <item name="android:singleLine">true</item>
+        <item name="android:maxLines">1</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Title" parent="TextAppearance.Material3.HeadlineSmall" >
