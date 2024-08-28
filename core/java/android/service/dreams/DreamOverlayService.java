@@ -51,8 +51,6 @@ public abstract class DreamOverlayService extends Service {
      */
     private Executor mExecutor;
 
-    private boolean mCurrentRedirectToWake;
-
     // An {@link IDreamOverlayClient} implementation that identifies itself when forwarding
     // requests to the {@link DreamOverlayService}
     private static class OverlayClient extends IDreamOverlayClient.Stub {
@@ -134,10 +132,6 @@ public abstract class DreamOverlayService extends Service {
         mExecutor.execute(() -> {
             endDreamInternal(mCurrentClient);
             mCurrentClient = client;
-            if (Flags.dreamWakeRedirect()) {
-                mCurrentClient.redirectWake(mCurrentRedirectToWake);
-            }
-
             onStartDream(params);
         });
     }
@@ -288,10 +282,8 @@ public abstract class DreamOverlayService extends Service {
             return;
         }
 
-        mCurrentRedirectToWake = redirect;
-
         if (mCurrentClient == null) {
-            return;
+            throw new IllegalStateException("redirected wake with no dream present");
         }
 
         mCurrentClient.redirectWake(redirect);
