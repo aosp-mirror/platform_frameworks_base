@@ -34,7 +34,6 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -63,7 +62,7 @@ constructor(
     private val pinViewModelFactory: PinBouncerViewModel.Factory,
     private val patternViewModelFactory: PatternBouncerViewModel.Factory,
     private val passwordViewModelFactory: PasswordBouncerViewModel.Factory,
-) : SysUiViewModel, ExclusiveActivatable() {
+) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
 

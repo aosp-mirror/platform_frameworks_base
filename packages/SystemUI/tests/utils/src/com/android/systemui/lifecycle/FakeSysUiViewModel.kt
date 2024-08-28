@@ -26,17 +26,25 @@ import kotlinx.coroutines.flow.flowOf
 class FakeSysUiViewModel(
     private val onActivation: () -> Unit = {},
     private val onDeactivation: () -> Unit = {},
-    private val upstreamFlow: Flow<Boolean> = flowOf(true),
-    private val upstreamStateFlow: StateFlow<Boolean> = MutableStateFlow(true).asStateFlow(),
-) : SysUiViewModel, ExclusiveActivatable() {
+    upstreamFlow: Flow<Boolean> = flowOf(true),
+    upstreamStateFlow: StateFlow<Boolean> = MutableStateFlow(true).asStateFlow(),
+) : ExclusiveActivatable() {
 
     var activationCount = 0
     var cancellationCount = 0
 
-    private val hydrator = Hydrator()
+    private val hydrator = Hydrator("test")
     val stateBackedByFlow: Boolean by
-        hydrator.hydratedStateOf(initialValue = true, source = upstreamFlow)
-    val stateBackedByStateFlow: Boolean by hydrator.hydratedStateOf(source = upstreamStateFlow)
+        hydrator.hydratedStateOf(
+            traceName = "test",
+            initialValue = true,
+            source = upstreamFlow,
+        )
+    val stateBackedByStateFlow: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "test",
+            source = upstreamStateFlow,
+        )
 
     override suspend fun onActivated(): Nothing {
         activationCount++

@@ -18,7 +18,6 @@ package com.android.systemui.shade.ui.viewmodel
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
@@ -37,8 +36,10 @@ import kotlinx.coroutines.flow.collectLatest
  */
 class OverlayShadeViewModel
 @AssistedInject
-constructor(private val sceneInteractor: SceneInteractor, shadeInteractor: ShadeInteractor) :
-    SysUiViewModel, ExclusiveActivatable() {
+constructor(
+    private val sceneInteractor: SceneInteractor,
+    shadeInteractor: ShadeInteractor,
+) : ExclusiveActivatable() {
     private val _backgroundScene = MutableStateFlow(Scenes.Lockscreen)
     /** The scene to show in the background when the overlay shade is open. */
     val backgroundScene: StateFlow<SceneKey> = _backgroundScene.asStateFlow()
