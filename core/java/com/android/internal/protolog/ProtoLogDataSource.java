@@ -17,7 +17,6 @@
 package com.android.internal.protolog;
 
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.DEFAULT;
-import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.DEFAULT_LOG_FROM_LEVEL;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.ENABLE_ALL;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.GROUP_OVERRIDES;
 import static android.internal.perfetto.protos.ProtologConfig.ProtoLogConfig.TRACING_MODE;
@@ -44,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.TlsState,
@@ -190,72 +190,79 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         final Map<String, GroupConfig> groupConfigs = new HashMap<>();
 
         while (configStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-            switch (configStream.getFieldNumber()) {
-                case (int) DEFAULT_LOG_FROM_LEVEL:
-                    int defaultLogFromLevelInt = configStream.readInt(DEFAULT_LOG_FROM_LEVEL);
-                    if (defaultLogFromLevelInt < defaultLogFromLevel.ordinal()) {
-                        defaultLogFromLevel =
-                                logLevelFromInt(configStream.readInt(DEFAULT_LOG_FROM_LEVEL));
-                    }
-                    break;
-                case (int) TRACING_MODE:
-                    int tracingMode = configStream.readInt(TRACING_MODE);
-                    switch (tracingMode) {
-                        case DEFAULT:
-                            break;
-                        case ENABLE_ALL:
-                            defaultLogFromLevel = LogLevel.DEBUG;
-                            break;
-                        default:
-                            throw new RuntimeException("Unhandled ProtoLog tracing mode type");
-                    }
-                    break;
-                case (int) GROUP_OVERRIDES:
-                    final long group_overrides_token  = configStream.start(GROUP_OVERRIDES);
+            if (configStream.getFieldNumber() == (int) TRACING_MODE) {
+                int tracingMode = configStream.readInt(TRACING_MODE);
+                switch (tracingMode) {
+                    case DEFAULT:
+                        break;
+                    case ENABLE_ALL:
+                        defaultLogFromLevel = LogLevel.DEBUG;
+                        break;
+                    default:
+                        throw new RuntimeException("Unhandled ProtoLog tracing mode type");
+                }
+            }
+            if (configStream.getFieldNumber() == (int) GROUP_OVERRIDES) {
+                final long group_overrides_token  = configStream.start(GROUP_OVERRIDES);
 
-                    String tag = null;
-                    LogLevel logFromLevel = defaultLogFromLevel;
-                    boolean collectStackTrace = false;
-                    while (configStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
-                        if (configStream.getFieldNumber() == (int) GROUP_NAME) {
-                            tag = configStream.readString(GROUP_NAME);
+                String tag = null;
+                LogLevel logFromLevel = defaultLogFromLevel;
+                boolean collectStackTrace = false;
+                while (configStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                    if (configStream.getFieldNumber() == (int) GROUP_NAME) {
+                        tag = configStream.readString(GROUP_NAME);
+                    }
+                    if (configStream.getFieldNumber() == (int) LOG_FROM) {
+                        final int logFromInt = configStream.readInt(LOG_FROM);
+                        switch (logFromInt) {
+                            case (ProtologCommon.PROTOLOG_LEVEL_DEBUG): {
+                                logFromLevel = LogLevel.DEBUG;
+                                break;
+                            }
+                            case (ProtologCommon.PROTOLOG_LEVEL_VERBOSE): {
+                                logFromLevel = LogLevel.VERBOSE;
+                                break;
+                            }
+                            case (ProtologCommon.PROTOLOG_LEVEL_INFO): {
+                                logFromLevel = LogLevel.INFO;
+                                break;
+                            }
+                            case (ProtologCommon.PROTOLOG_LEVEL_WARN): {
+                                logFromLevel = LogLevel.WARN;
+                                break;
+                            }
+                            case (ProtologCommon.PROTOLOG_LEVEL_ERROR): {
+                                logFromLevel = LogLevel.ERROR;
+                                break;
+                            }
+                            case (ProtologCommon.PROTOLOG_LEVEL_WTF): {
+                                logFromLevel = LogLevel.WTF;
+                                break;
+                            }
+                            default: {
+                                throw new RuntimeException("Unhandled log level");
+                            }
                         }
-                        if (configStream.getFieldNumber() == (int) LOG_FROM) {
-                            final int logFromInt = configStream.readInt(LOG_FROM);
-                            logFromLevel = logLevelFromInt(logFromInt);
-                        }
-                        if (configStream.getFieldNumber() == (int) COLLECT_STACKTRACE) {
-                            collectStackTrace = configStream.readBoolean(COLLECT_STACKTRACE);
-                        }
                     }
-
-                    if (tag == null) {
-                        throw new RuntimeException("Failed to decode proto config. "
-                                + "Got a group override without a group tag.");
+                    if (configStream.getFieldNumber() == (int) COLLECT_STACKTRACE) {
+                        collectStackTrace = configStream.readBoolean(COLLECT_STACKTRACE);
                     }
+                }
 
-                    groupConfigs.put(tag, new GroupConfig(logFromLevel, collectStackTrace));
+                if (tag == null) {
+                    throw new RuntimeException("Failed to decode proto config. "
+                            + "Got a group override without a group tag.");
+                }
 
-                    configStream.end(group_overrides_token);
-                    break;
+                groupConfigs.put(tag, new GroupConfig(logFromLevel, collectStackTrace));
+
+                configStream.end(group_overrides_token);
             }
         }
 
         configStream.end(config_token);
 
         return new ProtoLogConfig(defaultLogFromLevel, groupConfigs);
-    }
-
-    private LogLevel logLevelFromInt(int logFromInt) {
-        return switch (logFromInt) {
-            case (ProtologCommon.PROTOLOG_LEVEL_DEBUG) -> LogLevel.DEBUG;
-            case (ProtologCommon.PROTOLOG_LEVEL_VERBOSE) -> LogLevel.VERBOSE;
-            case (ProtologCommon.PROTOLOG_LEVEL_INFO) -> LogLevel.INFO;
-            case (ProtologCommon.PROTOLOG_LEVEL_WARN) -> LogLevel.WARN;
-            case (ProtologCommon.PROTOLOG_LEVEL_ERROR) -> LogLevel.ERROR;
-            case (ProtologCommon.PROTOLOG_LEVEL_WTF) -> LogLevel.WTF;
-            default -> throw new RuntimeException("Unhandled log level");
-        };
     }
 
     public static class Instance extends DataSourceInstance {
