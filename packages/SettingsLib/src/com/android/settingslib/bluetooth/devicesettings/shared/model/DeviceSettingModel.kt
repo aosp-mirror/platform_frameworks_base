@@ -59,6 +59,13 @@ sealed interface DeviceSettingModel {
         val footerText: String,
     ) : DeviceSettingModel
 
+    /** Models a help preference displayed on the top right corner of the fragment. */
+    data class HelpPreference(
+        override val cachedDevice: CachedBluetoothDevice,
+        @DeviceSettingId override val id: Int,
+        val intent: Intent,
+    ) : DeviceSettingModel
+
     /** Models an unknown preference. */
     data class Unknown(
         override val cachedDevice: CachedBluetoothDevice,

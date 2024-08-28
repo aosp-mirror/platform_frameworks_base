@@ -50,6 +50,14 @@ class DeviceSettingsConfigTest {
                             null,
                             Bundle(),
                         )),
+                moreSettingsHelpItem = DeviceSettingItem(
+                    3,
+                    "package_name_2",
+                    "class_name_2",
+                    "intent_action_2",
+                    null,
+                    Bundle(),
+                ),
                 extras = Bundle().apply { putString("key1", "value1") },
             )
 
@@ -71,6 +79,10 @@ class DeviceSettingsConfigTest {
             .containsExactly("class_name_2")
         assertThat(fromParcel.moreSettingsItems.stream().map { it.intentAction }.toList())
             .containsExactly("intent_action_2")
+        assertThat(fromParcel.moreSettingsHelpItem?.settingId).isEqualTo(3)
+        assertThat(fromParcel.moreSettingsHelpItem?.packageName).isEqualTo("package_name_2")
+        assertThat(fromParcel.moreSettingsHelpItem?.className).isEqualTo("class_name_2")
+        assertThat(fromParcel.moreSettingsHelpItem?.intentAction).isEqualTo("intent_action_2")
     }
 
     private fun writeAndRead(item: DeviceSettingsConfig): DeviceSettingsConfig {
