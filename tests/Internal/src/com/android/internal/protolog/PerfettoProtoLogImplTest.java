@@ -798,6 +798,38 @@ public class PerfettoProtoLogImplTest {
                 .isEqualTo("My Test Debug Log Message true");
     }
 
+    @Test
+    public void usesDefaultLogFromLevel() throws IOException {
+        PerfettoTraceMonitor traceMonitor =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(LogLevel.WARN).build();
+        try {
+            traceMonitor.start();
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP,
+                "This message should not be logged");
+            mProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP,
+                "This message should logged %d", 123);
+            mProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP,
+                "This message should also be logged %d", 567);
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protolog = reader.readProtoLogTrace();
+
+        Truth.assertThat(protolog.messages).hasSize(2);
+
+        Truth.assertThat(protolog.messages.get(0).getLevel())
+                .isEqualTo(LogLevel.WARN);
+        Truth.assertThat(protolog.messages.get(0).getMessage())
+                .isEqualTo("This message should logged 123");
+
+        Truth.assertThat(protolog.messages.get(1).getLevel())
+                .isEqualTo(LogLevel.ERROR);
+        Truth.assertThat(protolog.messages.get(1).getMessage())
+                .isEqualTo("This message should also be logged 567");
+    }
+
     private enum TestProtoLogGroup implements IProtoLogGroup {
         TEST_GROUP(true, true, false, "TEST_TAG");
 

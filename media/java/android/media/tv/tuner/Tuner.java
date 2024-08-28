@@ -18,6 +18,7 @@ package android.media.tv.tuner;
 
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -32,6 +33,7 @@ import android.hardware.tv.tuner.Constant64Bit;
 import android.hardware.tv.tuner.FrontendScanType;
 import android.media.MediaCodec;
 import android.media.tv.TvInputService;
+import android.media.tv.flags.Flags;
 import android.media.tv.tuner.dvr.DvrPlayback;
 import android.media.tv.tuner.dvr.DvrRecorder;
 import android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener;
@@ -2518,6 +2520,50 @@ public class Tuner implements AutoCloseable  {
             if (DEBUG) {
                 Log.d(TAG, "Applying frontend with type " + mFrontendType + ", id "
                         + mDesiredFrontendId);
+            }
+            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, mFrontendLock)) {
+                return RESULT_UNAVAILABLE;
+            }
+            return RESULT_SUCCESS;
+        } finally {
+            mFrontendLock.unlock();
+        }
+    }
+
+    /**
+     * Request a frontend by frontend type.
+     *
+     * <p> This API is used if the applications want to select a frontend with desired type when
+     * there are multiple frontends of the same type is there before {@link tune}. The applied
+     * frontend will be one of the not in-use frontend. If all frontends are in-use, this API will
+     * reclaim and apply the frontend owned by the lowest priority client if current client has
+     * higher priority. Otherwise, this API will not apply any frontend and return
+     * {@link #RESULT_UNAVAILABLE}.
+     *
+     * @param desiredFrontendType the Type of the desired fronted. Should be one of
+     *                            {@link android.media.tv.tuner.frontend.FrontendSettings.Type}
+     * @return result status of open operation.
+     */
+    @Result
+    @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
+    @RequiresPermission(
+        allOf = {"android.permission.TUNER_RESOURCE_ACCESS", "android.permission.ACCESS_TV_TUNER"})
+    public int applyFrontendByType(@FrontendSettings.Type int desiredFrontendType) {
+        mFrontendLock.lock();
+        try {
+            if (mFeOwnerTuner != null) {
+                Log.e(TAG, "Operation connot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
+            if (mFrontendHandle != null) {
+                Log.e(TAG, "A frontend has been opened before");
+                return RESULT_INVALID_STATE;
+            }
+
+            mDesiredFrontendId = null;
+            mFrontendType = desiredFrontendType;
+            if (DEBUG) {
+                Log.d(TAG, "Applying frontend with type " + mFrontendType);
             }
             if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, mFrontendLock)) {
                 return RESULT_UNAVAILABLE;

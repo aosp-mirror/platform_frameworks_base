@@ -67,7 +67,7 @@ import java.util.List;
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
-public class ProtoLogServiceTest {
+public class ProtoLogConfigurationServiceTest {
 
     private static final String TEST_GROUP = "MY_TEST_GROUP";
     private static final String OTHER_TEST_GROUP = "MY_OTHER_TEST_GROUP";
@@ -128,7 +128,7 @@ public class ProtoLogServiceTest {
 
     private File mViewerConfigFile;
 
-    public ProtoLogServiceTest() throws IOException {
+    public ProtoLogConfigurationServiceTest() throws IOException {
     }
 
     @Before
@@ -150,10 +150,12 @@ public class ProtoLogServiceTest {
 
     @Test
     public void canRegisterClientWithGroupsOnly() throws RemoteException {
-        final ProtoLogService service = new ProtoLogService();
+        final ProtoLogConfigurationService service = new ProtoLogConfigurationService();
 
-        final ProtoLogService.RegisterClientArgs args = new ProtoLogService.RegisterClientArgs()
-                .setGroups(new ProtoLogService.RegisterClientArgs.GroupConfig(TEST_GROUP, true));
+        final ProtoLogConfigurationService.RegisterClientArgs args =
+                new ProtoLogConfigurationService.RegisterClientArgs()
+                        .setGroups(new ProtoLogConfigurationService.RegisterClientArgs
+                                .GroupConfig(TEST_GROUP, true));
         service.registerClient(mMockClient, args);
 
         Truth.assertThat(service.isLoggingToLogcat(TEST_GROUP)).isTrue();
@@ -163,11 +165,13 @@ public class ProtoLogServiceTest {
     @Test
     public void willDumpViewerConfigOnlyOnceOnTraceStop()
             throws RemoteException, InvalidProtocolBufferException {
-        final ProtoLogService service = new ProtoLogService();
+        final ProtoLogConfigurationService service = new ProtoLogConfigurationService();
 
-        final ProtoLogService.RegisterClientArgs args = new ProtoLogService.RegisterClientArgs()
-                .setGroups(new ProtoLogService.RegisterClientArgs.GroupConfig(TEST_GROUP, true))
-                .setViewerConfigFile(mViewerConfigFile.getAbsolutePath());
+        final ProtoLogConfigurationService.RegisterClientArgs args =
+                new ProtoLogConfigurationService.RegisterClientArgs()
+                        .setGroups(new ProtoLogConfigurationService.RegisterClientArgs
+                                .GroupConfig(TEST_GROUP, true))
+                        .setViewerConfigFile(mViewerConfigFile.getAbsolutePath());
         service.registerClient(mMockClient, args);
         service.registerClient(mSecondMockClient, args);
 
@@ -196,14 +200,15 @@ public class ProtoLogServiceTest {
     @Test
     public void willDumpViewerConfigOnLastClientDisconnected()
             throws RemoteException, FileNotFoundException {
-        final ProtoLogService.ViewerConfigFileTracer tracer =
-                Mockito.mock(ProtoLogService.ViewerConfigFileTracer.class);
-        final ProtoLogService service = new ProtoLogService(tracer);
+        final ProtoLogConfigurationService.ViewerConfigFileTracer tracer =
+                Mockito.mock(ProtoLogConfigurationService.ViewerConfigFileTracer.class);
+        final ProtoLogConfigurationService service = new ProtoLogConfigurationService(tracer);
 
-        final ProtoLogService.RegisterClientArgs args = new ProtoLogService.RegisterClientArgs()
-                .setGroups(new ProtoLogService.RegisterClientArgs.GroupConfig(
-                        TEST_GROUP, true))
-                .setViewerConfigFile(mViewerConfigFile.getAbsolutePath());
+        final ProtoLogConfigurationService.RegisterClientArgs args =
+                new ProtoLogConfigurationService.RegisterClientArgs()
+                        .setGroups(new ProtoLogConfigurationService.RegisterClientArgs
+                                .GroupConfig(TEST_GROUP, true))
+                        .setViewerConfigFile(mViewerConfigFile.getAbsolutePath());
         service.registerClient(mMockClient, args);
         service.registerClient(mSecondMockClient, args);
 
@@ -220,10 +225,11 @@ public class ProtoLogServiceTest {
 
     @Test
     public void sendEnableLoggingToLogcatToClient() throws RemoteException {
-        final var service = new ProtoLogService();
+        final var service = new ProtoLogConfigurationService();
 
-        final var args = new ProtoLogService.RegisterClientArgs()
-                .setGroups(new ProtoLogService.RegisterClientArgs.GroupConfig(TEST_GROUP, false));
+        final var args = new ProtoLogConfigurationService.RegisterClientArgs()
+                .setGroups(new ProtoLogConfigurationService.RegisterClientArgs
+                        .GroupConfig(TEST_GROUP, false));
         service.registerClient(mMockClient, args);
 
         Truth.assertThat(service.isLoggingToLogcat(TEST_GROUP)).isFalse();
@@ -236,10 +242,12 @@ public class ProtoLogServiceTest {
 
     @Test
     public void sendDisableLoggingToLogcatToClient() throws RemoteException {
-        final ProtoLogService service = new ProtoLogService();
+        final ProtoLogConfigurationService service = new ProtoLogConfigurationService();
 
-        final ProtoLogService.RegisterClientArgs args = new ProtoLogService.RegisterClientArgs()
-                .setGroups(new ProtoLogService.RegisterClientArgs.GroupConfig(TEST_GROUP, true));
+        final ProtoLogConfigurationService.RegisterClientArgs args =
+                new ProtoLogConfigurationService.RegisterClientArgs()
+                        .setGroups(new ProtoLogConfigurationService.RegisterClientArgs
+                                .GroupConfig(TEST_GROUP, true));
         service.registerClient(mMockClient, args);
 
         Truth.assertThat(service.isLoggingToLogcat(TEST_GROUP)).isTrue();
@@ -252,10 +260,12 @@ public class ProtoLogServiceTest {
 
     @Test
     public void doNotSendLoggingToLogcatToClientWithoutRegisteredGroup() throws RemoteException {
-        final ProtoLogService service = new ProtoLogService();
+        final ProtoLogConfigurationService service = new ProtoLogConfigurationService();
 
-        final ProtoLogService.RegisterClientArgs args = new ProtoLogService.RegisterClientArgs()
-                .setGroups(new ProtoLogService.RegisterClientArgs.GroupConfig(TEST_GROUP, false));
+        final ProtoLogConfigurationService.RegisterClientArgs args =
+                new ProtoLogConfigurationService.RegisterClientArgs()
+                        .setGroups(new ProtoLogConfigurationService.RegisterClientArgs
+                                .GroupConfig(TEST_GROUP, false));
         service.registerClient(mMockClient, args);
 
         Truth.assertThat(service.isLoggingToLogcat(TEST_GROUP)).isFalse();
@@ -267,14 +277,16 @@ public class ProtoLogServiceTest {
 
     @Test
     public void handlesToggleToLogcatBeforeClientIsRegistered() throws RemoteException {
-        final ProtoLogService service = new ProtoLogService();
+        final ProtoLogConfigurationService service = new ProtoLogConfigurationService();
 
         Truth.assertThat(service.getGroups()).asList().doesNotContain(TEST_GROUP);
         service.enableProtoLogToLogcat(TEST_GROUP);
         Truth.assertThat(service.isLoggingToLogcat(TEST_GROUP)).isTrue();
 
-        final ProtoLogService.RegisterClientArgs args = new ProtoLogService.RegisterClientArgs()
-                .setGroups(new ProtoLogService.RegisterClientArgs.GroupConfig(TEST_GROUP, false));
+        final ProtoLogConfigurationService.RegisterClientArgs args =
+                new ProtoLogConfigurationService.RegisterClientArgs()
+                        .setGroups(new ProtoLogConfigurationService.RegisterClientArgs
+                                .GroupConfig(TEST_GROUP, false));
         service.registerClient(mMockClient, args);
 
         Mockito.verify(mMockClient).toggleLogcat(eq(true),

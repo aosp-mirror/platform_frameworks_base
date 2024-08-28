@@ -71,6 +71,7 @@ import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * Base quick-settings tile, extend this to create a new tile.
@@ -350,6 +351,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId, 0).sendToTarget();
+        postStale();
     }
 
     public void destroy() {
@@ -666,6 +668,18 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         @NonNull
         public String toString() {
             return "DrawableIcon";
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            // No need to compare equality of the mInvisibleDrawable as that's generated from
+            // mDrawable's constant state.
+            return other instanceof DrawableIcon && ((DrawableIcon) other).mDrawable == mDrawable;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mDrawable);
         }
     }
 

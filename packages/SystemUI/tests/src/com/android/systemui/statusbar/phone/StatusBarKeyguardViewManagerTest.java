@@ -108,7 +108,9 @@ import com.android.systemui.statusbar.domain.interactor.StatusBarKeyguardViewMan
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.common.truth.Truth;
 
@@ -175,6 +177,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
             mBouncerExpansionCallback;
     private FakeKeyguardStateController mKeyguardStateController =
             spy(new FakeKeyguardStateController());
+    private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Mock
     private ViewRootImpl mViewRootImpl;
@@ -238,6 +241,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(JavaAdapter.class),
                         () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),
+                        mExecutor,
                         () -> mDeviceEntryInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
@@ -760,6 +764,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(JavaAdapter.class),
                         () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),
+                        mExecutor,
                         () -> mDeviceEntryInteractor) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
@@ -1084,6 +1089,9 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(KeyguardState.LOCKSCREEN);
 
         reset(mCentralSurfaces);
+        // Advance past reattempts
+        mStatusBarKeyguardViewManager.setAttemptsToShowBouncer(10);
+
         mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false, false);
         verify(mPrimaryBouncerInteractor).show(true);
         verify(mCentralSurfaces).showKeyguard();

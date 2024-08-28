@@ -487,39 +487,19 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     HalVibration performHapticFeedbackInternal(
             int uid, int deviceId, String opPkg, int constant, String reason,
             IBinder token, int flags, int privFlags) {
-
         // Make sure we report the constant id in the requested haptic feedback reason.
         reason = "performHapticFeedback(constant=" + constant + "): " + reason;
-
         HapticFeedbackVibrationProvider hapticVibrationProvider = getHapticVibrationProvider();
-        if (hapticVibrationProvider == null) {
-            Slog.e(TAG, "performHapticFeedback; haptic vibration provider not ready.");
-            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason,
-                    Vibration.Status.IGNORED_ERROR_SCHEDULING);
+        Vibration.Status ignoreStatus = shouldIgnoreHapticFeedback(constant, reason,
+                hapticVibrationProvider);
+        if (ignoreStatus != null) {
+            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason, ignoreStatus);
             return null;
         }
-
-        if (hapticVibrationProvider.isRestrictedHapticFeedback(constant)
-                && !hasPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS)) {
-            Slog.w(TAG, "performHapticFeedback; no permission for system constant " + constant);
-            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason,
-                    Vibration.Status.IGNORED_MISSING_PERMISSION);
-            return null;
-        }
-
-        VibrationEffect effect = hapticVibrationProvider.getVibrationForHapticFeedback(constant);
-        if (effect == null) {
-            Slog.w(TAG, "performHapticFeedback; vibration absent for constant " + constant);
-            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason,
-                    Vibration.Status.IGNORED_UNSUPPORTED);
-            return null;
-        }
-
-        CombinedVibration vib = CombinedVibration.createParallel(effect);
-        VibrationAttributes attrs = hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
-                constant, flags, privFlags);
-        VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
-        return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, vib, attrs, reason, token);
+        return performHapticFeedbackWithEffect(uid, deviceId, opPkg, constant, reason, token,
+                hapticVibrationProvider.getVibration(constant),
+                hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
+                        constant, flags, privFlags));
     }
 
     /**
@@ -532,12 +512,35 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     HalVibration performHapticFeedbackForInputDeviceInternal(
             int uid, int deviceId, String opPkg, int constant, int inputDeviceId, int inputSource,
             String reason, IBinder token, int flags, int privFlags) {
-        // TODO(b/355543835): implement input device specific logic.
-        if (DEBUG) {
-            Slog.d(TAG, "performHapticFeedbackForInput: input device specific not implemented.");
+        // Make sure we report the constant id in the requested haptic feedback reason.
+        reason = "performHapticFeedbackForInputDevice(constant=" + constant + ", inputDeviceId="
+                + inputDeviceId + ", inputSource=" + inputSource + "): " + reason;
+        HapticFeedbackVibrationProvider hapticVibrationProvider = getHapticVibrationProvider();
+        Vibration.Status ignoreStatus = shouldIgnoreHapticFeedback(constant, reason,
+                hapticVibrationProvider);
+        if (ignoreStatus != null) {
+            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason, ignoreStatus);
+            return null;
         }
-        return performHapticFeedbackInternal(uid, deviceId, opPkg, constant, reason, /* token= */
-                this, flags, privFlags);
+        return performHapticFeedbackWithEffect(uid, deviceId, opPkg, constant, reason, token,
+                hapticVibrationProvider.getVibration(constant, inputSource),
+                hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
+                        constant, flags, privFlags));
+    }
+
+    private HalVibration performHapticFeedbackWithEffect(int uid, int deviceId, String opPkg,
+            int constant, String reason, IBinder token, VibrationEffect effect,
+            VibrationAttributes attrs) {
+        if (effect == null) {
+            logAndRecordPerformHapticFeedbackAttempt(uid, deviceId, opPkg, reason,
+                    Vibration.Status.IGNORED_UNSUPPORTED);
+            Slog.w(TAG,
+                    "performHapticFeedbackWithEffect; vibration absent for constant " + constant);
+            return null;
+        }
+        CombinedVibration vib = CombinedVibration.createParallel(effect);
+        VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
+        return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, vib, attrs, reason, token);
     }
 
     /**
@@ -1234,6 +1237,21 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
         }
 
+        return null;
+    }
+
+    @Nullable
+    private Vibration.Status shouldIgnoreHapticFeedback(int constant, String reason,
+            HapticFeedbackVibrationProvider hapticVibrationProvider) {
+        if (hapticVibrationProvider == null) {
+            Slog.e(TAG, reason + "; haptic vibration provider not ready.");
+            return Vibration.Status.IGNORED_ERROR_SCHEDULING;
+        }
+        if (hapticVibrationProvider.isRestrictedHapticFeedback(constant)
+                && !hasPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS)) {
+            Slog.w(TAG, reason + "; no permission for system constant " + constant);
+            return Vibration.Status.IGNORED_MISSING_PERMISSION;
+        }
         return null;
     }
 

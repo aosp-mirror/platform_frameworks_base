@@ -1820,8 +1820,10 @@ class BackNavigationController {
                             mNavigationMonitor.cancelBackNavigating("cancelAnimation");
                             mBackAnimationAdapter.getRunner().onAnimationCancelled();
                         } else {
-                            mBackAnimationAdapter.getRunner().onAnimationStart(
-                                    targets, null, null, callback);
+                            mBackAnimationAdapter.getRunner().onAnimationStart(targets,
+                                    mOpenAnimAdaptor.mPreparedOpenTransition != null
+                                            ? mOpenAnimAdaptor.mPreparedOpenTransition.getToken()
+                                            : null, callback);
                         }
                     } catch (RemoteException e) {
                         e.printStackTrace();

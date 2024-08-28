@@ -18,7 +18,9 @@ package com.android.server.dreams;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,7 +29,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.DreamOverlayService;
+import android.service.dreams.Flags;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
 import android.service.dreams.IDreamOverlayClient;
@@ -219,6 +223,47 @@ public class DreamOverlayServiceTest {
 
         firstClient.wakeUp();
         verify(monitor, never()).onWakeUp();
+    }
+
+    /**
+     * Verifies that only the currently started dream is able to affect the overlay.
+     */
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    public void testRedirectToWakeAcrossClients() throws RemoteException {
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mExecutor).execute(any());
+
+        final TestDreamOverlayService.Monitor monitor = Mockito.mock(
+                TestDreamOverlayService.Monitor.class);
+        final TestDreamOverlayService service = new TestDreamOverlayService(monitor, mExecutor);
+        final IBinder binder = service.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(binder);
+
+        service.redirectWake(true);
+
+        final IDreamOverlayClient client = getClient(overlay);
+
+        // Start the dream.
+        client.startDream(mLayoutParams, mOverlayCallback,
+                FIRST_DREAM_COMPONENT.flattenToString(), false);
+        // Make sure redirect state is set on dream.
+        verify(mOverlayCallback).onRedirectWake(eq(true));
+
+        // Make sure new changes are propagated.
+        clearInvocations(mOverlayCallback);
+        service.redirectWake(false);
+        verify(mOverlayCallback).onRedirectWake(eq(false));
+
+
+        // Start another dream, make sure new dream is informed of current state.
+        service.redirectWake(true);
+        clearInvocations(mOverlayCallback);
+        client.startDream(mLayoutParams, mOverlayCallback,
+                FIRST_DREAM_COMPONENT.flattenToString(), false);
+        verify(mOverlayCallback).onRedirectWake(eq(true));
     }
 
     private static IDreamOverlayClient getClient(IDreamOverlay overlay) throws RemoteException {

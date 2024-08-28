@@ -3,7 +3,6 @@ package com.android.systemui.user.domain.interactor
 import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_REFACTOR_GET_CURRENT_USER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +27,6 @@ class SelectedUserInteractorTest : SysuiTestCase() {
 
     @Test
     fun getSelectedUserIdReturnsId() {
-        mSetFlagsRule.enableFlags(FLAG_REFACTOR_GET_CURRENT_USER)
         runBlocking { userRepository.setSelectedUserInfo(USER_INFOS[0]) }
 
         val actualId = underTest.getSelectedUserId()

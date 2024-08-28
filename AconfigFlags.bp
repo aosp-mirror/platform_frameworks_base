@@ -26,6 +26,7 @@ aconfig_declarations_group {
         "android.app.flags-aconfig-java",
         "android.app.ondeviceintelligence-aconfig-java",
         "android.app.smartspace.flags-aconfig-java",
+        "android.app.supervision.flags-aconfig-java",
         "android.app.usage.flags-aconfig-java",
         "android.app.wearable.flags-aconfig-java",
         "android.appwidget.flags-aconfig-java",
@@ -1209,6 +1210,21 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.smartspace.flags-aconfig-java",
     aconfig_declarations: "android.app.smartspace.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Supervision
+aconfig_declarations {
+    name: "android.app.supervision.flags-aconfig",
+    exportable: true,
+    package: "android.app.supervision.flags",
+    container: "system",
+    srcs: ["core/java/android/app/supervision/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.supervision.flags-aconfig-java",
+    aconfig_declarations: "android.app.supervision.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

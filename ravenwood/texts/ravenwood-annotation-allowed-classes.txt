@@ -99,6 +99,7 @@ android.util.SparseDoubleArray
 android.util.SparseIntArray
 android.util.SparseLongArray
 android.util.SparseSetArray
+android.util.StateSet
 android.util.StringBuilderPrinter
 android.util.TeeWriter
 android.util.TimeUtils
@@ -222,9 +223,11 @@ android.content.res.ApkAssets
 android.content.res.AssetFileDescriptor
 android.content.res.AssetManager
 android.content.res.AssetManager$Builder
+android.content.res.ColorStateList
 android.content.res.ConfigurationBoundResourceCache
 android.content.res.Configuration
 android.content.res.CompatibilityInfo
+android.content.res.ComplexColor
 android.content.res.ConstantState
 android.content.res.DrawableCache
 android.content.res.Element

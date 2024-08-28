@@ -18,7 +18,9 @@ package com.android.systemui.navigationbar;
 
 import static android.app.StatusBarManager.WINDOW_NAVIGATION_BAR;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
@@ -37,6 +39,9 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.os.Handler;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.provider.Flags;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 
@@ -47,6 +52,7 @@ import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutT
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.accessibility.AccessibilityGestureTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
@@ -93,6 +99,8 @@ public class NavBarHelperTest extends SysuiTestCase {
     AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     @Mock
     AccessibilityButtonTargetsObserver mAccessibilityButtonTargetObserver;
+    @Mock
+    AccessibilityGestureTargetsObserver mAccessibilityGestureTargetObserver;
     @Mock
     SystemActions mSystemActions;
     @Mock
@@ -152,6 +160,7 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mAccessibilityManager).addAccessibilityServicesStateChangeListener(any());
         mNavBarHelper = new NavBarHelper(mContext, mAccessibilityManager,
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
+                mAccessibilityGestureTargetObserver,
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
                 mNavigationModeController, mEdgeBackGestureHandlerFactory, mWm, mUserTracker,
@@ -171,6 +180,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         verify(mAccessibilityButtonModeObserver, times(1)).addListener(mNavBarHelper);
         verify(mAccessibilityButtonTargetObserver, times(1)).addListener(mNavBarHelper);
+        verify(mAccessibilityGestureTargetObserver, times(1)).addListener(mNavBarHelper);
         verify(mAccessibilityManager, times(1)).addAccessibilityServicesStateChangeListener(
                 mNavBarHelper);
         verify(mAssistManager, times(1)).getAssistInfoForUser(anyInt());
@@ -185,6 +195,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         verify(mAccessibilityButtonModeObserver, times(1)).removeListener(mNavBarHelper);
         verify(mAccessibilityButtonTargetObserver, times(1)).removeListener(mNavBarHelper);
+        verify(mAccessibilityGestureTargetObserver, times(1)).removeListener(mNavBarHelper);
         verify(mAccessibilityManager, times(1)).removeAccessibilityServicesStateChangeListener(
                 mNavBarHelper);
         verify(mWm, times(1)).removeRotationWatcher(any());
@@ -351,6 +362,83 @@ public class NavBarHelperTest extends SysuiTestCase {
     public void configUpdatePropagatesToEdgeBackGestureHandler() {
         mConfigurationController.onConfigurationChanged(Configuration.EMPTY);
         verify(mEdgeBackGestureHandler, times(1)).onConfigurationChanged(any());
+    }
+
+    @Test
+    public void updateA11yState_navBarMode_softwareTargets_isClickable() {
+        when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
+                ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(UserShortcutType.SOFTWARE))
+                .thenReturn(createFakeShortcutTargets());
+
+        mNavBarHelper.updateA11yState();
+        long state = mNavBarHelper.getA11yButtonState();
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_CLICKABLE).isEqualTo(
+                SYSUI_STATE_A11Y_BUTTON_CLICKABLE);
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE).isEqualTo(
+                SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void updateA11yState_gestureMode_softwareTargets_isClickable() {
+        when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
+                ACCESSIBILITY_BUTTON_MODE_GESTURE);
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(UserShortcutType.SOFTWARE))
+                .thenReturn(createFakeShortcutTargets());
+
+        mNavBarHelper.updateA11yState();
+        long state = mNavBarHelper.getA11yButtonState();
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_CLICKABLE).isEqualTo(
+                SYSUI_STATE_A11Y_BUTTON_CLICKABLE);
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE).isEqualTo(
+                SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void updateA11yState_gestureNavMode_floatingButtonMode_gestureTargets_isClickable() {
+        mNavBarHelper.onNavigationModeChanged(NAV_BAR_MODE_GESTURAL);
+        when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
+                ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(UserShortcutType.GESTURE))
+                .thenReturn(createFakeShortcutTargets());
+
+        mNavBarHelper.updateA11yState();
+        long state = mNavBarHelper.getA11yButtonState();
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_CLICKABLE).isEqualTo(
+                SYSUI_STATE_A11Y_BUTTON_CLICKABLE);
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE).isEqualTo(
+                SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void updateA11yState_navBarMode_gestureTargets_isNotClickable() {
+        when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
+                ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(UserShortcutType.GESTURE))
+                .thenReturn(createFakeShortcutTargets());
+
+        mNavBarHelper.updateA11yState();
+        long state = mNavBarHelper.getA11yButtonState();
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_CLICKABLE).isEqualTo(0);
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_STANDALONE_GESTURE_ENABLED)
+    public void updateA11yState_singleTarget_clickableButNotLongClickable() {
+        when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
+                ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
+        when(mAccessibilityManager.getAccessibilityShortcutTargets(UserShortcutType.SOFTWARE))
+                .thenReturn(new ArrayList<>(List.of("a")));
+
+        mNavBarHelper.updateA11yState();
+        long state = mNavBarHelper.getA11yButtonState();
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_CLICKABLE).isEqualTo(
+                SYSUI_STATE_A11Y_BUTTON_CLICKABLE);
+        assertThat(state & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE).isEqualTo(0);
     }
 
     private List<String> createFakeShortcutTargets() {

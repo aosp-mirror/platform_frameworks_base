@@ -22,6 +22,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -82,5 +84,70 @@ class NotificationShadeWindowModelTest : SysuiTestCase() {
                 testScope,
             )
             assertThat(isKeyguardOccluded).isFalse()
+        }
+
+    @Test
+    fun transitionFromOccludedToDreamingTransitionRemainsTrue() =
+        testScope.runTest {
+            val isKeyguardOccluded by collectLastValue(underTest.isKeyguardOccluded)
+            assertThat(isKeyguardOccluded).isFalse()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.DREAMING,
+                        value = 0f,
+                        transitionState = TransitionState.STARTED,
+                    ),
+                    TransitionStep(
+                        from = KeyguardState.LOCKSCREEN,
+                        to = KeyguardState.DREAMING,
+                        value = 0.5f,
+                        transitionState = TransitionState.RUNNING,
+                    ),
+                ),
+                testScope,
+            )
+            assertThat(isKeyguardOccluded).isFalse()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.DREAMING,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED,
+                ),
+            )
+            assertThat(isKeyguardOccluded).isTrue()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    TransitionStep(
+                        from = KeyguardState.DREAMING,
+                        to = KeyguardState.OCCLUDED,
+                        value = 0f,
+                        transitionState = TransitionState.STARTED,
+                    ),
+                    TransitionStep(
+                        from = KeyguardState.DREAMING,
+                        to = KeyguardState.OCCLUDED,
+                        value = 0.5f,
+                        transitionState = TransitionState.RUNNING,
+                    ),
+                ),
+                testScope,
+            )
+            assertThat(isKeyguardOccluded).isTrue()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.DREAMING,
+                    to = KeyguardState.OCCLUDED,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED,
+                ),
+            )
+            assertThat(isKeyguardOccluded).isTrue()
         }
 }

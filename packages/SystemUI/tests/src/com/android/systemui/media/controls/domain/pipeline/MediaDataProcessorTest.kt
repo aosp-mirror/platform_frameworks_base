@@ -57,6 +57,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.data.repository.MediaDataRepository
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
@@ -134,6 +135,7 @@ private fun <T> anyObject(): T {
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class MediaDataProcessorTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
@@ -200,8 +202,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(true)
-
         staticMockSession =
             ExtendedMockito.mockitoSession()
                 .mockStatic<UriGrantsManager>(UriGrantsManager::class.java)

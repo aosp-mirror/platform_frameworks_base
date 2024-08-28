@@ -148,11 +148,11 @@ constructor(
     val isVisible: StateFlow<Boolean> =
         combine(
                 repository.isVisible,
-                repository.isRemoteUserInteractionOngoing,
+                repository.isRemoteUserInputOngoing,
             ) { isVisible, isRemoteUserInteractionOngoing ->
                 isVisibleInternal(
                     raw = isVisible,
-                    isRemoteUserInteractionOngoing = isRemoteUserInteractionOngoing,
+                    isRemoteUserInputOngoing = isRemoteUserInteractionOngoing,
                 )
             }
             .stateIn(
@@ -162,8 +162,13 @@ constructor(
             )
 
     /** Whether there's an ongoing remotely-initiated user interaction. */
-    val isRemoteUserInteractionOngoing: StateFlow<Boolean> =
-        repository.isRemoteUserInteractionOngoing
+    val isRemoteUserInteractionOngoing: StateFlow<Boolean> = repository.isRemoteUserInputOngoing
+
+    /**
+     * Whether there's an ongoing user interaction started in the scene container Compose hierarchy.
+     */
+    val isSceneContainerUserInputOngoing: StateFlow<Boolean> =
+        repository.isSceneContainerUserInputOngoing
 
     /**
      * The amount of transition into or out of the given [scene].
@@ -284,7 +289,7 @@ constructor(
      * Please do not call this from outside of the scene framework. If you are trying to force the
      * visibility to visible or invisible, prefer making changes to the existing caller of this
      * method or to upstream state used to calculate [isVisible]; for an example of the latter,
-     * please see [onRemoteUserInteractionStarted] and [onUserInteractionFinished].
+     * please see [onRemoteUserInputStarted] and [onUserInputFinished].
      */
     fun setVisible(isVisible: Boolean, loggingReason: String) {
         val wasVisible = repository.isVisible.value
@@ -301,6 +306,16 @@ constructor(
     }
 
     /**
+     * Notifies that a scene container user interaction has begun.
+     *
+     * This is a user interaction that originates within the Composable hierarchy of the scene
+     * container.
+     */
+    fun onSceneContainerUserInputStarted() {
+        repository.isSceneContainerUserInputOngoing.value = true
+    }
+
+    /**
      * Notifies that a remote user interaction has begun.
      *
      * This is a user interaction that originates outside of the UI of the scene container and
@@ -311,18 +326,19 @@ constructor(
      * then rerouted by window manager to System UI. While the user interaction definitely continues
      * within the System UI process and code, it also originates remotely.
      */
-    fun onRemoteUserInteractionStarted(loggingReason: String) {
-        logger.logRemoteUserInteractionStarted(loggingReason)
-        repository.isRemoteUserInteractionOngoing.value = true
+    fun onRemoteUserInputStarted(loggingReason: String) {
+        logger.logRemoteUserInputStarted(loggingReason)
+        repository.isRemoteUserInputOngoing.value = true
     }
 
     /**
      * Notifies that the current user interaction (internally or remotely started, see
-     * [onRemoteUserInteractionStarted]) has finished.
+     * [onSceneContainerUserInputStarted] and [onRemoteUserInputStarted]) has finished.
      */
-    fun onUserInteractionFinished() {
-        logger.logUserInteractionFinished()
-        repository.isRemoteUserInteractionOngoing.value = false
+    fun onUserInputFinished() {
+        logger.logUserInputFinished()
+        repository.isSceneContainerUserInputOngoing.value = false
+        repository.isRemoteUserInputOngoing.value = false
     }
 
     /**
@@ -351,9 +367,9 @@ constructor(
 
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,
-        isRemoteUserInteractionOngoing: Boolean = repository.isRemoteUserInteractionOngoing.value,
+        isRemoteUserInputOngoing: Boolean = repository.isRemoteUserInputOngoing.value,
     ): Boolean {
-        return raw || isRemoteUserInteractionOngoing
+        return raw || isRemoteUserInputOngoing
     }
 
     /**
