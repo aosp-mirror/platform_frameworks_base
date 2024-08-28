@@ -39,6 +39,9 @@ sealed class AuthMethodBouncerViewModel(
      * being able to attempt to unlock the device.
      */
     val isInputEnabled: StateFlow<Boolean>,
+
+    /** Name to use for performance tracing purposes. */
+    val traceName: String,
 ) : ExclusiveActivatable() {
 
     private val _animateFailure = MutableStateFlow(false)

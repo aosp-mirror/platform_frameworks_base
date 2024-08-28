@@ -23,6 +23,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.core.graphics.drawable.toBitmap
+import com.android.app.tracing.coroutines.traceCoroutine
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
@@ -146,7 +147,7 @@ constructor(
                     .map(::getChildViewModel)
                     .collectLatest { childViewModelOrNull ->
                         _authMethodViewModel.value = childViewModelOrNull
-                        childViewModelOrNull?.activate()
+                        childViewModelOrNull?.let { traceCoroutine(it.traceName) { it.activate() } }
                     }
             }
 
