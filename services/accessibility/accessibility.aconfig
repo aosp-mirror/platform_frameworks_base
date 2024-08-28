@@ -11,6 +11,16 @@ flag {
 }
 
 flag {
+    name: "always_allow_observing_touch_events"
+    namespace: "accessibility"
+    description: "Always allows InputFilter observing SOURCE_TOUCHSCREEN events, even if touch exploration is enabled."
+    bug: "344604959"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "resettable_dynamic_properties"
     namespace: "accessibility"
     description: "Maintains initial copies of a11yServiceInfo dynamic properties so they can reset on disconnect."
