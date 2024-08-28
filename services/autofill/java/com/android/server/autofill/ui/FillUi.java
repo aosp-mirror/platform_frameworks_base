@@ -48,6 +48,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.BaseAdapter;
@@ -82,7 +83,6 @@ final class FillUi {
             com.android.internal.R.style.Theme_DeviceDefault_Light_Autofill;
     private static final int THEME_ID_DARK =
             com.android.internal.R.style.Theme_DeviceDefault_Autofill;
-    private static final int AUTOFILL_CREDMAN_MAX_VISIBLE_DATASETS = 5;
 
     private static final TypedValue sTempTypedValue = new TypedValue();
 
@@ -113,9 +113,11 @@ final class FillUi {
 
     private final @NonNull Callback mCallback;
 
+    private final @NonNull WindowManager mWindowManager;
+
     private final @Nullable View mHeader;
     private final @NonNull ListView mListView;
-    private final @Nullable View mFooter;
+    private @Nullable View mFooter;
 
     private final @Nullable ItemsAdapter mAdapter;
 
@@ -133,6 +135,8 @@ final class FillUi {
     private final int mThemeId;
 
     private int mMaxInputLengthForAutofill;
+
+    private final boolean mIsCredmanAutofillSession;
 
     public static boolean isFullScreen(Context context) {
         if (sFullScreenMode != null) {
@@ -158,6 +162,9 @@ final class FillUi {
         mContext = new ContextThemeWrapper(context, mThemeId);
         mUserContext = Helper.getUserContext(mContext);
         mMaxInputLengthForAutofill = maxInputLengthForAutofill;
+        mIsCredmanAutofillSession = (Flags.autofillCredmanIntegration()
+            && ((response.getFlags() & FLAG_CREDENTIAL_MANAGER_RESPONSE) != 0));
+        mWindowManager = mContext.getSystemService(WindowManager.class);
 
         final LayoutInflater inflater = LayoutInflater.from(mContext);
 
@@ -167,7 +174,8 @@ final class FillUi {
         final ViewGroup decor;
         if (mFullScreen) {
             decor = (ViewGroup) inflater.inflate(R.layout.autofill_dataset_picker_fullscreen, null);
-        } else if (headerPresentation != null || footerPresentation != null) {
+        } else if (headerPresentation != null
+                || footerPresentation != null || mIsCredmanAutofillSession) {
             decor = (ViewGroup) inflater.inflate(R.layout.autofill_dataset_picker_header_footer,
                     null);
         } else {
@@ -219,11 +227,7 @@ final class FillUi {
             if (sVerbose) {
                 Slog.v(TAG, "overriding maximum visible datasets to " + mVisibleDatasetsMaxCount);
             }
-        } else if (Flags.autofillCredmanIntegration() && (
-                (response.getFlags() & FLAG_CREDENTIAL_MANAGER_RESPONSE) != 0)) {
-            mVisibleDatasetsMaxCount = AUTOFILL_CREDMAN_MAX_VISIBLE_DATASETS;
-        }
-        else {
+        } else {
             mVisibleDatasetsMaxCount = mContext.getResources()
                     .getInteger(com.android.internal.R.integer.autofill_max_visible_datasets);
         }
@@ -301,7 +305,7 @@ final class FillUi {
                 mHeader = null;
             }
 
-            if (footerPresentation != null) {
+            if (footerPresentation != null && !mIsCredmanAutofillSession) {
                 final LinearLayout footerContainer =
                         decor.findViewById(R.id.autofill_dataset_footer);
                 if (footerContainer != null) {
@@ -366,7 +370,22 @@ final class FillUi {
                     }
 
                     applyCancelAction(view, response.getCancelIds());
-                    items.add(new ViewItem(dataset, filterPattern, filterable, valueText, view));
+                    if (AutofillManager.PINNED_DATASET_ID.equals(dataset.getId())
+                            && mIsCredmanAutofillSession && !items.isEmpty()) {
+                        final LinearLayout footerContainer =
+                                decor.findViewById(R.id.autofill_dataset_footer);
+                        if (sVerbose) {
+                          Slog.v(TAG, "adding footer");
+                        }
+                        mFooter = view;
+                        footerContainer.addView(mFooter);
+                        footerContainer.setVisibility(View.VISIBLE);
+                        footerContainer.setClickable(true);
+                        footerContainer.setOnClickListener(v -> mCallback.onDatasetPicked(dataset));
+                    } else {
+                        items.add(
+                            new ViewItem(dataset, filterPattern, filterable, valueText, view));
+                    }
                 }
             }
 
@@ -459,12 +478,9 @@ final class FillUi {
                 if (updateContentSize()) {
                     requestShowFillUi();
                 }
-                if (mAdapter.getCount() > mVisibleDatasetsMaxCount) {
-                    mListView.setVerticalScrollBarEnabled(true);
-                    mListView.onVisibilityAggregated(true);
-                } else {
-                    mListView.setVerticalScrollBarEnabled(false);
-                }
+                mListView.setVerticalScrollBarEnabled(true);
+                mListView.onVisibilityAggregated(true);
+
                 if (mAdapter.getCount() != oldCount) {
                     mListView.requestLayout();
                 }
@@ -578,11 +594,18 @@ final class FillUi {
         return changed;
     }
 
+    private boolean heightLesserThanDisplayScreen(int height) {
+        // Don't update list height for credential options beyond 80% of display window even if we
+        // are still under the max visible number of datasets. This could happen when font or
+        // display size is set to large.
+        return height < (0.8 * mWindowManager.getCurrentWindowMetrics().getBounds().height());
+    }
+
     private boolean updateHeight(View view, Point maxSize) {
         boolean changed = false;
         final int clampedMeasuredHeight = Math.min(view.getMeasuredHeight(), maxSize.y);
         final int newContentHeight = mContentHeight + clampedMeasuredHeight;
-        if (newContentHeight != mContentHeight) {
+        if (newContentHeight != mContentHeight && heightLesserThanDisplayScreen(newContentHeight)) {
             mContentHeight = newContentHeight;
             changed = true;
         }
