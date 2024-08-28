@@ -23,6 +23,7 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import static com.android.server.health.Utils.copyV1Battery;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -67,6 +68,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.health.HealthServiceWrapper;
@@ -207,18 +209,18 @@ public final class BatteryService extends SystemService {
     private final CopyOnWriteArraySet<BatteryManagerInternal.ChargingPolicyChangeListener>
             mChargingPolicyChangeListeners = new CopyOnWriteArraySet<>();
 
-    private Bundle mBatteryChangedOptions = BroadcastOptions.makeBasic()
+    private static final Bundle BATTERY_CHANGED_OPTIONS = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
             .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
     /** Used for both connected/disconnected, so match using key */
-    private Bundle mPowerOptions = BroadcastOptions.makeBasic()
+    private static final Bundle POWER_OPTIONS = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
             .setDeliveryGroupMatchingKey("android", Intent.ACTION_POWER_CONNECTED)
             .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
     /** Used for both low/okay, so match using key */
-    private Bundle mBatteryOptions = BroadcastOptions.makeBasic()
+    private static final Bundle BATTERY_OPTIONS = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
             .setDeliveryGroupMatchingKey("android", Intent.ACTION_BATTERY_OKAY)
             .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
@@ -226,11 +228,60 @@ public final class BatteryService extends SystemService {
 
     private MetricsLogger mMetricsLogger;
 
+    private static final int MSG_BROADCAST_BATTERY_CHANGED = 1;
+    private static final int MSG_BROADCAST_POWER_CONNECTION_CHANGED = 2;
+    private static final int MSG_BROADCAST_BATTERY_LOW_OKAY = 3;
+
+    private final Handler.Callback mLocalCallback = msg -> {
+        switch (msg.what) {
+            case MSG_BROADCAST_BATTERY_CHANGED: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                final Context context;
+                final Intent intent;
+                try {
+                    context = (Context) args.arg1;
+                    intent = (Intent) args.arg2;
+                } finally {
+                    args.recycle();
+                }
+                broadcastBatteryChangedIntent(context, intent, BATTERY_CHANGED_OPTIONS);
+                return true;
+            }
+            case MSG_BROADCAST_POWER_CONNECTION_CHANGED: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                final Context context;
+                final Intent intent;
+                try {
+                    context = (Context) args.arg1;
+                    intent = (Intent) args.arg2;
+                } finally {
+                    args.recycle();
+                }
+                sendBroadcastToAllUsers(context, intent, POWER_OPTIONS);
+                return true;
+            }
+            case MSG_BROADCAST_BATTERY_LOW_OKAY: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                final Context context;
+                final Intent intent;
+                try {
+                    context = (Context) args.arg1;
+                    intent = (Intent) args.arg2;
+                } finally {
+                    args.recycle();
+                }
+                sendBroadcastToAllUsers(context, intent, BATTERY_OPTIONS);
+                return true;
+            }
+        }
+        return false;
+    };
+
     public BatteryService(Context context) {
         super(context);
 
         mContext = context;
-        mHandler = new Handler(true /*async*/);
+        mHandler = new Handler(mLocalCallback, true /*async*/);
         mLed = new Led(context, getLocalService(LightsManager.class));
         mBatteryStats = BatteryStatsService.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
@@ -660,25 +711,43 @@ public final class BatteryService extends SystemService {
                 final Intent statusIntent = new Intent(Intent.ACTION_POWER_CONNECTED);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mPowerOptions);
-                    }
-                });
+                if (com.android.server.flags.Flags.consolidateBatteryChangeEvents()) {
+                    mHandler.removeMessages(MSG_BROADCAST_POWER_CONNECTION_CHANGED);
+                    final SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = mContext;
+                    args.arg2 = statusIntent;
+                    mHandler.obtainMessage(MSG_BROADCAST_POWER_CONNECTION_CHANGED, args)
+                            .sendToTarget();
+                } else {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                    POWER_OPTIONS);
+                        }
+                    });
+                }
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
                 final Intent statusIntent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mPowerOptions);
-                    }
-                });
+                if (com.android.server.flags.Flags.consolidateBatteryChangeEvents()) {
+                    mHandler.removeMessages(MSG_BROADCAST_POWER_CONNECTION_CHANGED);
+                    final SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = mContext;
+                    args.arg2 = statusIntent;
+                    mHandler.obtainMessage(MSG_BROADCAST_POWER_CONNECTION_CHANGED, args)
+                            .sendToTarget();
+                } else {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                    POWER_OPTIONS);
+                        }
+                    });
+                }
             }
 
             if (shouldSendBatteryLowLocked()) {
@@ -686,26 +755,44 @@ public final class BatteryService extends SystemService {
                 final Intent statusIntent = new Intent(Intent.ACTION_BATTERY_LOW);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mBatteryOptions);
-                    }
-                });
+                if (com.android.server.flags.Flags.consolidateBatteryChangeEvents()) {
+                    mHandler.removeMessages(MSG_BROADCAST_BATTERY_LOW_OKAY);
+                    final SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = mContext;
+                    args.arg2 = statusIntent;
+                    mHandler.obtainMessage(MSG_BROADCAST_BATTERY_LOW_OKAY, args)
+                            .sendToTarget();
+                } else {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                    BATTERY_OPTIONS);
+                        }
+                    });
+                }
             } else if (mSentLowBatteryBroadcast &&
                     mHealthInfo.batteryLevel >= mLowBatteryCloseWarningLevel) {
                 mSentLowBatteryBroadcast = false;
                 final Intent statusIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mBatteryOptions);
-                    }
-                });
+                if (com.android.server.flags.Flags.consolidateBatteryChangeEvents()) {
+                    mHandler.removeMessages(MSG_BROADCAST_BATTERY_LOW_OKAY);
+                    final SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = mContext;
+                    args.arg2 = statusIntent;
+                    mHandler.obtainMessage(MSG_BROADCAST_BATTERY_LOW_OKAY, args)
+                            .sendToTarget();
+                } else {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
+                                    BATTERY_OPTIONS);
+                        }
+                    });
+                }
             }
 
             // We are doing this after sending the above broadcasts, so anything processing
@@ -777,8 +864,16 @@ public final class BatteryService extends SystemService {
                     + ", info:" + mHealthInfo.toString());
         }
 
-        mHandler.post(() -> broadcastBatteryChangedIntent(mContext,
-                intent, mBatteryChangedOptions));
+        if (com.android.server.flags.Flags.consolidateBatteryChangeEvents()) {
+            mHandler.removeMessages(MSG_BROADCAST_BATTERY_CHANGED);
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = mContext;
+            args.arg2 = intent;
+            mHandler.obtainMessage(MSG_BROADCAST_BATTERY_CHANGED, args).sendToTarget();
+        } else {
+            mHandler.post(() -> broadcastBatteryChangedIntent(mContext,
+                    intent, BATTERY_CHANGED_OPTIONS));
+        }
     }
 
     private static void broadcastBatteryChangedIntent(Context context, Intent intent,
@@ -1305,6 +1400,12 @@ public final class BatteryService extends SystemService {
 
     private static void traceEnd() {
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+    }
+
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    private static void sendBroadcastToAllUsers(Context context, Intent intent,
+            Bundle options) {
+        context.sendBroadcastAsUser(intent, UserHandle.ALL, null, options);
     }
 
     private final class Led {
