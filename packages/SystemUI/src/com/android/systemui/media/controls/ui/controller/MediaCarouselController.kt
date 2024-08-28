@@ -45,6 +45,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -75,7 +76,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.SysUiStatsLog
@@ -103,6 +103,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -121,6 +122,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
  * Class that is responsible for keeping the view carousel up to date. This also handles changes in
  * state and applies them to the media carousel like the expansion.
  */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class MediaCarouselController
 @Inject
@@ -149,7 +151,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val mediaCarouselViewModel: MediaCarouselViewModel,
     private val mediaViewControllerFactory: Provider<MediaViewController>,
-    private val sceneInteractor: SceneInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
     var currentCarouselWidth: Int = 0
@@ -904,9 +906,15 @@ constructor(
 
     /** Return true if the carousel should be hidden because lockscreen is currently visible */
     fun isLockedAndHidden(): Boolean {
-        val keyguardState = keyguardTransitionInteractor.getFinishedState()
-        return !allowMediaPlayerOnLockScreen &&
-            KeyguardState.lockscreenVisibleInState(keyguardState)
+        val isOnLockscreen =
+            if (SceneContainerFlag.isEnabled) {
+                !deviceEntryInteractor.isDeviceEntered.value
+            } else {
+                KeyguardState.lockscreenVisibleInState(
+                    keyguardTransitionInteractor.getFinishedState()
+                )
+            }
+        return !allowMediaPlayerOnLockScreen && isOnLockscreen
     }
 
     private fun reorderAllPlayers(
