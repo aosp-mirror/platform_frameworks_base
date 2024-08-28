@@ -567,7 +567,7 @@ public final class InputManagerGlobal {
         Objects.requireNonNull(listener, "listener must not be null");
 
         synchronized (mOnTabletModeChangedListeners) {
-            if (mOnTabletModeChangedListeners == null) {
+            if (mOnTabletModeChangedListeners.isEmpty()) {
                 initializeTabletModeListenerLocked();
             }
             int idx = findOnTabletModeChangedListenerLocked(listener);
