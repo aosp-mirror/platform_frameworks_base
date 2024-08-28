@@ -166,6 +166,9 @@ constructor(
     /** Is the player currently visible (at the end of the transformation */
     private var playersVisible: Boolean = false
 
+    /** Are we currently disabling pagination only allowing one media session to show */
+    private var currentlyDisablePagination: Boolean = false
+
     /**
      * The desired location where we'll be at the end of the transformation. Usually this matches
      * the end location, except when we're still waiting on a state update call.
@@ -1355,14 +1358,20 @@ constructor(
         val endShowsActive = hostStates[currentEndLocation]?.showsOnlyActiveMedia ?: true
         val startShowsActive =
             hostStates[currentStartLocation]?.showsOnlyActiveMedia ?: endShowsActive
+        val startDisablePagination = hostStates[currentStartLocation]?.disablePagination ?: false
+        val endDisablePagination = hostStates[currentEndLocation]?.disablePagination ?: false
+
         if (
             currentlyShowingOnlyActive != endShowsActive ||
+                currentlyDisablePagination != endDisablePagination ||
                 ((currentTransitionProgress != 1.0f && currentTransitionProgress != 0.0f) &&
-                    startShowsActive != endShowsActive)
+                    (startShowsActive != endShowsActive ||
+                        startDisablePagination != endDisablePagination))
         ) {
             // Whenever we're transitioning from between differing states or the endstate differs
             // we reset the translation
             currentlyShowingOnlyActive = endShowsActive
+            currentlyDisablePagination = endDisablePagination
             mediaCarouselScrollHandler.resetTranslation(animate = true)
         }
     }
