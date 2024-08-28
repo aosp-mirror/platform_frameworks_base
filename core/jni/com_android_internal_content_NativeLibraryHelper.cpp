@@ -17,6 +17,7 @@
 #define LOG_TAG "NativeLibraryHelper"
 //#define LOG_NDEBUG 0
 
+#include <android-base/properties.h>
 #include <androidfw/ApkParsing.h>
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
@@ -263,6 +264,7 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
     jstring* javaNativeLibPath = (jstring*)args[0];
     jboolean extractNativeLibs = *(jboolean*)args[1];
     jboolean debuggable = *(jboolean*)args[2];
+    jboolean app_compat_16kb = *(jboolean*)args[3];
     install_status_t ret = INSTALL_SUCCEEDED;
 
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
@@ -294,6 +296,16 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
         }
 
         if (offset % kPageSize != 0) {
+            // If the library is zip-aligned correctly for 4kb devices and app compat is
+            // enabled, on 16kb devices fallback to extraction
+            if (offset % 0x1000 == 0 && app_compat_16kb) {
+                ALOGI("16kB AppCompat: Library '%s' is not PAGE(%zu)-aligned - falling back to "
+                      "extraction from apk\n",
+                      fileName, kPageSize);
+                return extractNativeLibFromApk(zipFile, zipEntry, fileName, nativeLibPath.c_str(),
+                                               when, uncompLen, crc);
+            }
+
             ALOGE("Library '%s' is not PAGE(%zu)-aligned - will not be able to open it directly "
                   "from apk.\n",
                   fileName, kPageSize);
@@ -508,12 +520,24 @@ static int findSupportedAbi(JNIEnv* env, jlong apkHandle, jobjectArray supported
     return status;
 }
 
+static inline bool app_compat_16kb_enabled() {
+    static const size_t kPageSize = getpagesize();
+
+    // App compat is only applicable on 16kb-page-size devices.
+    if (kPageSize != 0x4000) {
+        return false;
+    }
+
+    return android::base::GetBoolProperty("bionic.linker.16kb.app_compat.enabled", false);
+}
+
 static jint
 com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
         jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
         jboolean extractNativeLibs, jboolean debuggable)
 {
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable };
+    jboolean app_compat_16kb = app_compat_16kb_enabled();
+    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable, &app_compat_16kb };
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi, debuggable,
             copyFileIfChanged, reinterpret_cast<void*>(args));
 }
