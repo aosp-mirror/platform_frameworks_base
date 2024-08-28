@@ -574,10 +574,15 @@ class BackNavigationController {
 
     private void scheduleAnimation(@NonNull AnimationHandler.ScheduleAnimationBuilder builder) {
         mPendingAnimation = builder.build();
-        mWindowManagerService.mWindowPlacerLocked.requestTraversal();
-        if (mShowWallpaper) {
-            mWindowManagerService.getDefaultDisplayContentLocked().mWallpaperController
-                    .adjustWallpaperWindows();
+        if (mAnimationHandler.mOpenAnimAdaptor != null
+                && mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition != null) {
+            startAnimation();
+        } else {
+            mWindowManagerService.mWindowPlacerLocked.requestTraversal();
+            if (mShowWallpaper) {
+                mWindowManagerService.getDefaultDisplayContentLocked().mWallpaperController
+                        .adjustWallpaperWindows();
+            }
         }
     }
 
