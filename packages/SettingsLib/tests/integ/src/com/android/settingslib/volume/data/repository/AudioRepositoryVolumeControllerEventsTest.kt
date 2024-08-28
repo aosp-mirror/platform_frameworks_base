@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.media.data.repository
+package com.android.settingslib.volume.data.repository
 
+import android.content.ContentResolver
 import android.media.AudioManager
 import android.media.IVolumeController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.volume.data.model.VolumeControllerEvent
+import com.android.settingslib.volume.shared.FakeAudioManagerEventsReceiver
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -39,16 +42,32 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class AudioManagerVolumeControllerExtTest {
+class AudioRepositoryVolumeControllerEventsTest {
 
     private val testScope = TestScope()
 
     @Captor private lateinit var volumeControllerCaptor: ArgumentCaptor<IVolumeController>
     @Mock private lateinit var audioManager: AudioManager
+    @Mock private lateinit var contentResolver: ContentResolver
+
+    private val logger = FakeAudioRepositoryLogger()
+    private val eventsReceiver = FakeAudioManagerEventsReceiver()
+
+    private lateinit var underTest: AudioRepository
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        underTest =
+            AudioRepositoryImpl(
+                eventsReceiver,
+                audioManager,
+                contentResolver,
+                testScope.testScheduler,
+                testScope.backgroundScope,
+                logger,
+                true,
+            )
     }
 
     @Test
@@ -83,7 +102,7 @@ class AudioManagerVolumeControllerExtTest {
     ) =
         testScope.runTest {
             var event: VolumeControllerEvent? = null
-            audioManager.volumeControllerEvents().onEach { event = it }.launchIn(backgroundScope)
+            underTest.volumeControllerEvents.onEach { event = it }.launchIn(backgroundScope)
             runCurrent()
             verify(audioManager).volumeController = volumeControllerCaptor.capture()
 
