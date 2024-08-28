@@ -505,16 +505,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             return;
         }
-        openInBrowser(uri);
+        openInBrowser(uri, decoration.getUser());
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }
 
-    private void openInBrowser(Uri uri) {
+    private void openInBrowser(Uri uri, @NonNull UserHandle userHandle) {
         final Intent intent = Intent.makeMainSelectorActivity(ACTION_MAIN, CATEGORY_APP_BROWSER)
                 .setData(uri)
                 .addFlags(FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+        mContext.startActivityAsUser(intent, userHandle);
     }
 
     private void onToDesktop(int taskId, DesktopModeTransitionSource source) {

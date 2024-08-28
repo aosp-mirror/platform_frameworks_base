@@ -34,6 +34,7 @@ import android.hardware.display.VirtualDisplay
 import android.hardware.input.InputManager
 import android.net.Uri
 import android.os.Handler
+import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.CheckFlagsRule
@@ -163,6 +164,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockWindowManager: IWindowManager
     @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
     @Mock private lateinit var mockGenericLinksParser: AppToWebGenericLinksParser
+    @Mock private lateinit var mockUserHandle: UserHandle
     @Mock private lateinit var mockToast: Toast
     private val bgExecutor = TestShellExecutor()
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
@@ -892,12 +894,12 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         openInBrowserListenerCaptor.value.accept(uri)
 
-        verify(spyContext).startActivity(argThat { intent ->
+        verify(spyContext).startActivityAsUser(argThat { intent ->
             intent.data == uri
                     && ((intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK) != 0)
                     && intent.categories.contains(Intent.CATEGORY_LAUNCHER)
                     && intent.action == Intent.ACTION_MAIN
-        })
+        }, eq(mockUserHandle))
     }
 
     @Test
@@ -1108,6 +1110,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)
+        whenever(decoration.user).thenReturn(mockUserHandle)
         if (task.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
             whenever(mockSplitScreenController.isTaskInSplitScreen(task.taskId))
                 .thenReturn(true)
