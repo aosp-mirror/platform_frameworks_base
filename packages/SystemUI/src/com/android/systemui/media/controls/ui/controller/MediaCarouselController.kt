@@ -220,7 +220,7 @@ constructor(
     private val animationScaleObserver: ContentObserver =
         object : ContentObserver(executor, 0) {
             override fun onChange(selfChange: Boolean) {
-                if (!mediaFlags.isSceneContainerEnabled()) {
+                if (!SceneContainerFlag.isEnabled) {
                     MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
                 } else {
                     controllerById.values.forEach { it.updateAnimatorDurationScale() }
@@ -350,7 +350,7 @@ constructor(
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
         configurationController.addCallback(configListener)
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             setUpListeners()
         } else {
             val visualStabilityCallback = OnReorderingAllowedListener {
@@ -391,7 +391,7 @@ constructor(
                 listenForAnyStateToGoneKeyguardTransition(this)
                 listenForAnyStateToLockscreenTransition(this)
 
-                if (!mediaFlags.isSceneContainerEnabled()) return@repeatOnLifecycle
+                if (!SceneContainerFlag.isEnabled) return@repeatOnLifecycle
                 listenForMediaItemsChanges(this)
             }
         }
@@ -733,7 +733,7 @@ constructor(
         when (commonViewModel) {
             is MediaCommonViewModel.MediaControl -> {
                 val viewHolder = MediaViewHolder.create(LayoutInflater.from(context), mediaContent)
-                if (mediaFlags.isSceneContainerEnabled()) {
+                if (SceneContainerFlag.isEnabled) {
                     viewController.widthInSceneContainerPx = widthInSceneContainerPx
                     viewController.heightInSceneContainerPx = heightInSceneContainerPx
                 }
@@ -965,7 +965,7 @@ constructor(
                     .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
             if (existingPlayer == null) {
                 val newPlayer = mediaControlPanelFactory.get()
-                if (mediaFlags.isSceneContainerEnabled()) {
+                if (SceneContainerFlag.isEnabled) {
                     newPlayer.mediaViewController.widthInSceneContainerPx = widthInSceneContainerPx
                     newPlayer.mediaViewController.heightInSceneContainerPx =
                         heightInSceneContainerPx
@@ -1140,7 +1140,7 @@ constructor(
     }
 
     private fun updatePlayers(recreateMedia: Boolean) {
-        if (mediaFlags.isSceneContainerEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             updateMediaPlayers(recreateMedia)
             return
         }
@@ -1240,7 +1240,7 @@ constructor(
             currentStartLocation = startLocation
             currentEndLocation = endLocation
             currentTransitionProgress = progress
-            if (!mediaFlags.isSceneContainerEnabled()) {
+            if (!SceneContainerFlag.isEnabled) {
                 for (mediaPlayer in MediaPlayerData.players()) {
                     updateViewControllerToState(mediaPlayer.mediaViewController, immediately)
                 }
@@ -1300,7 +1300,7 @@ constructor(
 
     /** Update listening to seekbar. */
     private fun updateSeekbarListening(visibleToUser: Boolean) {
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             for (player in MediaPlayerData.players()) {
                 player.setListening(visibleToUser && currentlyExpanded)
             }
@@ -1313,7 +1313,7 @@ constructor(
     private fun updateCarouselDimensions() {
         var width = 0
         var height = 0
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             for (mediaPlayer in MediaPlayerData.players()) {
                 val controller = mediaPlayer.mediaViewController
                 // When transitioning the view to gone, the view gets smaller, but the translation
@@ -1405,7 +1405,7 @@ constructor(
                         !mediaManager.hasActiveMediaOrRecommendation() &&
                         desiredHostState.showsOnlyActiveMedia
 
-                if (!mediaFlags.isSceneContainerEnabled()) {
+                if (!SceneContainerFlag.isEnabled) {
                     for (mediaPlayer in MediaPlayerData.players()) {
                         if (animate) {
                             mediaPlayer.mediaViewController.animatePendingStateChange(
@@ -1445,7 +1445,7 @@ constructor(
         }
 
     fun closeGuts(immediate: Boolean = true) {
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             MediaPlayerData.players().forEach { it.closeGuts(immediate) }
         } else {
             controllerById.values.forEach { it.closeGuts(immediate) }
@@ -1596,7 +1596,7 @@ constructor(
 
     @VisibleForTesting
     fun onSwipeToDismiss() {
-        if (mediaFlags.isSceneContainerEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             mediaCarouselViewModel.onSwipeToDismiss(currentEndLocation)
             return
         }

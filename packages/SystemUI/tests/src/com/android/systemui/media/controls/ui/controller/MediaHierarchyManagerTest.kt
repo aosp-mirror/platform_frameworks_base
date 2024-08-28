@@ -30,6 +30,7 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.communalTransitionViewModel
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -40,7 +41,6 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.view.MediaCarouselScrollHandler
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -85,6 +85,7 @@ import org.mockito.kotlin.anyOrNull
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableSceneContainer
 class MediaHierarchyManagerTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -105,7 +106,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock lateinit var logger: MediaViewLogger
-    @Mock private lateinit var mediaFlags: MediaFlags
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -139,7 +139,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         shadeExpansion = MutableStateFlow(0f)
         whenever(shadeInteractor.isQsBypassingShade).thenReturn(isQsBypassingShade)
         whenever(shadeInteractor.shadeExpansion).thenReturn(shadeExpansion)
-        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
         mediaHierarchyManager =
             MediaHierarchyManager(
                 context,
@@ -160,7 +159,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 ResourcesSplitShadeStateController(),
                 logger,
-                mediaFlags,
             )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())

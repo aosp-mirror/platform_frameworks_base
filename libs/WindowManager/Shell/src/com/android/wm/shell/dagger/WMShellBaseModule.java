@@ -137,6 +137,7 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.Optional;
+import java.util.function.IntPredicate;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -261,6 +262,7 @@ public abstract class WMShellBaseModule {
             Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
             Lazy<AccessibilityManager> accessibilityManager,
             CompatUIRepository compatUIRepository,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             @NonNull CompatUIState compatUIState,
             @NonNull CompatUIComponentIdGenerator componentIdGenerator,
             @NonNull CompatUIComponentFactory compatUIComponentFactory,
@@ -273,6 +275,10 @@ public abstract class WMShellBaseModule {
                     new DefaultCompatUIHandler(compatUIRepository, compatUIState,
                             componentIdGenerator, compatUIComponentFactory, mainExecutor));
         }
+        final IntPredicate inDesktopModePredicate =
+                desktopModeTaskRepository.<IntPredicate>map(modeTaskRepository -> displayId ->
+                        modeTaskRepository.getVisibleTaskCount(displayId) > 0)
+                            .orElseGet(() -> displayId -> false);
         return Optional.of(
                 new CompatUIController(
                         context,
@@ -288,7 +294,8 @@ public abstract class WMShellBaseModule {
                         compatUIConfiguration.get(),
                         compatUIShellCommandHandler.get(),
                         accessibilityManager.get(),
-                        compatUIStatusManager));
+                        compatUIStatusManager,
+                        inDesktopModePredicate));
     }
 
     @WMSingleton

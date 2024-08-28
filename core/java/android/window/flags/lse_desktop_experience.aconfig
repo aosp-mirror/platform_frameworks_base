@@ -225,3 +225,13 @@ flag {
     description: "Adds a minimize button the the caption bar"
     bug: "356843241"
 }
+
+flag {
+    name: "skip_compat_ui_education_in_desktop_mode"
+    namespace: "lse_desktop_experience"
+    description: "Ignore Compat UI educations when in Desktop Mode."
+    bug: "357062954"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

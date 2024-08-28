@@ -1124,7 +1124,6 @@ public class Resources {
      */
     @NonNull
     @Deprecated
-    @RavenwoodThrow(blockedBy = ColorStateList.class)
     public ColorStateList getColorStateList(@ColorRes int id) throws NotFoundException {
         final ColorStateList csl = getColorStateList(id, null);
         if (csl != null && csl.canApplyTheme()) {
@@ -1155,7 +1154,6 @@ public class Resources {
      *         color or multiple colors that can be selected based on a state.
      */
     @NonNull
-    @RavenwoodThrow(blockedBy = ColorStateList.class)
     public ColorStateList getColorStateList(@ColorRes int id, @Nullable Theme theme)
             throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
@@ -1169,7 +1167,6 @@ public class Resources {
     }
 
     @NonNull
-    @RavenwoodThrow(blockedBy = ColorStateList.class)
     ColorStateList loadColorStateList(@NonNull TypedValue value, int id, @Nullable Theme theme)
             throws NotFoundException {
         return mResourcesImpl.loadColorStateList(this, value, id, theme);
@@ -1179,7 +1176,6 @@ public class Resources {
      * @hide
      */
     @NonNull
-    @RavenwoodThrow(blockedBy = ComplexColor.class)
     public ComplexColor loadComplexColor(@NonNull TypedValue value, int id, @Nullable Theme theme) {
         return mResourcesImpl.loadComplexColor(this, value, id, theme);
     }

@@ -79,7 +79,6 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.SensorList;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.PowerPressHandler;
 import com.android.server.biometrics.sensors.fingerprint.ServiceProvider;
@@ -354,8 +353,9 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         }
 
         if (Build.isDebuggable()) {
-            BiometricUtils<Fingerprint> utils = FingerprintUtils.getInstance(
-                    mFingerprintSensors.keyAt(0));
+            final int sensorId = mFingerprintSensors.keyAt(0);
+            final BiometricUtils<Fingerprint> utils = mFingerprintSensors.get(sensorId)
+                    .getFingerprintUtilsInstance();
             for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
                 List<Fingerprint> enrollments = utils.getBiometricsForUser(mContext, user.id);
                 Slog.d(getTag(), "Expecting enrollments for user " + user.id + ": "
@@ -442,7 +442,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     new InvalidationRequesterClient<>(mContext, userId, sensorId,
                             BiometricLogger.ofUnknown(mContext),
                             mBiometricContext,
-                            FingerprintUtils.getInstance(sensorId));
+                            mFingerprintSensors.get(sensorId).getFingerprintUtilsInstance());
             scheduleForSensor(sensorId, client);
         });
     }
@@ -507,7 +507,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                     mFingerprintSensors.get(sensorId).getLazySession(), token, id,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, FingerprintUtils.getInstance(sensorId),
+                    opPackageName, mFingerprintSensors.get(sensorId).getFingerprintUtilsInstance(),
                     sensorId, createLogger(BiometricsProtoEnums.ACTION_ENROLL,
                             BiometricsProtoEnums.CLIENT_UNKNOWN, mAuthenticationStatsCollector),
                     mBiometricContext,
@@ -638,8 +638,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleRemoveAll(int sensorId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, int userId,
             @NonNull String opPackageName) {
-        final List<Fingerprint> fingers = FingerprintUtils.getInstance(sensorId)
-                .getBiometricsForUser(mContext, userId);
+        final List<Fingerprint> fingers = mFingerprintSensors.get(sensorId)
+                .getFingerprintUtilsInstance().getBiometricsForUser(mContext, userId);
         final int[] fingerIds = new int[fingers.size()];
         for (int i = 0; i < fingers.size(); i++) {
             fingerIds[i] = fingers.get(i).getBiometricId();
@@ -655,11 +655,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
                     mFingerprintSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), fingerprintIds, userId,
-                    opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                    createLogger(BiometricsProtoEnums.ACTION_REMOVE,
-                            BiometricsProtoEnums.CLIENT_UNKNOWN,
-                            mAuthenticationStatsCollector),
-                    mBiometricContext,
+                    opPackageName, mFingerprintSensors.get(sensorId).getFingerprintUtilsInstance(),
+                    sensorId, createLogger(BiometricsProtoEnums.ACTION_REMOVE,
+                    BiometricsProtoEnums.CLIENT_UNKNOWN,
+                    mAuthenticationStatsCollector), mBiometricContext,
                     mFingerprintSensors.get(sensorId).getAuthenticatorIds());
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
@@ -683,7 +682,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                                     BiometricsProtoEnums.CLIENT_UNKNOWN,
                                     mAuthenticationStatsCollector),
                             mBiometricContext,
-                            FingerprintUtils.getInstance(sensorId),
+                            mFingerprintSensors.get(sensorId).getFingerprintUtilsInstance(),
                             mFingerprintSensors.get(sensorId).getAuthenticatorIds());
             if (favorHalEnrollments) {
                 client.setFavorHalEnrollments();
@@ -706,14 +705,15 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public void rename(int sensorId, int fingerId, int userId, @NonNull String name) {
-        FingerprintUtils.getInstance(sensorId)
+        mFingerprintSensors.get(sensorId).getFingerprintUtilsInstance()
                 .renameBiometricForUser(mContext, userId, fingerId, name);
     }
 
     @NonNull
     @Override
     public List<Fingerprint> getEnrolledFingerprints(int sensorId, int userId) {
-        return FingerprintUtils.getInstance(sensorId).getBiometricsForUser(mContext, userId);
+        return mFingerprintSensors.get(sensorId).getFingerprintUtilsInstance()
+                .getBiometricsForUser(mContext, userId);
     }
 
     @Override
@@ -842,7 +842,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
-                final int c = FingerprintUtils.getInstance(sensorId)
+                final int c = mFingerprintSensors.get(sensorId).getFingerprintUtilsInstance()
                         .getBiometricsForUser(mContext, userId).size();
                 JSONObject set = new JSONObject();
                 set.put("id", userId);

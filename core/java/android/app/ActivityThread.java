@@ -4583,7 +4583,7 @@ public final class ActivityThread extends ClientTransactionHandler
     public void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
             @Nullable SplashScreenView.SplashScreenViewParcelable parcelable,
             @NonNull SurfaceControl startingWindowLeash) {
-        final DecorView decorView = (DecorView) r.window.peekDecorView();
+        final DecorView decorView = r.window != null ? (DecorView) r.window.peekDecorView() : null;
         if (parcelable != null && decorView != null) {
             createSplashScreen(r, decorView, parcelable, startingWindowLeash);
         } else {

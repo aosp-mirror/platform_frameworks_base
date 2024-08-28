@@ -233,6 +233,16 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
     }
 
     @Override
+    public long getDurationMs() {
+        return 0;
+    }
+
+    @Override
+    public Interpolator getInsetsInterpolator() {
+        return null;
+    }
+
+    @Override
     public void setReadyDispatched(boolean dispatched) {
     }
 

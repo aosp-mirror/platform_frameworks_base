@@ -170,7 +170,7 @@ public class Sensor {
                                                 "Fingerprint sensor hardware unavailable.");
                                         mCurrentSession = null;
                                     }
-                                });
+                                }, getFingerprintUtilsInstance());
 
                         return Sensor.this.getStartUserClient(resultController, sensorId,
                                 newUserId);
@@ -187,7 +187,7 @@ public class Sensor {
                             + halInterfaceVersion);
                     mCurrentSession = new AidlSession(halInterfaceVersion,
                             newSession, userIdStarted, resultController);
-                    if (FingerprintUtils.getInstance(sensorId)
+                    if (getFingerprintUtilsInstance()
                             .isInvalidationInProgress(mContext, userIdStarted)) {
                         Slog.w(TAG,
                                 "Scheduling unfinished invalidation request for "
@@ -307,9 +307,8 @@ public class Sensor {
 
             final long userToken = proto.start(SensorStateProto.USER_STATES);
             proto.write(UserStateProto.USER_ID, userId);
-            proto.write(UserStateProto.NUM_ENROLLED,
-                    FingerprintUtils.getInstance(mSensorProperties.sensorId)
-                            .getBiometricsForUser(mContext, userId).size());
+            proto.write(UserStateProto.NUM_ENROLLED, getFingerprintUtilsInstance()
+                    .getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
 
@@ -385,5 +384,9 @@ public class Sensor {
 
     public FingerprintProvider getProvider() {
         return mProvider;
+    }
+
+    public FingerprintUtils getFingerprintUtilsInstance() {
+        return FingerprintUtils.getInstance(mSensorProperties.sensorId);
     }
 }

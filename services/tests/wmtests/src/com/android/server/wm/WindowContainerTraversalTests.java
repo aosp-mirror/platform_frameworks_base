@@ -62,8 +62,6 @@ public class WindowContainerTraversalTests extends WindowTestsBase {
         verify(c).accept(eq(mImeWindow));
     }
 
-    @android.platform.test.annotations.RequiresFlagsEnabled(
-            com.android.window.flags.Flags.FLAG_DO_NOT_SKIP_IME_BY_TARGET_VISIBILITY)
     @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testTraverseImeRegardlessOfImeTarget() {

@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationPlaceholderRepository
@@ -39,6 +40,7 @@ class NotificationStackAppearanceInteractor
 constructor(
     private val viewHeightRepository: NotificationViewHeightRepository,
     private val placeholderRepository: NotificationPlaceholderRepository,
+    sceneInteractor: SceneInteractor,
     shadeInteractor: ShadeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
@@ -93,6 +95,15 @@ constructor(
     val isCurrentGestureOverscroll: Flow<Boolean> =
         viewHeightRepository.isCurrentGestureOverscroll.asStateFlow()
 
+    /** Whether we should close any notification guts that are currently open. */
+    val shouldCloseGuts: Flow<Boolean> =
+        combine(
+            sceneInteractor.isSceneContainerUserInputOngoing,
+            viewHeightRepository.isCurrentGestureInGuts
+        ) { isUserInputOngoing, isCurrentGestureInGuts ->
+            isUserInputOngoing && !isCurrentGestureInGuts
+        }
+
     /** Sets the alpha to apply to the NSSL for the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         placeholderRepository.alphaForBrightnessMirror.value = alpha
@@ -117,6 +128,10 @@ constructor(
     /** Sets whether the current touch gesture is overscroll. */
     fun setCurrentGestureOverscroll(isOverscroll: Boolean) {
         viewHeightRepository.isCurrentGestureOverscroll.value = isOverscroll
+    }
+
+    fun setCurrentGestureInGuts(isInGuts: Boolean) {
+        viewHeightRepository.isCurrentGestureInGuts.value = isInGuts
     }
 
     fun setConstrainedAvailableSpace(height: Int) {

@@ -106,6 +106,7 @@ import android.window.WindowContext;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.compat.IPlatformCompatNative;
+import com.android.internal.protolog.ProtoLogConfigurationService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6701,13 +6702,23 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve the
-     * {@link com.android.internal.protolog.ProtoLogService} for registering ProtoLog clients.
+     * {@link ProtoLogConfigurationService} for registering ProtoLog clients.
      *
      * @see #getSystemService(String)
-     * @see com.android.internal.protolog.ProtoLogService
+     * @see ProtoLogConfigurationService
      * @hide
      */
-    public static final String PROTOLOG_SERVICE = "protolog";
+    public static final String PROTOLOG_CONFIGURATION_SERVICE = "protolog_configuration";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.supervision.SupervisionManager}.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.supervision.SupervisionManager
+     * @hide
+     */
+    public static final String SUPERVISION_SERVICE = "supervision";
 
     /**
      * Determine whether the given permission is allowed for a particular

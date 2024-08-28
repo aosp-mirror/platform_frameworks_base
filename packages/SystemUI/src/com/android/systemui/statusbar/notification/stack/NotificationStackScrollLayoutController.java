@@ -1690,7 +1690,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 mVisibilityProvider.obtain(entry, true));
     }
 
-    public void closeControlsIfOutsideTouch(MotionEvent ev) {
+    private View getGutsView() {
         NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
         NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
         View translatingParentView = mSwipeHelper.getTranslatingParentView();
@@ -1703,13 +1703,33 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             // Checking menu
             view = translatingParentView;
         }
+        return view;
+    }
+
+    public void closeControlsIfOutsideTouch(MotionEvent ev) {
+        SceneContainerFlag.assertInLegacyMode();
+        View view = getGutsView();
         if (view != null && !NotificationSwipeHelper.isTouchInView(ev, view)) {
             // Touch was outside visible guts / menu notification, close what's visible
-            mNotificationGutsManager.closeAndSaveGuts(false /* removeLeavebehind */,
-                    false /* force */, true /* removeControls */, -1 /* x */, -1 /* y */,
-                    false /* resetMenu */);
-            mSwipeHelper.resetExposedMenuView(true /* animate */, true /* force */);
+            closeAndSaveGuts();
         }
+    }
+
+    void closeControlsDueToOutsideTouch() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        closeAndSaveGuts();
+    }
+
+    private void closeAndSaveGuts() {
+        mNotificationGutsManager.closeAndSaveGuts(false /* removeLeavebehind */,
+                false /* force */, true /* removeControls */, -1 /* x */, -1 /* y */,
+                false /* resetMenu */);
+        mSwipeHelper.resetExposedMenuView(true /* animate */, true /* force */);
+    }
+
+    boolean isTouchInGutsView(MotionEvent event) {
+        View view = getGutsView();
+        return NotificationSwipeHelper.isTouchInView(event, view);
     }
 
     public void clearSilentNotifications() {

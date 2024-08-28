@@ -4388,14 +4388,7 @@ public final class ViewRootImpl implements ViewParent,
             mReportNextDraw = false;
             mLastReportNextDrawReason = null;
             mActiveSurfaceSyncGroup = null;
-            if (mHasPendingTransactions) {
-                // TODO: We shouldn't ever actually hit this, it means mPendingTransaction wasn't
-                // merged with a sync group or BLASTBufferQueue before making it to this point
-                // But better a one or two frame flicker than steady-state broken from dropping
-                // whatever is in this transaction
-                mPendingTransaction.apply();
-                mHasPendingTransactions = false;
-            }
+            mHasPendingTransactions = false;
             mSyncBuffer = false;
             if (isInWMSRequestedSync()) {
                 mWmsRequestSyncGroup.markSyncReady();

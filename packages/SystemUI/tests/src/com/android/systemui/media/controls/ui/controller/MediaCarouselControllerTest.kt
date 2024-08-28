@@ -186,7 +186,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 sceneInteractor = kosmos.sceneInteractor,
             )
         verify(configurationController).addCallback(capture(configListener))
-        verify(mediaDataManager).addListener(capture(listener))
         verify(visualStabilityProvider)
             .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
         verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCallback))
@@ -405,8 +404,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.playerKeys().elementAt(2).isSsMediaRec)
     }
 
+    @DisableSceneContainer
     @Test
     fun testOrderWithSmartspace_prioritized_updatingVisibleMediaPlayers() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         testPlayerOrdering()
 
         // If smartspace is prioritized
@@ -439,8 +441,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.playerKeys().elementAt(idx).isSsMediaRec)
     }
 
+    @DisableSceneContainer
     @Test
     fun testPlayingExistingMediaPlayerFromCarousel_visibleMediaPlayersNotUpdated() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         testPlayerOrdering()
         // playing paused player
         listener.value.onMediaDataLoaded(
@@ -547,8 +552,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
     }
 
+    @DisableSceneContainer
     @Test
     fun testMediaLoaded_ScrollToActivePlayer() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         listener.value.onMediaDataLoaded(
             PLAYING_LOCAL,
             null,
@@ -604,8 +612,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
     }
 
+    @DisableSceneContainer
     @Test
     fun testMediaLoadedFromRecommendationCard_ScrollToActivePlayer() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         listener.value.onSmartspaceMediaDataLoaded(
             SMARTSPACE_KEY,
             EMPTY_SMARTSPACE_MEDIA_DATA.copy(packageName = "PACKAGE_NAME", isActive = true),
@@ -647,8 +658,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(playerIndex, 0)
     }
 
+    @DisableSceneContainer
     @Test
     fun testRecommendationRemovedWhileNotVisible_updateHostVisibility() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         var result = false
         mediaCarouselController.updateHostVisibility = { result = true }
 
@@ -658,8 +672,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(true, result)
     }
 
+    @DisableSceneContainer
     @Test
     fun testRecommendationRemovedWhileVisible_thenReorders_updateHostVisibility() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         var result = false
         mediaCarouselController.updateHostVisibility = { result = true }
 
@@ -788,8 +805,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(pageIndicator, times(4)).setNumPages(any())
     }
 
+    @DisableSceneContainer
     @Test
     fun testRecommendation_persistentEnabled_newSmartspaceLoaded_updatesSort() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         testRecommendation_persistentEnabled_inactiveSmartspaceDataLoaded_isAdded()
 
         // When an update to existing smartspace data is loaded
@@ -804,8 +824,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(0).data.active)
     }
 
+    @DisableSceneContainer
     @Test
     fun testRecommendation_persistentEnabled_inactiveSmartspaceDataLoaded_isAdded() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
 
         // When inactive smartspace data is loaded
@@ -1023,11 +1046,13 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(panel).updateAnimatorDurationScale()
     }
 
+    @DisableSceneContainer
     @Test
     fun swipeToDismiss_pausedAndResumeOff_userInitiated() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         // When resumption is disabled, paused media should be dismissed after being swiped away
         Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
-
         val pausedMedia = DATA.copy(isPlaying = false)
         listener.value.onMediaDataLoaded(PAUSED_LOCAL, PAUSED_LOCAL, pausedMedia)
         mediaCarouselController.onSwipeToDismiss()
@@ -1042,8 +1067,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(mediaDataManager).dismissMediaData(eq(PAUSED_LOCAL), anyLong(), eq(true))
     }
 
+    @DisableSceneContainer
     @Test
     fun swipeToDismiss_pausedAndResumeOff_delayed_userInitiated() {
+        verify(mediaDataManager).addListener(capture(listener))
+
         // When resumption is disabled, paused media should be dismissed after being swiped away
         Settings.Secure.putInt(context.contentResolver, Settings.Secure.MEDIA_CONTROLS_RESUME, 0)
         mediaCarouselController.updateHostVisibility = {}
@@ -1068,6 +1096,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
      * @param function called when a certain configuration change occurs.
      */
     private fun testConfigurationChange(function: () -> Unit) {
+        verify(mediaDataManager).addListener(capture(listener))
         mediaCarouselController.pageIndicator = pageIndicator
         listener.value.onMediaDataLoaded(
             PLAYING_LOCAL,

@@ -2726,22 +2726,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if (Flags.securityLogV2Enabled()) {
-            boolean auditLoggingEnabled = Boolean.TRUE.equals(
-                    mDevicePolicyEngine.getResolvedPolicy(
-                            PolicyDefinition.AUDIT_LOGGING, UserHandle.USER_ALL));
-            boolean securityLoggingEnabled = Boolean.TRUE.equals(
-                    mDevicePolicyEngine.getResolvedPolicy(
-                            PolicyDefinition.SECURITY_LOGGING, UserHandle.USER_ALL));
-            setLoggingConfiguration(securityLoggingEnabled, auditLoggingEnabled);
-            mInjector.runCryptoSelfTest();
-        } else {
-            synchronized (getLockObject()) {
-                mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
-                mInjector.runCryptoSelfTest();
-                maybePauseDeviceWideLoggingLocked();
-            }
-        }
+        boolean auditLoggingEnabled = Boolean.TRUE.equals(
+                mDevicePolicyEngine.getResolvedPolicy(
+                        PolicyDefinition.AUDIT_LOGGING, UserHandle.USER_ALL));
+        boolean securityLoggingEnabled = Boolean.TRUE.equals(
+                mDevicePolicyEngine.getResolvedPolicy(
+                        PolicyDefinition.SECURITY_LOGGING, UserHandle.USER_ALL));
+        setLoggingConfiguration(securityLoggingEnabled, auditLoggingEnabled);
+        mInjector.runCryptoSelfTest();
     }
 
     /**
@@ -3399,7 +3391,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @GuardedBy("getLockObject()")
     private void maybeMigrateSecurityLoggingPolicyLocked() {
-        if (!Flags.securityLogV2Enabled() || mOwners.isSecurityLoggingMigrated()) {
+        if (mOwners.isSecurityLoggingMigrated()) {
             return;
         }
 
@@ -16304,9 +16296,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         @Override
         public void enforceSecurityLoggingPolicy(boolean enabled) {
-            if (!Flags.securityLogV2Enabled()) {
-                return;
-            }
             Boolean auditLoggingEnabled = mDevicePolicyEngine.getResolvedPolicy(
                     PolicyDefinition.AUDIT_LOGGING, UserHandle.USER_ALL);
             enforceLoggingPolicy(enabled, Boolean.TRUE.equals(auditLoggingEnabled));
@@ -16314,9 +16303,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         @Override
         public void enforceAuditLoggingPolicy(boolean enabled) {
-            if (!Flags.securityLogV2Enabled()) {
-                return;
-            }
             Boolean securityLoggingEnabled = mDevicePolicyEngine.getResolvedPolicy(
                     PolicyDefinition.SECURITY_LOGGING, UserHandle.USER_ALL);
             enforceLoggingPolicy(Boolean.TRUE.equals(securityLoggingEnabled), enabled);
@@ -18252,45 +18238,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         final CallerIdentity caller = getCallerIdentity(who, packageName);
 
-        if (Flags.securityLogV2Enabled()) {
-            EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
-                    who,
-                    MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
-                    caller.getPackageName(),
-                    caller.getUserId());
-            if (enabled) {
-                mDevicePolicyEngine.setGlobalPolicy(
-                        PolicyDefinition.SECURITY_LOGGING,
-                        admin,
-                        new BooleanPolicyValue(true));
-            } else {
-                mDevicePolicyEngine.removeGlobalPolicy(
-                        PolicyDefinition.SECURITY_LOGGING,
-                        admin);
-            }
+        EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
+                who,
+                MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
+                caller.getPackageName(),
+                caller.getUserId());
+        if (enabled) {
+            mDevicePolicyEngine.setGlobalPolicy(
+                    PolicyDefinition.SECURITY_LOGGING,
+                    admin,
+                    new BooleanPolicyValue(true));
         } else {
-            synchronized (getLockObject()) {
-                if (who != null) {
-                    Preconditions.checkCallAuthorization(
-                            isProfileOwnerOfOrganizationOwnedDevice(caller)
-                                    || isDefaultDeviceOwner(caller));
-                } else {
-                    // A delegate app passes a null admin component, which is expected
-                    Preconditions.checkCallAuthorization(
-                            isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
-                }
-
-                if (enabled == mInjector.securityLogGetLoggingEnabledProperty()) {
-                    return;
-                }
-                mInjector.securityLogSetLoggingEnabledProperty(enabled);
-                if (enabled) {
-                    mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
-                    maybePauseDeviceWideLoggingLocked();
-                } else {
-                    mSecurityLogMonitor.stop();
-                }
-            }
+            mDevicePolicyEngine.removeGlobalPolicy(
+                    PolicyDefinition.SECURITY_LOGGING,
+                    admin);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_SECURITY_LOGGING_ENABLED)
@@ -18312,29 +18273,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return mInjector.securityLogGetLoggingEnabledProperty();
         }
 
-        if (Flags.securityLogV2Enabled()) {
-            final EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                    admin,
-                    MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
-                    caller.getPackageName(),
-                    caller.getUserId());
-            final Boolean policy = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
-                    PolicyDefinition.SECURITY_LOGGING, enforcingAdmin);
-            return Boolean.TRUE.equals(policy);
-        } else {
-            synchronized (getLockObject()) {
-                if (admin != null) {
-                    Preconditions.checkCallAuthorization(
-                            isProfileOwnerOfOrganizationOwnedDevice(caller)
-                                    || isDefaultDeviceOwner(caller));
-                } else {
-                    // A delegate app passes a null admin component, which is expected
-                    Preconditions.checkCallAuthorization(
-                            isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
-                }
-                return mInjector.securityLogGetLoggingEnabledProperty();
-            }
-        }
+        final EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                admin,
+                MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
+                caller.getPackageName(),
+                caller.getUserId());
+        final Boolean policy = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
+                PolicyDefinition.SECURITY_LOGGING, enforcingAdmin);
+        return Boolean.TRUE.equals(policy);
     }
 
     private void recordSecurityLogRetrievalTime() {
@@ -18410,42 +18356,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
 
-        if (Flags.securityLogV2Enabled()) {
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                    admin,
-                    MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
-                    caller.getPackageName(),
-                    caller.getUserId());
+        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                admin,
+                MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
+                caller.getPackageName(),
+                caller.getUserId());
 
-            synchronized (getLockObject()) {
-                Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
-                        || areAllUsersAffiliatedWithDeviceLocked());
-            }
-
-            Boolean policy = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
-                    PolicyDefinition.SECURITY_LOGGING, enforcingAdmin);
-
-            if (!Boolean.TRUE.equals(policy)) {
-                Slogf.e(LOG_TAG, "%s hasn't enabled security logging but tries to retrieve logs",
-                        caller.getPackageName());
-                return null;
-            }
-        } else {
-            if (admin != null) {
-                Preconditions.checkCallAuthorization(
-                        isProfileOwnerOfOrganizationOwnedDevice(caller)
-                                || isDefaultDeviceOwner(caller));
-            } else {
-                // A delegate app passes a null admin component, which is expected
-                Preconditions.checkCallAuthorization(
-                        isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
-            }
+        synchronized (getLockObject()) {
             Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
                     || areAllUsersAffiliatedWithDeviceLocked());
+        }
 
-            if (!mInjector.securityLogGetLoggingEnabledProperty()) {
-                return null;
-            }
+        Boolean policy = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
+                PolicyDefinition.SECURITY_LOGGING, enforcingAdmin);
+
+        if (!Boolean.TRUE.equals(policy)) {
+            Slogf.e(LOG_TAG, "%s hasn't enabled security logging but tries to retrieve logs",
+                    caller.getPackageName());
+            return null;
         }
 
         recordSecurityLogRetrievalTime();
@@ -18464,10 +18392,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         final CallerIdentity caller = getCallerIdentity(callingPackage);
-
-        if (!Flags.securityLogV2Enabled()) {
-            throw new UnsupportedOperationException("Audit log not enabled");
-        }
 
         EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
                 null /* admin */,
@@ -18491,10 +18415,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isAuditLogEnabled(String callingPackage) {
         if (!mHasFeature) {
             return false;
-        }
-
-        if (!Flags.securityLogV2Enabled()) {
-            throw new UnsupportedOperationException("Audit log not enabled");
         }
 
         final CallerIdentity caller = getCallerIdentity(callingPackage);

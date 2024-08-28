@@ -15,18 +15,31 @@
  */
 package com.android.platform.test.ravenwood.ravenizer
 
+import android.platform.test.ravenwood.RavenwoodAwareTestRunner
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.findAnyAnnotation
+import com.android.hoststubgen.asm.startsWithAny
+import org.junit.rules.TestRule
+import org.junit.runner.RunWith
 import org.objectweb.asm.Type
 
-val junitTestMethodType = Type.getType(org.junit.Test::class.java)
-val junitRunWithType = Type.getType(org.junit.runner.RunWith::class.java)
+data class TypeHolder(
+    val clazz: Class<*>,
+) {
+    val type = Type.getType(clazz)
+    val desc = type.descriptor
+    val descAsSet = setOf<String>(desc)
+    val internlName = type.internalName
+}
 
-val junitTestMethodDescriptor = junitTestMethodType.descriptor
-val junitRunWithDescriptor = junitRunWithType.descriptor
+val testAnotType = TypeHolder(org.junit.Test::class.java)
+val ruleAnotType = TypeHolder(org.junit.Rule::class.java)
+val classRuleAnotType = TypeHolder(org.junit.ClassRule::class.java)
+val runWithAnotType = TypeHolder(RunWith::class.java)
+val innerRunnerAnotType = TypeHolder(RavenwoodAwareTestRunner.InnerRunner::class.java)
 
-val junitTestMethodDescriptors = setOf<String>(junitTestMethodDescriptor)
-val junitRunWithDescriptors = setOf<String>(junitRunWithDescriptor)
+val testRuleType = TypeHolder(TestRule::class.java)
+val ravenwoodTestRunnerType = TypeHolder(RavenwoodAwareTestRunner::class.java)
 
 /**
  * Returns true, if a test looks like it's a test class which needs to be processed.
@@ -39,16 +52,44 @@ fun isTestLookingClass(classes: ClassNodes, className: String): Boolean {
 
     val cn = classes.findClass(className) ?: return false
 
-    if (cn.findAnyAnnotation(junitRunWithDescriptors) != null) {
+    if (cn.findAnyAnnotation(runWithAnotType.descAsSet) != null) {
         return true
     }
     cn.methods?.forEach { method ->
-        if (method.findAnyAnnotation(junitTestMethodDescriptors) != null) {
+        if (method.findAnyAnnotation(testAnotType.descAsSet) != null) {
             return true
         }
     }
+
+    // Check the super class.
     if (cn.superName == null) {
         return false
     }
     return isTestLookingClass(classes, cn.superName)
+}
+
+fun String.isRavenwoodClass(): Boolean {
+    return this.startsWithAny(
+        "com/android/hoststubgen/",
+        "android/platform/test/ravenwood",
+        "com/android/ravenwood/",
+        "com/android/platform/test/ravenwood/",
+    )
+}
+
+/**
+ * Classes that should never be modified.
+ */
+fun String.shouldByBypassed(): Boolean {
+    if (this.isRavenwoodClass()) {
+        return true
+    }
+    return this.startsWithAny(
+        "java/", // just in case...
+        "javax/",
+        "org/junit/",
+        "org/mockito/",
+        "kotlin/",
+        // TODO -- anything else?
+    )
 }

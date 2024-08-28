@@ -20,7 +20,10 @@ import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.data.repository.trustRepository
+import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,11 +32,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.keyguardDismissInteractor by
     Kosmos.Fixture {
         KeyguardDismissInteractor(
-            trustRepository = trustRepository,
+            mainDispatcher = testDispatcher,
+            scope = applicationCoroutineScope,
             keyguardRepository = keyguardRepository,
             primaryBouncerInteractor = primaryBouncerInteractor,
+            selectedUserInteractor = selectedUserInteractor,
+            dismissCallbackRegistry = dismissCallbackRegistry,
+            trustRepository = trustRepository,
             alternateBouncerInteractor = alternateBouncerInteractor,
             powerInteractor = powerInteractor,
-            selectedUserInteractor = selectedUserInteractor,
         )
     }

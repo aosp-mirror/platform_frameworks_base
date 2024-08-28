@@ -483,22 +483,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     SparseArray<BiometricAuthenticated> mUserFingerprintAuthenticated = new SparseArray<>();
 
-    private static int sCurrentUser;
-
-    @Deprecated
-    public synchronized static void setCurrentUser(int currentUser) {
-        sCurrentUser = currentUser;
-    }
-
-    /**
-     * @deprecated This can potentially return unexpected values in a multi user scenario
-     * as this state is managed by another component. Consider using {@link SelectedUserInteractor}.
-     */
-    @Deprecated
-    public synchronized static int getCurrentUser() {
-        return sCurrentUser;
-    }
-
     @Override
     public void onTrustChanged(boolean enabled, boolean newlyUnlocked, int userId, int flags,
             List<String> trustGrantedMessages) {
@@ -969,7 +953,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mHandler.removeCallbacks(mFpCancelNotReceived);
         }
         try {
-            final int userId = mSelectedUserInteractor.getSelectedUserId(true);
+            final int userId = mSelectedUserInteractor.getSelectedUserId();
             if (userId != authUserId) {
                 mLogger.logFingerprintAuthForWrongUser(authUserId);
                 return;
@@ -1220,7 +1204,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mLogger.d("Aborted successful auth because device is going to sleep.");
             return;
         }
-        final int userId = mSelectedUserInteractor.getSelectedUserId(true);
+        final int userId = mSelectedUserInteractor.getSelectedUserId();
         if (userId != authUserId) {
             mLogger.logFaceAuthForWrongUser(authUserId);
             return;
@@ -2462,7 +2446,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
 
         mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
-        int user = mSelectedUserInteractor.getSelectedUserId(true);
+        int user = mSelectedUserInteractor.getSelectedUserId();
         boolean isUserUnlocked = mUserManager.isUserUnlocked(user);
         mLogger.logUserUnlockedInitialState(user, isUserUnlocked);
         mUserIsUnlocked.put(user, isUserUnlocked);
@@ -4081,7 +4065,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    " + subId + "=" + mServiceStates.get(subId));
         }
         if (isFingerprintSupported()) {
-            final int userId = mSelectedUserInteractor.getSelectedUserId(true);
+            final int userId = mSelectedUserInteractor.getSelectedUserId();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
             pw.println("  Fingerprint state (user=" + userId + ")");
@@ -4124,7 +4108,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mFingerprintListenBuffer.toList()
             ).printTableData(pw);
         } else if (mFpm != null && mFingerprintSensorProperties.isEmpty()) {
-            final int userId = mSelectedUserInteractor.getSelectedUserId(true);
+            final int userId = mSelectedUserInteractor.getSelectedUserId();
             pw.println("  Fingerprint state (user=" + userId + ")");
             pw.println("    mFingerprintSensorProperties.isEmpty="
                     + mFingerprintSensorProperties.isEmpty());
@@ -4137,7 +4121,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mFingerprintListenBuffer.toList()
             ).printTableData(pw);
         }
-        final int userId = mSelectedUserInteractor.getSelectedUserId(true);
+        final int userId = mSelectedUserInteractor.getSelectedUserId();
         final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
         pw.println("    authSinceBoot="
                 + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());

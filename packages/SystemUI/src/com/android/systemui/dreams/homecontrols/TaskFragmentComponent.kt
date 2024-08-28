@@ -43,6 +43,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.lang.ref.WeakReference
+import java.util.concurrent.Executor
 
 typealias FragmentInfoCallback = (TaskFragmentInfo) -> Unit
 
@@ -68,14 +70,18 @@ constructor(
     }
 
     private val fragmentToken = Binder()
-    private val organizer: TaskFragmentOrganizer =
-        object : TaskFragmentOrganizer(executor) {
 
-                override fun onTransactionReady(transaction: TaskFragmentTransaction) {
-                    handleTransactionReady(transaction)
-                }
-            }
-            .apply { registerOrganizer(true /* isSystemOrganizer */) }
+    class Organizer(val component: WeakReference<TaskFragmentComponent>, executor: Executor) :
+        TaskFragmentOrganizer(executor) {
+        override fun onTransactionReady(transaction: TaskFragmentTransaction) {
+            component.get()?.handleTransactionReady(transaction)
+        }
+    }
+
+    private val organizer: TaskFragmentOrganizer =
+        Organizer(WeakReference(this), executor).apply {
+            registerOrganizer(true /* isSystemOrganizer */)
+        }
 
     private fun handleTransactionReady(transaction: TaskFragmentTransaction) {
         val resultT = WindowContainerTransaction()
