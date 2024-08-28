@@ -74,11 +74,11 @@ import kotlinx.coroutines.launch
 class PromptViewModel
 @Inject
 constructor(
-    displayStateInteractor: DisplayStateInteractor,
+    private val displayStateInteractor: DisplayStateInteractor,
     private val promptSelectorInteractor: PromptSelectorInteractor,
     @Application private val context: Context,
-    private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
-    private val biometricStatusInteractor: BiometricStatusInteractor,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
+    biometricStatusInteractor: BiometricStatusInteractor,
     private val udfpsUtils: UdfpsUtils,
     private val iconProvider: IconProvider,
     private val activityTaskManager: ActivityTaskManager,
@@ -131,11 +131,13 @@ constructor(
             R.dimen.biometric_prompt_landscape_medium_horizontal_padding
         )
 
+    val currentRotation: StateFlow<DisplayRotation> = displayStateInteractor.currentRotation
+
     val udfpsOverlayParams: StateFlow<UdfpsOverlayParams> =
         udfpsOverlayInteractor.udfpsOverlayParams
 
     private val udfpsSensorBounds: Flow<Rect> =
-        combine(udfpsOverlayParams, displayStateInteractor.currentRotation) { params, rotation ->
+        combine(udfpsOverlayParams, currentRotation) { params, rotation ->
                 val rotatedBounds = Rect(params.sensorBounds)
                 RotationUtils.rotateBounds(
                     rotatedBounds,
@@ -257,7 +259,7 @@ constructor(
                 _forceLargeSize,
                 promptKind,
                 displayStateInteractor.isLargeScreen,
-                displayStateInteractor.currentRotation,
+                currentRotation,
                 modalities
             ) { forceLarge, promptKind, isLargeScreen, rotation, modalities ->
                 when {
@@ -449,7 +451,7 @@ constructor(
 
     /** Padding for prompt UI elements */
     val promptPadding: Flow<Rect> =
-        combine(size, displayStateInteractor.currentRotation) { size, rotation ->
+        combine(size, currentRotation) { size, rotation ->
             if (size != PromptSize.LARGE) {
                 val navBarInsets = Utils.getNavbarInsets(context)
                 if (rotation == DisplayRotation.ROTATION_90) {
