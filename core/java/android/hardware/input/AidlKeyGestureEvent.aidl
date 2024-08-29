@@ -16,13 +16,14 @@
 
 package android.hardware.input;
 
-import android.hardware.input.AidlKeyGestureEvent;
-
 /** @hide */
-oneway interface IKeyGestureEventListener {
-
-    /**
-     * Called when a key gesture event occurs.
-     */
-    void onKeyGestureEvent(in AidlKeyGestureEvent event);
+@JavaDerive(equals=true)
+parcelable AidlKeyGestureEvent {
+    int deviceId;
+    int[] keycodes;
+    int modifierState;
+    int gestureType;
+    int action;
+    int displayId;
+    int flags;
 }
