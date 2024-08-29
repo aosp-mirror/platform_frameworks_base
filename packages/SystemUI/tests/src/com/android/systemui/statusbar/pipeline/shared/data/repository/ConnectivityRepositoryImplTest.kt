@@ -21,12 +21,17 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
+import android.net.NetworkCapabilities.TRANSPORT_VPN
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
+import android.net.VpnTransportInfo
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_ALWAYS_CHECK_UNDERLYING_NETWORKS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityInputLogger
@@ -404,6 +409,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             job.cancel()
         }
 
+    /** VCN over W+ (aka VCN over carrier merged). See b/352162710#comment27 scenario #1. */
     @Test
     fun defaultConnections_carrierMergedViaMobileWithVcnTransport_mobileCarrierMergedWifiDefault() =
         testScope.runTest {
@@ -425,6 +431,45 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             assertThat(latest!!.mobile.isDefault).isTrue()
             assertThat(latest!!.carrierMerged.isDefault).isTrue()
             assertThat(latest!!.wifi.isDefault).isTrue()
+
+            job.cancel()
+        }
+
+    /** VPN over W+ (aka VPN over carrier merged). See b/352162710#comment27 scenario #2. */
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_ALWAYS_CHECK_UNDERLYING_NETWORKS)
+    fun defaultConnections_vpnOverCarrierMerged_carrierMergedDefault() =
+        testScope.runTest {
+            var latest: DefaultConnectionModel? = null
+            val job = underTest.defaultConnections.onEach { latest = it }.launchIn(this)
+
+            // Underlying carrier merged network
+            val underlyingCarrierMergedNetwork = mock<Network>()
+            val carrierMergedInfo =
+                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+            val underlyingCapabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(carrierMergedInfo)
+                }
+            whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
+                .thenReturn(underlyingCapabilities)
+
+            val mainCapabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_ETHERNET)).thenReturn(false)
+                    // Transports are WIFI|VPN, *not* CELLULAR.
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                    whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                    whenever(it.hasTransport(TRANSPORT_VPN)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(VpnTransportInfo(0, null, false, false))
+                    whenever(it.underlyingNetworks)
+                        .thenReturn(listOf(underlyingCarrierMergedNetwork))
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, mainCapabilities)
+
+            assertThat(latest!!.carrierMerged.isDefault).isTrue()
 
             job.cancel()
         }
@@ -564,7 +609,11 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             job.cancel()
         }
 
-    /** Test for b/225902574. */
+    /**
+     * Test for b/225902574: VPN over VCN over W+ (aka VPN over VCN over carrier merged).
+     *
+     * Also see b/352162710#comment27 scenario #3 and b/352162710#comment30.
+     */
     @Test
     fun defaultConnections_cellular_underlyingCarrierMergedViaMobileWithVcnTransport_allDefault() =
         testScope.runTest {
@@ -587,6 +636,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             val mainCapabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.hasTransport(TRANSPORT_VPN)).thenReturn(true)
                     whenever(it.transportInfo).thenReturn(null)
                     whenever(it.underlyingNetworks)
                         .thenReturn(listOf(underlyingCarrierMergedNetwork))
@@ -862,6 +912,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_ALWAYS_CHECK_UNDERLYING_NETWORKS)
     fun getMainOrUnderlyingWifiInfo_notCellular_underlyingWifi_noInfo() {
         val underlyingNetwork = mock<Network>()
         val underlyingWifiInfo = mock<WifiInfo>()
@@ -916,6 +967,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_ALWAYS_CHECK_UNDERLYING_NETWORKS)
     fun getMainOrUnderlyingWifiInfo_notCellular_underlyingVcnWithWifi_noInfo() {
         val underlyingNetwork = mock<Network>()
         val underlyingVcnInfo = VcnTransportInfo(mock<WifiInfo>())

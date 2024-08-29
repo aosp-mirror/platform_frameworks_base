@@ -31,6 +31,7 @@ import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.annotation.ArrayRes
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -252,7 +253,10 @@ constructor(
             }
             // Only CELLULAR networks may have underlying wifi information that's relevant to SysUI,
             // so skip the underlying network check if it's not CELLULAR.
-            if (!this.hasTransport(TRANSPORT_CELLULAR)) {
+            if (
+                !this.hasTransport(TRANSPORT_CELLULAR) &&
+                    !Flags.statusBarAlwaysCheckUnderlyingNetworks()
+            ) {
                 return mainWifiInfo
             }
 
