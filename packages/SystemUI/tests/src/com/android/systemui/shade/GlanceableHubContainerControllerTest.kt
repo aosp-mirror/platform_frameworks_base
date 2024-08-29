@@ -417,13 +417,17 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 // Communal is open.
                 goToScene(CommunalScenes.Communal)
 
-                // Shade shows up.
-                shadeTestUtil.setQsExpansion(0.5f)
-                testableLooper.processAllMessages()
+                // Touch starts and ends.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
                 assertThat(underTest.onTouchEvent(CANCEL_EVENT)).isTrue()
+
+                // Up event is no longer processed
                 assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+
+                // Move event can still be processed
                 assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
             }
         }
 
@@ -712,6 +716,30 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 // An up event is still delivered.
                 assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
                 verify(containerView).onTouchEvent(UP_EVENT)
+            }
+        }
+
+    @Test
+    fun onTouchEvent_shadeExpanding_touchesNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+                whenever(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            any(),
+                            any()
+                        )
+                    )
+                    .thenReturn(true)
+
+                // Shade is open slightly.
+                fakeShadeRepository.setLegacyShadeExpansion(0.01f)
+                testableLooper.processAllMessages()
+
+                // Touches are not consumed.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(DOWN_EVENT)
             }
         }
 
