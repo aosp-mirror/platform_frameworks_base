@@ -101,6 +101,17 @@ flag {
 }
 
 flag {
+    namespace: "input_native"
+    name: "manage_key_gestures"
+    description: "Manage key gestures through Input APIs"
+    is_exported: true
+    bug: "358569822"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "keyboard_repeat_keys"
   namespace: "input"
   description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"

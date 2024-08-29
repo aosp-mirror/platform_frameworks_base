@@ -26,6 +26,8 @@ import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.bluetooth.BluetoothAdapter;
@@ -35,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.hardware.SensorPrivacyManager;
@@ -84,7 +87,6 @@ import android.os.VibrationEffect;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
@@ -125,7 +127,6 @@ import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
 import com.android.server.input.debug.TouchpadDebugViewController;
-import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 
 import libcore.io.IoUtils;
@@ -175,7 +176,7 @@ public class InputManagerService extends IInputManager.Stub
     private final InputManagerHandler mHandler;
     private DisplayManagerInternal mDisplayManagerInternal;
 
-    private InputMethodManagerInternal mInputMethodManagerInternal;
+    private PackageManagerInternal mPackageManagerInternal;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -546,8 +547,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mInputMethodManagerInternal =
-                LocalServices.getService(InputMethodManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         mSettingsObserver.registerAndUpdate();
 
@@ -2743,21 +2743,48 @@ public class InputManagerService extends IInputManager.Stub
                 lockedModifierState);
     }
 
+    /**
+     * Enforces the caller contains the necessary permission to manage key gestures.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    private void enforceManageKeyGesturePermission() {
+        // TODO(b/361567988): Use @EnforcePermission to enforce permission once flag guarding the
+        //  permission is rolled out
+        String systemUIPackage = mContext.getString(R.string.config_systemUi);
+        int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
+                .getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
+                        UserHandle.USER_SYSTEM));
+        if (UserHandle.getCallingAppId() == systemUIAppId) {
+            return;
+        }
+        if (mContext.checkCallingOrSelfPermission(
+                Manifest.permission.MANAGE_KEY_GESTURES) == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        String message = "Managing Key Gestures requires the following permission: "
+                + Manifest.permission.MANAGE_KEY_GESTURES;
+        throw new SecurityException(message);
+    }
+
+
     @Override
-    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @PermissionManuallyEnforced
     public void registerKeyGestureEventListener(
             @NonNull IKeyGestureEventListener listener) {
-        super.registerKeyGestureEventListener_enforcePermission();
+        enforceManageKeyGesturePermission();
+
         Objects.requireNonNull(listener);
         mKeyGestureController.registerKeyGestureEventListener(listener,
                 Binder.getCallingPid());
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @PermissionManuallyEnforced
     public void unregisterKeyGestureEventListener(
             @NonNull IKeyGestureEventListener listener) {
-        super.unregisterKeyGestureEventListener_enforcePermission();
+        enforceManageKeyGesturePermission();
+
         Objects.requireNonNull(listener);
         mKeyGestureController.unregisterKeyGestureEventListener(listener,
                 Binder.getCallingPid());
