@@ -16248,43 +16248,55 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         boolean closeFd = true;
         try {
-            synchronized (mProcLock) {
-                if (fd == null) {
-                    throw new IllegalArgumentException("null fd");
-                }
-                mBinderTransactionTrackingEnabled = false;
+            Objects.requireNonNull(fd);
 
-                PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd.getFileDescriptor()));
-                pw.println("Binder transaction traces for all processes.\n");
-                mProcessList.forEachLruProcessesLOSP(true, process -> {
+            record ProcessToDump(String processName, IApplicationThread thread) { }
+
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd.getFileDescriptor()));
+            pw.println("Binder transaction traces for all processes.\n");
+            final ArrayList<ProcessToDump> processes = new ArrayList<>();
+            synchronized (mProcLock) {
+                // Since dumping binder transactions is a long-running operation, we can't do it
+                // with mProcLock held. Do the initial verification here, and save the processes
+                // to dump later outside the lock.
+                final ArrayList<ProcessRecord> unverifiedProcesses =
+                        new ArrayList<>(mProcessList.getLruProcessesLOSP());
+                for (int i = 0, size = unverifiedProcesses.size(); i < size; i++) {
+                    ProcessRecord process = unverifiedProcesses.get(i);
                     final IApplicationThread thread = process.getThread();
                     if (!processSanityChecksLPr(process, thread)) {
-                        return;
+                        continue;
                     }
-
-                    pw.println("Traces for process: " + process.processName);
-                    pw.flush();
-                    try {
-                        TransferPipe tp = new TransferPipe();
-                        try {
-                            thread.stopBinderTrackingAndDump(tp.getWriteFd());
-                            tp.go(fd.getFileDescriptor());
-                        } finally {
-                            tp.kill();
-                        }
-                    } catch (IOException e) {
-                        pw.println("Failure while dumping IPC traces from " + process +
-                                ".  Exception: " + e);
-                        pw.flush();
-                    } catch (RemoteException e) {
-                        pw.println("Got a RemoteException while dumping IPC traces from " +
-                                process + ".  Exception: " + e);
-                        pw.flush();
-                    }
-                });
-                closeFd = false;
-                return true;
+                    processes.add(new ProcessToDump(process.processName, process.getThread()));
+                }
+                mBinderTransactionTrackingEnabled = false;
             }
+            for (int i = 0, size = processes.size(); i < size; i++) {
+                final String processName = processes.get(i).processName();
+                final IApplicationThread thread = processes.get(i).thread();
+
+                pw.println("Traces for process: " + processName);
+                pw.flush();
+                try {
+                    TransferPipe tp = new TransferPipe();
+                    try {
+                        thread.stopBinderTrackingAndDump(tp.getWriteFd());
+                        tp.go(fd.getFileDescriptor());
+                    } finally {
+                        tp.kill();
+                    }
+                } catch (IOException e) {
+                    pw.println("Failure while dumping IPC traces from " + processName +
+                            ".  Exception: " + e);
+                    pw.flush();
+                } catch (RemoteException e) {
+                    pw.println("Got a RemoteException while dumping IPC traces from " +
+                            processName + ".  Exception: " + e);
+                    pw.flush();
+                }
+            }
+            closeFd = false;
+            return true;
         } finally {
             if (fd != null && closeFd) {
                 try {
