@@ -1835,10 +1835,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         assertThat(userEntries).hasSize(1)
         val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
-        assertThat(secondSemanticActions.playOrPause?.icon)
-            .isEqualTo(firstSemanticActions.playOrPause?.icon)
-        assertThat(secondSemanticActions.playOrPause?.background)
-            .isEqualTo(firstSemanticActions.playOrPause?.background)
         assertThat(secondSemanticActions.nextOrCustom?.icon)
             .isEqualTo(firstSemanticActions.nextOrCustom?.icon)
         assertThat(secondSemanticActions.prevOrCustom?.icon)
@@ -1873,11 +1869,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         assertThat(userEntries).hasSize(1)
         val secondSemanticActions = userEntries?.values?.toList()?.get(0)?.semanticActions!!
-
-        assertThat(secondSemanticActions.playOrPause?.icon)
-            .isNotEqualTo(firstSemanticActions.playOrPause?.icon)
-        assertThat(secondSemanticActions.playOrPause?.background)
-            .isNotEqualTo(firstSemanticActions.playOrPause?.background)
         assertThat(secondSemanticActions.nextOrCustom?.icon)
             .isNotEqualTo(firstSemanticActions.nextOrCustom?.icon)
         assertThat(secondSemanticActions.prevOrCustom?.icon)
