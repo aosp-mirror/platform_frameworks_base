@@ -1,5 +1,6 @@
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.annotation.SuppressLint;
@@ -704,10 +705,48 @@ public class BluetoothUtils {
         return !sourceList.isEmpty() && sourceList.stream().anyMatch(BluetoothUtils::isConnected);
     }
 
+    /**
+     * Check if {@link BluetoothDevice} has a active local broadcast source.
+     *
+     * @param device The bluetooth device to check.
+     * @param localBtManager The BT manager to provide BT functions.
+     * @return Whether the device has a active local broadcast source.
+     */
+    @WorkerThread
+    public static boolean hasActiveLocalBroadcastSourceForBtDevice(
+            @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                localBtManager == null
+                        ? null
+                        : localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        LocalBluetoothLeBroadcast broadcast =
+                localBtManager == null
+                        ? null
+                        : localBtManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (device == null || assistant == null || broadcast == null) {
+            Log.d(TAG, "Skip check hasActiveLocalBroadcastSourceForBtDevice due to arg is null");
+            return false;
+        }
+        List<BluetoothLeBroadcastReceiveState> sourceList = assistant.getAllSources(device);
+        int broadcastId = broadcast.getLatestBroadcastId();
+        return !sourceList.isEmpty()
+                && broadcastId != UNKNOWN_VALUE_PLACEHOLDER
+                && sourceList.stream()
+                        .anyMatch(
+                                source -> isSourceMatched(source, broadcastId));
+    }
+
     /** Checks the connectivity status based on the provided broadcast receive state. */
     @WorkerThread
     public static boolean isConnected(BluetoothLeBroadcastReceiveState state) {
         return state.getBisSyncState().stream().anyMatch(bitmap -> bitmap != 0);
+    }
+
+    /** Checks if the broadcast id is matched based on the provided broadcast receive state. */
+    @WorkerThread
+    public static boolean isSourceMatched(
+            @Nullable BluetoothLeBroadcastReceiveState state, int broadcastId) {
+        return state != null && state.getBroadcastId() == broadcastId;
     }
 
     /**
