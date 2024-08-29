@@ -1401,12 +1401,8 @@ public class NotificationStackScrollLayout
     }
 
     public int getTopPadding() {
-        // TODO(b/332574413) replace all usages of getTopPadding()
-        if (SceneContainerFlag.isEnabled()) {
-            return (int) mAmbientState.getStackTop();
-        } else {
-            return mAmbientState.getTopPadding();
-        }
+        SceneContainerFlag.assertInLegacyMode();
+        return mAmbientState.getTopPadding();
     }
 
     private void onTopPaddingChanged(boolean animate) {
