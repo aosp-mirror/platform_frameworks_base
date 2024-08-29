@@ -11479,10 +11479,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.println();
                 mStatLogger.dump(pw);
                 pw.println();
-                if (Flags.dumpsysPolicyEngineMigrationEnabled()) {
-                    mDevicePolicyEngine.dump(pw);
-                    pw.println();
-                }
+                mDevicePolicyEngine.dump(pw);
+                pw.println();
                 pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
                 pw.println("Logout user: " + getLogoutUserIdUnchecked());
                 pw.println();
@@ -12682,14 +12680,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_CREATE_AND_MANAGE_USER);
 
-        if (Flags.headlessDeviceOwnerSingleUserEnabled()) {
-            // Block this method if the device is in headless main user mode
-            Preconditions.checkCallAuthorization(
-                    !mInjector.userManagerIsHeadlessSystemUserMode()
-                            || getHeadlessDeviceOwnerModeForDeviceOwner()
-                            != HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER,
-                    "createAndManageUser was called while in headless single user mode");
-        }
+        // Block this method if the device is in headless main user mode
+        Preconditions.checkCallAuthorization(
+                !mInjector.userManagerIsHeadlessSystemUserMode()
+                        || getHeadlessDeviceOwnerModeForDeviceOwner()
+                        != HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER,
+                "createAndManageUser was called while in headless single user mode");
 
         // Only allow the system user to use this method
         Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
@@ -17315,7 +17311,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     return STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED;
                 }
 
-                if (Flags.headlessDeviceOwnerSingleUserEnabled() && isHeadlessModeSingleUser) {
+                if (isHeadlessModeSingleUser) {
                     ensureSetUpUser = mUserManagerInternal.getMainUserId();
                     if (ensureSetUpUser == UserHandle.USER_NULL) {
                         return STATUS_HEADLESS_ONLY_SYSTEM_USER;
@@ -22063,8 +22059,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
             setLocale(provisioningParams.getLocale());
 
-            int deviceOwnerUserId = Flags.headlessDeviceOwnerSingleUserEnabled()
-                    && isSingleUserMode && mInjector.userManagerIsHeadlessSystemUserMode()
+            int deviceOwnerUserId =
+                    isSingleUserMode && mInjector.userManagerIsHeadlessSystemUserMode()
                     ? mUserManagerInternal.getMainUserId() : UserHandle.USER_SYSTEM;
 
             if (!removeNonRequiredAppsForManagedDevice(

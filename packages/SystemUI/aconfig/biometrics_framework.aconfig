@@ -3,3 +3,12 @@ container: "system"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
+flag {
+  name: "bp_icon_a11y"
+  namespace: "biometrics_framework"
+  description: "Fixes biometric prompt icon not working as button with a11y"
+  bug: "359423579"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

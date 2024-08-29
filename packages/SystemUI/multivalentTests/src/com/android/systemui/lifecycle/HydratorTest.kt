@@ -48,12 +48,13 @@ class HydratorTest : SysuiTestCase() {
         composeRule.setContent {
             val keepAlive by keepAliveMutable
             if (keepAlive) {
-                val viewModel = rememberViewModel {
-                    FakeSysUiViewModel(
-                        upstreamFlow = upstreamFlow,
-                        upstreamStateFlow = upstreamStateFlow,
-                    )
-                }
+                val viewModel =
+                    rememberViewModel("test") {
+                        FakeSysUiViewModel(
+                            upstreamFlow = upstreamFlow,
+                            upstreamStateFlow = upstreamStateFlow,
+                        )
+                    }
 
                 Column {
                     Text(

@@ -314,6 +314,15 @@ public final class SystemClock {
     }
 
     /**
+     * @see #currentNetworkTimeMillis(ITimeDetectorService)
+     * @hide
+     */
+    public static long currentNetworkTimeMillis() {
+        return currentNetworkTimeMillis(ITimeDetectorService.Stub
+                .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE)));
+    }
+
+    /**
      * Returns milliseconds since January 1, 1970 00:00:00.0 UTC, synchronized
      * using a remote network source outside the device.
      * <p>
@@ -331,14 +340,14 @@ public final class SystemClock {
      * at any time. Due to network delays, variations between servers, or local
      * (client side) clock drift, the accuracy of the returned times cannot be
      * guaranteed. In extreme cases, consecutive calls to {@link
-     * #currentNetworkTimeMillis()} could return times that are out of order.
+     * #currentNetworkTimeMillis(ITimeDetectorService)} could return times that
+     * are out of order.
      *
      * @throws DateTimeException when no network time can be provided.
      * @hide
      */
-    public static long currentNetworkTimeMillis() {
-        ITimeDetectorService timeDetectorService = ITimeDetectorService.Stub
-                .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
+    public static long currentNetworkTimeMillis(
+            ITimeDetectorService timeDetectorService) {
         if (timeDetectorService != null) {
             UnixEpochTime time;
             try {
@@ -380,16 +389,21 @@ public final class SystemClock {
      * at any time. Due to network delays, variations between servers, or local
      * (client side) clock drift, the accuracy of the returned times cannot be
      * guaranteed. In extreme cases, consecutive calls to {@link
-     * Clock#millis()} on the returned {@link Clock}could return times that are
+     * Clock#millis()} on the returned {@link Clock} could return times that are
      * out of order.
      *
      * @throws DateTimeException when no network time can be provided.
      */
     public static @NonNull Clock currentNetworkTimeClock() {
         return new SimpleClock(ZoneOffset.UTC) {
+            private ITimeDetectorService mSvc;
             @Override
             public long millis() {
-                return SystemClock.currentNetworkTimeMillis();
+                if (mSvc == null) {
+                    mSvc = ITimeDetectorService.Stub
+                            .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
+                }
+                return SystemClock.currentNetworkTimeMillis(mSvc);
             }
         };
     }

@@ -24,6 +24,9 @@ import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.Executor
@@ -49,7 +52,10 @@ constructor(
     private val communalSmartspaceController: CommunalSmartspaceController,
     @Main private val uiExecutor: Executor,
     private val systemClock: SystemClock,
+    @CommunalLog logBuffer: LogBuffer,
 ) : CommunalSmartspaceRepository, BcSmartspaceDataPlugin.SmartspaceTargetListener {
+
+    private val logger = Logger(logBuffer, "CommunalSmartspaceRepository")
 
     private val _timers: MutableStateFlow<List<CommunalSmartspaceTimer>> =
         MutableStateFlow(emptyList())
@@ -87,6 +93,8 @@ constructor(
                     remoteViews = target.remoteViews!!,
                 )
             }
+
+        logger.d({ "Smartspace timers updated: $str1" }) { str1 = _timers.value.toString() }
     }
 
     override fun startListening() {

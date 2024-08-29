@@ -23,27 +23,51 @@ import org.junit.runner.Runner;
 import org.junit.runners.model.TestClass;
 
 /**
- * Provide hook points created by {@link RavenwoodAwareTestRunner}.
+ * Provide hook points created by {@link RavenwoodAwareTestRunner}. This is a version
+ * that's used on a device side test.
+ *
+ * All methods are no-op in real device tests.
+ *
+ * TODO: Use some kind of factory to provide different implementation for the device test
+ * and the ravenwood test.
  */
 public class RavenwoodAwareTestRunnerHook {
     private RavenwoodAwareTestRunnerHook() {
     }
 
     /**
-     * Called when a runner starts, befre the inner runner gets a chance to run.
+     * Called when a runner starts, before the inner runner gets a chance to run.
      */
     public static void onRunnerInitializing(Runner runner, TestClass testClass) {
-        // No-op on a real device.
     }
 
+    /**
+     * Called when a whole test class is skipped.
+     */
+    public static void onClassSkipped(Description description) {
+    }
+
+    /**
+     * Called before a test / class.
+     *
+     * Return false if it should be skipped.
+     */
     public static boolean onBefore(RavenwoodAwareTestRunner runner, Description description,
             Scope scope, Order order) {
-        // No-op on a real device.
         return true;
     }
 
-    public static void onAfter(RavenwoodAwareTestRunner runner, Description description,
+    /**
+     * Called after a test / class.
+     *
+     * Return false if the exception should be ignored.
+     */
+    public static boolean onAfter(RavenwoodAwareTestRunner runner, Description description,
             Scope scope, Order order, Throwable th) {
-        // No-op on a real device.
+        return true;
+    }
+
+    public static boolean shouldRunClassOnRavenwood(Class<?> clazz) {
+        return true;
     }
 }

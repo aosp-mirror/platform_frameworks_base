@@ -488,7 +488,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @Override
         public Interpolator getInsetsInterpolator(boolean hasZeroInsetsIme) {
             if ((mRequestedTypes & ime()) != 0) {
-                if (mHasAnimationCallbacks && hasZeroInsetsIme) {
+                if (mHasAnimationCallbacks && !hasZeroInsetsIme) {
                     return SYNC_IME_INTERPOLATOR;
                 } else if (mShow) {
                     return LINEAR_OUT_SLOW_IN_INTERPOLATOR;
@@ -536,7 +536,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @Override
         public long getDurationMs(boolean hasZeroInsetsIme) {
             if ((mRequestedTypes & ime()) != 0) {
-                if (mHasAnimationCallbacks && hasZeroInsetsIme) {
+                if (mHasAnimationCallbacks && !hasZeroInsetsIme) {
                     return ANIMATION_DURATION_SYNC_IME_MS;
                 } else {
                     return ANIMATION_DURATION_UNSYNC_IME_MS;

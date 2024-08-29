@@ -18,7 +18,6 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -35,7 +34,7 @@ class QuickSettingsShadeSceneContentViewModel
 constructor(
     val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
     val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
-) : SysUiViewModel {
+) {
 
     @AssistedFactory
     interface Factory {

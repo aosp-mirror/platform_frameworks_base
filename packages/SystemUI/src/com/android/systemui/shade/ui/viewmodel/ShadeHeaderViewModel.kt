@@ -25,7 +25,6 @@ import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
@@ -66,7 +65,7 @@ constructor(
     private val privacyChipInteractor: PrivacyChipInteractor,
     private val clockInteractor: ShadeHeaderClockInteractor,
     private val broadcastDispatcher: BroadcastDispatcher,
-) : SysUiViewModel, ExclusiveActivatable() {
+) : ExclusiveActivatable() {
     /** True if there is exactly one mobile connection. */
     val isSingleCarrier: StateFlow<Boolean> = mobileIconsInteractor.isSingleCarrier
 

@@ -63,6 +63,7 @@ constructor(
     AuthMethodBouncerViewModel(
         interactor = interactor,
         isInputEnabled = isInputEnabled,
+        traceName = "PinBouncerViewModel",
     ) {
     /**
      * Whether the sim-related UI in the pin view is showing.
