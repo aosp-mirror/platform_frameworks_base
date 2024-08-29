@@ -44,6 +44,9 @@ data class RavenizerStats(
     /** Time took to build [ClasNodes] */
     var loadStructureTime: Double = .0,
 
+    /** Time took to validate the classes */
+    var validationTime: Double = .0,
+
     /** Total real time spent for converting the jar file */
     var totalProcessTime: Double = .0,
 
@@ -67,6 +70,7 @@ data class RavenizerStats(
             RavenizerStats{
               totalTime=$totalTime,
               loadStructureTime=$loadStructureTime,
+              validationTime=$validationTime,
               totalProcessTime=$totalProcessTime,
               totalConversionTime=$totalConversionTime,
               totalCopyTime=$totalCopyTime,
@@ -84,15 +88,43 @@ data class RavenizerStats(
 class Ravenizer(val options: RavenizerOptions) {
     fun run() {
         val stats = RavenizerStats()
+
+        val fatalValidation = options.fatalValidation.get
+
         stats.totalTime = log.nTime {
-            process(options.inJar.get, options.outJar.get, stats)
+            process(
+                options.inJar.get,
+                options.outJar.get,
+                options.enableValidation.get,
+                fatalValidation,
+                stats,
+            )
         }
         log.i(stats.toString())
     }
 
-    private fun process(inJar: String, outJar: String, stats: RavenizerStats) {
+    private fun process(
+        inJar: String,
+        outJar: String,
+        enableValidation: Boolean,
+        fatalValidation: Boolean,
+        stats: RavenizerStats,
+    ) {
         var allClasses = ClassNodes.loadClassStructures(inJar) {
             time -> stats.loadStructureTime = time
+        }
+        if (enableValidation) {
+            stats.validationTime = log.iTime("Validating classes") {
+                if (!validateClasses(allClasses)) {
+                    var message = "Invalid test class(es) detected." +
+                            " See error log for details."
+                    if (fatalValidation) {
+                        throw RavenizerInvalidTestException(message)
+                    } else {
+                        log.w("Warning: $message")
+                    }
+                }
+            }
         }
 
         stats.totalProcessTime = log.iTime("$executableName processing $inJar") {

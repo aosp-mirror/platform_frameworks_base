@@ -17,7 +17,14 @@
 
 package com.android.platform.test.ravenwood.ravenizer
 
+import com.android.hoststubgen.UserErrorException
+
 /**
  * Use it for internal exception that really shouldn't happen.
  */
 class RavenizerInternalException(message: String) : Exception(message)
+
+/**
+ * Thrown when an invalid test is detected in the target jar. (e.g. JUni3 tests)
+ */
+class RavenizerInvalidTestException(message: String) : Exception(message), UserErrorException

@@ -87,9 +87,12 @@ fun String.shouldByBypassed(): Boolean {
     return this.startsWithAny(
         "java/", // just in case...
         "javax/",
+        "junit/",
         "org/junit/",
         "org/mockito/",
         "kotlin/",
+        "androidx/",
+        "android/support/",
         // TODO -- anything else?
     )
 }
