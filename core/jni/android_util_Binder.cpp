@@ -466,10 +466,25 @@ class JavaBBinderHolder
 public:
     sp<JavaBBinder> get(JNIEnv* env, jobject obj)
     {
-        AutoMutex _l(mLock);
-        sp<JavaBBinder> b = mBinder.promote();
-        if (b == NULL) {
-            b = new JavaBBinder(env, obj);
+        sp<JavaBBinder> b;
+        {
+            AutoMutex _l(mLock);
+            // must take lock to promote because we set the same wp<>
+            // on another thread.
+            b = mBinder.promote();
+        }
+
+        if (b) return b;
+
+        // b/360067751: constructor may trigger GC, so call outside lock
+        b = new JavaBBinder(env, obj);
+
+        {
+            AutoMutex _l(mLock);
+            // if it was constructed on another thread in the meantime,
+            // return that. 'b' will just get destructed.
+            if (sp<JavaBBinder> b2 = mBinder.promote(); b2) return b2;
+
             if (mVintf) {
                 ::android::internal::Stability::markVintf(b.get());
             }
