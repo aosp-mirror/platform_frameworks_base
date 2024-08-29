@@ -8,6 +8,12 @@
     },
     {
       "name": "PowerServiceTests_server_power"
+    },
+    {
+      "name": "CtsStatsdAtomHostTestCases_statsdatom_powermanager",
+      "file_patterns": [
+        "(/|^)ThermalManagerService.java"
+      ]
     }
   ],
   "postsubmit": [
@@ -22,12 +28,6 @@
     },
     {
       "name": "PowerServiceTests_server_power"
-    },
-    {
-      "name": "CtsStatsdAtomHostTestCases_statsdatom_powermanager",
-      "file_patterns": [
-        "(/|^)ThermalManagerService.java"
-      ]
     }
   ]
 }
