@@ -25,7 +25,6 @@ import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 
 /**
@@ -46,7 +45,7 @@ constructor(
                     Swipe(SwipeDirection.Down) to UserActionResult(prevScene),
                 )
             }
-            .collectLatest { actions -> setActions(actions) }
+            .collect { actions -> setActions(actions) }
     }
 
     @AssistedFactory

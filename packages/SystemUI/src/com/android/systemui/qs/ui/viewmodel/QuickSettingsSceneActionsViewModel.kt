@@ -31,7 +31,6 @@ import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -78,7 +77,7 @@ constructor(
                     }
                 }
             }
-            .collectLatest { actions -> setActions(actions) }
+            .collect { actions -> setActions(actions) }
     }
 
     @AssistedFactory
