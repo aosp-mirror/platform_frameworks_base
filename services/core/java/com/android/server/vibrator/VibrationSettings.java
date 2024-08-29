@@ -66,6 +66,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
+import com.android.server.vibrator.VibrationSession.CallerInfo;
+import com.android.server.vibrator.VibrationSession.Status;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -416,46 +418,46 @@ final class VibrationSettings {
     /**
      * Check if given vibration should be ignored by the service.
      *
-     * @return One of Vibration.Status.IGNORED_* values if the vibration should be ignored,
+     * @return One of VibrationSession.Status.IGNORED_* values if the vibration should be ignored,
      * null otherwise.
      */
     @Nullable
-    public Vibration.Status shouldIgnoreVibration(@NonNull Vibration.CallerInfo callerInfo) {
+    public Status shouldIgnoreVibration(@NonNull CallerInfo callerInfo) {
         final int usage = callerInfo.attrs.getUsage();
         synchronized (mLock) {
             if (!mUidObserver.isUidForeground(callerInfo.uid)
                     && !BACKGROUND_PROCESS_USAGE_ALLOWLIST.contains(usage)) {
-                return Vibration.Status.IGNORED_BACKGROUND;
+                return Status.IGNORED_BACKGROUND;
             }
 
             if (callerInfo.deviceId != Context.DEVICE_ID_DEFAULT
                     && callerInfo.deviceId != Context.DEVICE_ID_INVALID) {
-                return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
+                return Status.IGNORED_FROM_VIRTUAL_DEVICE;
             }
 
             if (callerInfo.deviceId == Context.DEVICE_ID_INVALID
                     && isAppRunningOnAnyVirtualDevice(callerInfo.uid)) {
-                return Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE;
+                return Status.IGNORED_FROM_VIRTUAL_DEVICE;
             }
 
             if (mBatterySaverMode && !BATTERY_SAVER_USAGE_ALLOWLIST.contains(usage)) {
-                return Vibration.Status.IGNORED_FOR_POWER;
+                return Status.IGNORED_FOR_POWER;
             }
 
             if (!callerInfo.attrs.isFlagSet(
                     VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
                     && !shouldVibrateForUserSetting(callerInfo)) {
-                return Vibration.Status.IGNORED_FOR_SETTINGS;
+                return Status.IGNORED_FOR_SETTINGS;
             }
 
             if (!callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY)) {
                 if (!shouldVibrateForRingerModeLocked(usage)) {
-                    return Vibration.Status.IGNORED_FOR_RINGER_MODE;
+                    return Status.IGNORED_FOR_RINGER_MODE;
                 }
             }
 
             if (mVibrationConfig.ignoreVibrationsOnWirelessCharger() && mOnWirelessCharger) {
-                return Vibration.Status.IGNORED_ON_WIRELESS_CHARGER;
+                return Status.IGNORED_ON_WIRELESS_CHARGER;
             }
         }
         return null;
@@ -471,7 +473,7 @@ final class VibrationSettings {
      *
      * @return true if the vibration should be cancelled when the screen goes off, false otherwise.
      */
-    public boolean shouldCancelVibrationOnScreenOff(@NonNull Vibration.CallerInfo callerInfo,
+    public boolean shouldCancelVibrationOnScreenOff(@NonNull CallerInfo callerInfo,
             long vibrationStartUptimeMillis) {
         PowerManagerInternal pm;
         synchronized (mLock) {
@@ -483,8 +485,8 @@ final class VibrationSettings {
             // ignored here and not cancel a vibration, and those are usually triggered by timeout
             // or inactivity, so it's unlikely that it will override a more active goToSleep reason.
             PowerManager.SleepData sleepData = pm.getLastGoToSleep();
-            if ((sleepData.goToSleepUptimeMillis < vibrationStartUptimeMillis)
-                    || POWER_MANAGER_SLEEP_REASON_ALLOWLIST.contains(sleepData.goToSleepReason)) {
+            if (sleepData != null && (sleepData.goToSleepUptimeMillis < vibrationStartUptimeMillis
+                    || POWER_MANAGER_SLEEP_REASON_ALLOWLIST.contains(sleepData.goToSleepReason))) {
                 // Ignore screen off events triggered before the vibration started, and all
                 // automatic "go to sleep" events from allowlist.
                 Slog.d(TAG, "Ignoring screen off event triggered at uptime "
@@ -522,7 +524,7 @@ final class VibrationSettings {
      * {@code false} to ignore the vibration.
      */
     @GuardedBy("mLock")
-    private boolean shouldVibrateForUserSetting(Vibration.CallerInfo callerInfo) {
+    private boolean shouldVibrateForUserSetting(CallerInfo callerInfo) {
         final int usage = callerInfo.attrs.getUsage();
         if (!mVibrateOn && (VIBRATE_ON_DISABLED_USAGE_ALLOWED != usage)) {
             // Main setting disabled.
