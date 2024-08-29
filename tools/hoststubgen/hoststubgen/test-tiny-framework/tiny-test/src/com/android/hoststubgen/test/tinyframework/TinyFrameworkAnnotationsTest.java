@@ -21,20 +21,20 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class TinyFrameworkClassWithAnnotTest {
+public class TinyFrameworkAnnotationsTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testSimple() {
-        TinyFrameworkClassAnnotations tfc = new TinyFrameworkClassAnnotations();
+        TinyFrameworkAnnotations tfc = new TinyFrameworkAnnotations();
         assertThat(tfc.addOne(1)).isEqualTo(2);
         assertThat(tfc.stub).isEqualTo(1);
     }
 
 //    @Test
 //    public void testDoesntCompile() {
-//        TinyFrameworkClassWithAnnot tfc = new TinyFrameworkClassWithAnnot();
+//        TinyFrameworkAnnotations tfc = new TinyFrameworkAnnotations();
 //
 //        tfc.addOneInner(1); // Shouldn't compile.
 //        tfc.toBeRemoved("abc"); // Shouldn't compile.
@@ -45,19 +45,19 @@ public class TinyFrameworkClassWithAnnotTest {
 
     @Test
     public void testSubstitute() {
-        TinyFrameworkClassAnnotations tfc = new TinyFrameworkClassAnnotations();
+        TinyFrameworkAnnotations tfc = new TinyFrameworkAnnotations();
         assertThat(tfc.addTwo(1)).isEqualTo(3);
     }
 
     @Test
     public void testSubstituteNative() {
-        TinyFrameworkClassAnnotations tfc = new TinyFrameworkClassAnnotations();
+        TinyFrameworkAnnotations tfc = new TinyFrameworkAnnotations();
         assertThat(tfc.nativeAddThree(1)).isEqualTo(4);
     }
 
     @Test
     public void testVisibleButUsesUnsupportedMethod() {
-        TinyFrameworkClassAnnotations tfc = new TinyFrameworkClassAnnotations();
+        TinyFrameworkAnnotations tfc = new TinyFrameworkAnnotations();
 
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("not yet supported");
