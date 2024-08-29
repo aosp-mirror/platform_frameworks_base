@@ -132,13 +132,17 @@ constructor(
             _stackScrollerOverscrolling.value = value
         }
 
-    private val qsDisabled =
+    /**
+     * Whether QS is enabled by policy. This is normally true, except when it's disabled by some
+     * policy. See [DisableFlagsRepository].
+     */
+    val qsEnabled =
         disableFlagsRepository.disableFlags
-            .map { !it.isQuickSettingsEnabled() }
+            .map { it.isQuickSettingsEnabled() }
             .stateIn(
                 lifecycleScope,
                 SharingStarted.WhileSubscribed(),
-                !disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled()
+                disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled()
             )
 
     private val _showCollapsedOnKeyguard = MutableStateFlow(false)

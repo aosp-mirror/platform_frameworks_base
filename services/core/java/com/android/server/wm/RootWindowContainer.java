@@ -2032,33 +2032,39 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 onTop);
     }
 
-    void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
-            @Nullable ActivityRecord launchIntoPipHostActivity, String reason) {
-        moveActivityToPinnedRootTask(r, launchIntoPipHostActivity, reason, null /* transition */);
+    /** Wrapper/Helper for tests */
+    void moveActivityToPinnedRootTask(@NonNull ActivityRecord r, String reason) {
+        Transition newTransit = (r.mTransitionController.isCollecting()
+                || !r.mTransitionController.isShellTransitionsEnabled())
+                ? null : r.mTransitionController.createTransition(TRANSIT_PIP);
+        moveActivityToPinnedRootTaskInner(r, null /* launchIntoPipHostActivity */, reason,
+                null /* bounds */, newTransit != null);
     }
 
     void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
             @Nullable ActivityRecord launchIntoPipHostActivity, String reason,
-            @Nullable Transition transition) {
-        moveActivityToPinnedRootTask(r, launchIntoPipHostActivity, reason, transition,
-                null /* bounds */);
+            @Nullable Rect bounds) {
+        moveActivityToPinnedRootTaskInner(r, launchIntoPipHostActivity, reason, bounds,
+                false /* requestStart */);
     }
 
-    void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
+    /**
+     * Moves activity to pinned in the provided transition and also requests start on that
+     * Transition at an appropriate time.
+     */
+    void moveActivityToPinnedRootTaskAndRequestStart(@NonNull ActivityRecord r, String reason) {
+        moveActivityToPinnedRootTaskInner(r, null /* launchIntoPipHostActivity */, reason,
+                null /* bounds */, true /* requestStart */);
+    }
+
+    private void moveActivityToPinnedRootTaskInner(@NonNull ActivityRecord r,
             @Nullable ActivityRecord launchIntoPipHostActivity, String reason,
-            @Nullable Transition transition, @Nullable Rect bounds) {
+            @Nullable Rect bounds, boolean requestStart) {
         final TaskDisplayArea taskDisplayArea = r.getDisplayArea();
         final Task task = r.getTask();
         final Task rootTask;
 
-        Transition newTransition = transition;
-        // Create a transition now (if not provided) to collect the current pinned Task dismiss.
-        // Only do the create here as the Task (trigger) to enter PIP is not ready yet.
         final TransitionController transitionController = task.mTransitionController;
-        if (newTransition == null && !transitionController.isCollecting()
-                && transitionController.getTransitionPlayer() != null) {
-            newTransition = transitionController.createTransition(TRANSIT_PIP);
-        }
 
         transitionController.deferTransitionReady();
         Transition.ReadyCondition pipChangesApplied = new Transition.ReadyCondition("movedToPip");
@@ -2273,14 +2279,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        if (newTransition != null) {
+        // can be null (for now) if shell transitions are disabled or inactive at this time
+        final Transition transit = transitionController.getCollectingTransition();
+        if (requestStart && transit != null) {
             // Request at end since we want task-organizer events from ensureActivitiesVisible
             // to be recognized.
-            transitionController.requestStartTransition(newTransition, rootTask,
+            transitionController.requestStartTransition(transit, rootTask,
                     null /* remoteTransition */, null /* displayChange */);
             // A new transition was created just for this operations. Since the operation is
             // complete, mark it as ready.
-            newTransition.setReady(rootTask, true /* ready */);
+            transit.setReady(rootTask, true /* ready */);
         }
 
         resumeFocusedTasksTopActivities();

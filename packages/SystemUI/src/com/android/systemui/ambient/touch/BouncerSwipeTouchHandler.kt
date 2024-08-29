@@ -29,7 +29,6 @@ import android.view.VelocityTracker
 import androidx.annotation.VisibleForTesting
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Flags
 import com.android.systemui.ambient.touch.TouchHandler.TouchSession
 import com.android.systemui.ambient.touch.dagger.BouncerSwipeModule
@@ -37,8 +36,8 @@ import com.android.systemui.ambient.touch.scrim.ScrimController
 import com.android.systemui.ambient.touch.scrim.ScrimManager
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -63,8 +62,6 @@ constructor(
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val valueAnimatorCreator: ValueAnimatorCreator,
     private val velocityTrackerFactory: VelocityTrackerFactory,
-    private val lockPatternUtils: LockPatternUtils,
-    private val userTracker: UserTracker,
     private val communalViewModel: CommunalViewModel,
     @param:Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
     private val flingAnimationUtils: FlingAnimationUtils,
@@ -75,7 +72,8 @@ constructor(
     @param:Named(BouncerSwipeModule.MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE)
     private val minBouncerZoneScreenPercentage: Float,
     private val uiEventLogger: UiEventLogger,
-    private val activityStarter: ActivityStarter
+    private val activityStarter: ActivityStarter,
+    private val keyguardInteractor: KeyguardInteractor,
 ) : TouchHandler {
     /** An interface for creating ValueAnimators. */
     interface ValueAnimatorCreator {
@@ -148,7 +146,7 @@ constructor(
 
                     // If scrolling up and keyguard is not locked, dismiss both keyguard and the
                     // dream since there's no bouncer to show.
-                    if (y > e2.y && !lockPatternUtils.isSecure(userTracker.userId)) {
+                    if (y > e2.y && keyguardInteractor.isKeyguardDismissible.value) {
                         activityStarter.executeRunnableDismissingKeyguard(
                             { centralSurfaces.get().awakenDreams() },
                             /* cancelAction= */ null,
@@ -331,8 +329,8 @@ constructor(
             return
         }
 
-        // Don't set expansion if the user doesn't have a pin/password set.
-        if (!lockPatternUtils.isSecure(userTracker.userId)) {
+        // Don't set expansion if keyguard is dismissible (i.e. unlocked).
+        if (keyguardInteractor.isKeyguardDismissible.value) {
             return
         }
 

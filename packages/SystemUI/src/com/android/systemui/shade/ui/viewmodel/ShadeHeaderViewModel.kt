@@ -25,7 +25,6 @@ import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
@@ -47,7 +46,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -66,7 +64,7 @@ constructor(
     private val privacyChipInteractor: PrivacyChipInteractor,
     private val clockInteractor: ShadeHeaderClockInteractor,
     private val broadcastDispatcher: BroadcastDispatcher,
-) : SysUiViewModel, ExclusiveActivatable() {
+) : ExclusiveActivatable() {
     /** True if there is exactly one mobile connection. */
     val isSingleCarrier: StateFlow<Boolean> = mobileIconsInteractor.isSingleCarrier
 
@@ -133,12 +131,10 @@ constructor(
             launch {
                 mobileIconsInteractor.filteredSubscriptions
                     .map { list -> list.map { it.subscriptionId } }
-                    .collectLatest { _mobileSubIds.value = it }
+                    .collect { _mobileSubIds.value = it }
             }
 
-            launch {
-                shadeInteractor.isQsEnabled.map { !it }.collectLatest { _isDisabled.value = it }
-            }
+            launch { shadeInteractor.isQsEnabled.map { !it }.collect { _isDisabled.value = it } }
 
             awaitCancellation()
         }

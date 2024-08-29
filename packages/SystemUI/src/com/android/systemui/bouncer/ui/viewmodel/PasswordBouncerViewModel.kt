@@ -34,7 +34,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -53,6 +52,7 @@ constructor(
     AuthMethodBouncerViewModel(
         interactor = interactor,
         isInputEnabled = isInputEnabled,
+        traceName = "PasswordBouncerViewModel",
     ) {
 
     private val _password = MutableStateFlow("")
@@ -104,11 +104,9 @@ constructor(
                 combine(isInputEnabled, isTextFieldFocused) { hasInput, hasFocus ->
                         hasInput && !hasFocus
                     }
-                    .collectLatest { _isTextFieldFocusRequested.value = it }
+                    .collect { _isTextFieldFocusRequested.value = it }
             }
-            launch {
-                selectedUserInteractor.selectedUser.collectLatest { _selectedUserId.value = it }
-            }
+            launch { selectedUserInteractor.selectedUser.collect { _selectedUserId.value = it } }
             launch {
                 // Re-fetch the currently-enabled IMEs whenever the selected user changes, and
                 // whenever
@@ -124,7 +122,7 @@ constructor(
                     ) { selectedUserId, _ ->
                         inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(selectedUserId)
                     }
-                    .collectLatest { _isImeSwitcherButtonVisible.value = it }
+                    .collect { _isImeSwitcherButtonVisible.value = it }
             }
             awaitCancellation()
         }

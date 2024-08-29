@@ -131,7 +131,7 @@ constructor(
             .map { state ->
                 when (state) {
                     is ObservableTransitionState.Idle -> null
-                    is ObservableTransitionState.Transition.ChangeCurrentScene -> state.toScene
+                    is ObservableTransitionState.Transition.ChangeScene -> state.toScene
                     is ObservableTransitionState.Transition.ShowOrHideOverlay,
                     is ObservableTransitionState.Transition.ReplaceOverlay ->
                         TODO("b/359173565: Handle overlay transitions")

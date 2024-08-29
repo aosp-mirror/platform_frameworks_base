@@ -62,16 +62,16 @@ constructor(
         communalInteractor
             .transitionProgressToScene(toScene)
             .sample(
-                transitionInteractor.startedKeyguardState,
+                transitionInteractor.startedKeyguardTransitionStep,
                 ::Pair,
             )
-            .collect { (transitionProgress, lastStartedState) ->
+            .collect { (transitionProgress, lastStartedStep) ->
                 val id = transitionId
                 if (id == null) {
                     // No transition started.
                     if (
                         transitionProgress is CommunalTransitionProgressModel.Transition &&
-                            lastStartedState == fromState
+                            lastStartedStep.to == fromState
                     ) {
                         transitionId =
                             transitionRepository.startTransition(
@@ -84,7 +84,7 @@ constructor(
                             )
                     }
                 } else {
-                    if (lastStartedState != toState) {
+                    if (lastStartedStep.to != toState) {
                         return@collect
                     }
                     // An existing `id` means a transition is started, and calls to

@@ -31,7 +31,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** A class allowing Java classes to collect on Kotlin flows. */
@@ -57,6 +60,15 @@ constructor(
         consumer: Consumer<T>,
     ): Job {
         return scope.launch { flow.collect { consumer.accept(it) } }
+    }
+
+    @JvmOverloads
+    fun <T> stateInApp(
+        flow: Flow<T>,
+        initialValue: T,
+        started: SharingStarted = SharingStarted.Eagerly
+    ): StateFlow<T> {
+        return flow.stateIn(scope, started, initialValue)
     }
 }
 

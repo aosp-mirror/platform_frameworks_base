@@ -166,7 +166,7 @@ final class VibrationStats {
      * @return true if the status was accepted. This method will only accept given values if
      * the end timestamp was never set.
      */
-    boolean reportEnded(@Nullable Vibration.CallerInfo endedBy) {
+    boolean reportEnded(@Nullable VibrationSession.CallerInfo endedBy) {
         if (hasEnded()) {
             // Vibration already ended, keep first ending stats set and ignore this one.
             return false;
@@ -187,7 +187,7 @@ final class VibrationStats {
      * <p>This method will only accept the first value as the one that was interrupted by this
      * vibration, and will ignore all successive calls.
      */
-    void reportInterruptedAnotherVibration(@NonNull Vibration.CallerInfo callerInfo) {
+    void reportInterruptedAnotherVibration(@NonNull VibrationSession.CallerInfo callerInfo) {
         if (mInterruptedUsage < 0) {
             mInterruptedUsage = callerInfo.attrs.getUsage();
         }
@@ -330,7 +330,7 @@ final class VibrationStats {
         public final int[] halUnsupportedEffectsUsed;
         private boolean mIsWritten;
 
-        StatsInfo(int uid, int vibrationType, int usage, Vibration.Status status,
+        StatsInfo(int uid, int vibrationType, int usage, VibrationSession.Status status,
                 VibrationStats stats, long completionUptimeMillis) {
             this.uid = uid;
             this.vibrationType = vibrationType;

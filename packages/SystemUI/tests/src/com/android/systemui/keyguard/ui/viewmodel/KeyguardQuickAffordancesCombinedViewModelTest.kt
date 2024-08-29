@@ -47,8 +47,11 @@ import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepo
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
@@ -56,7 +59,10 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.setTransition
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -144,7 +150,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Mock
     private lateinit var glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel
-    @Mock private lateinit var transitionInteractor: KeyguardTransitionInteractor
 
     private val kosmos = testKosmos()
 
@@ -162,8 +167,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     private val intendedAlphaMutableStateFlow: MutableStateFlow<Float> = MutableStateFlow(1f)
     // the viewModel does a `map { 1 - it }` on this value, which is why it's different
     private val intendedShadeAlphaMutableStateFlow: MutableStateFlow<Float> = MutableStateFlow(0f)
-
-    private val intendedFinishedKeyguardStateFlow = MutableStateFlow(KeyguardState.LOCKSCREEN)
 
     @Before
     fun setUp() {
@@ -256,7 +259,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
         intendedAlphaMutableStateFlow.value = 1f
         intendedShadeAlphaMutableStateFlow.value = 0f
-        intendedFinishedKeyguardStateFlow.value = KeyguardState.LOCKSCREEN
         whenever(aodToLockscreenTransitionViewModel.shortcutsAlpha)
             .thenReturn(intendedAlphaMutableStateFlow)
         whenever(dozingToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
@@ -283,8 +285,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(glanceableHubToLockscreenTransitionViewModel.shortcutsAlpha)
             .thenReturn(emptyFlow())
         whenever(shadeInteractor.anyExpansion).thenReturn(intendedShadeAlphaMutableStateFlow)
-        whenever(transitionInteractor.finishedKeyguardState)
-            .thenReturn(intendedFinishedKeyguardStateFlow)
 
         underTest =
             KeyguardQuickAffordancesCombinedViewModel(
@@ -334,7 +334,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                     lockscreenToPrimaryBouncerTransitionViewModel,
                 lockscreenToGlanceableHubTransitionViewModel =
                     lockscreenToGlanceableHubTransitionViewModel,
-                transitionInteractor = transitionInteractor,
+                transitionInteractor = kosmos.keyguardTransitionInteractor,
             )
     }
 
@@ -776,7 +776,10 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Test
     fun shadeExpansionAlpha_changes_whenOnLockscreen() =
         testScope.runTest {
-            intendedFinishedKeyguardStateFlow.value = KeyguardState.LOCKSCREEN
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Lockscreen),
+                stateTransition = TransitionStep(from = AOD, to = LOCKSCREEN)
+            )
             intendedShadeAlphaMutableStateFlow.value = 0.25f
             val underTest = collectLastValue(underTest.transitionAlpha)
             assertEquals(0.75f, underTest())
@@ -788,7 +791,10 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Test
     fun shadeExpansionAlpha_alwaysZero_whenNotOnLockscreen() =
         testScope.runTest {
-            intendedFinishedKeyguardStateFlow.value = KeyguardState.GONE
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Gone),
+                stateTransition = TransitionStep(from = AOD, to = GONE)
+            )
             intendedShadeAlphaMutableStateFlow.value = 0.5f
             val underTest = collectLastValue(underTest.transitionAlpha)
             assertEquals(0f, underTest())

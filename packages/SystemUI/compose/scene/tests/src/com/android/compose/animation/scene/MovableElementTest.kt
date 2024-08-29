@@ -163,7 +163,7 @@ class MovableElementTest {
                             fromContentZIndex: Float,
                             toContentZIndex: Float
                         ): ContentKey {
-                            transition as TransitionState.Transition.ChangeCurrentScene
+                            transition as TransitionState.Transition.ChangeScene
                             assertThat(transition).hasFromScene(SceneA)
                             assertThat(transition).hasToScene(SceneB)
                             assertThat(fromContentZIndex).isEqualTo(0)

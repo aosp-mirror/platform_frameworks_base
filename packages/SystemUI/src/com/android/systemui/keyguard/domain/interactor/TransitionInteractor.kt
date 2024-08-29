@@ -32,7 +32,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -62,17 +61,6 @@ sealed class TransitionInteractor(
 
     abstract fun start()
 
-    /* Use background dispatcher for all [KeyguardTransitionInteractor] flows. Necessary because
-     * the [sample] utility internally runs a collect on the Unconfined dispatcher, resulting
-     * in continuations on the main thread. We don't want that for classes that inherit from this.
-     */
-    val startedKeyguardTransitionStep =
-        transitionInteractor.startedKeyguardTransitionStep.flowOn(bgDispatcher)
-    // The following are MutableSharedFlows, and do not require flowOn
-    val startedKeyguardState = transitionInteractor.startedKeyguardState
-    val finishedKeyguardState = transitionInteractor.finishedKeyguardState
-    val currentKeyguardState = transitionInteractor.currentKeyguardState
-
     suspend fun startTransitionTo(
         toState: KeyguardState,
         animator: ValueAnimator? = getDefaultAnimatorForTransitionsToState(toState),
@@ -92,17 +80,6 @@ sealed class TransitionInteractor(
                     " $fromState. This should never happen - check currentTransitionInfoInternal" +
                     " or use filterRelevantKeyguardState before starting transitions."
             )
-
-            if (fromState == transitionInteractor.finishedKeyguardState.replayCache.last()) {
-                Log.e(
-                    name,
-                    "This transition would not have been ignored prior to ag/26681239, since we " +
-                        "are FINISHED in $fromState (but have since started another transition). " +
-                        "If ignoring this transition has caused a regression, fix it by ensuring " +
-                        "that transitions are exclusively started from the most recently started " +
-                        "state."
-                )
-            }
             return null
         }
 
@@ -207,7 +184,7 @@ sealed class TransitionInteractor(
         powerInteractor.isAsleep
             .filter { isAsleep -> isAsleep }
             .filterRelevantKeyguardState()
-            .sample(startedKeyguardTransitionStep)
+            .sample(transitionInteractor.startedKeyguardTransitionStep)
             .map(modeOnCanceledFromStartedStep)
             .collect { modeOnCanceled ->
                 startTransitionTo(

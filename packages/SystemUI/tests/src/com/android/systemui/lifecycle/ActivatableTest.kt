@@ -40,7 +40,7 @@ class ActivatableTest : SysuiTestCase() {
         composeRule.setContent {
             val keepAlive by keepAliveMutable
             if (keepAlive) {
-                rememberActivated {
+                rememberActivated("test") {
                     FakeActivatable(
                         onActivation = { isActive = true },
                         onDeactivation = { isActive = false },
@@ -58,7 +58,7 @@ class ActivatableTest : SysuiTestCase() {
         composeRule.setContent {
             val keepAlive by keepAliveMutable
             if (keepAlive) {
-                rememberActivated {
+                rememberActivated("name") {
                     FakeActivatable(
                         onActivation = { isActive = true },
                         onDeactivation = { isActive = false },

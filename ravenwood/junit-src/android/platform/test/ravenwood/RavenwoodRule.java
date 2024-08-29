@@ -20,22 +20,20 @@ import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.SYSTEM;
 
-import static org.junit.Assert.fail;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.log;
 
+import android.annotation.Nullable;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
-import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -56,18 +54,18 @@ import java.util.regex.Pattern;
  * before a test class is fully initialized.
  */
 public class RavenwoodRule implements TestRule {
+    private static final String TAG = "RavenwoodRule";
+
     static final boolean IS_ON_RAVENWOOD = RavenwoodCommonUtils.isOnRavenwood();
 
     /**
-     * When probing is enabled, all tests will be unconditionally run on Ravenwood to detect
+     * When this flag is enabled, all tests will be unconditionally run on Ravenwood to detect
      * cases where a test is able to pass despite being marked as {@link DisabledOnRavenwood}.
      *
      * This is typically helpful for internal maintainers discovering tests that had previously
      * been ignored, but now have enough Ravenwood-supported functionality to be enabled.
-     *
-     * TODO: Rename it to a more descriptive name.
      */
-    static final boolean ENABLE_PROBE_IGNORED = "1".equals(
+    private static final boolean RUN_DISABLED_TESTS = "1".equals(
             System.getenv("RAVENWOOD_RUN_DISABLED_TESTS"));
 
     /**
@@ -92,23 +90,17 @@ public class RavenwoodRule implements TestRule {
      *
      * Because we use a regex-find, setting "." would disable all tests.
      */
-    private static final Pattern REALLY_DISABLE_PATTERN = Pattern.compile(
-            Objects.requireNonNullElse(System.getenv("RAVENWOOD_REALLY_DISABLE"), ""));
+    private static final Pattern REALLY_DISABLED_PATTERN = Pattern.compile(
+            Objects.requireNonNullElse(System.getenv("RAVENWOOD_REALLY_DISABLED"), ""));
 
-    private static final boolean ENABLE_REALLY_DISABLE_PATTERN =
-            !REALLY_DISABLE_PATTERN.pattern().isEmpty();
-
-    /**
-     * If true, enable optional validation on running tests.
-     */
-    private static final boolean ENABLE_OPTIONAL_VALIDATION = "1".equals(
-            System.getenv("RAVENWOOD_OPTIONAL_VALIDATION"));
+    private static final boolean HAS_REALLY_DISABLE_PATTERN =
+            !REALLY_DISABLED_PATTERN.pattern().isEmpty();
 
     static {
-        if (ENABLE_PROBE_IGNORED) {
-            System.out.println("$RAVENWOOD_RUN_DISABLED_TESTS enabled: force running all tests");
-            if (ENABLE_REALLY_DISABLE_PATTERN) {
-                System.out.println("$RAVENWOOD_REALLY_DISABLE=" + REALLY_DISABLE_PATTERN.pattern());
+        if (RUN_DISABLED_TESTS) {
+            log(TAG, "$RAVENWOOD_RUN_DISABLED_TESTS enabled: force running all tests");
+            if (HAS_REALLY_DISABLE_PATTERN) {
+                log(TAG, "$RAVENWOOD_REALLY_DISABLED=" + REALLY_DISABLED_PATTERN.pattern());
             }
         }
     }
@@ -275,146 +267,23 @@ public class RavenwoodRule implements TestRule {
                 "Instrumentation is only available during @Test execution");
     }
 
-    /**
-     * Determine if the given {@link Description} should be enabled when running on the
-     * Ravenwood test environment.
-     *
-     * A more specific method-level annotation always takes precedence over any class-level
-     * annotation, and an {@link EnabledOnRavenwood} annotation always takes precedence over
-     * an {@link DisabledOnRavenwood} annotation.
-     */
-    public static boolean shouldEnableOnRavenwood(Description description) {
-        // First, consult any method-level annotations
-        if (description.isTest()) {
-            // Stopgap for http://g/ravenwood/EPAD-N5ntxM
-            if (description.getMethodName().endsWith("$noRavenwood")) {
-                return false;
-            }
-            if (description.getAnnotation(EnabledOnRavenwood.class) != null) {
-                return true;
-            }
-            if (description.getAnnotation(DisabledOnRavenwood.class) != null) {
-                return false;
-            }
-            if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
-                return false;
-            }
-        }
-
-        // Otherwise, consult any class-level annotations
-        return shouldRunCassOnRavenwood(description.getTestClass());
-    }
-
-    public static boolean shouldRunCassOnRavenwood(Class<?> clazz) {
-        if (clazz != null) {
-            if (clazz.getAnnotation(EnabledOnRavenwood.class) != null) {
-                return true;
-            }
-            if (clazz.getAnnotation(DisabledOnRavenwood.class) != null) {
-                return false;
-            }
-            if (clazz.getAnnotation(IgnoreUnderRavenwood.class) != null) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static boolean shouldStillIgnoreInProbeIgnoreMode(Description description) {
-        if (!ENABLE_REALLY_DISABLE_PATTERN) {
-            return false;
-        }
-
-        final var fullname = description.getTestClass().getName()
-                + (description.isTest() ? "#" + description.getMethodName() : "");
-
-        if (REALLY_DISABLE_PATTERN.matcher(fullname).find()) {
-            System.out.println("Still ignoring " + fullname);
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public Statement apply(Statement base, Description description) {
-        // No special treatment when running outside Ravenwood; run tests as-is
-        if (!IS_ON_RAVENWOOD) {
-            return base;
-        }
-
-        if (ENABLE_PROBE_IGNORED) {
-            return applyProbeIgnored(base, description);
-        } else {
-            return applyDefault(base, description);
-        }
-    }
-
-    private void commonPrologue(Statement base, Description description) throws IOException {
-        RavenwoodRuleImpl.logTestRunner("started", description);
-        RavenwoodRuleImpl.validate(base, description, ENABLE_OPTIONAL_VALIDATION);
-        RavenwoodRuleImpl.init(RavenwoodRule.this);
-    }
-
-    /**
-     * Run the given {@link Statement} with no special treatment.
-     */
-    private Statement applyDefault(Statement base, Description description) {
+        // TODO: Here, we're calling init() / reset() once for each rule.
+        // That means if a test class has multiple rules -- even if they refer to the same
+        // rule instance -- we're calling them multiple times. We need to fix it.
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                Assume.assumeTrue(shouldEnableOnRavenwood(description));
-
-                commonPrologue(base, description);
+                RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
                     base.evaluate();
-
-                    RavenwoodRuleImpl.logTestRunner("finished", description);
-                } catch (Throwable t) {
-                    RavenwoodRuleImpl.logTestRunner("failed", description);
-                    throw t;
                 } finally {
                     RavenwoodRuleImpl.reset(RavenwoodRule.this);
                 }
             }
         };
-    }
-
-    /**
-     * Run the given {@link Statement} with probing enabled. All tests will be unconditionally
-     * run on Ravenwood to detect cases where a test is able to pass despite being marked as
-     * {@code IgnoreUnderRavenwood}.
-     */
-    private Statement applyProbeIgnored(Statement base, Description description) {
-        return new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
-
-                commonPrologue(base, description);
-                try {
-                    base.evaluate();
-                } catch (Throwable t) {
-                    // If the test isn't included, eat the exception and report the
-                    // assumption failure that test authors expect; otherwise throw
-                    Assume.assumeTrue(shouldEnableOnRavenwood(description));
-                    throw t;
-                } finally {
-                    RavenwoodRuleImpl.logTestRunner("finished", description);
-                    RavenwoodRuleImpl.reset(RavenwoodRule.this);
-                }
-
-                if (!shouldEnableOnRavenwood(description)) {
-                    fail("Test wasn't included under Ravenwood, but it actually "
-                            + "passed under Ravenwood; consider updating annotations");
-                }
-            }
-        };
-    }
-
-    public static class _$RavenwoodPrivate {
-        public static boolean isOptionalValidationEnabled() {
-            return ENABLE_OPTIONAL_VALIDATION;
-        }
     }
 
     /**
@@ -426,5 +295,48 @@ public class RavenwoodRule implements TestRule {
      */
     public long realCurrentTimeMillis() {
         return System.currentTimeMillis();
+    }
+
+    // Below are internal to ravenwood. Don't use them from normal tests...
+
+    public static class RavenwoodPrivate {
+        private RavenwoodPrivate() {
+        }
+
+        private volatile Boolean mRunDisabledTestsOverride = null;
+
+        private volatile Pattern mReallyDisabledPattern = null;
+
+        public boolean isRunningDisabledTests() {
+            if (mRunDisabledTestsOverride != null) {
+                return mRunDisabledTestsOverride;
+            }
+            return RUN_DISABLED_TESTS;
+        }
+
+        public Pattern getReallyDisabledPattern() {
+            if (mReallyDisabledPattern != null) {
+                return mReallyDisabledPattern;
+            }
+            return REALLY_DISABLED_PATTERN;
+        }
+
+        public void overrideRunDisabledTest(boolean runDisabledTests,
+                @Nullable String reallyDisabledPattern) {
+            mRunDisabledTestsOverride = runDisabledTests;
+            mReallyDisabledPattern =
+                    reallyDisabledPattern == null ? null : Pattern.compile(reallyDisabledPattern);
+        }
+
+        public void resetRunDisabledTest() {
+            mRunDisabledTestsOverride = null;
+            mReallyDisabledPattern = null;
+        }
+    }
+
+    private static final RavenwoodPrivate sRavenwoodPrivate = new  RavenwoodPrivate();
+
+    public static RavenwoodPrivate private$ravenwood() {
+        return sRavenwoodPrivate;
     }
 }

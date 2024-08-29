@@ -129,7 +129,7 @@ fun SceneScope.CollapsedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = rememberViewModel { viewModelFactory.create() }
+    val viewModel = rememberViewModel("CollapsedShadeHeader") { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
@@ -287,7 +287,7 @@ fun SceneScope.ExpandedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = rememberViewModel { viewModelFactory.create() }
+    val viewModel = rememberViewModel("ExpandedShadeHeader") { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return

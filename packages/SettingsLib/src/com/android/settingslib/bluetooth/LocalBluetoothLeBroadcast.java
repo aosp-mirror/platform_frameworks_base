@@ -101,7 +101,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     private static final int DEFAULT_CODE_MIN = 1000;
     // Order of this profile in device profiles list
     private static final int ORDINAL = 1;
-    private static final int UNKNOWN_VALUE_PLACEHOLDER = -1;
+    static final int UNKNOWN_VALUE_PLACEHOLDER = -1;
     private static final Uri[] SETTINGS_URIS =
             new Uri[] {
                 Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_NAME),

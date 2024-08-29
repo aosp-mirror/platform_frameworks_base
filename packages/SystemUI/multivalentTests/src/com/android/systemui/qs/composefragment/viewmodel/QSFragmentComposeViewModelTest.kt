@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.composefragment.viewmodel
 
+import android.app.StatusBarManager
 import android.content.testableContext
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle
@@ -32,6 +33,8 @@ import com.android.systemui.qs.fgsManagerController
 import com.android.systemui.res.R
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -178,6 +181,23 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun qsEnabled_followsRepository() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val qsEnabled by collectLastValue(underTest.qsEnabled)
+
+                fakeDisableFlagsRepository.disableFlags.value =
+                    DisableFlagsModel(disable2 = QS_DISABLE_FLAG)
+
+                assertThat(qsEnabled).isFalse()
+
+                fakeDisableFlagsRepository.disableFlags.value = DisableFlagsModel()
+
+                assertThat(qsEnabled).isTrue()
+            }
+        }
+
     private inline fun TestScope.testWithinLifecycle(
         crossinline block: suspend TestScope.() -> TestResult
     ): TestResult {
@@ -185,5 +205,9 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
             lifecycleOwner.setCurrentState(Lifecycle.State.RESUMED)
             block().also { lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED) }
         }
+    }
+
+    companion object {
+        private const val QS_DISABLE_FLAG = StatusBarManager.DISABLE2_QUICK_SETTINGS
     }
 }

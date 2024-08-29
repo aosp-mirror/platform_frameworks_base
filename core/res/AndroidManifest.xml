@@ -843,6 +843,7 @@
     <protected-broadcast android:name="android.app.action.CONSOLIDATED_NOTIFICATION_POLICY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED" />
     <protected-broadcast android:name="com.android.uwb.uwbcountrycode.GEOCODE_RETRY" />
+    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -3765,7 +3766,6 @@
         privileged app such as the Assistant app.
         <p>Protection level: internal|role
         <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
-        @FlaggedApi("android.app.admin.flags.assist_content_user_restriction_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT"
         android:protectionLevel="internal|role" />
@@ -4026,7 +4026,6 @@
         APIs protected by this permission on users different to the calling user.
         <p>Protection level: internal|role
         <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
-        @FlaggedApi("android.app.admin.flags.esim_management_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS"
         android:protectionLevel="internal|role" />

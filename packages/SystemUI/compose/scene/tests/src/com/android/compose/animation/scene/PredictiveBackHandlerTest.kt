@@ -20,10 +20,16 @@ import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestOverlays.OverlayA
+import com.android.compose.animation.scene.TestOverlays.OverlayB
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
@@ -196,6 +202,42 @@ class PredictiveBackHandlerTest {
         assertThat(layoutState.transitionState).isIdle()
         assertThat(predictiveTransition).hasCurrentScene(SceneA)
         assertThat(canChangeSceneCalled).isFalse()
+    }
+
+    @Test
+    fun backDismissesOverlayWithHighestZIndexByDefault() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    initialOverlays = setOf(OverlayA, OverlayB)
+                )
+            }
+
+        rule.setContent {
+            SceneTransitionLayout(state, Modifier.size(200.dp)) {
+                scene(SceneA) { Box(Modifier.fillMaxSize()) }
+                overlay(OverlayA) { Box(Modifier.fillMaxSize()) }
+                overlay(OverlayB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        // Initial state.
+        rule.onNode(hasTestTag(SceneA.testTag)).assertIsDisplayed()
+        rule.onNode(hasTestTag(OverlayA.testTag)).assertIsDisplayed()
+        rule.onNode(hasTestTag(OverlayB.testTag)).assertIsDisplayed()
+
+        // Press back. This should hide overlay B because it has a higher zIndex than overlay A.
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.onNode(hasTestTag(SceneA.testTag)).assertIsDisplayed()
+        rule.onNode(hasTestTag(OverlayA.testTag)).assertIsDisplayed()
+        rule.onNode(hasTestTag(OverlayB.testTag)).assertDoesNotExist()
+
+        // Press back again. This should hide overlay A.
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.onNode(hasTestTag(SceneA.testTag)).assertIsDisplayed()
+        rule.onNode(hasTestTag(OverlayA.testTag)).assertDoesNotExist()
+        rule.onNode(hasTestTag(OverlayB.testTag)).assertDoesNotExist()
     }
 
     private fun backEvent(progress: Float = 0f): BackEventCompat {

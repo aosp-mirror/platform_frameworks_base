@@ -23,7 +23,7 @@ import android.view.RemoteAnimationTarget
 import android.view.WindowManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
@@ -41,7 +41,7 @@ constructor(
     private val activityTaskManagerService: IActivityTaskManager,
     private val keyguardStateController: KeyguardStateController,
     private val keyguardSurfaceBehindAnimator: KeyguardSurfaceBehindParamsApplier,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardDismissTransitionInteractor: KeyguardDismissTransitionInteractor,
 ) {
 
     /**
@@ -148,7 +148,7 @@ constructor(
         // a transition to GONE. This transition needs to start even if we're not provided an app
         // animation target - it's possible the app is destroyed on creation, etc. but we'll still
         // be unlocking.
-        keyguardTransitionInteractor.startDismissKeyguardTransition(
+        keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
             reason = "Going away remote animation started"
         )
 

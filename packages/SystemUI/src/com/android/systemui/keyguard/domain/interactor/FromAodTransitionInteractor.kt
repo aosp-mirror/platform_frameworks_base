@@ -89,7 +89,7 @@ constructor(
                 .filterRelevantKeyguardStateAnd { wakefulness -> wakefulness.isAwake() }
                 .debounce(50L)
                 .sample(
-                    startedKeyguardTransitionStep,
+                    transitionInteractor.startedKeyguardTransitionStep,
                     wakeToGoneInteractor.canWakeDirectlyToGone,
                 )
                 .collect {

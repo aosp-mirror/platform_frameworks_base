@@ -18,7 +18,6 @@ package com.android.systemui.shade.ui.viewmodel
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
@@ -29,7 +28,6 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Models UI state and handles user input for the overlay shade UI, which shows a shade as an
@@ -37,8 +35,10 @@ import kotlinx.coroutines.flow.collectLatest
  */
 class OverlayShadeViewModel
 @AssistedInject
-constructor(private val sceneInteractor: SceneInteractor, shadeInteractor: ShadeInteractor) :
-    SysUiViewModel, ExclusiveActivatable() {
+constructor(
+    private val sceneInteractor: SceneInteractor,
+    shadeInteractor: ShadeInteractor,
+) : ExclusiveActivatable() {
     private val _backgroundScene = MutableStateFlow(Scenes.Lockscreen)
     /** The scene to show in the background when the overlay shade is open. */
     val backgroundScene: StateFlow<SceneKey> = _backgroundScene.asStateFlow()
@@ -47,7 +47,7 @@ constructor(private val sceneInteractor: SceneInteractor, shadeInteractor: Shade
     val panelAlignment = shadeInteractor.shadeAlignment
 
     override suspend fun onActivated(): Nothing {
-        sceneInteractor.resolveSceneFamily(SceneFamilies.Home).collectLatest { sceneKey ->
+        sceneInteractor.resolveSceneFamily(SceneFamilies.Home).collect { sceneKey ->
             _backgroundScene.value = sceneKey
         }
         awaitCancellation()

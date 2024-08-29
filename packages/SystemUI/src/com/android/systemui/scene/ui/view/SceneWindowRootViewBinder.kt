@@ -104,6 +104,7 @@ object SceneWindowRootViewBinder {
 
         view.repeatWhenAttached {
             view.viewModel(
+                traceName = "SceneWindowRootViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = { viewModelFactory.create(motionEventHandlerReceiver) },
             ) { viewModel ->

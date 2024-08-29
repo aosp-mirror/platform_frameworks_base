@@ -23,6 +23,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.core.graphics.drawable.toBitmap
+import com.android.app.tracing.coroutines.traceCoroutine
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
@@ -34,7 +35,6 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -63,7 +63,7 @@ constructor(
     private val pinViewModelFactory: PinBouncerViewModel.Factory,
     private val patternViewModelFactory: PatternBouncerViewModel.Factory,
     private val passwordViewModelFactory: PasswordBouncerViewModel.Factory,
-) : SysUiViewModel, ExclusiveActivatable() {
+) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
 
@@ -147,7 +147,7 @@ constructor(
                     .map(::getChildViewModel)
                     .collectLatest { childViewModelOrNull ->
                         _authMethodViewModel.value = childViewModelOrNull
-                        childViewModelOrNull?.activate()
+                        childViewModelOrNull?.let { traceCoroutine(it.traceName) { it.activate() } }
                     }
             }
 
@@ -160,7 +160,7 @@ constructor(
             launch {
                 userSwitcher.selectedUser
                     .map { it.image.toBitmap() }
-                    .collectLatest { _selectedUserImage.value = it }
+                    .collect { _selectedUserImage.value = it }
             }
 
             launch {
@@ -187,34 +187,32 @@ constructor(
                                 )
                             }
                     }
-                    .collectLatest { _userSwitcherDropdown.value = it }
+                    .collect { _userSwitcherDropdown.value = it }
             }
 
             launch {
                 combine(wipeDialogMessage, lockoutDialogMessage) { _, _ -> createDialogViewModel() }
-                    .collectLatest { _dialogViewModel.value = it }
+                    .collect { _dialogViewModel.value = it }
             }
 
-            launch {
-                actionButtonInteractor.actionButton.collectLatest { _actionButton.value = it }
-            }
+            launch { actionButtonInteractor.actionButton.collect { _actionButton.value = it } }
 
             launch {
                 authMethodViewModel
                     .map { authMethod -> isSideBySideSupported(authMethod) }
-                    .collectLatest { _isSideBySideSupported.value = it }
+                    .collect { _isSideBySideSupported.value = it }
             }
 
             launch {
                 authMethodViewModel
                     .map { authMethod -> isFoldSplitRequired(authMethod) }
-                    .collectLatest { _isFoldSplitRequired.value = it }
+                    .collect { _isFoldSplitRequired.value = it }
             }
 
             launch {
                 message.isLockoutMessagePresent
                     .map { lockoutMessagePresent -> !lockoutMessagePresent }
-                    .collectLatest { _isInputEnabled.value = it }
+                    .collect { _isInputEnabled.value = it }
             }
 
             awaitCancellation()

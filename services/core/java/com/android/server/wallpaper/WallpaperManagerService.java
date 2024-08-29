@@ -42,6 +42,7 @@ import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_INFO;
 import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
+import static com.android.window.flags.Flags.avoidRebindingIntentionallyDisconnectedWallpaper;
 import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.offloadColorExtraction;
 
@@ -897,6 +898,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     return;
                 }
 
+                if (avoidRebindingIntentionallyDisconnectedWallpaper()
+                        && mWallpaper.connection == null) {
+                    Slog.w(TAG, "Trying to reset an intentionally disconnected wallpaper!");
+                    return;
+                }
+
                 if (!mWallpaper.wallpaperUpdating && mWallpaper.userId == mCurrentUserId) {
                     Slog.w(TAG, "Wallpaper reconnect timed out for " + mWallpaper.wallpaperComponent
                             + ", reverting to built-in wallpaper!");
@@ -1066,6 +1073,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (mWallpaper.wallpaperUpdating) {
                     return;
                 }
+
+                if (avoidRebindingIntentionallyDisconnectedWallpaper()
+                        && mWallpaper.connection == null) {
+                    Slog.w(TAG, "Trying to rebind an intentionally disconnected wallpaper!");
+                    return;
+                }
+
                 final ComponentName wpService = mWallpaper.wallpaperComponent;
                 // The broadcast of package update could be delayed after service disconnected. Try
                 // to re-bind the service for 10 seconds.

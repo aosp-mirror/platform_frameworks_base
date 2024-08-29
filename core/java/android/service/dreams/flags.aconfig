@@ -57,3 +57,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "publish_preview_state_to_overlay"
+    namespace: "systemui"
+    description: "send preview information from dream to overlay"
+    bug: "333734282"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -60,7 +60,8 @@ public class FaceResetLockoutClient extends HalClientMonitor<AidlSession> implem
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @Authenticators.Types int biometricStrength) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, logger, biometricContext);
+                0 /* cookie */, sensorId, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);
         mLockoutTracker = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;

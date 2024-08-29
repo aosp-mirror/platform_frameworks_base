@@ -257,13 +257,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     private State createShellState() {
         State state = new VolumeDialogController.State();
-        for (int i = AudioManager.STREAM_VOICE_CALL; i <= AudioManager.STREAM_ACCESSIBILITY; i++) {
+        for (int stream : STREAMS.keySet()) {
             VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
-            ss.name = STREAMS.get(i);
+            ss.name = STREAMS.get(stream);
             ss.level = 1;
             ss.levelMin = 0;
             ss.levelMax = 25;
-            state.states.append(i, ss);
+            state.states.append(stream, ss);
         }
         return state;
     }

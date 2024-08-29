@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
@@ -403,30 +404,40 @@ constructor(
             onDispose { qqsVisible.value = false }
         }
         Column(modifier = Modifier.sysuiResTag("quick_qs_panel")) {
-            QuickQuickSettings(
-                viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel,
-                modifier =
-                    Modifier.onGloballyPositioned { coordinates ->
-                            val (leftFromRoot, topFromRoot) = coordinates.positionInRoot().round()
-                            val (width, height) = coordinates.size
-                            qqsPositionOnRoot.set(
-                                leftFromRoot,
-                                topFromRoot,
-                                leftFromRoot + width,
-                                topFromRoot + height
-                            )
-                        }
-                        .layout { measurable, constraints ->
-                            val placeable = measurable.measure(constraints)
-                            qqsHeight.value = placeable.height
+            Box(modifier = Modifier.fillMaxWidth()) {
+                val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
+                if (qsEnabled) {
+                    QuickQuickSettings(
+                        viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel,
+                        modifier =
+                            Modifier.onGloballyPositioned { coordinates ->
+                                    val (leftFromRoot, topFromRoot) =
+                                        coordinates.positionInRoot().round()
+                                    val (width, height) = coordinates.size
+                                    qqsPositionOnRoot.set(
+                                        leftFromRoot,
+                                        topFromRoot,
+                                        leftFromRoot + width,
+                                        topFromRoot + height
+                                    )
+                                }
+                                .layout { measurable, constraints ->
+                                    val placeable = measurable.measure(constraints)
+                                    qqsHeight.value = placeable.height
 
-                            layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-                        }
-                        .padding(top = { qqsPadding })
-                        .collapseExpandSemanticAction(
-                            stringResource(id = R.string.accessibility_quick_settings_expand)
-                        )
-            )
+                                    layout(placeable.width, placeable.height) {
+                                        placeable.place(0, 0)
+                                    }
+                                }
+                                .padding(top = { qqsPadding })
+                                .collapseExpandSemanticAction(
+                                    stringResource(
+                                        id = R.string.accessibility_quick_settings_expand
+                                    )
+                                )
+                    )
+                }
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
     }
@@ -441,18 +452,23 @@ constructor(
                     stringResource(id = R.string.accessibility_quick_settings_collapse)
                 )
         ) {
-            Box(modifier = Modifier.fillMaxSize().weight(1f)) {
-                Column {
-                    Spacer(modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() })
-                    ShadeBody(viewModel = viewModel.containerViewModel)
+            val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
+            if (qsEnabled) {
+                Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+                    Column {
+                        Spacer(
+                            modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() }
+                        )
+                        ShadeBody(viewModel = viewModel.containerViewModel)
+                    }
                 }
-            }
-            QuickSettingsTheme {
-                FooterActions(
-                    viewModel = viewModel.footerActionsViewModel,
-                    qsVisibilityLifecycleOwner = this@QSFragmentCompose,
-                    modifier = Modifier.sysuiResTag("qs_footer_actions")
-                )
+                QuickSettingsTheme {
+                    FooterActions(
+                        viewModel = viewModel.footerActionsViewModel,
+                        qsVisibilityLifecycleOwner = this@QSFragmentCompose,
+                        modifier = Modifier.sysuiResTag("qs_footer_actions")
+                    )
+                }
             }
         }
     }

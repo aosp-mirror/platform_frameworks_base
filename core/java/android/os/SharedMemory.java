@@ -379,6 +379,12 @@ public final class SharedMemory implements Parcelable, Closeable {
         private int mReferenceCount;
 
         private MemoryRegistration(int size) {
+            // Round up to the nearest page size
+            final int PAGE_SIZE = OsConstants._SC_PAGE_SIZE;
+            final int remainder = size % PAGE_SIZE;
+            if (remainder != 0) {
+                size += PAGE_SIZE - remainder;
+            }
             mSize = size;
             mReferenceCount = 1;
             VMRuntime.getRuntime().registerNativeAllocation(mSize);

@@ -16,9 +16,7 @@
 
 package com.android.systemui.volume.panel.component.volume.domain.interactor
 
-import android.media.AudioDeviceInfo
 import android.media.AudioManager
-import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
@@ -42,7 +40,6 @@ class AudioSlidersInteractor
 constructor(
     @VolumePanelScope scope: CoroutineScope,
     mediaOutputInteractor: MediaOutputInteractor,
-    audioRepository: AudioRepository,
     audioModeInteractor: AudioModeInteractor,
 ) {
 
@@ -50,13 +47,12 @@ constructor(
         combineTransform(
                 mediaOutputInteractor.activeMediaDeviceSessions,
                 mediaOutputInteractor.defaultActiveMediaSession.filterData(),
-                audioRepository.communicationDevice,
                 audioModeInteractor.isOngoingCall,
-            ) { activeSessions, defaultSession, communicationDevice, isOngoingCall ->
+            ) { activeSessions, defaultSession, isOngoingCall ->
                 coroutineScope {
                     val viewModels = buildList {
                         if (isOngoingCall) {
-                            addCall(communicationDevice?.type)
+                            addStream(AudioManager.STREAM_VOICE_CALL)
                         }
 
                         if (defaultSession?.isTheSameSession(activeSessions.remote) == true) {
@@ -68,7 +64,7 @@ constructor(
                         }
 
                         if (!isOngoingCall) {
-                            addCall(communicationDevice?.type)
+                            addStream(AudioManager.STREAM_VOICE_CALL)
                         }
 
                         addStream(AudioManager.STREAM_RING)
@@ -79,14 +75,6 @@ constructor(
                 }
             }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
-
-    private fun MutableList<SliderType>.addCall(communicationDeviceType: Int?) {
-        if (communicationDeviceType == AudioDeviceInfo.TYPE_BLUETOOTH_SCO) {
-            addStream(AudioManager.STREAM_BLUETOOTH_SCO)
-        } else {
-            addStream(AudioManager.STREAM_VOICE_CALL)
-        }
-    }
 
     private fun MutableList<SliderType>.addSession(remoteMediaDeviceSession: MediaDeviceSession?) {
         if (remoteMediaDeviceSession?.canAdjustVolume == true) {

@@ -110,6 +110,7 @@ import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.pm.BackgroundUserSoundNotifier;
+import com.android.server.vibrator.VibrationSession.Status;
 
 import org.junit.After;
 import org.junit.Before;
@@ -803,8 +804,8 @@ public class VibratorManagerServiceTest {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
 
-        var vib = vibrate(service,
-                VibrationEffect.createWaveform(new long[]{100, 100, 100, 100}, 0), RINGTONE_ATTRS);
+        HalVibration vib = vibrate(service, VibrationEffect.createWaveform(
+                new long[]{0, TEST_TIMEOUT_MILLIS, TEST_TIMEOUT_MILLIS}, 0), RINGTONE_ATTRS);
 
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
@@ -815,14 +816,80 @@ public class VibratorManagerServiceTest {
         service.mAppOpsChangeListener.onOpChanged(AppOpsManager.OP_VIBRATE, null);
 
         assertTrue(waitUntil(s -> vib.hasEnded(), service, TEST_TIMEOUT_MILLIS));
+        assertThat(vib.getStatus()).isEqualTo(Status.CANCELLED_BY_APP_OPS);
+    }
 
-        var statsInfoCaptor = ArgumentCaptor.forClass(VibrationStats.StatsInfo.class);
-        verify(mVibratorFrameworkStatsLoggerMock, timeout(TEST_TIMEOUT_MILLIS))
-                .writeVibrationReportedAsync(statsInfoCaptor.capture());
+    @Test
+    public void vibrate_thenPowerModeChanges_getsCancelled() throws Exception {
+        mockVibrators(1, 2);
+        VibratorManagerService service = createSystemReadyService();
 
-        VibrationStats.StatsInfo touchMetrics = statsInfoCaptor.getAllValues().get(0);
-        assertEquals(Vibration.Status.CANCELLED_BY_APP_OPS.getProtoEnumValue(),
-                touchMetrics.status);
+        HalVibration vib = vibrate(service,
+                CombinedVibration.startParallel()
+                        .addVibrator(1, VibrationEffect.createOneShot(2 * TEST_TIMEOUT_MILLIS, 100))
+                        .combine(),
+                HAPTIC_FEEDBACK_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        assertTrue(waitUntil(s -> vib.hasEnded(), service, TEST_TIMEOUT_MILLIS));
+        assertThat(vib.getStatus()).isEqualTo(Status.CANCELLED_BY_SETTINGS_UPDATE);
+    }
+
+    @Test
+    public void vibrate_thenSettingsRefreshedWithoutChange_doNotCancelVibration() throws Exception {
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        vibrate(service, VibrationEffect.createOneShot(2 * TEST_TIMEOUT_MILLIS, 100),
+                HAPTIC_FEEDBACK_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        service.updateServiceState();
+
+        // Vibration is not stopped nearly after updating service.
+        assertFalse(waitUntil(s -> !s.isVibrating(1), service, 50));
+    }
+
+    @Test
+    public void vibrate_thenSettingsChange_getsCancelled() throws Exception {
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vib = vibrate(service,
+                VibrationEffect.createOneShot(2 * TEST_TIMEOUT_MILLIS, 100),
+                HAPTIC_FEEDBACK_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, Vibrator.VIBRATION_INTENSITY_OFF);
+        service.mVibrationSettings.mSettingObserver.onChange(false);
+        service.updateServiceState();
+
+        assertTrue(waitUntil(s -> vib.hasEnded(), service, TEST_TIMEOUT_MILLIS));
+        assertThat(vib.getStatus()).isEqualTo(Status.CANCELLED_BY_SETTINGS_UPDATE);
+    }
+
+    @Test
+    public void vibrate_thenScreenTurnsOff_getsCancelled() throws Throwable {
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vib = vibrate(service, VibrationEffect.createWaveform(
+                new long[]{0, TEST_TIMEOUT_MILLIS, TEST_TIMEOUT_MILLIS}, 0), ALARM_ATTRS);
+
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        service.mIntentReceiver.onReceive(mContextSpy, new Intent(Intent.ACTION_SCREEN_OFF));
+
+        assertTrue(waitUntil(s -> vib.hasEnded(), service, TEST_TIMEOUT_MILLIS));
+        assertThat(vib.getStatus()).isEqualTo(Status.CANCELLED_BY_SCREEN_OFF);
     }
 
     @Test
@@ -831,8 +898,8 @@ public class VibratorManagerServiceTest {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
 
-        var vib = vibrate(service,
-                VibrationEffect.createWaveform(new long[]{100, 100, 100, 100}, 0), ALARM_ATTRS);
+        HalVibration vib = vibrate(service, VibrationEffect.createWaveform(
+                new long[]{0, TEST_TIMEOUT_MILLIS, TEST_TIMEOUT_MILLIS}, 0), ALARM_ATTRS);
 
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
@@ -841,14 +908,7 @@ public class VibratorManagerServiceTest {
                 BackgroundUserSoundNotifier.ACTION_MUTE_SOUND));
 
         assertTrue(waitUntil(s -> vib.hasEnded(), service, TEST_TIMEOUT_MILLIS));
-
-        var statsInfoCaptor = ArgumentCaptor.forClass(VibrationStats.StatsInfo.class);
-        verify(mVibratorFrameworkStatsLoggerMock, timeout(TEST_TIMEOUT_MILLIS))
-                .writeVibrationReportedAsync(statsInfoCaptor.capture());
-
-        VibrationStats.StatsInfo touchMetrics = statsInfoCaptor.getAllValues().get(0);
-        assertEquals(Vibration.Status.CANCELLED_BY_FOREGROUND_USER.getProtoEnumValue(),
-                touchMetrics.status);
+        assertThat(vib.getStatus()).isEqualTo(Status.CANCELLED_BY_FOREGROUND_USER);
     }
 
     @Test
@@ -1314,7 +1374,7 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void vibrate_withriggerCallback_finishesVibration() throws Exception {
+    public void vibrate_withTriggerCallback_finishesVibration() throws Exception {
         mockCapabilities(IVibratorManager.CAP_SYNC, IVibratorManager.CAP_PREPARE_COMPOSE);
         mockVibrators(1, 2);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
@@ -1947,41 +2007,6 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void vibrate_withPowerModeChange_cancelVibrationIfNotAllowed() throws Exception {
-        mockVibrators(1, 2);
-        VibratorManagerService service = createSystemReadyService();
-        vibrate(service,
-                CombinedVibration.startParallel()
-                        .addVibrator(1, VibrationEffect.createOneShot(1000, 100))
-                        .combine(),
-                HAPTIC_FEEDBACK_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait until vibration is triggered.
-        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
-
-        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
-
-        // Haptic feedback cancelled on low power mode.
-        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
-    }
-
-    @Test
-    public void vibrate_withSettingsChange_doNotCancelVibration() throws Exception {
-        mockVibrators(1);
-        VibratorManagerService service = createSystemReadyService();
-
-        vibrate(service, VibrationEffect.createOneShot(1000, 100), HAPTIC_FEEDBACK_ATTRS);
-
-        // VibrationThread will start this vibration async, so wait until vibration is triggered.
-        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
-
-        service.updateServiceState();
-
-        // Vibration is not stopped nearly after updating service.
-        assertFalse(waitUntil(s -> !s.isVibrating(1), service, 50));
-    }
-
-    @Test
     public void vibrate_ignoreVibrationFromVirtualDevice() throws Exception {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
@@ -2475,6 +2500,113 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void onExternalVibration_thenDeniedAppOps_doNotCancelVibration() throws Throwable {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        IExternalVibrationController externalVibrationControllerMock =
+                mock(IExternalVibrationController.class);
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS, externalVibrationControllerMock, mock(IBinder.class));
+        ExternalVibrationScale scale = mExternalVibratorService.onExternalVibrationStart(
+                externalVibration);
+
+        assertThat(scale.scaleLevel).isNotEqualTo(ExternalVibrationScale.ScaleLevel.SCALE_MUTE);
+
+        when(mAppOpsManagerMock.checkAudioOpNoThrow(eq(AppOpsManager.OP_VIBRATE),
+                eq(AudioAttributes.USAGE_ALARM), anyInt(), anyString()))
+                .thenReturn(AppOpsManager.MODE_IGNORED);
+        service.mAppOpsChangeListener.onOpChanged(AppOpsManager.OP_VIBRATE, null);
+
+        verify(externalVibrationControllerMock, never()).mute();
+    }
+
+    @Test
+    public void onExternalVibration_thenPowerModeChanges_doNotCancelVibration() throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        createSystemReadyService();
+
+        IExternalVibrationController externalVibrationControllerMock =
+                mock(IExternalVibrationController.class);
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS, externalVibrationControllerMock, mock(IBinder.class));
+        ExternalVibrationScale scale = mExternalVibratorService.onExternalVibrationStart(
+                externalVibration);
+
+        assertThat(scale.scaleLevel).isNotEqualTo(ExternalVibrationScale.ScaleLevel.SCALE_MUTE);
+
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        verify(externalVibrationControllerMock, never()).mute();
+    }
+
+    @Test
+    public void onExternalVibration_thenSettingsChange_doNotCancelVibration() throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        IExternalVibrationController externalVibrationControllerMock =
+                mock(IExternalVibrationController.class);
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS, externalVibrationControllerMock, mock(IBinder.class));
+        ExternalVibrationScale scale = mExternalVibratorService.onExternalVibrationStart(
+                externalVibration);
+
+        assertThat(scale.scaleLevel).isNotEqualTo(ExternalVibrationScale.ScaleLevel.SCALE_MUTE);
+
+        setUserSetting(Settings.System.ALARM_VIBRATION_INTENSITY, Vibrator.VIBRATION_INTENSITY_OFF);
+        service.mVibrationSettings.mSettingObserver.onChange(false);
+        service.updateServiceState();
+
+        verify(externalVibrationControllerMock, never()).mute();
+    }
+
+    @Test
+    public void onExternalVibration_thenScreenTurnsOff_doNotCancelVibration() throws Throwable {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        IExternalVibrationController externalVibrationControllerMock =
+                mock(IExternalVibrationController.class);
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS, externalVibrationControllerMock, mock(IBinder.class));
+        ExternalVibrationScale scale = mExternalVibratorService.onExternalVibrationStart(
+                externalVibration);
+
+        assertThat(scale.scaleLevel).isNotEqualTo(ExternalVibrationScale.ScaleLevel.SCALE_MUTE);
+
+        service.mIntentReceiver.onReceive(mContextSpy, new Intent(Intent.ACTION_SCREEN_OFF));
+
+        verify(externalVibrationControllerMock, never()).mute();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_ADD_UI_FOR_SOUNDS_FROM_BACKGROUND_USERS)
+    public void onExternalVibration_thenFgUserRequestsMute_doNotCancelVibration() throws Throwable {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        IExternalVibrationController externalVibrationControllerMock =
+                mock(IExternalVibrationController.class);
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS, externalVibrationControllerMock, mock(IBinder.class));
+        ExternalVibrationScale scale = mExternalVibratorService.onExternalVibrationStart(
+                externalVibration);
+
+        assertThat(scale.scaleLevel).isNotEqualTo(ExternalVibrationScale.ScaleLevel.SCALE_MUTE);
+
+        service.mIntentReceiver.onReceive(mContextSpy, new Intent(
+                BackgroundUserSoundNotifier.ACTION_MUTE_SOUND));
+
+        verify(externalVibrationControllerMock, never()).mute();
+    }
+
+    @Test
     public void frameworkStats_externalVibration_reportsAllMetrics() throws Exception {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
@@ -2501,7 +2633,7 @@ public class VibratorManagerServiceTest {
         assertEquals(FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__EXTERNAL,
                 statsInfo.vibrationType);
         assertEquals(VibrationAttributes.USAGE_ALARM, statsInfo.usage);
-        assertEquals(Vibration.Status.FINISHED.getProtoEnumValue(), statsInfo.status);
+        assertEquals(Status.FINISHED.getProtoEnumValue(), statsInfo.status);
         assertTrue(statsInfo.totalDurationMillis > 0);
         assertTrue(
                 "Expected vibrator ON for at least 10ms, got " + statsInfo.vibratorOnMillis + "ms",
@@ -2533,7 +2665,7 @@ public class VibratorManagerServiceTest {
         assertEquals(FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE,
                 metrics.vibrationType);
         assertEquals(VibrationAttributes.USAGE_RINGTONE, metrics.usage);
-        assertEquals(Vibration.Status.FINISHED.getProtoEnumValue(), metrics.status);
+        assertEquals(Status.FINISHED.getProtoEnumValue(), metrics.status);
         assertTrue("Total duration was too low, " + metrics.totalDurationMillis + "ms",
                 metrics.totalDurationMillis >= 20);
         assertTrue("Vibrator ON duration was too low, " + metrics.vibratorOnMillis + "ms",
@@ -2586,7 +2718,7 @@ public class VibratorManagerServiceTest {
         assertEquals(FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED,
                 metrics.vibrationType);
         assertEquals(VibrationAttributes.USAGE_RINGTONE, metrics.usage);
-        assertEquals(Vibration.Status.CANCELLED_BY_USER.getProtoEnumValue(), metrics.status);
+        assertEquals(Status.CANCELLED_BY_USER.getProtoEnumValue(), metrics.status);
         assertTrue("Total duration was too low, " + metrics.totalDurationMillis + "ms",
                 metrics.totalDurationMillis >= 100);
         assertTrue("Vibrator ON duration was too low, " + metrics.vibratorOnMillis + "ms",
@@ -2647,7 +2779,7 @@ public class VibratorManagerServiceTest {
         assertEquals(FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE,
                 metrics.vibrationType);
         assertEquals(VibrationAttributes.USAGE_ALARM, metrics.usage);
-        assertEquals(Vibration.Status.FINISHED.getProtoEnumValue(), metrics.status);
+        assertEquals(Status.FINISHED.getProtoEnumValue(), metrics.status);
 
         // At least 4 effect/primitive played, 20ms each, plus configured fallback.
         assertTrue("Total duration was too low, " + metrics.totalDurationMillis + "ms",
@@ -2703,7 +2835,7 @@ public class VibratorManagerServiceTest {
         VibrationStats.StatsInfo touchMetrics = argumentCaptor.getAllValues().get(0);
         assertEquals(UID, touchMetrics.uid);
         assertEquals(VibrationAttributes.USAGE_TOUCH, touchMetrics.usage);
-        assertEquals(Vibration.Status.CANCELLED_SUPERSEDED.getProtoEnumValue(),
+        assertEquals(Status.CANCELLED_SUPERSEDED.getProtoEnumValue(),
                 touchMetrics.status);
         assertTrue(touchMetrics.endedBySameUid);
         assertEquals(VibrationAttributes.USAGE_ALARM, touchMetrics.endedByUsage);
@@ -2712,7 +2844,7 @@ public class VibratorManagerServiceTest {
         VibrationStats.StatsInfo alarmMetrics = argumentCaptor.getAllValues().get(1);
         assertEquals(UID, alarmMetrics.uid);
         assertEquals(VibrationAttributes.USAGE_ALARM, alarmMetrics.usage);
-        assertEquals(Vibration.Status.FINISHED.getProtoEnumValue(), alarmMetrics.status);
+        assertEquals(Status.FINISHED.getProtoEnumValue(), alarmMetrics.status);
         assertFalse(alarmMetrics.endedBySameUid);
         assertEquals(-1, alarmMetrics.endedByUsage);
         assertEquals(VibrationAttributes.USAGE_TOUCH, alarmMetrics.interruptedUsage);
@@ -2742,12 +2874,12 @@ public class VibratorManagerServiceTest {
         VibrationStats.StatsInfo touchMetrics = argumentCaptor.getAllValues().get(0);
         assertEquals(UID, touchMetrics.uid);
         assertEquals(VibrationAttributes.USAGE_TOUCH, touchMetrics.usage);
-        assertEquals(Vibration.Status.IGNORED_FOR_POWER.getProtoEnumValue(), touchMetrics.status);
+        assertEquals(Status.IGNORED_FOR_POWER.getProtoEnumValue(), touchMetrics.status);
 
         VibrationStats.StatsInfo ringtoneMetrics = argumentCaptor.getAllValues().get(1);
         assertEquals(UID, ringtoneMetrics.uid);
         assertEquals(VibrationAttributes.USAGE_RINGTONE, ringtoneMetrics.usage);
-        assertEquals(Vibration.Status.IGNORED_FOR_SETTINGS.getProtoEnumValue(),
+        assertEquals(Status.IGNORED_FOR_SETTINGS.getProtoEnumValue(),
                 ringtoneMetrics.status);
 
         for (VibrationStats.StatsInfo metrics : argumentCaptor.getAllValues()) {
@@ -2814,7 +2946,7 @@ public class VibratorManagerServiceTest {
         assertEquals(FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE,
                 metrics.vibrationType);
         assertEquals(VibrationAttributes.USAGE_NOTIFICATION, metrics.usage);
-        assertEquals(Vibration.Status.FINISHED.getProtoEnumValue(), metrics.status);
+        assertEquals(Status.FINISHED.getProtoEnumValue(), metrics.status);
         assertTrue(metrics.totalDurationMillis >= 20);
 
         // vibratorOnMillis accumulates both vibrators, it's 20 for each constant.

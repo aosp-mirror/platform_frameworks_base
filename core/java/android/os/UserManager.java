@@ -1978,7 +1978,6 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED)
     public static final String DISALLOW_SIM_GLOBALLY =
             "no_sim_globally";
 
@@ -1999,7 +1998,6 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ASSIST_CONTENT_USER_RESTRICTION_ENABLED)
     public static final String DISALLOW_ASSIST_CONTENT = "no_assist_content";
 
     /**

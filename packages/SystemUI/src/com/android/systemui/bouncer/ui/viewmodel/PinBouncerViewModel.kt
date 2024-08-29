@@ -42,7 +42,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -63,6 +62,7 @@ constructor(
     AuthMethodBouncerViewModel(
         interactor = interactor,
         isInputEnabled = isInputEnabled,
+        traceName = "PinBouncerViewModel",
     ) {
     /**
      * Whether the sim-related UI in the pin view is showing.
@@ -122,7 +122,7 @@ constructor(
                     } else {
                         interactor.hintedPinLength
                     }
-                    .collectLatest { _hintedPinLength.value = it }
+                    .collect { _hintedPinLength.value = it }
             }
             launch {
                 combine(
@@ -134,17 +134,17 @@ constructor(
                             isAutoConfirmEnabled = isAutoConfirmEnabled,
                         )
                     }
-                    .collectLatest { _backspaceButtonAppearance.value = it }
+                    .collect { _backspaceButtonAppearance.value = it }
             }
             launch {
                 interactor.isAutoConfirmEnabled
                     .map { if (it) ActionButtonAppearance.Hidden else ActionButtonAppearance.Shown }
-                    .collectLatest { _confirmButtonAppearance.value = it }
+                    .collect { _confirmButtonAppearance.value = it }
             }
             launch {
                 interactor.isPinEnhancedPrivacyEnabled
                     .map { !it }
-                    .collectLatest { _isDigitButtonAnimationEnabled.value = it }
+                    .collect { _isDigitButtonAnimationEnabled.value = it }
             }
             awaitCancellation()
         }

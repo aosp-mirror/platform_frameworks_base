@@ -19,12 +19,11 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.compose.animation.scene.ObservableTransitionState.Idle
 import com.android.compose.animation.scene.ObservableTransitionState.Transition
-import com.android.compose.animation.scene.ObservableTransitionState.Transition.ChangeCurrentScene
+import com.android.compose.animation.scene.ObservableTransitionState.Transition.ChangeScene
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneFamilies
@@ -63,7 +62,6 @@ constructor(
     keyguardInteractor: Lazy<KeyguardInteractor>,
 ) :
     ActivatableFlowDumper by ActivatableFlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
-    SysUiViewModel,
     ExclusiveActivatable() {
 
     override suspend fun onActivated(): Nothing {
@@ -79,7 +77,7 @@ constructor(
         }
     }
 
-    private fun fullyExpandedDuringSceneChange(change: ChangeCurrentScene): Boolean {
+    private fun fullyExpandedDuringSceneChange(change: ChangeScene): Boolean {
         // The lockscreen stack is visible during all transitions away from the lockscreen, so keep
         // the stack expanded until those transitions finish.
         return (expandedInScene(change.fromScene) && expandedInScene(change.toScene)) ||
@@ -87,7 +85,7 @@ constructor(
     }
 
     private fun expandFractionDuringSceneChange(
-        change: ChangeCurrentScene,
+        change: ChangeScene,
         shadeExpansion: Float,
         qsExpansion: Float,
     ): Float {
@@ -120,7 +118,7 @@ constructor(
             ) { shadeExpansion, _, qsExpansion, transitionState, _ ->
                 when (transitionState) {
                     is Idle -> if (expandedInScene(transitionState.currentScene)) 1f else 0f
-                    is ChangeCurrentScene ->
+                    is ChangeScene ->
                         expandFractionDuringSceneChange(
                             transitionState,
                             shadeExpansion,
@@ -250,7 +248,7 @@ constructor(
     }
 }
 
-private fun ChangeCurrentScene.isBetween(
+private fun ChangeScene.isBetween(
     a: (SceneKey) -> Boolean,
-    b: (SceneKey) -> Boolean
+    b: (SceneKey) -> Boolean,
 ): Boolean = (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))

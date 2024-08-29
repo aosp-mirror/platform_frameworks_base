@@ -80,6 +80,7 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shared.Flags;
 import com.android.systemui.shared.rotation.RotationPolicyUtil;
 import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -501,9 +502,11 @@ public final class NavBarHelper implements
                 Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
 
+        boolean supportsSwipeGesture = QuickStepContract.isGesturalMode(mNavBarMode)
+                || (QuickStepContract.isLegacyMode(mNavBarMode) && Flags.threeButtonCornerSwipe());
         mAssistantAvailable = assistantAvailableForUser
                 && mAssistantTouchGestureEnabled
-                && QuickStepContract.isGesturalMode(mNavBarMode);
+                && supportsSwipeGesture;
         dispatchAssistantEventUpdate(mAssistantAvailable, mLongPressHomeEnabled);
     }
 

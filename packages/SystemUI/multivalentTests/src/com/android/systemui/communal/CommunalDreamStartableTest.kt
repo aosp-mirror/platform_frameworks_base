@@ -81,6 +81,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
     @Test
     fun startDreamWhenTransitioningToHub() =
         testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
             whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)

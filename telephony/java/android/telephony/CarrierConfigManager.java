@@ -9994,6 +9994,17 @@ public class CarrierConfigManager {
     public static final String KEY_SATELLITE_ESOS_SUPPORTED_BOOL = "satellite_esos_supported_bool";
 
     /**
+     * Indicate whether carrier roaming to satellite is using P2P SMS.
+     *
+     * This will need agreement with carriers before enabling this flag.
+     *
+     * The default value is false.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_ROAMING_P2P_SMS_SUPPORTED_BOOL =
+            "satellite_roaming_p2p_sms_supported_bool";
+
+    /**
      * Defines the NIDD (Non-IP Data Delivery) APN to be used for carrier roaming to satellite
      * attachment. For more on NIDD, see 3GPP TS 29.542.
      * Note this config is the only source of truth regarding the definition of the APN.
@@ -10075,7 +10086,35 @@ public class CarrierConfigManager {
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     public static final String KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT =
-            "satellite_screen_off_inactivity_timeout_duration_sec_int";
+            "satellite_screen_off_inactivity_timeout_sec_int";
+
+    /**
+     * An integer key holds the timeout duration in seconds used to determine whether to exit P2P
+     * SMS mode and start TN scanning.
+     *
+     * The timer is started when the device is not connected, user is not pointing to the
+     * satellite and no data transfer is happening.
+     * When the timer expires, the device will move to IDLE mode upon which TN scanning will start.
+     *
+     * The default value is 180 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_p2p_sms_inactivity_timeout_sec_int";
+
+    /**
+     * An integer key holds the timeout duration in seconds used to determine whether to exit ESOS
+     * mode and start TN scanning.
+     *
+     * The timer is started when the device is not connected, user is not pointing to the
+     * satellite and no data transfer is happening.
+     * When the timer expires, the device will move to IDLE mode upon which TN scanning will start.
+     *
+     * The default value is 600 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_ESOS_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_esos_inactivity_timeout_sec_int";
 
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
@@ -11235,12 +11274,15 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
                 (int) TimeUnit.SECONDS.toMillis(30));
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
+        sDefaults.putBoolean(KEY_SATELLITE_ROAMING_P2P_SMS_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_NIDD_APN_NAME_STRING, "");
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT,
                 SatelliteManager.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911);
         sDefaults.putInt(KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT, 180);
         sDefaults.putInt(KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
+        sDefaults.putInt(KEY_SATELLITE_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT, 180);
+        sDefaults.putInt(KEY_SATELLITE_ESOS_INACTIVITY_TIMEOUT_SEC_INT, 600);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);
