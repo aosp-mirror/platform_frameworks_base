@@ -1387,6 +1387,10 @@ public class NotificationStackScrollLayout
     }
 
     private void clampScrollPosition() {
+        // NSSL doesn't control scrolling with SceneContainer enabled
+        if (SceneContainerFlag.isEnabled()) {
+            return;
+        }
         int scrollRange = getScrollRange();
         if (scrollRange < mOwnScrollY && !mAmbientState.isClearAllInProgress()) {
             // if the scroll boundary updates the position of the stack,
@@ -2444,6 +2448,11 @@ public class NotificationStackScrollLayout
     }
 
     private int getScrollRange() {
+        // TODO(b/360091533) Disable the usages of #getScrollRange() with SceneContainer enabled,
+        // because NSSL shouldn't control its own scrolling.
+        if (SceneContainerFlag.isEnabled()) {
+            return 0;
+        }
         // In current design, it only use the top HUN to treat all of HUNs
         // although there are more than one HUNs
         int contentHeight = mContentHeight;
@@ -2874,7 +2883,9 @@ public class NotificationStackScrollLayout
             NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
             entry.removeOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
         }
-        updateScrollStateForRemovedChild(child);
+        if (!SceneContainerFlag.isEnabled()) {
+            updateScrollStateForRemovedChild(child);
+        }
         boolean animationGenerated = container != null && generateRemoveAnimation(child);
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
@@ -3053,6 +3064,7 @@ public class NotificationStackScrollLayout
      * @param removedChild the removed child
      */
     private void updateScrollStateForRemovedChild(ExpandableView removedChild) {
+        SceneContainerFlag.assertInLegacyMode();
         final int startingPosition = getPositionInLinearLayout(removedChild);
         final int childHeight = getIntrinsicHeight(removedChild) + mPaddingBetweenElements;
         final int endPosition = startingPosition + childHeight;
@@ -3074,6 +3086,7 @@ public class NotificationStackScrollLayout
      * @return the amount of scrolling needed to start clipping notifications.
      */
     private int getScrollAmountToScrollBoundary() {
+        SceneContainerFlag.assertInLegacyMode();
         if (mShouldUseSplitNotificationShade) {
             return mSidePaddings;
         }
