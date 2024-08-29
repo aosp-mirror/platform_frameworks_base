@@ -28,7 +28,6 @@ import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
-import kotlinx.coroutines.CoroutineScope
 
 internal interface DraggableHandler {
     /**
@@ -63,7 +62,6 @@ internal interface DragController {
 internal class DraggableHandlerImpl(
     internal val layoutImpl: SceneTransitionLayoutImpl,
     internal val orientation: Orientation,
-    internal val coroutineScope: CoroutineScope,
 ) : DraggableHandler {
     internal val nestedScrollKey = Any()
     /** The [DraggableHandler] can only have one active [DragController] at a time. */
@@ -101,11 +99,6 @@ internal class DraggableHandlerImpl(
 
         val swipeAnimation = dragController.swipeAnimation
 
-        // Don't intercept a transition that is finishing.
-        if (swipeAnimation.isFinishing) {
-            return false
-        }
-
         // Only intercept the current transition if one of the 2 swipes results is also a transition
         // between the same pair of contents.
         val swipes = computeSwipes(startedPosition, pointersDown = 1)
@@ -140,7 +133,6 @@ internal class DraggableHandlerImpl(
             // This [transition] was already driving the animation: simply take over it.
             // Stop animating and start from the current offset.
             val oldSwipeAnimation = oldDragController.swipeAnimation
-            oldSwipeAnimation.cancelOffsetAnimation()
 
             // We need to recompute the swipe results since this is a new gesture, and the
             // fromScene.userActions may have changed.
@@ -192,13 +184,7 @@ internal class DraggableHandlerImpl(
                 else -> error("Unknown result $result ($upOrLeftResult $downOrRightResult)")
             }
 
-        return createSwipeAnimation(
-            layoutImpl,
-            layoutImpl.coroutineScope,
-            result,
-            isUpOrLeft,
-            orientation
-        )
+        return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation)
     }
 
     private fun computeSwipes(startedPosition: Offset?, pointersDown: Int): Swipes {
@@ -279,16 +265,14 @@ private class DragControllerImpl(
 
     fun updateTransition(newTransition: SwipeAnimation<*>, force: Boolean = false) {
         if (force || isDrivingTransition) {
-            layoutState.startTransition(newTransition.contentTransition)
+            layoutState.startTransitionImmediately(
+                animationScope = draggableHandler.layoutImpl.animationScope,
+                newTransition.contentTransition,
+                true
+            )
         }
 
-        val previous = swipeAnimation
         swipeAnimation = newTransition
-
-        // Finish the previous transition.
-        if (previous != newTransition) {
-            layoutState.finishTransition(previous.contentTransition)
-        }
     }
 
     /**
@@ -302,7 +286,7 @@ private class DragControllerImpl(
     }
 
     private fun <T : ContentKey> onDrag(delta: Float, swipeAnimation: SwipeAnimation<T>): Float {
-        if (delta == 0f || !isDrivingTransition || swipeAnimation.isFinishing) {
+        if (delta == 0f || !isDrivingTransition || swipeAnimation.isAnimatingOffset()) {
             return 0f
         }
 
@@ -409,7 +393,7 @@ private class DragControllerImpl(
         swipeAnimation: SwipeAnimation<T>,
     ): Float {
         // The state was changed since the drag started; don't do anything.
-        if (!isDrivingTransition || swipeAnimation.isFinishing) {
+        if (!isDrivingTransition || swipeAnimation.isAnimatingOffset()) {
             return 0f
         }
 

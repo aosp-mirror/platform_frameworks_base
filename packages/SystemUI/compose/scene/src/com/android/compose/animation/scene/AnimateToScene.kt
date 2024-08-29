@@ -28,7 +28,7 @@ internal fun CoroutineScope.animateToScene(
     layoutState: MutableSceneTransitionLayoutStateImpl,
     target: SceneKey,
     transitionKey: TransitionKey?,
-): TransitionState.Transition.ChangeScene? {
+): Pair<TransitionState.Transition.ChangeScene, Job>? {
     val transitionState = layoutState.transitionState
     if (transitionState.currentScene == target) {
         // This can happen in 3 different situations, for which there isn't anything else to do:
@@ -139,7 +139,7 @@ private fun CoroutineScope.animateToScene(
     reversed: Boolean = false,
     fromScene: SceneKey = layoutState.transitionState.currentScene,
     chain: Boolean = true,
-): TransitionState.Transition.ChangeScene {
+): Pair<TransitionState.Transition.ChangeScene, Job> {
     val oneOffAnimation = OneOffAnimation()
     val targetProgress = if (reversed) 0f else 1f
     val transition =
@@ -165,15 +165,16 @@ private fun CoroutineScope.animateToScene(
             )
         }
 
-    animateContent(
-        layoutState = layoutState,
-        transition = transition,
-        oneOffAnimation = oneOffAnimation,
-        targetProgress = targetProgress,
-        chain = chain,
-    )
+    val job =
+        animateContent(
+            layoutState = layoutState,
+            transition = transition,
+            oneOffAnimation = oneOffAnimation,
+            targetProgress = targetProgress,
+            chain = chain,
+        )
 
-    return transition
+    return transition to job
 }
 
 private class OneOffSceneTransition(
@@ -193,5 +194,11 @@ private class OneOffSceneTransition(
 
     override val isUserInputOngoing: Boolean = false
 
-    override fun finish(): Job = oneOffAnimation.finish()
+    override suspend fun run() {
+        oneOffAnimation.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        oneOffAnimation.freezeAndAnimateToCurrentState()
+    }
 }

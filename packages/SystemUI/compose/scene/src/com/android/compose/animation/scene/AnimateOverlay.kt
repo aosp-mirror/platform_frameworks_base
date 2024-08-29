@@ -18,7 +18,6 @@ package com.android.compose.animation.scene
 
 import com.android.compose.animation.scene.content.state.TransitionState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 
 /** Trigger a one-off transition to show or hide an overlay. */
 internal fun CoroutineScope.showOrHideOverlay(
@@ -120,7 +119,13 @@ private class OneOffShowOrHideOverlayTransition(
     override val isInitiatedByUserInput: Boolean = false
     override val isUserInputOngoing: Boolean = false
 
-    override fun finish(): Job = oneOffAnimation.finish()
+    override suspend fun run() {
+        oneOffAnimation.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        oneOffAnimation.freezeAndAnimateToCurrentState()
+    }
 }
 
 private class OneOffOverlayReplacingTransition(
@@ -140,5 +145,11 @@ private class OneOffOverlayReplacingTransition(
     override val isInitiatedByUserInput: Boolean = false
     override val isUserInputOngoing: Boolean = false
 
-    override fun finish(): Job = oneOffAnimation.finish()
+    override suspend fun run() {
+        oneOffAnimation.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        oneOffAnimation.freezeAndAnimateToCurrentState()
+    }
 }

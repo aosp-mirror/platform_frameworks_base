@@ -617,7 +617,7 @@ internal fun SceneTransitionLayoutForTesting(
                 swipeSourceDetector = swipeSourceDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
-                coroutineScope = coroutineScope,
+                animationScope = coroutineScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }

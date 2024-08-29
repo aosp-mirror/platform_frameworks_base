@@ -59,7 +59,13 @@ internal class SceneTransitionLayoutImpl(
     internal var swipeSourceDetector: SwipeSourceDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
-    internal val coroutineScope: CoroutineScope,
+
+    /**
+     * The scope that should be used by *animations started by this layout only*, i.e. animations
+     * triggered by gestures set up on this layout in [swipeToScene] or interruption decay
+     * animations.
+     */
+    internal val animationScope: CoroutineScope,
 ) {
     /**
      * The map of [Scene]s.
@@ -142,18 +148,10 @@ internal class SceneTransitionLayoutImpl(
         // DraggableHandlerImpl must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
         horizontalDraggableHandler =
-            DraggableHandlerImpl(
-                layoutImpl = this,
-                orientation = Orientation.Horizontal,
-                coroutineScope = coroutineScope,
-            )
+            DraggableHandlerImpl(layoutImpl = this, orientation = Orientation.Horizontal)
 
         verticalDraggableHandler =
-            DraggableHandlerImpl(
-                layoutImpl = this,
-                orientation = Orientation.Vertical,
-                coroutineScope = coroutineScope,
-            )
+            DraggableHandlerImpl(layoutImpl = this, orientation = Orientation.Vertical)
 
         // Make sure that the state is created on the same thread (most probably the main thread)
         // than this STLImpl.
