@@ -182,6 +182,7 @@ constructor(
     }
 
     private suspend fun finishCurrentTransition() {
+        if (currentTransitionId == null) return
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             1f,

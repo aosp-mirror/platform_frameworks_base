@@ -32,11 +32,14 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.filterState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 /**
@@ -54,6 +57,18 @@ constructor(
     private val dreamManager: DreamManager,
     @Background private val bgScope: CoroutineScope,
 ) : CoreStartable {
+    /** Flow that emits when the dream should be started underneath the glanceable hub. */
+    val startDream =
+        allOf(
+                keyguardTransitionInteractor
+                    .transitionValue(Scenes.Communal, KeyguardState.GLANCEABLE_HUB)
+                    .map { it == 1f },
+                not(keyguardInteractor.isDreaming),
+                // TODO(b/362830856): Remove this workaround.
+                keyguardInteractor.isKeyguardShowing,
+            )
+            .filter { it }
+
     @SuppressLint("MissingPermission")
     override fun start() {
         if (!communalSettingsInteractor.isCommunalFlagEnabled()) {
@@ -72,17 +87,10 @@ constructor(
 
         // Restart the dream underneath the hub in order to support the ability to swipe
         // away the hub to enter the dream.
-        keyguardTransitionInteractor
-            .transition(
-                edge = Edge.create(to = Scenes.Communal),
-                edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GLANCEABLE_HUB)
-            )
-            .filterState(TransitionState.FINISHED)
+        startDream
             .sampleFilter(powerInteractor.isAwake) { isAwake ->
-                dreamManager.canStartDreaming(isAwake)
+                !glanceableHubAllowKeyguardWhenDreaming() && dreamManager.canStartDreaming(isAwake)
             }
-            .sampleFilter(keyguardInteractor.isDreaming) { isDreaming -> !isDreaming }
-            .filter { !glanceableHubAllowKeyguardWhenDreaming() }
             .onEach { dreamManager.startDream() }
             .launchIn(bgScope)
     }
