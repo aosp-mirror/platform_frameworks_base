@@ -209,7 +209,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
     private companion object {
         val TEST_USER = UserHandle.of(1)!!
 
-        val MODES_DRAWABLE_ID = com.android.systemui.res.R.drawable.qs_dnd_icon_off
+        val MODES_DRAWABLE_ID = R.drawable.ic_zen_priority_modes
 
         val MODES_DRAWABLE = TestStubDrawable("modes_icon")
         val BEDTIME_DRAWABLE = TestStubDrawable("bedtime")
