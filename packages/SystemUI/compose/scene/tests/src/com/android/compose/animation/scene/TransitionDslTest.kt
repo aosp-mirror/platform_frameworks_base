@@ -232,6 +232,47 @@ class TransitionDslTest {
     }
 
     @Test
+    fun defaultPredictiveBack() {
+        val transitions = transitions {
+            from(
+                TestScenes.SceneA,
+                to = TestScenes.SceneB,
+                preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } }
+            ) {
+                spec = tween(500)
+                fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
+                timestampRange(startMillis = 100, endMillis = 300) { fade(TestElements.Foo) }
+            }
+        }
+
+        // Verify that fetching the transitionSpec with the PredictiveBack key defaults to the above
+        // transition despite it not having the PredictiveBack key set.
+        val transitionSpec =
+            transitions.transitionSpec(
+                from = TestScenes.SceneA,
+                to = TestScenes.SceneB,
+                key = TransitionKey.PredictiveBack
+            )
+
+        val transformations = transitionSpec.transformationSpec().transformations
+
+        assertThat(transformations)
+            .comparingElementsUsing(TRANSFORMATION_RANGE)
+            .containsExactly(
+                TransformationRange(start = 0.1f, end = 0.8f),
+                TransformationRange(start = 100 / 500f, end = 300 / 500f),
+            )
+
+        val previewTransformations = transitionSpec.previewTransformationSpec()?.transformations
+
+        assertThat(previewTransformations)
+            .comparingElementsUsing(TRANSFORMATION_RANGE)
+            .containsExactly(
+                TransformationRange(start = 0.1f, end = 0.8f),
+            )
+    }
+
+    @Test
     fun springSpec() {
         val defaultSpec = spring<Float>(stiffness = 1f)
         val specFromAToC = spring<Float>(stiffness = 2f)

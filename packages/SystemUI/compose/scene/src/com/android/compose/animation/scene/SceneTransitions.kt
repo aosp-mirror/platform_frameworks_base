@@ -90,10 +90,19 @@ internal constructor(
             return relaxedSpec
         }
 
-        return transition(from, to, key) {
+        val relaxedReversed =
+            transition(from, to, key) {
                 (it.from == to && it.to == null) || (it.to == from && it.from == null)
             }
-            ?.reversed() ?: defaultTransition(from, to)
+        if (relaxedReversed != null) {
+            return relaxedReversed.reversed()
+        }
+
+        return if (key != null) {
+            findSpec(from, to, null)
+        } else {
+            defaultTransition(from, to)
+        }
     }
 
     private fun transition(
