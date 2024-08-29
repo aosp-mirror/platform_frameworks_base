@@ -134,16 +134,12 @@ constructor(
                 .filterRelevantKeyguardState()
                 .sampleCombine(
                     internalTransitionInteractor.currentTransitionInfoInternal,
-                    finishedKeyguardState,
+                    transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
                     keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
                 .collect {
-                    (
-                        isAbleToDream,
-                        transitionInfo,
-                        finishedKeyguardState,
-                        isActiveDreamLockscreenHosted) ->
-                    val isOnLockscreen = finishedKeyguardState == KeyguardState.LOCKSCREEN
+                    (isAbleToDream, transitionInfo, isOnLockscreen, isActiveDreamLockscreenHosted)
+                    ->
                     val isTransitionInterruptible =
                         transitionInfo.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(transitionInfo.from)
@@ -189,7 +185,7 @@ constructor(
         scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
             shadeRepository.legacyShadeExpansion
                 .sampleCombine(
-                    startedKeyguardTransitionStep,
+                    transitionInteractor.startedKeyguardTransitionStep,
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,

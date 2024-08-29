@@ -49,7 +49,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -58,7 +57,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 
 /** Encapsulates business-logic related to the keyguard transitions. */
@@ -286,67 +284,10 @@ constructor(
     }
 
     /** The last [TransitionStep] with a [TransitionState] of STARTED */
-    val startedKeyguardTransitionStep: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
-
-    /** The destination state of the last [TransitionState.STARTED] transition. */
-    @SuppressLint("SharedFlowCreation")
-    val startedKeyguardState: SharedFlow<KeyguardState> =
-        startedKeyguardTransitionStep
-            .map { step -> step.to }
-            .buffer(2, BufferOverflow.DROP_OLDEST)
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
-
-    /** The from state of the last [TransitionState.STARTED] transition. */
-    // TODO: is it performant to have several SharedFlows side by side instead of one?
-    @SuppressLint("SharedFlowCreation")
-    val startedKeyguardFromState: SharedFlow<KeyguardState> =
-        startedKeyguardTransitionStep
-            .map { step -> step.from }
-            .buffer(2, BufferOverflow.DROP_OLDEST)
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
-
-    /**
-     * The last [KeyguardState] to which we [TransitionState.FINISHED] a transition.
-     *
-     * WARNING: This will NOT emit a value if a transition is CANCELED, and will also not emit a
-     * value when a subsequent transition is STARTED. It will *only* emit once we have finally
-     * FINISHED in a state. This can have unintuitive implications.
-     *
-     * For example, if we're transitioning from GONE -> DOZING, and that transition is CANCELED in
-     * favor of a DOZING -> LOCKSCREEN transition, the FINISHED state is still GONE, and will remain
-     * GONE throughout the DOZING -> LOCKSCREEN transition until the DOZING -> LOCKSCREEN transition
-     * finishes (at which point we'll be FINISHED in LOCKSCREEN).
-     *
-     * Since there's no real limit to how many consecutive transitions can be canceled, it's even
-     * possible for the FINISHED state to be the same as the STARTED state while still
-     * transitioning.
-     *
-     * For example:
-     * 1. We're finished in GONE.
-     * 2. The user presses the power button, starting a GONE -> DOZING transition. We're still
-     *    FINISHED in GONE.
-     * 3. The user changes their mind, pressing the power button to wake up; this starts a DOZING ->
-     *    LOCKSCREEN transition. We're still FINISHED in GONE.
-     * 4. The user quickly swipes away the lockscreen prior to DOZING -> LOCKSCREEN finishing; this
-     *    starts a LOCKSCREEN -> GONE transition. We're still FINISHED in GONE, but we've also
-     *    STARTED a transition *to* GONE.
-     * 5. We'll emit KeyguardState.GONE again once the transition finishes.
-     *
-     * If you just need to know when we eventually settle into a state, this flow is likely
-     * sufficient. However, if you're having issues with state *during* transitions started after
-     * one or more canceled transitions, you probably need to use [currentKeyguardState].
-     */
-    @SuppressLint("SharedFlowCreation")
-    val finishedKeyguardState: SharedFlow<KeyguardState> =
+    val startedKeyguardTransitionStep: StateFlow<TransitionStep> =
         repository.transitions
-            .transform { step ->
-                if (step.transitionState == TransitionState.FINISHED) {
-                    emit(step.to)
-                }
-            }
-            .buffer(2, BufferOverflow.DROP_OLDEST)
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+            .filter { step -> step.transitionState == TransitionState.STARTED }
+            .stateIn(scope, SharingStarted.Eagerly, TransitionStep())
 
     /**
      * The [KeyguardState] we're currently in.
@@ -412,7 +353,6 @@ constructor(
                     it.from
                 }
             }
-            .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, OFF)
 
     val isInTransition =
@@ -509,12 +449,13 @@ constructor(
 
     fun isFinishedIn(scene: SceneKey, stateWithoutSceneContainer: KeyguardState): Flow<Boolean> {
         return if (SceneContainerFlag.isEnabled) {
-            sceneInteractor.transitionState
-                .map { it.isIdle(scene) || it.isTransitioning(from = scene) }
-                .distinctUntilChanged()
-        } else {
-            isFinishedIn(stateWithoutSceneContainer)
-        }
+                sceneInteractor.transitionState.map {
+                    it.isIdle(scene) || it.isTransitioning(from = scene)
+                }
+            } else {
+                isFinishedIn(stateWithoutSceneContainer)
+            }
+            .distinctUntilChanged()
     }
 
     /** Whether we've FINISHED a transition to a state */
@@ -527,13 +468,11 @@ constructor(
         return currentKeyguardState.replayCache.last()
     }
 
-    fun getStartedFromState(): KeyguardState {
-        return startedKeyguardFromState.replayCache.last()
-    }
-
-    fun getFinishedState(): KeyguardState {
-        return finishedKeyguardState.replayCache.last()
-    }
+    private val finishedKeyguardState: StateFlow<KeyguardState> =
+        repository.transitions
+            .filter { it.transitionState == TransitionState.FINISHED }
+            .map { it.to }
+            .stateIn(scope, SharingStarted.Eagerly, OFF)
 
     companion object {
         private val TAG = KeyguardTransitionInteractor::class.simpleName
