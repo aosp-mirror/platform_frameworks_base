@@ -99,11 +99,3 @@ flag {
   description: "Refactor ModifierShortcutManager internal representation of shortcuts."
   bug: "358603902"
 }
-
-flag {
-    namespace: "input_native"
-    name: "manage_key_gestures"
-    description: "Manage key gestures through Input APIs"
-    is_exported: true
-    bug: "358569822"
-}
