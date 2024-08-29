@@ -56,6 +56,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardDismissTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.Kosmos
@@ -279,7 +280,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
                 devicePolicyManager,
-                keyguardTransitionInteractor,
+                kosmos.keyguardDismissTransitionInteractor,
                 { primaryBouncerInteractor },
             ) {
                 deviceEntryInteractor

@@ -84,10 +84,9 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -235,11 +234,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mUdfpsOverlayInteractor,
                         mActivityStarter,
                         mKeyguardTransitionInteractor,
+                        mock(KeyguardDismissTransitionInteractor.class),
                         StandardTestDispatcher(null, null),
-                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
                         () -> mock(KeyguardDismissActionInteractor.class),
                         mSelectedUserInteractor,
-                        () -> mock(KeyguardSurfaceBehindInteractor.class),
                         mock(JavaAdapter.class),
                         () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),
@@ -759,11 +757,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mUdfpsOverlayInteractor,
                         mActivityStarter,
                         mock(KeyguardTransitionInteractor.class),
+                        mock(KeyguardDismissTransitionInteractor.class),
                         StandardTestDispatcher(null, null),
-                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
                         () -> mock(KeyguardDismissActionInteractor.class),
                         mSelectedUserInteractor,
-                        () -> mock(KeyguardSurfaceBehindInteractor.class),
                         mock(JavaAdapter.class),
                         () -> mSceneInteractor,
                         mock(StatusBarKeyguardViewManagerInteractor.class),

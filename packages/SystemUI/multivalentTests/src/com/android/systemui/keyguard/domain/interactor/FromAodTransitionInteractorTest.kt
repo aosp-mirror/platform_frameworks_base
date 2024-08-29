@@ -327,7 +327,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setKeyguardShowing(false)
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
-            kosmos.keyguardTransitionInteractor.startDismissKeyguardTransition()
+            kosmos.keyguardDismissTransitionInteractor.startDismissKeyguardTransition()
             powerInteractor.setAwakeForTest()
             advanceTimeBy(100) // account for debouncing
 
