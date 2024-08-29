@@ -34,6 +34,7 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.StatusBarIcon
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -429,7 +430,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
                     eq(mContext.packageName),
                     eq(android.R.drawable.ic_lock_lock),
                     any(), // non-null
-                    eq("Bedtime Mode")
+                    eq("Bedtime Mode"),
+                    eq(StatusBarIcon.Shape.FIXED_SPACE)
                 )
 
             zenModeRepository.deactivateMode("bedtime")
@@ -441,7 +443,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
                     eq(null),
                     eq(android.R.drawable.ic_media_play),
                     any(), // non-null
-                    eq("Other Mode")
+                    eq("Other Mode"),
+                    eq(StatusBarIcon.Shape.FIXED_SPACE)
                 )
 
             zenModeRepository.deactivateMode("other")
@@ -460,7 +463,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
         verify(iconController, never()).setIconVisibility(eq(ZEN_SLOT), any())
         verify(iconController, never()).setIcon(eq(ZEN_SLOT), anyInt(), any())
-        verify(iconController, never()).setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any())
+        verify(iconController, never())
+            .setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -476,7 +480,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             verify(iconController, never()).setIconVisibility(eq(ZEN_SLOT), any())
             verify(iconController, never()).setIcon(eq(ZEN_SLOT), anyInt(), any())
             verify(iconController, never())
-                .setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any())
+                .setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any(), any())
         }
 
     @Test

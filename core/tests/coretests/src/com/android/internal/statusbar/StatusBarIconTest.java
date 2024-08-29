@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.UserHandle;
 
@@ -69,22 +70,22 @@ public class StatusBarIconTest {
         assertThat(copy.preloadedIcon).isEqualTo(original.preloadedIcon);
     }
 
-
     private static StatusBarIcon newStatusBarIcon() {
         final UserHandle dummyUserHandle = UserHandle.of(100);
         final String dummyIconPackageName = "com.android.internal.statusbar.test";
-        final int dummyIconId = 123;
+        final Icon dummyIcon = Icon.createWithResource(dummyIconPackageName, 123);
         final int dummyIconLevel = 1;
         final int dummyIconNumber = 2;
         final CharSequence dummyIconContentDescription = "dummyIcon";
         return new StatusBarIcon(
-                dummyIconPackageName,
                 dummyUserHandle,
-                dummyIconId,
+                dummyIconPackageName,
+                dummyIcon,
                 dummyIconLevel,
                 dummyIconNumber,
                 dummyIconContentDescription,
-                StatusBarIcon.Type.SystemIcon);
+                StatusBarIcon.Type.SystemIcon,
+                StatusBarIcon.Shape.FIXED_SPACE);
     }
 
     private static void assertSerializableFieldsEqual(StatusBarIcon copy, StatusBarIcon original) {
@@ -96,6 +97,7 @@ public class StatusBarIconTest {
         assertThat(copy.number).isEqualTo(original.number);
         assertThat(copy.contentDescription).isEqualTo(original.contentDescription);
         assertThat(copy.type).isEqualTo(original.type);
+        assertThat(copy.shape).isEqualTo(original.shape);
     }
 
     private static StatusBarIcon parcelAndUnparcel(StatusBarIcon original) {

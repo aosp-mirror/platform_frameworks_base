@@ -96,6 +96,9 @@ constructor(
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
 
+    val mainActiveMode: Flow<ZenModeInfo?> =
+        activeModes.map { a -> a.mainMode }.distinctUntilChanged()
+
     suspend fun getModeIcon(mode: ZenMode): ZenIcon {
         return iconLoader.getIcon(context, mode).await()
     }

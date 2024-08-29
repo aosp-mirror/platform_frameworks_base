@@ -58,6 +58,7 @@ import androidx.core.graphics.ColorUtils;
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.statusbar.StatusBarIcon.Shape;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Flags;
 import com.android.systemui.res.R;
@@ -211,16 +212,19 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     /** Should always be preceded by {@link #reloadDimens()} */
     @VisibleForTesting
     public void maybeUpdateIconScaleDimens() {
-        // We do not resize and scale system icons (on the right), only notification icons (on the
-        // left).
-        if (isNotification()) {
-            updateIconScaleForNotifications();
+        // We scale notification icons (on the left) plus icons on the right that explicitly
+        // want FIXED_SPACE.
+        boolean useNonSystemIconScaling = isNotification()
+                || (usesModeIcons() && mIcon != null && mIcon.shape == Shape.FIXED_SPACE);
+
+        if (useNonSystemIconScaling) {
+            updateIconScaleForNonSystemIcons();
         } else {
             updateIconScaleForSystemIcons();
         }
     }
 
-    private void updateIconScaleForNotifications() {
+    private void updateIconScaleForNonSystemIcons() {
         float iconScale;
         // we need to scale the image size to be same as the original size
         // (fit mOriginalStatusBarIconSize), then we can scale it with mScaleToFitNewIconSize
@@ -411,7 +415,9 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);
         }
-
+        if (usesModeIcons()) {
+            setScaleType(icon.shape == Shape.FIXED_SPACE ? ScaleType.FIT_CENTER : ScaleType.CENTER);
+        }
         if (!visibilityEquals) {
             setVisibility(icon.visible && !mBlocked ? VISIBLE : GONE);
         }
@@ -501,7 +507,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     @Nullable
     private Drawable loadDrawable(Context context, StatusBarIcon statusBarIcon) {
         if (usesModeIcons() && statusBarIcon.preloadedIcon != null) {
-            return statusBarIcon.preloadedIcon.mutate();
+            Drawable.ConstantState cached = statusBarIcon.preloadedIcon.getConstantState();
+            if (cached != null) {
+                return cached.newDrawable(mContext.getResources()).mutate();
+            } else {
+                return statusBarIcon.preloadedIcon.mutate();
+            }
         } else {
             int userId = statusBarIcon.user.getIdentifier();
             if (userId == UserHandle.USER_ALL) {
