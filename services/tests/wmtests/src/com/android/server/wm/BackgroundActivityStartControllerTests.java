@@ -44,6 +44,7 @@ import androidx.test.filters.SmallTest;
 import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
+import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
 
 import org.junit.After;
 import org.junit.Before;
@@ -168,9 +169,9 @@ public class BackgroundActivityStartControllerTests {
         }
 
         @Override
-        BalVerdict checkBackgroundActivityStartAllowedBySender(BalState state) {
+        BalVerdict checkBackgroundActivityStartAllowedByRealCaller(BalState state) {
             return mRealCallerVerdict.orElseGet(
-                    () -> super.checkBackgroundActivityStartAllowedBySender(state));
+                    () -> super.checkBackgroundActivityStartAllowedByRealCaller(state));
         }
 
         public void setRealCallerVerdict(BalVerdict verdict) {
@@ -178,11 +179,12 @@ public class BackgroundActivityStartControllerTests {
         }
 
         @Override
-        BalVerdict checkProcessAllowsBal(WindowProcessController app, BalState state) {
+        BalVerdict checkProcessAllowsBal(WindowProcessController app, BalState state,
+                BalCheckConfiguration checkConfiguration) {
             if (mProcessVerdicts.containsKey(app)) {
                 return mProcessVerdicts.get(app);
             }
-            return super.checkProcessAllowsBal(app, state);
+            return super.checkProcessAllowsBal(app, state, checkConfiguration);
         }
     }
 

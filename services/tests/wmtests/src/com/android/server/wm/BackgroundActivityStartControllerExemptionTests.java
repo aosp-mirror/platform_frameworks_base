@@ -232,7 +232,7 @@ public class BackgroundActivityStartControllerExemptionTests {
         // call
         BalVerdict callerVerdict = mController.checkBackgroundActivityStartAllowedByCaller(
                 balState);
-        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedBySender(
+        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedByRealCaller(
                 balState);
 
         balState.setResultForCaller(callerVerdict);
@@ -300,7 +300,7 @@ public class BackgroundActivityStartControllerExemptionTests {
                 checkedOptions);
 
         // call
-        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedBySender(
+        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedByRealCaller(
                 balState);
         balState.setResultForRealCaller(realCallerVerdict);
 
@@ -376,7 +376,7 @@ public class BackgroundActivityStartControllerExemptionTests {
                 checkedOptions);
 
         // call
-        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedBySender(
+        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedByRealCaller(
                 balState);
         balState.setResultForRealCaller(realCallerVerdict);
 
@@ -425,7 +425,7 @@ public class BackgroundActivityStartControllerExemptionTests {
                 checkedOptions);
 
         // call
-        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedBySender(
+        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedByRealCaller(
                 balState);
         balState.setResultForRealCaller(realCallerVerdict);
 
@@ -461,7 +461,7 @@ public class BackgroundActivityStartControllerExemptionTests {
                 checkedOptions);
 
         // call
-        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedBySender(
+        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedByRealCaller(
                 balState);
         balState.setResultForRealCaller(realCallerVerdict);
 
@@ -528,7 +528,7 @@ public class BackgroundActivityStartControllerExemptionTests {
                 checkedOptions);
 
         // call
-        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedBySender(
+        BalVerdict realCallerVerdict = mController.checkBackgroundActivityStartAllowedByRealCaller(
                 balState);
         balState.setResultForRealCaller(realCallerVerdict);
 

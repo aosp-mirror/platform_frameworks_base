@@ -109,9 +109,14 @@ public class BackgroundActivityStartController {
     private static final int ASM_GRACEPERIOD_MAX_REPEATS = 5;
     private static final int NO_PROCESS_UID = -1;
 
-    private static final BalCheckConfiguration BAL_CHECK_CONFIGURATION = new BalCheckConfiguration(
+    private static final BalCheckConfiguration BAL_CHECK_FOREGROUND = new BalCheckConfiguration(
             /* isCheckingForFgsStarts */ false,
             /* checkVisibility */ true,
+            /* checkOtherExemptions */ false,
+            ACTIVITY_BG_START_GRACE_PERIOD_MS);
+    private static final BalCheckConfiguration BAL_CHECK_BACKGROUND = new BalCheckConfiguration(
+            /* isCheckingForFgsStarts */ false,
+            /* checkVisibility */ false,
             /* checkOtherExemptions */ true,
             ACTIVITY_BG_START_GRACE_PERIOD_MS);
 
@@ -760,7 +765,7 @@ public class BackgroundActivityStartController {
         // PendingIntents is null).
         BalVerdict resultForRealCaller = state.callerIsRealCaller() && resultForCaller.allows()
                 ? resultForCaller
-                : checkBackgroundActivityStartAllowedBySender(state)
+                : checkBackgroundActivityStartAllowedByRealCaller(state)
                         .setBasedOnRealCaller();
         state.setResultForRealCaller(resultForRealCaller);
 
@@ -835,6 +840,18 @@ public class BackgroundActivityStartController {
      * or {@link #BAL_BLOCK} if the launch should be blocked
      */
     BalVerdict checkBackgroundActivityStartAllowedByCaller(BalState state) {
+        BalVerdict result = checkBackgroundActivityStartAllowedByCallerInForeground(state);
+        if (result == BalVerdict.BLOCK) {
+            result = checkBackgroundActivityStartAllowedByCallerInBackground(state);
+        }
+        return result;
+    }
+
+    /**
+     * @return A code denoting which BAL rule allows an activity to be started,
+     * or {@link #BAL_BLOCK} if the launch should be blocked
+     */
+    BalVerdict checkBackgroundActivityStartAllowedByCallerInForeground(BalState state) {
         // This is used to block background activity launch even if the app is still
         // visible to user after user clicking home button.
 
@@ -850,7 +867,16 @@ public class BackgroundActivityStartController {
             return new BalVerdict(BAL_ALLOW_NON_APP_VISIBLE_WINDOW,
                     /*background*/ false, "callingUid has non-app visible window");
         }
+        // Don't abort if the callerApp or other processes of that uid are considered to be in the
+        // foreground.
+        return checkProcessAllowsBal(state.mCallerApp, state, BAL_CHECK_FOREGROUND);
+    }
 
+    /**
+     * @return A code denoting which BAL rule allows an activity to be started,
+     * or {@link #BAL_BLOCK} if the launch should be blocked
+     */
+    BalVerdict checkBackgroundActivityStartAllowedByCallerInBackground(BalState state) {
         // don't abort for the most important UIDs
         final int callingAppId = UserHandle.getAppId(state.mCallingUid);
         if (state.mCallingUid == Process.ROOT_UID
@@ -930,25 +956,27 @@ public class BackgroundActivityStartController {
                     "OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop is granted");
         }
 
-        // If we don't have callerApp at this point, no caller was provided to startActivity().
-        // That's the case for PendingIntent-based starts, since the creator's process might not be
-        // up and alive.
         // Don't abort if the callerApp or other processes of that uid are allowed in any way.
-        BalVerdict callerAppAllowsBal = checkProcessAllowsBal(state.mCallerApp, state);
-        if (callerAppAllowsBal.allows()) {
-            return callerAppAllowsBal;
-        }
-
-        // If we are here, it means all exemptions based on the creator failed
-        return BalVerdict.BLOCK;
+        return checkProcessAllowsBal(state.mCallerApp, state, BAL_CHECK_BACKGROUND);
     }
 
     /**
      * @return A code denoting which BAL rule allows an activity to be started,
      * or {@link #BAL_BLOCK} if the launch should be blocked
      */
-    BalVerdict checkBackgroundActivityStartAllowedBySender(BalState state) {
+    BalVerdict checkBackgroundActivityStartAllowedByRealCaller(BalState state) {
+        BalVerdict result = checkBackgroundActivityStartAllowedByRealCallerInForeground(state);
+        if (result == BalVerdict.BLOCK) {
+            result = checkBackgroundActivityStartAllowedByRealCallerInBackground(state);
+        }
+        return result;
+    }
 
+    /**
+     * @return A code denoting which BAL rule allows an activity to be started,
+     * or {@link #BAL_BLOCK} if the launch should be blocked
+     */
+    BalVerdict checkBackgroundActivityStartAllowedByRealCallerInForeground(BalState state) {
         // Normal apps with visible app window will be allowed to start activity if app switching
         // is allowed, or apps like live wallpaper with non app visible window will be allowed.
         // The home app can start apps even if app switches are usually disallowed.
@@ -974,6 +1002,16 @@ public class BackgroundActivityStartController {
             }
         }
 
+        // Don't abort if the realCallerApp or other processes of that uid are considered to be in
+        // the foreground.
+        return checkProcessAllowsBal(state.mRealCallerApp, state, BAL_CHECK_FOREGROUND);
+    }
+
+    /**
+     * @return A code denoting which BAL rule allows an activity to be started,
+     * or {@link #BAL_BLOCK} if the launch should be blocked
+     */
+    BalVerdict checkBackgroundActivityStartAllowedByRealCallerInBackground(BalState state) {
         if (state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
                 == MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
                 && hasBalPermission(state.mRealCallingUid, state.mRealCallingPid)) {
@@ -1000,14 +1038,7 @@ public class BackgroundActivityStartController {
         }
 
         // don't abort if the callerApp or other processes of that uid are allowed in any way
-        BalVerdict realCallerAppAllowsBal =
-                checkProcessAllowsBal(state.mRealCallerApp, state);
-        if (realCallerAppAllowsBal.allows()) {
-            return realCallerAppAllowsBal;
-        }
-
-        // If we are here, it means all exemptions based on PI sender failed
-        return BalVerdict.BLOCK;
+        return checkProcessAllowsBal(state.mRealCallerApp, state, BAL_CHECK_BACKGROUND);
     }
 
     @VisibleForTesting boolean hasBalPermission(int uid, int pid) {
@@ -1023,13 +1054,13 @@ public class BackgroundActivityStartController {
      * exceptions.
      */
     @VisibleForTesting BalVerdict checkProcessAllowsBal(WindowProcessController app,
-            BalState state) {
+            BalState state, BalCheckConfiguration balCheckConfiguration) {
         if (app == null) {
             return BalVerdict.BLOCK;
         }
         // first check the original calling process
         final BalVerdict balAllowedForCaller = app
-                .areBackgroundActivityStartsAllowed(state.mAppSwitchState, BAL_CHECK_CONFIGURATION);
+                .areBackgroundActivityStartsAllowed(state.mAppSwitchState, balCheckConfiguration);
         if (balAllowedForCaller.allows()) {
             return balAllowedForCaller.withProcessInfo("callerApp process", app);
         } else {
@@ -1041,7 +1072,7 @@ public class BackgroundActivityStartController {
                     final WindowProcessController proc = uidProcesses.valueAt(i);
                     if (proc != app) {
                         BalVerdict balAllowedForUid = proc.areBackgroundActivityStartsAllowed(
-                                state.mAppSwitchState, BAL_CHECK_CONFIGURATION);
+                                state.mAppSwitchState, balCheckConfiguration);
                         if (balAllowedForUid.allows()) {
                             return balAllowedForUid.withProcessInfo("process", proc);
                         }
