@@ -1131,6 +1131,37 @@ public class InsetsControllerTest {
         });
     }
 
+    @Test
+    public void testPredictiveBackControlRequestCancelledDuringImeHideAnim() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // show ime as initial state
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
+            mController.cancelExistingAnimations(); // fast forward show animation
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start IME hide animation
+            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ime()));
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // verify that control request is cancelled and animation type remains HIDE
+            verify(listener).onCancelled(any());
+            assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ime()));
+        });
+    }
+
     private void waitUntilNextFrame() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         Choreographer.getMainThreadInstance().postCallback(Choreographer.CALLBACK_COMMIT,

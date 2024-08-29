@@ -1307,7 +1307,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             WindowInsetsAnimationControlListener listener,
             boolean fromIme, long durationMs, @Nullable Interpolator interpolator,
             @AnimationType int animationType, boolean fromPredictiveBack) {
-        if ((mState.calculateUncontrollableInsetsFromFrame(mFrame) & types) != 0) {
+        if ((mState.calculateUncontrollableInsetsFromFrame(mFrame) & types) != 0
+                || (fromPredictiveBack && ((mRequestedVisibleTypes & ime()) == 0))) {
+            // abort if insets are uncontrollable or if control request is from predictive back but
+            // there is already a hide anim in progress
             listener.onCancelled(null);
             return;
         }
