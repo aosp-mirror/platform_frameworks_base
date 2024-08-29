@@ -69,7 +69,7 @@ fun SceneScope.OverlayShade(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val viewModel = rememberViewModel { viewModelFactory.create() }
+    val viewModel = rememberViewModel("OverlayShade") { viewModelFactory.create() }
     val backgroundScene by viewModel.backgroundScene.collectAsStateWithLifecycle()
 
     Box(modifier) {

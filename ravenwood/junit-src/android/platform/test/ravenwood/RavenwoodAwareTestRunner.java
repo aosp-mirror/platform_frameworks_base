@@ -15,8 +15,6 @@
  */
 package android.platform.test.ravenwood;
 
-import static android.platform.test.ravenwood.RavenwoodRule.shouldRunCassOnRavenwood;
-
 import static com.android.ravenwood.common.RavenwoodCommonUtils.ensureIsPublicVoidMethod;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.isOnRavenwood;
 
@@ -164,7 +162,8 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
          * If the class has @DisabledOnRavenwood, then we'll delegate to ClassSkippingTestRunner,
          * which simply skips it.
          */
-        if (isOnRavenwood() && !shouldRunCassOnRavenwood(mTestClsas.getJavaClass())) {
+        if (isOnRavenwood() && !RavenwoodAwareTestRunnerHook.shouldRunClassOnRavenwood(
+                mTestClsas.getJavaClass())) {
             mRealRunner = new ClassSkippingTestRunner(mTestClsas);
             return;
         }
@@ -238,6 +237,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     public void run(RunNotifier notifier) {
         if (mRealRunner instanceof ClassSkippingTestRunner) {
             mRealRunner.run(notifier);
+            RavenwoodAwareTestRunnerHook.onClassSkipped(getDescription());
             return;
         }
 
@@ -294,19 +294,23 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     }
 
     private void runWithHooks(Description description, Scope scope, Order order, Statement s) {
-        Throwable th = null;
         if (isOnRavenwood()) {
             Assume.assumeTrue(
                     RavenwoodAwareTestRunnerHook.onBefore(this, description, scope, order));
         }
         try {
             s.evaluate();
-        } catch (Throwable t) {
-            th = t;
-            SneakyThrow.sneakyThrow(t);
-        } finally {
             if (isOnRavenwood()) {
-                RavenwoodAwareTestRunnerHook.onAfter(this, description, scope, order, th);
+                RavenwoodAwareTestRunnerHook.onAfter(this, description, scope, order, null);
+            }
+        } catch (Throwable t) {
+            boolean shouldThrow = true;
+            if (isOnRavenwood()) {
+                shouldThrow = RavenwoodAwareTestRunnerHook.onAfter(
+                        this, description, scope, order, t);
+            }
+            if (shouldThrow) {
+                SneakyThrow.sneakyThrow(t);
             }
         }
     }

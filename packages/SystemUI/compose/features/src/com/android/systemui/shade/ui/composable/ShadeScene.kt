@@ -182,9 +182,12 @@ constructor(
     ) =
         ShadeScene(
             notificationStackScrollView.get(),
-            viewModel = rememberViewModel { contentViewModelFactory.create() },
+            viewModel =
+                rememberViewModel("ShadeScene-viewModel") { contentViewModelFactory.create() },
             notificationsPlaceholderViewModel =
-                rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
+                rememberViewModel("ShadeScene-notifPlaceholderViewModel") {
+                    notificationsPlaceholderViewModelFactory.create()
+                },
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -493,9 +496,10 @@ private fun SceneScope.SplitShade(
         }
     }
 
-    val brightnessMirrorViewModel = rememberViewModel {
-        viewModel.brightnessMirrorViewModelFactory.create()
-    }
+    val brightnessMirrorViewModel =
+        rememberViewModel("SplitShade-brightnessMirrorViewModel") {
+            viewModel.brightnessMirrorViewModelFactory.create()
+        }
     val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(

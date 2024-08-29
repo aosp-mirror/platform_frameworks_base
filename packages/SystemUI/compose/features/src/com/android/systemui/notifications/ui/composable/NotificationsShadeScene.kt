@@ -81,9 +81,10 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        val notificationsPlaceholderViewModel = rememberViewModel {
-            notificationsPlaceholderViewModelFactory.create()
-        }
+        val notificationsPlaceholderViewModel =
+            rememberViewModel("NotificationsShadeScene") {
+                notificationsPlaceholderViewModelFactory.create()
+            }
 
         OverlayShade(
             modifier = modifier,

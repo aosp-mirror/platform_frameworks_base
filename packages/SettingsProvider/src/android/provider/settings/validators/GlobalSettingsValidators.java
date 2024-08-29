@@ -340,7 +340,8 @@ public class GlobalSettingsValidators {
                         new String[] {
                             String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN),
                             String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_ANDROID),
-                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_IOS)
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_IOS),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_NONE)
                         }));
         VALIDATORS.put(
                 Global.Wearable.COMPANION_BLE_ROLE,

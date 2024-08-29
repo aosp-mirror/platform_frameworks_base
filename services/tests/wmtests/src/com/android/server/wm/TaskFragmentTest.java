@@ -368,8 +368,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertNotEquals(TaskFragmentAnimationParams.DEFAULT, taskFragment0.getAnimationParams());
 
         // Move activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity, "test");
 
         // Ensure taskFragment requested config is reset.
         assertEquals(taskFragment0, activity.getOrganizedTaskFragment());
@@ -399,8 +398,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         spyOn(mAtm.mTaskFragmentOrganizerController);
 
         // Move activity to pinned.
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity0,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity0, "test");
 
         // Ensure taskFragment requested config is reset.
         assertTrue(taskFragment0.mClearedTaskFragmentForPip);
@@ -434,8 +432,7 @@ public class TaskFragmentTest extends WindowTestsBase {
                 .createActivityCount(1)
                 .build();
         final ActivityRecord activity = taskFragment.getTopMostActivity();
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity, "test");
         spyOn(mAtm.mTaskFragmentOrganizerController);
         assertEquals(mIOrganizer, activity.mLastTaskFragmentOrganizerBeforePip);
 

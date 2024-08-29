@@ -67,6 +67,7 @@ constructor(
 
     suspend fun bind(): Nothing =
         view.asView().viewModel(
+            traceName = "NotificationScrollViewBinder",
             minWindowLifecycleState = WindowLifecycleState.ATTACHED,
             factory = viewModelFactory::create,
         ) { viewModel ->

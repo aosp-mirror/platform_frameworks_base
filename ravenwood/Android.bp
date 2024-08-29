@@ -160,6 +160,7 @@ java_library {
         "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
+        "framework-annotations-lib",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],

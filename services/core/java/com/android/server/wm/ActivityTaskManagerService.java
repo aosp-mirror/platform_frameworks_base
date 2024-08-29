@@ -3796,9 +3796,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         r.shortComponentName, Boolean.toString(isAutoEnter));
                 r.setPictureInPictureParams(params);
                 r.mAutoEnteringPip = isAutoEnter;
-                mRootWindowContainer.moveActivityToPinnedRootTask(r,
-                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
-                        transition);
+
+                if (transition != null) {
+                    mRootWindowContainer.moveActivityToPinnedRootTaskAndRequestStart(r,
+                            "enterPictureInPictureMode");
+                } else if (getTransitionController().isCollecting()
+                        || !getTransitionController().isShellTransitionsEnabled()) {
+                    mRootWindowContainer.moveActivityToPinnedRootTask(r,
+                            null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
+                            null /* bounds */);
+                } else {
+                    // Need to make a transition just for this. This shouldn't really happen
+                    // though because if transition == null, we should be part of an existing one.
+                    getTransitionController().createTransition(TRANSIT_PIP);
+                    mRootWindowContainer.moveActivityToPinnedRootTaskAndRequestStart(r,
+                            "enterPictureInPictureMode");
+                }
                 // Continue the pausing process after entering pip.
                 if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,

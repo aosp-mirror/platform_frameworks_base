@@ -19,7 +19,6 @@ package com.android.systemui.scene.ui.viewmodel
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * need to worry about resetting the value of [actions] when the view-model is deactivated/canceled,
  * this base class takes care of it.
  */
-abstract class SceneActionsViewModel : SysUiViewModel, ExclusiveActivatable() {
+abstract class SceneActionsViewModel : ExclusiveActivatable() {
 
     private val _actions = MutableStateFlow<Map<UserAction, UserActionResult>>(emptyMap())
     /**

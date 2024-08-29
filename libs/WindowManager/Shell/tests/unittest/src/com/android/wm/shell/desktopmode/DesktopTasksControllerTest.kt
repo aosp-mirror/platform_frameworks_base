@@ -84,6 +84,7 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.DesktopTasksController.TaskbarDesktopTaskListener
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -175,6 +176,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock
   private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
   @Mock private lateinit var mockSurface: SurfaceControl
+  @Mock private lateinit var taskbarDesktopTaskListener: TaskbarDesktopTaskListener
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -237,6 +239,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val captor = ArgumentCaptor.forClass(RecentsTransitionStateListener::class.java)
     verify(recentsTransitionHandler).addTransitionStateListener(captor.capture())
     recentsTransitionStateListener = captor.value
+
+    controller.taskbarDesktopTaskListener = taskbarDesktopTaskListener
   }
 
   private fun createController(): DesktopTasksController {
@@ -280,6 +284,52 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun instantiate_addInitCallback() {
     verify(shellInit).addInitCallback(any(), any<DesktopTasksController>())
   }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_onlyFreeFormTaskIsRunning_returnFalse() {
+    setUpFreeformTask()
+
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isFalse()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_toggleResizeOfFreeFormTask_returnTrue() {
+    val task1 = setUpFreeformTask()
+
+    val argumentCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+    controller.toggleDesktopTaskSize(task1)
+    verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
+
+    assertThat(argumentCaptor.value).isTrue()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_fullScreenTaskIsRunning_returnTrue() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    setUpFreeformTask(bounds = stableBounds, active = true)
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isTrue()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_toggleResizeOfFullScreenTask_returnFalse() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    val task1 = setUpFreeformTask(bounds = stableBounds, active = true)
+
+    val argumentCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+    controller.toggleDesktopTaskSize(task1)
+    verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
+
+    assertThat(argumentCaptor.value).isFalse()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_splitScreenTaskIsRunning_returnTrue() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    setUpFreeformTask(bounds = Rect(stableBounds.left, stableBounds.top, 500, stableBounds.bottom))
+
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isTrue()
+  }
+
 
   @Test
   fun instantiate_cannotEnterDesktopMode_doNotAddInitCallback() {

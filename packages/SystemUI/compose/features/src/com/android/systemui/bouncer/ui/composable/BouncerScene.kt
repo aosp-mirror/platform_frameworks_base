@@ -76,7 +76,7 @@ constructor(
         modifier: Modifier,
     ) =
         BouncerScene(
-            viewModel = rememberViewModel { contentViewModelFactory.create() },
+            viewModel = rememberViewModel("BouncerScene") { contentViewModelFactory.create() },
             dialogFactory = dialogFactory,
             modifier = modifier,
         )
