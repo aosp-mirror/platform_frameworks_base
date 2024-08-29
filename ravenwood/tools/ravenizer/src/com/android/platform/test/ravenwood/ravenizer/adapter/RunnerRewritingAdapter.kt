@@ -183,7 +183,7 @@ class RunnerRewritingAdapter private constructor(
             av.visit("value", ravenwoodTestRunnerType.type)
             av.visitEnd()
         }
-        log.d("Processed ${classInternalName.toHumanReadableClassName()}")
+        log.i("Update the @RunWith: ${classInternalName.toHumanReadableClassName()}")
     }
 
     /*
