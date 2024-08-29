@@ -23,7 +23,6 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
-import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -35,12 +34,10 @@ import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
@@ -66,12 +63,6 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             mockDialogDelegate,
             mockDialogEventLogger
         )
-
-    @Before
-    fun setUp() {
-        // TODO: b/360399800 - Remove; ZenIconLoader should always use direct executor for tests
-        ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
-    }
 
     @Test
     fun tiles_filtersOutUserDisabledModes() =

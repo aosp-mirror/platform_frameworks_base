@@ -35,7 +35,6 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
-import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -71,14 +70,12 @@ import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.DateFormatUtil
 import com.android.systemui.util.time.FakeSystemClock
-import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
@@ -114,12 +111,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         private const val SCREEN_RECORD_SLOT = "screen_record"
         private const val CONNECTED_DISPLAY_SLOT = "connected_display"
         private const val MANAGED_PROFILE_SLOT = "managed_profile"
-
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
-        }
     }
 
     @Mock private lateinit var iconController: StatusBarIconController
