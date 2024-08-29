@@ -13972,11 +13972,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     UserManager.DISALLOW_THREAD_NETWORK,
                     new String[]{MANAGE_DEVICE_POLICY_THREAD_NETWORK});
         }
-        if (Flags.assistContentUserRestrictionEnabled()) {
-            USER_RESTRICTION_PERMISSIONS.put(
-                    UserManager.DISALLOW_ASSIST_CONTENT,
-                    new String[]{MANAGE_DEVICE_POLICY_ASSIST_CONTENT});
-        }
+        USER_RESTRICTION_PERMISSIONS.put(
+                UserManager.DISALLOW_ASSIST_CONTENT,
+                new String[]{MANAGE_DEVICE_POLICY_ASSIST_CONTENT});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, new String[]{MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION});
         USER_RESTRICTION_PERMISSIONS.put(
@@ -19755,16 +19753,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void transferSubscriptionOwnership(ComponentName admin, ComponentName target) {
-        if (Flags.esimManagementEnabled()) {
-            SubscriptionManager subscriptionManager = mContext.getSystemService(
-                    SubscriptionManager.class);
-            for (int subId : getSubscriptionIdsInternal(admin.getPackageName()).toArray()) {
-                try {
-                    subscriptionManager.setGroupOwner(subId, target.getPackageName());
-                } catch (Exception e) {
-                    // Shouldn't happen.
-                    Slogf.e(LOG_TAG, e, "Error setting group owner for subId: " + subId);
-                }
+        SubscriptionManager subscriptionManager = mContext.getSystemService(
+                SubscriptionManager.class);
+        for (int subId : getSubscriptionIdsInternal(admin.getPackageName()).toArray()) {
+            try {
+                subscriptionManager.setGroupOwner(subId, target.getPackageName());
+            } catch (Exception e) {
+                // Shouldn't happen.
+                Slogf.e(LOG_TAG, e, "Error setting group owner for subId: " + subId);
             }
         }
     }
