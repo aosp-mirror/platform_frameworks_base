@@ -380,6 +380,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_always_check_underlying_networks"
+    namespace: "systemui"
+    description: "For status bar connectivity UI, always check underlying networks for wifi and "
+        "carrier merged information, regardless of the sepcified transport type"
+    bug: "352162710"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_stop_updating_window_height"
     namespace: "systemui"
     description: "Don't have PhoneStatusBarView manually trigger an update of the height in "
