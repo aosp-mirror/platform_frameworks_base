@@ -403,7 +403,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_NEW_PICKER_UI)
+    @EnableFlags(com.android.systemui.shared.Flags.FLAG_NEW_CUSTOMIZATION_PICKER_UI)
     fun startButton_inPreviewMode_onPreviewQuickAffordanceSelected() =
         testScope.runTest {
             underTest.onPreviewSlotSelected(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START)
