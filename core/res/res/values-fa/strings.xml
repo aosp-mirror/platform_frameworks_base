@@ -1183,7 +1183,7 @@
     <string name="copyUrl" msgid="6229645005987260230">"‏کپی URL"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"انتخاب متن"</string>
     <string name="undo" msgid="3175318090002654673">"لغو"</string>
-    <string name="redo" msgid="7231448494008532233">"بازانجام"</string>
+    <string name="redo" msgid="7231448494008532233">"ازنو انجام دادن"</string>
     <string name="autofill" msgid="511224882647795296">"تکمیل خودکار"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"انتخاب متن"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"افزودن به واژه‌نامه"</string>

@@ -291,7 +291,7 @@
     <string name="notification_channel_security" msgid="8516754650348238057">"સુરક્ષા"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"કાર મોડ"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"એકાઉન્ટ સ્થિતિ"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"વિકાસકર્તા માટેના સંદેશા"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"ડેવલપર માટેના મેસેજ"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ડેવલપર માટેના મહત્ત્વપૂર્ણ મેસેજ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"અપડેટ્સ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"નેટવર્ક સ્થિતિ"</string>
@@ -400,7 +400,7 @@
     <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"આ ઍપ, તમારા ફોન પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"ટેક્સ્ટ મેસેજ  (WAP) મેળવો"</string>
-    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"એપ્લિકેશનને WAP સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલ સંદેશાઓનું નિરીક્ષણ કરવાની અને કાઢી નાખવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
+    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"ઍપને WAP મેસેજ મેળવવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલા મેસેજનું નિરીક્ષણ કરવાની અને ડિલીટ કરવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"ચાલુ ઍપ્લિકેશનો પુનઃપ્રાપ્ત કરો"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ Tasks વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"પ્રોફાઇલ અને ડિવાઇસ માલિકોને મેનેજ કરો"</string>
