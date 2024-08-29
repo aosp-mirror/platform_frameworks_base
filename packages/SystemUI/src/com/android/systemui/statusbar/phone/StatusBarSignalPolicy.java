@@ -25,6 +25,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.settingslib.mobile.TelephonyIcons;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.IconState;
@@ -44,10 +45,13 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-/** Controls the signal policies for icons shown in the statusbar. **/
+/** Controls the signal policies for icons shown in the statusbar. */
 @SysUISingleton
-public class StatusBarSignalPolicy implements SignalCallback,
-        SecurityController.SecurityControllerCallback, Tunable {
+public class StatusBarSignalPolicy
+        implements SignalCallback,
+                SecurityController.SecurityControllerCallback,
+                Tunable,
+                CoreStartable {
     private static final String TAG = "StatusBarSignalPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -71,9 +75,9 @@ public class StatusBarSignalPolicy implements SignalCallback,
     private boolean mHideAirplane;
     private boolean mHideMobile;
     private boolean mHideEthernet;
-    private boolean mActivityEnabled;
+    private final boolean mActivityEnabled;
 
-    private ArrayList<CallIndicatorIconState> mCallIndicatorStates = new ArrayList<>();
+    private final ArrayList<CallIndicatorIconState> mCallIndicatorStates = new ArrayList<>();
     private boolean mInitialized;
 
     @Inject
@@ -107,9 +111,23 @@ public class StatusBarSignalPolicy implements SignalCallback,
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
     }
 
+    @Override
+    public void start() {
+        if (!statusBarSignalPolicyRefactor()) {
+            return;
+        }
+
+        mTunerService.addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
+        mNetworkController.addCallback(this);
+        mSecurityController.addCallback(this);
+
+        mJavaAdapter.alwaysCollectFlow(
+                mAirplaneModeInteractor.isAirplaneMode(), this::updateAirplaneModeIcon);
+    }
+
     /** Call to initialize and register this class with the system. */
     public void init() {
-        if (mInitialized) {
+        if (mInitialized || statusBarSignalPolicyRefactor()) {
             return;
         }
         mInitialized = true;
