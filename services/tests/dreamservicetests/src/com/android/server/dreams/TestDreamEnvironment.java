@@ -385,7 +385,8 @@ public class TestDreamEnvironment {
             final ArgumentCaptor<IDreamOverlayCallback> overlayCallbackCaptor =
                     ArgumentCaptor.forClass(IDreamOverlayCallback.class);
             verify(mDreamOverlayClient, description("dream client not informed of dream start"))
-                    .startDream(any(), overlayCallbackCaptor.capture(), any(), anyBoolean());
+                    .startDream(any(), overlayCallbackCaptor.capture(), any(), anyBoolean(),
+                            anyBoolean());
 
             mDreamOverlayCallback = overlayCallbackCaptor.getValue();
         }

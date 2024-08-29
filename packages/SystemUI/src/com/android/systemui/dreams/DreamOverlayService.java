@@ -24,12 +24,11 @@ import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_M
 import static com.android.systemui.dreams.dagger.DreamModule.HOME_CONTROL_PANEL_DREAM_COMPONENT;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.drawable.ColorDrawable;
-import android.service.dreams.DreamActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,6 +64,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -89,6 +89,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         LifecycleOwner {
     private static final String TAG = "DreamOverlayService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final TaskMatcher DREAM_TYPE_MATCHER =
+            new TaskMatcher.TopActivityType(WindowConfiguration.ACTIVITY_TYPE_DREAM);
 
     // The Context is used to construct the hosting constraint layout and child overlay views.
     private final Context mContext;
@@ -140,10 +142,6 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private final TouchInsetManager mTouchInsetManager;
     private final LifecycleOwner mLifecycleOwner;
-
-
-
-    private ComponentName mCurrentBlockedGestureDreamActivityComponent;
 
     private final ArrayList<Job> mFlows = new ArrayList<>();
 
@@ -420,7 +418,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStarted = true;
 
         updateRedirectWakeup();
-        updateBlockedGestureDreamActivityComponent();
+
+        if (!isDreamInPreviewMode()) {
+            mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                    GestureInteractor.Scope.Global);
+        }
     }
 
     private void updateRedirectWakeup() {
@@ -429,18 +431,6 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
 
         redirectWake(mCommunalAvailable && !glanceableHubAllowKeyguardWhenDreaming());
-    }
-
-    private void updateBlockedGestureDreamActivityComponent() {
-        // TODO(b/343815446): We should not be crafting this ActivityInfo ourselves. It should be
-        // in a common place, Such as DreamActivity itself.
-        final ActivityInfo info = new ActivityInfo();
-        info.name = DreamActivity.class.getName();
-        info.packageName = getDreamComponent().getPackageName();
-        mCurrentBlockedGestureDreamActivityComponent = info.getComponentName();
-
-        mGestureInteractor.addGestureBlockedActivity(mCurrentBlockedGestureDreamActivityComponent,
-                GestureInteractor.Scope.Global);
     }
 
     @Override
@@ -613,11 +603,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mWindow = null;
 
         // Always unregister the any set DreamActivity from being blocked from gestures.
-        if (mCurrentBlockedGestureDreamActivityComponent != null) {
-            mGestureInteractor.removeGestureBlockedActivity(
-                    mCurrentBlockedGestureDreamActivityComponent, GestureInteractor.Scope.Global);
-            mCurrentBlockedGestureDreamActivityComponent = null;
-        }
+        mGestureInteractor.removeGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                GestureInteractor.Scope.Global);
 
         mStarted = false;
     }

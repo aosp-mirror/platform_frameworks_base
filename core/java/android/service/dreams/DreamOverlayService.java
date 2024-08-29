@@ -58,6 +58,7 @@ public abstract class DreamOverlayService extends Service {
     private static class OverlayClient extends IDreamOverlayClient.Stub {
         private final WeakReference<DreamOverlayService> mService;
         private boolean mShowComplications;
+        private boolean mIsPreview;
         private ComponentName mDreamComponent;
         IDreamOverlayCallback mDreamOverlayCallback;
 
@@ -75,9 +76,11 @@ public abstract class DreamOverlayService extends Service {
 
         @Override
         public void startDream(WindowManager.LayoutParams params, IDreamOverlayCallback callback,
-                String dreamComponent, boolean shouldShowComplications) throws RemoteException {
+                String dreamComponent, boolean isPreview, boolean shouldShowComplications)
+                throws RemoteException {
             mDreamComponent = ComponentName.unflattenFromString(dreamComponent);
             mShowComplications = shouldShowComplications;
+            mIsPreview = isPreview;
             mDreamOverlayCallback = callback;
             applyToDream(dreamOverlayService -> dreamOverlayService.startDream(this, params));
         }
@@ -122,6 +125,10 @@ public abstract class DreamOverlayService extends Service {
 
         private boolean shouldShowComplications() {
             return mShowComplications;
+        }
+
+        private boolean isDreamInPreviewMode() {
+            return mIsPreview;
         }
 
         private ComponentName getComponent() {
@@ -303,7 +310,6 @@ public abstract class DreamOverlayService extends Service {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_DREAM_WAKE_REDIRECT)
     public void onWakeRequested() {
     }
 
@@ -317,6 +323,19 @@ public abstract class DreamOverlayService extends Service {
         }
 
         return mCurrentClient.shouldShowComplications();
+    }
+
+    /**
+     * Returns whether dream is in preview mode.
+     */
+    @FlaggedApi(Flags.FLAG_PUBLISH_PREVIEW_STATE_TO_OVERLAY)
+    public final boolean isDreamInPreviewMode() {
+        if (mCurrentClient == null) {
+            throw new IllegalStateException(
+                    "requested if preview when no dream active");
+        }
+
+        return mCurrentClient.isDreamInPreviewMode();
     }
 
     /**
