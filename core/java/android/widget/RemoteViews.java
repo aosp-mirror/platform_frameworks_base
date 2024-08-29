@@ -1448,6 +1448,11 @@ public class RemoteViews implements Parcelable, Filter {
                         }
 
                         @Override
+                        public void onNullBinding(ComponentName name) {
+                            context.unbindService(this);
+                        }
+
+                        @Override
                         public void onServiceDisconnected(ComponentName componentName) { }
                     });
 
