@@ -285,9 +285,8 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     private HardwareBuffer(long nativeObject) {
         mNativeObject = nativeObject;
         long bufferSize = nEstimateSize(nativeObject);
-        ClassLoader loader = HardwareBuffer.class.getClassLoader();
-        NativeAllocationRegistry registry = new NativeAllocationRegistry(
-                loader, nGetNativeFinalizer(), bufferSize);
+        NativeAllocationRegistry registry = NativeAllocationRegistry.createNonmalloced(
+                HardwareBuffer.class, nGetNativeFinalizer(), bufferSize);
         mCleaner = registry.registerNativeAllocation(this, mNativeObject);
         mCloseGuard.open("HardwareBuffer.close");
     }
