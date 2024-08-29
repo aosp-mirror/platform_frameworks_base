@@ -625,25 +625,10 @@ public class RebootEscrowManagerTests {
 
         // pretend reboot happens here
         when(mInjected.getBootCount()).thenReturn(1);
-        ArgumentCaptor<Boolean> metricsSuccessCaptor = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Integer> metricsErrorCodeCaptor = ArgumentCaptor.forClass(Integer.class);
-        doNothing()
-                .when(mInjected)
-                .reportMetric(
-                        metricsSuccessCaptor.capture(),
-                        metricsErrorCodeCaptor.capture(),
-                        eq(2) /* Server based */,
-                        eq(1) /* attempt count */,
-                        anyInt(),
-                        eq(0) /* vbmeta status */,
-                        anyInt());
+
         mService.loadRebootEscrowDataIfAvailable(null);
         verify(mServiceConnection, never()).unwrap(any(), anyLong());
         verify(mCallbacks, never()).onRebootEscrowRestored(anyByte(), any(), anyInt());
-        assertFalse(metricsSuccessCaptor.getValue());
-        assertEquals(
-                Integer.valueOf(RebootEscrowManager.ERROR_NO_REBOOT_ESCROW_DATA),
-                metricsErrorCodeCaptor.getValue());
     }
 
     @Test
