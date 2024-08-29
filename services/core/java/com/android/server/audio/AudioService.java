@@ -790,8 +790,7 @@ public class AudioService extends IAudioService.Stub
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
     private final Executor mAudioServerLifecycleExecutor;
-    private final ConcurrentLinkedQueue<Future> mScheduledPermissionTasks =
-            new ConcurrentLinkedQueue();
+    private final List<Future> mScheduledPermissionTasks = new ArrayList();
 
     private IMediaProjectionManager mProjectionService; // to validate projection token
 
@@ -10600,46 +10599,50 @@ public class AudioService extends IAudioService.Stub
         // instanceof to simplify the construction requirements of AudioService for testing: no
         // delayed execution during unit tests.
         if (mAudioServerLifecycleExecutor instanceof ScheduledExecutorService exec) {
-            // We schedule and add from a this callback thread only (serially), so the task order on
-            // the serial executor matches the order on the task list.  This list should almost
-            // always have only two elements, except in cases of serious system contention.
-            Runnable task = () -> mScheduledPermissionTasks.add(exec.schedule(() -> {
-                    try {
-                        // Clean up completed tasks before us to bound the queue length.  Cancel any
-                        // pending permission refresh tasks, after our own, since we are about to
-                        // fulfill all of them.  We must be the first non-completed task in the
-                        // queue, since the execution order matches the queue order.  Note, this
-                        // task is the only writer on elements in the queue, and the task is
-                        // serialized, so
-                        //  => no in-flight cancellation
-                        //  => exists at least one non-completed task (ourselves)
-                        //  => the queue is non-empty (only completed tasks removed)
-                        final var iter = mScheduledPermissionTasks.iterator();
-                        while (iter.next().isDone()) {
-                            iter.remove();
-                        }
-                        // iter is on the first element which is not completed (us)
-                        while (iter.hasNext()) {
-                            if (!iter.next().cancel(false)) {
-                                throw new AssertionError(
-                                        "Cancel should be infallible since we" +
-                                        "cancel from the executor");
+            // The order on the task list is an embedding on the scheduling order of the executor,
+            // since we synchronously add the scheduled task to our local queue. This list should
+            // almost always have only two elements, except in cases of serious system contention.
+            Runnable task = () -> {
+                synchronized (mScheduledPermissionTasks) {
+                    mScheduledPermissionTasks.add(exec.schedule(() -> {
+                        try {
+                            // Our goal is to remove all tasks which don't correspond to ourselves
+                            // on this queue. Either they are already done (ahead of us), or we
+                            // should cancel them (behind us), since their work is redundant after
+                            // we fire.
+                            // We must be the first non-completed task in the queue, since the
+                            // execution order matches the queue order. Note, this task is the only
+                            // writer on elements in the queue, and the task is serialized, so
+                            //  => no in-flight cancellation
+                            //  => exists at least one non-completed task (ourselves)
+                            //  => the queue is non-empty (only completed tasks removed)
+                            synchronized (mScheduledPermissionTasks) {
+                                final var iter = mScheduledPermissionTasks.iterator();
+                                while (iter.next().isDone()) {
+                                    iter.remove();
+                                }
+                                // iter is on the first element which is not completed (us)
+                                while (iter.hasNext()) {
+                                    if (!iter.next().cancel(false)) {
+                                        throw new AssertionError(
+                                                "Cancel should be infallible since we" +
+                                                "cancel from the executor");
+                                    }
+                                    iter.remove();
+                                }
                             }
-                            iter.remove();
+                            mPermissionProvider.onPermissionStateChanged();
+                        } catch (Exception e) {
+                            // Handle executor routing exceptions to nowhere
+                            Thread.getDefaultUncaughtExceptionHandler()
+                                    .uncaughtException(Thread.currentThread(), e);
                         }
-                        mPermissionProvider.onPermissionStateChanged();
-                    } catch (Exception e) {
-                        // Handle executor routing exceptions to nowhere
-                        Thread.getDefaultUncaughtExceptionHandler()
-                                .uncaughtException(Thread.currentThread(), e);
-                    }
-                },
-                UPDATE_DELAY_MS,
-                TimeUnit.MILLISECONDS));
+                    }, UPDATE_DELAY_MS, TimeUnit.MILLISECONDS));
+                }
+            };
             mAudioSystem.listenForSystemPropertyChange(
                     PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     task);
-            task.run();
         } else {
             mAudioSystem.listenForSystemPropertyChange(
                     PermissionManager.CACHE_KEY_PACKAGE_INFO,
@@ -14705,7 +14708,11 @@ public class AudioService extends IAudioService.Stub
     @Override
     /** @see AudioManager#permissionUpdateBarrier() */
     public void permissionUpdateBarrier() {
-        for (var x : List.copyOf(mScheduledPermissionTasks)) {
+        List<Future> snapshot;
+        synchronized (mScheduledPermissionTasks) {
+            snapshot = List.copyOf(mScheduledPermissionTasks);
+        }
+        for (var x : snapshot) {
             try {
                 x.get();
             } catch (CancellationException e) {
