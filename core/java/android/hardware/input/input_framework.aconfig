@@ -117,3 +117,10 @@ flag {
   description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
   bug: "336585002"
 }
+
+flag {
+  name: "mouse_reverse_vertical_scrolling"
+  namespace: "input"
+  description: "Controls whether external mouse vertical scrolling can be reversed"
+  bug: "352598211"
+}
