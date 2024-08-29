@@ -1057,9 +1057,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * needs to be passed/applied in shell because until finish is called, shell owns the surfaces.
      * Additionally, this gives shell the ability to better deal with merged transitions.
      */
-    private void buildFinishTransaction(SurfaceControl.Transaction t, TransitionInfo info) {
-        // usually only size 1
-        final ArraySet<DisplayContent> displays = new ArraySet<>();
+    private void buildFinishTransaction(SurfaceControl.Transaction t, TransitionInfo info,
+            DisplayContent[] participantDisplays) {
         for (int i = mTargets.size() - 1; i >= 0; --i) {
             final WindowContainer<?> target = mTargets.get(i).mContainer;
             if (target.getParent() == null) continue;
@@ -1071,7 +1070,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             t.setCornerRadius(targetLeash, 0);
             t.setShadowRadius(targetLeash, 0);
             t.setAlpha(targetLeash, 1);
-            displays.add(target.getDisplayContent());
             // For config-at-end, the end-transform will be reset after the config is actually
             // applied in the client (since the transform depends on config). The other properties
             // remain here because shell might want to persistently override them.
@@ -1085,9 +1083,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         // Need to update layers on involved displays since they were all paused while
         // the animation played. This puts the layers back into the correct order.
-        for (int i = displays.size() - 1; i >= 0; --i) {
-            if (displays.valueAt(i) == null) continue;
-            assignLayers(displays.valueAt(i), t);
+        for (int i = participantDisplays.length - 1; i >= 0; --i) {
+            assignLayers(participantDisplays[i], t);
         }
 
         for (int i = 0; i < info.getRootCount(); ++i) {
@@ -1800,6 +1797,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.moveToPlaying(this);
 
         // Repopulate the displays based on the resolved targets.
+        final DisplayContent[] participantDisplays = mTargetDisplays.toArray(
+                new DisplayContent[mTargetDisplays.size()]);
         mTargetDisplays.clear();
         for (int i = 0; i < info.getRootCount(); ++i) {
             final DisplayContent dc = mController.mAtm.mRootWindowContainer.getDisplayContent(
@@ -1893,7 +1892,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 controller.setupStartTransaction(transaction);
             }
         }
-        buildFinishTransaction(mFinishTransaction, info);
+        // Use participant displays here (rather than just targets) because it's possible for
+        // there to be order changes between non-top tasks in an otherwise no-op transition.
+        buildFinishTransaction(mFinishTransaction, info, participantDisplays);
         mCleanupTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         buildCleanupTransaction(mCleanupTransaction, info);
         if (mController.getTransitionPlayer() != null && mIsPlayerEnabled) {
