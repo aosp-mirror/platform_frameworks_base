@@ -3811,7 +3811,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (!mSimDatas.containsKey(subId)) {
             refreshSimState(subId, SubscriptionManager.getSlotIndex(subId));
         }
-        return mSimDatas.get(subId).slotId;
+        SimData simData = mSimDatas.get(subId);
+        return simData != null ? simData.slotId : SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 
     private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
