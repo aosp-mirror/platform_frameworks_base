@@ -17,7 +17,6 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -44,7 +43,7 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     val mediaCarouselInteractor: MediaCarouselInteractor,
-) : SysUiViewModel {
+) {
 
     val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasAnyMediaOrRecommendation
 

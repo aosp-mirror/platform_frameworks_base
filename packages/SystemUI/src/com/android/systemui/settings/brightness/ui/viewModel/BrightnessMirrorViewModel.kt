@@ -20,7 +20,6 @@ import android.content.res.Resources
 import android.util.Log
 import android.view.View
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.settings.brightness.MirrorController
@@ -37,7 +36,7 @@ constructor(
     private val brightnessMirrorShowingInteractor: BrightnessMirrorShowingInteractor,
     @Main private val resources: Resources,
     val sliderControllerFactory: BrightnessSliderController.Factory,
-) : SysUiViewModel, MirrorController {
+) : MirrorController {
 
     private val tempPosition = IntArray(2)
 

@@ -46,6 +46,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.server.am.ActivityManagerService.FOLLOW_UP_OOMADJUSTER_UPDATE_MSG;
 import static com.android.server.am.ProcessList.BACKUP_APP_ADJ;
+import static com.android.server.am.ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
 import static com.android.server.am.ProcessList.CACHED_APP_MAX_ADJ;
 import static com.android.server.am.ProcessList.CACHED_APP_MIN_ADJ;
 import static com.android.server.am.ProcessList.FOREGROUND_APP_ADJ;
@@ -840,6 +841,49 @@ public class MockingOomAdjusterTests {
         // Follow up should not have been called again.
         verify(mService.mHandler).sendEmptyMessageAtTime(eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG),
                 followUpTimeCaptor.capture());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoAll_PreviousApp() {
+        final int numberOfApps = 15;
+        final ProcessRecord[] apps = new ProcessRecord[numberOfApps];
+        for (int i = 0; i < numberOfApps; i++) {
+            apps[i] = spy(makeDefaultProcessRecord(MOCKAPP_PID + i, MOCKAPP_UID + i,
+                    MOCKAPP_PROCESSNAME + i, MOCKAPP_PACKAGENAME + i, true));
+            final WindowProcessController wpc = apps[i].getWindowProcessController();
+            doReturn(true).when(wpc).isPreviousProcess();
+            doReturn(true).when(wpc).hasActivities();
+        }
+        mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        setProcessesToLru(apps);
+        mService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+
+        for (int i = 0; i < numberOfApps; i++) {
+            assertProcStates(apps[i], PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
+                    SCHED_GROUP_BACKGROUND, "previous");
+        }
+
+        if (!Flags.followUpOomadjUpdates()) return;
+
+        for (int i = 0; i < numberOfApps; i++) {
+            final ArgumentCaptor<Long> followUpTimeCaptor = ArgumentCaptor.forClass(Long.class);
+            verify(mService.mHandler).sendEmptyMessageAtTime(eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG),
+                    followUpTimeCaptor.capture());
+            mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
+        }
+
+        mService.mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
+
+        for (int i = 0; i < numberOfApps; i++) {
+            final int mruIndex = numberOfApps - i - 1;
+            int expectedAdj = CACHED_APP_MIN_ADJ + (mruIndex * 2 * CACHED_APP_IMPORTANCE_LEVELS);
+            if (expectedAdj > CACHED_APP_MAX_ADJ) {
+                expectedAdj = CACHED_APP_MAX_ADJ;
+            }
+            assertProcStates(apps[i], PROCESS_STATE_LAST_ACTIVITY, expectedAdj,
+                    SCHED_GROUP_BACKGROUND, "previous-expired");
+        }
     }
 
     @SuppressWarnings("GuardedBy")

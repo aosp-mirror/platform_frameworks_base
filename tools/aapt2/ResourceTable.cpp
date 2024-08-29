@@ -50,21 +50,21 @@ bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs,
 
 template <typename T>
 bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, StringPiece rhs) {
-  return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
+  return lhs->name < rhs;
 }
 
 template <typename T>
 bool greater_than_struct_with_name(StringPiece lhs, const std::unique_ptr<T>& rhs) {
-  return rhs->name.compare(0, rhs->name.size(), lhs.data(), lhs.size()) > 0;
+  return rhs->name > lhs;
 }
 
 template <typename T>
 struct NameEqualRange {
   bool operator()(const std::unique_ptr<T>& lhs, StringPiece rhs) const {
-    return less_than_struct_with_name<T>(lhs, rhs);
+    return less_than_struct_with_name(lhs, rhs);
   }
   bool operator()(StringPiece lhs, const std::unique_ptr<T>& rhs) const {
-    return greater_than_struct_with_name<T>(lhs, rhs);
+    return greater_than_struct_with_name(lhs, rhs);
   }
 };
 
@@ -74,7 +74,7 @@ bool less_than_struct_with_name_and_id(const T& lhs,
   if (lhs.id != rhs.second) {
     return lhs.id < rhs.second;
   }
-  return lhs.name.compare(0, lhs.name.size(), rhs.first.data(), rhs.first.size()) < 0;
+  return lhs.name < rhs.first;
 }
 
 template <typename T, typename Func, typename Elements>
@@ -90,14 +90,16 @@ struct ConfigKey {
   StringPiece product;
 };
 
-template <typename T>
-bool lt_config_key_ref(const T& lhs, const ConfigKey& rhs) {
-  int cmp = lhs->config.compare(*rhs.config);
-  if (cmp == 0) {
-    cmp = StringPiece(lhs->product).compare(rhs.product);
+struct lt_config_key_ref {
+  template <typename T>
+  bool operator()(const T& lhs, const ConfigKey& rhs) const noexcept {
+    int cmp = lhs->config.compare(*rhs.config);
+    if (cmp == 0) {
+      cmp = lhs->product.compare(rhs.product);
+    }
+    return cmp < 0;
   }
-  return cmp < 0;
-}
+};
 
 }  // namespace
 
@@ -159,10 +161,10 @@ ResourceEntry* ResourceTableType::FindOrCreateEntry(android::StringPiece name) {
 ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
                                               android::StringPiece product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
       return value;
     }
   }
@@ -172,10 +174,10 @@ ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
 const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescription& config,
                                                     android::StringPiece product) const {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
       return value;
     }
   }
@@ -185,10 +187,10 @@ const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescrip
 ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& config,
                                                       StringPiece product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
       return value;
     }
   }
@@ -199,36 +201,21 @@ ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& c
 
 std::vector<ResourceConfigValue*> ResourceEntry::FindAllValues(const ConfigDescription& config) {
   std::vector<ResourceConfigValue*> results;
-
-  auto iter = values.begin();
+  auto iter =
+      std::lower_bound(values.begin(), values.end(), ConfigKey{&config, ""}, lt_config_key_ref());
   for (; iter != values.end(); ++iter) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config) {
-      results.push_back(value);
-      ++iter;
+    if (value->config != config) {
       break;
     }
-  }
-
-  for (; iter != values.end(); ++iter) {
-    ResourceConfigValue* value = iter->get();
-    if (value->config == config) {
-      results.push_back(value);
-    }
+    results.push_back(value);
   }
   return results;
 }
 
 bool ResourceEntry::HasDefaultValue() const {
-  const ConfigDescription& default_config = ConfigDescription::DefaultConfig();
-
   // The default config should be at the top of the list, since the list is sorted.
-  for (auto& config_value : values) {
-    if (config_value->config == default_config) {
-      return true;
-    }
-  }
-  return false;
+  return !values.empty() && values.front()->config == ConfigDescription::DefaultConfig();
 }
 
 ResourceTable::CollisionResult ResourceTable::ResolveFlagCollision(FlagStatus existing,
@@ -364,14 +351,14 @@ struct SortedVectorInserter : public Comparer {
     if (found) {
       return &*it;
     }
-    return &*el.insert(it, std::forward<T>(value));
+    return &*el.insert(it, std::move(value));
   }
 };
 
 struct PackageViewComparer {
   bool operator()(const ResourceTablePackageView& lhs, const ResourceTablePackageView& rhs) {
     return less_than_struct_with_name_and_id<ResourceTablePackageView, uint8_t>(
-        lhs, std::make_pair(rhs.name, rhs.id));
+        lhs, std::tie(rhs.name, rhs.id));
   }
 };
 
@@ -384,7 +371,7 @@ struct TypeViewComparer {
 struct EntryViewComparer {
   bool operator()(const ResourceTableEntryView& lhs, const ResourceTableEntryView& rhs) {
     return less_than_struct_with_name_and_id<ResourceTableEntryView, uint16_t>(
-        lhs, std::make_pair(rhs.name, rhs.id));
+        lhs, std::tie(rhs.name, rhs.id));
   }
 };
 
@@ -429,10 +416,10 @@ void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePacka
 const ResourceConfigValue* ResourceTableEntryView::FindValue(const ConfigDescription& config,
                                                              android::StringPiece product) const {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<const ResourceConfigValue*>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     const ResourceConfigValue* value = *iter;
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
       return value;
     }
   }
@@ -615,11 +602,15 @@ bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) 
         result = ResolveValueCollision(config_value->value.get(), res.value.get());
       }
       switch (result) {
-        case CollisionResult::kKeepBoth:
+        case CollisionResult::kKeepBoth: {
           // Insert the value ignoring for duplicate configurations
-          entry->values.push_back(util::make_unique<ResourceConfigValue>(res.config, res.product));
-          entry->values.back()->value = std::move(res.value);
+          auto it = entry->values.insert(
+              std::lower_bound(entry->values.begin(), entry->values.end(),
+                               ConfigKey{&res.config, res.product}, lt_config_key_ref()),
+              util::make_unique<ResourceConfigValue>(res.config, res.product));
+          (*it)->value = std::move(res.value);
           break;
+        }
 
         case CollisionResult::kTakeNew:
           // Take the incoming value.

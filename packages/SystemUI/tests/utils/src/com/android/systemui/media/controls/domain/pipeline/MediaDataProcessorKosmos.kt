@@ -18,7 +18,6 @@ package com.android.systemui.media.controls.domain.pipeline
 
 import android.app.smartspace.SmartspaceManager
 import android.content.applicationContext
-import android.os.fakeExecutorHandler
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.concurrency.fakeExecutor
@@ -45,7 +44,7 @@ val Kosmos.mediaDataProcessor by
             backgroundExecutor = fakeExecutor,
             uiExecutor = fakeExecutor,
             foregroundExecutor = fakeExecutor,
-            handler = fakeExecutorHandler,
+            mainDispatcher = testDispatcher,
             mediaControllerFactory = fakeMediaControllerFactory,
             broadcastDispatcher = broadcastDispatcher,
             dumpManager = dumpManager,
@@ -60,5 +59,6 @@ val Kosmos.mediaDataProcessor by
             smartspaceManager = SmartspaceManager(applicationContext),
             keyguardUpdateMonitor = keyguardUpdateMonitor,
             mediaDataRepository = mediaDataRepository,
+            mediaDataLoader = { mediaDataLoader },
         )
     }

@@ -46,18 +46,7 @@
       ]
     },
     {
-      "name": "CtsPermissionTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-filter": "android.permission.cts.SplitPermissionTest"
-        },
-        {
-          "include-filter": "android.permission.cts.BackgroundPermissionsTest"
-        }
-      ]
+      "name": "CtsPermissionTestCases_Platform"
     },
     {
       "name": "CtsBackupTestCases",

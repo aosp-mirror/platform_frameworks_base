@@ -17,13 +17,15 @@ package android.platform.test.ravenwood;
 
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
 
+import static org.junit.Assert.fail;
+
 import android.os.Bundle;
 import android.platform.test.ravenwood.RavenwoodAwareTestRunner.Order;
 import android.platform.test.ravenwood.RavenwoodAwareTestRunner.Scope;
+import android.platform.test.ravenwood.RavenwoodTestStats.Result;
+import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
-
-import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
@@ -38,12 +40,24 @@ public class RavenwoodAwareTestRunnerHook {
     private RavenwoodAwareTestRunnerHook() {
     }
 
-    private static void log(String message) {
-        RavenwoodCommonUtils.log(TAG, message);
+    private static RavenwoodTestStats sStats; // lazy initialization.
+    private static Description sCurrentClassDescription;
+
+    private static RavenwoodTestStats getStats() {
+        if (sStats == null) {
+            // We don't want to throw in the static initializer, because tradefed may not report
+            // it properly, so we initialize it here.
+            sStats = new RavenwoodTestStats();
+        }
+        return sStats;
     }
 
+    /**
+     * Called when a runner starts, before the inner runner gets a chance to run.
+     */
     public static void onRunnerInitializing(Runner runner, TestClass testClass) {
-        log("onRunnerStart: testClass=" + testClass + " runner=" + runner);
+        // This log call also ensures the framework JNI is loaded.
+        Log.i(TAG, "onRunnerInitializing: testClass=" + testClass + " runner=" + runner);
 
         // TODO: Move the initialization code to a better place.
 
@@ -52,26 +66,97 @@ public class RavenwoodAwareTestRunnerHook {
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
         System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
 
+
         // This is needed to make AndroidJUnit4ClassRunner happy.
         InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
     }
 
+    /**
+     * Called when a whole test class is skipped.
+     */
+    public static void onClassSkipped(Description description) {
+        Log.i(TAG, "onClassSkipped: description=" + description);
+        getStats().onClassSkipped(description);
+    }
+
+    /**
+     * Called before a test / class.
+     *
+     * Return false if it should be skipped.
+     */
     public static boolean onBefore(RavenwoodAwareTestRunner runner, Description description,
             Scope scope, Order order) {
-        log("onBefore: description=" + description + ", " + scope + ", " + order);
+        Log.i(TAG, "onBefore: description=" + description + ", " + scope + ", " + order);
+
+        if (scope == Scope.Class && order == Order.First) {
+            // Keep track of the current class.
+            sCurrentClassDescription = description;
+        }
 
         // Class-level annotations are checked by the runner already, so we only check
         // method-level annotations here.
         if (scope == Scope.Instance && order == Order.First) {
-            if (!RavenwoodRule.shouldEnableOnRavenwood(description)) {
+            if (!RavenwoodEnablementChecker.shouldEnableOnRavenwood(
+                    description, true)) {
+                getStats().onTestFinished(sCurrentClassDescription, description, Result.Skipped);
                 return false;
             }
         }
         return true;
     }
 
-    public static void onAfter(RavenwoodAwareTestRunner runner, Description description,
+    /**
+     * Called after a test / class.
+     *
+     * Return false if the exception should be ignored.
+     */
+    public static boolean onAfter(RavenwoodAwareTestRunner runner, Description description,
             Scope scope, Order order, Throwable th) {
-        log("onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
+        Log.i(TAG, "onAfter: description=" + description + ", " + scope + ", " + order + ", " + th);
+
+        if (scope == Scope.Instance && order == Order.First) {
+            getStats().onTestFinished(sCurrentClassDescription, description,
+                    th == null ? Result.Passed : Result.Failed);
+
+        } else if (scope == Scope.Class && order == Order.Last) {
+            getStats().onClassFinished(sCurrentClassDescription);
+        }
+
+        // If RUN_DISABLED_TESTS is set, and the method did _not_ throw, make it an error.
+        if (RavenwoodRule.private$ravenwood().isRunningDisabledTests()
+                && scope == Scope.Instance && order == Order.First) {
+
+            boolean isTestEnabled = RavenwoodEnablementChecker.shouldEnableOnRavenwood(
+                    description, false);
+            if (th == null) {
+                // Test passed. Is the test method supposed to be enabled?
+                if (isTestEnabled) {
+                    // Enabled and didn't throw, okay.
+                    return true;
+                } else {
+                    // Disabled and didn't throw. We should report it.
+                    fail("Test wasn't included under Ravenwood, but it actually "
+                            + "passed under Ravenwood; consider updating annotations");
+                    return true; // unreachable.
+                }
+            } else {
+                // Test failed.
+                if (isTestEnabled) {
+                    // Enabled but failed. We should throw the exception.
+                    return true;
+                } else {
+                    // Disabled and failed. Expected. Don't throw.
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Called by {@link RavenwoodAwareTestRunner} to see if it should run a test class or not.
+     */
+    public static boolean shouldRunClassOnRavenwood(Class<?> clazz) {
+        return RavenwoodEnablementChecker.shouldRunClassOnRavenwood(clazz, true);
     }
 }

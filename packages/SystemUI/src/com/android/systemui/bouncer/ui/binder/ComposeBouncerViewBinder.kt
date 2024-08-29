@@ -52,7 +52,9 @@ object ComposeBouncerViewBinder {
                         setContent {
                             PlatformTheme {
                                 BouncerContent(
-                                    rememberViewModel { viewModelFactory.create() },
+                                    rememberViewModel("ComposeBouncerViewBinder") {
+                                        viewModelFactory.create()
+                                    },
                                     dialogFactory,
                                 )
                             }

@@ -169,6 +169,9 @@ class DesktopTasksController(
             }
         }
 
+    @VisibleForTesting
+    var taskbarDesktopTaskListener: TaskbarDesktopTaskListener? = null
+
     /** Task id of the task currently being dragged from fullscreen/split. */
     val draggingTaskId
         get() = dragToDesktopTransitionHandler.draggingTaskId
@@ -610,13 +613,10 @@ class DesktopTasksController(
         val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         val destinationBounds = Rect()
 
-        val isMaximized = if (taskInfo.isResizeable) {
-            currentTaskBounds == stableBounds
-        } else {
-            currentTaskBounds.width() == stableBounds.width()
-                    || currentTaskBounds.height() == stableBounds.height()
-        }
-
+        val isMaximized = isTaskMaximized(taskInfo, stableBounds)
+        // If the task is currently maximized, we will toggle it not to be and vice versa. This is
+        // helpful to eliminate the current task from logic to calculate taskbar corner rounding.
+        val willMaximize = !isMaximized
         if (isMaximized) {
             // The desktop task is at the maximized width and/or height of the stable bounds.
             // If the task's pre-maximize stable bounds were saved, toggle the task to those bounds.
@@ -651,12 +651,83 @@ class DesktopTasksController(
             }
         }
 
+
+
+        val shouldRestoreToSnap =
+            isMaximized && isTaskSnappedToHalfScreen(taskInfo, destinationBounds)
+
+        logD("willMaximize = %s", willMaximize)
+        logD("shouldRestoreToSnap = %s", shouldRestoreToSnap)
+
+        val doesAnyTaskRequireTaskbarRounding = willMaximize || shouldRestoreToSnap ||
+                doesAnyTaskRequireTaskbarRounding(taskInfo.displayId, taskInfo.taskId)
+
+        taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
+    }
+
+    private fun isTaskMaximized(
+        taskInfo: RunningTaskInfo,
+        stableBounds: Rect
+    ): Boolean {
+        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
+
+        return if (taskInfo.isResizeable) {
+            isTaskBoundsEqual(currentTaskBounds, stableBounds)
+        } else {
+            isTaskWidthOrHeightEqual(currentTaskBounds, stableBounds)
+        }
+    }
+
+    private fun isMaximizedToStableBoundsEdges(
+        taskInfo: RunningTaskInfo,
+        stableBounds: Rect
+    ): Boolean {
+        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
+        return isTaskBoundsEqual(currentTaskBounds, stableBounds)
+    }
+
+    /** Returns if current task bound is snapped to half screen */
+    private fun isTaskSnappedToHalfScreen(
+        taskInfo: RunningTaskInfo,
+        taskBounds: Rect = taskInfo.configuration.windowConfiguration.bounds
+    ): Boolean =
+        getSnapBounds(taskInfo, SnapPosition.LEFT) == taskBounds ||
+                getSnapBounds(taskInfo, SnapPosition.RIGHT) == taskBounds
+
+    @VisibleForTesting
+    fun doesAnyTaskRequireTaskbarRounding(
+        displayId: Int,
+        excludeTaskId: Int? = null,
+    ): Boolean {
+        val doesAnyTaskRequireTaskbarRounding =
+            taskRepository.getActiveNonMinimizedOrderedTasks(displayId)
+                // exclude current task since maximize/restore transition has not taken place yet.
+                .filterNot { taskId -> taskId == excludeTaskId }
+                .any { taskId ->
+                    val taskInfo = shellTaskOrganizer.getRunningTaskInfo(taskId)!!
+                    val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
+                    val stableBounds = Rect().apply { displayLayout?.getStableBounds(this) }
+                    logD("taskInfo = %s", taskInfo)
+                    logD(
+                        "isTaskSnappedToHalfScreen(taskInfo) = %s",
+                        isTaskSnappedToHalfScreen(taskInfo)
+                    )
+                    logD(
+                        "isMaximizedToStableBoundsEdges(taskInfo, stableBounds) = %s",
+                        isMaximizedToStableBoundsEdges(taskInfo, stableBounds)
+                    )
+                    isTaskSnappedToHalfScreen(taskInfo)
+                            || isMaximizedToStableBoundsEdges(taskInfo, stableBounds)
+                }
+
+        logD("doesAnyTaskRequireTaskbarRounding = %s", doesAnyTaskRequireTaskbarRounding)
+        return doesAnyTaskRequireTaskbarRounding
     }
 
     /**
@@ -673,9 +744,9 @@ class DesktopTasksController(
         position: SnapPosition
     ) {
         val destinationBounds = getSnapBounds(taskInfo, position)
-
         if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) return
 
+        taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(true)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
@@ -806,6 +877,10 @@ class DesktopTasksController(
             .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
             .reversed() // Start from the back so the front task is brought forward last
             .forEach { task -> wct.reorder(task.token, /* onTop= */ true) }
+
+        taskbarDesktopTaskListener?.
+            onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding(displayId))
+
         return taskToMinimize
     }
 
@@ -1156,6 +1231,12 @@ class DesktopTasksController(
         ) {
             wct.removeTask(task.token)
         }
+        taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
+            doesAnyTaskRequireTaskbarRounding(
+                task.displayId,
+                task.id
+            )
+        )
         return if (wct.isEmpty) null else wct
     }
 
@@ -1450,6 +1531,8 @@ class DesktopTasksController(
         }
         // A freeform drag-move ended, remove the indicator immediately.
         releaseVisualIndicator()
+        taskbarDesktopTaskListener
+            ?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding(taskInfo.displayId))
     }
 
     /**
@@ -1686,17 +1769,39 @@ class DesktopTasksController(
                 }
             }
 
+        private val mTaskbarDesktopTaskListener: TaskbarDesktopTaskListener =
+                object : TaskbarDesktopTaskListener {
+                    override fun onTaskbarCornerRoundingUpdate(
+                        hasTasksRequiringTaskbarRounding: Boolean) {
+                        ProtoLog.v(
+                                WM_SHELL_DESKTOP_MODE,
+                                "IDesktopModeImpl: onTaskbarCornerRoundingUpdate " +
+                                        "doesAnyTaskRequireTaskbarRounding=%s",
+                                hasTasksRequiringTaskbarRounding
+                        )
+
+                        remoteListener.call { l ->
+                            l.onTaskbarCornerRoundingUpdate(hasTasksRequiringTaskbarRounding)
+                        }
+                    }
+                }
+
         init {
             remoteListener =
                 SingleInstanceRemoteListener<DesktopTasksController, IDesktopTaskListener>(
                     controller,
                     { c ->
-                        c.taskRepository.addVisibleTasksListener(
-                            listener,
-                            c.mainExecutor
-                        )
+                        run {
+                            c.taskRepository.addVisibleTasksListener(listener, c.mainExecutor)
+                            c.taskbarDesktopTaskListener = mTaskbarDesktopTaskListener
+                        }
                     },
-                    { c -> c.taskRepository.removeVisibleTasksListener(listener) }
+                    { c ->
+                        run {
+                            c.taskRepository.removeVisibleTasksListener(listener)
+                            c.taskbarDesktopTaskListener = null
+                        }
+                    }
                 )
         }
 
@@ -1777,6 +1882,16 @@ class DesktopTasksController(
             SystemProperties.getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f
 
         private const val TAG = "DesktopTasksController"
+    }
+
+    /** Defines interface for classes that can listen to changes for task resize. */
+    // TODO(b/343931111): Migrate to using TransitionObservers when ready
+    interface TaskbarDesktopTaskListener {
+        /**
+         * [hasTasksRequiringTaskbarRounding] is true when a task is either maximized or snapped
+         * left/right and rounded corners are enabled.
+         */
+        fun onTaskbarCornerRoundingUpdate(hasTasksRequiringTaskbarRounding: Boolean)
     }
 
     /** The positions on a screen that a task can snap to. */

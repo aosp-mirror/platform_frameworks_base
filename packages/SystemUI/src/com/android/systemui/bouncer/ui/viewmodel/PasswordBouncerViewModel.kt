@@ -53,6 +53,7 @@ constructor(
     AuthMethodBouncerViewModel(
         interactor = interactor,
         isInputEnabled = isInputEnabled,
+        traceName = "PasswordBouncerViewModel",
     ) {
 
     private val _password = MutableStateFlow("")

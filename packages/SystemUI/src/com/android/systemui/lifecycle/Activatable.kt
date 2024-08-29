@@ -19,6 +19,7 @@ package com.android.systemui.lifecycle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import com.android.app.tracing.coroutines.traceCoroutine
 
 /** Defines interface for classes that can be activated to do coroutine work. */
 interface Activatable {
@@ -66,13 +67,19 @@ interface Activatable {
  *
  * If the [key] changes, the old [Activatable] is deactivated and a new one will be instantiated,
  * activated, and returned.
+ *
+ * The [traceName] is used for coroutine performance tracing purposes. Please try to use a label
+ * that's unique enough and easy enough to find in code search; this should help correlate
+ * performance findings with actual code. One recommendation: prefer whole string literals instead
+ * of some complex concatenation or templating scheme.
  */
 @Composable
 fun <T : Activatable> rememberActivated(
+    traceName: String,
     key: Any = Unit,
     factory: () -> T,
 ): T {
     val instance = remember(key) { factory() }
-    LaunchedEffect(instance) { instance.activate() }
+    LaunchedEffect(instance) { traceCoroutine(traceName) { instance.activate() } }
     return instance
 }

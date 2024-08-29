@@ -11777,6 +11777,8 @@ public class NotificationManagerService extends SystemService {
 
             mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
                     record, isAppForeground, /* isAppProvided= */ false, tracker));
+
+            EventLogTags.writeNotificationCancelPrevented(record.getKey());
         }
     }
 

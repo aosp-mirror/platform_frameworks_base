@@ -2316,6 +2316,7 @@ public class NotificationStackScrollLayout
 
     private void setOverScrollAmountInternal(float amount, boolean onTop, boolean animate,
                                              boolean isRubberbanded) {
+        SceneContainerFlag.assertInLegacyMode();
         amount = Math.max(0, amount);
         if (animate) {
             mStateAnimator.animateOverScrollToAmount(amount, onTop, isRubberbanded);

@@ -67,7 +67,7 @@ public abstract class MultiUserUtilsModule {
             @Background CoroutineDispatcher backgroundDispatcher,
             @Background Handler handler
     ) {
-        int startingUser = userManager.getBootUser().getIdentifier();
+        int startingUser = ActivityManager.getCurrentUser();
         UserTrackerImpl tracker = new UserTrackerImpl(context, featureFlagsProvider, userManager,
                 iActivityManager, dumpManager, appScope, backgroundDispatcher, handler);
         tracker.initialize(startingUser);
