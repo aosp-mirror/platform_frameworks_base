@@ -10014,6 +10014,19 @@ public class CarrierConfigManager {
     public static final String KEY_SATELLITE_NIDD_APN_NAME_STRING =
             "satellite_nidd_apn_name_string";
 
+    /**
+     * Default value {@code true}, meaning when an emergency call request comes in, if the device is
+     * in emergency satellite mode but hasn't sent the first satellite datagram, then exits
+     * satellite mode to allow the emergency call to go through.
+     *
+     * If {@code false}, the emergency call is always blocked if device is in emergency satellite
+     * mode. Note if device is NOT in emergency satellite mode, emergency call is always allowed.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_ROAMING_TURN_OFF_SESSION_FOR_EMERGENCY_CALL_BOOL =
+            "satellite_roaming_turn_off_session_for_emergency_call_bool";
+
     /** @hide */
     @IntDef({
             CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC,
@@ -11276,6 +11289,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_SATELLITE_ROAMING_P2P_SMS_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_NIDD_APN_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SATELLITE_ROAMING_TURN_OFF_SESSION_FOR_EMERGENCY_CALL_BOOL, true);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT,
                 SatelliteManager.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911);
