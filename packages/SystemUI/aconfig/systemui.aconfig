@@ -363,6 +363,13 @@ flag {
 }
 
 flag {
+   name: "status_bar_signal_policy_refactor"
+   namespace: "systemui"
+   description: "Use a settings observer for airplane mode and make StatusBarSignalPolicy startable"
+   bug: "264539100"
+}
+
+flag {
     name: "status_bar_swipe_over_chip"
     namespace: "systemui"
     description: "Allow users to swipe over the status bar chip to open the shade"
