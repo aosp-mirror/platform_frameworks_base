@@ -4115,6 +4115,11 @@ public class NotificationStackScrollLayout
      */
     @Override
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        // Don't handle scroll accessibility events from the NSSL, when SceneContainer enabled.
+        if (SceneContainerFlag.isEnabled()) {
+            return super.performAccessibilityActionInternal(action, arguments);
+        }
+
         if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
@@ -4875,6 +4880,11 @@ public class NotificationStackScrollLayout
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
+        // Don't handle scroll accessibility events from the NSSL, when SceneContainer enabled.
+        if (SceneContainerFlag.isEnabled()) {
+            return;
+        }
+
         event.setScrollable(mScrollable);
         event.setMaxScrollX(mScrollX);
         event.setScrollY(mOwnScrollY);
@@ -4884,6 +4894,11 @@ public class NotificationStackScrollLayout
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
+        // Don't handle scroll accessibility events from the NSSL, when SceneContainer enabled.
+        if (SceneContainerFlag.isEnabled()) {
+            return;
+        }
+
         if (mScrollable) {
             info.setScrollable(true);
             if (mBackwardScrollable) {
