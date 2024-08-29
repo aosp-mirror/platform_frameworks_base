@@ -75,7 +75,9 @@ import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -134,6 +136,7 @@ abstract public class ManagedServices {
     private final UserProfiles mUserProfiles;
     protected final IPackageManager mPm;
     protected final UserManager mUm;
+    private final UserManagerInternal mUserManagerInternal;
     private final Config mConfig;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -195,6 +198,7 @@ abstract public class ManagedServices {
         mConfig = getConfig();
         mApprovalLevel = APPROVAL_BY_COMPONENT;
         mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
     abstract protected Config getConfig();
@@ -1372,9 +1376,14 @@ abstract public class ManagedServices {
     @GuardedBy("mMutex")
     protected void populateComponentsToBind(SparseArray<Set<ComponentName>> componentsToBind,
             final IntArray activeUsers,
-            SparseArray<ArraySet<ComponentName>> approvedComponentsByUser) {
-        mEnabledServicesForCurrentProfiles.clear();
-        mEnabledServicesPackageNames.clear();
+            SparseArray<ArraySet<ComponentName>> approvedComponentsByUser,
+            boolean isVisibleBackgroundUser) {
+        // When it is a visible background user in Automotive MUMD environment,
+        // don't clear mEnabledServicesForCurrentProfile and mEnabledServicesPackageNames.
+        if (!isVisibleBackgroundUser) {
+            mEnabledServicesForCurrentProfiles.clear();
+            mEnabledServicesPackageNames.clear();
+        }
         final int nUserIds = activeUsers.size();
 
         for (int i = 0; i < nUserIds; ++i) {
@@ -1395,7 +1404,12 @@ abstract public class ManagedServices {
             }
 
             componentsToBind.put(userId, add);
-
+            // When it is a visible background user in Automotive MUMD environment,
+            // skip adding items to mEnabledServicesForCurrentProfile
+            // and mEnabledServicesPackageNames.
+            if (isVisibleBackgroundUser) {
+                continue;
+            }
             mEnabledServicesForCurrentProfiles.addAll(userComponents);
 
             for (int j = 0; j < userComponents.size(); j++) {
@@ -1443,7 +1457,10 @@ abstract public class ManagedServices {
         IntArray userIds = mUserProfiles.getCurrentProfileIds();
         boolean rebindAllCurrentUsers = mUserProfiles.isProfileUser(userToRebind, mContext)
                 && allowRebindForParentUser();
+        boolean isVisibleBackgroundUser = false;
         if (userToRebind != USER_ALL && !rebindAllCurrentUsers) {
+            isVisibleBackgroundUser =
+                    mUserManagerInternal.isVisibleBackgroundFullUser(userToRebind);
             userIds = new IntArray(1);
             userIds.add(userToRebind);
         }
@@ -1458,7 +1475,8 @@ abstract public class ManagedServices {
 
             // Filter approvedComponentsByUser to collect all of the components that are allowed
             // for the currently active user(s).
-            populateComponentsToBind(componentsToBind, userIds, approvedComponentsByUser);
+            populateComponentsToBind(componentsToBind, userIds, approvedComponentsByUser,
+                    isVisibleBackgroundUser);
 
             // For every current non-system connection, disconnect services that are no longer
             // approved, or ALL services if we are force rebinding
