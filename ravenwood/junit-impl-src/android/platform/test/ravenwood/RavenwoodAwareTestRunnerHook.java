@@ -57,7 +57,8 @@ public class RavenwoodAwareTestRunnerHook {
      */
     public static void onRunnerInitializing(Runner runner, TestClass testClass) {
         // This log call also ensures the framework JNI is loaded.
-        Log.i(TAG, "onRunnerInitializing: testClass=" + testClass + " runner=" + runner);
+        Log.i(TAG, "onRunnerInitializing: testClass=" + testClass.getJavaClass()
+                + " runner=" + runner);
 
         // TODO: Move the initialization code to a better place.
 

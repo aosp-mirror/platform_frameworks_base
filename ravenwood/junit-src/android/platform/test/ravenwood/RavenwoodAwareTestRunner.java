@@ -27,6 +27,7 @@ import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.SneakyThrow;
 
 import org.junit.Assume;
+import org.junit.internal.builders.AllDefaultPossibilitiesBuilder;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
@@ -41,6 +42,7 @@ import org.junit.runner.manipulation.Sorter;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.runners.model.RunnerBuilder;
 import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
 
@@ -53,8 +55,6 @@ import java.lang.reflect.InvocationTargetException;
 
 /**
  * A test runner used for Ravenwood.
- *
- * TODO: Handle ENABLE_PROBE_IGNORED
  *
  * It will delegate to another runner specified with {@link InnerRunner}
  * (default = {@link BlockJUnit4ClassRunner}) with the following features.
@@ -144,7 +144,8 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
 
     /** Simple logging method. */
     private void log(String message) {
-        RavenwoodCommonUtils.log(TAG, "[" + getTestClass() + "  @" + this + "] " + message);
+        RavenwoodCommonUtils.log(TAG, "[" + getTestClass().getJavaClass() + "  @" + this + "] "
+                + message);
     }
 
     private Error logAndFail(String message, Throwable innerException) {
@@ -176,26 +177,26 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
             }
 
             // Find the real runner.
-            final Class<? extends Runner> realRunner;
+            final Class<? extends Runner> realRunnerClass;
             final InnerRunner innerRunnerAnnotation = mTestClass.getAnnotation(InnerRunner.class);
             if (innerRunnerAnnotation != null) {
-                realRunner = innerRunnerAnnotation.value();
+                realRunnerClass = innerRunnerAnnotation.value();
             } else {
                 // Default runner.
-                realRunner = BlockJUnit4ClassRunner.class;
+                realRunnerClass = BlockJUnit4ClassRunner.class;
             }
 
             onRunnerInitializing();
 
             try {
-                log("Initializing the inner runner: " + realRunner);
+                log("Initializing the inner runner: " + realRunnerClass);
 
-                mRealRunner = realRunner.getConstructor(Class.class).newInstance(testClass);
+                mRealRunner = instantiateRealRunner(realRunnerClass, testClass);
                 mDescription = mRealRunner.getDescription();
 
             } catch (InstantiationException | IllegalAccessException
                      | InvocationTargetException | NoSuchMethodException e) {
-                throw logAndFail("Failed to instantiate " + realRunner, e);
+                throw logAndFail("Failed to instantiate " + realRunnerClass, e);
             }
         } catch (Throwable th) {
             // If we throw in the constructor, Tradefed may not report it and just ignore the class,
@@ -210,6 +211,20 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
             if ("1".equals(System.getenv("RAVENWOOD_THROW_EXCEPTION_IN_TEST_RUNNER"))) {
                 throw th;
             }
+        }
+    }
+
+    private static Runner instantiateRealRunner(
+            Class<? extends Runner> realRunnerClass,
+            Class<?> testClass)
+            throws NoSuchMethodException, InvocationTargetException, InstantiationException,
+            IllegalAccessException {
+        try {
+            return realRunnerClass.getConstructor(Class.class).newInstance(testClass);
+        } catch (NoSuchMethodException e) {
+            var runnerBuilder = new AllDefaultPossibilitiesBuilder();
+            return realRunnerClass.getConstructor(Class.class,
+                    RunnerBuilder.class).newInstance(testClass, runnerBuilder);
         }
     }
 
