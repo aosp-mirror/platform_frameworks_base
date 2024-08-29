@@ -118,6 +118,7 @@ constructor(
         listOf(
             ActiveMediaDeviceItemFactory(),
             AudioSharingMediaDeviceItemFactory(localBluetoothManager),
+            AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager),
             AvailableMediaDeviceItemFactory(),
             ConnectedDeviceItemFactory(),
             SavedDeviceItemFactory()
@@ -127,6 +128,7 @@ constructor(
         listOf(
             DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
+            DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
             DeviceItemType.SAVED_BLUETOOTH_DEVICE,
