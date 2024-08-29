@@ -21,7 +21,6 @@ import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileMappings.Config
-import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -93,17 +92,15 @@ interface MobileConnectionsRepository {
     val defaultMobileIconGroup: Flow<MobileIconGroup>
 
     /**
-     * [deviceServiceState] is equivalent to the last [Intent.ACTION_SERVICE_STATE] broadcast with a
-     * subscriptionId of -1 (aka [SubscriptionManager.INVALID_SUBSCRIPTION_ID]).
+     * Can the device make emergency calls using the device-based service state? This field is only
+     * useful when all known active subscriptions are OOS and not emergency call capable.
      *
-     * While each [MobileConnectionsRepository] listens for the service state of each subscription,
-     * there is potentially a service state associated with the device itself. This value can be
-     * used to calculate e.g., the emergency calling capability of the device (as opposed to the
-     * emergency calling capability of an individual mobile connection)
+     * Specifically, this checks every [ServiceState] of the device, and looks for any that report
+     * [ServiceState.isEmergencyOnly].
      *
-     * Note: this is a [StateFlow] using an eager sharing strategy.
+     * This is an eager flow, and re-evaluates whenever ACTION_SERVICE_STATE is sent for subId = -1.
      */
-    val deviceServiceState: StateFlow<ServiceStateModel?>
+    val isDeviceEmergencyCallCapable: StateFlow<Boolean>
 
     /**
      * If any active SIM on the device is in

@@ -29,7 +29,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
@@ -897,13 +896,11 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.isDeviceInEmergencyCallsOnlyMode)
 
-            connectionsRepository.deviceServiceState.value =
-                ServiceStateModel(isEmergencyOnly = true)
+            connectionsRepository.isDeviceEmergencyCallCapable.value = true
 
             assertThat(latest).isTrue()
 
-            connectionsRepository.deviceServiceState.value =
-                ServiceStateModel(isEmergencyOnly = false)
+            connectionsRepository.isDeviceEmergencyCallCapable.value = false
 
             assertThat(latest).isFalse()
         }
