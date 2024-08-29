@@ -16,10 +16,14 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.subject.exceptions.ExceptionMessageBuilder
+import android.tools.flicker.subject.exceptions.IncorrectRegionException
+import android.tools.flicker.subject.layers.LayerSubject
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.pip.common.EnterPipTransition
@@ -29,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
+import kotlin.math.abs
 
 /**
  * Test entering pip from an app via auto-enter property when navigating to home.
@@ -67,13 +72,54 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTran
 
     override val defaultTeardown: FlickerBuilder.() -> Unit = { teardown { pipApp.exit(wmHelper) } }
 
-    @FlakyTest(bugId = 293133362)
+    private val widthNotSmallerThan: LayerSubject.(LayerSubject) -> Unit = {
+        val width = visibleRegion.region.bounds.width()
+        val otherWidth = it.visibleRegion.region.bounds.width()
+        if (width < otherWidth && abs(width - otherWidth) > EPSILON) {
+            val errorMsgBuilder =
+                ExceptionMessageBuilder()
+                    .forSubject(this)
+                    .forIncorrectRegion("width. $width smaller than $otherWidth")
+                    .setExpected(width)
+                    .setActual(otherWidth)
+            throw IncorrectRegionException(errorMsgBuilder)
+        }
+    }
+
+    @Postsubmit
     @Test
     override fun pipLayerReduces() {
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         flicker.assertLayers {
             val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
+            }
+        }
+    }
+
+    /** Checks that [pipApp] window's width is first decreasing then increasing. */
+    @Postsubmit
+    @Test
+    fun pipLayerWidthDecreasesThenIncreases() {
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        flicker.assertLayers {
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
+            var previousLayer = pipLayerList[0]
+            var currentLayer = previousLayer
+            var i = 0
+            invoke("layer area is decreasing") {
+                if (i < pipLayerList.size - 1) {
+                    previousLayer = currentLayer
+                    currentLayer = pipLayerList[++i]
+                    previousLayer.widthNotSmallerThan(currentLayer)
+                }
+            }.then().invoke("layer are is increasing", true /* isOptional */) {
+                if (i < pipLayerList.size - 1) {
+                    previousLayer = currentLayer
+                    currentLayer = pipLayerList[++i]
+                    currentLayer.widthNotSmallerThan(previousLayer)
+                }
             }
         }
     }
@@ -107,5 +153,10 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTran
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    companion object {
+        // TODO(b/363080056): A margin of error allowed on certain layer size calculations.
+        const val EPSILON = 1
     }
 }
