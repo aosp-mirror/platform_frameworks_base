@@ -21,6 +21,8 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.isOnRavenwood;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 
+import android.util.Log;
+
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.SneakyThrow;
 
@@ -36,6 +38,7 @@ import org.junit.runner.manipulation.Orderable;
 import org.junit.runner.manipulation.Orderer;
 import org.junit.runner.manipulation.Sortable;
 import org.junit.runner.manipulation.Sorter;
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.Statement;
@@ -134,8 +137,10 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         return runner;
     }
 
-    private final TestClass mTestClsas;
-    private final Runner mRealRunner;
+    private TestClass mTestClass = null;
+    private Runner mRealRunner = null;
+    private Description mDescription = null;
+    private Throwable mExceptionInConstructor = null;
 
     /** Simple logging method. */
     private void log(String message) {
@@ -149,45 +154,62 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
     }
 
     public TestClass getTestClass() {
-        return mTestClsas;
+        return mTestClass;
     }
 
     /**
      * Constructor.
      */
     public RavenwoodAwareTestRunner(Class<?> testClass) {
-        mTestClsas = new TestClass(testClass);
-
-        /*
-         * If the class has @DisabledOnRavenwood, then we'll delegate to ClassSkippingTestRunner,
-         * which simply skips it.
-         */
-        if (isOnRavenwood() && !RavenwoodAwareTestRunnerHook.shouldRunClassOnRavenwood(
-                mTestClsas.getJavaClass())) {
-            mRealRunner = new ClassSkippingTestRunner(mTestClsas);
-            return;
-        }
-
-        // Find the real runner.
-        final Class<? extends Runner> realRunner;
-        final InnerRunner innerRunnerAnnotation = mTestClsas.getAnnotation(InnerRunner.class);
-        if (innerRunnerAnnotation != null) {
-            realRunner = innerRunnerAnnotation.value();
-        } else {
-            // Default runner.
-            realRunner = BlockJUnit4ClassRunner.class;
-        }
-
-        onRunnerInitializing();
-
         try {
-            log("Initializing the inner runner: " + realRunner);
+            mTestClass = new TestClass(testClass);
 
-            mRealRunner = realRunner.getConstructor(Class.class).newInstance(testClass);
+            /*
+             * If the class has @DisabledOnRavenwood, then we'll delegate to
+             * ClassSkippingTestRunner, which simply skips it.
+             */
+            if (isOnRavenwood() && !RavenwoodAwareTestRunnerHook.shouldRunClassOnRavenwood(
+                    mTestClass.getJavaClass())) {
+                mRealRunner = new ClassSkippingTestRunner(mTestClass);
+                mDescription = mRealRunner.getDescription();
+                return;
+            }
 
-        } catch (InstantiationException | IllegalAccessException
-                 | InvocationTargetException | NoSuchMethodException e) {
-            throw logAndFail("Failed to instantiate " + realRunner, e);
+            // Find the real runner.
+            final Class<? extends Runner> realRunner;
+            final InnerRunner innerRunnerAnnotation = mTestClass.getAnnotation(InnerRunner.class);
+            if (innerRunnerAnnotation != null) {
+                realRunner = innerRunnerAnnotation.value();
+            } else {
+                // Default runner.
+                realRunner = BlockJUnit4ClassRunner.class;
+            }
+
+            onRunnerInitializing();
+
+            try {
+                log("Initializing the inner runner: " + realRunner);
+
+                mRealRunner = realRunner.getConstructor(Class.class).newInstance(testClass);
+                mDescription = mRealRunner.getDescription();
+
+            } catch (InstantiationException | IllegalAccessException
+                     | InvocationTargetException | NoSuchMethodException e) {
+                throw logAndFail("Failed to instantiate " + realRunner, e);
+            }
+        } catch (Throwable th) {
+            // If we throw in the constructor, Tradefed may not report it and just ignore the class,
+            // so record it and throw it when the test actually started.
+            log("Fatal: Exception detected in constructor: " + th.getMessage() + "\n"
+                    + Log.getStackTraceString(th));
+            mExceptionInConstructor = new RuntimeException("Exception detected in constructor",
+                    th);
+            mDescription = Description.createTestDescription(testClass, "Constructor");
+
+            // This is for testing if tradefed is fixed.
+            if ("1".equals(System.getenv("RAVENWOOD_THROW_EXCEPTION_IN_TEST_RUNNER"))) {
+                throw th;
+            }
         }
     }
 
@@ -202,7 +224,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
 
         log("onRunnerInitializing");
 
-        RavenwoodAwareTestRunnerHook.onRunnerInitializing(this, mTestClsas);
+        RavenwoodAwareTestRunnerHook.onRunnerInitializing(this, mTestClass);
 
         // Hook point to allow more customization.
         runAnnotatedMethodsOnRavenwood(RavenwoodTestRunnerInitializing.class, null);
@@ -230,7 +252,7 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
 
     @Override
     public Description getDescription() {
-        return mRealRunner.getDescription();
+        return mDescription;
     }
 
     @Override
@@ -241,6 +263,10 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
             return;
         }
 
+        if (maybeReportExceptionFromConstructor(notifier)) {
+            return;
+        }
+
         sCurrentRunner.set(this);
         try {
             runWithHooks(getDescription(), Scope.Runner, Order.First,
@@ -248,6 +274,18 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
         } finally {
             sCurrentRunner.remove();
         }
+    }
+
+    /** Throw the exception detected in the constructor, if any. */
+    private boolean maybeReportExceptionFromConstructor(RunNotifier notifier) {
+        if (mExceptionInConstructor == null) {
+            return false;
+        }
+        notifier.fireTestStarted(mDescription);
+        notifier.fireTestFailure(new Failure(mDescription, mExceptionInConstructor));
+        notifier.fireTestFinished(mDescription);
+
+        return true;
     }
 
     @Override
