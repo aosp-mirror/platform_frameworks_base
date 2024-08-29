@@ -26,6 +26,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.BooleanFlowOperators.any
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /** Models UI state for the shade window. */
 @SysUISingleton
@@ -42,9 +43,11 @@ constructor(
     val isKeyguardOccluded: Flow<Boolean> =
         listOf(
                 // Finished in state...
-                keyguardTransitionInteractor.isFinishedIn(OCCLUDED),
-                keyguardTransitionInteractor.isFinishedIn(DREAMING),
-                keyguardTransitionInteractor.isFinishedIn(Scenes.Communal, GLANCEABLE_HUB),
+                keyguardTransitionInteractor.transitionValue(OCCLUDED).map { it == 1f },
+                keyguardTransitionInteractor.transitionValue(DREAMING).map { it == 1f },
+                keyguardTransitionInteractor.transitionValue(Scenes.Communal, GLANCEABLE_HUB).map {
+                    it == 1f
+                },
 
                 // ... or transitions between those states
                 keyguardTransitionInteractor.isInTransition(Edge.create(OCCLUDED, DREAMING)),
