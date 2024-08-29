@@ -20,7 +20,7 @@
        xmlns:tools="http://schemas.android.com/tools"
        tools:targetApi="28"
        android:shape="rectangle">
-    <solid android:color="?androidprv:attr/colorSurface" />
+    <solid android:color="?androidprv:attr/materialColorSurfaceContainerHigh" />
     <corners
         android:radius="?android:attr/dialogCornerRadius"
     />
