@@ -19,6 +19,8 @@ package com.android.server.power.stats;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 
+import com.android.server.power.stats.format.EnergyConsumerPowerStatsLayout;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +31,8 @@ public class CustomEnergyConsumerPowerStatsCollector extends PowerStatsCollector
     private final EnergyConsumerPowerStatsCollector.Injector mInjector;
     private List<EnergyConsumerPowerStatsCollector> mCollectors;
 
-    CustomEnergyConsumerPowerStatsCollector(EnergyConsumerPowerStatsCollector.Injector injector) {
+    public CustomEnergyConsumerPowerStatsCollector(
+            EnergyConsumerPowerStatsCollector.Injector injector) {
         super(injector.getHandler(), 0, injector.getUidResolver(), injector.getClock());
         mInjector = injector;
     }

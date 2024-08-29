@@ -235,7 +235,7 @@ public abstract class PowerStatsCollector {
         return (deltaEnergyUj * MILLIVOLTS_PER_VOLT + (avgVoltageMv / 2)) / avgVoltageMv;
     }
 
-    interface ConsumedEnergyRetriever {
+    public interface ConsumedEnergyRetriever {
         @NonNull
         int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType, String name);
 

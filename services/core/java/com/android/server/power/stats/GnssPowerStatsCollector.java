@@ -19,9 +19,11 @@ package com.android.server.power.stats;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 
+import com.android.server.power.stats.format.GnssPowerStatsLayout;
+
 public class GnssPowerStatsCollector extends EnergyConsumerPowerStatsCollector {
 
-    GnssPowerStatsCollector(Injector injector) {
+    public GnssPowerStatsCollector(Injector injector) {
         super(injector, BatteryConsumer.POWER_COMPONENT_GNSS,
                 BatteryConsumer.powerComponentIdToString(BatteryConsumer.POWER_COMPONENT_GNSS),
                 EnergyConsumerType.GNSS, /* energy consumer name */ null,

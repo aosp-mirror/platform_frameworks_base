@@ -35,6 +35,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
 
 import java.util.Arrays;
 import java.util.List;
@@ -77,7 +78,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
                 long elapsedRealtimeMs, long uptimeMs);
     }
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
@@ -114,7 +115,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     private long mLastCallDuration;
     private long mLastScanDuration;
 
-    MobileRadioPowerStatsCollector(Injector injector, Observer observer) {
+    public MobileRadioPowerStatsCollector(Injector injector, Observer observer) {
         super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)),
@@ -171,7 +172,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             final int freqCount = rat == BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR
                     ? ServiceState.FREQUENCY_RANGE_COUNT : 1;
             for (int freq = 0; freq < freqCount; freq++) {
-                int stateKey = makeStateKey(rat, freq);
+                int stateKey = MobileRadioPowerStatsLayout.makeStateKey(rat, freq);
                 StringBuilder sb = new StringBuilder();
                 if (rat != BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER) {
                     sb.append(BatteryStats.RADIO_ACCESS_TECHNOLOGY_NAMES[rat]);
@@ -200,7 +201,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     }
 
     @Override
-    protected PowerStats collectStats() {
+    public PowerStats collectStats() {
         if (!ensureInitialized()) {
             return null;
         }
@@ -374,37 +375,8 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         }
     }
 
-    static int makeStateKey(int rat, int freqRange) {
-        if (rat == BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR) {
-            return rat | (freqRange << 8);
-        } else {
-            return rat;
-        }
-    }
-
     private void setTimestamp(long timestamp) {
         mPowerStats.durationMs = Math.max(timestamp - mLastUpdateTimestampMillis, 0);
         mLastUpdateTimestampMillis = timestamp;
-    }
-
-    @BatteryStats.RadioAccessTechnology
-    static int mapRadioAccessNetworkTypeToRadioAccessTechnology(
-            @AccessNetworkConstants.RadioAccessNetworkType int networkType) {
-        switch (networkType) {
-            case AccessNetworkConstants.AccessNetworkType.NGRAN:
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR;
-            case AccessNetworkConstants.AccessNetworkType.EUTRAN:
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE;
-            case AccessNetworkConstants.AccessNetworkType.UNKNOWN: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.GERAN: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.UTRAN: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.CDMA2000: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.IWLAN:
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER;
-            default:
-                Slog.w(TAG,
-                        "Unhandled RadioAccessNetworkType (" + networkType + "), mapping to OTHER");
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER;
-        }
     }
 }

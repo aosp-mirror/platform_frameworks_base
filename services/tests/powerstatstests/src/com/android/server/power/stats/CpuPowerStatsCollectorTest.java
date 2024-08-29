@@ -42,6 +42,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.CpuPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -228,8 +229,7 @@ public class CpuPowerStatsCollectorTest {
         assertThat(descriptor.name).isEqualTo("cpu");
         assertThat(descriptor.statsArrayLength).isEqualTo(13);
         assertThat(descriptor.uidStatsArrayLength).isEqualTo(5);
-        CpuPowerStatsLayout layout =
-                new CpuPowerStatsLayout();
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
         layout.fromExtras(descriptor.extras);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
@@ -470,8 +470,7 @@ public class CpuPowerStatsCollectorTest {
     }
 
     private static int[] getScalingStepToPowerBracketMap(CpuPowerStatsCollector collector) {
-        CpuPowerStatsLayout layout =
-                new CpuPowerStatsLayout();
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
         layout.fromExtras(collector.getPowerStatsDescriptor().extras);
         return layout.getScalingStepToPowerBracketMap();
     }

@@ -51,6 +51,7 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -242,8 +243,7 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(powerStats.durationMs).isEqualTo(100);
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
-        MobileRadioPowerStatsLayout layout =
-                new MobileRadioPowerStatsLayout(descriptor);
+        MobileRadioPowerStatsLayout layout = new MobileRadioPowerStatsLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getDeviceCallTime(powerStats.stats)).isEqualTo(40000);
@@ -252,7 +252,7 @@ public class MobileRadioPowerStatsCollectorTest {
                 .isEqualTo((64321 - 10000) * 1000 / 3500);
 
         assertThat(powerStats.stateStats.size()).isEqualTo(2);
-        long[] state1 = powerStats.stateStats.get(MobileRadioPowerStatsCollector.makeStateKey(
+        long[] state1 = powerStats.stateStats.get(MobileRadioPowerStatsLayout.makeStateKey(
                 BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR,
                 ServiceState.FREQUENCY_RANGE_MMWAVE
         ));
@@ -263,7 +263,7 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(layout.getStateTxTime(state1, 3)).isEqualTo(4000);
         assertThat(layout.getStateTxTime(state1, 4)).isEqualTo(5000);
 
-        long[] state2 = powerStats.stateStats.get(MobileRadioPowerStatsCollector.makeStateKey(
+        long[] state2 = powerStats.stateStats.get(MobileRadioPowerStatsLayout.makeStateKey(
                 BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE,
                 ServiceState.FREQUENCY_RANGE_LOW
         ));
@@ -298,15 +298,14 @@ public class MobileRadioPowerStatsCollectorTest {
         assertThat(powerStats.durationMs).isEqualTo(100);
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
-        MobileRadioPowerStatsLayout layout =
-                new MobileRadioPowerStatsLayout(descriptor);
+        MobileRadioPowerStatsLayout layout = new MobileRadioPowerStatsLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getConsumedEnergy(powerStats.stats, 0))
                 .isEqualTo((64321 - 10000) * 1000 / 3500);
 
         assertThat(powerStats.stateStats.size()).isEqualTo(1);
-        long[] stateStats = powerStats.stateStats.get(MobileRadioPowerStatsCollector.makeStateKey(
+        long[] stateStats = powerStats.stateStats.get(MobileRadioPowerStatsLayout.makeStateKey(
                 AccessNetworkConstants.AccessNetworkType.UNKNOWN,
                 ServiceState.FREQUENCY_RANGE_UNKNOWN
         ));

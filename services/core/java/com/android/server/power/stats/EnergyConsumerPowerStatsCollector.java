@@ -26,6 +26,7 @@ import android.util.SparseLongArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.EnergyConsumerPowerStatsLayout;
 
 import java.util.function.IntSupplier;
 
@@ -34,7 +35,7 @@ public class EnergyConsumerPowerStatsCollector extends PowerStatsCollector {
 
     private static final long ENERGY_UNSPECIFIED = -1;
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();

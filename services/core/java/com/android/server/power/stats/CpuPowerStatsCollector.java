@@ -31,6 +31,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.CpuPowerStatsLayout;
 
 import java.io.PrintWriter;
 import java.util.Arrays;

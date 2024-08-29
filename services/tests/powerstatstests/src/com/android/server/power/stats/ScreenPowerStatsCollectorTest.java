@@ -32,6 +32,7 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.ScreenPowerStatsCollector.Injector;
+import com.android.server.power.stats.format.ScreenPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
