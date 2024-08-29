@@ -44,6 +44,7 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
+import static com.android.window.flags.Flags.balAdditionalStartModes;
 import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
 import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balImprovedMetrics;
@@ -425,6 +426,8 @@ public class BackgroundActivityStartController {
                 int callingUid, String callingPackage, ActivityOptions checkedOptions) {
             switch (checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()) {
                 case MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
+                case MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE:
+                case MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS:
                     return BackgroundStartPrivileges.ALLOW_BAL;
                 case MODE_BACKGROUND_ACTIVITY_START_DENIED:
                     return BackgroundStartPrivileges.NONE;
@@ -840,11 +843,30 @@ public class BackgroundActivityStartController {
      * or {@link #BAL_BLOCK} if the launch should be blocked
      */
     BalVerdict checkBackgroundActivityStartAllowedByCaller(BalState state) {
-        BalVerdict result = checkBackgroundActivityStartAllowedByCallerInForeground(state);
-        if (result == BalVerdict.BLOCK) {
-            result = checkBackgroundActivityStartAllowedByCallerInBackground(state);
+        if (state.isPendingIntent()) {
+            // PendingIntents should mostly be allowed by the sender (real caller) or a permission
+            // the creator of the PendingIntent has. Visibility should be the exceptional case, so
+            // test it last (this does not change the result, just the bal code).
+            BalVerdict result = BalVerdict.BLOCK;
+            if (!(balAdditionalStartModes()
+                    && state.mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE)) {
+                result = checkBackgroundActivityStartAllowedByCallerInBackground(state);
+            }
+            if (result == BalVerdict.BLOCK) {
+                result = checkBackgroundActivityStartAllowedByCallerInForeground(state);
+
+            }
+            return result;
+        } else {
+            BalVerdict result = checkBackgroundActivityStartAllowedByCallerInForeground(state);
+            if (result == BalVerdict.BLOCK && !(balAdditionalStartModes()
+                    && state.mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE)) {
+                result = checkBackgroundActivityStartAllowedByCallerInBackground(state);
+            }
+            return result;
         }
-        return result;
     }
 
     /**
@@ -966,7 +988,9 @@ public class BackgroundActivityStartController {
      */
     BalVerdict checkBackgroundActivityStartAllowedByRealCaller(BalState state) {
         BalVerdict result = checkBackgroundActivityStartAllowedByRealCallerInForeground(state);
-        if (result == BalVerdict.BLOCK) {
+        if (result == BalVerdict.BLOCK && !(balAdditionalStartModes()
+                && state.mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                == MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE)) {
             result = checkBackgroundActivityStartAllowedByRealCallerInBackground(state);
         }
         return result;
