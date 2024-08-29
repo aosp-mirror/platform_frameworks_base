@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy_Factory
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.airplaneModeInteractor
-import com.android.systemui.statusbar.policy.securityController
+import com.android.systemui.statusbar.policy.SecurityController
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.kotlin.JavaAdapter
@@ -60,8 +60,8 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
 
     private val javaAdapter = JavaAdapter(testScope.backgroundScope)
     private val airplaneModeInteractor = kosmos.airplaneModeInteractor
-    private val securityController = kosmos.securityController
 
+    private val securityController = mock<SecurityController>()
     private val tunerService = mock<TunerService>()
     private val statusBarIconController = mock<StatusBarIconController>()
     private val networkController = mock<NetworkController>()
@@ -90,7 +90,7 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
     @EnableFlags(FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR)
     fun airplaneModeViaInteractor_statusBarSignalPolicyRefactorFlagEnabled_iconUpdated() =
         testScope.runTest {
-            underTest.init()
+            underTest.start()
             airplaneModeInteractor.setIsAirplaneMode(true)
             runCurrent()
             verify(statusBarIconController).setIconVisibility(slotAirplane, true)
@@ -104,7 +104,7 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
     @EnableFlags(FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR)
     fun airplaneModeViaSignalCallback_statusBarSignalPolicyRefactorFlagEnabled_iconNotUpdated() =
         testScope.runTest {
-            underTest.init()
+            underTest.start()
             runCurrent()
             clearInvocations(statusBarIconController)
 
@@ -117,6 +117,16 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             underTest.setIsAirplaneMode(IconState(false, TelephonyIcons.FLIGHT_MODE_ICON, ""))
             runCurrent()
             verifyZeroInteractions(statusBarIconController)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR)
+    fun statusBarSignalPolicyInitialization_statusBarSignalPolicyRefactorFlagEnabled_initNoOp() =
+        testScope.runTest {
+            // Make sure StatusBarSignalPolicy.init does no initialization when
+            // the refactor flag is disabled.
+            underTest.init()
+            verifyZeroInteractions(securityController, networkController, tunerService)
         }
 
     @Test
@@ -149,5 +159,15 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             airplaneModeInteractor.setIsAirplaneMode(false)
             runCurrent()
             verifyZeroInteractions(statusBarIconController)
+        }
+
+    @Test
+    @DisableFlags(FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR)
+    fun statusBarSignalPolicyInitialization_statusBarSignalPolicyRefactorFlagDisabled_startNoOp() =
+        testScope.runTest {
+            // Make sure StatusBarSignalPolicy.start does no initialization when
+            // the refactor flag is disabled.
+            underTest.start()
+            verifyZeroInteractions(securityController, networkController, tunerService)
         }
 }
