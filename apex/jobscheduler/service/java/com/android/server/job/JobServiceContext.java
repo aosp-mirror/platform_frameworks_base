@@ -473,6 +473,14 @@ public final class JobServiceContext implements ServiceConnection {
             mInitialDownloadedBytesFromCalling = TrafficStats.getUidRxBytes(job.getUid());
             mInitialUploadedBytesFromCalling = TrafficStats.getUidTxBytes(job.getUid());
 
+            int procState = mService.getUidProcState(job.getUid());
+            if (Flags.useCorrectProcessStateForLogging()
+                    && procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+                // Try to get the latest proc state from AMS, there might be some delay
+                // for the proc states worse than TRANSIENT_BACKGROUND.
+                procState = mActivityManagerInternal.getUidProcessState(job.getUid());
+            }
+
             FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     job.isProxyJob() ? new int[]{sourceUid, job.getUid()} : new int[]{sourceUid},
                     // Given that the source tag is set by the calling app, it should be connected
@@ -517,7 +525,7 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getEstimatedNetworkDownloadBytes(),
                     job.getEstimatedNetworkUploadBytes(),
                     job.getWorkCount(),
-                    ActivityManager.processStateAmToProto(mService.getUidProcState(job.getUid())),
+                    ActivityManager.processStateAmToProto(procState),
                     job.getNamespaceHash(),
                     /* system_measured_source_download_bytes */ 0,
                     /* system_measured_source_upload_bytes */ 0,
@@ -1528,6 +1536,13 @@ public final class JobServiceContext implements ServiceConnection {
         mJobPackageTracker.noteInactive(completedJob,
                 loggingInternalStopReason, loggingDebugReason);
         final int sourceUid = completedJob.getSourceUid();
+        int procState = mService.getUidProcState(completedJob.getUid());
+        if (Flags.useCorrectProcessStateForLogging()
+                && procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+            // Try to get the latest proc state from AMS, there might be some delay
+            // for the proc states worse than TRANSIENT_BACKGROUND.
+            procState = mActivityManagerInternal.getUidProcessState(completedJob.getUid());
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.isProxyJob()
                         ? new int[]{sourceUid, completedJob.getUid()} : new int[]{sourceUid},
@@ -1573,7 +1588,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getEstimatedNetworkUploadBytes(),
                 completedJob.getWorkCount(),
                 ActivityManager
-                        .processStateAmToProto(mService.getUidProcState(completedJob.getUid())),
+                        .processStateAmToProto(procState),
                 completedJob.getNamespaceHash(),
                 TrafficStats.getUidRxBytes(completedJob.getSourceUid())
                         - mInitialDownloadedBytesFromSource,
