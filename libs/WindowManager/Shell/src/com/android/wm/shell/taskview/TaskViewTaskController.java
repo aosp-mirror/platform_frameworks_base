@@ -604,7 +604,6 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                 });
             }
             mTaskViewBase.onTaskVanished(taskInfo);
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskInfo.token, false);
         }
     }
 
@@ -718,6 +717,9 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             mTaskViewBase.setResizeBgColor(startTransaction, backgroundColor);
         }
 
+        // After the embedded task has appeared, set it to non-trimmable. This is important
+        // to prevent recents from trimming and removing the embedded task.
+        wct.setTaskTrimmableFromRecents(taskInfo.token, false /* isTrimmableFromRecents */);
         mTaskViewBase.onTaskAppeared(mTaskInfo, mTaskLeash);
         if (mListener != null) {
             final int taskId = mTaskInfo.taskId;
