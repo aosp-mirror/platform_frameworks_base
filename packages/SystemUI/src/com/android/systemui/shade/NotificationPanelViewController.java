@@ -191,7 +191,6 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
-import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -608,7 +607,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
     private final SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
     private final ActiveNotificationsInteractor mActiveNotificationsInteractor;
-    private final HeadsUpNotificationInteractor mHeadsUpNotificationInteractor;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
     private final PowerInteractor mPowerInteractor;
@@ -774,7 +772,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             ActivityStarter activityStarter,
             SharedNotificationContainerInteractor sharedNotificationContainerInteractor,
             ActiveNotificationsInteractor activeNotificationsInteractor,
-            HeadsUpNotificationInteractor headsUpNotificationInteractor,
             ShadeAnimationInteractor shadeAnimationInteractor,
             KeyguardViewConfigurator keyguardViewConfigurator,
             DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
@@ -809,7 +806,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mSharedNotificationContainerInteractor = sharedNotificationContainerInteractor;
         mActiveNotificationsInteractor = activeNotificationsInteractor;
-        mHeadsUpNotificationInteractor = headsUpNotificationInteractor;
         mKeyguardInteractor = keyguardInteractor;
         mPowerInteractor = powerInteractor;
         mKeyguardViewConfigurator = keyguardViewConfigurator;
