@@ -25,9 +25,11 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.settingslib.notification.data.repository.FakeZenModeRepository
+import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
@@ -41,25 +43,25 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigTestBuilder
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.res.R
-import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
-import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -68,6 +70,18 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class ModesTileTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val testDispatcher = kosmos.testDispatcher
+
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun setup() {
+            // TODO: b/360399800 - Remove; ZenIconLoader should always use direct executor for tests
+            ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
+        }
+    }
 
     @Mock private lateinit var qsHost: QSHost
 
@@ -85,17 +99,10 @@ class ModesTileTest : SysuiTestCase() {
 
     @Mock private lateinit var dialogDelegate: ModesDialogDelegate
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
-
     private val inputHandler = FakeQSTileIntentUserInputHandler()
-    private val zenModeRepository = FakeZenModeRepository()
+    private val zenModeRepository = kosmos.zenModeRepository
     private val tileDataInteractor =
-        ModesTileDataInteractor(
-            context,
-            ZenModeInteractor(context, zenModeRepository, mock<NotificationSettingsRepository>()),
-            testDispatcher
-        )
+        ModesTileDataInteractor(context, kosmos.zenModeInteractor, testDispatcher)
     private val mapper =
         ModesTileMapper(
             context.orCreateTestableResources
