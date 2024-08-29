@@ -113,7 +113,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
@@ -600,6 +600,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDecorSnappedLeft_snapResizes() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onLeftSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -610,8 +611,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onLeftSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController)
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.LEFT)
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.LEFT)
+        )
+        assertEquals(taskSurfaceCaptor.firstValue, decor.mTaskSurface)
     }
 
     @Test
@@ -632,6 +638,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
     fun testOnSnapResizeLeft_nonResizable_decorSnappedLeft() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onLeftSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -642,8 +649,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onLeftSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController)
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.LEFT)
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.LEFT)
+        )
+        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
 
     @Test
@@ -660,12 +672,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onLeftSnapClickListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController, never())
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.LEFT)
+            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT))
         verify(mockToast).show()
     }
 
     @Test
     fun testOnDecorSnappedRight_snapResizes() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onRightSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -676,8 +689,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onRightSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController)
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.RIGHT)
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.RIGHT)
+        )
+        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
 
     @Test
@@ -698,6 +716,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
     fun testOnSnapResizeRight_nonResizable_decorSnappedRight() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onRightSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -708,8 +727,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onRightSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController)
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.RIGHT)
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.RIGHT)
+        )
+        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
 
     @Test
@@ -726,7 +750,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onRightSnapClickListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController, never())
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.RIGHT)
+            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT))
         verify(mockToast).show()
     }
 
@@ -1033,6 +1057,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
+        taskSurface: SurfaceControl = SurfaceControl(),
         onMaxOrRestoreListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onLeftSnapClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
@@ -1051,7 +1076,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             forClass(View.OnClickListener::class.java) as ArgumentCaptor<View.OnClickListener>
     ): DesktopModeWindowDecoration {
         val decor = setUpMockDecorationForTask(createTask(windowingMode = windowingMode))
-        onTaskOpening(decor.mTaskInfo)
+        onTaskOpening(decor.mTaskInfo, taskSurface)
         verify(decor).setOnMaximizeOrRestoreClickListener(onMaxOrRestoreListenerCaptor.capture())
         verify(decor).setOnLeftSnapClickListener(onLeftSnapClickListenerCaptor.capture())
         verify(decor).setOnRightSnapClickListener(onRightSnapClickListenerCaptor.capture())

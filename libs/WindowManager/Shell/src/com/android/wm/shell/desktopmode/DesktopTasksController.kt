@@ -734,17 +734,33 @@ class DesktopTasksController(
      * Quick-resize to the right or left half of the stable bounds.
      *
      * @param taskInfo current task that is being snap-resized via dragging or maximize menu button
+     * @param taskSurface the leash of the task being dragged
      * @param currentDragBounds current position of the task leash being dragged (or current task
      *                          bounds if being snapped resize via maximize menu button)
      * @param position the portion of the screen (RIGHT or LEFT) we want to snap the task to.
      */
     fun snapToHalfScreen(
         taskInfo: RunningTaskInfo,
+        taskSurface: SurfaceControl,
         currentDragBounds: Rect,
         position: SnapPosition
     ) {
         val destinationBounds = getSnapBounds(taskInfo, position)
-        if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) return
+        if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) {
+            // Handle the case where we attempt to snap resize when already snap resized: the task
+            // position won't need to change but we want to animate the surface going back to the
+            // snapped position from the "dragged-to-the-edge" position.
+            if (destinationBounds != currentDragBounds) {
+                returnToDragStartAnimator.start(
+                    taskInfo.taskId,
+                    taskSurface,
+                    startBounds = currentDragBounds,
+                    endBounds = destinationBounds,
+                    isResizable = taskInfo.isResizeable
+                )
+            }
+            return
+        }
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(true)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
@@ -774,13 +790,14 @@ class DesktopTasksController(
                 taskInfo.taskId,
                 taskSurface,
                 startBounds = currentDragBounds,
-                endBounds = dragStartBounds
+                endBounds = dragStartBounds,
+                isResizable = taskInfo.isResizeable,
             )
         } else {
             interactionJankMonitor.begin(
                 taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
             )
-            snapToHalfScreen(taskInfo, currentDragBounds, position)
+            snapToHalfScreen(taskInfo, taskSurface, currentDragBounds, position)
         }
     }
 
