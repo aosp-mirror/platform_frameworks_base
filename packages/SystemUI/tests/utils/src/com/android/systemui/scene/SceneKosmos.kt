@@ -1,9 +1,9 @@
 package com.android.systemui.scene
 
-import com.android.compose.animation.scene.OverlayKey
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.scene.shared.model.FakeScene
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.FakeOverlay
@@ -26,8 +26,8 @@ val Kosmos.scenes by Fixture { fakeScenes }
 val Kosmos.initialSceneKey by Fixture { Scenes.Lockscreen }
 
 var Kosmos.overlayKeys by Fixture {
-    listOf<OverlayKey>(
-        // TODO(b/356596436): Add overlays here when we have them.
+    listOf(
+        Overlays.NotificationsShade,
     )
 }
 

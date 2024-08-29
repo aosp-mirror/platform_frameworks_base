@@ -28,6 +28,7 @@ import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartabl
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
 import com.android.systemui.scene.domain.startable.StatusBarStartable
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.flag.DualShade
@@ -50,6 +51,7 @@ import dagger.multibindings.IntoMap
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
             QuickSettingsShadeSceneModule::class,
+            NotificationsShadeOverlayModule::class,
             NotificationsShadeSceneModule::class,
             NotificationsShadeSessionModule::class,
             SceneDomainModule::class,
@@ -108,6 +110,10 @@ interface SceneContainerFrameworkModule {
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Lockscreen,
+                overlayKeys =
+                    listOfNotNull(
+                        Overlays.NotificationsShade.takeIf { DualShade.isEnabled },
+                    ),
                 navigationDistances =
                     mapOf(
                             Scenes.Gone to 0,
