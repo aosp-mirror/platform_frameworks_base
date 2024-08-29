@@ -798,6 +798,12 @@ public class Handler {
     /**
      * Remove any pending posts of messages with code 'what' that are in the
      * message queue.
+     *
+     * Note that `Message#what` is 0 unless otherwise set.
+     * When calling `postMessage(Runnable)` or `postAtTime(Runnable, long)`,
+     * the `Runnable` is internally wrapped with a `Message` whose `what` is 0.
+     * Calling `removeMessages(0)` will remove all messages without a `what`,
+     * including posted `Runnable`s.
      */
     public final void removeMessages(int what) {
         mQueue.removeMessages(this, what, null);
