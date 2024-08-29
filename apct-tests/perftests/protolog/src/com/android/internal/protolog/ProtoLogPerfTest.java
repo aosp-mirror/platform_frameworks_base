@@ -15,43 +15,54 @@
  */
 package com.android.internal.protolog;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import android.app.Activity;
+import android.os.Bundle;
+import android.perftests.utils.Stats;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
 public class ProtoLogPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
-
-    @Parameters(name="logToProto_{0}_logToLogcat_{1}")
-    public static Collection<Object[]> params() {
-        return Arrays.asList(new Object[][] {
-                { true, true },
-                { true, false },
-                { false, true },
-                { false, false }
-        });
-    }
-
     private final boolean mLogToProto;
     private final boolean mLogToLogcat;
 
-    public ProtoLogPerfTest(boolean logToProto, boolean logToLogcat) {
-        mLogToProto = logToProto;
-        mLogToLogcat = logToLogcat;
+    /**
+     * Generates the parameters used for this test class
+     */
+    @Parameters(name = "LOG_TO_{0}")
+    public static Collection<Object[]> params() {
+        var params = new ArrayList<Object[]>();
+
+        for (LogTo logTo : LogTo.values()) {
+            params.add(new Object[] { logTo });
+        }
+
+        return params;
+    }
+
+    public ProtoLogPerfTest(LogTo logTo) {
+        mLogToProto = switch (logTo) {
+            case ALL, PROTO_ONLY -> true;
+            case LOGCAT_ONLY, NONE -> false;
+        };
+
+        mLogToLogcat = switch (logTo) {
+            case ALL, LOGCAT_ONLY -> true;
+            case PROTO_ONLY, NONE -> false;
+        };
     }
 
     @BeforeClass
@@ -66,11 +77,11 @@ public class ProtoLogPerfTest {
     }
 
     @Test
-    public void logProcessedProtoLogMessageWithoutArgs() {
+    public void log_Processed_NoArgs() {
         final var protoLog = ProtoLog.getSingleInstance();
+        final var perfMonitor = new PerfMonitor();
 
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        while (perfMonitor.keepRunning()) {
             protoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 123,
                     0, (Object[]) null);
@@ -78,11 +89,11 @@ public class ProtoLogPerfTest {
     }
 
     @Test
-    public void logProcessedProtoLogMessageWithArgs() {
+    public void log_Processed_WithArgs() {
         final var protoLog = ProtoLog.getSingleInstance();
+        final var perfMonitor = new PerfMonitor();
 
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+        while (perfMonitor.keepRunning()) {
             protoLog.log(
                     LogLevel.INFO, TestProtoLogGroup.TEST_GROUP, 123,
                     0b1110101001010100,
@@ -91,18 +102,58 @@ public class ProtoLogPerfTest {
     }
 
     @Test
-    public void logNonProcessedProtoLogMessageWithNoArgs() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
+    public void log_Unprocessed_NoArgs() {
+        final var perfMonitor = new PerfMonitor();
+
+        while (perfMonitor.keepRunning()) {
             ProtoLog.d(TestProtoLogGroup.TEST_GROUP, "Test message");
         }
     }
 
     @Test
-    public void logNonProcessedProtoLogMessageWithArgs() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            ProtoLog.d(TestProtoLogGroup.TEST_GROUP, "Test messag %s, %d, %b", "arg1", 2, true);
+    public void log_Unprocessed_WithArgs() {
+        final var perfMonitor = new PerfMonitor();
+
+        while (perfMonitor.keepRunning()) {
+            ProtoLog.d(TestProtoLogGroup.TEST_GROUP, "Test message %s, %d, %b", "arg1", 2, true);
+        }
+    }
+
+    private class PerfMonitor {
+        private int mIteration = 0;
+
+        private static final int WARM_UP_ITERATIONS = 10;
+        private static final int ITERATIONS = 1000;
+
+        private final ArrayList<Long> mResults = new ArrayList<>();
+
+        private long mStartTimeNs;
+
+        public boolean keepRunning() {
+            final long currentTime = System.nanoTime();
+
+            mIteration++;
+
+            if (mIteration > ITERATIONS) {
+                reportResults();
+                return false;
+            }
+
+            if (mIteration > WARM_UP_ITERATIONS) {
+                mResults.add(currentTime - mStartTimeNs);
+            }
+
+            mStartTimeNs = System.nanoTime();
+            return true;
+        }
+
+        public void reportResults() {
+            final var stats = new Stats(mResults);
+
+            Bundle status = new Bundle();
+            status.putLong("protologging_time_mean_ns", (long) stats.getMean());
+            status.putLong("protologging_time_median_ns", (long) stats.getMedian());
+            InstrumentationRegistry.getInstrumentation().sendStatus(Activity.RESULT_OK, status);
         }
     }
 
@@ -167,5 +218,12 @@ public class ProtoLogPerfTest {
         public int getId() {
             return ordinal();
         }
+    }
+
+    private enum LogTo {
+        PROTO_ONLY,
+        LOGCAT_ONLY,
+        ALL,
+        NONE,
     }
 }
