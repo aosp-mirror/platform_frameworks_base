@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.notification.collection.modifyEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.domain.interactor.lockScreenNotificationMinimalismSetting
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.testKosmos
@@ -76,7 +77,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
                 mock<SysuiStatusBarStateController>().also { mock ->
                     doAnswer { statusBarState.ordinal }.whenever(mock).state
                 }
-            fakeSettings.putInt(Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS, 1)
+            lockScreenNotificationMinimalismSetting = true
         }
     private val notifPipeline: NotifPipeline = mock()
     private var statusBarState: StatusBarState = StatusBarState.KEYGUARD

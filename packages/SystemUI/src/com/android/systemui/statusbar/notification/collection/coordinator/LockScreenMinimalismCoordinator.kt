@@ -129,26 +129,25 @@ constructor(
             }
     }
 
-    private fun unseenFeatureEnabled(): Flow<Boolean> {
-        // TODO(b/330387368): create LOCK_SCREEN_NOTIFICATION_MINIMALISM setting to use here?
-        //  Or should we actually just repurpose using the existing setting?
-        if (NotificationMinimalism.isEnabled) {
-            return flowOf(true)
+    private fun minimalismFeatureSettingEnabled(): Flow<Boolean> {
+        if (!NotificationMinimalism.isEnabled) {
+            return flowOf(false)
         }
-        return seenNotificationsInteractor.isLockScreenShowOnlyUnseenNotificationsEnabled()
+        return seenNotificationsInteractor.isLockScreenNotificationMinimalismEnabled()
     }
 
     private suspend fun trackUnseenFilterSettingChanges() {
-        unseenFeatureEnabled().collectLatest { isSettingEnabled ->
+        // Only filter the seen notifs when the lock screen minimalism feature settings is on.
+        minimalismFeatureSettingEnabled().collectLatest { isMinimalismSettingEnabled ->
             // update local field and invalidate if necessary
-            if (isSettingEnabled != unseenFilterEnabled) {
-                unseenFilterEnabled = isSettingEnabled
+            if (isMinimalismSettingEnabled != unseenFilterEnabled) {
+                unseenFilterEnabled = isMinimalismSettingEnabled
                 unseenNotifications.clear()
                 unseenNotifPromoter.invalidateList("unseen setting changed")
             }
             // if the setting is enabled, then start tracking and filtering unseen notifications
-            logger.logTrackingUnseen(isSettingEnabled)
-            if (isSettingEnabled) {
+            logger.logTrackingUnseen(isMinimalismSettingEnabled)
+            if (isMinimalismSettingEnabled) {
                 trackSeenNotifications()
             }
         }

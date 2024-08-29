@@ -91,4 +91,17 @@ class SeenNotificationsInteractorTest : SysuiTestCase() {
         testScheduler.runCurrent()
         assertThat(settingEnabled).isTrue()
     }
+
+    fun testLockScreenNotificationMinimalismSetting() = runTest {
+        val settingEnabled by
+            collectLastValue(underTest.isLockScreenNotificationMinimalismEnabled())
+
+        kosmos.lockScreenNotificationMinimalismSetting = false
+        testScheduler.runCurrent()
+        assertThat(settingEnabled).isFalse()
+
+        kosmos.lockScreenNotificationMinimalismSetting = true
+        testScheduler.runCurrent()
+        assertThat(settingEnabled).isTrue()
+    }
 }
