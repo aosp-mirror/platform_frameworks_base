@@ -224,9 +224,6 @@ class StorageManagerService extends IStorageManager.Stub
     /** Extended timeout for the system server watchdog for vold#partition operation. */
     private static final int PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS = 3 * 60 * 1000;
 
-    private static final Pattern OBB_FILE_PATH = Pattern.compile(
-            "(?i)(^/storage/[^/]+/(?:([0-9]+)/)?Android/obb/)([^/]+)/([^/]+\\.obb)");
-
     @GuardedBy("mLock")
     private final Set<Integer> mFuseMountedUser = new ArraySet<>();
 
@@ -3147,9 +3144,7 @@ class StorageManagerService extends IStorageManager.Stub
         Objects.requireNonNull(rawPath, "rawPath cannot be null");
         Objects.requireNonNull(canonicalPath, "canonicalPath cannot be null");
         Objects.requireNonNull(token, "token cannot be null");
-        Objects.requireNonNull(obbInfo, "obbInfo cannot be null");
-
-        validateObbInfo(obbInfo, rawPath);
+        Objects.requireNonNull(obbInfo, "obbIfno cannot be null");
 
         final int callingUid = Binder.getCallingUid();
         final ObbState obbState = new ObbState(rawPath, canonicalPath,
@@ -3159,34 +3154,6 @@ class StorageManagerService extends IStorageManager.Stub
 
         if (DEBUG_OBB)
             Slog.i(TAG, "Send to OBB handler: " + action.toString());
-    }
-
-    private void validateObbInfo(ObbInfo obbInfo, String rawPath) {
-        String obbFilePath;
-        try {
-            obbFilePath = new File(rawPath).getCanonicalPath();
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to resolve path" + rawPath + " : " + ex);
-        }
-
-        Matcher matcher = OBB_FILE_PATH.matcher(obbFilePath);
-
-        if (matcher.matches()) {
-            int userId = UserHandle.getUserId(Binder.getCallingUid());
-            String pathUserId = matcher.group(2);
-            String pathPackageName = matcher.group(3);
-            if ((pathUserId != null && Integer.parseInt(pathUserId) != userId)
-                    || (pathUserId == null && userId != mCurrentUserId)) {
-                throw new SecurityException(
-                        "Path " + obbFilePath + "does not correspond to calling userId " + userId);
-            }
-            if (obbInfo != null && !obbInfo.packageName.equals(pathPackageName)) {
-                throw new SecurityException("Path " + obbFilePath
-                        + " does not contain package name " + pathPackageName);
-            }
-        } else {
-            throw new SecurityException("Invalid path to Obb file : " + obbFilePath);
-        }
     }
 
     @Override
