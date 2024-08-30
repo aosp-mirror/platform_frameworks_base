@@ -55,7 +55,7 @@ constructor(
     fun tileData() =
         zenModeInteractor.activeModes
             .map { activeModes ->
-                val modesIconResId = R.drawable.qs_dnd_icon_off
+                val modesIconResId = com.android.internal.R.drawable.ic_zen_priority_modes
 
                 if (usesModeIcons()) {
                     val mainModeDrawable = activeModes.mainMode?.icon?.drawable

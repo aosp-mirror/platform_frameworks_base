@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles
 
-import android.graphics.drawable.TestStubDrawable
 import android.os.Handler
 import android.platform.test.annotations.EnableFlags
 import android.service.quicksettings.Tile
@@ -93,12 +92,7 @@ class ModesTileTest : SysuiTestCase() {
         ModesTileDataInteractor(context, kosmos.zenModeInteractor, testDispatcher)
     private val mapper =
         ModesTileMapper(
-            context.orCreateTestableResources
-                .apply {
-                    addOverride(R.drawable.qs_dnd_icon_on, TestStubDrawable())
-                    addOverride(R.drawable.qs_dnd_icon_off, TestStubDrawable())
-                }
-                .resources,
+            context.resources,
             context.theme,
         )
 
@@ -122,7 +116,7 @@ class ModesTileTest : SysuiTestCase() {
                 QSTileConfigTestBuilder.build {
                     uiConfig =
                         QSTileUIConfig.Resource(
-                            iconRes = R.drawable.qs_dnd_icon_off,
+                            iconRes = ModesTile.ICON_RES_ID,
                             labelRes = R.string.quick_settings_modes_label,
                         )
                 }
