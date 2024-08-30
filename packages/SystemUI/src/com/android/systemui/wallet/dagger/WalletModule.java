@@ -23,10 +23,18 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.pipeline.shared.TileSpec;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.QuickAccessWalletTile;
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfig;
+import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy;
+import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig;
+import com.android.systemui.res.R;
 import com.android.systemui.wallet.controller.WalletContextualLocationsService;
 import com.android.systemui.wallet.ui.WalletActivity;
+
+import java.util.concurrent.Executor;
 
 import dagger.Binds;
 import dagger.Module;
@@ -35,13 +43,13 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 
-import java.util.concurrent.Executor;
-
 /**
  * Module for injecting classes in Wallet.
  */
 @Module
 public abstract class WalletModule {
+
+    public static final String WALLET_TILE_SPEC = "wallet";
 
     @Binds
     @IntoMap
@@ -69,4 +77,21 @@ public abstract class WalletModule {
     @StringKey(QuickAccessWalletTile.TILE_SPEC)
     public abstract QSTileImpl<?> bindQuickAccessWalletTile(
             QuickAccessWalletTile quickAccessWalletTile);
+
+    @Provides
+    @IntoMap
+    @StringKey(WALLET_TILE_SPEC)
+    public static QSTileConfig provideQuickAccessWalletTileConfig(QsEventLogger uiEventLogger) {
+        TileSpec tileSpec = TileSpec.create(WALLET_TILE_SPEC);
+        return new QSTileConfig(
+                tileSpec,
+                new QSTileUIConfig.Resource(
+                        R.drawable.ic_wallet_lockscreen,
+                        R.string.wallet_title
+                ),
+                uiEventLogger.getNewInstanceId(),
+                tileSpec.getSpec(),
+                QSTilePolicy.NoRestrictions.INSTANCE
+        );
+    }
 }
