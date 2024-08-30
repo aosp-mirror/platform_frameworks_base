@@ -751,6 +751,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             incrementalState.protologMessageInterningSet.add(messageHash);
 
             final ProtoOutputStream os = ctx.newTracePacket();
+
+            // Dependent on the ProtoLog viewer config packet that contains the group information.
+            os.write(SEQUENCE_FLAGS, SEQ_NEEDS_INCREMENTAL_STATE);
+
             final long protologViewerConfigToken = os.start(PROTOLOG_VIEWER_CONFIG);
             final long messageConfigToken = os.start(MESSAGES);
 
