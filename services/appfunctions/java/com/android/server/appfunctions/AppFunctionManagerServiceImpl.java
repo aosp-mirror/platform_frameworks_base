@@ -25,6 +25,7 @@ import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -141,10 +142,16 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             ));
             return;
         }
-        bindAppFunctionServiceUnchecked(requestInternal, serviceIntent, targetUser,
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            bindAppFunctionServiceUnchecked(requestInternal, serviceIntent, targetUser,
                 safeExecuteAppFunctionCallback,
                 /*bindFlags=*/ Context.BIND_AUTO_CREATE,
                 /*timeoutInMillis=*/ mServiceConfig.getExecuteAppFunctionTimeoutMillis());
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private void bindAppFunctionServiceUnchecked(
