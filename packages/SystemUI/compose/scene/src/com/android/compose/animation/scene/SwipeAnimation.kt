@@ -17,8 +17,8 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -320,7 +320,7 @@ internal class SwipeAnimation<T : ContentKey>(
     fun animateOffset(
         initialVelocity: Float,
         targetContent: T,
-        spec: SpringSpec<Float>? = null,
+        spec: AnimationSpec<Float>? = null,
     ): OffsetAnimation {
         val initialProgress = progress
         // Skip the animation if we have already reached the target content and the overscroll does
