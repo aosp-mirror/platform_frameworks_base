@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.notifications.ui.viewmodel
 
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /**
- * Models UI state used to render the content of the quick settings shade overlay.
+ * Models UI state used to render the content of the notifications shade overlay.
  *
- * Different from [QuickSettingsShadeOverlayActionsViewModel], which only models user actions that
+ * Different from [NotificationsShadeOverlayActionsViewModel], which only models user actions that
  * can be performed to navigate to other scenes.
  */
-class QuickSettingsShadeOverlayContentViewModel
+class NotificationsShadeOverlayContentViewModel
 @AssistedInject
 constructor(
-    val sceneInteractor: SceneInteractor,
     val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
-    val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
+    val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
+    private val sceneInteractor: SceneInteractor,
 ) {
     fun onScrimClicked() {
         sceneInteractor.hideOverlay(
-            overlay = Overlays.QuickSettingsShade,
+            overlay = Overlays.NotificationsShade,
             loggingReason = "Shade scrim clicked",
         )
     }
 
     @AssistedFactory
     interface Factory {
-        fun create(): QuickSettingsShadeOverlayContentViewModel
+        fun create(): NotificationsShadeOverlayContentViewModel
     }
 }
