@@ -236,7 +236,8 @@ public final class NfcActivityManager extends IAppCallback.Stub
 
     public void setReaderMode(Binder token, int flags, Bundle extras) {
         if (DBG) Log.d(TAG, "Setting reader mode");
-        NfcAdapter.callService(() -> NfcAdapter.sService.setReaderMode(token, this, flags, extras));
+        NfcAdapter.callService(() -> NfcAdapter.sService.setReaderMode(
+                token, this, flags, extras, mAdapter.getContext().getPackageName()));
     }
 
     /**
@@ -395,7 +396,8 @@ public final class NfcActivityManager extends IAppCallback.Stub
 
     private void changeDiscoveryTech(Binder token, int pollTech, int listenTech) {
         NfcAdapter.callService(
-            () -> NfcAdapter.sService.updateDiscoveryTechnology(token, pollTech, listenTech));
+                () -> NfcAdapter.sService.updateDiscoveryTechnology(
+                        token, pollTech, listenTech, mAdapter.getContext().getPackageName()));
     }
 
 }
