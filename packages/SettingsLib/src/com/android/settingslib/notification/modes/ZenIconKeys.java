@@ -37,7 +37,7 @@ class ZenIconKeys {
      * chosen one via Settings).
      */
     static final ZenIcon.Key IMPLICIT_MODE_DEFAULT = ZenIcon.Key.forSystemResource(
-            R.drawable.ic_zen_mode_type_unknown);
+            R.drawable.ic_zen_mode_type_special_dnd);
 
     private static final ImmutableMap<Integer, ZenIcon.Key> TYPE_DEFAULTS = ImmutableMap.of(
             AutomaticZenRule.TYPE_UNKNOWN,
