@@ -99,11 +99,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     public static final String NULL_STRING = "null";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
-    private final ProtoLogDataSource mDataSource = new ProtoLogDataSource(
-            this::onTracingInstanceStart,
-            this::onTracingFlush,
-            this::onTracingInstanceStop
-    );
+    @NonNull
+    private final ProtoLogDataSource mDataSource;
     @Nullable
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     @Nullable
@@ -156,8 +153,11 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             @NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups) {
-        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater, groups);
+            @NonNull IProtoLogGroup[] groups,
+            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
+            @NonNull ProtoLogConfigurationService configurationService) {
+        this(null, viewerConfigInputStreamProvider, viewerConfigReader, cacheUpdater,
+                groups, dataSourceBuilder, configurationService);
     }
 
     private PerfettoProtoLogImpl(
@@ -166,11 +166,44 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             @NonNull Runnable cacheUpdater,
             @NonNull IProtoLogGroup[] groups) {
+        this(viewerConfigFilePath, viewerConfigInputStreamProvider, viewerConfigReader,
+                cacheUpdater, groups,
+                ProtoLogDataSource::new,
+                IProtoLogConfigurationService.Stub
+                        .asInterface(ServiceManager.getService(PROTOLOG_CONFIGURATION_SERVICE))
+        );
+    }
+
+    @VisibleForTesting
+    public interface ProtoLogDataSourceBuilder {
+        /**
+         * Builder method for the DataSource the PerfettoProtoLogImpl is going to us.
+         * @param onStart The onStart callback that should be used by the created datasource.
+         * @param onFlush The onFlush callback that should be used by the created datasource.
+         * @param onStop The onStop callback that should be used by the created datasource.
+         * @return A new DataSource that uses the provided callbacks.
+         */
+        ProtoLogDataSource build(ProtoLogDataSource.Instance.TracingInstanceStartCallback onStart,
+                Runnable onFlush, ProtoLogDataSource.Instance.TracingInstanceStopCallback onStop);
+    }
+
+    private PerfettoProtoLogImpl(
+            @Nullable String viewerConfigFilePath,
+            @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            @Nullable ProtoLogViewerConfigReader viewerConfigReader,
+            @NonNull Runnable cacheUpdater,
+            @NonNull IProtoLogGroup[] groups,
+            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
+            @Nullable IProtoLogConfigurationService configurationService) {
         if (viewerConfigFilePath != null && viewerConfigInputStreamProvider != null) {
             throw new RuntimeException("Only one of viewerConfigFilePath and "
                     + "viewerConfigInputStreamProvider can be set");
         }
 
+        mDataSource = dataSourceBuilder.build(
+                this::onTracingInstanceStart,
+                this::onTracingFlush,
+                this::onTracingInstanceStop);
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
                 new DataSourceParams.Builder()
@@ -186,9 +219,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         registerGroupsLocally(groups);
 
         if (android.tracing.Flags.clientSideProtoLogging()) {
-            mProtoLogConfigurationService =
-                    IProtoLogConfigurationService.Stub.asInterface(ServiceManager.getService(
-                            PROTOLOG_CONFIGURATION_SERVICE));
+            mProtoLogConfigurationService = configurationService;
             Objects.requireNonNull(mProtoLogConfigurationService,
                     "ServiceManager returned a null ProtoLog Configuration Service");
 
