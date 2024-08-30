@@ -2939,7 +2939,7 @@ public class ZenModeConfig implements Parcelable {
             }
         }
 
-        // TODO: b/333527800 - Rename to isActive()
+        // TODO: b/363193376 - Rename to isActive()
         public boolean isAutomaticActive() {
             if (Flags.modesApi() && Flags.modesUi()) {
                 if (!enabled || getPkg() == null) {

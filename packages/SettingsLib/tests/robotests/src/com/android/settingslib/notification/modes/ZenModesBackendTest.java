@@ -16,12 +16,14 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 import static android.service.notification.Condition.SOURCE_UNKNOWN;
 import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.ZenAdapters.notificationPolicyToZenPolicy;
 import static android.service.notification.ZenPolicy.STATE_ALLOW;
 
@@ -46,8 +48,6 @@ import android.service.notification.Condition;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
-
-import com.android.settingslib.R;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -172,9 +172,8 @@ public class ZenModesBackendTest {
         // all modes exist, but none of them are currently active
         assertThat(modes).containsExactly(
                         ZenMode.manualDndMode(
-                                new AutomaticZenRule.Builder(
-                                        mContext.getString(R.string.zen_mode_settings_title),
-                                        Uri.EMPTY)
+                                new AutomaticZenRule.Builder("Do Not Disturb", Uri.EMPTY)
+                                        .setPackage(PACKAGE_ANDROID)
                                         .setType(AutomaticZenRule.TYPE_OTHER)
                                         .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                                         .setZenPolicy(notificationPolicyToZenPolicy(dndPolicy))
@@ -196,15 +195,52 @@ public class ZenModesBackendTest {
 
         ZenMode mode = mBackend.getMode(ZenMode.MANUAL_DND_MODE_ID);
 
+        assertThat(mode).isNotNull();
         assertThat(mode).isEqualTo(
                 ZenMode.manualDndMode(
-                        new AutomaticZenRule.Builder(
-                                mContext.getString(R.string.zen_mode_settings_title), Uri.EMPTY)
+                        new AutomaticZenRule.Builder("Do Not Disturb", Uri.EMPTY)
+                                .setPackage(PACKAGE_ANDROID)
                                 .setType(AutomaticZenRule.TYPE_OTHER)
                                 .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                                 .setZenPolicy(notificationPolicyToZenPolicy(dndPolicy))
                                 .setManualInvocationAllowed(true)
                                 .build(), false));
+
+        assertThat(mode.isManualDnd()).isTrue();
+        assertThat(mode.isEnabled()).isTrue();
+        assertThat(mode.isActive()).isFalse();
+        assertThat(mode.canEditPolicy()).isTrue();
+        assertThat(mode.getPolicy()).isEqualTo(notificationPolicyToZenPolicy(dndPolicy));
+    }
+
+    @Test
+    public void getMode_dndWithOtherInterruptionFilter_returnsSpecialDndMode() {
+        ZenModeConfig config = configWithManualRule(new ZenModeConfig(), true);
+        config.manualRule.zenMode = Settings.Global.ZEN_MODE_ALARMS;
+        Policy dndPolicyForPriority = new Policy(Policy.PRIORITY_CATEGORY_ALARMS,
+                Policy.PRIORITY_SENDERS_CONTACTS, Policy.PRIORITY_SENDERS_CONTACTS);
+        config.applyNotificationPolicy(dndPolicyForPriority);
+        when(mNm.getZenModeConfig()).thenReturn(config);
+
+        ZenMode mode = mBackend.getMode(ZenMode.MANUAL_DND_MODE_ID);
+
+        assertThat(mode).isNotNull();
+        assertThat(mode).isEqualTo(
+                ZenMode.manualDndMode(
+                        new AutomaticZenRule.Builder("Do Not Disturb", Uri.EMPTY)
+                                .setPackage(PACKAGE_ANDROID)
+                                .setType(AutomaticZenRule.TYPE_OTHER)
+                                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                                .setZenPolicy(notificationPolicyToZenPolicy(dndPolicyForPriority))
+                                .setManualInvocationAllowed(true)
+                                .build(), true));
+
+        assertThat(mode.isManualDnd()).isTrue();
+        assertThat(mode.isEnabled()).isTrue();
+        assertThat(mode.isActive()).isTrue();
+        // Mode itself has a special fixed policy, different to the rule.
+        assertThat(mode.canEditPolicy()).isFalse();
+        assertThat(mode.getPolicy()).isEqualTo(ZenMode.POLICY_INTERRUPTION_FILTER_ALARMS);
     }
 
     @Test
