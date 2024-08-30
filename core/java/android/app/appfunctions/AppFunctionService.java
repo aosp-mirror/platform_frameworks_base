@@ -81,8 +81,9 @@ public abstract class AppFunctionService extends Service {
                         // Apps should handle exceptions. But if they don't, report the error on
                         // behalf of them.
                         safeCallback.onResult(
-                                new ExecuteAppFunctionResponse.Builder(
-                                        getResultCode(ex), getExceptionMessage(ex)).build());
+                                ExecuteAppFunctionResponse.newFailure(
+                                        getResultCode(ex),
+                                        ex.getMessage(), /*extras=*/  null));
                     }
                 }
             };
@@ -117,8 +118,4 @@ public abstract class AppFunctionService extends Service {
     public abstract void onExecuteFunction(
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull Consumer<ExecuteAppFunctionResponse> callback);
-
-    private String getExceptionMessage(Exception exception) {
-        return exception.getMessage() == null ? "" : exception.getMessage();
-    }
 }
