@@ -35,7 +35,6 @@ import com.android.systemui.util.kotlin.filterValuesNotNull
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -100,7 +99,7 @@ constructor(
                     }
                 }
             }
-            .collectLatest { setActions(it) }
+            .collect { setActions(it) }
     }
 
     private fun swipeDownFromTop(pointerCount: Int): Swipe {

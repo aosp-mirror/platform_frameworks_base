@@ -142,7 +142,6 @@ class RebootEscrowManager {
             ERROR_KEYSTORE_FAILURE,
             ERROR_NO_NETWORK,
             ERROR_TIMEOUT_EXHAUSTED,
-            ERROR_NO_REBOOT_ESCROW_DATA,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RebootEscrowErrorCode {
@@ -158,7 +157,6 @@ class RebootEscrowManager {
     static final int ERROR_KEYSTORE_FAILURE = 7;
     static final int ERROR_NO_NETWORK = 8;
     static final int ERROR_TIMEOUT_EXHAUSTED = 9;
-    static final int ERROR_NO_REBOOT_ESCROW_DATA = 10;
 
     private @RebootEscrowErrorCode int mLoadEscrowDataErrorCode = ERROR_NONE;
 
@@ -507,9 +505,6 @@ class RebootEscrowManager {
         if (rebootEscrowUsers.isEmpty()) {
             Slog.i(TAG, "No reboot escrow data found for users,"
                     + " skipping loading escrow data");
-            setLoadEscrowDataErrorCode(ERROR_NO_REBOOT_ESCROW_DATA, retryHandler);
-            reportMetricOnRestoreComplete(
-                    /* success= */ false, /* attemptCount= */ 1, retryHandler);
             clearMetricsStorage();
             return;
         }

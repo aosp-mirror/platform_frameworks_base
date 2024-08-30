@@ -85,9 +85,7 @@ constructor(
     private val previewMode = MutableStateFlow(PreviewMode())
 
     private val showingLockscreen: Flow<Boolean> =
-        transitionInteractor.finishedKeyguardState.map { keyguardState ->
-            keyguardState == KeyguardState.LOCKSCREEN
-        }
+        transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN)
 
     /** The only time the expansion is important is while lockscreen is actively displayed */
     private val shadeExpansionAlpha =

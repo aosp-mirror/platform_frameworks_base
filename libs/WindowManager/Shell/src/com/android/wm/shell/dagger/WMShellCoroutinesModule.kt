@@ -61,20 +61,20 @@ class WMShellCoroutinesModule {
   @WMSingleton
   @ShellMainThread
   fun provideApplicationScope(
-      @ShellMainThread applicationDispatcher: CoroutineDispatcher,
+      @ShellMainThread applicationDispatcher: MainCoroutineDispatcher,
   ): CoroutineScope = CoroutineScope(applicationDispatcher)
 
   @Provides
   @WMSingleton
   @ShellBackgroundThread
   fun provideBackgroundCoroutineScope(
-      @ShellBackgroundThread backgroundDispatcher: CoroutineDispatcher,
+      @ShellBackgroundThread backgroundDispatcher: MainCoroutineDispatcher,
   ): CoroutineScope = CoroutineScope(backgroundDispatcher)
 
   @Provides
   @WMSingleton
   @ShellBackgroundThread
   fun provideBackgroundCoroutineContext(
-      @ShellBackgroundThread backgroundDispatcher: CoroutineDispatcher
+      @ShellBackgroundThread backgroundDispatcher: MainCoroutineDispatcher
   ): CoroutineContext = backgroundDispatcher + SupervisorJob()
 }

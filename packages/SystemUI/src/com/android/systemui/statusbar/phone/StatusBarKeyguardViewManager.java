@@ -68,13 +68,11 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
 import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardDone;
@@ -363,8 +361,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         }
     };
-    private Lazy<WindowManagerLockscreenVisibilityInteractor> mWmLockscreenVisibilityInteractor;
-    private Lazy<KeyguardSurfaceBehindInteractor> mSurfaceBehindInteractor;
     private Lazy<KeyguardDismissActionInteractor> mKeyguardDismissActionInteractor;
     private final JavaAdapter mJavaAdapter;
     private StatusBarKeyguardViewManagerInteractor mStatusBarKeyguardViewManagerInteractor;
@@ -394,11 +390,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             UdfpsOverlayInteractor udfpsOverlayInteractor,
             ActivityStarter activityStarter,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
+            KeyguardDismissTransitionInteractor keyguardDismissTransitionInteractor,
             @Main CoroutineDispatcher mainDispatcher,
-            Lazy<WindowManagerLockscreenVisibilityInteractor> wmLockscreenVisibilityInteractor,
             Lazy<KeyguardDismissActionInteractor> keyguardDismissActionInteractorLazy,
             SelectedUserInteractor selectedUserInteractor,
-            Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor,
             JavaAdapter javaAdapter,
             Lazy<SceneInteractor> sceneInteractorLazy,
             StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor,
@@ -432,11 +427,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
         mActivityStarter = activityStarter;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mKeyguardDismissTransitionInteractor = keyguardDismissTransitionInteractor;
         mMainDispatcher = mainDispatcher;
-        mWmLockscreenVisibilityInteractor = wmLockscreenVisibilityInteractor;
         mKeyguardDismissActionInteractor = keyguardDismissActionInteractorLazy;
         mSelectedUserInteractor = selectedUserInteractor;
-        mSurfaceBehindInteractor = surfaceBehindInteractor;
         mJavaAdapter = javaAdapter;
         mSceneInteractorLazy = sceneInteractorLazy;
         mStatusBarKeyguardViewManagerInteractor = statusBarKeyguardViewManagerInteractor;
@@ -445,6 +439,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    KeyguardDismissTransitionInteractor mKeyguardDismissTransitionInteractor;
     CoroutineDispatcher mMainDispatcher;
 
     @Override
@@ -1616,7 +1611,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
 
         if (KeyguardWmStateRefactor.isEnabled()) {
-            mKeyguardTransitionInteractor.startDismissKeyguardTransition(
+            mKeyguardDismissTransitionInteractor.startDismissKeyguardTransition(
                     "SBKVM#keyguardAuthenticated");
         }
     }

@@ -15,4 +15,4 @@
 
 # List all the ravenwood test modules.
 
-jq -r 'to_entries[] | select( .value.compatibility_suites | index("ravenwood-tests") ) | .key' "$OUT/module-info.json"
+jq -r 'to_entries[] | select( .value.compatibility_suites | index("ravenwood-tests") ) | .key' "$OUT/module-info.json" | sort

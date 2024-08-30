@@ -35,7 +35,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -123,7 +122,7 @@ class SceneActionsViewModelTest : SysuiTestCase() {
         override suspend fun hydrateActions(
             setActions: (Map<UserAction, UserActionResult>) -> Unit,
         ) {
-            upstream.collectLatest { setActions(it) }
+            upstream.collect { setActions(it) }
         }
     }
 }

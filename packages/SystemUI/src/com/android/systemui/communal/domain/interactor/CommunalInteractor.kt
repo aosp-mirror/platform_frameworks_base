@@ -510,7 +510,7 @@ constructor(
      * A flow of ongoing content, including smartspace timers and umo, ordered by creation time and
      * sized dynamically.
      */
-    fun getOngoingContent(mediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
+    val ongoingContent: Flow<List<CommunalContentModel.Ongoing>> =
         combine(smartspaceRepository.timers, mediaRepository.mediaModel) { timers, media ->
                 val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
@@ -526,7 +526,7 @@ constructor(
                 )
 
                 // Add UMO
-                if (mediaHostVisible && media.hasAnyMediaOrRecommendation) {
+                if (media.hasAnyMediaOrRecommendation) {
                     ongoingContent.add(
                         CommunalContentModel.Umo(
                             createdTimestampMillis = media.createdTimestampMillis,

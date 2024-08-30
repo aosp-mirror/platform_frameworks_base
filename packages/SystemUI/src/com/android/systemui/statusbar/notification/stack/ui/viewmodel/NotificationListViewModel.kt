@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -26,7 +27,6 @@ import com.android.systemui.statusbar.notification.domain.interactor.SeenNotific
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.UserSetupInteractor
@@ -256,7 +256,7 @@ constructor(
     }
 
     val topHeadsUpRow: Flow<HeadsUpRowKey?> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(null)
         } else {
             headsUpNotificationInteractor.topHeadsUpRow.dumpWhileCollecting("topHeadsUpRow")
@@ -264,7 +264,7 @@ constructor(
     }
 
     val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
             headsUpNotificationInteractor.pinnedHeadsUpRows.dumpWhileCollecting("pinnedHeadsUpRows")
@@ -272,7 +272,7 @@ constructor(
     }
 
     val headsUpAnimationsEnabled: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             flowOf(true).dumpWhileCollecting("headsUpAnimationsEnabled")
@@ -280,7 +280,7 @@ constructor(
     }
 
     val hasPinnedHeadsUpRow: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             headsUpNotificationInteractor.hasPinnedRows.dumpWhileCollecting("hasPinnedHeadsUpRow")

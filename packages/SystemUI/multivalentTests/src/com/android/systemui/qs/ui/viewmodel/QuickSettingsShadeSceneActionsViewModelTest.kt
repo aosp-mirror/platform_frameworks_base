@@ -46,7 +46,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -64,14 +63,10 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
 
     private val underTest by lazy { kosmos.quickSettingsShadeSceneActionsViewModel }
 
-    @Before
-    fun setUp() {
-        underTest.activateIn(testScope)
-    }
-
     @Test
     fun upTransitionSceneKey_deviceLocked_lockscreen() =
         testScope.runTest {
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
@@ -85,6 +80,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_deviceLocked_keyguardDisabled_gone() =
         testScope.runTest {
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
@@ -98,6 +94,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
@@ -113,6 +110,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     fun downTransitionSceneKey_deviceLocked_bottomAligned_lockscreen() =
         testScope.runTest {
             kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
@@ -127,6 +125,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     fun downTransitionSceneKey_deviceUnlocked_bottomAligned_gone() =
         testScope.runTest {
             kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             lockDevice()
@@ -141,6 +140,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
@@ -157,6 +157,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
@@ -174,6 +175,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     @Test
     fun backTransitionSceneKey_notEditing_Home() =
         testScope.runTest {
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
 
             assertThat((actions?.get(Back) as? UserActionResult.ChangeScene)?.toScene)
@@ -183,6 +185,7 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
     @Test
     fun backTransition_editing_noDestination() =
         testScope.runTest {
+            underTest.activateIn(this)
             val actions by collectLastValue(underTest.actions)
             kosmos.editModeViewModel.startEditing()
 

@@ -299,7 +299,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         targetScene: SceneKey,
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey?,
-    ): TransitionState.Transition.ChangeCurrentScene? {
+    ): TransitionState.Transition.ChangeScene? {
         checkThread()
 
         return coroutineScope.animateToScene(

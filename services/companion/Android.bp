@@ -28,7 +28,6 @@ java_library_static {
     ],
     static_libs: [
         "ukey2_jni",
-        "virtualdevice_flags_lib",
         "virtual_camera_service_aidl-java",
     ],
     lint: {

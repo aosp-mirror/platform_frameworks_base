@@ -51,6 +51,19 @@ public class StatusBarIcon implements Parcelable {
         ResourceIcon
     }
 
+    public enum Shape {
+        /**
+         * Icon view should use WRAP_CONTENT -- so that the horizontal space occupied depends on the
+         * icon's shape (skinny/fat icons take less/more). Most icons will want to use this option
+         * for a nicer-looking overall spacing in the status bar, as long as the icon is "known"
+         * (i.e. not coming from a 3P package).
+         */
+        WRAP_CONTENT,
+
+        /** Icon should always be displayed in a space as wide as the status bar is tall. */
+        FIXED_SPACE,
+    }
+
     public UserHandle user;
     public String pkg;
     public Icon icon;
@@ -59,6 +72,7 @@ public class StatusBarIcon implements Parcelable {
     public int number;
     public CharSequence contentDescription;
     public Type type;
+    public Shape shape;
 
     /**
      * Optional {@link Drawable} corresponding to {@link #icon}. This field is not parcelable, so
@@ -68,7 +82,7 @@ public class StatusBarIcon implements Parcelable {
     @Nullable public Drawable preloadedIcon;
 
     public StatusBarIcon(UserHandle user, String resPackage, Icon icon, int iconLevel, int number,
-            CharSequence contentDescription, Type type) {
+            CharSequence contentDescription, Type type, Shape shape) {
         if (icon.getType() == Icon.TYPE_RESOURCE
                 && TextUtils.isEmpty(icon.getResPackage())) {
             // This is an odd situation where someone's managed to hand us an icon without a
@@ -83,6 +97,13 @@ public class StatusBarIcon implements Parcelable {
         this.number = number;
         this.contentDescription = contentDescription;
         this.type = type;
+        this.shape = shape;
+    }
+
+    public StatusBarIcon(UserHandle user, String resPackage, Icon icon, int iconLevel, int number,
+            CharSequence contentDescription, Type type) {
+        this(user, resPackage, icon, iconLevel, number, contentDescription, type,
+                Shape.WRAP_CONTENT);
     }
 
     public StatusBarIcon(String iconPackage, UserHandle user,
@@ -107,7 +128,7 @@ public class StatusBarIcon implements Parcelable {
     @Override
     public StatusBarIcon clone() {
         StatusBarIcon that = new StatusBarIcon(this.user, this.pkg, this.icon,
-                this.iconLevel, this.number, this.contentDescription, this.type);
+                this.iconLevel, this.number, this.contentDescription, this.type, this.shape);
         that.visible = this.visible;
         that.preloadedIcon = this.preloadedIcon;
         return that;
@@ -129,6 +150,7 @@ public class StatusBarIcon implements Parcelable {
         this.number = in.readInt();
         this.contentDescription = in.readCharSequence();
         this.type = Type.valueOf(in.readString());
+        this.shape = Shape.valueOf(in.readString());
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -140,6 +162,7 @@ public class StatusBarIcon implements Parcelable {
         out.writeInt(this.number);
         out.writeCharSequence(this.contentDescription);
         out.writeString(this.type.name());
+        out.writeString(this.shape.name());
     }
 
     public int describeContents() {

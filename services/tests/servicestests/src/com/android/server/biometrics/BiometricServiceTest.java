@@ -636,7 +636,8 @@ public class BiometricServiceTest {
                 eq(TEST_REQUEST_ID),
                 cookieCaptor.capture() /* cookie */,
                 anyBoolean() /* allowBackgroundAuthentication */,
-                anyBoolean() /* isForLegacyFingerprintManager */);
+                anyBoolean() /* isForLegacyFingerprintManager */,
+                eq(false) /* isMandatoryBiometrics */);
 
         // onReadyForAuthentication, mAuthSession state OK
         mBiometricService.mImpl.onReadyForAuthentication(TEST_REQUEST_ID, cookieCaptor.getValue());

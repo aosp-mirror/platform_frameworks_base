@@ -99,7 +99,7 @@ constructor(
 
     private val logger = Logger(logBuffer, "CommunalViewModel")
 
-    private val _isMediaHostVisible =
+    private val isMediaHostVisible =
         conflatedCallbackFlow {
                 val callback = { visible: Boolean ->
                     trySend(visible)
@@ -117,11 +117,25 @@ constructor(
                 mediaHost.updateViewVisibility()
                 emit(mediaHost.visible)
             }
+            .distinctUntilChanged()
             .onEach { logger.d({ "_isMediaHostVisible: $bool1" }) { bool1 = it } }
             .flowOn(mainDispatcher)
 
     /** Communal content saved from the previous emission when the flow is active (not "frozen"). */
     private var frozenCommunalContent: List<CommunalContentModel>? = null
+
+    private val ongoingContent =
+        combine(
+            isMediaHostVisible,
+            communalInteractor.ongoingContent.onEach { mediaHost.updateViewVisibility() }
+        ) { mediaVisible, ongoingContent ->
+            if (mediaVisible) {
+                ongoingContent
+            } else {
+                // Media is not visible, don't show UMO
+                ongoingContent.filterNot { it is CommunalContentModel.Umo }
+            }
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val latestCommunalContent: Flow<List<CommunalContentModel>> =
@@ -130,8 +144,6 @@ constructor(
                 if (isTutorialMode) {
                     return@flatMapLatest flowOf(communalInteractor.tutorialContent)
                 }
-                val ongoingContent =
-                    _isMediaHostVisible.flatMapLatest { communalInteractor.getOngoingContent(it) }
                 combine(
                     ongoingContent,
                     communalInteractor.widgetContent,

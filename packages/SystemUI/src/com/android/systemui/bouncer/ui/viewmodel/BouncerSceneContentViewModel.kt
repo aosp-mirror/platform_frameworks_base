@@ -160,7 +160,7 @@ constructor(
             launch {
                 userSwitcher.selectedUser
                     .map { it.image.toBitmap() }
-                    .collectLatest { _selectedUserImage.value = it }
+                    .collect { _selectedUserImage.value = it }
             }
 
             launch {
@@ -187,34 +187,32 @@ constructor(
                                 )
                             }
                     }
-                    .collectLatest { _userSwitcherDropdown.value = it }
+                    .collect { _userSwitcherDropdown.value = it }
             }
 
             launch {
                 combine(wipeDialogMessage, lockoutDialogMessage) { _, _ -> createDialogViewModel() }
-                    .collectLatest { _dialogViewModel.value = it }
+                    .collect { _dialogViewModel.value = it }
             }
 
-            launch {
-                actionButtonInteractor.actionButton.collectLatest { _actionButton.value = it }
-            }
+            launch { actionButtonInteractor.actionButton.collect { _actionButton.value = it } }
 
             launch {
                 authMethodViewModel
                     .map { authMethod -> isSideBySideSupported(authMethod) }
-                    .collectLatest { _isSideBySideSupported.value = it }
+                    .collect { _isSideBySideSupported.value = it }
             }
 
             launch {
                 authMethodViewModel
                     .map { authMethod -> isFoldSplitRequired(authMethod) }
-                    .collectLatest { _isFoldSplitRequired.value = it }
+                    .collect { _isFoldSplitRequired.value = it }
             }
 
             launch {
                 message.isLockoutMessagePresent
                     .map { lockoutMessagePresent -> !lockoutMessagePresent }
-                    .collectLatest { _isInputEnabled.value = it }
+                    .collect { _isInputEnabled.value = it }
             }
 
             awaitCancellation()

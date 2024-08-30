@@ -16,7 +16,6 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -32,8 +31,6 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -57,11 +54,12 @@ import java.util.List;
 import java.util.Set;
 
 /** Represents TaskFragments and split pairs below a Task. */
-class TaskContainer implements Parcelable {
+class TaskContainer {
     private static final String TAG = TaskContainer.class.getSimpleName();
 
-    /** The unique task id. */
-    private final int mTaskId;
+    /** Parcelable data of this TaskContainer. */
+    @NonNull
+    private final ParcelableTaskContainerData mParcelableTaskContainerData;
 
     /** Active TaskFragments in this Task. */
     @NonNull
@@ -130,11 +128,9 @@ class TaskContainer implements Parcelable {
      * @param splitController The {@link SplitController}.
      */
     TaskContainer(int taskId, @NonNull Activity activityInTask,
-            @Nullable SplitController splitController) {
-        if (taskId == INVALID_TASK_ID) {
-            throw new IllegalArgumentException("Invalid Task id");
-        }
-        mTaskId = taskId;
+            @NonNull SplitController splitController) {
+        mParcelableTaskContainerData = new ParcelableTaskContainerData(taskId, this);
+
         final TaskProperties taskProperties = TaskProperties
                 .getTaskPropertiesFromActivity(activityInTask);
         mInfo = new TaskFragmentParentInfo(
@@ -148,8 +144,44 @@ class TaskContainer implements Parcelable {
         mSplitController = splitController;
     }
 
+    /** This is only used when restoring it from a {@link ParcelableTaskContainerData}. */
+    TaskContainer(@NonNull ParcelableTaskContainerData data,
+            @NonNull SplitController splitController) {
+        mParcelableTaskContainerData = new ParcelableTaskContainerData(data, this);
+        mSplitController = splitController;
+        for (ParcelableTaskFragmentContainerData tfData :
+                data.getParcelableTaskFragmentContainerDataList()) {
+            final TaskFragmentContainer container =
+                    new TaskFragmentContainer(tfData, splitController, this);
+            mContainers.add(container);
+        }
+    }
+
+    @NonNull
+    ParcelableTaskContainerData getParcelableData() {
+        return mParcelableTaskContainerData;
+    }
+
+    @NonNull
+    List<ParcelableTaskFragmentContainerData> getParcelableTaskFragmentContainerDataList() {
+        final List<ParcelableTaskFragmentContainerData> data = new ArrayList<>(mContainers.size());
+        for (TaskFragmentContainer container : mContainers) {
+            data.add(container.getParcelableData());
+        }
+        return data;
+    }
+
+    @NonNull
+    List<ParcelableSplitContainerData> getParcelableSplitContainerDataList() {
+        final List<ParcelableSplitContainerData> data = new ArrayList<>(mSplitContainers.size());
+        for (SplitContainer splitContainer : mSplitContainers) {
+            data.add(splitContainer.getParcelableData());
+        }
+        return data;
+    }
+
     int getTaskId() {
-        return mTaskId;
+        return mParcelableTaskContainerData.mTaskId;
     }
 
     int getDisplayId() {
@@ -679,34 +711,6 @@ class TaskContainer implements Parcelable {
         }
         return activityStacks;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mTaskId);
-        // TODO(b/289875940)
-    }
-
-    protected TaskContainer(Parcel in) {
-        mTaskId = in.readInt();
-        // TODO(b/289875940)
-    }
-
-    public static final Creator<TaskContainer> CREATOR = new Creator<>() {
-        @Override
-        public TaskContainer createFromParcel(Parcel in) {
-            return new TaskContainer(in);
-        }
-
-        @Override
-        public TaskContainer[] newArray(int size) {
-            return new TaskContainer[size];
-        }
-    };
 
     /** A wrapper class which contains the information of {@link TaskContainer} */
     static final class TaskProperties {
