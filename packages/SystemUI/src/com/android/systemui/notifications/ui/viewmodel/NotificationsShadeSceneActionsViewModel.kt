@@ -22,28 +22,19 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeAlignment
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /**
  * Models the UI state for the user actions that the user can perform to navigate to other scenes.
  */
-class NotificationsShadeSceneActionsViewModel
-@AssistedInject
-constructor(
-    private val shadeInteractor: ShadeInteractor,
-) : SceneActionsViewModel() {
+class NotificationsShadeSceneActionsViewModel @AssistedInject constructor() :
+    SceneActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         setActions(
             mapOf(
-                if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
-                    Swipe.Up
-                } else {
-                    Swipe.Down
-                } to SceneFamilies.Home,
+                Swipe.Up to SceneFamilies.Home,
                 Back to SceneFamilies.Home,
             )
         )

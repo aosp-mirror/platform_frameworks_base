@@ -21,7 +21,6 @@ import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
@@ -37,14 +36,10 @@ class OverlayShadeViewModel
 @AssistedInject
 constructor(
     private val sceneInteractor: SceneInteractor,
-    shadeInteractor: ShadeInteractor,
 ) : ExclusiveActivatable() {
     private val _backgroundScene = MutableStateFlow(Scenes.Lockscreen)
     /** The scene to show in the background when the overlay shade is open. */
     val backgroundScene: StateFlow<SceneKey> = _backgroundScene.asStateFlow()
-
-    /** Dictates the alignment of the overlay shade panel on the screen. */
-    val panelAlignment = shadeInteractor.shadeAlignment
 
     override suspend fun onActivated(): Nothing {
         sceneInteractor.resolveSceneFamily(SceneFamilies.Home).collect { sceneKey ->

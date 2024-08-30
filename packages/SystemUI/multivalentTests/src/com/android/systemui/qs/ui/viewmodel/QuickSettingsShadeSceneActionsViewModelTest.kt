@@ -39,7 +39,6 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -103,37 +102,6 @@ class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
             assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Down)).isNull()
-            assertThat(homeScene).isEqualTo(Scenes.Gone)
-        }
-
-    @Test
-    fun downTransitionSceneKey_deviceLocked_bottomAligned_lockscreen() =
-        testScope.runTest {
-            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
-            underTest.activateIn(this)
-            val actions by collectLastValue(underTest.actions)
-            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
-            lockDevice()
-
-            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
-                .isEqualTo(SceneFamilies.Home)
-            assertThat(actions?.get(Swipe.Up)).isNull()
-            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
-        }
-
-    @Test
-    fun downTransitionSceneKey_deviceUnlocked_bottomAligned_gone() =
-        testScope.runTest {
-            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
-            underTest.activateIn(this)
-            val actions by collectLastValue(underTest.actions)
-            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
-            lockDevice()
-            unlockDevice()
-
-            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
-                .isEqualTo(SceneFamilies.Home)
-            assertThat(actions?.get(Swipe.Up)).isNull()
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
 
