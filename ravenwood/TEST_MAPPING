@@ -5,13 +5,11 @@
   "presubmit": [
     { "name": "tiny-framework-dump-test" },
     { "name": "hoststubgentest" },
+    { "name": "hoststubgen-test-tiny-test" },
     { "name": "hoststubgen-invoke-test" },
-    {
-      "name": "RavenwoodMockitoTest_device"
-    },
-    {
-      "name": "RavenwoodBivalentTest_device"
-    },
+    { "name": "RavenwoodMockitoTest_device" },
+    { "name": "RavenwoodBivalentTest_device" },
+
     // The sysui tests should match vendor/unbundled_google/packages/SystemUIGoogle/TEST_MAPPING
     {
       "name": "SystemUIGoogleTests",
