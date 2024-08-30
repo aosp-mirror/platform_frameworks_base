@@ -33,6 +33,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.ui.compose.Icon
@@ -56,9 +60,11 @@ fun ModeTile(viewModel: ModeTileViewModel) {
                 modifier =
                     Modifier.combinedClickable(
                             onClick = viewModel.onClick,
-                            onLongClick = viewModel.onLongClick
+                            onLongClick = viewModel.onLongClick,
+                            onLongClickLabel = viewModel.onLongClickLabel
                         )
-                        .padding(20.dp),
+                        .padding(20.dp)
+                        .semantics { stateDescription = viewModel.stateDescription },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement =
                     Arrangement.spacedBy(
@@ -76,7 +82,10 @@ fun ModeTile(viewModel: ModeTileViewModel) {
                     Text(
                         viewModel.subtext,
                         fontWeight = FontWeight.W400,
-                        modifier = Modifier.tileMarquee().testTag("state")
+                        modifier =
+                            Modifier.tileMarquee().testTag("state").clearAndSetSemantics {
+                                contentDescription = viewModel.subtextDescription
+                            }
                     )
                 }
             }
