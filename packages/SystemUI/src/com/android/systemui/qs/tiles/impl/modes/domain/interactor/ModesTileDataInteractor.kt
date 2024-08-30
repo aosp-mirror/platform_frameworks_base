@@ -20,10 +20,12 @@ import android.app.Flags
 import android.content.Context
 import android.os.UserHandle
 import com.android.app.tracing.coroutines.flow.map
+import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,18 +54,32 @@ constructor(
      */
     fun tileData() =
         zenModeInteractor.activeModes
-            .map { modes ->
-                ModesTileModel(
-                    isActivated = modes.isNotEmpty(),
-                    icon =
-                        if (Flags.modesApi() && Flags.modesUi() && Flags.modesUiIcons())
-                            zenModeInteractor.getActiveModeIcon(modes)
-                        else null,
-                    activeModes = modes.map { it.name }
-                )
+            .map { activeModes ->
+                val modesIconResId = R.drawable.qs_dnd_icon_off
+
+                if (usesModeIcons()) {
+                    val mainModeDrawable = activeModes.mainMode?.icon?.drawable
+                    val iconResId = if (mainModeDrawable == null) modesIconResId else null
+
+                    ModesTileModel(
+                        isActivated = activeModes.isAnyActive(),
+                        icon = (mainModeDrawable ?: context.getDrawable(modesIconResId)!!).asIcon(),
+                        iconResId = iconResId,
+                        activeModes = activeModes.modeNames
+                    )
+                } else {
+                    ModesTileModel(
+                        isActivated = activeModes.isAnyActive(),
+                        icon = context.getDrawable(modesIconResId)!!.asIcon(),
+                        iconResId = modesIconResId,
+                        activeModes = activeModes.modeNames
+                    )
+                }
             }
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
 
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(Flags.modesUi())
+
+    private fun usesModeIcons() = Flags.modesApi() && Flags.modesUi() && Flags.modesUiIcons()
 }

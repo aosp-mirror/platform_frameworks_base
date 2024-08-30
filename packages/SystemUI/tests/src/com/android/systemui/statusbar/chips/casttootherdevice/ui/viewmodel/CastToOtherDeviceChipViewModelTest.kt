@@ -127,7 +127,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             assertThat((icon.contentDescription as ContentDescription.Resource).res)
@@ -146,7 +146,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             assertThat((icon.contentDescription as ContentDescription.Resource).res)
@@ -184,7 +184,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             // This content description is just generic "Casting", not "Casting screen"
@@ -214,7 +214,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             // MediaProjection == screen casting, so this content description reflects that we're

@@ -438,7 +438,20 @@ aconfig_declarations {
     name: "android.companion.virtualdevice.flags-aconfig",
     package: "android.companion.virtualdevice.flags",
     container: "system",
+    exportable: true,
     srcs: ["core/java/android/companion/virtual/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.companion.virtualdevice.flags-aconfig-java-export",
+    aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.permission",
+    ],
 }
 
 java_aconfig_library {

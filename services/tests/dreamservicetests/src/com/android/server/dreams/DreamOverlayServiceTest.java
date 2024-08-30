@@ -140,7 +140,7 @@ public class DreamOverlayServiceTest {
 
         // Start the dream.
         client.startDream(mLayoutParams, mOverlayCallback,
-                FIRST_DREAM_COMPONENT.flattenToString(), false);
+                FIRST_DREAM_COMPONENT.flattenToString(), false, false);
 
         // The callback should not have run yet.
         verify(monitor, never()).onStartDream();
@@ -198,22 +198,24 @@ public class DreamOverlayServiceTest {
         // Start a dream with the first client and ensure the dream is now active from the
         // overlay's perspective.
         firstClient.startDream(mLayoutParams, mOverlayCallback,
-                FIRST_DREAM_COMPONENT.flattenToString(), false);
+                FIRST_DREAM_COMPONENT.flattenToString(), true, false);
 
 
         verify(monitor).onStartDream();
         assertThat(service.getDreamComponent()).isEqualTo(FIRST_DREAM_COMPONENT);
+        assertThat(service.isDreamInPreviewMode()).isTrue();
 
         Mockito.clearInvocations(monitor);
 
         // Start a dream from the second client and verify that the overlay has both cycled to
         // the new dream (ended/started).
         secondClient.startDream(mLayoutParams, mOverlayCallback,
-                SECOND_DREAM_COMPONENT.flattenToString(), false);
+                SECOND_DREAM_COMPONENT.flattenToString(), false, false);
 
         verify(monitor).onEndDream();
         verify(monitor).onStartDream();
         assertThat(service.getDreamComponent()).isEqualTo(SECOND_DREAM_COMPONENT);
+        assertThat(service.isDreamInPreviewMode()).isFalse();
 
         Mockito.clearInvocations(monitor);
 
@@ -248,7 +250,7 @@ public class DreamOverlayServiceTest {
 
         // Start the dream.
         client.startDream(mLayoutParams, mOverlayCallback,
-                FIRST_DREAM_COMPONENT.flattenToString(), false);
+                FIRST_DREAM_COMPONENT.flattenToString(), false, false);
         // Make sure redirect state is set on dream.
         verify(mOverlayCallback).onRedirectWake(eq(true));
 
@@ -262,7 +264,7 @@ public class DreamOverlayServiceTest {
         service.redirectWake(true);
         clearInvocations(mOverlayCallback);
         client.startDream(mLayoutParams, mOverlayCallback,
-                FIRST_DREAM_COMPONENT.flattenToString(), false);
+                FIRST_DREAM_COMPONENT.flattenToString(), false, false);
         verify(mOverlayCallback).onRedirectWake(eq(true));
     }
 

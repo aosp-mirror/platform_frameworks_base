@@ -203,6 +203,13 @@ constructor(
      */
     private var shadeConsumingTouches = false
 
+    /**
+     * True if the shade is showing at all.
+     *
+     * Inverse of [ShadeInteractor.isShadeFullyCollapsed]
+     */
+    private var shadeShowing = false
+
     /** True if the keyguard transition state is finished on [KeyguardState.LOCKSCREEN]. */
     private var onLockscreen = false
 
@@ -414,6 +421,7 @@ constructor(
             ),
             { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
                 shadeConsumingTouches = isUserInteracting
+                shadeShowing = !isShadeFullyCollapsed
                 val expandedAndNotInteractive = isFullyExpanded && !isUserInteracting
 
                 // If we ever are fully expanded and not interacting, capture this state as we
@@ -529,7 +537,7 @@ constructor(
         val isMove = ev.actionMasked == MotionEvent.ACTION_MOVE
         val isCancel = ev.actionMasked == MotionEvent.ACTION_CANCEL
 
-        val hubOccluded = anyBouncerShowing || shadeShowingAndConsumingTouches
+        val hubOccluded = anyBouncerShowing || shadeConsumingTouches || shadeShowing
 
         if ((isDown || isMove) && !hubOccluded) {
             if (isDown) {

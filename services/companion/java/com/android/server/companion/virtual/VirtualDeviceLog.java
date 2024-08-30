@@ -48,9 +48,6 @@ final class VirtualDeviceLog {
     void logCreated(int deviceId, int ownerUid) {
         final long token = Binder.clearCallingIdentity();
         try {
-            if (!Flags.dumpHistory()) {
-                return;
-            }
             addEntry(new LogEntry(TYPE_CREATED, deviceId, System.currentTimeMillis(), ownerUid));
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -60,9 +57,6 @@ final class VirtualDeviceLog {
     void logClosed(int deviceId, int ownerUid) {
         final long token = Binder.clearCallingIdentity();
         try {
-            if (!Flags.dumpHistory()) {
-                return;
-            }
             addEntry(new LogEntry(TYPE_CLOSED, deviceId, System.currentTimeMillis(), ownerUid));
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -79,9 +73,6 @@ final class VirtualDeviceLog {
     void dump(PrintWriter pw) {
         final long token = Binder.clearCallingIdentity();
         try {
-            if (!Flags.dumpHistory()) {
-                return;
-            }
             pw.println("VirtualDevice Log:");
             UidToPackageNameCache packageNameCache = new UidToPackageNameCache(
                     mContext.getPackageManager());

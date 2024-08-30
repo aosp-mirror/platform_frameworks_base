@@ -155,7 +155,7 @@ constructor(
                     emptyFlow()
                 }
             }
-            .collectLatest { messageViewModel -> message.value = messageViewModel }
+            .collect { messageViewModel -> message.value = messageViewModel }
     }
 
     private suspend fun listenForSimBouncerEvents() {
@@ -170,7 +170,7 @@ constructor(
                     emptyFlow()
                 }
             }
-            .collectLatest {
+            .collect {
                 if (it != null) {
                     message.value = it
                 } else {

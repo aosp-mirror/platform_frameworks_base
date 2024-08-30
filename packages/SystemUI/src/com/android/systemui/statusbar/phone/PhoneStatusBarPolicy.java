@@ -44,7 +44,7 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
-import com.android.settingslib.notification.modes.ZenMode;
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
@@ -80,6 +80,7 @@ import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor;
+import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.DateFormatUtil;
@@ -363,7 +364,7 @@ public class PhoneStatusBarPolicy
             // Note that we're not fully replacing ZenModeController with ZenModeInteractor, so
             // we listen for the extra event here but still add the ZMC callback.
             mJavaAdapter.alwaysCollectFlow(mZenModeInteractor.getMainActiveMode(),
-                    this::onActiveModeChanged);
+                    this::onMainActiveModeChanged);
         }
         mZenController.addCallback(mZenControllerCallback);
         if (!Flags.statusBarScreenSharingChips()) {
@@ -395,20 +396,23 @@ public class PhoneStatusBarPolicy
                 () -> mResources.getString(R.string.accessibility_managed_profile));
     }
 
-    private void onActiveModeChanged(@Nullable ZenMode mode) {
+    private void onMainActiveModeChanged(@Nullable ZenModeInfo mainActiveMode) {
         if (!usesModeIcons()) {
-            Log.wtf(TAG, "onActiveModeChanged shouldn't be called if MODES_UI_ICONS is disabled");
+            Log.wtf(TAG, "onMainActiveModeChanged shouldn't run if MODES_UI_ICONS is disabled");
             return;
         }
-        boolean visible = mode != null;
-        if (visible) {
-            // TODO: b/360399800 - Get the resource id, package, and cached drawable from the mode;
-            //  this is a shortcut for testing.
-            String resPackage = mode.getIconKey().resPackage();
-            int iconResId = mode.getIconKey().resId();
 
-            mIconController.setResourceIcon(mSlotZen, resPackage, iconResId,
-                    /* preloadedIcon= */ null, mode.getName());
+        boolean visible = mainActiveMode != null;
+        if (visible) {
+            // Shape=FIXED_SPACE because mode icons can be from 3P packages and may not be square;
+            // we don't want to allow apps to set incredibly wide icons and take up too much space
+            // in the status bar.
+            mIconController.setResourceIcon(mSlotZen,
+                    mainActiveMode.getIcon().key().resPackage(),
+                    mainActiveMode.getIcon().key().resId(),
+                    mainActiveMode.getIcon().drawable(),
+                    mainActiveMode.getName(),
+                    StatusBarIcon.Shape.FIXED_SPACE);
         }
         if (visible != mZenVisible) {
             mIconController.setIconVisibility(mSlotZen, visible);

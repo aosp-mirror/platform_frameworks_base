@@ -98,7 +98,7 @@ private fun SceneScope.stateForQuickSettingsContent(
                 else -> QSSceneAdapter.State.CLOSED
             }
         }
-        is TransitionState.Transition.ChangeCurrentScene ->
+        is TransitionState.Transition.ChangeScene ->
             with(transitionState) {
                 when {
                     isSplitShade -> UnsquishingQS(squishiness)

@@ -63,13 +63,14 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, long requestId, int cookie, boolean allowBackgroundAuthentication,
-            boolean isForLegacyFingerprintManager)
+            boolean isForLegacyFingerprintManager, boolean isMandatoryBiometrics)
             throws RemoteException {
         mFaceService.prepareForAuthentication(requireConfirmation, token, operationId,
                 sensorReceiver, new FaceAuthenticateOptions.Builder()
                         .setUserId(userId)
                         .setSensorId(mSensorId)
                         .setOpPackageName(opPackageName)
+                        .setIsMandatoryBiometrics(isMandatoryBiometrics)
                         .build(),
                 requestId, cookie, allowBackgroundAuthentication);
     }

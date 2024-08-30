@@ -3138,6 +3138,7 @@ package android.service.dreams {
 
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
+    method @FlaggedApi("android.service.dreams.publish_preview_state_to_overlay") public final boolean isDreamInPreviewMode();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onEndDream();
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);

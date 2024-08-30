@@ -55,7 +55,7 @@ public class FaceGetFeatureClient extends HalClientMonitor<AidlSession> implemen
             @NonNull String owner, int sensorId, @NonNull BiometricLogger logger,
             @NonNull BiometricContext biometricContext, int feature) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                logger, biometricContext);
+                logger, biometricContext, false /* isMandatoryBiometrics */);
         mUserId = userId;
         mFeature = feature;
     }

@@ -125,7 +125,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     static final ArrayMap<Integer, Integer> STREAMS = new ArrayMap<>();
     static {
         STREAMS.put(AudioSystem.STREAM_ALARM, R.string.stream_alarm);
-        STREAMS.put(AudioSystem.STREAM_BLUETOOTH_SCO, R.string.stream_bluetooth_sco);
         STREAMS.put(AudioSystem.STREAM_DTMF, R.string.stream_dtmf);
         STREAMS.put(AudioSystem.STREAM_MUSIC, R.string.stream_music);
         STREAMS.put(AudioSystem.STREAM_ACCESSIBILITY, R.string.stream_accessibility);
@@ -654,7 +653,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private static boolean isLogWorthy(int stream) {
         switch (stream) {
             case AudioSystem.STREAM_ALARM:
-            case AudioSystem.STREAM_BLUETOOTH_SCO:
             case AudioSystem.STREAM_MUSIC:
             case AudioSystem.STREAM_RING:
             case AudioSystem.STREAM_SYSTEM:

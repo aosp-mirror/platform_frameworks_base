@@ -16,6 +16,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.bluetooth.BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice;
+import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
 import static com.android.settingslib.flags.Flags.FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -96,6 +97,7 @@ public class BluetoothUtilsTest {
                     + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
     private static final String TEST_EXCLUSIVE_MANAGER_PACKAGE = "com.test.manager";
     private static final String TEST_EXCLUSIVE_MANAGER_COMPONENT = "com.test.manager/.component";
+    private static final int TEST_BROADCAST_ID = 25;
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -669,6 +671,34 @@ public class BluetoothUtilsTest {
                                 mBluetoothDevice, mLocalBluetoothManager))
                 .isFalse();
     }
+
+    @Test
+    public void testHasActiveLocalBroadcastSourceForBtDevice_hasActiveLocalSource() {
+        when(mBroadcast.getLatestBroadcastId()).thenReturn(TEST_BROADCAST_ID);
+        when(mLeBroadcastReceiveState.getBroadcastId()).thenReturn(TEST_BROADCAST_ID);
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        sourceList.add(mLeBroadcastReceiveState);
+        when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(sourceList);
+
+        assertThat(
+                BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
+                        mBluetoothDevice, mLocalBluetoothManager))
+                .isTrue();
+    }
+
+    @Test
+    public void testHasActiveLocalBroadcastSourceForBtDevice_noActiveLocalSource() {
+        when(mLeBroadcastReceiveState.getBroadcastId()).thenReturn(UNKNOWN_VALUE_PLACEHOLDER);
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        sourceList.add(mLeBroadcastReceiveState);
+        when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(sourceList);
+
+        assertThat(
+                BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
+                        mBluetoothDevice, mLocalBluetoothManager))
+                .isFalse();
+    }
+
 
     @Test
     public void isAvailableHearingDevice_isConnectedHearingAid_returnTure() {

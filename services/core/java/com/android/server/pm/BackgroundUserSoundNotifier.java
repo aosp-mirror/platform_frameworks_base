@@ -69,6 +69,7 @@ public class BackgroundUserSoundNotifier {
         mUserManager = mSystemUserContext.getSystemService(UserManager.class);
         NotificationChannel channel = new NotificationChannel(BUSN_CHANNEL_ID, BUSN_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH);
+        channel.setSound(null, null);
         mNotificationManager.createNotificationChannel(channel);
         setupFocusControlAudioPolicy();
     }

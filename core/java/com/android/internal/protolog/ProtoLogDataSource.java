@@ -195,7 +195,7 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
                     int defaultLogFromLevelInt = configStream.readInt(DEFAULT_LOG_FROM_LEVEL);
                     if (defaultLogFromLevelInt < defaultLogFromLevel.ordinal()) {
                         defaultLogFromLevel =
-                                logLevelFromInt(configStream.readInt(DEFAULT_LOG_FROM_LEVEL));
+                                logLevelFromInt(defaultLogFromLevelInt);
                     }
                     break;
                 case (int) TRACING_MODE:

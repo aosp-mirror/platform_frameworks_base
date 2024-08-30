@@ -218,6 +218,7 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public String title;
     @ViewDebug.ExportedProperty(category="recents")
+    @Nullable
     public String titleDescription;
     @ViewDebug.ExportedProperty(category="recents")
     public int colorPrimary;

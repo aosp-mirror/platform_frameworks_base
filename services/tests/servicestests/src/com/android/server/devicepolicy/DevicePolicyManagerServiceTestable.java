@@ -60,6 +60,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -322,6 +323,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         boolean userManagerIsHeadlessSystemUserMode() {
             return services.userManagerForMock.isHeadlessSystemUserMode();
+        }
+
+        @Override
+        List<String> roleManagerGetRoleHoldersAsUser(String role, UserHandle userHandle) {
+            return services.roleManagerForMock.getRoleHoldersAsUser(role, userHandle);
         }
 
         @Override

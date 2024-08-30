@@ -42,8 +42,8 @@ public final class CiCamResource extends CasResource {
      * Builder class for {@link CiCamResource}.
      */
     public static class Builder extends CasResource.Builder {
-        Builder(int systemId) {
-            super(systemId);
+        Builder(int handle, int systemId) {
+            super(handle, systemId);
         }
 
         /**

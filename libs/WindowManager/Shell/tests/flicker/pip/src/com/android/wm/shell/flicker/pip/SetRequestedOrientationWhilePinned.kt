@@ -147,6 +147,12 @@ open class SetRequestedOrientationWhilePinned(flicker: LegacyFlickerTest) : PipT
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
 
+    @Postsubmit
+    @Test
+    override fun pipLayerHasCorrectCornersAtEnd() {
+        flicker.assertLayersEnd { hasNoRoundedCorners(pipApp) }
+    }
+
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

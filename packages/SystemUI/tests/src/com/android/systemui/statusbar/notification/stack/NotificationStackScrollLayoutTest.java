@@ -95,7 +95,6 @@ import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -1206,7 +1205,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
 
     @Test
-    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    @EnableSceneContainer
     public void testGenerateHeadsUpDisappearEvent_setsHeadsUpAnimatingAway() {
         // GIVEN NSSL is ready for HUN animations
         Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
@@ -1222,7 +1221,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    @EnableSceneContainer
     public void testGenerateHeadsUpDisappearEvent_stackExpanded_headsUpAnimatingAwayNotSet() {
         // GIVEN NSSL would be ready for HUN animations, BUT it is expanded
         Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
@@ -1241,7 +1240,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    @EnableSceneContainer
     public void testGenerateHeadsUpDisappearEvent_pendingAppearEvent_headsUpAnimatingAwayNotSet() {
         // GIVEN NSSL is ready for HUN animations
         Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
@@ -1259,7 +1258,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    @EnableSceneContainer
     public void testGenerateHeadsUpAppearEvent_headsUpAnimatingAwayNotSet() {
         // GIVEN NSSL is ready for HUN animations
         Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);
@@ -1295,7 +1294,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    @EnableSceneContainer
     public void testOnChildAnimationsFinished_resetsheadsUpAnimatingAway() {
         // GIVEN NSSL is ready for HUN animations
         Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);

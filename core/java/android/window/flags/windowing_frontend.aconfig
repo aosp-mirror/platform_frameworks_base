@@ -246,3 +246,14 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "always_capture_activity_snapshot"
+  namespace: "windowing_frontend"
+  description: "Always capture activity snapshot regardless predictive back status"
+  bug: "362183912"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

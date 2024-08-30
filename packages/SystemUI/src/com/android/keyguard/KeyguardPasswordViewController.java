@@ -19,9 +19,12 @@ package com.android.keyguard;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -170,8 +173,33 @@ public class KeyguardPasswordViewController
         mPasswordEntry.setOnEditorActionListener(mOnEditorActionListener);
         mPasswordEntry.setOnKeyListener(mKeyListener);
         mPasswordEntry.addTextChangedListener(mTextWatcher);
+
         // Poke the wakelock any time the text is selected or modified
-        mPasswordEntry.setOnClickListener(v -> mKeyguardSecurityCallback.userActivity());
+        // TODO(b/362362385): Revert to the previous onClickListener implementation once this bug is
+        //  fixed.
+        mPasswordEntry.setOnClickListener(new View.OnClickListener() {
+
+            private final boolean mAutomotiveAndVisibleBackgroundUsers =
+                    isAutomotiveAndVisibleBackgroundUsers();
+
+            @Override
+            public void onClick(View v) {
+                if (mAutomotiveAndVisibleBackgroundUsers) {
+                    mInputMethodManager.restartInput(v);
+                }
+                mKeyguardSecurityCallback.userActivity();
+            }
+
+            private boolean isAutomotiveAndVisibleBackgroundUsers() {
+                final Context context = getContext();
+                return context.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_AUTOMOTIVE)
+                        && UserManager.isVisibleBackgroundUsersEnabled()
+                        && context.getResources().getBoolean(
+                        android.R.bool.config_perDisplayFocusEnabled);
+            }
+        });
+
         mSwitchImeButton.setOnClickListener(v -> {
             mKeyguardSecurityCallback.userActivity(); // Leave the screen on a bit longer
             // Do not show auxiliary subtypes in password lock screen.
