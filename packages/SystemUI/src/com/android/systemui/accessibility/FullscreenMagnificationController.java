@@ -408,6 +408,10 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
         if (!isActivated()) {
             return;
         }
+        if (!(mFullscreenBorder.getBackground() instanceof GradientDrawable)) {
+            // Wear doesn't use the same magnification border background. So early return here.
+            return;
+        }
 
         float cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
         GradientDrawable backgroundDrawable = (GradientDrawable) mFullscreenBorder.getBackground();
