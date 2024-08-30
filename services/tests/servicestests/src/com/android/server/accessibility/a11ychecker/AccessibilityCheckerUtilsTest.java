@@ -89,14 +89,15 @@ public class AccessibilityCheckerUtilsTest {
                         AccessibilityCheckResult.AccessibilityCheckResultType.NOT_RUN, null, 5,
                         null);
 
-        Set<AndroidAccessibilityCheckerResult> results =
-                AccessibilityCheckerUtils.processResults(
-                        mockNodeInfo,
-                        List.of(result1, result2, result3, result4),
-                        null,
+
+        AndroidAccessibilityCheckerResult.Builder resultBuilder =
+                AccessibilityCheckerUtils.getCommonResultBuilder(mockNodeInfo, null,
                         mMockPackageManager,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME));
+        Set<AndroidAccessibilityCheckerResult> results =
+                AccessibilityCheckerUtils.processResults(mockNodeInfo,
+                        List.of(result1, result2, result3, result4), resultBuilder);
 
         assertThat(results).containsExactly(
                 createResult("TargetNode", "",
@@ -128,14 +129,14 @@ public class AccessibilityCheckerUtilsTest {
                         TouchTargetSizeCheck.class,
                         AccessibilityCheckResult.AccessibilityCheckResultType.ERROR, null, 2, null);
 
-        Set<AndroidAccessibilityCheckerResult> results =
-                AccessibilityCheckerUtils.processResults(
-                        mockNodeInfo,
-                        List.of(result1, result2),
-                        null,
+        AndroidAccessibilityCheckerResult.Builder resultBuilder =
+                AccessibilityCheckerUtils.getCommonResultBuilder(mockNodeInfo, null,
                         mMockPackageManager,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME));
+        Set<AndroidAccessibilityCheckerResult> results =
+                AccessibilityCheckerUtils.processResults(mockNodeInfo,
+                        List.of(result1, result2), resultBuilder);
 
         assertThat(results).isEmpty();
     }
