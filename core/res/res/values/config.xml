@@ -5831,6 +5831,13 @@
          should also be non-empty.-->
     <string name="config_rawContactsLocalAccountType" translatable="false"></string>
 
+    <!-- The array of account types that accounts in any of these can be set as the default account
+         for new raw contacts. -->
+    <string-array name="config_rawContactsEligibleDefaultAccountTypes" translatable="false">
+        <!-- Add account types here, example: -->
+        <!-- <item>com.google</item> -->
+    </string-array>
+
     <!-- Whether or not to use assistant stream volume separately from music volume -->
     <bool name="config_useAssistantVolume">false</bool>
 
