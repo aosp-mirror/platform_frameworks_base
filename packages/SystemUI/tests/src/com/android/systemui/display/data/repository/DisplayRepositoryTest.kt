@@ -467,6 +467,16 @@ class DisplayRepositoryTest : SysuiTestCase() {
             assertThat(values.toIdSets()).containsExactly(setOf(0, 1, 2))
         }
 
+    @Test
+    fun displayFlow_onlyDefaultDisplayAvailable_neverEmitsEmptySet() =
+        testScope.runTest {
+            setDisplays(0)
+
+            val values: List<Set<Display>> by collectValues(displayRepository.displays)
+
+            assertThat(values.toIdSets()).containsExactly(setOf(0))
+        }
+
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
 
     private fun Iterable<Set<Display>>.toIdSets(): List<Set<Int>> = map { it.ids().toSet() }
