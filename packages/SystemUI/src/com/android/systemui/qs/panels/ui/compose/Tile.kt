@@ -44,7 +44,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -136,23 +135,23 @@ fun Tile(
 
     // TODO(b/361789146): Draw the shapes instead of clipping
     val tileShape = TileDefaults.animateTileShape(uiState.state)
-    val iconShape = TileDefaults.animateIconShape(uiState.state)
 
     TileContainer(
         colors = colors,
         showLabels = showLabels,
         label = uiState.label,
         iconOnly = iconOnly,
-        shape = if (iconOnly) iconShape else tileShape,
+        shape = tileShape,
         clickEnabled = true,
         onClick = tile::onClick,
         onLongClick = tile::onLongClick,
-        modifier = modifier,
+        modifier = modifier.height(tileHeight()),
     ) {
         val icon = getTileIcon(icon = uiState.icon)
         if (iconOnly) {
             TileIcon(icon = icon, color = colors.icon, modifier = Modifier.align(Alignment.Center))
         } else {
+            val iconShape = TileDefaults.animateIconShape(uiState.state)
             LargeTileContent(
                 label = uiState.label,
                 secondaryLabel = uiState.secondaryLabel,
@@ -199,7 +198,7 @@ private fun TileContainer(
         Expandable(
             color = backgroundColor,
             shape = shape,
-            modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height)).clip(shape)
+            modifier = Modifier.height(tileHeight()).clip(shape)
         ) {
             Box(
                 modifier =
@@ -246,7 +245,7 @@ private fun LargeTileContent(
         // Icon
         Box(
             modifier =
-                Modifier.fillMaxHeight().aspectRatio(1f).thenIf(toggleClickSupported) {
+                Modifier.size(TileDefaults.ToggleTargetSize).thenIf(toggleClickSupported) {
                     Modifier.clip(iconShape)
                         .background(colors.iconBackground, { 1f })
                         .combinedClickable(onClick = onClick, onLongClick = onLongClick)
@@ -673,7 +672,7 @@ private fun TileIcon(
     animateToEnd: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    val iconModifier = modifier.size(dimensionResource(id = R.dimen.qs_icon_size))
+    val iconModifier = modifier.size(TileDefaults.IconSize)
     val context = LocalContext.current
     val loadedDrawable =
         remember(icon, context) {
@@ -710,17 +709,12 @@ private fun TileIcon(
     }
 }
 
-@Composable
 private fun Modifier.tilePadding(): Modifier {
-    return padding(dimensionResource(id = R.dimen.qs_label_container_margin))
+    return padding(TileDefaults.TilePadding)
 }
 
-@Composable
 private fun tileHorizontalArrangement(): Arrangement.Horizontal {
-    return spacedBy(
-        space = dimensionResource(id = R.dimen.qs_label_container_margin),
-        alignment = Alignment.Start
-    )
+    return spacedBy(space = TileDefaults.TileArrangementPadding, alignment = Alignment.Start)
 }
 
 @Composable
@@ -728,7 +722,7 @@ fun tileHeight(iconWithLabel: Boolean = false): Dp {
     return if (iconWithLabel) {
         TileDefaults.IconTileWithLabelHeight
     } else {
-        dimensionResource(id = R.dimen.qs_tile_height)
+        TileDefaults.TileHeight
     }
 }
 
@@ -749,6 +743,14 @@ private object TileDefaults {
     val InactiveCornerRadius = 50.dp
     val ActiveIconCornerRadius = 16.dp
     val ActiveTileCornerRadius = 24.dp
+
+    val ToggleTargetSize = 56.dp
+    val IconSize = 24.dp
+
+    val TilePadding = 8.dp
+    val TileArrangementPadding = 6.dp
+
+    val TileHeight = 72.dp
     val IconTileWithLabelHeight = 140.dp
 
     /** An active tile without dual target uses the active color as background */
@@ -812,7 +814,7 @@ private object TileDefaults {
     fun animateIconShape(state: Int): Shape {
         return animateShape(
             state = state,
-            activeCornerRadius = ActiveTileCornerRadius,
+            activeCornerRadius = ActiveIconCornerRadius,
             label = "QSTileCornerRadius",
         )
     }
@@ -821,7 +823,7 @@ private object TileDefaults {
     fun animateTileShape(state: Int): Shape {
         return animateShape(
             state = state,
-            activeCornerRadius = ActiveIconCornerRadius,
+            activeCornerRadius = ActiveTileCornerRadius,
             label = "QSTileIconCornerRadius",
         )
     }

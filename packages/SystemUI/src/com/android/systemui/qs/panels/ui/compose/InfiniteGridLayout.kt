@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.runtime.Composable
@@ -24,7 +23,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
@@ -33,7 +31,6 @@ import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import com.android.systemui.res.R
 import javax.inject.Inject
 
 @SysUISingleton
@@ -64,7 +61,7 @@ constructor(
                 Tile(
                     tile = sizedTiles[index].tile,
                     iconOnly = iconTilesViewModel.isIconTile(sizedTiles[index].tile.spec),
-                    modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
+                    modifier = Modifier
                 )
             }
         }

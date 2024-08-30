@@ -16,18 +16,15 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
-import com.android.systemui.res.R
 
 @Composable
 fun QuickQuickSettings(
@@ -54,11 +51,7 @@ fun QuickQuickSettings(
             key = { index -> sizedTiles[index].tile.spec.spec },
             span = { index -> GridItemSpan(sizedTiles[index].width) }
         ) { index ->
-            Tile(
-                tile = tiles[index],
-                iconOnly = sizedTiles[index].isIcon,
-                modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
-            )
+            Tile(tile = tiles[index], iconOnly = sizedTiles[index].isIcon, modifier = Modifier)
         }
     }
 }
