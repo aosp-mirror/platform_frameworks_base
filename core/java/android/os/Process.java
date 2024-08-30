@@ -274,13 +274,6 @@ public class Process {
      */
     public static final int INET_GID = 3003;
 
-    /**
-     * Defines the UID/GID for the vendor based data process.
-     * This is used to register AIDL service from vendor app context.
-     * @hide
-     */
-    public static final int VENDOR_DATA_UID = 2918;
-
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 
