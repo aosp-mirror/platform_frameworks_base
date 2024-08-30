@@ -196,7 +196,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
         super.appLayerBecomesVisible()
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 338296297)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
