@@ -1114,6 +1114,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeOpened_hunDoesNotOverlapQQS_hunShouldHaveNoShadow() {
         // Given: shade is opened, yTranslation of HUN is equal to QQS Panel's height,
         // the height of HUN is equal to the height of QQS Panel,
@@ -1144,6 +1145,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeClosed_hunShouldHaveFullShadow() {
         // Given: shade is closed, ambientState.stackTranslation == -ambientState.topPadding,
         // the height of HUN is equal to the height of QQS Panel,
@@ -1172,6 +1174,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun draggingHunToOpenShade_hunShouldHavePartialShadow() {
         // Given: shade is closed when HUN pops up,
         // now drags down the HUN to open shade
@@ -1447,7 +1450,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // set stackEndHeight and stackHeight
         // ExpansionFractionWithoutShelf == stackHeight / stackEndHeight
         ambientState.stackEndHeight = 100f
-        ambientState.stackHeight = ambientState.stackEndHeight * fraction
+        ambientState.interpolatedStackHeight = ambientState.stackEndHeight * fraction
     }
 
     private fun resetViewStates_hunYTranslationIs(expected: Float) {
@@ -1531,7 +1534,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // shade is fully open
         ambientState.expansionFraction = 1.0f
         with(fullStackHeight) {
-            ambientState.stackHeight = this
+            ambientState.interpolatedStackHeight = this
             ambientState.stackEndHeight = this
         }
         stackScrollAlgorithm.setIsExpanded(true)
