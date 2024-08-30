@@ -141,7 +141,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.Vibrator;
 import android.service.credentials.CredentialProviderService;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
@@ -34156,7 +34155,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Keep in mind that the preferred frame rate affects the frame rate for the next frame,
      * so use this method carefully. It's important to note that the preference is valid as
-     * long as the View is invalidated.
+     * long as the View is invalidated. Please also be aware that the requested frame rate
+     * will not propagate to child views when this API is used on a ViewGroup.
      *
      * @param frameRate the preferred frame rate of the view.
      */
@@ -34175,6 +34175,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, and REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Note that the frame rate value is valid as long as the View is invalidated.
+     * Please also be aware that the requested frame rate will not propagate to
+     * child views when this API is used on a ViewGroup.
      *
      * @return REQUESTED_FRAME_RATE_CATEGORY_DEFAULT by default,
      * or value passed to {@link #setRequestedFrameRate(float)}.
