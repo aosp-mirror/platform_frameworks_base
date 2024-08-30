@@ -177,10 +177,16 @@ constructor(
                 )
             }
         } else {
-            button(
-                KeyguardQuickAffordancePosition.BOTTOM_START,
-            )
+            button(KeyguardQuickAffordancePosition.BOTTOM_START)
         }
+        .stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue =
+                KeyguardQuickAffordanceViewModel(
+                    slotId = KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()
+                ),
+        )
 
     /** An observable for the view-model of the "end button" quick affordance. */
     val endButton: Flow<KeyguardQuickAffordanceViewModel> =
@@ -194,6 +200,14 @@ constructor(
         } else {
             button(KeyguardQuickAffordancePosition.BOTTOM_END)
         }
+        .stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue =
+                KeyguardQuickAffordanceViewModel(
+                    slotId = KeyguardQuickAffordancePosition.BOTTOM_END.toSlotId()
+                ),
+        )
 
     /**
      * Notifies that a slot with the given ID has been selected in the preview experience that is

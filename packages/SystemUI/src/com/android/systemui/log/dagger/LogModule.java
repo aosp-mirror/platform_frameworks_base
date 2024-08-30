@@ -584,7 +584,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardQuickAffordancesLog
     public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardQuickAffordancesLog", 25);
+        return factory.create("KeyguardQuickAffordancesLog", 100);
     }
 
     /**
