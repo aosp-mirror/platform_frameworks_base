@@ -270,6 +270,7 @@
     <!-- Add to note button used in App Clips flow to return the saved screenshot image to notes app. [CHAR LIMIT=NONE] -->
     <string name="app_clips_save_add_to_note">Add to note</string>
     <string name="backlinks_include_link">Include link</string>
+    <string name="backlinks_duplicate_label_format"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> <xliff:g id="frequencyCount" example="(1)">(%2$d)</xliff:g></string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_title">Screen Recorder</string>

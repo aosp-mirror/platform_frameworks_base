@@ -71,7 +71,9 @@ import com.android.systemui.res.R;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -344,8 +346,61 @@ public class AppClipsActivity extends ComponentActivity {
 
         // Set up the dropdown when multiple backlinks are available.
         if (backlinksData.size() > 1) {
-            setUpListPopupWindow(backlinksData, mBacklinksDataTextView);
+            setUpListPopupWindow(updateBacklinkLabelsWithDuplicateNames(backlinksData),
+                    mBacklinksDataTextView);
         }
+    }
+
+    /**
+     * If there are more than 1 backlinks that have the same app name, then this method appends
+     * a numerical suffix to such backlinks to help users distinguish.
+     */
+    private List<InternalBacklinksData> updateBacklinkLabelsWithDuplicateNames(
+            List<InternalBacklinksData> backlinksData) {
+        // Check if there are multiple backlinks with same name.
+        Map<String, Integer> duplicateNamedBacklinksCountMap = new HashMap<>();
+        for (InternalBacklinksData data : backlinksData) {
+            if (duplicateNamedBacklinksCountMap.containsKey(data.getDisplayLabel())) {
+                int duplicateCount = duplicateNamedBacklinksCountMap.get(data.getDisplayLabel());
+                if (duplicateCount == 0) {
+                    // If this is the first time the loop is coming across a duplicate name, set the
+                    // count to 2. This way the count starts from 1 for all duplicate named
+                    // backlinks.
+                    duplicateNamedBacklinksCountMap.put(data.getDisplayLabel(), 2);
+                } else {
+                    // For all duplicate named backlinks, increase the duplicate count by 1.
+                    duplicateNamedBacklinksCountMap.put(data.getDisplayLabel(), duplicateCount + 1);
+                }
+            } else {
+                // This is the first time the loop is coming across a backlink with this name. Set
+                // its count to 0. The loop will increase its count by 1 when a duplicate is found.
+                duplicateNamedBacklinksCountMap.put(data.getDisplayLabel(), 0);
+            }
+        }
+
+        // Go through the backlinks in reverse order as it is easier to assign the numerical suffix
+        // in descending order of frequency using the duplicate map that was built earlier. For
+        // example, if "App A" is present 3 times, then we assign display label "App A (3)" first
+        // and then "App A (2)", lastly "App A (1)".
+        for (InternalBacklinksData data : backlinksData.reversed()) {
+            String originalBacklinkLabel = data.getDisplayLabel();
+            int duplicateCount = duplicateNamedBacklinksCountMap.get(originalBacklinkLabel);
+
+            // The display label should only be updated if there are multiple backlinks with the
+            // same name.
+            if (duplicateCount > 0) {
+                // Update the display label to: "App name (count)"
+                data.setDisplayLabel(
+                        getString(R.string.backlinks_duplicate_label_format, originalBacklinkLabel,
+                                duplicateCount));
+
+                // Decrease the duplicate count and update the map.
+                duplicateCount--;
+                duplicateNamedBacklinksCountMap.put(originalBacklinkLabel, duplicateCount);
+            }
+        }
+
+        return backlinksData;
     }
 
     private void setUpListPopupWindow(List<InternalBacklinksData> backlinksData, View anchor) {
@@ -365,7 +420,7 @@ public class AppClipsActivity extends ComponentActivity {
             public View getView(int position, @Nullable View convertView, ViewGroup parent) {
                 TextView itemView = (TextView) super.getView(position, convertView, parent);
                 InternalBacklinksData data = backlinksData.get(position);
-                itemView.setText(data.getClipData().getDescription().getLabel());
+                itemView.setText(data.getDisplayLabel());
 
                 Drawable icon = data.getAppIcon();
                 icon.setBounds(createBacklinksTextViewDrawableBounds());
@@ -387,7 +442,7 @@ public class AppClipsActivity extends ComponentActivity {
      * expected to be already set when this method is called.
      */
     private void updateBacklinksTextView(InternalBacklinksData backlinksData) {
-        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
+        mBacklinksDataTextView.setText(backlinksData.getDisplayLabel());
         Drawable appIcon = backlinksData.getAppIcon();
         Rect compoundDrawableBounds = createBacklinksTextViewDrawableBounds();
         appIcon.setBounds(compoundDrawableBounds);
