@@ -609,9 +609,20 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         params.appLabel = TextUtils.trimToSize(params.appLabel,
                 PackageItemInfo.MAX_SAFE_LABEL_LENGTH);
 
-        String requestedInstallerPackageName = (params.installerPackageName != null
-                && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
-                ? params.installerPackageName : installerPackageName;
+        // Validate requested installer package name.
+        if (params.installerPackageName != null && !isValidPackageName(
+                params.installerPackageName)) {
+            params.installerPackageName = null;
+        }
+
+        // Validate installer package name.
+        if (installerPackageName != null && !isValidPackageName(installerPackageName)) {
+            installerPackageName = null;
+        }
+
+        String requestedInstallerPackageName =
+                params.installerPackageName != null ? params.installerPackageName
+                        : installerPackageName;
 
         if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
