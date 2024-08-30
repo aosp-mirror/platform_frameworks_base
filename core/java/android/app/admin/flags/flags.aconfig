@@ -4,6 +4,7 @@
 package: "android.app.admin.flags"
 container: "system"
 
+# Fully rolled out and must not be used.
 flag {
   name: "policy_engine_migration_v2_enabled"
   is_exported: true
@@ -25,16 +26,6 @@ flag {
   namespace: "enterprise"
   description: "Add feature to track the total policy size and have a max threshold - internal changes"
   bug: "281543351"
-}
-
-flag {
-  name: "device_policy_size_tracking_internal_bug_fix_enabled"
-  namespace: "enterprise"
-  description: "Bug fix for tracking the total policy size and have a max threshold"
-  bug: "281543351"
-  metadata {
-      purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
@@ -73,13 +64,6 @@ flag {
   is_exported: true
   namespace: "enterprise"
   description: "(API) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
-  bug: "289520697"
-}
-
-flag {
-  name: "permission_migration_for_zero_trust_impl_enabled"
-  namespace: "enterprise"
-  description: "(Implementation) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
   bug: "289520697"
 }
 
@@ -220,33 +204,6 @@ flag {
 }
 
 flag {
-  name: "headless_device_owner_provisioning_fix_enabled"
-  namespace: "enterprise"
-  description: "Fix provisioning for single-user headless DO"
-  bug: "289515470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "dmrh_set_app_restrictions"
-  namespace: "enterprise"
-  description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
-  bug: "328758346"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "allow_screen_brightness_control_on_cope"
-  namespace: "enterprise"
-  description: "Allow COPE admin to control screen brightness and timeout."
-  bug: "323894620"
-}
-
-flag {
   name: "always_persist_do"
   namespace: "enterprise"
   description: "Always write device_owners2.xml so that migration flags aren't lost"
@@ -261,16 +218,6 @@ flag {
   namespace: "enterprise"
   description: "Guards a new flow for recursive required enterprise app list merging"
   bug: "319084618"
-}
-
-flag {
-  name: "headless_device_owner_delegate_security_logging_bug_fix"
-  namespace: "enterprise"
-  description: "Fix delegate security logging for single user headless DO."
-  bug: "289515470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
@@ -294,30 +241,10 @@ flag {
 }
 
 flag {
-  name: "delete_private_space_under_restriction"
-  namespace: "enterprise"
-  description: "Delete private space if user restriction is set"
-  bug: "328758346"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "unmanaged_mode_migration"
     namespace: "enterprise"
     description: "Migrate APIs for unmanaged mode"
     bug: "335624297"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "headless_single_user_fixes"
-    namespace: "enterprise"
-    description: "Various fixes for headless single user mode"
-    bug: "289515470"
     metadata {
       purpose: PURPOSE_BUGFIX
     }

@@ -16,9 +16,6 @@
 
 package android.app.admin;
 
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
-
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -64,7 +61,6 @@ public final class EnforcingAdmin implements Parcelable {
      *
      * @hide
      */
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
     @TestApi
     public EnforcingAdmin(
             @NonNull String packageName, @NonNull Authority authority,
