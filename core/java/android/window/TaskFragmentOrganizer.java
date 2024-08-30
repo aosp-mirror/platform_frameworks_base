@@ -34,6 +34,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 
 import com.android.window.flags.Flags;
@@ -219,6 +220,34 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public void unregisterOrganizer() {
         try {
             getController().unregisterOrganizer(mInterface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers remote animations per transition type for the organizer. It will override the
+     * animations if the transition only contains windows that belong to the organized
+     * TaskFragments, and at least one of the transition window is embedded (not filling the Task).
+     * @hide
+     */
+    @CallSuper
+    public void registerRemoteAnimations(@NonNull RemoteAnimationDefinition definition) {
+        try {
+            getController().registerRemoteAnimations(mInterface, definition);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters remote animations per transition type for the organizer.
+     * @hide
+     */
+    @CallSuper
+    public void unregisterRemoteAnimations() {
+        try {
+            getController().unregisterRemoteAnimations(mInterface);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

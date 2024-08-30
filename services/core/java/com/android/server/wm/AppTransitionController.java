@@ -97,6 +97,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -253,10 +254,12 @@ public class AppTransitionController {
                 getTopApp(mDisplayContent.mChangingContainers, false /* ignoreHidden */);
         final WindowManager.LayoutParams animLp = getAnimLp(animLpActivity);
 
-        // No AE remote animation with Shell transition.
-        // Unfreeze the windows that were previously frozen for TaskFragment animation.
-        unfreezeEmbeddedChangingWindows();
-        overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
+        // Check if there is any override
+        if (!overrideWithTaskFragmentRemoteAnimation(transit, activityTypes)) {
+            // Unfreeze the windows that were previously frozen for TaskFragment animation.
+            unfreezeEmbeddedChangingWindows();
+            overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
+        }
 
         final boolean voiceInteraction = containsVoiceInteraction(mDisplayContent.mClosingApps)
                 || containsVoiceInteraction(mDisplayContent.mOpeningApps);
@@ -684,6 +687,64 @@ public class AppTransitionController {
             return null;
         }
         return organizer[0];
+    }
+
+    /**
+     * Overrides the pending transition with the remote animation defined by the
+     * {@link ITaskFragmentOrganizer} if all windows in the transition are children of
+     * {@link TaskFragment} that are organized by the same organizer.
+     *
+     * @return {@code true} if the transition is overridden.
+     */
+    private boolean overrideWithTaskFragmentRemoteAnimation(@TransitionOldType int transit,
+            ArraySet<Integer> activityTypes) {
+        if (transitionMayContainNonAppWindows(transit)) {
+            return false;
+        }
+        if (!transitionContainsTaskFragmentWithBoundsOverride()) {
+            // No need to play TaskFragment remote animation if all embedded TaskFragment in the
+            // transition fill the Task.
+            return false;
+        }
+
+        final Task task = findParentTaskForAllEmbeddedWindows();
+        final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizer(task);
+        final RemoteAnimationDefinition definition = organizer != null
+                ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                    .getRemoteAnimationDefinition(organizer)
+                : null;
+        final RemoteAnimationAdapter adapter = definition != null
+                ? definition.getAdapter(transit, activityTypes)
+                : null;
+        if (adapter == null) {
+            return false;
+        }
+        mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(
+                adapter, false /* sync */, true /*isActivityEmbedding*/);
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                "Override with TaskFragment remote animation for transit=%s",
+                AppTransition.appTransitionOldToString(transit));
+
+        final int organizerUid = mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                .getTaskFragmentOrganizerUid(organizer);
+        final boolean shouldDisableInputForRemoteAnimation = !task.isFullyTrustedEmbedding(
+                organizerUid);
+        final RemoteAnimationController remoteAnimationController =
+                mDisplayContent.mAppTransition.getRemoteAnimationController();
+        if (shouldDisableInputForRemoteAnimation && remoteAnimationController != null) {
+            // We are going to use client-driven animation, Disable all input on activity windows
+            // during the animation (unless it is fully trusted) to ensure it is safe to allow
+            // client to animate the surfaces.
+            // This is needed for all activity windows in the animation Task.
+            remoteAnimationController.setOnRemoteAnimationReady(() -> {
+                final Consumer<ActivityRecord> updateActivities =
+                        activity -> activity.setDropInputForAnimation(true);
+                task.forAllActivities(updateActivities);
+            });
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "Task=%d contains embedded TaskFragment."
+                    + " Disabled all input during TaskFragment remote animation.", task.mTaskId);
+        }
+        return true;
     }
 
     /**
