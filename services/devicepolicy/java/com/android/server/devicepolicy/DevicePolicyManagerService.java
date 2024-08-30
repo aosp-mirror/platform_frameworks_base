@@ -15162,7 +15162,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(
                 isProfileOwner(caller) || isDefaultDeviceOwner(caller));
-        if (parent) {
+        if (Flags.allowScreenBrightnessControlOnCope() && parent) {
             Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
         }
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_SYSTEM_SETTING);
@@ -15173,7 +15173,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "Permission denial: device owners cannot update %1$s", setting));
             }
             int affectedUser;
-            if (parent) {
+            if (Flags.allowScreenBrightnessControlOnCope() && parent) {
                 affectedUser = getProfileParentId(caller.getUserId());
             } else {
                 affectedUser = caller.getUserId();
