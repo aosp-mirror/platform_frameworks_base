@@ -5210,8 +5210,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (isVisibleNow()) {
                 dimmer.adjustAppearance(this, dimAmount, blurRadius);
             }
-            dimmer.adjustPosition(geometryParent,
-                    this /* relativeParent */, -1 /* relativeLayer */);
+            dimmer.adjustPosition(geometryParent, this /* relativeParent */);
         }
     }
 

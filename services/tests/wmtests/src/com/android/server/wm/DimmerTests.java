@@ -52,39 +52,14 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class DimmerTests extends WindowTestsBase {
 
-    private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {
-        final SurfaceControl mControl = mock(SurfaceControl.class);
-        final SurfaceControl.Transaction mPendingTransaction = spy(StubTransaction.class);
-        final SurfaceControl.Transaction mSyncTransaction = spy(StubTransaction.class);
-
-        TestWindowContainer(WindowManagerService wm) {
-            super(wm);
-            setVisibleRequested(true);
-        }
-
-        @Override
-        public SurfaceControl getSurfaceControl() {
-            return mControl;
-        }
-
-        @Override
-        public SurfaceControl.Transaction getSyncTransaction() {
-            return mSyncTransaction;
-        }
-
-        @Override
-        public SurfaceControl.Transaction getPendingTransaction() {
-            return mPendingTransaction;
-        }
-    }
-
-    private static class MockSurfaceBuildingContainer extends WindowContainer<TestWindowContainer> {
+    private static class MockSurfaceBuildingContainer extends WindowContainer<WindowState> {
         final SurfaceSession mSession = new SurfaceSession();
         final SurfaceControl mHostControl = mock(SurfaceControl.class);
         final SurfaceControl.Transaction mHostTransaction = spy(StubTransaction.class);
 
         MockSurfaceBuildingContainer(WindowManagerService wm) {
             super(wm);
+            mVisibleRequested = true;
         }
 
         class MockSurfaceBuilder extends SurfaceControl.Builder {
@@ -129,28 +104,41 @@ public class DimmerTests extends WindowTestsBase {
         }
     }
 
-    private MockSurfaceBuildingContainer mHost;
     private Dimmer mDimmer;
     private SurfaceControl.Transaction mTransaction;
-    private TestWindowContainer mChild;
+    private WindowState mChild1;
+    private WindowState mChild2;
     private static AnimationAdapter sTestAnimation;
 
     @Before
     public void setUp() throws Exception {
-        mHost = new MockSurfaceBuildingContainer(mWm);
+        MockSurfaceBuildingContainer host = new MockSurfaceBuildingContainer(mWm);
         mTransaction = spy(StubTransaction.class);
-        mChild = new TestWindowContainer(mWm);
+
+        final SurfaceControl mControl1 = mock(SurfaceControl.class);
+        final SurfaceControl mControl2 = mock(SurfaceControl.class);
+
+        SurfaceAnimator animator = mock(SurfaceAnimator.class);
+        when(animator.getAnimation()).thenReturn(null);
+
+        mChild1 = mock(WindowState.class);
+        when(mChild1.getSurfaceControl()).thenReturn(mControl1);
+
+        mChild2 = mock(WindowState.class);
+        when(mChild2.getSurfaceControl()).thenReturn(mControl2);
+
+        host.addChild(mChild1, 0);
+        host.addChild(mChild2, 1);
+
         sTestAnimation = spy(new MockAnimationAdapter());
-        mDimmer = new Dimmer(mHost, new MockAnimationAdapterFactory());
+        mDimmer = new Dimmer(host, new MockAnimationAdapterFactory());
     }
 
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_USE_TASKS_DIM_ONLY)
     public void testUpdateDimsAppliesCrop() {
-        mHost.addChild(mChild, 0);
-
-        mDimmer.adjustAppearance(mChild, 1, 1);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 1, 1);
+        mDimmer.adjustPosition(mChild1, mChild1);
 
         int width = 100;
         int height = 300;
@@ -165,9 +153,8 @@ public class DimmerTests extends WindowTestsBase {
     public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild() {
         final float alpha = 0.7f;
         final int blur = 50;
-        mHost.addChild(mChild, 0);
-        mDimmer.adjustAppearance(mChild, alpha, blur);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, alpha, blur);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
 
         assertNotNull("Dimmer should have created a surface", dimLayer);
@@ -175,25 +162,23 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.updateDims(mTransaction);
         verify(sTestAnimation).startAnimation(eq(dimLayer), eq(mTransaction),
                 anyInt(), any(SurfaceAnimator.OnAnimationFinishedCallback.class));
-        verify(mTransaction).setRelativeLayer(dimLayer, mChild.mControl, -1);
+        verify(mTransaction).setRelativeLayer(dimLayer, mChild1.getSurfaceControl(), -1);
         verify(mTransaction, lastCall()).setAlpha(dimLayer, alpha);
         verify(mTransaction).setBackgroundBlurRadius(dimLayer, blur);
     }
 
     @Test
     public void testDimBelowWithChildSurfaceDestroyedWhenReset() {
-        mHost.addChild(mChild, 0);
-
         final float alpha = 0.8f;
         final int blur = 50;
         // Dim once
-        mDimmer.adjustAppearance(mChild, alpha, blur);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, alpha, blur);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
         // Reset, and don't dim
         mDimmer.resetDimStates();
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustPosition(mChild1, mChild1);
         mDimmer.updateDims(mTransaction);
         verify(mTransaction).show(dimLayer);
         verify(mTransaction).remove(dimLayer);
@@ -201,19 +186,17 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testDimBelowWithChildSurfaceNotDestroyedWhenPersisted() {
-        mHost.addChild(mChild, 0);
-
         final float alpha = 0.8f;
         final int blur = 20;
         // Dim once
-        mDimmer.adjustAppearance(mChild, alpha, blur);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, alpha, blur);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
         // Reset and dim again
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(mChild, alpha, blur);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, alpha, blur);
+        mDimmer.adjustPosition(mChild1, mChild1);
         mDimmer.updateDims(mTransaction);
         verify(mTransaction).show(dimLayer);
         verify(mTransaction, never()).remove(dimLayer);
@@ -222,10 +205,9 @@ public class DimmerTests extends WindowTestsBase {
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_USE_TASKS_DIM_ONLY)
     public void testDimUpdateWhileDimming() {
-        mHost.addChild(mChild, 0);
         final float alpha = 0.8f;
-        mDimmer.adjustAppearance(mChild, alpha, 20);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, alpha, 20);
+        mDimmer.adjustPosition(mChild1, mChild1);
         final Rect bounds = mDimmer.getDimBounds();
 
         SurfaceControl dimLayer = mDimmer.getDimLayer();
@@ -243,9 +225,8 @@ public class DimmerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveDimImmediately() {
-        mHost.addChild(mChild, 0);
-        mDimmer.adjustAppearance(mChild, 1, 2);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 1, 2);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
         verify(mTransaction, times(1)).show(dimLayer);
@@ -266,22 +247,20 @@ public class DimmerTests extends WindowTestsBase {
      */
     @Test
     public void testContainerDimsOpeningAnimationByItself() {
-        mHost.addChild(mChild, 0);
-
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(mChild, 0.1f, 0);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 0.1f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
 
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(mChild, 0.2f, 0);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 0.2f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         mDimmer.updateDims(mTransaction);
 
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(mChild, 0.3f, 0);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 0.3f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         mDimmer.updateDims(mTransaction);
 
         verify(mTransaction).setAlpha(dimLayer, 0.2f);
@@ -297,22 +276,20 @@ public class DimmerTests extends WindowTestsBase {
      */
     @Test
     public void testContainerDimsClosingAnimationByItself() {
-        mHost.addChild(mChild, 0);
-
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(mChild, 0.2f, 0);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 0.2f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
 
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(mChild, 0.1f, 0);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 0.1f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         mDimmer.updateDims(mTransaction);
 
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(mChild, 0f, 0);
-        mDimmer.adjustPosition(mChild, mChild, -1);
+        mDimmer.adjustAppearance(mChild1, 0f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         mDimmer.updateDims(mTransaction);
 
         mDimmer.resetDimStates();
@@ -325,19 +302,14 @@ public class DimmerTests extends WindowTestsBase {
      */
     @Test
     public void testMultipleContainersDimmingConsecutively() {
-        TestWindowContainer first = mChild;
-        TestWindowContainer second = new TestWindowContainer(mWm);
-        mHost.addChild(first, 0);
-        mHost.addChild(second, 1);
-
-        mDimmer.adjustAppearance(first, 0.5f, 0);
-        mDimmer.adjustPosition(mChild, first, -1);
+        mDimmer.adjustAppearance(mChild1, 0.5f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
         mDimmer.updateDims(mTransaction);
 
         mDimmer.resetDimStates();
-        mDimmer.adjustAppearance(second, 0.9f, 0);
-        mDimmer.adjustPosition(mChild, second, -1);
+        mDimmer.adjustAppearance(mChild2, 0.9f, 0);
+        mDimmer.adjustPosition(mChild1, mChild2);
         mDimmer.updateDims(mTransaction);
 
         verify(sTestAnimation, times(2)).startAnimation(
@@ -353,16 +325,11 @@ public class DimmerTests extends WindowTestsBase {
      */
     @Test
     public void testMultipleContainersDimmingAtTheSameTime() {
-        TestWindowContainer first = mChild;
-        TestWindowContainer second = new TestWindowContainer(mWm);
-        mHost.addChild(first, 0);
-        mHost.addChild(second, 1);
-
-        mDimmer.adjustAppearance(first, 0.5f, 0);
-        mDimmer.adjustPosition(mChild, first, -1);
+        mDimmer.adjustAppearance(mChild1, 0.5f, 0);
+        mDimmer.adjustPosition(mChild1, mChild1);
         SurfaceControl dimLayer = mDimmer.getDimLayer();
-        mDimmer.adjustAppearance(second, 0.9f, 0);
-        mDimmer.adjustPosition(mChild, second, -1);
+        mDimmer.adjustAppearance(mChild2, 0.9f, 0);
+        mDimmer.adjustPosition(mChild1, mChild2);
         mDimmer.updateDims(mTransaction);
 
         verify(sTestAnimation, times(1)).startAnimation(

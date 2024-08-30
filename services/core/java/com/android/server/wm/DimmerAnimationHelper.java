@@ -48,9 +48,8 @@ public class DimmerAnimationHelper {
     static class Change {
         private float mAlpha = -1f;
         private int mBlurRadius = -1;
-        private WindowContainer<?> mDimmingContainer = null;
+        private WindowState mDimmingContainer = null;
         private WindowContainer<?> mGeometryParent = null;
-        private int mRelativeLayer = -1;
         private static final float EPSILON = 0.0001f;
 
         Change() {}
@@ -64,7 +63,6 @@ public class DimmerAnimationHelper {
             mBlurRadius = other.mBlurRadius;
             mDimmingContainer = other.mDimmingContainer;
             mGeometryParent = other.mGeometryParent;
-            mRelativeLayer = other.mRelativeLayer;
         }
 
         // Same alpha and blur
@@ -84,7 +82,7 @@ public class DimmerAnimationHelper {
         @Override
         public String toString() {
             return "Dim state: alpha=" + mAlpha + ", blur=" + mBlurRadius + ", container="
-                    + mDimmingContainer + ", relativePosition=" + mRelativeLayer;
+                    + mDimmingContainer + ", geometryParent " + mGeometryParent;
         }
     }
 
@@ -100,14 +98,13 @@ public class DimmerAnimationHelper {
     }
 
     void setExitParameters() {
-        setRequestedRelativeParent(mRequestedProperties.mDimmingContainer, -1 /* relativeLayer */);
+        setRequestedRelativeParent(mRequestedProperties.mDimmingContainer);
         setRequestedAppearance(0f /* alpha */, 0 /* blur */);
     }
 
     // Sets a requested change without applying it immediately
-    void setRequestedRelativeParent(@NonNull WindowContainer<?> relativeParent, int relativeLayer) {
+    void setRequestedRelativeParent(@NonNull WindowState relativeParent) {
         mRequestedProperties.mDimmingContainer = relativeParent;
-        mRequestedProperties.mRelativeLayer = relativeLayer;
     }
 
     // Sets the requested layer to reparent the dim to without applying it immediately
@@ -124,7 +121,7 @@ public class DimmerAnimationHelper {
     /**
      * Commit the last changes we received. Called after
      * {@link Change#setExitParameters()},
-     * {@link Change#setRequestedRelativeParent(WindowContainer, int)}, or
+     * {@link Change#setRequestedRelativeParent(WindowContainer)}, or
      * {@link Change#setRequestedAppearance(float, int)}
      */
     void applyChanges(@NonNull SurfaceControl.Transaction t, @NonNull Dimmer.DimState dim) {
@@ -147,8 +144,8 @@ public class DimmerAnimationHelper {
         reparent(dim.mDimSurface,
                 startProperties.mGeometryParent != mRequestedProperties.mGeometryParent
                         ? mRequestedProperties.mGeometryParent.getSurfaceControl() : null,
-                mRequestedProperties.mDimmingContainer.getSurfaceControl(),
-                mRequestedProperties.mRelativeLayer, t);
+                mRequestedProperties.mDimmingContainer != startProperties.mDimmingContainer
+                        ? mRequestedProperties.mDimmingContainer.getSurfaceControl() : null, t);
 
         if (!startProperties.hasSameVisualProperties(mRequestedProperties)) {
             stopCurrentAnimation(dim.mDimSurface);
@@ -232,14 +229,15 @@ public class DimmerAnimationHelper {
      */
     static void reparent(@NonNull SurfaceControl dimLayer,
                   @Nullable SurfaceControl newGeometryParent,
-                  @NonNull SurfaceControl relativeParent,
-                  int relativePosition,
+                  @Nullable SurfaceControl newRelativeParent,
                   @NonNull SurfaceControl.Transaction t) {
         try {
             if (newGeometryParent != null) {
                 t.reparent(dimLayer, newGeometryParent);
             }
-            t.setRelativeLayer(dimLayer, relativeParent, relativePosition);
+            if (newRelativeParent != null) {
+                t.setRelativeLayer(dimLayer, newRelativeParent, -1);
+            }
         } catch (NullPointerException e) {
             Log.w(TAG, "Tried to change parent of dim " + dimLayer + " after remove", e);
         }
@@ -256,10 +254,13 @@ public class DimmerAnimationHelper {
 
     private static long getDimDuration(@NonNull WindowContainer<?> container) {
         // Use the same duration as the animation on the WindowContainer
-        AnimationAdapter animationAdapter = container.mSurfaceAnimator.getAnimation();
-        final float durationScale = container.mWmService.getTransitionAnimationScaleLocked();
-        return animationAdapter == null ? (long) (DEFAULT_DIM_ANIM_DURATION_MS * durationScale)
-                : animationAdapter.getDurationHint();
+        if (container.mSurfaceAnimator != null) {
+            AnimationAdapter animationAdapter = container.mSurfaceAnimator.getAnimation();
+            final float durationScale = container.mWmService.getTransitionAnimationScaleLocked();
+            return animationAdapter == null ? (long) (DEFAULT_DIM_ANIM_DURATION_MS * durationScale)
+                    : animationAdapter.getDurationHint();
+        }
+        return 0;
     }
 
     /**
