@@ -251,7 +251,7 @@ constructor(
     }
 
     override fun onShadeExpansionStarted() {
-        runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true)
+        runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false)
     }
 
     override fun onDeviceLifted() {

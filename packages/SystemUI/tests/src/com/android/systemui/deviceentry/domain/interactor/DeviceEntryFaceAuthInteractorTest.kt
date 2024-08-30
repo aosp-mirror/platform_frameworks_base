@@ -370,7 +370,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
-                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false))
         }
 
     @Test
@@ -398,7 +398,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
-                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false))
         }
 
     @Test
@@ -426,7 +426,7 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
-                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false))
             faceAuthRepository.runningAuthRequest.value = null
 
             // expansion progress shouldn't trigger face auth again
