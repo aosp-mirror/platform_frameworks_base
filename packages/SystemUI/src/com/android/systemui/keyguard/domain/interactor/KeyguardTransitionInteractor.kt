@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.WithPrev
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -87,6 +88,18 @@ constructor(
 
     val transitionState: StateFlow<TransitionStep> =
         transitions.stateIn(scope, SharingStarted.Eagerly, TransitionStep())
+
+    private val sceneTransitionPair =
+        sceneInteractor.transitionState
+            .pairwise()
+            .stateIn(
+                scope,
+                SharingStarted.Eagerly,
+                WithPrev(
+                    sceneInteractor.transitionState.value,
+                    sceneInteractor.transitionState.value
+                )
+            )
 
     /**
      * A pair of the most recent STARTED step, and the transition step immediately preceding it. The
@@ -194,7 +207,7 @@ constructor(
             }
 
         return if (SceneContainerFlag.isEnabled) {
-            flow.filter {
+            flow.filter { step ->
                 val fromScene =
                     when (edge) {
                         is Edge.StateToState -> edge.from?.mapToSceneContainerScene()
@@ -211,8 +224,23 @@ constructor(
 
                 fun SceneKey?.isLockscreenOrNull() = this == Scenes.Lockscreen || this == null
 
-                return@filter (fromScene.isLockscreenOrNull() && toScene.isLockscreenOrNull()) ||
+                val isTransitioningBetweenLockscreenStates =
+                    fromScene.isLockscreenOrNull() && toScene.isLockscreenOrNull()
+                val isTransitioningBetweenDesiredScenes =
                     sceneInteractor.transitionState.value.isTransitioning(fromScene, toScene)
+
+                // We can't compare the terminal step with the current sceneTransition because
+                // a) STL has no guarantee that it will settle in Idle() when finished/canceled
+                // b) Comparing to Idle(toScene) would make any other FINISHED step settling in
+                //    toScene pass as well
+                val terminalStepBelongsToPreviousTransition =
+                    (step.transitionState == TransitionState.FINISHED ||
+                        step.transitionState == TransitionState.CANCELED) &&
+                        sceneTransitionPair.value.previousValue.isTransitioning(fromScene, toScene)
+
+                return@filter isTransitioningBetweenLockscreenStates ||
+                    isTransitioningBetweenDesiredScenes ||
+                    terminalStepBelongsToPreviousTransition
             }
         } else {
             flow

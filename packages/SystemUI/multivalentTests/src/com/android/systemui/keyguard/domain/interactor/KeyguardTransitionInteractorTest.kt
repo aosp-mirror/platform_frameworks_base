@@ -1394,9 +1394,11 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            sendSteps(sendStep1)
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
-            sendSteps(sendStep1, sendStep2, sendStep3)
+            sendSteps(sendStep2, sendStep3)
 
             assertEquals(listOf(sendStep1, sendStep2), currentStates)
             assertEquals(listOf(sendStep1, sendStep2), currentStatesConverted)
@@ -1410,6 +1412,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
             sendSteps(sendStep1, sendStep2, sendStep3)
@@ -1426,6 +1429,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
             val sendStep2 = TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
             sendSteps(sendStep1, sendStep2, sendStep3)
@@ -1443,6 +1447,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, DOZING, 0f, STARTED)
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
             val sendStep2 = TransitionStep(LOCKSCREEN, DOZING, 1f, FINISHED)
             val sendStep3 = TransitionStep(LOCKSCREEN, AOD, 0f, STARTED)
             val sendStep4 = TransitionStep(AOD, LOCKSCREEN, 0f, STARTED)
@@ -1461,10 +1466,12 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            sendSteps(sendStep1)
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(UNDEFINED, AOD, 0f, STARTED)
             val sendStep4 = TransitionStep(AOD, LOCKSCREEN, 0f, STARTED)
-            sendSteps(sendStep1, sendStep2, sendStep3, sendStep4)
+            sendSteps(sendStep2, sendStep3, sendStep4)
 
             assertEquals(listOf(sendStep1, sendStep2), currentStates)
             assertEquals(listOf(sendStep1, sendStep2), currentStatesMapped)
@@ -1478,10 +1485,12 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            sendSteps(sendStep1)
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
             val sendStep3 = TransitionStep(UNDEFINED, AOD, 0f, STARTED)
             val sendStep4 = TransitionStep(AOD, LOCKSCREEN, 0f, STARTED)
-            sendSteps(sendStep1, sendStep2, sendStep3, sendStep4)
+            sendSteps(sendStep2, sendStep3, sendStep4)
 
             assertEquals(listOf<TransitionStep>(), currentStatesMapped)
         }
