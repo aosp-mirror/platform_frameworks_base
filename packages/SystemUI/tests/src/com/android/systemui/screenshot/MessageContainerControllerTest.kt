@@ -2,8 +2,6 @@ package com.android.systemui.screenshot
 
 import android.graphics.drawable.Drawable
 import android.os.UserHandle
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -90,20 +88,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(com.android.systemui.Flags.FLAG_SCREENSHOT_PRIVATE_PROFILE_BEHAVIOR_FIX)
-    fun testOnScreenshotTakenUserHandle_withWorkProfileFirstRun() {
-        whenever(workProfileMessageController.onScreenshotTaken(eq(userHandle)))
-            .thenReturn(workProfileData)
-        messageContainer.onScreenshotTaken(screenshotData)
-
-        verify(workProfileMessageController)
-            .populateView(eq(workProfileFirstRunView), eq(workProfileData), any())
-        assertEquals(View.VISIBLE, workProfileFirstRunView.visibility)
-        assertEquals(View.GONE, detectionNoticeView.visibility)
-    }
-
-    @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_SCREENSHOT_PRIVATE_PROFILE_BEHAVIOR_FIX)
     fun testOnScreenshotTakenUserHandle_withProfileProfileFirstRun() = runTest {
         val profileData =
             ProfileMessageController.ProfileFirstRunData(
