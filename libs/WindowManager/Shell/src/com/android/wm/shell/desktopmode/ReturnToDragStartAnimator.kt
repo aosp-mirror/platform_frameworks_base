@@ -48,7 +48,13 @@ class ReturnToDragStartAnimator(
     }
 
     /** Builds new animator and starts animation of task leash reposition. */
-    fun start(taskId: Int, taskSurface: SurfaceControl, startBounds: Rect, endBounds: Rect) {
+    fun start(
+        taskId: Int,
+        taskSurface: SurfaceControl,
+        startBounds: Rect,
+        endBounds: Rect,
+        isResizable: Boolean
+    ) {
         val tx = transactionSupplier.get()
 
         boundsAnimator?.cancel()
@@ -81,11 +87,13 @@ class ReturnToDragStartAnimator(
                                 .apply()
                             taskRepositionAnimationListener.onAnimationEnd(taskId)
                             boundsAnimator = null
-                            Toast.makeText(
-                                context,
-                                R.string.desktop_mode_non_resizable_snap_text,
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            if (!isResizable) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.desktop_mode_non_resizable_snap_text,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
                         }
                     )
