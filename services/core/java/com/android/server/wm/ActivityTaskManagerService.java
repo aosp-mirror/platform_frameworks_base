@@ -3913,6 +3913,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    private TaskSnapshot getTaskSnapshotInner(int taskId, boolean isLowResolution,
+            @TaskSnapshot.ReferenceFlags int usage) {
+        final Task task;
+        synchronized (mGlobalLock) {
+            task = mRootWindowContainer.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+            if (task == null) {
+                Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
+                return null;
+            }
+            // Try to load snapshot from cache first, and add reference if the snapshot is in cache.
+            final TaskSnapshot snapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+                    task.mUserId, false /* restoreFromDisk */, isLowResolution);
+            if (snapshot != null) {
+                snapshot.addReference(usage);
+                return snapshot;
+            }
+        }
+        // Don't call this while holding the lock as this operation might hit the disk.
+        return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+                task.mUserId, true /* restoreFromDisk */, isLowResolution);
+    }
+
     @Override
     public TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
@@ -7235,8 +7257,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
-                int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
+                int taskId, boolean isLowResolution, @TaskSnapshot.ReferenceFlags int usage) {
+            return ActivityTaskManagerService.this.getTaskSnapshotInner(
+                    taskId, isLowResolution, usage);
         }
 
         @Override

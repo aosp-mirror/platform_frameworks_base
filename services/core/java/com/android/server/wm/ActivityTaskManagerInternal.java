@@ -607,7 +607,7 @@ public abstract class ActivityTaskManagerInternal {
      * sensitive environment.
      */
     public abstract TaskSnapshot getTaskSnapshotBlocking(int taskId,
-            boolean isLowResolution);
+            boolean isLowResolution, @TaskSnapshot.ReferenceFlags int usage);
 
     /** Returns true if uid is considered foreground for activity start purposes. */
     public abstract boolean isUidForeground(int uid);

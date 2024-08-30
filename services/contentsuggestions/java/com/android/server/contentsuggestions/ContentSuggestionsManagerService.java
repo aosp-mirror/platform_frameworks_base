@@ -160,11 +160,13 @@ public class ContentSuggestionsManagerService extends
             HardwareBuffer snapshotBuffer = null;
             int colorSpaceId = 0;
 
+            TaskSnapshot snapshot = null;
             // Skip taking TaskSnapshot when bitmap is provided.
             if (!imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {
                 // Can block, so call before acquiring the lock.
-                TaskSnapshot snapshot =
-                        mActivityTaskManagerInternal.getTaskSnapshotBlocking(taskId, false);
+                snapshot = mActivityTaskManagerInternal.getTaskSnapshotBlocking(
+                        taskId, false /* isLowResolution */,
+                        TaskSnapshot.REFERENCE_CONTENT_SUGGESTION);
                 if (snapshot != null) {
                     snapshotBuffer = snapshot.getHardwareBuffer();
                     ColorSpace colorSpace = snapshot.getColorSpace();
@@ -184,6 +186,9 @@ public class ContentSuggestionsManagerService extends
                         Slog.v(TAG, "provideContextImageLocked: no service for " + userId);
                     }
                 }
+            }
+            if (snapshot != null) {
+                snapshot.removeReference(TaskSnapshot.REFERENCE_CONTENT_SUGGESTION);
             }
         }
 
