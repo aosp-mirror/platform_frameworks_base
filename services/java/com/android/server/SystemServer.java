@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -38,6 +37,7 @@ import android.app.ApplicationErrorReport;
 import android.app.INotificationManager;
 import android.app.SystemServiceRegistry;
 import android.app.admin.DevicePolicySafetyChecker;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -1743,12 +1743,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
-            t.traceBegin("StartAppFunctionManager");
-            if (enableAppFunctionManager()) {
+            if (AppFunctionManagerConfiguration.isSupported(context)) {
+                t.traceBegin("StartAppFunctionManager");
                 mSystemServiceManager.startService(AppFunctionManagerService.class);
+                t.traceEnd();
             }
-            t.traceEnd();
-
         } catch (Throwable e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service");
