@@ -37,10 +37,10 @@ android_test {
     ],
 
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs",
         "telephony-common",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
         "truth",
     ],
 

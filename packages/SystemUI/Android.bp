@@ -804,9 +804,9 @@ android_library {
         "androidx.test.rules",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "keepanno-annotations",
     ],
     kotlincflags: [
@@ -896,9 +896,9 @@ android_robolectric_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "truth",
     ],
 
@@ -971,9 +971,9 @@ android_ravenwood_test {
         "androidx.compose.runtime_runtime",
     ],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
     auto_gen_config: true,
     plugins: [
