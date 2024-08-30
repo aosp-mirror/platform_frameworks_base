@@ -3679,6 +3679,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             revertTransferOwnershipIfNecessaryLocked();
+            if (!Flags.policyEngineMigrationV2Enabled()) {
+                updateUsbDataSignal(mContext, isUsbDataSignalingEnabledInternalLocked());
+            }
         }
 
         // Check whether work apps were paused via suspension and unsuspend if necessary.
@@ -22425,17 +22428,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Objects.requireNonNull(packageName, "Admin package name must be provided");
         final CallerIdentity caller = getCallerIdentity(packageName);
 
-        synchronized (getLockObject()) {
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                    /* admin= */ null, MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
-                    caller.getPackageName(),
-                    caller.getUserId());
+        if (!Flags.policyEngineMigrationV2Enabled()) {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller),
+                    "USB data signaling can only be controlled by a device owner or "
+                            + "a profile owner on an organization-owned device.");
             Preconditions.checkState(canUsbDataSignalingBeDisabled(),
                     "USB data signaling cannot be disabled.");
-            mDevicePolicyEngine.setGlobalPolicy(
-                    PolicyDefinition.USB_DATA_SIGNALING,
-                    enforcingAdmin,
-                    new BooleanPolicyValue(enabled));
+        }
+
+        synchronized (getLockObject()) {
+            if (Flags.policyEngineMigrationV2Enabled()) {
+                EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                        /* admin= */ null, MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
+                        caller.getPackageName(),
+                        caller.getUserId());
+                Preconditions.checkState(canUsbDataSignalingBeDisabled(),
+                        "USB data signaling cannot be disabled.");
+                mDevicePolicyEngine.setGlobalPolicy(
+                        PolicyDefinition.USB_DATA_SIGNALING,
+                        enforcingAdmin,
+                        new BooleanPolicyValue(enabled));
+            } else {
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+                if (admin.mUsbDataSignalingEnabled != enabled) {
+                    admin.mUsbDataSignalingEnabled = enabled;
+                    saveSettingsLocked(caller.getUserId());
+                    updateUsbDataSignal(mContext, isUsbDataSignalingEnabledInternalLocked());
+                }
+            }
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_USB_DATA_SIGNALING)
@@ -22457,10 +22478,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isUsbDataSignalingEnabled(String packageName) {
         final CallerIdentity caller = getCallerIdentity(packageName);
-        Boolean enabled = mDevicePolicyEngine.getResolvedPolicy(
-                PolicyDefinition.USB_DATA_SIGNALING,
-                caller.getUserId());
-        return enabled == null || enabled;
+        if (Flags.policyEngineMigrationV2Enabled()) {
+            Boolean enabled = mDevicePolicyEngine.getResolvedPolicy(
+                    PolicyDefinition.USB_DATA_SIGNALING,
+                    caller.getUserId());
+            return enabled == null || enabled;
+        } else {
+            synchronized (getLockObject()) {
+                // If the caller is an admin, return the policy set by itself. Otherwise
+                // return the device-wide policy.
+                if (isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(
+                        caller)) {
+                    return getProfileOwnerOrDeviceOwnerLocked(
+                            caller.getUserId()).mUsbDataSignalingEnabled;
+                } else {
+                    return isUsbDataSignalingEnabledInternalLocked();
+                }
+            }
+        }
     }
 
     private boolean isUsbDataSignalingEnabledInternalLocked() {
