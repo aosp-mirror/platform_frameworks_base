@@ -185,6 +185,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                         mShadeExpanded = expanded;
 
                         updateLifecycleStateLocked();
+                        updateGestureBlockingLocked();
                     });
                 }
             };
@@ -215,6 +216,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mBouncerShowing = bouncerShowing;
 
                 updateLifecycleStateLocked();
+                updateGestureBlockingLocked();
             });
         }
     };
@@ -248,7 +250,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
          * others.
          */
         public void reset(String source) {
-            reset(()-> {}, source);
+            reset(() -> {}, source);
         }
 
         /**
@@ -525,11 +527,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStarted = true;
 
         updateRedirectWakeup();
-
-        if (!isDreamInPreviewMode()) {
-            mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,
-                    GestureInteractor.Scope.Global);
-        }
+        updateGestureBlockingLocked();
     }
 
     private void updateRedirectWakeup() {
@@ -551,6 +549,18 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mCommunalInteractor.changeScene(CommunalScenes.Communal,
                 "dream wake requested",
                 null);
+    }
+
+    private void updateGestureBlockingLocked() {
+        final boolean shouldBlock = !isDreamInPreviewMode() && !mShadeExpanded && !mBouncerShowing;
+
+        if (shouldBlock) {
+            mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                    GestureInteractor.Scope.Global);
+        } else {
+            mGestureInteractor.removeGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                    GestureInteractor.Scope.Global);
+        }
     }
 
     private Lifecycle.State getLifecycleStateLocked() {
