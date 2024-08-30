@@ -99,14 +99,17 @@ constructor(
             .distinctUntilChanged()
 
     override val isQsFullscreen: Flow<Boolean> =
-        sceneInteractor
-            .resolveSceneFamily(SceneFamilies.QuickSettings)
-            .flatMapLatestConflated { quickSettingsScene ->
+        combine(
+                shadeRepository.isShadeLayoutWide,
+                sceneInteractor.resolveSceneFamily(SceneFamilies.QuickSettings),
+                ::Pair
+            )
+            .flatMapLatestConflated { (isShadeLayoutWide, quickSettingsScene) ->
                 sceneInteractor.transitionState
                     .map { state ->
                         when (state) {
                             is ObservableTransitionState.Idle ->
-                                state.currentScene == quickSettingsScene
+                                !isShadeLayoutWide && state.currentScene == quickSettingsScene
                             is ObservableTransitionState.Transition -> false
                         }
                     }
