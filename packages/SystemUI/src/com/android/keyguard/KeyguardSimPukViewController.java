@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -42,6 +43,8 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+
+import com.google.android.msdl.domain.MSDLPlayer;
 
 public class KeyguardSimPukViewController
         extends KeyguardPinBasedInputViewController<KeyguardSimPukView> {
@@ -92,11 +95,12 @@ public class KeyguardSimPukViewController
             TelephonyManager telephonyManager, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController, FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
-            KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
+            KeyguardKeyboardInteractor keyguardKeyboardInteractor,
+            @Nullable MSDLPlayer msdlPlayer) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
-                keyguardKeyboardInteractor);
+                keyguardKeyboardInteractor, msdlPlayer);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);

@@ -237,6 +237,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 featureFlags,
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
+                null,
             )
 
         kosmos = testKosmos()

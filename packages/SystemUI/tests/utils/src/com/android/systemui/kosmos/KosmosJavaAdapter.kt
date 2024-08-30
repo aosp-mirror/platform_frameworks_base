@@ -36,6 +36,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.globalactions.domain.interactor.globalActionsInteractor
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -154,4 +155,5 @@ class KosmosJavaAdapter() {
     val scrimController by lazy { kosmos.scrimController }
     val scrimStartable by lazy { kosmos.scrimStartable }
     val sceneContainerOcclusionInteractor by lazy { kosmos.sceneContainerOcclusionInteractor }
+    val msdlPlayer by lazy { kosmos.msdlPlayer }
 }

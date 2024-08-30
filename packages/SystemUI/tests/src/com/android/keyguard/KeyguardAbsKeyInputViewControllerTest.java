@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.KeyEvent;
@@ -43,8 +46,12 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.haptics.msdl.FakeMSDLPlayer;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+
+import com.google.android.msdl.data.model.MSDLToken;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +93,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
     private KeyguardAbsKeyInputViewController mKeyguardAbsKeyInputViewController;
+    private KosmosJavaAdapter mKosmosJavaAdapter = new KosmosJavaAdapter(this);
+    private final FakeMSDLPlayer mMSDLPlayer = mKosmosJavaAdapter.getMsdlPlayer();
 
     @Before
     public void setup() {
@@ -108,7 +117,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         return new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
-                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor) {
+                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor, mMSDLPlayer) {
             @Override
             void resetState() {
             }
@@ -196,5 +205,33 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         verify(mAbsKeyInputView).setPasswordEntryEnabled(false);
         verify(mAbsKeyInputView, never()).setPasswordEntryInputEnabled(true);
         verify(mAbsKeyInputView, never()).setPasswordEntryEnabled(true);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    public void onPasswordChecked_withMSDLFeedback_withMatch_playsUnlockToken() {
+        mKeyguardAbsKeyInputViewController.onPasswordChecked(0, true, 100, true);
+        assertThat(mMSDLPlayer.getLatestTokenPlayed()).isEqualTo(MSDLToken.UNLOCK);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    public void onPasswordChecked_withoutMSDLFeedback_withMatch_doesNotPlayToken() {
+        mKeyguardAbsKeyInputViewController.onPasswordChecked(0, true, 100, true);
+        assertThat(mMSDLPlayer.getLatestTokenPlayed()).isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    public void onPasswordChecked_withMSDLFeedback_withoutMatch_playsFailureToken() {
+        mKeyguardAbsKeyInputViewController.onPasswordChecked(0, false, 100, true);
+        assertThat(mMSDLPlayer.getLatestTokenPlayed()).isEqualTo(MSDLToken.FAILURE);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    public void onPasswordChecked_withoutMSDLFeedback_withoutMatch_doesNotPlayToken() {
+        mKeyguardAbsKeyInputViewController.onPasswordChecked(0, false, 100, true);
+        assertThat(mMSDLPlayer.getLatestTokenPlayed()).isNull();
     }
 }
