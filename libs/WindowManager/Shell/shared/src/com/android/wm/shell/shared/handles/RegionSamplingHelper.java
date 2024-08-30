@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.navigationbar;
+package com.android.wm.shell.shared.handles;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -194,7 +194,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
             ViewRootImpl viewRootImpl = mSampledView.getViewRootImpl();
             SurfaceControl stopLayerControl = null;
             if (viewRootImpl != null) {
-                 stopLayerControl = viewRootImpl.getSurfaceControl();
+                stopLayerControl = viewRootImpl.getSurfaceControl();
             }
             if (stopLayerControl == null || !stopLayerControl.isValid()) {
                 if (!mWaitingOnDraw) {
