@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -145,7 +146,6 @@ import java.util.stream.Stream;
  */
 @SmallTest
 @Presubmit
-
 public class UserControllerTest {
     // Use big enough user id to avoid picking up already active user id.
     private static final int TEST_USER_ID = 100;
@@ -593,6 +593,7 @@ public class UserControllerTest {
     @Test
     public void testScheduleStopOfBackgroundUser_switch() {
         mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
 
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
@@ -642,6 +643,7 @@ public class UserControllerTest {
     @Test
     public void testScheduleStopOfBackgroundUser_startInBackground() throws Exception {
         mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
 
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
@@ -681,6 +683,7 @@ public class UserControllerTest {
     @Test
     public void testScheduleStopOfBackgroundUser_rescheduleWhenGuest() throws Exception {
         mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
 
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
@@ -736,6 +739,7 @@ public class UserControllerTest {
     @Test
     public void testScheduleStopOfBackgroundUser_rescheduleIfAlarm() throws Exception {
         mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
 
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
                 /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
