@@ -492,17 +492,6 @@ sealed class UserActionResult(
 ) {
     internal abstract fun toContent(currentScene: SceneKey): ContentKey
 
-    internal fun userActionCopy(
-        transitionKey: TransitionKey? = this.transitionKey
-    ): UserActionResult {
-        return when (this) {
-            is ChangeScene -> copy(transitionKey = transitionKey)
-            is ShowOverlay -> copy(transitionKey = transitionKey)
-            is HideOverlay -> copy(transitionKey = transitionKey)
-            is ReplaceByOverlay -> copy(transitionKey = transitionKey)
-        }
-    }
-
     data class ChangeScene
     internal constructor(
         /** The scene we should be transitioning to during the [UserAction]. */
