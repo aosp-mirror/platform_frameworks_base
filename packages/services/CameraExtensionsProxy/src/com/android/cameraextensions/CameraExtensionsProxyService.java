@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.hardware.SyncFence;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
@@ -2458,6 +2459,19 @@ public class CameraExtensionsProxyService extends Service {
             }
             // Shallow copy is fine.
             return mPlanes.clone();
+        }
+
+        @Override
+        public SyncFence getFence() {
+            if (mParcelImage.fence != null) {
+                try {
+                    return SyncFence.create(mParcelImage.fence.dup());
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to parcel buffer fence!");
+                }
+            }
+
+            return SyncFence.createEmpty();
         }
 
         @Override
