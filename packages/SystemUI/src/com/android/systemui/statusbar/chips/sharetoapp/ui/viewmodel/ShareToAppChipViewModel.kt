@@ -110,7 +110,7 @@ constructor(
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
             icon =
-                OngoingActivityChipModel.ChipIcon.Basic(
+                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
                         SHARE_TO_APP_ICON,
                         ContentDescription.Resource(R.string.share_to_app_chip_accessibility_label),

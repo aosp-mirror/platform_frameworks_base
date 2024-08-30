@@ -1,6 +1,3 @@
-// Keep the following two TEST_MAPPINGs in sync:
-// frameworks/base/ravenwood/TEST_MAPPING
-// frameworks/base/tools/hoststubgen/TEST_MAPPING
 {
   "presubmit": [
     { "name": "tiny-framework-dump-test" },
@@ -39,6 +36,113 @@
     }
   ],
   "ravenwood-presubmit": [
+    // AUTO-GENERATED-START
+    // DO NOT MODIFY MANUALLY
+    // Use scripts/update-test-mapping.sh to update it.
+    {
+      "name": "AdServicesSharedLibrariesUnitTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "android.test.mock.ravenwood.tests",
+      "host": true
+    },
+    {
+      "name": "CarLibHostUnitTest",
+      "host": true
+    },
+    {
+      "name": "CarServiceHostUnitTest",
+      "host": true
+    },
+    {
+      "name": "CarSystemUIRavenTests",
+      "host": true
+    },
+    {
+      "name": "CtsAccountManagerTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsAppTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsContentTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsDatabaseTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsGraphicsTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsIcuTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsInputMethodTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsOsTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsProtoTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsResourcesTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsTextTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksCoreSystemPropertiesTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksCoreTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksInputMethodSystemServerTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksMockingServicesTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksServicesTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksUtilTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "InternalTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "PowerStatsTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentTest",
+      "host": true
+    },
     {
       "name": "RavenwoodMinimumTest",
       "host": true
@@ -48,16 +152,21 @@
       "host": true
     },
     {
-      "name": "CtsUtilTestCasesRavenwood",
-      "host": true
-    },
-    {
       "name": "RavenwoodResApkTest",
       "host": true
     },
     {
-      "name": "RavenwoodBivalentTest",
+      "name": "RavenwoodRuntimeTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodServicesTest",
+      "host": true
+    },
+    {
+      "name": "SystemUiRavenTests",
       "host": true
     }
+    // AUTO-GENERATED-END
   ]
 }

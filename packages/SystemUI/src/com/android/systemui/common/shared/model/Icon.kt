@@ -38,5 +38,5 @@ sealed class Icon {
 }
 
 /** Creates [Icon.Loaded] for a given drawable with an optional [contentDescription]. */
-fun Drawable.asIcon(contentDescription: ContentDescription? = null): Icon =
+fun Drawable.asIcon(contentDescription: ContentDescription? = null): Icon.Loaded =
     Icon.Loaded(this, contentDescription)

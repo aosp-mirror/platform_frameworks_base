@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.shared
+package com.android.systemui.statusbar.phone
 
 import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
-/** Helper for reading or using the notifications heads up refactor flag state. */
+/** Helper for reading or using the status_bar_signal_policy_refactor flag state. */
 @Suppress("NOTHING_TO_INLINE")
-object NotificationsHeadsUpRefactor {
+object StatusBarSignalPolicyRefactor {
     /** The aconfig flag name */
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATIONS_HEADS_UP_REFACTOR
+    const val FLAG_NAME = Flags.FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -33,7 +33,7 @@ object NotificationsHeadsUpRefactor {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationsHeadsUpRefactor()
+        get() = Flags.statusBarSignalPolicyRefactor()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the

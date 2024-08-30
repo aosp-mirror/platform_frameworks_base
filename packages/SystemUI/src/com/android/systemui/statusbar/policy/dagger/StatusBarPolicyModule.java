@@ -22,8 +22,10 @@ import android.os.UserManager;
 
 import com.android.internal.R;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
+import com.android.settingslib.notification.modes.ZenIconLoader;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.settings.UserTracker;
@@ -79,6 +81,7 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Named;
 
@@ -235,5 +238,13 @@ public interface StatusBarPolicyModule {
     @CastControllerLog
     static LogBuffer provideCastControllerLog(LogBufferFactory factory) {
         return factory.create("CastControllerLog", 50);
+    }
+
+    /** Provides a {@link ZenIconLoader} that fetches icons in a background thread. */
+    @Provides
+    @SysUISingleton
+    static ZenIconLoader provideZenIconLoader(
+            @UiBackground ExecutorService backgroundExecutorService) {
+        return new ZenIconLoader(backgroundExecutorService);
     }
 }

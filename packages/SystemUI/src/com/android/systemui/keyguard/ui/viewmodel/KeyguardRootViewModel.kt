@@ -132,8 +132,8 @@ constructor(
     val burnInModel = _burnInModel.asStateFlow()
 
     val burnInLayerVisibility: Flow<Int> =
-        keyguardTransitionInteractor.startedKeyguardState
-            .filter { it == AOD || it == LOCKSCREEN }
+        keyguardTransitionInteractor.startedKeyguardTransitionStep
+            .filter { it.to == AOD || it.to == LOCKSCREEN }
             .map { VISIBLE }
 
     val goneToAodTransition =
@@ -333,16 +333,17 @@ constructor(
                     .transitionValue(LOCKSCREEN)
                     .map { it > 0f }
                     .onStart { emit(false) },
-                keyguardTransitionInteractor.finishedKeyguardState.map {
-                    KeyguardState.lockscreenVisibleInState(it)
-                },
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = GONE
+                ),
                 deviceEntryInteractor.isBypassEnabled,
                 areNotifsFullyHiddenAnimated(),
                 isPulseExpandingAnimated(),
             ) { flows ->
                 val goneToAodTransitionRunning = flows[0] as Boolean
                 val isOnLockscreen = flows[1] as Boolean
-                val onKeyguard = flows[2] as Boolean
+                val isOnGone = flows[2] as Boolean
                 val isBypassEnabled = flows[3] as Boolean
                 val notifsFullyHidden = flows[4] as AnimatedValue<Boolean>
                 val pulseExpanding = flows[5] as AnimatedValue<Boolean>
@@ -352,8 +353,7 @@ constructor(
                     // animation is playing, in which case we want them to be visible if we're
                     // animating in the AOD UI and will be switching to KEYGUARD shortly.
                     goneToAodTransitionRunning ||
-                        (!onKeyguard &&
-                            !screenOffAnimationController.shouldShowAodIconsWhenShade()) ->
+                        (isOnGone && !screenOffAnimationController.shouldShowAodIconsWhenShade()) ->
                         AnimatedValue.NotAnimating(false)
                     else ->
                         zip(notifsFullyHidden, pulseExpanding) {

@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -27,12 +26,6 @@ val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
         KeyguardTransitionInteractor(
             scope = applicationCoroutineScope,
             repository = keyguardTransitionRepository,
-            fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
-            fromPrimaryBouncerTransitionInteractor = { fromPrimaryBouncerTransitionInteractor },
-            fromAodTransitionInteractor = { fromAodTransitionInteractor },
-            fromAlternateBouncerTransitionInteractor = { fromAlternateBouncerTransitionInteractor },
-            fromDozingTransitionInteractor = { fromDozingTransitionInteractor },
-            fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
             sceneInteractor = sceneInteractor
         )
     }

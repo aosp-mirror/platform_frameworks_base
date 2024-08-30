@@ -16,10 +16,9 @@
 
 package com.android.systemui.navigationbar.gestural.data.respository
 
-import android.content.ComponentName
-import android.util.ArraySet
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,36 +27,43 @@ import kotlinx.coroutines.withContext
 
 /** A repository for storing gesture related information */
 interface GestureRepository {
-    /** A {@link StateFlow} tracking activities currently blocked from gestures. */
-    val gestureBlockedActivities: StateFlow<Set<ComponentName>>
+    /** A {@link StateFlow} tracking matchers that can block gestures. */
+    val gestureBlockedMatchers: StateFlow<Set<TaskMatcher>>
 
-    /** Adds an activity to be blocked from gestures. */
-    suspend fun addGestureBlockedActivity(activity: ComponentName)
+    /** Adds a matcher to determine whether a gesture should be blocked. */
+    suspend fun addGestureBlockedMatcher(matcher: TaskMatcher)
 
-    /** Removes an activity from being blocked from gestures. */
-    suspend fun removeGestureBlockedActivity(activity: ComponentName)
+    /** Removes a matcher from blocking from gestures. */
+    suspend fun removeGestureBlockedMatcher(matcher: TaskMatcher)
 }
 
 @SysUISingleton
 class GestureRepositoryImpl
 @Inject
 constructor(@Main private val mainDispatcher: CoroutineDispatcher) : GestureRepository {
-    private val _gestureBlockedActivities = MutableStateFlow<Set<ComponentName>>(ArraySet())
+    private val _gestureBlockedMatchers = MutableStateFlow<Set<TaskMatcher>>(emptySet())
 
-    override val gestureBlockedActivities: StateFlow<Set<ComponentName>>
-        get() = _gestureBlockedActivities
+    override val gestureBlockedMatchers: StateFlow<Set<TaskMatcher>>
+        get() = _gestureBlockedMatchers
 
-    override suspend fun addGestureBlockedActivity(activity: ComponentName) =
+    override suspend fun addGestureBlockedMatcher(matcher: TaskMatcher) =
         withContext(mainDispatcher) {
-            _gestureBlockedActivities.emit(
-                _gestureBlockedActivities.value.toMutableSet().apply { add(activity) }
-            )
+            val existingMatchers = _gestureBlockedMatchers.value
+            if (existingMatchers.contains(matcher)) {
+                return@withContext
+            }
+
+            _gestureBlockedMatchers.value = existingMatchers.toMutableSet().apply { add(matcher) }
         }
 
-    override suspend fun removeGestureBlockedActivity(activity: ComponentName) =
+    override suspend fun removeGestureBlockedMatcher(matcher: TaskMatcher) =
         withContext(mainDispatcher) {
-            _gestureBlockedActivities.emit(
-                _gestureBlockedActivities.value.toMutableSet().apply { remove(activity) }
-            )
+            val existingMatchers = _gestureBlockedMatchers.value
+            if (!existingMatchers.contains(matcher)) {
+                return@withContext
+            }
+
+            _gestureBlockedMatchers.value =
+                existingMatchers.toMutableSet().apply { remove(matcher) }
         }
 }

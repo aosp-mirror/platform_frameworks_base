@@ -23,6 +23,7 @@ import android.provider.Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
 import android.provider.Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID
 import com.android.settingslib.notification.modes.EnableZenModeDialog
 import com.android.settingslib.notification.modes.ZenMode
+import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger
@@ -88,7 +89,7 @@ constructor(
                 modesList.map { mode ->
                     ModeTileViewModel(
                         id = mode.id,
-                        icon = zenModeInteractor.getModeIcon(mode),
+                        icon = zenModeInteractor.getModeIcon(mode).drawable().asIcon(),
                         text = mode.name,
                         subtext = getTileSubtext(mode),
                         enabled = mode.isActive,

@@ -22,6 +22,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.phone.LightBarController
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
@@ -50,6 +51,11 @@ abstract class StatusBarModule {
     @IntoMap
     @ClassKey(LightBarController::class)
     abstract fun bindLightBarController(impl: LightBarController): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBarSignalPolicy::class)
+    abstract fun bindStatusBarSignalPolicy(impl: StatusBarSignalPolicy): CoreStartable
 
     companion object {
         @Provides

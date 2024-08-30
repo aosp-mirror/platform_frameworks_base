@@ -182,6 +182,7 @@ constructor(
     }
 
     private suspend fun finishCurrentTransition() {
+        if (currentTransitionId == null) return
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             1f,
@@ -224,7 +225,7 @@ constructor(
             collectProgress(transition)
         } else if (transition.toScene == CommunalScenes.Communal) {
             if (currentToState == KeyguardState.GLANCEABLE_HUB) {
-                transitionKtfTo(transitionInteractor.getStartedFromState())
+                transitionKtfTo(transitionInteractor.startedKeyguardTransitionStep.value.from)
             }
             startTransitionToGlanceableHub()
             collectProgress(transition)

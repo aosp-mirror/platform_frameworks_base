@@ -64,7 +64,7 @@ constructor(
                             0f
                         }
                     )
-                is ObservableTransitionState.Transition.ChangeCurrentScene ->
+                is ObservableTransitionState.Transition.ChangeScene ->
                     when {
                         state.fromScene == Scenes.Gone ->
                             if (state.toScene.isExpandable()) {

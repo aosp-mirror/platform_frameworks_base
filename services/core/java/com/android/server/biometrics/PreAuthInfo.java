@@ -447,6 +447,12 @@ class PreAuthInfo {
                         getInternalStatus().second));
     }
 
+    /** Returns if mandatory biometrics authentication is in effect */
+    boolean getIsMandatoryBiometricsAuthentication() {
+        return mIsMandatoryBiometricsAuthentication;
+    }
+
+
     /**
      * For the given request, generate the appropriate reason why authentication cannot be started.
      * Note that for some errors, modality is intentionally cleared.

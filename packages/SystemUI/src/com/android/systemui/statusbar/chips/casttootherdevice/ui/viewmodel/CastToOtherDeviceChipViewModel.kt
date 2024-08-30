@@ -190,7 +190,7 @@ constructor(
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
             icon =
-                OngoingActivityChipModel.ChipIcon.Basic(
+                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
                         CAST_TO_OTHER_DEVICE_ICON,
                         // This string is "Casting screen"
@@ -215,7 +215,7 @@ constructor(
     private fun createIconOnlyCastChip(deviceName: String?): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.IconOnly(
             icon =
-                OngoingActivityChipModel.ChipIcon.Basic(
+                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                     Icon.Resource(
                         CAST_TO_OTHER_DEVICE_ICON,
                         // This string is just "Casting"

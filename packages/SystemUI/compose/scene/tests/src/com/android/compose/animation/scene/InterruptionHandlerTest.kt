@@ -69,7 +69,7 @@ class InterruptionHandlerTest {
                     interruptionHandler =
                         object : InterruptionHandler {
                             override fun onInterruption(
-                                interrupted: TransitionState.Transition.ChangeCurrentScene,
+                                interrupted: TransitionState.Transition.ChangeScene,
                                 newTargetScene: SceneKey
                             ): InterruptionResult {
                                 return InterruptionResult(
@@ -104,7 +104,7 @@ class InterruptionHandlerTest {
                     interruptionHandler =
                         object : InterruptionHandler {
                             override fun onInterruption(
-                                interrupted: TransitionState.Transition.ChangeCurrentScene,
+                                interrupted: TransitionState.Transition.ChangeScene,
                                 newTargetScene: SceneKey
                             ): InterruptionResult {
                                 return InterruptionResult(
@@ -198,7 +198,7 @@ class InterruptionHandlerTest {
     companion object {
         val FromToCurrentTriple =
             Correspondence.transforming(
-                { transition: TransitionState.Transition.ChangeCurrentScene? ->
+                { transition: TransitionState.Transition.ChangeScene? ->
                     Triple(transition?.fromScene, transition?.toScene, transition?.currentScene)
                 },
                 "(from, to, current) triple"

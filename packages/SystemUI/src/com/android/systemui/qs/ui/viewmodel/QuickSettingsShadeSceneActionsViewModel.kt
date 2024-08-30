@@ -29,7 +29,6 @@ import com.android.systemui.shade.shared.model.ShadeAlignment
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 
 /**
@@ -62,7 +61,7 @@ constructor(
                     }
                 }
             }
-            .collectLatest { actions -> setActions(actions) }
+            .collect { actions -> setActions(actions) }
     }
 
     @AssistedFactory

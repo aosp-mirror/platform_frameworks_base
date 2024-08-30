@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.server.vibrator;
+package com.android.systemui.statusbar.commandline
 
-import static com.google.common.truth.Truth.assertThat;
+import android.content.applicationContext
+import com.android.systemui.kosmos.Kosmos
 
-import static java.util.stream.Collectors.toList;
-
-import org.junit.Test;
-
-import java.util.Arrays;
-
-public class VibrationTest {
-
-    @Test
-    public void status_hasUniqueProtoEnumValues() {
-        assertThat(
-                Arrays.stream(Vibration.Status.values())
-                        .map(Vibration.Status::getProtoEnumValue)
-                        .collect(toList()))
-                .containsNoDuplicates();
+val Kosmos.commandRegistry: CommandRegistry by
+    Kosmos.Fixture {
+        CommandRegistry(
+            context = applicationContext,
+            // Immediately run anything that comes in
+            mainExecutor = { command -> command.run() },
+        )
     }
-}

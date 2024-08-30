@@ -16,12 +16,14 @@
 
 package com.android.systemui.gesture.data
 
+import android.app.WindowConfiguration
 import android.content.ComponentName
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.navigationbar.gestural.data.respository.GestureRepositoryImpl
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -40,14 +42,36 @@ class GestureRepositoryTest : SysuiTestCase() {
     @Test
     fun addRemoveComponentToBlock_updatesBlockedComponentSet() =
         testScope.runTest {
-            val component = mock<ComponentName>()
+            val matcher = TaskMatcher.TopActivityComponent(mock<ComponentName>())
 
-            underTest.addGestureBlockedActivity(component)
-            val addedBlockedComponents by collectLastValue(underTest.gestureBlockedActivities)
-            assertThat(addedBlockedComponents).contains(component)
+            kotlin.run {
+                underTest.addGestureBlockedMatcher(matcher)
+                val blockedMatchers by collectLastValue(underTest.gestureBlockedMatchers)
+                assertThat(blockedMatchers).contains(matcher)
+            }
 
-            underTest.removeGestureBlockedActivity(component)
-            val removedBlockedComponents by collectLastValue(underTest.gestureBlockedActivities)
-            assertThat(removedBlockedComponents).isEmpty()
+            kotlin.run {
+                underTest.removeGestureBlockedMatcher(matcher)
+                val blockedMatchers by collectLastValue(underTest.gestureBlockedMatchers)
+                assertThat(blockedMatchers).doesNotContain(matcher)
+            }
+        }
+
+    @Test
+    fun addRemoveActivityTypeToBlock_updatesBlockedActivityTypesSet() =
+        testScope.runTest {
+            val matcher = TaskMatcher.TopActivityType(WindowConfiguration.ACTIVITY_TYPE_STANDARD)
+
+            kotlin.run {
+                underTest.addGestureBlockedMatcher(matcher)
+                val blockedMatchers by collectLastValue(underTest.gestureBlockedMatchers)
+                assertThat(blockedMatchers).contains(matcher)
+            }
+
+            kotlin.run {
+                underTest.removeGestureBlockedMatcher(matcher)
+                val blockedMatchers by collectLastValue(underTest.gestureBlockedMatchers)
+                assertThat(blockedMatchers).doesNotContain(matcher)
+            }
         }
 }

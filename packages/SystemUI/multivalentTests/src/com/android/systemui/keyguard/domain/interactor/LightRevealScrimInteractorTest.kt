@@ -19,18 +19,20 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.fakeLightRevealScrimRepository
+import com.android.systemui.keyguard.data.repository.DEFAULT_REVEAL_EFFECT
 import com.android.systemui.keyguard.data.repository.FakeLightRevealScrimRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -64,35 +66,45 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
 
     @Test
     fun lightRevealEffect_doesNotChangeDuringKeyguardTransition() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<LightRevealEffect>()
-            val job = underTest.lightRevealEffect.onEach(values::add).launchIn(this)
+        kosmos.testScope.runTest {
+            val values by collectValues(underTest.lightRevealEffect)
+            runCurrent()
+            assertEquals(listOf(DEFAULT_REVEAL_EFFECT), values)
 
             fakeLightRevealScrimRepository.setRevealEffect(reveal1)
-
+            runCurrent()
             // The reveal effect shouldn't emit anything until a keyguard transition starts.
-            assertEquals(values.size, 0)
+            assertEquals(listOf(DEFAULT_REVEAL_EFFECT), values)
 
             // Once it starts, it should emit reveal1.
             fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(transitionState = TransitionState.STARTED)
+                TransitionStep(to = KeyguardState.AOD, transitionState = TransitionState.STARTED)
             )
-            assertEquals(values, listOf(reveal1))
+            runCurrent()
+            assertEquals(listOf(DEFAULT_REVEAL_EFFECT, reveal1), values)
 
             // Until the next transition starts, reveal2 should not be emitted.
             fakeLightRevealScrimRepository.setRevealEffect(reveal2)
+            runCurrent()
             fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(transitionState = TransitionState.RUNNING)
+                TransitionStep(
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.RUNNING
+                )
             )
+            runCurrent()
             fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(transitionState = TransitionState.FINISHED)
+                TransitionStep(to = KeyguardState.AOD, transitionState = TransitionState.FINISHED)
             )
-            assertEquals(values, listOf(reveal1))
+            runCurrent()
+            assertEquals(listOf(DEFAULT_REVEAL_EFFECT, reveal1), values)
             fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(transitionState = TransitionState.STARTED)
+                TransitionStep(
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.STARTED
+                )
             )
-            assertEquals(values, listOf(reveal1, reveal2))
-
-            job.cancel()
+            runCurrent()
+            assertEquals(listOf(DEFAULT_REVEAL_EFFECT, reveal1, reveal2), values)
         }
 }

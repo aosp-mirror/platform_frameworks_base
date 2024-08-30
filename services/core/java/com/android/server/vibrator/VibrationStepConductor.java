@@ -32,6 +32,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.vibrator.VibrationSession.Status;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -217,7 +218,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     }
 
     /**
-     * Calculate the {@link Vibration.Status} based on the current queue state and the expected
+     * Calculate the {@link Vibration.EndInfo} based on the current queue state and the expected
      * number of {@link StartSequentialEffectStep} to be played.
      */
     @Nullable
@@ -235,10 +236,10 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         }
         // No pending steps, and something happened.
         if (mSuccessfulVibratorOnSteps > 0) {
-            return new Vibration.EndInfo(Vibration.Status.FINISHED);
+            return new Vibration.EndInfo(Status.FINISHED);
         }
         // If no step was able to turn the vibrator ON successfully.
-        return new Vibration.EndInfo(Vibration.Status.IGNORED_UNSUPPORTED);
+        return new Vibration.EndInfo(Status.IGNORED_UNSUPPORTED);
     }
 
     /**
@@ -352,7 +353,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if (DEBUG) {
             Slog.d(TAG, "Binder died, cancelling vibration...");
         }
-        notifyCancelled(new Vibration.EndInfo(Vibration.Status.CANCELLED_BINDER_DIED),
+        notifyCancelled(new Vibration.EndInfo(Status.CANCELLED_BINDER_DIED),
                 /* immediate= */ false);
     }
 
@@ -377,7 +378,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if ((cancelInfo == null) || !cancelInfo.status.name().startsWith("CANCEL")) {
             Slog.w(TAG, "Vibration cancel requested with bad signal=" + cancelInfo
                     + ", using CANCELLED_UNKNOWN_REASON to ensure cancellation.");
-            cancelInfo = new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_UNKNOWN_REASON);
+            cancelInfo = new Vibration.EndInfo(Status.CANCELLED_BY_UNKNOWN_REASON);
         }
         synchronized (mLock) {
             if ((immediate && mSignalCancelImmediate) || (mSignalCancel != null)) {

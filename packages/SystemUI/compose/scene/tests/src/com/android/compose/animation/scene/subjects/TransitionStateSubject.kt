@@ -32,8 +32,8 @@ fun assertThat(state: TransitionState): TransitionStateSubject {
     return Truth.assertAbout(TransitionStateSubject.transitionStates()).that(state)
 }
 
-/** Assert on a [TransitionState.Transition.ChangeCurrentScene]. */
-fun assertThat(transition: TransitionState.Transition.ChangeCurrentScene): SceneTransitionSubject {
+/** Assert on a [TransitionState.Transition.ChangeScene]. */
+fun assertThat(transition: TransitionState.Transition.ChangeScene): SceneTransitionSubject {
     return Truth.assertAbout(SceneTransitionSubject.sceneTransitions()).that(transition)
 }
 
@@ -74,14 +74,14 @@ private constructor(
         return actual as TransitionState.Idle
     }
 
-    fun isSceneTransition(): TransitionState.Transition.ChangeCurrentScene {
-        if (actual !is TransitionState.Transition.ChangeCurrentScene) {
+    fun isSceneTransition(): TransitionState.Transition.ChangeScene {
+        if (actual !is TransitionState.Transition.ChangeScene) {
             failWithActual(
                 simpleFact("expected to be TransitionState.Transition.ChangeCurrentScene")
             )
         }
 
-        return actual as TransitionState.Transition.ChangeCurrentScene
+        return actual as TransitionState.Transition.ChangeScene
     }
 
     fun isShowOrHideOverlayTransition(): TransitionState.Transition.ShowOrHideOverlay {
@@ -183,8 +183,8 @@ abstract class BaseTransitionSubject<T : TransitionState.Transition>(
 class SceneTransitionSubject
 private constructor(
     metadata: FailureMetadata,
-    actual: TransitionState.Transition.ChangeCurrentScene,
-) : BaseTransitionSubject<TransitionState.Transition.ChangeCurrentScene>(metadata, actual) {
+    actual: TransitionState.Transition.ChangeScene,
+) : BaseTransitionSubject<TransitionState.Transition.ChangeScene>(metadata, actual) {
     fun hasFromScene(sceneKey: SceneKey) {
         check("fromScene").that(actual.fromScene).isEqualTo(sceneKey)
     }
@@ -195,7 +195,7 @@ private constructor(
 
     companion object {
         fun sceneTransitions() =
-            Factory { metadata, actual: TransitionState.Transition.ChangeCurrentScene ->
+            Factory { metadata, actual: TransitionState.Transition.ChangeScene ->
                 SceneTransitionSubject(metadata, actual)
             }
     }

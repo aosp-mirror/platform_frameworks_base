@@ -567,16 +567,8 @@ private fun ScrollOnUpdatedLiveContentEffect(
         // Do nothing if there is no new live content
         val indexOfFirstUpdatedContent =
             newLiveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
-        if (indexOfFirstUpdatedContent < 0) {
-            return@LaunchedEffect
-        }
-
-        // Scroll if the live content is not visible
-        val lastVisibleItemIndex = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        if (lastVisibleItemIndex != null && indexOfFirstUpdatedContent > lastVisibleItemIndex) {
-            // Launching with a scope to prevent the job from being canceled in the case of a
-            // recomposition during scrolling
-            coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
+        if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
+            gridState.scrollToItem(indexOfFirstUpdatedContent)
         }
     }
 }

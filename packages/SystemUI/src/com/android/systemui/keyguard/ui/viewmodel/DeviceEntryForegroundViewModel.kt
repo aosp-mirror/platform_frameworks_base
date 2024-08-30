@@ -53,10 +53,10 @@ constructor(
 ) {
     private val isShowingAodOrDozing: Flow<Boolean> =
         combine(
-            transitionInteractor.startedKeyguardState,
+            transitionInteractor.startedKeyguardTransitionStep,
             transitionInteractor.transitionValue(KeyguardState.DOZING),
-        ) { startedKeyguardState, dozingTransitionValue ->
-            startedKeyguardState == KeyguardState.AOD || dozingTransitionValue == 1f
+        ) { startedKeyguardStep, dozingTransitionValue ->
+            startedKeyguardStep.to == KeyguardState.AOD || dozingTransitionValue == 1f
         }
 
     private fun getColor(usingBackgroundProtection: Boolean): Int {

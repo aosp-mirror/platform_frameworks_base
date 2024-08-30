@@ -10,13 +10,6 @@ flag {
 }
 
 flag {
-    name: "companion_transport_apis"
-    namespace: "companion"
-    description: "Grants access to the companion transport apis."
-    bug: "288297505"
-}
-
-flag {
     name: "association_tag"
     is_exported: true
     namespace: "companion"

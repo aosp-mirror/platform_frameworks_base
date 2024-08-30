@@ -46,6 +46,7 @@ android.util.EmptyArray
 android.util.EventLog
 android.util.FloatProperty
 android.util.FloatMath
+android.util.Half
 android.util.IndentingPrintWriter
 android.util.IntArray
 android.util.IntProperty
@@ -277,7 +278,11 @@ android.graphics.ColorSpace
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Matrix
+android.graphics.Matrix44
+android.graphics.Outline
+android.graphics.ParcelableColorSpace
 android.graphics.Path
+android.graphics.PixelFormat
 android.graphics.Point
 android.graphics.PointF
 android.graphics.Rect

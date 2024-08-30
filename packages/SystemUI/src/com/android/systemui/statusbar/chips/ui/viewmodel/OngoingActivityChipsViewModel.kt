@@ -23,6 +23,8 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.call.ui.viewmodel.CallChipViewModel
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel
+import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModel
+import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
 import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
@@ -51,6 +53,7 @@ constructor(
     shareToAppChipViewModel: ShareToAppChipViewModel,
     castToOtherDeviceChipViewModel: CastToOtherDeviceChipViewModel,
     callChipViewModel: CallChipViewModel,
+    demoRonChipViewModel: DemoRonChipViewModel,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) {
     private enum class ChipType {
@@ -58,6 +61,8 @@ constructor(
         ShareToApp,
         CastToOtherDevice,
         Call,
+        /** A demo of a RON chip (rich ongoing notification chip), used just for testing. */
+        DemoRon,
     }
 
     /** Model that helps us internally track the various chip states from each of the types. */
@@ -78,6 +83,7 @@ constructor(
             val shareToApp: OngoingActivityChipModel.Hidden,
             val castToOtherDevice: OngoingActivityChipModel.Hidden,
             val call: OngoingActivityChipModel.Hidden,
+            val demoRon: OngoingActivityChipModel.Hidden,
         ) : InternalChipModel
     }
 
@@ -87,7 +93,8 @@ constructor(
             shareToAppChipViewModel.chip,
             castToOtherDeviceChipViewModel.chip,
             callChipViewModel.chip,
-        ) { screenRecord, shareToApp, castToOtherDevice, call ->
+            demoRonChipViewModel.chip,
+        ) { screenRecord, shareToApp, castToOtherDevice, call, demoRon ->
             logger.log(
                 TAG,
                 LogLevel.INFO,
@@ -98,7 +105,15 @@ constructor(
                 },
                 { "Chips: ScreenRecord=$str1 > ShareToApp=$str2 > CastToOther=$str3..." },
             )
-            logger.log(TAG, LogLevel.INFO, { str1 = call.logName }, { "... > Call=$str1" })
+            logger.log(
+                TAG,
+                LogLevel.INFO,
+                {
+                    str1 = call.logName
+                    str2 = demoRon.logName
+                },
+                { "... > Call=$str1 > DemoRon=$str2" }
+            )
             // This `when` statement shows the priority order of the chips.
             when {
                 // Screen recording also activates the media projection APIs, so whenever the
@@ -113,17 +128,23 @@ constructor(
                     InternalChipModel.Shown(ChipType.CastToOtherDevice, castToOtherDevice)
                 call is OngoingActivityChipModel.Shown ->
                     InternalChipModel.Shown(ChipType.Call, call)
+                demoRon is OngoingActivityChipModel.Shown -> {
+                    StatusBarRonChips.assertInNewMode()
+                    InternalChipModel.Shown(ChipType.DemoRon, demoRon)
+                }
                 else -> {
                     // We should only get here if all chip types are hidden
                     check(screenRecord is OngoingActivityChipModel.Hidden)
                     check(shareToApp is OngoingActivityChipModel.Hidden)
                     check(castToOtherDevice is OngoingActivityChipModel.Hidden)
                     check(call is OngoingActivityChipModel.Hidden)
+                    check(demoRon is OngoingActivityChipModel.Hidden)
                     InternalChipModel.Hidden(
                         screenRecord = screenRecord,
                         shareToApp = shareToApp,
                         castToOtherDevice = castToOtherDevice,
                         call = call,
+                        demoRon = demoRon,
                     )
                 }
             }
@@ -154,6 +175,7 @@ constructor(
                         ChipType.ShareToApp -> new.shareToApp
                         ChipType.CastToOtherDevice -> new.castToOtherDevice
                         ChipType.Call -> new.call
+                        ChipType.DemoRon -> new.demoRon
                     }
                 } else if (new is InternalChipModel.Shown) {
                     // If we have a chip to show, always show it.
@@ -179,6 +201,7 @@ constructor(
                 shareToApp = OngoingActivityChipModel.Hidden(),
                 castToOtherDevice = OngoingActivityChipModel.Hidden(),
                 call = OngoingActivityChipModel.Hidden(),
+                demoRon = OngoingActivityChipModel.Hidden(),
             )
     }
 }
