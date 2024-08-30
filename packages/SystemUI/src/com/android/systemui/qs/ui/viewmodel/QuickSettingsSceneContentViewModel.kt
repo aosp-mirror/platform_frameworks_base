@@ -17,16 +17,24 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Models UI state needed for rendering the content of the quick settings scene.
@@ -43,7 +51,9 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     val mediaCarouselInteractor: MediaCarouselInteractor,
-) {
+    private val shadeInteractor: ShadeInteractor,
+    private val sceneInteractor: SceneInteractor,
+) : ExclusiveActivatable() {
 
     val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasAnyMediaOrRecommendation
 
@@ -54,6 +64,19 @@ constructor(
             footerActionsController.init()
         }
         return footerActionsViewModelFactory.create(lifecycleOwner)
+    }
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                shadeInteractor.shadeMode.collect { shadeMode ->
+                    if (shadeMode == ShadeMode.Split) {
+                        sceneInteractor.snapToScene(Scenes.Shade, "Unfold while on QS")
+                    }
+                }
+            }
+            awaitCancellation()
+        }
     }
 
     @AssistedFactory
