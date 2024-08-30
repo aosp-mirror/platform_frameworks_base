@@ -17,20 +17,12 @@
 package com.android.systemui.media.controls.shared
 
 import android.content.Context
-import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import com.android.systemui.Flags.mediaControlsDrawablesReuse
 import com.android.systemui.res.R
 
 object MediaControlDrawables {
 
-    // Play/Pause Button drawables.
-    private var progress: Drawable? = null
-    private var connecting: Drawable? = null
-    private var playIcon: AnimatedVectorDrawable? = null
-    private var playBackground: AnimatedVectorDrawable? = null
-    private var pauseIcon: AnimatedVectorDrawable? = null
-    private var pauseBackground: AnimatedVectorDrawable? = null
     // Prev button.
     private var prevIcon: Drawable? = null
     // Next button.
@@ -40,81 +32,6 @@ object MediaControlDrawables {
     private var antenna: Drawable? = null
     private var groupDevice: Drawable? = null
     private var homeDevices: Drawable? = null
-    // Guts drawables.
-    private var outline: Drawable? = null
-    private var solid: Drawable? = null
-
-    fun getProgress(context: Context): Drawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(com.android.internal.R.drawable.progress_small_material)
-        }
-        return progress?.mutate()
-            ?: context.getDrawable(com.android.internal.R.drawable.progress_small_material).also {
-                progress = it
-            }
-    }
-
-    fun getConnecting(context: Context): Drawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(R.drawable.ic_media_connecting_container)
-        }
-        return connecting?.mutate()
-            ?: context.getDrawable(R.drawable.ic_media_connecting_container).also {
-                connecting = it
-            }
-    }
-
-    fun getPlayIcon(context: Context): AnimatedVectorDrawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(R.drawable.ic_media_play) as AnimatedVectorDrawable?
-        }
-        return playIcon?.let {
-            it.reset()
-            it.mutate() as AnimatedVectorDrawable
-        }
-            ?: (context.getDrawable(R.drawable.ic_media_play) as AnimatedVectorDrawable?).also {
-                playIcon = it
-            }
-    }
-
-    fun getPlayBackground(context: Context): AnimatedVectorDrawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(R.drawable.ic_media_play_container)
-                as AnimatedVectorDrawable?
-        }
-        return playBackground?.let {
-            it.reset()
-            it.mutate() as AnimatedVectorDrawable
-        }
-            ?: (context.getDrawable(R.drawable.ic_media_play_container) as AnimatedVectorDrawable?)
-                .also { playBackground = it }
-    }
-
-    fun getPauseIcon(context: Context): AnimatedVectorDrawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(R.drawable.ic_media_pause) as AnimatedVectorDrawable?
-        }
-        return pauseIcon?.let {
-            it.reset()
-            it.mutate() as AnimatedVectorDrawable
-        }
-            ?: (context.getDrawable(R.drawable.ic_media_pause) as AnimatedVectorDrawable?).also {
-                pauseIcon = it
-            }
-    }
-
-    fun getPauseBackground(context: Context): AnimatedVectorDrawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(R.drawable.ic_media_pause_container)
-                as AnimatedVectorDrawable?
-        }
-        return pauseBackground?.let {
-            it.reset()
-            it.mutate() as AnimatedVectorDrawable
-        }
-            ?: (context.getDrawable(R.drawable.ic_media_pause_container) as AnimatedVectorDrawable?)
-                .also { pauseBackground = it }
-    }
 
     fun getNextIcon(context: Context): Drawable? {
         if (!mediaControlsDrawablesReuse()) {
@@ -164,20 +81,5 @@ object MediaControlDrawables {
         }
         return homeDevices
             ?: context.getDrawable(R.drawable.ic_media_home_devices).also { homeDevices = it }
-    }
-
-    fun getOutline(context: Context): Drawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(R.drawable.qs_media_outline_button)
-        }
-        return outline
-            ?: context.getDrawable(R.drawable.qs_media_outline_button).also { outline = it }
-    }
-
-    fun getSolid(context: Context): Drawable? {
-        if (!mediaControlsDrawablesReuse()) {
-            return context.getDrawable(R.drawable.qs_media_solid_button)
-        }
-        return solid ?: context.getDrawable(R.drawable.qs_media_solid_button).also { solid = it }
     }
 }
