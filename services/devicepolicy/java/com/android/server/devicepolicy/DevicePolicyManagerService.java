@@ -11844,7 +11844,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             setBackwardsCompatibleAppRestrictions(
                     caller, packageName, restrictions, caller.getUserHandle());
-        } else {
+        } else if (Flags.dmrhSetAppRestrictions()) {
             final boolean isRoleHolder;
             if (who != null) {
                 // DO or PO
@@ -11891,6 +11891,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             caller.getUserHandle());
                 });
             }
+        } else {
+            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                    || (caller.hasPackage() && isCallerDelegate(caller,
+                    DELEGATION_APP_RESTRICTIONS)));
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                mUserManager.setApplicationRestrictions(packageName, restrictions,
+                        caller.getUserHandle());
+            });
         }
 
         DevicePolicyEventLogger
@@ -13227,7 +13236,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return Bundle.EMPTY;
             }
             return policies.get(enforcingAdmin).getValue();
-        } else {
+        } else if (Flags.dmrhSetAppRestrictions()) {
             final boolean isRoleHolder;
             if (who != null) {
                 // Caller is DO or PO. They cannot call this on parent
@@ -13270,6 +13279,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     return bundle != null ? bundle : Bundle.EMPTY;
                 });
             }
+
+        } else {
+            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                    || (caller.hasPackage() && isCallerDelegate(caller,
+                    DELEGATION_APP_RESTRICTIONS)));
+            return mInjector.binderWithCleanCallingIdentity(() -> {
+                Bundle bundle = mUserManager.getApplicationRestrictions(packageName,
+                        caller.getUserHandle());
+                // if no restrictions were saved, mUserManager.getApplicationRestrictions
+                // returns null, but DPM method should return an empty Bundle as per JavaDoc
+                return bundle != null ? bundle : Bundle.EMPTY;
+            });
         }
     }
 
