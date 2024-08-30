@@ -20,9 +20,9 @@
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
-#include <GrContextOptions.h>
 #include <SkSurface.h>
 #include <android-base/unique_fd.h>
+#include <include/gpu/ganesh/GrContextOptions.h>
 #include <utils/StrongPointer.h>
 #include <vk/VulkanExtensions.h>
 #include <vulkan/vulkan.h>

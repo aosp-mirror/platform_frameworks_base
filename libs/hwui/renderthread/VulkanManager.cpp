@@ -18,19 +18,19 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <GrBackendSemaphore.h>
-#include <GrBackendSurface.h>
-#include <GrDirectContext.h>
-#include <GrTypes.h>
 #include <android/sync.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/GrBackendSemaphore.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrTypes.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <include/gpu/ganesh/vk/GrVkBackendSemaphore.h>
 #include <include/gpu/ganesh/vk/GrVkBackendSurface.h>
 #include <include/gpu/ganesh/vk/GrVkDirectContext.h>
+#include <include/gpu/ganesh/vk/GrVkTypes.h>
 #include <include/gpu/vk/VulkanBackendContext.h>
 #include <ui/FatVector.h>
-#include <vk/GrVkTypes.h>
 
 #include <sstream>
 

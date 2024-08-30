@@ -16,11 +16,10 @@
 
 #include "ATraceMemoryDump.h"
 
+#include <include/gpu/ganesh/GrDirectContext.h>
 #include <utils/Trace.h>
 
 #include <cstring>
-
-#include "GrDirectContext.h"
 
 namespace android {
 namespace uirenderer {

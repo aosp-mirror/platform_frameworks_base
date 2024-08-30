@@ -16,9 +16,12 @@
 
 #include "RecordingCanvas.h"
 
-#include <GrRecordingContext.h>
 #include <SkMesh.h>
 #include <hwui/Paint.h>
+#include <include/gpu/GpuTypes.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrRecordingContext.h>
+#include <include/gpu/ganesh/SkMeshGanesh.h>
 #include <log/log.h>
 
 #include <experimental/type_traits>
@@ -48,9 +51,6 @@
 #include "Tonemapper.h"
 #include "VectorDrawable.h"
 #include "effects/GainmapRenderer.h"
-#include "include/gpu/GpuTypes.h"  // from Skia
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/ganesh/SkMeshGanesh.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 #ifdef __ANDROID__

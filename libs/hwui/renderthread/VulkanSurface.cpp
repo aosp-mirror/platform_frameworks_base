@@ -16,12 +16,13 @@
 
 #include "VulkanSurface.h"
 
-#include <include/android/SkSurfaceAndroid.h>
-#include <GrDirectContext.h>
 #include <SkSurface.h>
+#include <gui/TraceUtils.h>
+#include <include/android/SkSurfaceAndroid.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+
 #include <algorithm>
 
-#include <gui/TraceUtils.h>
 #include "VulkanManager.h"
 #include "utils/Color.h"
 

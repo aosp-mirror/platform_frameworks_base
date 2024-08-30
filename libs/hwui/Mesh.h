@@ -17,8 +17,8 @@
 #ifndef MESH_H_
 #define MESH_H_
 
-#include <GrDirectContext.h>
 #include <SkMesh.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
 #include <include/gpu/ganesh/SkMeshGanesh.h>
 #include <jni.h>
 #include <log/log.h>

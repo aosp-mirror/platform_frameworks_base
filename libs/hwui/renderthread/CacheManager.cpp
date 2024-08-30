@@ -16,10 +16,10 @@
 
 #include "CacheManager.h"
 
-#include <GrContextOptions.h>
-#include <GrTypes.h>
 #include <SkExecutor.h>
 #include <SkGraphics.h>
+#include <include/gpu/ganesh/GrContextOptions.h>
+#include <include/gpu/ganesh/GrTypes.h>
 #include <math.h>
 #include <utils/Trace.h>
 

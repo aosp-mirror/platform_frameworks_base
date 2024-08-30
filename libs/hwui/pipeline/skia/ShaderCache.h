@@ -17,10 +17,10 @@
 #pragma once
 
 #include <FileBlobCache.h>
-#include <GrContextOptions.h>
 #include <SkRefCnt.h>
 #include <cutils/compiler.h>
 #include <ftl/shared_mutex.h>
+#include <include/gpu/ganesh/GrContextOptions.h>
 #include <utils/Mutex.h>
 
 #include <memory>

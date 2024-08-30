@@ -17,11 +17,12 @@
 #include "AutoBackendTextureRelease.h"
 
 #include <SkImage.h>
-#include <include/gpu/ganesh/SkImageGanesh.h>
-#include <include/gpu/GrDirectContext.h>
-#include <include/gpu/GrBackendSurface.h>
 #include <include/gpu/MutableTextureState.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/SkImageGanesh.h>
 #include <include/gpu/vk/VulkanMutableTextureState.h>
+
 #include "renderthread/RenderThread.h"
 #include "utils/Color.h"
 #include "utils/PaintUtils.h"

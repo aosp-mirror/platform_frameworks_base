@@ -16,17 +16,17 @@
 
 #include "LayerDrawable.h"
 
+#include <include/gpu/ganesh/GrBackendSurface.h>
+#include <include/gpu/ganesh/gl/GrGLTypes.h>
 #include <shaders/shaders.h>
 #include <utils/Color.h>
 #include <utils/MathUtils.h>
 
 #include "DeviceInfo.h"
-#include "GrBackendSurface.h"
 #include "SkColorFilter.h"
 #include "SkRuntimeEffect.h"
 #include "SkSurface.h"
 #include "Tonemapper.h"
-#include "gl/GrGLTypes.h"
 #include "math/mat4.h"
 #include "system/graphics-base-v1.0.h"
 #include "system/window.h"

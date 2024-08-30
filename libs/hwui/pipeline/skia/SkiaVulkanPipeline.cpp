@@ -16,14 +16,14 @@
 
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 
-#include <GrDirectContext.h>
-#include <GrTypes.h>
 #include <SkSurface.h>
 #include <SkTypes.h>
 #include <cutils/properties.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrTypes.h>
+#include <include/gpu/ganesh/vk/GrVkTypes.h>
 #include <strings.h>
-#include <vk/GrVkTypes.h>
 
 #include "DeferredLayerUpdater.h"
 #include "LightingInfo.h"

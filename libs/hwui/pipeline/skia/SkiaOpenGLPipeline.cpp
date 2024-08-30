@@ -16,14 +16,14 @@
 
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 
-#include <GrBackendSurface.h>
 #include <SkBlendMode.h>
 #include <SkImageInfo.h>
 #include <cutils/properties.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
-#include <include/gpu/gl/GrGLTypes.h>
+#include <include/gpu/ganesh/gl/GrGLTypes.h>
 #include <strings.h>
 
 #include "DeferredLayerUpdater.h"

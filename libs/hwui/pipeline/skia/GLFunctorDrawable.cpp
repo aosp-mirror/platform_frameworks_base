@@ -15,24 +15,26 @@
  */
 
 #include "GLFunctorDrawable.h"
-#include <GrDirectContext.h>
+
+#include <effects/GainmapRenderer.h>
+#include <include/gpu/GpuTypes.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
+#include <include/gpu/ganesh/gl/GrGLTypes.h>
 #include <private/hwui/DrawGlInfo.h>
+
 #include "FunctorDrawable.h"
-#include "GrBackendSurface.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
 #include "SkCanvas.h"
 #include "SkCanvasAndroid.h"
 #include "SkClipStack.h"
-#include "SkRect.h"
 #include "SkM44.h"
-#include <include/gpu/ganesh/SkSurfaceGanesh.h>
-#include "include/gpu/GpuTypes.h" // from Skia
-#include <include/gpu/gl/GrGLTypes.h>
-#include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
-#include "utils/GLUtils.h"
-#include <effects/GainmapRenderer.h>
+#include "SkRect.h"
 #include "renderthread/CanvasContext.h"
+#include "utils/GLUtils.h"
 
 namespace android {
 namespace uirenderer {
