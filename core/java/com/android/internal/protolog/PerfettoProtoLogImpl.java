@@ -174,19 +174,6 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         );
     }
 
-    @VisibleForTesting
-    public interface ProtoLogDataSourceBuilder {
-        /**
-         * Builder method for the DataSource the PerfettoProtoLogImpl is going to us.
-         * @param onStart The onStart callback that should be used by the created datasource.
-         * @param onFlush The onFlush callback that should be used by the created datasource.
-         * @param onStop The onStop callback that should be used by the created datasource.
-         * @return A new DataSource that uses the provided callbacks.
-         */
-        ProtoLogDataSource build(ProtoLogDataSource.Instance.TracingInstanceStartCallback onStart,
-                Runnable onFlush, ProtoLogDataSource.Instance.TracingInstanceStopCallback onStop);
-    }
-
     private PerfettoProtoLogImpl(
             @Nullable String viewerConfigFilePath,
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
