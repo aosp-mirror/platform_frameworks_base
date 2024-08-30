@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.SurfaceControl;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.util.Preconditions;
@@ -86,6 +87,11 @@ public class PipTaskListener implements ShellTaskOrganizer.TaskListener,
         }
         mPictureInPictureParams.copyOnlySet(params != null ? params
                 : new PictureInPictureParams.Builder().build());
+    }
+
+    @NonNull
+    public PictureInPictureParams getPictureInPictureParams() {
+        return mPictureInPictureParams;
     }
 
     @Override

@@ -22,6 +22,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.graphics.Rect;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
@@ -51,8 +52,10 @@ public class PipEnterExitAnimator extends ValueAnimator
 
     @NonNull private final SurfaceControl mLeash;
     private final SurfaceControl.Transaction mStartTransaction;
-    private final int mEnterAnimationDuration;
+    private final SurfaceControl.Transaction mFinishTransaction;
+    private final int mEnterExitAnimationDuration;
     private final @BOUNDS int mDirection;
+    private final @Surface.Rotation int mRotation;
 
     // optional callbacks for tracking animation start and end
     @Nullable private Runnable mAnimationStartCallback;
@@ -62,37 +65,59 @@ public class PipEnterExitAnimator extends ValueAnimator
     private final Rect mStartBounds = new Rect();
     private final Rect mEndBounds = new Rect();
 
+    @Nullable private final Rect mSourceRectHint;
+    private final Rect mSourceRectHintInsets = new Rect();
+    private final Rect mZeroInsets = new Rect(0, 0, 0, 0);
+
     // Bounds updated by the evaluator as animator is running.
     private final Rect mAnimatedRect = new Rect();
 
     private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
     private final RectEvaluator mRectEvaluator;
+    private final RectEvaluator mInsetEvaluator;
     private final PipSurfaceTransactionHelper mPipSurfaceTransactionHelper;
 
     public PipEnterExitAnimator(Context context,
             @NonNull SurfaceControl leash,
             SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction,
             @NonNull Rect baseBounds,
             @NonNull Rect startBounds,
             @NonNull Rect endBounds,
-            @BOUNDS int direction) {
+            @Nullable Rect sourceRectHint,
+            @BOUNDS int direction,
+            @Surface.Rotation int rotation) {
         mLeash = leash;
         mStartTransaction = startTransaction;
+        mFinishTransaction = finishTransaction;
         mBaseBounds.set(baseBounds);
         mStartBounds.set(startBounds);
         mAnimatedRect.set(startBounds);
         mEndBounds.set(endBounds);
         mRectEvaluator = new RectEvaluator(mAnimatedRect);
+        mInsetEvaluator = new RectEvaluator(new Rect());
         mPipSurfaceTransactionHelper = new PipSurfaceTransactionHelper(context);
         mDirection = direction;
+        mRotation = rotation;
+
+        mSourceRectHint = sourceRectHint != null ? new Rect(sourceRectHint) : null;
+        if (mSourceRectHint != null) {
+            mSourceRectHintInsets.set(
+                    mSourceRectHint.left - mBaseBounds.left,
+                    mSourceRectHint.top - mBaseBounds.top,
+                    mBaseBounds.right - mSourceRectHint.right,
+                    mBaseBounds.bottom - mSourceRectHint.bottom
+            );
+        }
 
         mSurfaceControlTransactionFactory =
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
-        mEnterAnimationDuration = context.getResources()
+        mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
 
-        setDuration(mEnterAnimationDuration);
+        setObjectValues(startBounds, endBounds);
+        setDuration(mEnterExitAnimationDuration);
         setEvaluator(mRectEvaluator);
         addListener(this);
         addUpdateListener(this);
@@ -118,6 +143,14 @@ public class PipEnterExitAnimator extends ValueAnimator
 
     @Override
     public void onAnimationEnd(@NonNull Animator animation) {
+        if (mFinishTransaction != null) {
+            // finishTransaction might override some state (eg. corner radii) so we want to
+            // manually set the state to the end of the animation
+            mPipSurfaceTransactionHelper.scaleAndCrop(mFinishTransaction, mLeash, mSourceRectHint,
+                            mBaseBounds, mAnimatedRect, getInsets(1f), isInPipDirection(), 1f)
+                    .round(mFinishTransaction, mLeash, isInPipDirection())
+                    .shadow(mFinishTransaction, mLeash, isInPipDirection());
+        }
         if (mAnimationEndCallback != null) {
             mAnimationEndCallback.run();
         }
@@ -127,17 +160,30 @@ public class PipEnterExitAnimator extends ValueAnimator
     public void onAnimationUpdate(@NonNull ValueAnimator animation) {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         final float fraction = getAnimatedFraction();
+        Rect insets = getInsets(fraction);
+
         // TODO (b/350801661): implement fixed rotation
 
-        mPipSurfaceTransactionHelper.scaleAndCrop(tx, mLeash, null,
-                mBaseBounds, mAnimatedRect, null, isInPipDirection(), fraction)
+        mPipSurfaceTransactionHelper.scaleAndCrop(tx, mLeash, mSourceRectHint,
+                mBaseBounds, mAnimatedRect, insets, isInPipDirection(), fraction)
                 .round(tx, mLeash, isInPipDirection())
                 .shadow(tx, mLeash, isInPipDirection());
         tx.apply();
     }
 
+    private Rect getInsets(float fraction) {
+        Rect startInsets = isInPipDirection() ? mZeroInsets : mSourceRectHintInsets;
+        Rect endInsets = isInPipDirection() ? mSourceRectHintInsets : mZeroInsets;
+
+        return mInsetEvaluator.evaluate(fraction, startInsets, endInsets);
+    }
+
     private boolean isInPipDirection() {
         return mDirection == BOUNDS_ENTER;
+    }
+
+    private boolean isOutPipDirection() {
+        return mDirection == BOUNDS_EXIT;
     }
 
     // no-ops
