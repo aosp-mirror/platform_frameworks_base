@@ -203,6 +203,10 @@ public class RavenwoodAwareTestRunner extends Runner implements Filterable, Orde
             // so record it and throw it when the test actually started.
             log("Fatal: Exception detected in constructor: " + th.getMessage() + "\n"
                     + Log.getStackTraceString(th));
+            if (true) {
+                // TODO(b/363094647) Remove this
+                throw th;
+            }
             mExceptionInConstructor = new RuntimeException("Exception detected in constructor",
                     th);
             mDescription = Description.createTestDescription(testClass, "Constructor");
