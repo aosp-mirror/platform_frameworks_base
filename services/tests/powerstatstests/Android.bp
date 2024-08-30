@@ -126,3 +126,23 @@ android_ravenwood_test {
     ],
     auto_gen_config: true,
 }
+
+test_module_config {
+    name: "PowerStatsTests_stats_bstatscputimesvalidationtest",
+    base: "PowerStatsTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.power.stats.BstatsCpuTimesValidationTest"],
+}
+
+test_module_config {
+    name: "PowerStatsTests_power_stats",
+    base: "PowerStatsTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.power.stats"],
+}

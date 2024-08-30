@@ -163,3 +163,25 @@ java_genrule {
         "done && " +
         "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
 }
+
+test_module_config {
+    name: "PackageManagerServiceServerTests_server_pm_Presubmit",
+    base: "PackageManagerServiceServerTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.pm."],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
+
+test_module_config {
+    name: "PackageManagerServiceServerTests_server_pm_Postsubmit",
+    base: "PackageManagerServiceServerTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.pm."],
+    include_annotations: ["android.platform.test.annotations.Postsubmit"],
+}

@@ -332,3 +332,73 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.utils"],
 }
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_android_server",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_job",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.job"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_tare",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.tare"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_backup",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.backup"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_rescuepartytest",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.RescuePartyTest"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_power",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.power"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_trust",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.trust"],
+}
