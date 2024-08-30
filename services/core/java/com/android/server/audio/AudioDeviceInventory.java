@@ -505,14 +505,17 @@ public class AudioDeviceInventory {
     @GuardedBy("mDevicesLock")
     private final ArrayMap<Integer, String> mApmConnectedDevices = new ArrayMap<>();
 
+    @GuardedBy("mDevicesLock")
     // List of preferred devices for strategies
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mPreferredDevices =
             new ArrayMap<>();
 
+    @GuardedBy("mDevicesLock")
     // List of non-default devices for strategies
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mNonDefaultDevices =
             new ArrayMap<>();
 
+    @GuardedBy("mDevicesLock")
     // List of preferred devices of capture preset
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mPreferredDevicesForCapturePreset =
             new ArrayMap<>();
@@ -747,24 +750,18 @@ public class AudioDeviceInventory {
         synchronized (mDevicesLock) {
             mAppliedStrategyRoles.clear();
             mAppliedPresetRoles.clear();
-        }
-        synchronized (mPreferredDevices) {
             mPreferredDevices.forEach((strategy, devices) -> {
                 setPreferredDevicesForStrategy(strategy, devices);
             });
-        }
-        synchronized (mNonDefaultDevices) {
             mNonDefaultDevices.forEach((strategy, devices) -> {
                 addDevicesRoleForStrategy(strategy, AudioSystem.DEVICE_ROLE_DISABLED,
                         devices, false /* internal */);
             });
-        }
-        synchronized (mPreferredDevicesForCapturePreset) {
             mPreferredDevicesForCapturePreset.forEach((capturePreset, devices) -> {
                 setDevicesRoleForCapturePreset(
                         capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
             });
-        }
+       }
     }
 
     /** only public for mocking/spying, do not call outside of AudioService */
@@ -1136,7 +1133,8 @@ public class AudioDeviceInventory {
         mmi.record();
     }
 
-    /*package*/ void onSaveSetPreferredDevices(int strategy,
+    @GuardedBy("mDevicesLock")
+    private void saveSetPreferredDevices(int strategy,
                                                @NonNull List<AudioDeviceAttributes> devices) {
         mPreferredDevices.put(strategy, devices);
         List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
@@ -1154,12 +1152,14 @@ public class AudioDeviceInventory {
         dispatchPreferredDevice(strategy, devices);
     }
 
-    /*package*/ void onSaveRemovePreferredDevices(int strategy) {
+    @GuardedBy("mDevicesLock")
+    private void saveRemovePreferredDevices(int strategy) {
         mPreferredDevices.remove(strategy);
         dispatchPreferredDevice(strategy, new ArrayList<AudioDeviceAttributes>());
     }
 
-    /*package*/ void onSaveSetDeviceAsNonDefault(int strategy,
+    @GuardedBy("mDevicesLock")
+    private void saveSetDeviceAsNonDefault(int strategy,
                                                  @NonNull AudioDeviceAttributes device) {
         List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
         if (nonDefaultDevices == null) {
@@ -1183,7 +1183,8 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onSaveRemoveDeviceAsNonDefault(int strategy,
+    @GuardedBy("mDevicesLock")
+    private void saveRemoveDeviceAsNonDefault(int strategy,
                                                     @NonNull AudioDeviceAttributes device) {
         List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
         if (nonDefaultDevices != null) {
@@ -1193,14 +1194,16 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onSaveSetPreferredDevicesForCapturePreset(
+    @GuardedBy("mDevicesLock")
+    private void saveSetPreferredDevicesForCapturePreset(
             int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
         mPreferredDevicesForCapturePreset.put(capturePreset, devices);
         dispatchDevicesRoleForCapturePreset(
                 capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
     }
 
-    /*package*/ void onSaveClearPreferredDevicesForCapturePreset(int capturePreset) {
+    @GuardedBy("mDevicesLock")
+    private void saveClearPreferredDevicesForCapturePreset(int capturePreset) {
         mPreferredDevicesForCapturePreset.remove(capturePreset);
         dispatchDevicesRoleForCapturePreset(
                 capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED,
@@ -1212,21 +1215,22 @@ public class AudioDeviceInventory {
 
     /*package*/ int setPreferredDevicesForStrategyAndSave(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
-        final int status = setPreferredDevicesForStrategy(strategy, devices);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveSetPreferredDevicesForStrategy(strategy, devices);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status = setPreferredDevicesForStrategy(strategy, devices);
+                if (status == AudioSystem.SUCCESS) {
+                    saveSetPreferredDevices(strategy, devices);
+                }
+                return status;
+            }
         }
-        return status;
     }
     // Only used for external requests coming from an API
     /*package*/ int setPreferredDevicesForStrategy(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
-        int status = AudioSystem.ERROR;
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = setDevicesRoleForStrategy(
-                    strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices, false /* internal */);
-        }
-        return status;
+
+        return setDevicesRoleForStrategy(
+                strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices, false /* internal */);
     }
     // Only used for internal requests
     /*package*/ int setPreferredDevicesForStrategyInt(int strategy,
@@ -1237,21 +1241,21 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ int removePreferredDevicesForStrategyAndSave(int strategy) {
-        final int status = removePreferredDevicesForStrategy(strategy);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveRemovePreferredDevicesForStrategy(strategy);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status = removePreferredDevicesForStrategy(strategy);
+                if (status == AudioSystem.SUCCESS) {
+                    saveRemovePreferredDevices(strategy);
+                }
+                return status;
+            }
         }
-        return status;
     }
     // Only used for external requests coming from an API
     /*package*/ int removePreferredDevicesForStrategy(int strategy) {
-        int status = AudioSystem.ERROR;
 
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = clearDevicesRoleForStrategy(
+        return clearDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_PREFERRED, false /*internal */);
-        }
-        return status;
     }
     // Only used for internal requests
     /*package*/ int removePreferredDevicesForStrategyInt(int strategy) {
@@ -1262,16 +1266,17 @@ public class AudioDeviceInventory {
     /*package*/ int setDeviceAsNonDefaultForStrategyAndSave(int strategy,
             @NonNull AudioDeviceAttributes device) {
         int status = AudioSystem.ERROR;
-
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            List<AudioDeviceAttributes> devices = new ArrayList<>();
-            devices.add(device);
-            status = addDevicesRoleForStrategy(
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                List<AudioDeviceAttributes> devices = new ArrayList<>();
+                devices.add(device);
+                status = addDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices, false /* internal */);
-        }
 
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveSetDeviceAsNonDefaultForStrategy(strategy, device);
+                if (status == AudioSystem.SUCCESS) {
+                    saveSetDeviceAsNonDefault(strategy, device);
+                }
+            }
         }
         return status;
     }
@@ -1279,16 +1284,17 @@ public class AudioDeviceInventory {
     /*package*/ int removeDeviceAsNonDefaultForStrategyAndSave(int strategy,
             @NonNull AudioDeviceAttributes device) {
         int status = AudioSystem.ERROR;
-
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            List<AudioDeviceAttributes> devices = new ArrayList<>();
-            devices.add(device);
-            status = removeDevicesRoleForStrategy(
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                List<AudioDeviceAttributes> devices = new ArrayList<>();
+                devices.add(device);
+                status = removeDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices, false /* internal */);
-        }
 
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveRemoveDeviceAsNonDefaultForStrategy(strategy, device);
+                if (status == AudioSystem.SUCCESS) {
+                    saveRemoveDeviceAsNonDefault(strategy, device);
+                }
+            }
         }
         return status;
     }
@@ -1316,41 +1322,40 @@ public class AudioDeviceInventory {
 
     /*package*/ int setPreferredDevicesForCapturePresetAndSave(
             int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
-        final int status = setPreferredDevicesForCapturePreset(capturePreset, devices);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveSetPreferredDevicesForCapturePreset(capturePreset, devices);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status = setPreferredDevicesForCapturePreset(capturePreset, devices);
+                if (status == AudioSystem.SUCCESS) {
+                    saveSetPreferredDevicesForCapturePreset(capturePreset, devices);
+                }
+                return status;
+            }
         }
-        return status;
     }
 
     // Only used for external requests coming from an API
     private int setPreferredDevicesForCapturePreset(
             int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
-        int status = AudioSystem.ERROR;
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = setDevicesRoleForCapturePreset(
+        return setDevicesRoleForCapturePreset(
                     capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
-        }
-        return status;
     }
 
     /*package*/ int clearPreferredDevicesForCapturePresetAndSave(int capturePreset) {
-        final int status  = clearPreferredDevicesForCapturePreset(capturePreset);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveClearPreferredDevicesForCapturePreset(capturePreset);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status  = clearPreferredDevicesForCapturePreset(capturePreset);
+                if (status == AudioSystem.SUCCESS) {
+                   saveClearPreferredDevicesForCapturePreset(capturePreset);
+                }
+                return status;
+            }
         }
-        return status;
     }
 
     // Only used for external requests coming from an API
     private int clearPreferredDevicesForCapturePreset(int capturePreset) {
-        int status  = AudioSystem.ERROR;
-
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = clearDevicesRoleForCapturePreset(
+        return clearDevicesRoleForCapturePreset(
                     capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED);
-        }
-        return status;
     }
 
     // Only used for internal requests
