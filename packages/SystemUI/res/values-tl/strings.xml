@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gumamit ng Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Nakakonekta"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Pag-share ng Audio"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Na-save"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"idiskonekta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"i-activate"</string>
@@ -629,7 +631,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Mga Setting"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Instant Caption"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Ibinaba sa mas ligtas na level ang volume"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Naging malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Lampas na sa ligtas na limitasyon para sa linggong ito ang volume ng headphone"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Magpatuloy sa pakikinig"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Hinaan"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellite, malakas ang koneksyon"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellite, may koneksyon"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Mga emergency na tawag o SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profile sa trabaho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Masaya para sa ilan ngunit hindi para sa lahat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Nagbibigay sa iyo ang Tuner ng System UI ng mga karagdagang paraan upang baguhin at i-customize ang user interface ng Android. Ang mga pang-eksperimentong feature na ito ay maaaring magbago, masira o mawala sa mga pagpapalabas sa hinaharap. Magpatuloy nang may pag-iingat."</string>

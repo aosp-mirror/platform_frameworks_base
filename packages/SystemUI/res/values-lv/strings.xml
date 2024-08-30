@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Izmantot Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Savienojums izveidots"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audio kopīgošana"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saglabāta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"atvienot"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivizēt"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelīts, labs savienojums"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelīts, ir pieejams savienojums"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satelīta SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Ārkārtas izsaukumi vai ārkārtas zvani"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Darba profils"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Jautri dažiem, bet ne visiem"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistēmas saskarnes regulators sniedz papildu veidus, kā mainīt un pielāgot Android lietotāja saskarni. Nākamajās versijās šīs eksperimentālās funkcijas var tikt mainītas, bojātas vai to darbība var tikt pārtraukta. Turpinot esiet uzmanīgs."</string>

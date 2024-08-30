@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Përdor Bluetooth-in"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Lidhur"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Ndarja e audios"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Ruajtur"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"shkëput"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivizo"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Sateliti. Lidhje e mirë"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Sateliti. Ofrohet lidhje"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS satelitor"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Telefonatat e urgjencës ose SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profili i punës"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Argëtim për disa, por jo për të gjithë!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit të jep mënyra shtesë për të tërhequr dhe personalizuar ndërfaqen Android të përdoruesit. Këto funksione eksperimentale mund të ndryshojnë, prishen ose zhduken në versionet e ardhshme. Vazhdo me kujdes."</string>

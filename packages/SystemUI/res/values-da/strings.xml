@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Brug Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Der er oprettet forbindelse"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Lyddeling"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gemt"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"afbryd forbindelse"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivér"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellit – god forbindelse"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellit – forbindelsen er tilgængelig"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS-meldinger via satellit"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Nødopkald eller SOS-meldinger via satellit"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Arbejdsprofil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Sjovt for nogle, men ikke for alle"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner giver dig flere muligheder for at justere og tilpasse Android-brugerfladen. Disse eksperimentelle funktioner kan ændres, gå i stykker eller forsvinde i fremtidige udgivelser. Vær forsigtig, hvis du fortsætter."</string>

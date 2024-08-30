@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Use Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Connected"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audio sharing"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saved"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"disconnect"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activate"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellite, good connection"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellite, connection available"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Emergency calls or SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work profile"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Fun for some but not for all"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner gives you extra ways to tweak and customise the Android user interface. These experimental features may change, break or disappear in future releases. Proceed with caution."</string>

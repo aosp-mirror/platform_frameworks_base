@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"බ්ලූටූත් භාවිතා කරන්න"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"සම්බන්ධිතයි"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ශ්‍රව්‍ය බෙදා ගැනීම"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"සුරැකිණි"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"විසන්ධි කරන්න"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"සක්‍රිය කරන්න"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"චන්ද්‍රිකාව, හොඳ සම්බන්ධතාවයක්"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"චන්ද්‍රිකාව, සම්බන්ධතාවය තිබේ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"චන්ද්‍රිකා SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"හදිසි ඇමතුම් හෝ SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"කාර්යාල පැතිකඩ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"සමහරක් දේවල් වලට විනෝදයි, නමුත් සියල්ලටම නොවේ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"පද්ධති UI සුසරකය ඔබට Android පරිශීලක අතුරු මුහුණත වෙනස් කිරීමට හෝ අභිරුචිකරණය කිරීමට අමතර ක්‍රම ලබා දේ. මෙම පර්යේෂණාත්මක අංග ඉදිරි නිකුත් වීම් වල වෙනස් වීමට, වැඩ නොකිරීමට, හෝ නැතිවීමට හැක. ප්‍රවේශමෙන් ඉදිරියට යන්න."</string>

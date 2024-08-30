@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"使用藍牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已連線"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"音訊分享"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已儲存"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"取消連結"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"啟用"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"衛星，連線品質良好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛星，可連線"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"緊急衛星連線"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"緊急電話或緊急求救"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"工作資料夾"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"有趣與否，見仁見智"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"系統使用者介面調整精靈可讓你透過其他方式，調整及自訂 Android 使用者介面。這些實驗性功能隨著版本更新可能會變更、損壞或消失，執行時請務必謹慎。"</string>

@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"블루투스 사용"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"연결됨"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"오디오 공유"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"저장됨"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"연결 해제"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"실행"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"위성, 연결 상태 양호"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"위성, 연결 가능"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"위성 긴급 SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"긴급 전화 또는 SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"직장 프로필"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"마음에 들지 않을 수도 있음"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"시스템 UI 튜너를 사용하면 Android 사용자 인터페이스를 변경 및 맞춤설정할 수 있습니다. 이러한 실험실 기능은 향후 출시 버전에서는 변경되거나 다운되거나 사라질 수 있습니다. 신중하게 진행하시기 바랍니다."</string>

@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Folosește Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Conectat"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Permiterea accesului la audio"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Salvat"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"deconectează"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activează"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, conexiune bună"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, conexiune disponibilă"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS prin satelit"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Apeluri de urgență sau SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil de serviciu"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Distractiv pentru unii, dar nu pentru toată lumea"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner oferă modalități suplimentare de a ajusta și a personaliza interfața de utilizare Android. Aceste funcții experimentale pot să se schimbe, să se blocheze sau să dispară din versiunile viitoare. Continuă cu prudență."</string>

@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"استخدام البلوتوث"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"متّصل"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"مشاركة الصوت"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"إلغاء الربط"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"تفعيل"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"قمر صناعي، الاتصال جيد"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"قمر صناعي، الاتصال متوفّر"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"اتصالات الطوارئ بالقمر الصناعي"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"مكالمات الطوارئ أو ميزة \"اتصالات طوارئ بالقمر الصناعي\""</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ملف العمل"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"متعة للبعض وليس للجميع"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏توفر لك أداة ضبط واجهة مستخدم النظام طرقًا إضافية لتعديل واجهة مستخدم Android وتخصيصها. ويمكن أن تطرأ تغييرات على هذه الميزات التجريبية أو يمكن أن تتعطل هذه الميزات أو تختفي في الإصدارات المستقبلية. عليك متابعة الاستخدام مع توخي الحذر."</string>

@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"„Bluetooth“ naudojimas"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Prisijungta"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Garso įrašų bendrinimas"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Išsaugota"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"atjungti"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"suaktyvinti"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Palydovas, geras ryšys"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Palydovas, pasiekiamas ryšys"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Prisijungimas prie palydovo kritiniu atveju"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Skambučiai pagalbos numeriu arba pagalbos iškvietimas kritiniu atveju"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Darbo profilis"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Smagu, bet ne visada"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemos naudotojo sąsajos derinimo priemonė suteikia papildomų galimybių pagerinti ir tinkinti „Android“ naudotojo sąsają. Šios eksperimentinės funkcijos gali pasikeisti, nutrūkti ar išnykti iš būsimų laidų. Tęskite atsargiai."</string>

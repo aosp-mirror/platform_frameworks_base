@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth\'u kullan"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Bağlandı"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Ses Paylaşımı"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Kaydedildi"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"bağlantıyı kes"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"etkinleştir"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Uydu, bağlantı güçlü"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Uydu, bağlantı mevcut"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Acil Uydu Bağlantısı"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Acil durum aramaları veya acil yardım"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"İş profili"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Bazıları için eğlenceliyken diğerleri için olmayabilir"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistem Kullanıcı Arayüzü Ayarlayıcı, Android kullanıcı arayüzünde değişiklikler yapmanız ve arayüzü özelleştirmeniz için ekstra yollar sağlar. Bu deneysel özellikler değişebilir, bozulabilir veya gelecekteki sürümlerde yer almayabilir. Dikkatli bir şekilde devam edin."</string>

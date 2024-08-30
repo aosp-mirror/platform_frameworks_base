@@ -110,7 +110,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"क्या आपको स्क्रीन रिकॉर्ड करनी है?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एक ऐप्लिकेशन की रिकॉर्डिंग करें"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"पूरी स्क्रीन रिकॉर्ड करें"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"पूरी स्क्रीन रिकॉर्ड करते समय, स्क्रीन पर दिखने वाली हर चीज़ रिकॉर्ड की जाती है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, और डिवाइस पर चल रहे ऑडियो और वीडियो को लेकर सावधानी बरतें."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"पूरी स्क्रीन रिकॉर्ड करते समय, स्क्रीन पर दिखने वाली हर चीज़ रिकॉर्ड की जाती है. इसलिए पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज,  डिवाइस पर चल रहे ऑडियो और वीडियो, और फ़ोटो जैसी चीज़ों को लेकर सावधानी बरतें."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"किसी ऐप्लिकेशन को रिकॉर्ड करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी रिकॉर्ड होता है. इसलिए, रिकॉर्ड करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"स्क्रीन रिकॉर्ड करें"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"रिकॉर्ड करने के लिए ऐप्लिकेशन चुनें"</string>
@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्लूटूथ इस्तेमाल करें"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"कनेक्ट है"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ऑडियो शेयर करने की सुविधा"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेव किया गया"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिसकनेक्ट करें"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"चालू करें"</string>
@@ -628,8 +630,8 @@
     <string name="sound_settings" msgid="8874581353127418308">"आवाज़ और वाइब्रेशन"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"सेटिंग"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"लाइव कैप्शन"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"आवाज़ को कम करके, सुरक्षित लेवल पर सेट कर दिया गया है"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफ़ोन की आवाज़ सुझाए गए समय से देर तक ज़्यादा रही"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"आवाज़ को कम करके, सुरक्षित लेवल पर सेट किया गया"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफ़ोन की आवाज़ सुझाए गए समय के बाद भी ज़्यादा रही"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"इस हफ़्ते के लिए हेडफ़ोन की आवाज़, सुझाई गई सीमा से ज़्यादा हो गई है"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"सुनना जारी रखें"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"आवाज़ कम करें"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"सैटलाइट कनेक्शन अच्छा है"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"सैटलाइट कनेक्शन उपलब्ध है"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"सैटलाइट एसओएस"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"आपातकालीन कॉल या एसओएस"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"वर्क प्रोफ़ाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"कुछ के लिए मज़ेदार लेकिन सबके लिए नहीं"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम यूज़र इंटरफ़ेस (यूआई) ट्यूनर, आपको Android यूज़र इंटरफ़ेस में सुधार लाने और उसे अपनी पसंद के हिसाब से बदलने के कुछ और तरीके देता है. प्रयोग के तौर पर इस्तेमाल हो रहीं ये सुविधाएं आगे चल कर रिलीज़ की जा सकती हैं, रोकी जा सकती हैं या दिखाई देना बंद हो सकती हैं. सावधानी से आगे बढ़ें."</string>
