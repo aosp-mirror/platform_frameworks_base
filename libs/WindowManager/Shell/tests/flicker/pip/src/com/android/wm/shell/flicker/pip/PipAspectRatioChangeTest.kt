@@ -22,7 +22,6 @@ import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.FlakyTest
 import com.android.wm.shell.flicker.pip.common.PipTransition
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -36,7 +35,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipAspectRatioChangeTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
-        transitions { pipApp.changeAspectRatio() }
+        transitions { pipApp.changeAspectRatio(wmHelper) }
     }
 
     @Presubmit
@@ -45,22 +44,6 @@ class PipAspectRatioChangeTest(flicker: LegacyFlickerTest) : PipTransition(flick
         flicker.assertLayersStart { this.visibleRegion(pipApp).isSameAspectRatio(16, 9) }
         flicker.assertLayersEnd { this.visibleRegion(pipApp).isSameAspectRatio(1, 2) }
     }
-
-    @FlakyTest(bugId = 358278071)
-    override fun hasAtMostOnePipDismissOverlayWindow() =
-        super.hasAtMostOnePipDismissOverlayWindow()
-
-    @FlakyTest(bugId = 358278071)
-    override fun statusBarLayerPositionAtStartAndEnd() =
-        super.statusBarLayerPositionAtStartAndEnd()
-
-    @FlakyTest(bugId = 358278071)
-    override fun taskBarWindowIsAlwaysVisible() =
-        super.taskBarWindowIsAlwaysVisible()
-
-    @FlakyTest(bugId = 358278071)
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
