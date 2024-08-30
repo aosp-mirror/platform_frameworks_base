@@ -16,6 +16,7 @@
 
 package com.android.systemui.authentication.domain.interactor
 
+import android.app.admin.flags.Flags
 import android.os.UserHandle
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
@@ -288,7 +289,12 @@ constructor(
     private suspend fun getWipeTarget(): WipeTarget {
         // Check which profile has the strictest policy for failed authentication attempts.
         val userToBeWiped = repository.getProfileWithMinFailedUnlockAttemptsForWipe()
-        val primaryUser = selectedUserInteractor.getMainUserId() ?: UserHandle.USER_SYSTEM
+        val primaryUser =
+            if (Flags.headlessSingleUserFixes()) {
+                selectedUserInteractor.getMainUserId() ?: UserHandle.USER_SYSTEM
+            } else {
+                UserHandle.USER_SYSTEM
+            }
         return when (userToBeWiped) {
             selectedUserInteractor.getSelectedUserId() ->
                 if (userToBeWiped == primaryUser) {

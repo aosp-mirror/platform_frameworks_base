@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.flags.Flags;
 import android.os.Bundle;
 import android.os.Parcel;
 
@@ -53,7 +54,9 @@ public final class AccountTypePolicyKey extends PolicyKey {
     @TestApi
     public AccountTypePolicyKey(@NonNull String key, @NonNull String accountType) {
         super(key);
-        PolicySizeVerifier.enforceMaxStringLength(accountType, "accountType");
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
+            PolicySizeVerifier.enforceMaxStringLength(accountType, "accountType");
+        }
         mAccountType = Objects.requireNonNull((accountType));
     }
 

@@ -1325,6 +1325,11 @@ class ActiveAdmin {
         pw.print("encryptionRequested=");
         pw.println(encryptionRequested);
 
+        if (!Flags.policyEngineMigrationV2Enabled()) {
+            pw.print("mUsbDataSignaling=");
+            pw.println(mUsbDataSignalingEnabled);
+        }
+
         pw.print("disableCallerId=");
         pw.println(disableCallerId);
 
