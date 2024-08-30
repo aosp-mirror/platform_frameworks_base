@@ -43,7 +43,9 @@ internal fun PredictiveBackHandler(
             createSwipeAnimation(
                 layoutImpl,
                 layoutImpl.coroutineScope,
-                result,
+                result.userActionCopy(
+                    transitionKey = result.transitionKey ?: TransitionKey.PredictiveBack
+                ),
                 isUpOrLeft = false,
                 // Note that the orientation does not matter here given that it's only used to
                 // compute the distance. In our case the distance is always 1f.
