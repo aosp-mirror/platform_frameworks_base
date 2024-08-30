@@ -204,6 +204,16 @@ flag {
 }
 
 flag {
+  name: "headless_device_owner_provisioning_fix_enabled"
+  namespace: "enterprise"
+  description: "Fix provisioning for single-user headless DO"
+  bug: "289515470"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "always_persist_do"
   namespace: "enterprise"
   description: "Always write device_owners2.xml so that migration flags aren't lost"

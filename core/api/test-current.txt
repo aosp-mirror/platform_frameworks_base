@@ -603,7 +603,7 @@ package android.app.admin {
     method @Deprecated public int getDeviceOwnerType(@NonNull android.content.ComponentName);
     method @Nullable public String getDevicePolicyManagementRoleHolderUpdaterPackage();
     method @NonNull public java.util.Set<java.lang.String> getDisallowedSystemApps(@NonNull android.content.ComponentName, int, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int getHeadlessDeviceOwnerMode();
+    method @FlaggedApi("android.app.admin.flags.headless_device_owner_provisioning_fix_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int getHeadlessDeviceOwnerMode();
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
     method public long getLastSecurityLogRetrievalTime();

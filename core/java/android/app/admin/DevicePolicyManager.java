@@ -56,6 +56,7 @@ import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
@@ -17825,9 +17826,13 @@ public class DevicePolicyManager {
      * @hide
      */
     @TestApi
+    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED)
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     @DeviceAdminInfo.HeadlessDeviceOwnerMode
     public int getHeadlessDeviceOwnerMode() {
+        if (!Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
+            return HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
+        }
         if (mService != null) {
             try {
                 return mService.getHeadlessDeviceOwnerMode(mContext.getPackageName());

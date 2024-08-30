@@ -17321,10 +17321,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             @Nullable ComponentName componentName, @UserIdInt int callingUserId) {
         synchronized (getLockObject()) {
             int deviceOwnerUserId = -1;
-            deviceOwnerUserId = mInjector.userManagerIsHeadlessSystemUserMode()
-                    && getHeadlessDeviceOwnerModeForDeviceAdmin(componentName, callingUserId)
-                    == HEADLESS_DEVICE_OWNER_MODE_AFFILIATED
-                    ? UserHandle.USER_SYSTEM : callingUserId;
+            if (Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
+                deviceOwnerUserId = mInjector.userManagerIsHeadlessSystemUserMode()
+                        && getHeadlessDeviceOwnerModeForDeviceAdmin(componentName, callingUserId)
+                        == HEADLESS_DEVICE_OWNER_MODE_AFFILIATED
+                        ? UserHandle.USER_SYSTEM : callingUserId;
+            } else {
+                deviceOwnerUserId = mInjector.userManagerIsHeadlessSystemUserMode()
+                        && getHeadlessDeviceOwnerModeForDeviceOwner()
+                        == HEADLESS_DEVICE_OWNER_MODE_AFFILIATED
+                        ? UserHandle.USER_SYSTEM : callingUserId;
+            }
             Slogf.i(LOG_TAG, "Calling user %d, device owner will be set on user %d",
                     callingUserId, deviceOwnerUserId);
             // hasIncompatibleAccountsOrNonAdb doesn't matter since the caller is not adb.
@@ -21952,9 +21959,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             boolean isSingleUserMode;
-            int headlessDeviceOwnerMode = getHeadlessDeviceOwnerModeForDeviceAdmin(
-                    deviceAdmin, caller.getUserId());
-            isSingleUserMode = headlessDeviceOwnerMode == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
+            if (Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
+                int headlessDeviceOwnerMode = getHeadlessDeviceOwnerModeForDeviceAdmin(
+                        deviceAdmin, caller.getUserId());
+                isSingleUserMode =
+                        headlessDeviceOwnerMode == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
+            } else {
+                isSingleUserMode =
+                        getHeadlessDeviceOwnerModeForDeviceOwner()
+                                == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
+            }
 
             if (Flags.headlessSingleMinTargetSdk()
                     && mInjector.userManagerIsHeadlessSystemUserMode()
