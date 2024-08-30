@@ -175,6 +175,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             registerOrganizer();
         }
         mBackupHelper = new BackupHelper(controller, outSavedState);
+        if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
+            // TODO(b/207070762): cleanup with legacy app transition
+            // Animation will be handled by WM Shell when Shell transition is enabled.
+            overrideSplitAnimation();
+        }
     }
 
     void scheduleBackup() {
