@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
@@ -278,7 +277,7 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         mDisplayContent.mDisplayUpdater.onDisplaySwitching(/* switching= */ true);
 
         mWmInternal.waitForAllWindowsDrawn(mScreenUnblocker,
-                /* timeout= */ Integer.MAX_VALUE, DEFAULT_DISPLAY);
+                /* timeout= */ Integer.MAX_VALUE, INVALID_DISPLAY);
         mWmInternal.waitForAllWindowsDrawn(mSecondaryScreenUnblocker,
                 /* timeout= */ Integer.MAX_VALUE, mSecondaryDisplayContent.getDisplayId());
 
@@ -308,50 +307,6 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         verify(mSecondaryScreenUnblocker).sendToTarget();
 
         // Mark start transactions as presented
-        when(mDisplayContent.mTransitionController.inTransition()).thenReturn(false);
-        captureRequestedTransition().getAllValues().forEach(
-                this::makeTransitionTransactionCompleted);
-
-        // Verify that the default screen unblocker is sent only after start transaction
-        // of the Shell transition is presented
-        verify(mScreenUnblocker).sendToTarget();
-    }
-
-    @Test
-    public void testWaitForAllWindowsDrawnForInvalidDisplay_usesTransitionToUnblock() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_WAIT_FOR_TRANSITION_ON_DISPLAY_SWITCH);
-
-        final WindowState defaultDisplayWindow = createWindow(/* parent= */ null,
-                TYPE_BASE_APPLICATION, mDisplayContent, "DefaultDisplayWindow");
-        makeWindowVisibleAndNotDrawn(defaultDisplayWindow);
-
-        mDisplayContent.mDisplayUpdater.onDisplaySwitching(/* switching= */ true);
-
-        mWmInternal.waitForAllWindowsDrawn(mScreenUnblocker,
-                /* timeout= */ Integer.MAX_VALUE, INVALID_DISPLAY);
-
-        // Perform display update
-        mUniqueId = "new_default_display_unique_id";
-        mDisplayContent.requestDisplayUpdate(mock(Runnable.class));
-
-        when(mDisplayContent.mTransitionController.inTransition()).thenReturn(true);
-
-        // Notify that transition started collecting
-        captureStartTransitionCollection().getAllValues().forEach((callback) ->
-                callback.onCollectStarted(/* deferred= */ true));
-
-        // Verify that screen is not unblocked yet
-        verify(mScreenUnblocker, never()).sendToTarget();
-
-        // Make all display windows drawn
-        defaultDisplayWindow.mWinAnimator.mDrawState = HAS_DRAWN;
-        mWm.mRoot.performSurfacePlacement();
-
-        // Verify that default display is still not unblocked yet
-        // (so it doesn't use old windows drawn path)
-        verify(mScreenUnblocker, never()).sendToTarget();
-
-        // Mark start transaction as presented
         when(mDisplayContent.mTransitionController.inTransition()).thenReturn(false);
         captureRequestedTransition().getAllValues().forEach(
                 this::makeTransitionTransactionCompleted);
