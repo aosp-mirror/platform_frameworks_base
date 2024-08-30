@@ -31,6 +31,12 @@ sealed interface AudioOutputDevice {
         override val icon: Drawable?,
     ) : AudioOutputDevice
 
+    /** Models a cast audio output device. */
+    data class Remote(
+        override val name: String,
+        override val icon: Drawable?,
+    ) : AudioOutputDevice
+
     /** Models a wired audio output device. */
     data class Wired(
         override val name: String,
@@ -51,5 +57,17 @@ sealed interface AudioOutputDevice {
 
         override val icon: Drawable
             get() = error("Unsupported for unknown device")
+    }
+
+    /**
+     * Models a state when current audio output device is not loaded yet or the system failed to
+     * load it.
+     */
+    data object Unavailable : AudioOutputDevice {
+        override val name: String
+            get() = error("Unsupported for unavailable device")
+
+        override val icon: Drawable
+            get() = error("Unsupported for unavailable device")
     }
 }

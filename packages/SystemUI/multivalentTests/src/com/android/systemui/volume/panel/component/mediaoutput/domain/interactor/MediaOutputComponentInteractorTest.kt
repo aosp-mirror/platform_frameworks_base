@@ -90,8 +90,9 @@ class MediaOutputComponentInteractorTest : SysuiTestCase() {
                 assertThat(model)
                     .isEqualTo(
                         MediaOutputComponentModel.Calling(
-                            AudioOutputDevice.BuiltIn(builtInDeviceName, testIcon),
-                            false,
+                            device = AudioOutputDevice.BuiltIn(builtInDeviceName, testIcon),
+                            isInAudioSharing = false,
+                            canOpenAudioSwitcher = false,
                         )
                     )
             }
@@ -101,6 +102,9 @@ class MediaOutputComponentInteractorTest : SysuiTestCase() {
     fun hasSession_stateIs_MediaSession() =
         with(kosmos) {
             testScope.runTest {
+                localMediaRepository.updateCurrentConnectedDevice(
+                    TestMediaDevicesFactory.builtInMediaDevice()
+                )
                 mediaControllerRepository.setActiveSessions(listOf(localMediaController))
 
                 val model by collectLastValue(underTest.mediaOutputModel.filterData())
@@ -113,6 +117,7 @@ class MediaOutputComponentInteractorTest : SysuiTestCase() {
                     assertThat(device)
                         .isEqualTo(AudioOutputDevice.BuiltIn("built_in_media", testIcon))
                     assertThat(isInAudioSharing).isFalse()
+                    assertThat(canOpenAudioSwitcher).isTrue()
                 }
             }
         }
@@ -129,8 +134,9 @@ class MediaOutputComponentInteractorTest : SysuiTestCase() {
                 assertThat(model)
                     .isEqualTo(
                         MediaOutputComponentModel.Idle(
-                            AudioOutputDevice.BuiltIn("built_in_media", testIcon),
-                            true,
+                            device = AudioOutputDevice.BuiltIn("built_in_media", testIcon),
+                            isInAudioSharing = true,
+                            canOpenAudioSwitcher = false,
                         )
                     )
             }

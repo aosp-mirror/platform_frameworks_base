@@ -74,34 +74,51 @@ constructor(
             )
 
     private val currentAudioDevice: Flow<AudioOutputDevice> =
-        audioOutputInteractor.currentAudioDevice.filter { it !is AudioOutputDevice.Unknown }
+        audioOutputInteractor.currentAudioDevice.filter { it !is AudioOutputDevice.Unavailable }
 
+    /**
+     * Model for the Media Output component in the Volume Panel. It's guaranteed to have an
+     * available device if it's loaded.
+     */
     val mediaOutputModel: StateFlow<Result<MediaOutputComponentModel>> =
-        audioModeInteractor.isOngoingCall
-            .flatMapLatest { isOngoingCall ->
-                audioSharingInteractor.isInAudioSharing.flatMapLatest { isInAudioSharing ->
-                    if (isOngoingCall) {
-                        currentAudioDevice.map {
-                            MediaOutputComponentModel.Calling(it, isInAudioSharing)
-                        }
-                    } else {
-                        combine(sessionWithPlaybackState.filterData(), currentAudioDevice) {
-                            sessionWithPlaybackState,
-                            currentAudioDevice ->
-                            if (sessionWithPlaybackState == null) {
-                                MediaOutputComponentModel.Idle(currentAudioDevice, isInAudioSharing)
-                            } else {
-                                MediaOutputComponentModel.MediaSession(
-                                    sessionWithPlaybackState.session,
-                                    sessionWithPlaybackState.isPlaybackActive,
-                                    currentAudioDevice,
-                                    isInAudioSharing,
-                                )
-                            }
+        combine(
+                audioSharingInteractor.isInAudioSharing,
+                audioModeInteractor.isOngoingCall,
+                currentAudioDevice,
+            ) { isInAudioSharing, isOngoingCall, currentAudioDevice ->
+                if (isOngoingCall) {
+                    flowOf(
+                        MediaOutputComponentModel.Calling(
+                            device = currentAudioDevice,
+                            isInAudioSharing = isInAudioSharing,
+                            canOpenAudioSwitcher = false,
+                        )
+                    )
+                } else {
+                    sessionWithPlaybackState.filterData().map { sessionWithPlaybackState ->
+                        if (sessionWithPlaybackState == null) {
+                            MediaOutputComponentModel.Idle(
+                                device = currentAudioDevice,
+                                isInAudioSharing = isInAudioSharing,
+                                canOpenAudioSwitcher =
+                                    !isInAudioSharing &&
+                                        currentAudioDevice !is AudioOutputDevice.Unknown,
+                            )
+                        } else {
+                            MediaOutputComponentModel.MediaSession(
+                                session = sessionWithPlaybackState.session,
+                                isPlaybackActive = sessionWithPlaybackState.isPlaybackActive,
+                                device = currentAudioDevice,
+                                isInAudioSharing = isInAudioSharing,
+                                canOpenAudioSwitcher =
+                                    !isInAudioSharing &&
+                                        currentAudioDevice !is AudioOutputDevice.Unknown,
+                            )
                         }
                     }
                 }
             }
+            .flatMapLatest { it }
             .wrapInResult()
             .stateIn(coroutineScope, SharingStarted.Eagerly, Result.Loading())
 }
