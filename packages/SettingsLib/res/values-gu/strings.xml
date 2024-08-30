@@ -130,7 +130,7 @@
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"સંપર્કો અને કૉલ ઇતિહાસ ઍક્સેસ કરવા દો"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"માહિતીનો ઉપયોગ કૉલની ઘોષણાઓ અને વધુ બાબતો માટે કરવામાં આવશે"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ઇન્ટરનેટ કનેક્શન શેરિંગ"</string>
-    <string name="bluetooth_profile_map" msgid="8907204701162107271">"ટેક્સ્ટ સંદેશા"</string>
+    <string name="bluetooth_profile_map" msgid="8907204701162107271">"ટેક્સ્ટ મેસેજ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"સિમ ઍક્સેસ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ઑડિયો: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ઑડિયો"</string>
