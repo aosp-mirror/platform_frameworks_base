@@ -1308,8 +1308,10 @@ public class NotificationStackScrollLayout
     }
 
     private void updateAlgorithmLayoutMinHeight() {
-        mAmbientState.setLayoutMinHeight(mQsFullScreen || isHeadsUpTransition()
-                ? getLayoutMinHeightInternal() : 0);
+        if (!SceneContainerFlag.isEnabled()) {
+            mAmbientState.setLayoutMinHeight(mQsFullScreen || isHeadsUpTransition()
+                    ? getLayoutMinHeightInternal() : 0);
+        }
     }
 
     /**
@@ -2795,6 +2797,7 @@ public class NotificationStackScrollLayout
     }
 
     private int getLayoutMinHeightInternal() {
+        SceneContainerFlag.assertInLegacyMode();
         if (isHeadsUpTransition()) {
             ExpandableNotificationRow trackedHeadsUpRow = mAmbientState.getTrackedHeadsUpRow();
             if (trackedHeadsUpRow.isAboveShelf()) {
