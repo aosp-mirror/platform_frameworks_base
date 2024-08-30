@@ -36,4 +36,17 @@ object Overlays {
      * side-by-side in their own columns).
      */
     @JvmField val NotificationsShade = OverlayKey("notifications_shade")
+
+    /**
+     * The quick settings shade overlay shows the quick settings tiles UI.
+     *
+     * It's used only in the dual shade configuration, where there are two separate shades: one for
+     * quick settings (this overlay) and another for [NotificationsShade].
+     *
+     * It's not used in the single/accordion configuration (swipe down once to reveal the shade,
+     * swipe down again the to expand quick settings) or in the "split" shade configuration (on
+     * large screens or unfolded foldables, where notifications and quick settings are shown
+     * side-by-side in their own columns).
+     */
+    @JvmField val QuickSettingsShade = OverlayKey("quick_settings_shade")
 }
