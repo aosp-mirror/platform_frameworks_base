@@ -25,6 +25,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.ui.viewmodel.notificationShadeWindowModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.phone.screenOffAnimationController
@@ -39,6 +40,7 @@ val Kosmos.keyguardRootViewModel by Fixture {
         communalInteractor = communalInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         notificationsKeyguardInteractor = notificationsKeyguardInteractor,
+        notificationShadeWindowModel = notificationShadeWindowModel,
         alternateBouncerToAodTransitionViewModel = alternateBouncerToAodTransitionViewModel,
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
         alternateBouncerToLockscreenTransitionViewModel =
