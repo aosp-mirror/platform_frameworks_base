@@ -17,6 +17,7 @@
 #define LOG_TAG "NativeLibraryHelper"
 //#define LOG_NDEBUG 0
 
+#include <android-base/properties.h>
 #include <androidfw/ApkParsing.h>
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
@@ -36,6 +37,7 @@
 #include <zlib.h>
 
 #include <memory>
+#include <string>
 
 #include "com_android_internal_content_FileSystemUtils.h"
 #include "core_jni_helpers.h"
@@ -125,72 +127,10 @@ sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char
     return INSTALL_SUCCEEDED;
 }
 
-/*
- * Copy the native library if needed.
- *
- * This function assumes the library and path names passed in are considered safe.
- */
-static install_status_t
-copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
-{
-    static const size_t kPageSize = getpagesize();
-    void** args = reinterpret_cast<void**>(arg);
-    jstring* javaNativeLibPath = (jstring*) args[0];
-    jboolean extractNativeLibs = *(jboolean*) args[1];
-    jboolean debuggable = *(jboolean*) args[2];
-
-    ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
-
-    uint32_t uncompLen;
-    uint32_t when;
-    uint32_t crc;
-
-    uint16_t method;
-    off64_t offset;
-    uint16_t extraFieldLength;
-    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, nullptr, &offset, &when, &crc,
-                               &extraFieldLength)) {
-        ALOGE("Couldn't read zip entry info\n");
-        return INSTALL_FAILED_INVALID_APK;
-    }
-
-    // Always extract wrap.sh for debuggable, even if extractNativeLibs=false. This makes it
-    // easier to use wrap.sh because it only works when it is extracted, see
-    // frameworks/base/services/core/java/com/android/server/am/ProcessList.java.
-    bool forceExtractCurrentFile = debuggable && strcmp(fileName, "wrap.sh") == 0;
-
-    if (!extractNativeLibs && !forceExtractCurrentFile) {
-        // check if library is uncompressed and page-aligned
-        if (method != ZipFileRO::kCompressStored) {
-            ALOGE("Library '%s' is compressed - will not be able to open it directly from apk.\n",
-                fileName);
-            return INSTALL_FAILED_INVALID_APK;
-        }
-
-        if (offset % kPageSize != 0) {
-            ALOGE("Library '%s' is not PAGE(%zu)-aligned - will not be able to open it directly "
-                  "from apk.\n", fileName, kPageSize);
-            return INSTALL_FAILED_INVALID_APK;
-        }
-
-#ifdef ENABLE_PUNCH_HOLES
-        // if library is uncompressed, punch hole in it in place
-        if (!punchHolesInElf64(zipFile->getZipFileName(), offset)) {
-            ALOGW("Failed to punch uncompressed elf file :%s inside apk : %s at offset: "
-                  "%" PRIu64 "",
-                  fileName, zipFile->getZipFileName(), offset);
-        }
-
-        // if extra field for this zip file is present with some length, possibility is that it is
-        // padding added for zip alignment. Punch holes there too.
-        if (!punchHolesInZip(zipFile->getZipFileName(), offset, extraFieldLength)) {
-            ALOGW("Failed to punch apk : %s at extra field", zipFile->getZipFileName());
-        }
-#endif // ENABLE_PUNCH_HOLES
-
-        return INSTALL_SUCCEEDED;
-    }
-
+static install_status_t extractNativeLibFromApk(ZipFileRO* zipFile, ZipEntryRO zipEntry,
+                                                const char* fileName,
+                                                const std::string nativeLibPath, uint32_t when,
+                                                uint32_t uncompLen, uint32_t crc) {
     // Build local file path
     const size_t fileNameLen = strlen(fileName);
     char localFileName[nativeLibPath.size() + fileNameLen + 2];
@@ -310,6 +250,88 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     ALOGV("Successfully moved %s to %s\n", localTmpFileName, localFileName);
 
     return INSTALL_SUCCEEDED;
+}
+
+/*
+ * Copy the native library if needed.
+ *
+ * This function assumes the library and path names passed in are considered safe.
+ */
+static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zipFile,
+                                          ZipEntryRO zipEntry, const char* fileName) {
+    static const size_t kPageSize = getpagesize();
+    void** args = reinterpret_cast<void**>(arg);
+    jstring* javaNativeLibPath = (jstring*)args[0];
+    jboolean extractNativeLibs = *(jboolean*)args[1];
+    jboolean debuggable = *(jboolean*)args[2];
+    jboolean app_compat_16kb = *(jboolean*)args[3];
+    install_status_t ret = INSTALL_SUCCEEDED;
+
+    ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
+
+    uint32_t uncompLen;
+    uint32_t when;
+    uint32_t crc;
+
+    uint16_t method;
+    off64_t offset;
+    uint16_t extraFieldLength;
+    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, nullptr, &offset, &when, &crc,
+                               &extraFieldLength)) {
+        ALOGE("Couldn't read zip entry info\n");
+        return INSTALL_FAILED_INVALID_APK;
+    }
+
+    // Always extract wrap.sh for debuggable, even if extractNativeLibs=false. This makes it
+    // easier to use wrap.sh because it only works when it is extracted, see
+    // frameworks/base/services/core/java/com/android/server/am/ProcessList.java.
+    bool forceExtractCurrentFile = debuggable && strcmp(fileName, "wrap.sh") == 0;
+
+    if (!extractNativeLibs && !forceExtractCurrentFile) {
+        // check if library is uncompressed and page-aligned
+        if (method != ZipFileRO::kCompressStored) {
+            ALOGE("Library '%s' is compressed - will not be able to open it directly from apk.\n",
+                  fileName);
+            return INSTALL_FAILED_INVALID_APK;
+        }
+
+        if (offset % kPageSize != 0) {
+            // If the library is zip-aligned correctly for 4kb devices and app compat is
+            // enabled, on 16kb devices fallback to extraction
+            if (offset % 0x1000 == 0 && app_compat_16kb) {
+                ALOGI("16kB AppCompat: Library '%s' is not PAGE(%zu)-aligned - falling back to "
+                      "extraction from apk\n",
+                      fileName, kPageSize);
+                return extractNativeLibFromApk(zipFile, zipEntry, fileName, nativeLibPath.c_str(),
+                                               when, uncompLen, crc);
+            }
+
+            ALOGE("Library '%s' is not PAGE(%zu)-aligned - will not be able to open it directly "
+                  "from apk.\n",
+                  fileName, kPageSize);
+            return INSTALL_FAILED_INVALID_APK;
+        }
+
+#ifdef ENABLE_PUNCH_HOLES
+        // if library is uncompressed, punch hole in it in place
+        if (!punchHolesInElf64(zipFile->getZipFileName(), offset)) {
+            ALOGW("Failed to punch uncompressed elf file :%s inside apk : %s at offset: "
+                  "%" PRIu64 "",
+                  fileName, zipFile->getZipFileName(), offset);
+        }
+
+        // if extra field for this zip file is present with some length, possibility is that it is
+        // padding added for zip alignment. Punch holes there too.
+        if (!punchHolesInZip(zipFile->getZipFileName(), offset, extraFieldLength)) {
+            ALOGW("Failed to punch apk : %s at extra field", zipFile->getZipFileName());
+        }
+#endif // ENABLE_PUNCH_HOLES
+
+        return INSTALL_SUCCEEDED;
+    }
+
+    return extractNativeLibFromApk(zipFile, zipEntry, fileName, nativeLibPath.c_str(), when,
+                                   uncompLen, crc);
 }
 
 /*
@@ -498,12 +520,24 @@ static int findSupportedAbi(JNIEnv* env, jlong apkHandle, jobjectArray supported
     return status;
 }
 
+static inline bool app_compat_16kb_enabled() {
+    static const size_t kPageSize = getpagesize();
+
+    // App compat is only applicable on 16kb-page-size devices.
+    if (kPageSize != 0x4000) {
+        return false;
+    }
+
+    return android::base::GetBoolProperty("bionic.linker.16kb.app_compat.enabled", false);
+}
+
 static jint
 com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
         jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
         jboolean extractNativeLibs, jboolean debuggable)
 {
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable };
+    jboolean app_compat_16kb = app_compat_16kb_enabled();
+    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &debuggable, &app_compat_16kb };
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi, debuggable,
             copyFileIfChanged, reinterpret_cast<void*>(args));
 }
