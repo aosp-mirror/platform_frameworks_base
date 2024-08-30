@@ -60,6 +60,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
@@ -3372,8 +3373,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // TODO(b/261957226): centralise this logic in DPM
     boolean isPackageDeviceAdmin(String packageName, int userId) {
         final IDevicePolicyManager dpm = getDevicePolicyManager();
+        final DevicePolicyManagerInternal dpmi =
+                mInjector.getLocalService(DevicePolicyManagerInternal.class);
         try {
-            if (dpm != null) {
+            if (dpm != null && dpmi != null) {
                 final ComponentName deviceOwnerComponentName = dpm.getDeviceOwnerComponent(
                         /* callingUserOnly =*/ false);
                 final String deviceOwnerPackageName = deviceOwnerComponentName == null ? null
@@ -3396,7 +3399,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     if (dpm.packageHasActiveAdmins(packageName, users[i])) {
                         return true;
                     }
-                    if (isDeviceManagementRoleHolder(packageName, users[i])) {
+                    if (isDeviceManagementRoleHolder(packageName, users[i])
+                            && dpmi.isUserOrganizationManaged(users[i])) {
                         return true;
                     }
                 }
