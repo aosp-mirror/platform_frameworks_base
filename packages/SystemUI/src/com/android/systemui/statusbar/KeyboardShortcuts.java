@@ -386,6 +386,7 @@ public final class KeyboardShortcuts {
             @Override
             public void onKeyboardShortcutsReceived(
                     final List<KeyboardShortcutGroup> result) {
+                sanitiseShortcuts(result);
                 result.add(getSystemShortcuts());
                 final KeyboardShortcutGroup appShortcuts = getDefaultApplicationShortcuts();
                 if (appShortcuts != null) {
@@ -394,6 +395,14 @@ public final class KeyboardShortcuts {
                 showKeyboardShortcutsDialog(result);
             }
         }, deviceId);
+    }
+
+    static void sanitiseShortcuts(List<KeyboardShortcutGroup> shortcutGroups) {
+        for (KeyboardShortcutGroup group : shortcutGroups) {
+            for (KeyboardShortcutInfo info : group.getItems()) {
+                info.clearIcon();
+            }
+        }
     }
 
     private void dismissKeyboardShortcuts() {
