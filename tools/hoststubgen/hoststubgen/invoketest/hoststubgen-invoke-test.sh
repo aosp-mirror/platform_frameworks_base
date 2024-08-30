@@ -213,9 +213,9 @@ com.unsupported.*
 "
 
 run_hoststubgen_for_failure "One specific class disallowed" \
-    "TinyFrameworkClassAnnotations is not allowed to have Ravenwood annotations" \
+    "TinyFrameworkAnnotations is not allowed to have Ravenwood annotations" \
     "
-!com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnotations
+!com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
 * # All other classes allowed
 "
 

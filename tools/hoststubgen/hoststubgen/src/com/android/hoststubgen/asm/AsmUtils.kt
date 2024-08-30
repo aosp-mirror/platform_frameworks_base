@@ -202,18 +202,6 @@ fun isAnonymousInnerClass(cn: ClassNode): Boolean {
 }
 
 /**
- * Take a class name. If it's a nested class, then return the name of its direct outer class name.
- * Otherwise, return null.
- */
-fun getDirectOuterClassName(className: String): String? {
-    val pos = className.lastIndexOf('$')
-    if (pos < 0) {
-        return null
-    }
-    return className.substring(0, pos)
-}
-
-/**
  * Write bytecode to push all the method arguments to the stack.
  * The number of arguments and their type are taken from [methodDescriptor].
  */

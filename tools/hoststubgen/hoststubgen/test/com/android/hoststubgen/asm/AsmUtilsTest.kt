@@ -23,18 +23,6 @@ import org.objectweb.asm.Opcodes.ACC_PUBLIC
 import org.objectweb.asm.Opcodes.ACC_STATIC
 
 class AsmUtilsTest {
-    private fun checkGetDirectOuterClassName(input: String, expected: String?) {
-        assertThat(getDirectOuterClassName(input)).isEqualTo(expected)
-    }
-
-    @Test
-    fun testGetDirectOuterClassName() {
-        checkGetDirectOuterClassName("a", null)
-        checkGetDirectOuterClassName("a\$x", "a")
-        checkGetDirectOuterClassName("a.b.c\$x", "a.b.c")
-        checkGetDirectOuterClassName("a.b.c\$x\$y", "a.b.c\$x")
-    }
-
     @Test
     fun testVisibility() {
         fun test(access: Int, expected: Visibility) {

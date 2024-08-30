@@ -15,33 +15,46 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
+import android.hosttest.annotation.HostSideTestClassLoadHook;
+import android.hosttest.annotation.HostSideTestKeep;
+import android.hosttest.annotation.HostSideTestRemove;
 import android.hosttest.annotation.HostSideTestStub;
 import android.hosttest.annotation.HostSideTestSubstitute;
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestThrow;
 
-@HostSideTestWholeClassStub
-public class TinyFrameworkClassClassWideAnnotations {
-    public TinyFrameworkClassClassWideAnnotations() {
+/**
+ * Test without class-wide annotations.
+ */
+@HostSideTestStub
+@HostSideTestClassLoadHook(
+        "com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded")
+public class TinyFrameworkAnnotations {
+    @HostSideTestStub
+    public TinyFrameworkAnnotations() {
     }
 
+    @HostSideTestStub
     public int stub = 1;
 
+    @HostSideTestKeep
     public int keep = 2;
 
-    // Cannot have an initial value, because otherwise .ctor will fail to set it at runtime.
+    // Members will be deleted by default.
+    // Deleted fields cannot have an initial value, because otherwise .ctor will fail to set it at
+    // runtime.
     public int remove;
 
-    // @Stub
+    @HostSideTestStub
     public int addOne(int value) {
         return addOneInner(value);
     }
 
-    // @Keep
+    @HostSideTestKeep
     public int addOneInner(int value) {
         return value + 1;
     }
 
-    // @Remove
+    @HostSideTestRemove // Explicitly remove
     public void toBeRemoved(String foo) {
         throw new RuntimeException();
     }
@@ -60,14 +73,17 @@ public class TinyFrameworkClassClassWideAnnotations {
     @HostSideTestSubstitute(suffix = "_host")
     public static native int nativeAddThree(int value);
 
-    public static int nativeAddThree_host(int value) {
+    // This method is private, but at runtime, it'll inherit the visibility of the original method
+    private static int nativeAddThree_host(int value) {
         return value + 3;
     }
 
+    @HostSideTestThrow
     public String unsupportedMethod() {
         return "This value shouldn't be seen on the host side.";
     }
 
+    @HostSideTestStub
     public String visibleButUsesUnsupportedMethod() {
         return unsupportedMethod();
     }

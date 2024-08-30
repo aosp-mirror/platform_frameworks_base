@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.android.hoststubgen.test.tinyframework.R.Nested;
-import com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses.SubClass;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,42 +84,6 @@ public class TinyFrameworkClassTest {
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("not yet supported");
         tfc.visibleButUsesUnsupportedMethod();
-    }
-
-    @Test
-    public void testNestedClass1() {
-        assertThat(new TinyFrameworkNestedClasses().mSupplier.get()).isEqualTo(1);
-    }
-
-    @Test
-    public void testNestedClass2() {
-        assertThat(TinyFrameworkNestedClasses.sSupplier.get()).isEqualTo(2);
-    }
-
-    @Test
-    public void testNestedClass3() {
-        assertThat(new TinyFrameworkNestedClasses().getSupplier().get()).isEqualTo(3);
-    }
-
-    @Test
-    public void testNestedClass4() {
-        assertThat(TinyFrameworkNestedClasses.getSupplier_static().get()).isEqualTo(4);
-    }
-
-    @Test
-    public void testNestedClass5() {
-        assertThat((new TinyFrameworkNestedClasses()).new InnerClass().value).isEqualTo(5);
-    }
-
-    @Test
-    public void testNestedClass6() {
-        assertThat(new TinyFrameworkNestedClasses.StaticNestedClass().value).isEqualTo(6);
-    }
-
-    @Test
-    public void testNestedClass7() {
-        assertThat(TinyFrameworkNestedClasses.StaticNestedClass.getSupplier_static().get())
-                .isEqualTo(7);
     }
 
     @Test
@@ -220,18 +183,13 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
-    public void testMethodCallBeforeSuperCall() {
-        assertThat(new SubClass(3).value).isEqualTo(3);
-    }
-
-    @Test
     public void testClassLoadHook() {
         assertThat(TinyFrameworkClassWithInitializerStub.sInitialized).isTrue();
 
         // Having this line before assertThat() will ensure these class are already loaded.
         var classes = new Class[]{
                 TinyFrameworkClassWithInitializerStub.class,
-                TinyFrameworkClassAnnotations.class,
+                TinyFrameworkAnnotations.class,
                 TinyFrameworkForTextPolicy.class,
         };
 
