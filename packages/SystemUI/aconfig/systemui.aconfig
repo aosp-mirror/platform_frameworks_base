@@ -606,16 +606,6 @@ flag {
 }
 
 flag {
-    name: "screenshot_private_profile_behavior_fix"
-    namespace: "systemui"
-    description: "Private profile support for screenshots"
-    bug: "327613051"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "screenshot_save_image_exporter"
     namespace: "systemui"
     description: "Save all screenshots using ImageExporter"
