@@ -5156,6 +5156,7 @@ public class NotificationStackScrollLayout
     }
 
     public void setQsExpansionFraction(float qsExpansionFraction) {
+        SceneContainerFlag.assertInLegacyMode();
         boolean footerAffected = mQsExpansionFraction != qsExpansionFraction
                 && (mQsExpansionFraction == 1 || qsExpansionFraction == 1);
         mQsExpansionFraction = qsExpansionFraction;
