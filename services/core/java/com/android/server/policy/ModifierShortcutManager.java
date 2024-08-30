@@ -17,7 +17,9 @@
 package com.android.server.policy;
 
 import static com.android.server.flags.Flags.modifierShortcutManagerMultiuser;
+import static com.android.hardware.input.Flags.modifierShortcutManagerRefactor;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.role.RoleManager;
@@ -37,6 +39,7 @@ import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.KeyCharacterMap;
@@ -81,8 +84,8 @@ public class ModifierShortcutManager {
     private static final String ATTRIBUTE_SHIFT = "shift";
     private static final String ATTRIBUTE_ROLE = "role";
 
-    private final SparseArray<Intent> mIntentShortcuts = new SparseArray<>();
-    private final SparseArray<Intent> mShiftShortcuts = new SparseArray<>();
+    private final SparseArray<Intent> mCategoryShortcuts = new SparseArray<>();
+    private final SparseArray<Intent> mShiftCategoryShortcuts = new SparseArray<>();
     private final SparseArray<String> mRoleShortcuts = new SparseArray<String>();
     private final SparseArray<String> mShiftRoleShortcuts = new SparseArray<String>();
     private final Map<String, Intent> mRoleIntents = new HashMap<String, Intent>();
@@ -127,6 +130,7 @@ public class ModifierShortcutManager {
     private boolean mSearchKeyShortcutPending = false;
     private boolean mConsumeSearchKeyUp = true;
     private UserHandle mCurrentUser;
+    private final Map<Pair<Character, Boolean>, Bookmark> mBookmarks = new HashMap<>();
 
     ModifierShortcutManager(Context context, Handler handler, UserHandle currentUser) {
         mContext = context;
@@ -134,7 +138,14 @@ public class ModifierShortcutManager {
         RoleManager rm = mContext.getSystemService(RoleManager.class);
         rm.addOnRoleHoldersChangedListenerAsUser(mContext.getMainExecutor(),
                 (String roleName, UserHandle user) -> {
-                    mRoleIntents.remove(roleName);
+                    if (modifierShortcutManagerRefactor()) {
+                        mBookmarks.values().stream().filter(b ->
+                                b instanceof RoleBookmark
+                                && ((RoleBookmark) b).getRole().equals(roleName))
+                                .forEach(Bookmark::clearIntent);
+                    } else {
+                        mRoleIntents.remove(roleName);
+                    }
                 }, UserHandle.ALL);
         mCurrentUser = currentUser;
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
@@ -146,8 +157,26 @@ public class ModifierShortcutManager {
 
         // Role based shortcuts may resolve to different apps for different users
         // so clear the cache.
-        mRoleIntents.clear();
-        mComponentIntents.clear();
+        clearRoleIntents();
+        clearComponentIntents();
+    }
+
+    void clearRoleIntents() {
+        if (modifierShortcutManagerRefactor()) {
+            mBookmarks.values().stream().filter(b ->
+                    b instanceof RoleBookmark).forEach(Bookmark::clearIntent);
+        } else {
+            mRoleIntents.clear();
+        }
+    }
+
+    void clearComponentIntents() {
+        if (modifierShortcutManagerRefactor()) {
+            mBookmarks.values().stream().filter(b ->
+                    b instanceof ComponentBookmark).forEach(Bookmark::clearIntent);
+        } else {
+            mComponentIntents.clear();
+        }
     }
 
     /**
@@ -176,77 +205,111 @@ public class ModifierShortcutManager {
 
         Intent shortcutIntent = null;
 
-        // If the Shift key is pressed, then search for the shift shortcuts.
-        SparseArray<Intent> shortcutMap = isShiftOn ? mShiftShortcuts : mIntentShortcuts;
-
         // First try the exact keycode (with modifiers).
         int shortcutChar = kcm.get(keyCode, metaState);
         if (shortcutChar == 0) {
             return null;
         }
-        shortcutIntent = shortcutMap.get(shortcutChar);
 
-        if (shortcutIntent == null) {
-            // Next try the primary character on that key.
-            shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
-            if (shortcutChar == 0) {
-                return null;
+        if (modifierShortcutManagerRefactor()) {
+            Bookmark bookmark = mBookmarks.get(new Pair<>((char) shortcutChar, isShiftOn));
+            if (bookmark == null) {
+                // Next try the primary character on that key.
+                shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
+                if (shortcutChar == 0) {
+                    return null;
+                }
+                bookmark = mBookmarks.get(new Pair<>((char) shortcutChar, isShiftOn));
             }
+
+            if (bookmark != null) {
+                Context context = modifierShortcutManagerMultiuser()
+                        ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
+                shortcutIntent = bookmark.getIntent(context);
+            } else {
+                Log.d(TAG, "No bookmark found for "
+                        + (isShiftOn ? "SHIFT+" : "") + (char) shortcutChar);
+            }
+        } else {
+            // If the Shift key is pressed, then search for the shift shortcuts.
+            SparseArray<Intent> shortcutMap = isShiftOn
+                    ? mShiftCategoryShortcuts : mCategoryShortcuts;
             shortcutIntent = shortcutMap.get(shortcutChar);
-        }
 
-        if (shortcutIntent == null) {
-            // Next check for role based shortcut with primary character.
-            String role = isShiftOn ? mShiftRoleShortcuts.get(shortcutChar)
-                    : mRoleShortcuts.get(shortcutChar);
-            if (role != null) {
-                shortcutIntent = getRoleLaunchIntent(role);
-            }
-        }
-
-        if (modifierShortcutManagerMultiuser()) {
             if (shortcutIntent == null) {
-                // Next check component based shortcuts with primary character.
-                ComponentName component = isShiftOn
-                        ? mShiftComponentShortcuts.get(shortcutChar)
-                        : mComponentShortcuts.get(shortcutChar);
-                if (component != null) {
-                    shortcutIntent = resolveComponentNameIntent(component);
+                // Next try the primary character on that key.
+                shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
+                if (shortcutChar == 0) {
+                    return null;
+                }
+                shortcutIntent = shortcutMap.get(shortcutChar);
+            }
+
+            if (shortcutIntent == null) {
+                // Next check for role based shortcut with primary character.
+                String role = isShiftOn ? mShiftRoleShortcuts.get(shortcutChar)
+                        : mRoleShortcuts.get(shortcutChar);
+                if (role != null) {
+                    shortcutIntent = getRoleLaunchIntent(role);
+                }
+            }
+
+            if (modifierShortcutManagerMultiuser()) {
+                if (shortcutIntent == null) {
+                    // Next check component based shortcuts with primary character.
+                    ComponentName component = isShiftOn
+                            ? mShiftComponentShortcuts.get(shortcutChar)
+                            : mComponentShortcuts.get(shortcutChar);
+                    if (component != null) {
+                        shortcutIntent = resolveComponentNameIntent(component);
+                    }
                 }
             }
         }
         return shortcutIntent;
     }
 
+    @Nullable
+    private static Intent getRoleLaunchIntent(Context context, String role) {
+        Intent intent = null;
+        RoleManager rm = context.getSystemService(RoleManager.class);
+        PackageManager pm = context.getPackageManager();
+        if (rm.isRoleAvailable(role)) {
+            String rolePackage = rm.getDefaultApplication(role);
+            if (rolePackage != null) {
+                intent = pm.getLaunchIntentForPackage(rolePackage);
+                if (intent != null) {
+                    intent.putExtra(EXTRA_ROLE, role);
+
+                } else {
+                    Log.w(TAG, "No launch intent for role " + role);
+                }
+            } else {
+                Log.w(TAG, "No default application for role "
+                        + role + " user=" + context.getUser());
+            }
+        } else {
+            Log.w(TAG, "Role " + role + " is not available.");
+        }
+        return intent;
+    }
+
+    @Nullable
     private Intent getRoleLaunchIntent(String role) {
         Intent intent = mRoleIntents.get(role);
         if (intent == null) {
             Context context = modifierShortcutManagerMultiuser()
                     ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
-            RoleManager rm = context.getSystemService(RoleManager.class);
-            PackageManager pm = context.getPackageManager();
-            if (rm.isRoleAvailable(role)) {
-                String rolePackage = rm.getDefaultApplication(role);
-                if (rolePackage != null) {
-                    intent = pm.getLaunchIntentForPackage(rolePackage);
-                    if (intent != null) {
-                        intent.putExtra(EXTRA_ROLE, role);
-                        mRoleIntents.put(role, intent);
-                    } else {
-                        Log.w(TAG, "No launch intent for role " + role);
-                    }
-                } else {
-                    Log.w(TAG, "No default application for role " + role);
-                }
-            } else {
-                Log.w(TAG, "Role " + role + " is not available.");
+            intent = getRoleLaunchIntent(context, role);
+            if (intent != null) {
+                mRoleIntents.put(role, intent);
             }
         }
+
         return intent;
     }
 
     private void loadShortcuts() {
-
         try {
             XmlResourceParser parser = mContext.getResources().getXml(R.xml.bookmarks);
             XmlUtils.beginDocument(parser, TAG_BOOKMARKS);
@@ -276,57 +339,84 @@ public class ModifierShortcutManager {
                     continue;
                 }
 
-                final int shortcutChar = shortcutName.charAt(0);
                 final boolean isShiftShortcut = (shiftName != null && shiftName.equals("true"));
-                final Intent intent;
-                if (packageName != null && className != null) {
-                    if (roleName != null || categoryName != null) {
-                        Log.w(TAG, "Cannot specify role or category when package and class"
-                                + " are present for bookmark packageName=" + packageName
-                                + " className=" + className + " shortcutChar=" + shortcutChar);
-                        continue;
+
+                if (modifierShortcutManagerRefactor()) {
+                    final char shortcutChar = shortcutName.charAt(0);
+                    Bookmark bookmark = null;
+                    if (packageName != null && className != null) {
+                        bookmark = new ComponentBookmark(
+                                shortcutChar, isShiftShortcut, packageName, className);
+                    } else if (categoryName != null) {
+                        bookmark = new CategoryBookmark(
+                                shortcutChar, isShiftShortcut, categoryName);
+                    } else if (roleName != null) {
+                        bookmark = new RoleBookmark(shortcutChar, isShiftShortcut, roleName);
                     }
-                    if (modifierShortcutManagerMultiuser()) {
-                        ComponentName componentName = new ComponentName(packageName, className);
-                        if (isShiftShortcut) {
-                            mShiftComponentShortcuts.put(shortcutChar, componentName);
+                    if (bookmark != null) {
+                        Log.d(TAG, "adding shortcut " + bookmark + "shift="
+                                + isShiftShortcut + " char=" + shortcutChar);
+                        mBookmarks.put(new Pair<>(shortcutChar, isShiftShortcut), bookmark);
+                    }
+                } else {
+                    final int shortcutChar = shortcutName.charAt(0);
+                    if (packageName != null && className != null) {
+                        if (roleName != null || categoryName != null) {
+                            Log.w(TAG, "Cannot specify role or category when package and class"
+                                    + " are present for bookmark packageName=" + packageName
+                                    + " className=" + className + " shortcutChar=" + shortcutChar);
+                            continue;
+                        }
+                        if (modifierShortcutManagerMultiuser()) {
+                            ComponentName componentName =
+                                    new ComponentName(packageName, className);
+                            if (isShiftShortcut) {
+                                mShiftComponentShortcuts.put(shortcutChar, componentName);
+                            } else {
+                                mComponentShortcuts.put(shortcutChar, componentName);
+                            }
                         } else {
-                            mComponentShortcuts.put(shortcutChar, componentName);
+                            Intent intent = resolveComponentNameIntent(packageName, className);
+                            if (isShiftShortcut) {
+                                mShiftCategoryShortcuts.put(shortcutChar, intent);
+                            } else {
+                                mCategoryShortcuts.put(shortcutChar, intent);
+                            }
+                        }
+                        continue;
+                    } else if (categoryName != null) {
+                        if (roleName != null) {
+                            Log.w(TAG, "Cannot specify role bookmark when category is present for"
+                                    + " bookmark shortcutChar=" + shortcutChar
+                                    + " category= " + categoryName);
+                            continue;
+                        }
+                        Intent intent = Intent.makeMainSelectorActivity(
+                                Intent.ACTION_MAIN, categoryName);
+                        if (intent == null) {
+                            Log.w(TAG, "Null selector intent for " + categoryName);
+                        } else {
+                            if (isShiftShortcut) {
+                                mShiftCategoryShortcuts.put(shortcutChar, intent);
+                            } else {
+                                mCategoryShortcuts.put(shortcutChar, intent);
+                            }
+                        }
+                        continue;
+                    } else if (roleName != null) {
+                        // We can't resolve the role at the time of this file being parsed as the
+                        // device hasn't finished booting, so we will look it up lazily.
+                        if (isShiftShortcut) {
+                            mShiftRoleShortcuts.put(shortcutChar, roleName);
+                        } else {
+                            mRoleShortcuts.put(shortcutChar, roleName);
                         }
                         continue;
                     } else {
-                        intent = resolveComponentNameIntent(packageName, className);
-                    }
-                } else if (categoryName != null) {
-                    if (roleName != null) {
-                        Log.w(TAG, "Cannot specify role bookmark when category is present for"
-                                + " bookmark shortcutChar=" + shortcutChar
-                                + " category= " + categoryName);
+                        Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutName
+                                + ": missing package/class, category or role attributes");
                         continue;
                     }
-                    intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, categoryName);
-                    if (intent == null) {
-                        Log.w(TAG, "Null selector intent for " + categoryName);
-                    }
-                } else if (roleName != null) {
-                    // We can't resolve the role at the time of this file being parsed as the
-                    // device hasn't finished booting, so we will look it up lazily.
-                    if (isShiftShortcut) {
-                        mShiftRoleShortcuts.put(shortcutChar, roleName);
-                    } else {
-                        mRoleShortcuts.put(shortcutChar, roleName);
-                    }
-                    continue;
-                } else {
-                    Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutName
-                            + ": missing package/class, category or role attributes");
-                    continue;
-                }
-
-                if (isShiftShortcut) {
-                    mShiftShortcuts.put(shortcutChar, intent);
-                } else {
-                    mIntentShortcuts.put(shortcutChar, intent);
                 }
             }
         } catch (XmlPullParserException | IOException e) {
@@ -336,21 +426,35 @@ public class ModifierShortcutManager {
 
     @Nullable
     private Intent resolveComponentNameIntent(ComponentName componentName) {
-        Intent intent = mComponentIntents.get(componentName);
-        if (intent == null) {
-            intent = resolveComponentNameIntent(
-                    componentName.getPackageName(), componentName.getClassName());
-            if (intent != null) {
-                mComponentIntents.put(componentName, intent);
+        if (modifierShortcutManagerRefactor()) {
+            return null;
+        } else {
+            Intent intent = mComponentIntents.get(componentName);
+            if (intent == null) {
+                intent = resolveComponentNameIntent(
+                        componentName.getPackageName(), componentName.getClassName());
+                if (intent != null) {
+                    mComponentIntents.put(componentName, intent);
+                }
             }
+            return intent;
         }
-        return intent;
     }
 
     @Nullable
     private Intent resolveComponentNameIntent(String packageName, String className) {
-        Context context = modifierShortcutManagerMultiuser()
-                ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
+        if (modifierShortcutManagerRefactor()) {
+            return null;
+        } else {
+            Context context = modifierShortcutManagerMultiuser()
+                        ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
+            return resolveComponentNameIntent(context, packageName, className);
+        }
+    }
+
+    @Nullable
+    private static Intent resolveComponentNameIntent(
+            Context context, String packageName, String className) {
         PackageManager pm = context.getPackageManager();
         int flags = PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
         if (!modifierShortcutManagerMultiuser()) {
@@ -562,64 +666,81 @@ public class ModifierShortcutManager {
      */
     public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
         List<KeyboardShortcutInfo> shortcuts = new ArrayList();
-        for (int i = 0; i <  mIntentShortcuts.size(); i++) {
-            KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                    (char) (mIntentShortcuts.keyAt(i)), mIntentShortcuts.valueAt(i), false);
-            if (info != null) {
-                shortcuts.add(info);
-            }
-        }
-
-        for (int i = 0; i <  mShiftShortcuts.size(); i++) {
-            KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                    (char) (mShiftShortcuts.keyAt(i)), mShiftShortcuts.valueAt(i), true);
-            if (info != null) {
-                shortcuts.add(info);
-            }
-        }
-
-        for (int i = 0; i <  mRoleShortcuts.size(); i++) {
-            String role = mRoleShortcuts.valueAt(i);
-            KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                    (char) (mRoleShortcuts.keyAt(i)), getRoleLaunchIntent(role), false);
-            if (info != null) {
-                shortcuts.add(info);
-            }
-        }
-
-        for (int i = 0; i <  mShiftRoleShortcuts.size(); i++) {
-            String role = mShiftRoleShortcuts.valueAt(i);
-            KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                    (char) (mShiftRoleShortcuts.keyAt(i)), getRoleLaunchIntent(role), true);
-            if (info != null) {
-                shortcuts.add(info);
-            }
-        }
-
-        if (modifierShortcutManagerMultiuser()) {
-            for (int i = 0; i < mComponentShortcuts.size(); i++) {
-                ComponentName component = mComponentShortcuts.valueAt(i);
+        if (modifierShortcutManagerRefactor()) {
+            for (Bookmark b : mBookmarks.values()) {
                 KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                        (char) (mComponentShortcuts.keyAt(i)),
-                        resolveComponentNameIntent(component),
+                        b.getShortcutChar(), b.getIntent(mContext), b.isShift());
+                if (info != null) {
+                    shortcuts.add(info);
+                }
+            }
+        } else {
+            for (int i = 0; i <  mCategoryShortcuts.size(); i++) {
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                        (char) (mCategoryShortcuts.keyAt(i)),
+                        mCategoryShortcuts.valueAt(i),
                         false);
                 if (info != null) {
                     shortcuts.add(info);
                 }
             }
 
-            for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
-                ComponentName component = mShiftComponentShortcuts.valueAt(i);
+            for (int i = 0; i <  mShiftCategoryShortcuts.size(); i++) {
                 KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                        (char) (mShiftComponentShortcuts.keyAt(i)),
-                        resolveComponentNameIntent(component),
+                        (char) (mShiftCategoryShortcuts.keyAt(i)),
+                        mShiftCategoryShortcuts.valueAt(i),
                         true);
                 if (info != null) {
                     shortcuts.add(info);
                 }
             }
-        }
 
+            for (int i = 0; i <  mRoleShortcuts.size(); i++) {
+                String role = mRoleShortcuts.valueAt(i);
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                        (char) (mRoleShortcuts.keyAt(i)),
+                        getRoleLaunchIntent(role),
+                        false);
+                if (info != null) {
+                    shortcuts.add(info);
+                }
+            }
+
+            for (int i = 0; i <  mShiftRoleShortcuts.size(); i++) {
+                String role = mShiftRoleShortcuts.valueAt(i);
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                        (char) (mShiftRoleShortcuts.keyAt(i)),
+                        getRoleLaunchIntent(role),
+                        true);
+                if (info != null) {
+                    shortcuts.add(info);
+                }
+            }
+
+            if (modifierShortcutManagerMultiuser()) {
+                for (int i = 0; i < mComponentShortcuts.size(); i++) {
+                    ComponentName component = mComponentShortcuts.valueAt(i);
+                    KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                            (char) (mComponentShortcuts.keyAt(i)),
+                            resolveComponentNameIntent(component),
+                            false);
+                    if (info != null) {
+                        shortcuts.add(info);
+                    }
+                }
+
+                for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
+                    ComponentName component = mShiftComponentShortcuts.valueAt(i);
+                    KeyboardShortcutInfo info = shortcutInfoFromIntent(
+                            (char) (mShiftComponentShortcuts.keyAt(i)),
+                            resolveComponentNameIntent(component),
+                            true);
+                    if (info != null) {
+                        shortcuts.add(info);
+                    }
+                }
+            }
+        }
         return new KeyboardShortcutGroup(
                 mContext.getString(R.string.keyboard_shortcut_group_applications),
                 shortcuts);
@@ -800,57 +921,171 @@ public class ModifierShortcutManager {
     void dump(String prefix, PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw,  "  ", prefix);
         ipw.println("ModifierShortcutManager shortcuts:");
-
-        ipw.increaseIndent();
-        ipw.println("Roles");
-        ipw.increaseIndent();
-        for (int i = 0; i <  mRoleShortcuts.size(); i++) {
-            String role = mRoleShortcuts.valueAt(i);
-            char shortcutChar = (char) mRoleShortcuts.keyAt(i);
-            Intent intent = getRoleLaunchIntent(role);
-            ipw.println(shortcutChar + " " + role + " " + intent);
-        }
-
-        for (int i = 0; i <  mShiftRoleShortcuts.size(); i++) {
-            String role = mShiftRoleShortcuts.valueAt(i);
-            char shortcutChar = (char) mShiftRoleShortcuts.keyAt(i);
-            Intent intent = getRoleLaunchIntent(role);
-            ipw.println("SHIFT+" + shortcutChar + " " + role + " " + intent);
-        }
-
-        ipw.decreaseIndent();
-        ipw.println("Selectors");
-        ipw.increaseIndent();
-        for (int i = 0; i <  mIntentShortcuts.size(); i++) {
-            char shortcutChar = (char) mIntentShortcuts.keyAt(i);
-            Intent intent = mIntentShortcuts.valueAt(i);
-            ipw.println(shortcutChar + " " + intent);
-        }
-
-        for (int i = 0; i <  mShiftShortcuts.size(); i++) {
-            char shortcutChar = (char) mShiftShortcuts.keyAt(i);
-            Intent intent = mShiftShortcuts.valueAt(i);
-            ipw.println("SHIFT+" + shortcutChar + " " + intent);
-
-        }
-
-        if (modifierShortcutManagerMultiuser()) {
-            ipw.decreaseIndent();
-            ipw.println("ComponentNames");
+        if (modifierShortcutManagerRefactor()) {
             ipw.increaseIndent();
-            for (int i = 0; i < mComponentShortcuts.size(); i++) {
-                char shortcutChar = (char) mComponentShortcuts.keyAt(i);
-                ComponentName component = mComponentShortcuts.valueAt(i);
-                Intent intent = resolveComponentNameIntent(component);
-                ipw.println(shortcutChar + " " + component + " " + intent);
+            for (Bookmark b : mBookmarks.values()) {
+                boolean isShift = b.isShift();
+                char shortcutChar = b.getShortcutChar();
+                Context context = modifierShortcutManagerMultiuser()
+                        ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
+
+                Intent intent = b.getIntent(context);
+                ipw.print(isShift ? "SHIFT+" : "");
+                ipw.println(shortcutChar + " " + intent);
+                ipw.increaseIndent();
+                ipw.increaseIndent();
+                KeyboardShortcutInfo info = shortcutInfoFromIntent(shortcutChar, intent, isShift);
+                if (info != null) {
+                    ipw.println("Resolves to: " + info.getLabel());
+                } else {
+                    ipw.println("<No KeyboardShortcutInfo available for this shortcut>");
+                }
+                ipw.decreaseIndent();
+                ipw.decreaseIndent();
+            }
+        } else {
+            ipw.increaseIndent();
+            ipw.println("Roles");
+            ipw.increaseIndent();
+            for (int i = 0; i < mRoleShortcuts.size(); i++) {
+                String role = mRoleShortcuts.valueAt(i);
+                char shortcutChar = (char) mRoleShortcuts.keyAt(i);
+                Intent intent = getRoleLaunchIntent(role);
+                ipw.println(shortcutChar + " " + role + " " + intent);
             }
 
-            for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
-                char shortcutChar = (char) mShiftComponentShortcuts.keyAt(i);
-                ComponentName component = mShiftComponentShortcuts.valueAt(i);
-                Intent intent = resolveComponentNameIntent(component);
-                ipw.println("SHIFT+" + shortcutChar + " " + component + " " + intent);
+            for (int i = 0; i < mShiftRoleShortcuts.size(); i++) {
+                String role = mShiftRoleShortcuts.valueAt(i);
+                char shortcutChar = (char) mShiftRoleShortcuts.keyAt(i);
+                Intent intent = getRoleLaunchIntent(role);
+                ipw.println("SHIFT+" + shortcutChar + " " + role + " " + intent);
             }
+
+            ipw.decreaseIndent();
+            ipw.println("Selectors");
+            ipw.increaseIndent();
+            for (int i = 0; i < mCategoryShortcuts.size(); i++) {
+                char shortcutChar = (char) mCategoryShortcuts.keyAt(i);
+                Intent intent = mCategoryShortcuts.valueAt(i);
+                ipw.println(shortcutChar + " " + intent);
+            }
+
+            for (int i = 0; i < mShiftCategoryShortcuts.size(); i++) {
+                char shortcutChar = (char) mShiftCategoryShortcuts.keyAt(i);
+                Intent intent = mShiftCategoryShortcuts.valueAt(i);
+                ipw.println("SHIFT+" + shortcutChar + " " + intent);
+
+            }
+
+            if (modifierShortcutManagerMultiuser()) {
+                ipw.decreaseIndent();
+                ipw.println("ComponentNames");
+                ipw.increaseIndent();
+                for (int i = 0; i < mComponentShortcuts.size(); i++) {
+                    char shortcutChar = (char) mComponentShortcuts.keyAt(i);
+                    ComponentName component = mComponentShortcuts.valueAt(i);
+                    Intent intent = resolveComponentNameIntent(component);
+                    ipw.println(shortcutChar + " " + component + " " + intent);
+                }
+
+                for (int i = 0; i < mShiftComponentShortcuts.size(); i++) {
+                    char shortcutChar = (char) mShiftComponentShortcuts.keyAt(i);
+                    ComponentName component = mShiftComponentShortcuts.valueAt(i);
+                    Intent intent = resolveComponentNameIntent(component);
+                    ipw.println("SHIFT+" + shortcutChar + " " + component + " " + intent);
+                }
+            }
+        }
+    }
+
+    private abstract static  class Bookmark {
+        private final char mShortcutChar;
+        private final boolean mShift;
+        protected Intent mIntent;
+
+        Bookmark(char shortcutChar, boolean shift) {
+            mShortcutChar = shortcutChar;
+            mShift = shift;
+        }
+
+        public char getShortcutChar() {
+            return mShortcutChar;
+        }
+
+        public boolean isShift() {
+            return mShift;
+        }
+
+        public abstract Intent getIntent(Context context);
+
+        public void clearIntent() {
+            mIntent = null;
+        }
+
+    }
+
+    private static final class RoleBookmark extends Bookmark {
+        private final String mRole;
+
+        RoleBookmark(char shortcutChar, boolean shift, String role) {
+            super(shortcutChar, shift);
+            mRole = role;
+        }
+
+        public String getRole() {
+            return mRole;
+        }
+
+        @Nullable
+        @Override
+        public Intent getIntent(Context context) {
+            if (mIntent != null) {
+                return mIntent;
+            }
+            mIntent = getRoleLaunchIntent(context, mRole);
+            return mIntent;
+        }
+    }
+
+    private static final class CategoryBookmark extends Bookmark {
+        private final String mCategory;
+
+        CategoryBookmark(char shortcutChar, boolean shift, String category) {
+            super(shortcutChar, shift);
+            mCategory = category;
+        }
+
+        @NonNull
+        @Override
+        public Intent getIntent(Context context) {
+            if (mIntent != null) {
+                return mIntent;
+            }
+
+            mIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, mCategory);
+            return mIntent;
+        }
+    }
+
+    private static final class ComponentBookmark extends Bookmark {
+        private final String mPackageName;
+        private final String mClassName;
+
+        ComponentBookmark(
+                char shortcutChar, boolean shift, String packageName, String className) {
+            super(shortcutChar, shift);
+            mPackageName = packageName;
+            mClassName = className;
+        }
+
+        @Nullable
+        @Override
+        public Intent getIntent(Context context) {
+            if (mIntent != null) {
+                return mIntent;
+            }
+            mIntent = resolveComponentNameIntent(context, mPackageName, mClassName);
+            return mIntent;
         }
     }
 }
