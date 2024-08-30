@@ -27,6 +27,7 @@ import com.android.systemui.scene.domain.startable.KeyguardStateCallbackStartabl
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.domain.startable.ScrimStartable
 import com.android.systemui.scene.domain.startable.StatusBarStartable
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.flag.DualShade
@@ -42,6 +43,7 @@ import dagger.multibindings.IntoMap
         [
             EmptySceneModule::class,
             GoneSceneModule::class,
+            NotificationsShadeOverlayModule::class,
             NotificationsShadeSceneModule::class,
             NotificationsShadeSessionModule::class,
             QuickSettingsSceneModule::class,
@@ -99,6 +101,10 @@ interface KeyguardlessSceneContainerFrameworkModule {
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Gone,
+                overlayKeys =
+                    listOfNotNull(
+                        Overlays.NotificationsShade.takeIf { DualShade.isEnabled },
+                    ),
                 navigationDistances =
                     mapOf(
                             Scenes.Gone to 0,

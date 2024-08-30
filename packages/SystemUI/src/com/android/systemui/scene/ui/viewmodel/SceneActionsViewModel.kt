@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * need to worry about resetting the value of [actions] when the view-model is deactivated/canceled,
  * this base class takes care of it.
  */
+// TODO(b/363206563): Rename to UserActionsViewModel.
 abstract class SceneActionsViewModel : ExclusiveActivatable() {
 
     private val _actions = MutableStateFlow<Map<UserAction, UserActionResult>>(emptyMap())
