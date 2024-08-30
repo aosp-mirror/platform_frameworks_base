@@ -92,6 +92,7 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MASTER_CLEAR" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.VIBRATE_SYSTEM_CONSTANTS" />
     <uses-permission android:name="android.permission.MANAGE_SENSOR_PRIVACY" />
     <uses-permission android:name="android.permission.OBSERVE_SENSOR_PRIVACY" />
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />

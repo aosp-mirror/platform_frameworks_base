@@ -369,8 +369,7 @@ object KeyguardRootViewBinder {
                                 } else {
                                     vibratorHelper.performHapticFeedback(
                                         view,
-                                        HapticFeedbackConstants.CONFIRM,
-                                        HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+                                        HapticFeedbackConstants.BIOMETRIC_CONFIRM,
                                     )
                                 }
                             }
@@ -390,8 +389,7 @@ object KeyguardRootViewBinder {
                                 } else {
                                     vibratorHelper.performHapticFeedback(
                                         view,
-                                        HapticFeedbackConstants.REJECT,
-                                        HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+                                        HapticFeedbackConstants.BIOMETRIC_REJECT,
                                     )
                                 }
                             }

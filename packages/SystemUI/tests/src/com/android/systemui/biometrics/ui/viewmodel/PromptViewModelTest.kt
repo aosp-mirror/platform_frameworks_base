@@ -717,13 +717,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(confirmHaptics?.hapticFeedbackConstant)
                 .isEqualTo(
                     if (expectConfirmation) HapticFeedbackConstants.NO_HAPTICS
-                    else HapticFeedbackConstants.CONFIRM
+                    else HapticFeedbackConstants.BIOMETRIC_CONFIRM
                 )
-            assertThat(confirmHaptics?.flag)
-                .isEqualTo(
-                    if (expectConfirmation) null
-                    else HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
-                )
+            assertThat(confirmHaptics?.flag).isNull()
 
             if (expectConfirmation) {
                 kosmos.promptViewModel.confirmAuthenticated()
@@ -731,9 +727,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
             val confirmedHaptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
             assertThat(confirmedHaptics?.hapticFeedbackConstant)
-                .isEqualTo(HapticFeedbackConstants.CONFIRM)
-            assertThat(confirmedHaptics?.flag)
-                .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+                .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+            assertThat(confirmedHaptics?.flag).isNull()
         }
 
     @Test
@@ -747,9 +742,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         val currentHaptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
         assertThat(currentHaptics?.hapticFeedbackConstant)
-            .isEqualTo(HapticFeedbackConstants.CONFIRM)
-        assertThat(currentHaptics?.flag)
-            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
+        assertThat(currentHaptics?.flag).isNull()
     }
 
     @Test
@@ -757,9 +751,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         kosmos.promptViewModel.showTemporaryError("test", "messageAfterError", false)
 
         val currentHaptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-        assertThat(currentHaptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
-        assertThat(currentHaptics?.flag)
-            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        assertThat(currentHaptics?.hapticFeedbackConstant)
+            .isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+        assertThat(currentHaptics?.flag).isNull()
     }
 
     // biometricprompt_sfps_fingerprint_authenticating reused across rotations
@@ -870,8 +864,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         )
 
         val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
-        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
-        assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+        assertThat(haptics?.hapticFeedbackConstant)
+            .isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+        assertThat(haptics?.flag).isNull()
     }
 
     @Test
@@ -901,10 +896,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         val haptics by collectLastValue(kosmos.promptViewModel.hapticsToPlay)
         if (expectConfirmation) {
-            assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
-            assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
+            assertThat(haptics?.hapticFeedbackConstant)
+                .isEqualTo(HapticFeedbackConstants.BIOMETRIC_REJECT)
+            assertThat(haptics?.flag).isNull()
         } else {
-            assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.CONFIRM)
+            assertThat(haptics?.hapticFeedbackConstant)
+                .isEqualTo(HapticFeedbackConstants.BIOMETRIC_CONFIRM)
         }
     }
 
