@@ -140,3 +140,11 @@ flag {
     description: "Enable override and recover routing table"
     bug: "329043523"
 }
+
+flag {
+    name: "nfc_watchdog"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable watchdog for the NFC system process"
+    bug: "362937338"
+}
