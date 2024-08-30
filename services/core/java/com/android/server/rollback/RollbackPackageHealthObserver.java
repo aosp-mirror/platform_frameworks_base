@@ -18,6 +18,8 @@ package com.android.server.rollback;
 
 import static android.content.pm.Flags.provideInfoOfApkInApex;
 
+import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
+
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +42,7 @@ import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.sysprop.CrashRecoveryProperties;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -532,11 +535,13 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private void rollbackPackage(RollbackInfo rollback, VersionedPackage failedPackage,
             @FailureReasons int rollbackReason) {
         assertInWorkerThread();
+        String failedPackageName = (failedPackage == null ? null : failedPackage.getPackageName());
 
         Slog.i(TAG, "Rolling back package. RollbackId: " + rollback.getRollbackId()
-                + " failedPackage: "
-                + (failedPackage == null ? null : failedPackage.getPackageName())
+                + " failedPackage: " + failedPackageName
                 + " rollbackReason: " + rollbackReason);
+        logCrashRecoveryEvent(Log.DEBUG, String.format("Rolling back %s. Reason: %s",
+                failedPackageName, rollbackReason));
         final RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         int reasonToLog = WatchdogRollbackLogger.mapFailureReasonToMetric(rollbackReason);
         final String failedPackageToLog;
@@ -724,6 +729,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
 
         Slog.i(TAG, "Rolling back all available low impact rollbacks");
+        logCrashRecoveryEvent(Log.DEBUG, "Rolling back all available. Reason: " + rollbackReason);
         // Add all rollback ids to mPendingStagedRollbackIds, so that we do not reboot before all
         // pending staged rollbacks are handled.
         for (RollbackInfo rollback : lowImpactRollbacks) {

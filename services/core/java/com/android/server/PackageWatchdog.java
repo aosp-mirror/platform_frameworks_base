@@ -20,6 +20,8 @@ import static android.content.Intent.ACTION_REBOOT;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
+import static com.android.server.crashrecovery.CrashRecoveryUtils.dumpCrashRecoveryEvents;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
@@ -44,6 +46,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
@@ -51,7 +54,6 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -72,6 +74,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -1265,18 +1268,21 @@ public class PackageWatchdog {
 
 
     /** Dump status of every observer in mAllObservers. */
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("Package Watchdog status");
-        pw.increaseIndent();
+    public void dump(PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        ipw.println("Package Watchdog status");
+        ipw.increaseIndent();
         synchronized (mLock) {
             for (String observerName : mAllObservers.keySet()) {
-                pw.println("Observer name: " + observerName);
-                pw.increaseIndent();
+                ipw.println("Observer name: " + observerName);
+                ipw.increaseIndent();
                 ObserverInternal observerInternal = mAllObservers.get(observerName);
-                observerInternal.dump(pw);
-                pw.decreaseIndent();
+                observerInternal.dump(ipw);
+                ipw.decreaseIndent();
             }
         }
+        ipw.decreaseIndent();
+        dumpCrashRecoveryEvents(ipw);
     }
 
     @VisibleForTesting

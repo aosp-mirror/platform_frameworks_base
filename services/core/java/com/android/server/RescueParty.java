@@ -18,7 +18,7 @@ package com.android.server;
 
 import static android.provider.DeviceConfig.Properties;
 
-import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -291,13 +291,13 @@ public class RescueParty {
                 Properties properties = new Properties.Builder(namespaceToReset).build();
                 try {
                     if (!DeviceConfig.setProperties(properties)) {
-                        logCriticalInfo(Log.ERROR, "Failed to clear properties under "
+                        logCrashRecoveryEvent(Log.ERROR, "Failed to clear properties under "
                             + namespaceToReset
                             + ". Running `device_config get_sync_disabled_for_tests` will confirm"
                             + " if config-bulk-update is enabled.");
                     }
                 } catch (DeviceConfig.BadConfigException exception) {
-                    logCriticalInfo(Log.WARN, "namespace " + namespaceToReset
+                    logCrashRecoveryEvent(Log.WARN, "namespace " + namespaceToReset
                             + " is already banned, skip reset.");
                 }
             }
@@ -528,7 +528,7 @@ public class RescueParty {
             if (!TextUtils.isEmpty(failedPackage)) {
                 successMsg += " for package " + failedPackage;
             }
-            logCriticalInfo(Log.DEBUG, successMsg);
+            logCrashRecoveryEvent(Log.DEBUG, successMsg);
         } catch (Throwable t) {
             logRescueException(level, failedPackage, t);
         }
@@ -687,7 +687,7 @@ public class RescueParty {
         if (!TextUtils.isEmpty(failedPackageName)) {
             failureMsg += " for package " + failedPackageName;
         }
-        logCriticalInfo(Log.ERROR, failureMsg + ": " + msg);
+        logCrashRecoveryEvent(Log.ERROR, failureMsg + ": " + msg);
     }
 
     private static int mapRescueLevelToUserImpact(int rescueLevel) {
