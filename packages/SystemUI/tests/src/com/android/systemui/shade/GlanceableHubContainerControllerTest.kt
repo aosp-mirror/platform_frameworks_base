@@ -61,7 +61,6 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.controller.keyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.lockscreen.lockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
@@ -706,7 +705,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 verify(containerView).onTouchEvent(DOWN_EVENT)
 
                 // User is interacting with shade on lockscreen.
-                fakeShadeRepository.setLegacyLockscreenShadeTracking(true)
+                shadeTestUtil.setLockscreenShadeTracking(true)
                 testableLooper.processAllMessages()
 
                 // A move event is ignored while the user is already interacting.
@@ -734,7 +733,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     .thenReturn(true)
 
                 // Shade is open slightly.
-                fakeShadeRepository.setLegacyShadeExpansion(0.01f)
+                shadeTestUtil.setShadeExpansion(0.01f)
                 testableLooper.processAllMessages()
 
                 // Touches are not consumed.
