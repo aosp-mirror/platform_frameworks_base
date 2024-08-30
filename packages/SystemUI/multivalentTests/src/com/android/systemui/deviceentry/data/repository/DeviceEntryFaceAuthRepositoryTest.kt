@@ -96,6 +96,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -561,14 +562,29 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun withSceneContainerEnabled_authenticateDoesNotRunWhenKeyguardIsGoingAway() =
         testScope.runTest {
             testGatingCheckForFaceAuth(sceneContainerEnabled = true) {
-                keyguardTransitionRepository.sendTransitionStep(
-                    TransitionStep(
-                        KeyguardState.LOCKSCREEN,
-                        KeyguardState.UNDEFINED,
-                        value = 0.5f,
-                        transitionState = TransitionState.RUNNING
-                    ),
-                    validateStep = false
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(
+                        ObservableTransitionState.Transition(
+                            fromScene = Scenes.Bouncer,
+                            toScene = Scenes.Gone,
+                            currentScene = flowOf(Scenes.Bouncer),
+                            progress = MutableStateFlow(0.2f),
+                            isInitiatedByUserInput = true,
+                            isUserInputOngoing = flowOf(false),
+                        )
+                    )
+                )
+                runCurrent()
+            }
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun withSceneContainerEnabled_authenticateDoesNotRunWhenLockscreenIsGone() =
+        testScope.runTest {
+            testGatingCheckForFaceAuth(sceneContainerEnabled = true) {
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(ObservableTransitionState.Idle(Scenes.Gone))
                 )
                 runCurrent()
             }
@@ -898,15 +914,32 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun withSceneContainer_faceDetectDoesNotRunWhenKeyguardGoingAway() =
         testScope.runTest {
             testGatingCheckForDetect(sceneContainerEnabled = true) {
-                keyguardTransitionRepository.sendTransitionStep(
-                    TransitionStep(
-                        KeyguardState.LOCKSCREEN,
-                        KeyguardState.UNDEFINED,
-                        value = 0.5f,
-                        transitionState = TransitionState.RUNNING
-                    ),
-                    validateStep = false
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(
+                        ObservableTransitionState.Transition(
+                            fromScene = Scenes.Bouncer,
+                            toScene = Scenes.Gone,
+                            currentScene = flowOf(Scenes.Bouncer),
+                            progress = MutableStateFlow(0.2f),
+                            isInitiatedByUserInput = true,
+                            isUserInputOngoing = flowOf(false),
+                        )
+                    )
                 )
+
+                runCurrent()
+            }
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun withSceneContainer_faceDetectDoesNotRunWhenLockscreenIsGone() =
+        testScope.runTest {
+            testGatingCheckForDetect(sceneContainerEnabled = true) {
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow(ObservableTransitionState.Idle(Scenes.Gone))
+                )
+
                 runCurrent()
             }
         }
@@ -1230,6 +1263,9 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(KeyguardState.OFF, KeyguardState.LOCKSCREEN, value = 1.0f),
                 validateStep = false
+            )
+            kosmos.sceneInteractor.setTransitionState(
+                MutableStateFlow(ObservableTransitionState.Idle(Scenes.Lockscreen))
             )
         } else {
             keyguardRepository.setKeyguardGoingAway(false)

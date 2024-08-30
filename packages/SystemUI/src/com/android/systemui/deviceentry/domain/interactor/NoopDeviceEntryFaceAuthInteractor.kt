@@ -60,7 +60,7 @@ class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceA
 
     override fun onDeviceLifted() {}
 
-    override fun onQsExpansionStarted() {}
+    override fun onShadeExpansionStarted() {}
 
     override fun onNotificationPanelClicked() {}
 

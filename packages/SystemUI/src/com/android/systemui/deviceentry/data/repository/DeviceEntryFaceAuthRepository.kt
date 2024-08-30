@@ -391,8 +391,10 @@ constructor(
             ),
             Pair(
                 if (SceneContainerFlag.isEnabled) {
-                    keyguardTransitionInteractor
-                        .isInTransitionWhere(toStatePredicate = { it == KeyguardState.UNDEFINED })
+                    sceneInteractor
+                        .get()
+                        .transitionState
+                        .map { it.isTransitioning(to = Scenes.Gone) || it.isIdle(Scenes.Gone) }
                         .isFalse()
                 } else {
                     keyguardRepository.isKeyguardGoingAway.isFalse()

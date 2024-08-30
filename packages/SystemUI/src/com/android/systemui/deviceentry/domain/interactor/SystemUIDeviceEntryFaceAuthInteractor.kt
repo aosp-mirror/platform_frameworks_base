@@ -220,9 +220,9 @@ constructor(
             sceneInteractor
                 .get()
                 .transitionState
-                .filter { it.isTransitioning(from = Scenes.QuickSettings, to = Scenes.Shade) }
+                .filter { it.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade) }
                 .distinctUntilChanged()
-                .onEach { onQsExpansionStarted() }
+                .onEach { onShadeExpansionStarted() }
                 .launchIn(applicationScope)
         }
     }
@@ -250,7 +250,7 @@ constructor(
         runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED, true)
     }
 
-    override fun onQsExpansionStarted() {
+    override fun onShadeExpansionStarted() {
         runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true)
     }
 
