@@ -41,6 +41,8 @@ class FakeZenModeRepository : ZenModeRepository {
     override val modes: Flow<List<ZenMode>>
         get() = mutableModesFlow.asStateFlow()
 
+    override fun getModes(): List<ZenMode> = mutableModesFlow.value
+
     private val activeModesDurations = mutableMapOf<String, Duration?>()
 
     init {
