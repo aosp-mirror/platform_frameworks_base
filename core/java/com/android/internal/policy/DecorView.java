@@ -1140,7 +1140,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDrawLegacyNavigationBarBackground =
                     ((requestedVisibleTypes | mLastForceConsumingTypes)
                             & WindowInsets.Type.navigationBars()) != 0
-                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
+                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
+                    && navBarSize > 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
                 mDrawLegacyNavigationBarBackgroundHandled =
                         mWindow.onDrawLegacyNavigationBarBackgroundChanged(
