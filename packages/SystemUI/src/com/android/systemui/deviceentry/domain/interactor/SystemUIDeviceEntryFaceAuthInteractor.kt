@@ -60,6 +60,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
@@ -214,6 +215,16 @@ constructor(
                 }
             }
             .launchIn(applicationScope)
+
+        if (SceneContainerFlag.isEnabled) {
+            sceneInteractor
+                .get()
+                .transitionState
+                .filter { it.isTransitioning(from = Scenes.QuickSettings, to = Scenes.Shade) }
+                .distinctUntilChanged()
+                .onEach { onQsExpansionStarted() }
+                .launchIn(applicationScope)
+        }
     }
 
     private val isBouncerVisible: Flow<Boolean> by lazy {
@@ -239,7 +250,7 @@ constructor(
         runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED, true)
     }
 
-    override fun onQsExpansionStared() {
+    override fun onQsExpansionStarted() {
         runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true)
     }
 
