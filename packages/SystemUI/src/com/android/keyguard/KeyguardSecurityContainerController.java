@@ -35,6 +35,7 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.flags.Flags;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -1139,7 +1140,12 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             int remainingBeforeWipe, int failedAttempts) {
         int userType = USER_TYPE_PRIMARY;
         if (expiringUserId == userId) {
-            int primaryUser = mainUserId != null ? mainUserId : UserHandle.USER_SYSTEM;
+            int primaryUser = UserHandle.USER_SYSTEM;
+            if (Flags.headlessSingleUserFixes()) {
+                if (mainUserId != null) {
+                    primaryUser = mainUserId;
+                }
+            }
             // TODO: http://b/23522538
             if (expiringUserId != primaryUser) {
                 userType = USER_TYPE_SECONDARY_USER;
