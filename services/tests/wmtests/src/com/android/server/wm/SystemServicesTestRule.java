@@ -394,7 +394,7 @@ public class SystemServicesTestRule implements TestRule {
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, wmPolicy, mAtmService,
                 testDisplayWindowSettingsProvider, StubTransaction::new,
-                (unused) -> new MockSurfaceControlBuilder());
+                MockSurfaceControlBuilder::new);
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.

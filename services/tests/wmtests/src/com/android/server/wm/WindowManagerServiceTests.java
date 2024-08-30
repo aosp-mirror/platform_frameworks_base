@@ -1189,7 +1189,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int displayId = mDisplayContent.mDisplayId;
         // Use real surface, so ViewportWindow's BlastBufferQueue can be created.
         final ArrayList<SurfaceControl> surfaceControls = new ArrayList<>();
-        mWm.mSurfaceControlFactory = s -> new SurfaceControl.Builder() {
+        mWm.mSurfaceControlFactory = () -> new SurfaceControl.Builder() {
             @Override
             public SurfaceControl build() {
                 final SurfaceControl sc = super.build();

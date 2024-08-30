@@ -51,7 +51,7 @@ class TrustedOverlayHost {
 
     void requireOverlaySurfaceControl() {
         if (mSurfaceControl == null) {
-            final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
+            final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder()
                 .setContainerLayer()
                 .setHidden(true)
                 .setCallsite("TrustedOverlayHost.requireOverlaySurfaceControl")

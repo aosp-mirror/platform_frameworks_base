@@ -53,7 +53,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.ScreenCapture;
 
 import androidx.test.filters.SmallTest;
@@ -65,7 +64,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Tests for the {@link DisplayContent#assignChildLayers(SurfaceControl.Transaction)} method.
@@ -128,8 +127,7 @@ public class ZOrderingTests extends WindowTestsBase {
         private LayerRecordingTransaction mTransaction;
         private SurfaceControl mPendingParent;
 
-        HierarchyRecorder(SurfaceSession s, LayerRecordingTransaction transaction) {
-            super(s);
+        HierarchyRecorder(LayerRecordingTransaction transaction) {
             mTransaction = transaction;
         }
 
@@ -148,8 +146,8 @@ public class ZOrderingTests extends WindowTestsBase {
         }
     }
 
-    private static class HierarchyRecordingBuilderFactory implements Function<SurfaceSession,
-            SurfaceControl.Builder> {
+    private static class HierarchyRecordingBuilderFactory
+            implements Supplier<SurfaceControl.Builder> {
         private LayerRecordingTransaction mTransaction;
 
         HierarchyRecordingBuilderFactory(LayerRecordingTransaction transaction) {
@@ -157,9 +155,8 @@ public class ZOrderingTests extends WindowTestsBase {
         }
 
         @Override
-        public SurfaceControl.Builder apply(SurfaceSession s) {
-            final LayerRecordingTransaction transaction = mTransaction;
-            return new HierarchyRecorder(s, transaction);
+        public SurfaceControl.Builder get() {
+            return new HierarchyRecorder(mTransaction);
         }
     }
 
