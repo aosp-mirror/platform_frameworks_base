@@ -350,13 +350,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @BinderThread
     private int resolveImeUserIdLocked(@UserIdInt int callingProcessUserId,
             @NonNull IInputMethodClient client) {
-        if (mConcurrentMultiUserModeEnabled
-                && callingProcessUserId == UserHandle.USER_SYSTEM) {
-            final var clientState = mClientController.getClient(client.asBinder());
-            return mUserManagerInternal.getUserAssignedToDisplay(
-                    clientState.mSelfReportedDisplayId);
+        if (mConcurrentMultiUserModeEnabled) {
+            if (callingProcessUserId == UserHandle.USER_SYSTEM) {
+                final var clientState = mClientController.getClient(client.asBinder());
+                return mUserManagerInternal.getUserAssignedToDisplay(
+                        clientState.mSelfReportedDisplayId);
+            }
+            return callingProcessUserId;
         }
-        return callingProcessUserId;
+        return mCurrentImeUserId;
     }
 
    /**
