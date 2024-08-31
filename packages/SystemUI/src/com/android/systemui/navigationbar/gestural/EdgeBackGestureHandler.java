@@ -78,6 +78,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.plugins.PluginListener;
@@ -474,9 +475,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 } else {
                     String[] gestureBlockingActivities = resources.getStringArray(resId);
                     for (String gestureBlockingActivity : gestureBlockingActivities) {
-                        mGestureInteractor.addGestureBlockedActivity(
-                                ComponentName.unflattenFromString(gestureBlockingActivity),
-                                GestureInteractor.Scope.Local);
+                        final ComponentName component =
+                                ComponentName.unflattenFromString(gestureBlockingActivity);
+
+                        if (component != null) {
+                            mGestureInteractor.addGestureBlockedMatcher(
+                                    new TaskMatcher.TopActivityComponent(component),
+                                    GestureInteractor.Scope.Local);
+                        }
                     }
                 }
             } catch (NameNotFoundException e) {

@@ -42,4 +42,7 @@ public @interface DeviceSettingType {
 
     /** Device setting type is footer preference. */
     int DEVICE_SETTING_TYPE_FOOTER = 3;
+
+    /** Device setting type is "help" preference. */
+    int DEVICE_SETTING_TYPE_HELP = 4;
 }

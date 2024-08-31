@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Rudi nyuma"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Badilisha mbinu ya kuingiza data"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Fungua kiteua mbinu ya kuingiza data"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Mipangilio"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nafasi ya kuhifadhi inakaribia kujaa"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Hifadhi haitoshi kwa ajili ya mfumo. Hakikisha una MB 250 za nafasi ya hifadhi isiyotumika na uanzishe upya."</string>

@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -31,6 +32,7 @@ import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.node.LayoutAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -132,6 +134,8 @@ internal class SceneTransitionLayoutImpl(
     internal lateinit var lookaheadScope: LookaheadScope
         private set
 
+    internal var lastSize: IntSize = IntSize.Zero
+
     init {
         updateContents(builder, layoutDirection)
 
@@ -179,6 +183,28 @@ internal class SceneTransitionLayoutImpl(
         }
     }
 
+    internal fun contentForUserActions(): Content {
+        return findOverlayWithHighestZIndex() ?: scene(state.transitionState.currentScene)
+    }
+
+    private fun findOverlayWithHighestZIndex(): Overlay? {
+        val currentOverlays = state.transitionState.currentOverlays
+        if (currentOverlays.isEmpty()) {
+            return null
+        }
+
+        var overlay: Overlay? = null
+        currentOverlays.forEach { key ->
+            val previousZIndex = overlay?.zIndex
+            val candidate = overlay(key)
+            if (previousZIndex == null || candidate.zIndex > previousZIndex) {
+                overlay = candidate
+            }
+        }
+
+        return overlay
+    }
+
     internal fun updateContents(
         builder: SceneTransitionLayoutScope.() -> Unit,
         layoutDirection: LayoutDirection,
@@ -203,8 +229,7 @@ internal class SceneTransitionLayoutImpl(
 
                     scenesToRemove.remove(key)
 
-                    val resolvedUserActions =
-                        userActions.mapKeys { it.key.resolve(layoutDirection) }
+                    val resolvedUserActions = resolveUserActions(key, userActions, layoutDirection)
                     val scene = scenes[key]
                     if (scene != null) {
                         // Update an existing scene.
@@ -228,6 +253,7 @@ internal class SceneTransitionLayoutImpl(
 
                 override fun overlay(
                     key: OverlayKey,
+                    userActions: Map<UserAction, UserActionResult>,
                     alignment: Alignment,
                     content: @Composable (ContentScope.() -> Unit)
                 ) {
@@ -235,10 +261,12 @@ internal class SceneTransitionLayoutImpl(
                     overlaysToRemove.remove(key)
 
                     val overlay = overlays[key]
+                    val resolvedUserActions = resolveUserActions(key, userActions, layoutDirection)
                     if (overlay != null) {
                         // Update an existing overlay.
                         overlay.content = content
                         overlay.zIndex = zIndex
+                        overlay.userActions = resolvedUserActions
                         overlay.alignment = alignment
                     } else {
                         // New overlay.
@@ -247,8 +275,7 @@ internal class SceneTransitionLayoutImpl(
                                 key,
                                 this@SceneTransitionLayoutImpl,
                                 content,
-                                // TODO(b/353679003): Allow to specify user actions
-                                actions = emptyMap(),
+                                resolvedUserActions,
                                 zIndex,
                                 alignment,
                             )
@@ -261,6 +288,46 @@ internal class SceneTransitionLayoutImpl(
 
         scenesToRemove.forEach { scenes.remove(it) }
         overlaysToRemove.forEach { overlays.remove(it) }
+    }
+
+    private fun resolveUserActions(
+        key: ContentKey,
+        userActions: Map<UserAction, UserActionResult>,
+        layoutDirection: LayoutDirection
+    ): Map<UserAction.Resolved, UserActionResult> {
+        return userActions
+            .mapKeys { it.key.resolve(layoutDirection) }
+            .also { checkUserActions(key, it) }
+    }
+
+    private fun checkUserActions(
+        key: ContentKey,
+        userActions: Map<UserAction.Resolved, UserActionResult>,
+    ) {
+        userActions.forEach { (action, result) ->
+            fun details() = "Content $key, action $action, result $result."
+
+            when (result) {
+                is UserActionResult.ChangeScene -> {
+                    check(key != result.toScene) {
+                        error("Transition to the same scene is not supported. ${details()}")
+                    }
+                }
+                is UserActionResult.ReplaceByOverlay -> {
+                    check(key is OverlayKey) {
+                        "ReplaceByOverlay() can only be used for overlays, not scenes. ${details()}"
+                    }
+
+                    check(key != result.overlay) {
+                        "Transition to the same overlay is not supported. ${details()}"
+                    }
+                }
+                is UserActionResult.ShowOverlay,
+                is UserActionResult.HideOverlay -> {
+                    /* Always valid. */
+                }
+            }
+        }
     }
 
     @Composable
@@ -286,9 +353,8 @@ internal class SceneTransitionLayoutImpl(
 
     @Composable
     private fun BackHandler() {
-        val targetSceneForBack =
-            scene(state.transitionState.currentScene).userActions[Back.Resolved]?.toScene
-        PredictiveBackHandler(state, coroutineScope, targetSceneForBack)
+        val result = contentForUserActions().userActions[Back.Resolved]
+        PredictiveBackHandler(layoutImpl = this, result = result)
     }
 
     @Composable
@@ -312,7 +378,7 @@ internal class SceneTransitionLayoutImpl(
                 // Compose the new scene we are going to first.
                 transitions.fastForEachReversed { transition ->
                     when (transition) {
-                        is TransitionState.Transition.ChangeCurrentScene -> {
+                        is TransitionState.Transition.ChangeScene -> {
                             maybeAdd(transition.toScene)
                             maybeAdd(transition.fromScene)
                         }
@@ -362,7 +428,7 @@ internal class SceneTransitionLayoutImpl(
 
                     transitions.fastForEach { transition ->
                         when (transition) {
-                            is TransitionState.Transition.ChangeCurrentScene -> {}
+                            is TransitionState.Transition.ChangeScene -> {}
                             is TransitionState.Transition.ShowOrHideOverlay ->
                                 maybeAdd(transition.overlay)
                             is TransitionState.Transition.ReplaceOverlay -> {
@@ -379,8 +445,10 @@ internal class SceneTransitionLayoutImpl(
             .sortedBy { it.zIndex }
     }
 
-    internal fun setScenesTargetSizeForTest(size: IntSize) {
-        scenes.values.forEach { it.targetSize = size }
+    @VisibleForTesting
+    internal fun setContentsAndLayoutTargetSizeForTest(size: IntSize) {
+        lastSize = size
+        (scenes.values + overlays.values).forEach { it.targetSize = size }
     }
 
     internal fun overlaysOrNullForTest(): Map<OverlayKey, Overlay>? = _overlays
@@ -396,7 +464,11 @@ private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutIm
 }
 
 private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
-    Modifier.Node(), ApproachLayoutModifierNode {
+    Modifier.Node(), ApproachLayoutModifierNode, LayoutAwareModifierNode {
+    override fun onRemeasured(size: IntSize) {
+        layoutImpl.lastSize = size
+    }
+
     override fun isMeasurementApproachInProgress(lookaheadSize: IntSize): Boolean {
         return layoutImpl.state.isTransitioning()
     }
@@ -412,7 +484,7 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
         val width: Int
         val height: Int
         val transition =
-            layoutImpl.state.currentTransition as? TransitionState.Transition.ChangeCurrentScene
+            layoutImpl.state.currentTransition as? TransitionState.Transition.ChangeScene
         if (transition == null) {
             width = placeable.width
             height = placeable.height
@@ -432,7 +504,7 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 val progress =
                     when {
                         overscrollSpec == null -> transition.progress
-                        overscrollSpec.scene == transition.toScene -> 1f
+                        overscrollSpec.content == transition.toScene -> 1f
                         else -> 0f
                     }
 

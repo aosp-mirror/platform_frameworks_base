@@ -24,6 +24,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,9 +81,14 @@ class BackupHelper {
         }
 
         if (DEBUG) Log.d(TAG, "Start to back up " + taskContainers);
+        final List<ParcelableTaskContainerData> parcelableTaskContainerDataList = new ArrayList<>(
+                taskContainers.size());
+        for (TaskContainer taskContainer : taskContainers) {
+            parcelableTaskContainerDataList.add(taskContainer.getParcelableData());
+        }
         final Bundle state = new Bundle();
-        state.setClassLoader(TaskContainer.class.getClassLoader());
-        state.putParcelableList(KEY_TASK_CONTAINERS, taskContainers);
+        state.setClassLoader(ParcelableTaskContainerData.class.getClassLoader());
+        state.putParcelableList(KEY_TASK_CONTAINERS, parcelableTaskContainerDataList);
         mController.setSavedState(state);
     }
 
@@ -91,10 +97,12 @@ class BackupHelper {
             return;
         }
 
-        final List<TaskContainer> taskContainers = savedState.getParcelableArrayList(
-                KEY_TASK_CONTAINERS, TaskContainer.class);
-        for (TaskContainer taskContainer : taskContainers) {
-            if (DEBUG) Log.d(TAG, "restore task " + taskContainer.getTaskId());
+        final List<ParcelableTaskContainerData> parcelableTaskContainerDataList =
+                savedState.getParcelableArrayList(KEY_TASK_CONTAINERS,
+                        ParcelableTaskContainerData.class);
+        for (ParcelableTaskContainerData data : parcelableTaskContainerDataList) {
+            final TaskContainer taskContainer = new TaskContainer(data, mController);
+            if (DEBUG) Log.d(TAG, "Restoring task " + taskContainer.getTaskId());
             // TODO(b/289875940): implement the TaskContainer restoration.
         }
     }

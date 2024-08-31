@@ -126,7 +126,7 @@
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Կանգնեցնել"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Կիսվել"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Էկրանի տեսագրությունը պահվեց"</string>
-    <string name="screenrecord_save_text" msgid="3008973099800840163">"Հպեք՝ դիտելու համար"</string>
+    <string name="screenrecord_save_text" msgid="3008973099800840163">"Հպեք դիտելու համար"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Չհաջողվեց պահել էկրանի տեսագրությունը"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Չհաջողվեց սկսել տեսագրումը"</string>
     <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Կանգնեցնե՞լ տեսագրումը"</string>
@@ -156,7 +156,7 @@
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Տեսագրում ենք խնդիրը"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Կիսվել"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"Տեսագրությունը պահվեց"</string>
-    <string name="issuerecord_save_text" msgid="1205985304551521495">"Հպեք՝ դիտելու համար"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"Հպեք դիտելու համար"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"Չհաջողվեց պահել տեսագրությունը"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Չհաջողվեց սկսել տեսագրումը"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Լիաէկրան դիտակերպ"</string>
@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth-ը կմիանա վաղն առավոտյան"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Փոխանցել աուդիո"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Աուդիոյի փոխանցում"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"անցնել աուդիոյի փոխանցման կարգավորումներ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Մարտկոցի լիցքը՝ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Աուդիո"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Ականջակալ"</string>
@@ -381,7 +380,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Էկրանի տեսագրում"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Սկսել"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Կանգնեցնել"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Ձայնագրել"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Խնդրի տեսագրում"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Սկսել"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Կանգնեցնել"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Հաղորդում սխալի մասին"</string>
@@ -390,7 +389,7 @@
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Էկրանի տեսագրում"</string>
     <string name="performance" msgid="6552785217174378320">"Արդյունավետություն"</string>
     <string name="user_interface" msgid="3712869377953950887">"Օգտատիրական ինտերֆեյս"</string>
-    <string name="thermal" msgid="6758074791325414831">"Ջերմատեսիլ"</string>
+    <string name="thermal" msgid="6758074791325414831">"Տաքացում"</string>
     <string name="custom" msgid="3337456985275158299">"Հատուկ"</string>
     <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Հետագծման հատուկ կարգավորումներ"</string>
     <string name="restore_default" msgid="5259420807486239755">"Վերականգնել կանխադրված կարգավորումները"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Պատրաստ է"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Կարգավորումներ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Միացված է"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Միաց․ • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Անջատված է"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Կարգավորել"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Կառավարել կարգավորումներում"</string>
@@ -665,7 +665,7 @@
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Հասանելի չէ․ «Չանհանգստացնել» ռեժիմը միացված է"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Հասանելի չէ․ «Չանհանգստացնել» ռեժիմը միացված է"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s: Հպեք՝ ձայնը միացնելու համար:"</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s: Հպեք՝ թրթռումը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s: Հպեք՝ թրթռոցը միացնելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s: Հպեք՝ ձայնն անջատելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s։ Հպեք՝ թրթռոցը միացնելու համար։"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s։ Հպեք՝ ձայնը անջատելու համար։"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Արբանյակային լավ կապ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Հասանելի է արբանյակային կապ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Աշխատանքային պրոֆիլ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Զվարճանք մեկ՝ որոշակի մարդու համար"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Համակարգի ՕՄ-ի կարգավորիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտատիրոջ միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>

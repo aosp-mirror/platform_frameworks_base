@@ -3527,7 +3527,8 @@ class StorageManagerService extends IStorageManager.Stub
         // of the calling App
         final long token = Binder.clearCallingIdentity();
         try {
-            Context targetAppContext = mContext.createPackageContext(packageName, 0);
+            Context targetAppContext = mContext.createPackageContextAsUser(packageName,
+                    /* flags= */ 0, UserHandle.of(UserHandle.getUserId(originalUid)));
             Intent intent = new Intent(Intent.ACTION_DEFAULT);
             intent.setClassName(packageName,
                     appInfo.manageSpaceActivityName);

@@ -72,7 +72,6 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.SensorList;
-import com.android.server.biometrics.sensors.face.FaceUtils;
 import com.android.server.biometrics.sensors.face.ServiceProvider;
 import com.android.server.biometrics.sensors.face.UsageStats;
 import com.android.server.biometrics.sensors.face.hidl.HidlToAidlSensorAdapter;
@@ -326,8 +325,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         }
 
         if (Build.isDebuggable()) {
-            BiometricUtils<Face> utils = FaceUtils.getInstance(
-                    mFaceSensors.keyAt(0));
+            BiometricUtils<Face> utils = mFaceSensors.get(
+                    mFaceSensors.keyAt(0)).getFaceUtilsInstance();
             for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
                 List<Face> enrollments = utils.getBiometricsForUser(mContext, user.id);
                 Slog.d(getTag(), "Expecting enrollments for user " + user.id + ": "
@@ -386,7 +385,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     new InvalidationRequesterClient<>(mContext, userId, sensorId,
                             BiometricLogger.ofUnknown(mContext),
                             mBiometricContext,
-                            FaceUtils.getInstance(sensorId));
+                            mFaceSensors.get(sensorId).getFaceUtilsInstance());
             scheduleForSensor(sensorId, client);
         });
     }
@@ -415,7 +414,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @NonNull
     @Override
     public List<Face> getEnrolledFaces(int sensorId, int userId) {
-        return FaceUtils.getInstance(sensorId).getBiometricsForUser(mContext, userId);
+        return mFaceSensors.get(sensorId).getFaceUtilsInstance()
+                .getBiometricsForUser(mContext, userId);
     }
 
     @Override
@@ -497,13 +497,14 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceEnrollClient client = new FaceEnrollClient(mContext,
                     mFaceSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, id, FaceUtils.getInstance(sensorId), disabledFeatures,
-                    ENROLL_TIMEOUT_SEC, previewSurface, sensorId,
+                    opPackageName, id, mFaceSensors.get(sensorId).getFaceUtilsInstance(),
+                    disabledFeatures, ENROLL_TIMEOUT_SEC, previewSurface, sensorId,
                     createLogger(BiometricsProtoEnums.ACTION_ENROLL,
                             BiometricsProtoEnums.CLIENT_UNKNOWN,
                             mAuthenticationStatsCollector),
                     mBiometricContext, maxTemplatesPerUser, debugConsent, options,
-                    mAuthenticationStateListeners);
+                    mAuthenticationStateListeners,
+                    mFaceSensors.get(sensorId).getFaceUtilsInstance());
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
         return id;
@@ -615,7 +616,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @Override
     public void scheduleRemoveAll(int sensorId, @NonNull IBinder token, int userId,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
-        final List<Face> faces = FaceUtils.getInstance(sensorId)
+        final List<Face> faces = mFaceSensors.get(sensorId).getFaceUtilsInstance()
                 .getBiometricsForUser(mContext, userId);
         final int[] faceIds = new int[faces.size()];
         for (int i = 0; i < faces.size(); i++) {
@@ -632,7 +633,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceRemovalClient client = new FaceRemovalClient(mContext,
                     mFaceSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), faceIds, userId,
-                    opPackageName, FaceUtils.getInstance(sensorId), sensorId,
+                    opPackageName, mFaceSensors.get(sensorId).getFaceUtilsInstance(), sensorId,
                     createLogger(BiometricsProtoEnums.ACTION_REMOVE,
                             BiometricsProtoEnums.CLIENT_UNKNOWN,
                             mAuthenticationStatsCollector),
@@ -666,7 +667,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName) {
         mHandler.post(() -> {
             mFaceSensors.get(sensorId).scheduleFaceUpdateActiveUserClient(userId);
-            final List<Face> faces = FaceUtils.getInstance(sensorId)
+            final List<Face> faces = mFaceSensors.get(sensorId).getFaceUtilsInstance()
                     .getBiometricsForUser(mContext, userId);
             if (faces.isEmpty()) {
                 Slog.w(getTag(), "Ignoring setFeature, no templates enrolled for user: " + userId);
@@ -687,7 +688,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName) {
         mHandler.post(() -> {
             mFaceSensors.get(sensorId).scheduleFaceUpdateActiveUserClient(userId);
-            final List<Face> faces = FaceUtils.getInstance(sensorId)
+            final List<Face> faces = mFaceSensors.get(sensorId).getFaceUtilsInstance()
                     .getBiometricsForUser(mContext, userId);
             if (faces.isEmpty()) {
                 Slog.w(getTag(), "Ignoring getFeature, no templates enrolled for user: " + userId);
@@ -727,7 +728,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                                     BiometricsProtoEnums.CLIENT_UNKNOWN,
                                     mAuthenticationStatsCollector),
                             mBiometricContext,
-                            FaceUtils.getInstance(sensorId),
+                            mFaceSensors.get(sensorId).getFaceUtilsInstance(),
                             mFaceSensors.get(sensorId).getAuthenticatorIds());
             if (favorHalEnrollments) {
                 client.setFavorHalEnrollments();
@@ -768,7 +769,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
-                final int c = FaceUtils.getInstance(sensorId)
+                final int c = mFaceSensors.get(sensorId).getFaceUtilsInstance()
                         .getBiometricsForUser(mContext, userId).size();
                 JSONObject set = new JSONObject();
                 set.put("id", userId);

@@ -326,7 +326,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * Figures out the target IME user ID for a given {@link Binder} IPC.
      *
      * @param callingProcessUserId the user ID of the calling process
-     * @return User ID to be used for this {@link Binder} call.
+     * @return the user ID to be used for this {@link Binder} call
      */
     @GuardedBy("ImfLock.class")
     @UserIdInt
@@ -336,6 +336,30 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
+     * Figures out the targetIMuser for a given {@link Binder} IPC. In case
+     * {@code callingProcessUserId} is SYSTEM user, then it will return the owner of the display
+     * associated with the {@code client} passed as parameter.
+     *
+     * @param callingProcessUserId the user ID of the calling process
+     * @param client               the input method client used to retrieve the user id in case
+     *                             {@code callingProcessUserId} is assigned to SYSTEM user
+     * @return the user ID to be used for this {@link Binder} call
+     */
+    @GuardedBy("ImfLock.class")
+    @UserIdInt
+    @BinderThread
+    private int resolveImeUserIdLocked(@UserIdInt int callingProcessUserId,
+            @NonNull IInputMethodClient client) {
+        if (mConcurrentMultiUserModeEnabled
+                && callingProcessUserId == UserHandle.USER_SYSTEM) {
+            final var clientState = mClientController.getClient(client.asBinder());
+            return mUserManagerInternal.getUserAssignedToDisplay(
+                    clientState.mSelfReportedDisplayId);
+        }
+        return callingProcessUserId;
+    }
+
+   /**
      * Figures out the target IME user ID associated with the given {@code displayId}.
      *
      * @param displayId the display ID to be queried about
@@ -3069,7 +3093,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         synchronized (ImfLock.class) {
             final int uid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(uid);
-            final int userId = resolveImeUserIdLocked(callingUserId);
+            final int userId = resolveImeUserIdLocked(callingUserId, client);
             final boolean result = showSoftInputLocked(client, windowToken, statsToken, flags,
                     lastClickToolType, resultReceiver, reason, uid, userId);
             // When ZeroJankProxy is enabled, the app has already received "true" as the return
@@ -3515,7 +3539,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         synchronized (ImfLock.class) {
             final int uid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(uid);
-            final int userId = resolveImeUserIdLocked(callingUserId);
+            final int userId = resolveImeUserIdLocked(callingUserId, client);
             final boolean result = hideSoftInputLocked(client, windowToken, statsToken, flags,
                     resultReceiver, reason, uid, userId);
             // When ZeroJankProxy is enabled, the app has already received "true" as the return

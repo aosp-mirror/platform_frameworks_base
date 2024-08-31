@@ -81,6 +81,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
@@ -129,7 +130,7 @@ constructor(
     private val statusBarIconController: StatusBarIconController,
     private val mediaCarouselController: MediaCarouselController,
     @Named(MediaModule.QS_PANEL) private val mediaHost: MediaHost,
-) : ComposableScene {
+) : ExclusiveActivatable(), ComposableScene {
     override val key = Scenes.QuickSettings
 
     private val actionsViewModel: QuickSettingsSceneActionsViewModel by lazy {
@@ -139,7 +140,7 @@ constructor(
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions
 
-    override suspend fun activate(): Nothing {
+    override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
     }
 
@@ -151,7 +152,9 @@ constructor(
             notificationStackScrollView = notificationStackScrollView.get(),
             viewModelFactory = contentViewModelFactory,
             notificationsPlaceholderViewModel =
-                rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
+                rememberViewModel("QuickSettingsScene-notifPlaceholderViewModel") {
+                    notificationsPlaceholderViewModelFactory.create()
+                },
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -178,10 +181,11 @@ private fun SceneScope.QuickSettingsScene(
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
 
-    val viewModel = rememberViewModel { viewModelFactory.create() }
-    val brightnessMirrorViewModel = rememberViewModel {
-        viewModel.brightnessMirrorViewModelFactory.create()
-    }
+    val viewModel = rememberViewModel("QuickSettingsScene-viewModel") { viewModelFactory.create() }
+    val brightnessMirrorViewModel =
+        rememberViewModel("QuickSettingsScene-brightnessMirrorViewModel") {
+            viewModel.brightnessMirrorViewModelFactory.create()
+        }
     val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(

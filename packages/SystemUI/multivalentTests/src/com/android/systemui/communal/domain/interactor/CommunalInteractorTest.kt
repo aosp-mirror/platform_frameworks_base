@@ -68,15 +68,16 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
+import com.android.systemui.statusbar.phone.fakeManagedProfileController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.utils.leaks.FakeManagedProfileController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,6 +123,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var userTracker: FakeUserTracker
     private lateinit var activityStarter: ActivityStarter
     private lateinit var userManager: UserManager
+    private lateinit var managedProfileController: FakeManagedProfileController
 
     private lateinit var underTest: CommunalInteractor
 
@@ -143,6 +145,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         userTracker = kosmos.fakeUserTracker
         activityStarter = kosmos.activityStarter
         userManager = kosmos.userManager
+        managedProfileController = kosmos.fakeManagedProfileController
 
         whenever(mainUser.isMain).thenReturn(true)
         whenever(secondaryUser.isMain).thenReturn(false)
@@ -352,7 +355,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             smartspaceRepository.setTimers(targets)
 
-            val smartspaceContent by collectLastValue(underTest.getOngoingContent(true))
+            val smartspaceContent by collectLastValue(underTest.ongoingContent)
             assertThat(smartspaceContent?.size).isEqualTo(totalTargets)
             for (index in 0 until totalTargets) {
                 assertThat(smartspaceContent?.get(index)?.size).isEqualTo(expectedSizes[index])
@@ -368,25 +371,11 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Media is playing.
             mediaRepository.mediaActive()
 
-            val umoContent by collectLastValue(underTest.getOngoingContent(true))
+            val umoContent by collectLastValue(underTest.ongoingContent)
 
             assertThat(umoContent?.size).isEqualTo(1)
             assertThat(umoContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
             assertThat(umoContent?.get(0)?.key).isEqualTo(CommunalContentModel.KEY.umo())
-        }
-
-    @Test
-    fun umo_mediaPlaying_doNotShowUmo() =
-        testScope.run {
-            // Tutorial completed.
-            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            // Media is playing.
-            mediaRepository.mediaActive()
-
-            val umoContent by collectLastValue(underTest.getOngoingContent(false))
-
-            assertThat(umoContent?.size).isEqualTo(0)
         }
 
     @Test
@@ -412,7 +401,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val timer3 = smartspaceTimer("timer3", timestamp = 4L)
             smartspaceRepository.setTimers(listOf(timer1, timer2, timer3))
 
-            val ongoingContent by collectLastValue(underTest.getOngoingContent(true))
+            val ongoingContent by collectLastValue(underTest.ongoingContent)
             assertThat(ongoingContent?.size).isEqualTo(4)
             assertThat(ongoingContent?.get(0)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("timer3"))
@@ -791,14 +780,6 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun showWidgetEditor_withPreselectedKey_startsActivity() =
-        testScope.runTest {
-            val widgetKey = CommunalContentModel.KEY.widget(123)
-            underTest.showWidgetEditor(preselectedKey = widgetKey)
-            verify(editWidgetsActivityStarter).startActivity(widgetKey)
-        }
-
-    @Test
     fun showWidgetEditor_openWidgetPickerOnStart_startsActivity() =
         testScope.runTest {
             underTest.showWidgetEditor(shouldOpenWidgetPickerOnStart = true)
@@ -1080,6 +1061,24 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(disclaimerDismissed).isTrue()
             advanceTimeBy(CommunalInteractor.DISCLAIMER_RESET_MILLIS)
             assertThat(disclaimerDismissed).isFalse()
+        }
+
+    @Test
+    fun settingSelectedKey_flowUpdated() {
+        testScope.runTest {
+            val key = "test"
+            val selectedKey by collectLastValue(underTest.selectedKey)
+            underTest.setSelectedKey(key)
+            assertThat(selectedKey).isEqualTo(key)
+        }
+    }
+
+    @Test
+    fun unpauseWorkProfileEnablesWorkMode() =
+        testScope.runTest {
+            underTest.unpauseWorkProfile()
+
+            assertThat(managedProfileController.isWorkModeEnabled()).isTrue()
         }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {

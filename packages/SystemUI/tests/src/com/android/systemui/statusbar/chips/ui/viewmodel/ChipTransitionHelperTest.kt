@@ -154,5 +154,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
         }
 
     private fun createIcon(@DrawableRes drawable: Int) =
-        OngoingActivityChipModel.ChipIcon.Basic(Icon.Resource(drawable, contentDescription = null))
+        OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+            Icon.Resource(drawable, contentDescription = null)
+        )
 }

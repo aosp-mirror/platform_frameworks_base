@@ -83,8 +83,8 @@ constructor(
     private val intEvaluator = IntEvaluator()
     private val floatEvaluator = FloatEvaluator()
     private val showingAlternateBouncer: Flow<Boolean> =
-        transitionInteractor.startedKeyguardState.map { keyguardState ->
-            keyguardState == KeyguardState.ALTERNATE_BOUNCER
+        transitionInteractor.startedKeyguardTransitionStep.map { keyguardStep ->
+            keyguardStep.to == KeyguardState.ALTERNATE_BOUNCER
         }
     private val qsProgress: Flow<Float> = shadeInteractor.qsExpansion.onStart { emit(0f) }
     private val shadeExpansion: Flow<Float> = shadeInteractor.shadeExpansion.onStart { emit(0f) }

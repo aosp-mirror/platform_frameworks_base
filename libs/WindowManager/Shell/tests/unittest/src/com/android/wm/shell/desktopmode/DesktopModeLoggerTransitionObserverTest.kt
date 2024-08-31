@@ -22,6 +22,8 @@ import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
+import android.os.SystemProperties
+import android.os.Trace
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
@@ -38,6 +40,7 @@ import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.modules.utils.testing.ExtendedMockitoRule
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
@@ -86,7 +89,11 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
   @JvmField
   @Rule
   val extendedMockitoRule =
-      ExtendedMockitoRule.Builder(this).mockStatic(DesktopModeStatus::class.java).build()!!
+      ExtendedMockitoRule.Builder(this)
+          .mockStatic(DesktopModeStatus::class.java)
+          .mockStatic(SystemProperties::class.java)
+          .mockStatic(Trace::class.java)
+          .build()!!
 
   private val testExecutor = mock<ShellExecutor>()
   private val mockShellInit = mock<ShellInit>()
@@ -695,6 +702,17 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     assertNotNull(sessionId)
     verify(desktopModeEventLogger, times(1)).logSessionEnter(eq(sessionId!!), eq(enterReason))
     verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), eq(taskUpdate))
+    ExtendedMockito.verify {
+        Trace.setCounter(
+            eq(Trace.TRACE_TAG_WINDOW_MANAGER),
+            eq(DesktopModeLoggerTransitionObserver.VISIBLE_TASKS_COUNTER_NAME),
+            eq(taskUpdate.visibleTaskCount.toLong()))
+    }
+    ExtendedMockito.verify {
+        SystemProperties.set(
+            eq(DesktopModeLoggerTransitionObserver.VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY),
+            eq(taskUpdate.visibleTaskCount.toString()))
+    }
     verifyZeroInteractions(desktopModeEventLogger)
   }
 

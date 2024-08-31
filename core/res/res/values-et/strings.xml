@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Tagasi"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Sisestusmeetodi vahetamine"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Sisestusmeetodi valija avamine"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Seaded"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Talletusruum saab täis"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>

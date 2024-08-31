@@ -765,7 +765,9 @@ public class ZenModeHelper {
             try {
                 ApplicationInfo applicationInfo = mPm.getApplicationInfo(pkg, 0);
                 rule.name = applicationInfo.loadLabel(mPm).toString();
-                rule.iconResName = drawableResIdToResName(pkg, applicationInfo.icon);
+                if (!Flags.modesUi()) {
+                    rule.iconResName = drawableResIdToResName(pkg, applicationInfo.icon);
+                }
             } catch (PackageManager.NameNotFoundException e) {
                 // Should not happen, since it's the app calling us (?)
                 Log.w(TAG, "Package not found for creating implicit zen rule");
@@ -1748,6 +1750,15 @@ public class ZenModeHelper {
                             // to ZenPolicy to store with the automatic zen rule.
                             automaticRule.zenPolicy =
                                     manualRulePolicy.overwrittenWith(automaticRule.zenPolicy);
+                        }
+                    }
+
+                    if (Flags.modesApi() && Flags.modesUi()
+                            && config.version < ZenModeConfig.XML_VERSION_MODES_UI) {
+                        // Clear icons from implicit rules. App icons are not suitable for some
+                        // surfaces, so juse use a default (the user can select a different one).
+                        if (ZenModeConfig.isImplicitRuleId(automaticRule.id)) {
+                            automaticRule.iconResName = null;
                         }
                     }
                 }

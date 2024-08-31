@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.OverlayKey
-import com.android.compose.animation.scene.OverscrollScope
 import com.android.compose.animation.scene.OverscrollSpecImpl
 import com.android.compose.animation.scene.ProgressVisibilityThreshold
 import com.android.compose.animation.scene.SceneKey
@@ -75,7 +74,7 @@ sealed interface TransitionState {
         val replacedTransition: Transition? = null,
     ) : TransitionState {
         /** A transition animating between [fromScene] and [toScene]. */
-        abstract class ChangeCurrentScene(
+        abstract class ChangeScene(
             /** The scene this transition is starting from. Can't be the same as toScene */
             val fromScene: SceneKey,
 
@@ -386,10 +385,10 @@ sealed interface TransitionState {
         val orientation: Orientation
 
         /**
-         * Scope which can be used in the Overscroll DSL to define a transformation based on the
-         * distance between [Transition.fromContent] and [Transition.toContent].
+         * Return the absolute distance between fromScene and toScene, if available, otherwise
+         * [DistanceUnspecified].
          */
-        val overscrollScope: OverscrollScope
+        val absoluteDistance: Float
 
         /**
          * The content (scene or overlay) around which the transition is currently bouncing. When

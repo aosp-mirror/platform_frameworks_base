@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Il Bluetooth verrà attivato domani mattina"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Condividi audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Condivisione audio in corso…"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"inserisci le impostazioni di condivisione audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auricolare"</string>
@@ -385,14 +384,14 @@
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Avvia"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Interrompi"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Segnalazione di bug"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Quali problemi ha l\'esperienza del dispositivo?"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Quali problemi ha l\'esperienza con il dispositivo?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Seleziona il tipo di problema"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Registrazione schermo"</string>
     <string name="performance" msgid="6552785217174378320">"Prestazioni"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interfaccia utente"</string>
     <string name="thermal" msgid="6758074791325414831">"Termico"</string>
     <string name="custom" msgid="3337456985275158299">"Personalizzate"</string>
-    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Impostazioni monitoraggio personalizzate"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Impostazioni di traccia personalizzate"</string>
     <string name="restore_default" msgid="5259420807486239755">"Ripristina predefinite"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modalità a una mano"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Apparecchi acustici"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Fine"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Impostazioni"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"On"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"On • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Off"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Configura"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gestisci nelle impostazioni"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellitare, connessione buona"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellitare, connessione disponibile"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS satellitare"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profilo di lavoro"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Il divertimento riservato a pochi eletti"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"L\'Ottimizzatore UI di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>

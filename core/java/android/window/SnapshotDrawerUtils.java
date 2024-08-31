@@ -59,7 +59,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -185,7 +184,6 @@ public class SnapshotDrawerUtils {
 
         private void drawSizeMismatchSnapshot() {
             final HardwareBuffer buffer = mSnapshot.getHardwareBuffer();
-            final SurfaceSession session = new SurfaceSession();
 
             // We consider nearly matched dimensions as there can be rounding errors and the user
             // won't notice very minute differences from scaling one dimension more than the other
@@ -193,7 +191,7 @@ public class SnapshotDrawerUtils {
                     && !Flags.drawSnapshotAspectRatioMatch();
 
             // Keep a reference to it such that it doesn't get destroyed when finalized.
-            SurfaceControl childSurfaceControl = new SurfaceControl.Builder(session)
+            SurfaceControl childSurfaceControl = new SurfaceControl.Builder()
                     .setName(mTitle + " - task-snapshot-surface")
                     .setBLASTLayer()
                     .setFormat(buffer.getFormat())
