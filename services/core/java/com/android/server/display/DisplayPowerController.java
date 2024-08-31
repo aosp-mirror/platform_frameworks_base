@@ -2792,7 +2792,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mBatteryStats != null) {
             try {
                 // TODO(multi-display): make this multi-display
-                mBatteryStats.noteScreenState(screenState);
+                mBatteryStats.noteScreenState(/* displayId= */ 0, screenState, reason);
             } catch (RemoteException e) {
                 // same process
             }

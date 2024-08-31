@@ -144,7 +144,7 @@ interface IBatteryStats {
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteGpsSignalQuality(int signalLevel);
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteScreenState(int state);
+    void noteScreenState(int displayId, int state, int reason);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteScreenBrightness(int brightness);
     @EnforcePermission("UPDATE_DEVICE_STATS")
