@@ -92,7 +92,12 @@ constructor(
                         icon = zenModeInteractor.getModeIcon(mode).drawable().asIcon(),
                         text = mode.name,
                         subtext = getTileSubtext(mode),
+                        subtextDescription = getModeDescription(mode) ?: "",
                         enabled = mode.isActive,
+                        stateDescription =
+                            context.getString(
+                                if (mode.isActive) R.string.zen_mode_on else R.string.zen_mode_off
+                            ),
                         onClick = {
                             if (!mode.rule.isEnabled) {
                                 openSettings(mode)
@@ -113,7 +118,9 @@ constructor(
                                 }
                             }
                         },
-                        onLongClick = { openSettings(mode) }
+                        onLongClick = { openSettings(mode) },
+                        onLongClickLabel =
+                            context.resources.getString(R.string.accessibility_long_click_tile)
                     )
                 }
             }
@@ -128,23 +135,36 @@ constructor(
         dialogDelegate.launchFromDialog(intent)
     }
 
-    private fun getTileSubtext(mode: ZenMode): String {
+    /**
+     * Returns a description of the mode, which is:
+     *   * a prompt to set up the mode if it is not enabled
+     *   * if it cannot be manually activated, text that says so
+     *   * otherwise, the trigger description of the mode if it exists...
+     *   * ...or null if it doesn't
+     *
+     * This description is used directly for the content description of a mode tile for screen
+     * readers, and for the tile subtext will be augmented with the current status of the mode.
+     */
+    private fun getModeDescription(mode: ZenMode): String? {
         if (!mode.rule.isEnabled) {
             return context.resources.getString(R.string.zen_mode_set_up)
         }
         if (!mode.rule.isManualInvocationAllowed && !mode.isActive) {
             return context.resources.getString(R.string.zen_mode_no_manual_invocation)
         }
+        return mode.getDynamicDescription(context)
+    }
 
-        val modeSubtext = mode.getDynamicDescription(context)
+    private fun getTileSubtext(mode: ZenMode): String {
+        val modeDescription = getModeDescription(mode)
         return if (mode.isActive) {
-            if (modeSubtext != null) {
-                context.getString(R.string.zen_mode_on_with_details, modeSubtext)
+            if (modeDescription != null) {
+                context.getString(R.string.zen_mode_on_with_details, modeDescription)
             } else {
                 context.getString(R.string.zen_mode_on)
             }
         } else {
-            modeSubtext ?: context.getString(R.string.zen_mode_off)
+            modeDescription ?: context.getString(R.string.zen_mode_off)
         }
     }
 

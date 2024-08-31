@@ -6094,6 +6094,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
+        if (mImeBackAnimationController.isAnimationInProgress()) {
+            // IME predictive back animation is currently in progress which means that scrollY is
+            // currently controlled by ImeBackAnimationController.
+            return false;
+        }
+
         final Rect ci = mAttachInfo.mContentInsets;
         final Rect vi = mAttachInfo.mVisibleInsets;
         int scrollY = 0;

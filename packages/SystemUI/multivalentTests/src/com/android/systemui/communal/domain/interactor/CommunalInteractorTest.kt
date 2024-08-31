@@ -68,15 +68,16 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
+import com.android.systemui.statusbar.phone.fakeManagedProfileController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.utils.leaks.FakeManagedProfileController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,6 +123,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var userTracker: FakeUserTracker
     private lateinit var activityStarter: ActivityStarter
     private lateinit var userManager: UserManager
+    private lateinit var managedProfileController: FakeManagedProfileController
 
     private lateinit var underTest: CommunalInteractor
 
@@ -143,6 +145,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         userTracker = kosmos.fakeUserTracker
         activityStarter = kosmos.activityStarter
         userManager = kosmos.userManager
+        managedProfileController = kosmos.fakeManagedProfileController
 
         whenever(mainUser.isMain).thenReturn(true)
         whenever(secondaryUser.isMain).thenReturn(false)
@@ -1069,6 +1072,14 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(selectedKey).isEqualTo(key)
         }
     }
+
+    @Test
+    fun unpauseWorkProfileEnablesWorkMode() =
+        testScope.runTest {
+            underTest.unpauseWorkProfile()
+
+            assertThat(managedProfileController.isWorkModeEnabled()).isTrue()
+        }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
         whenever(kosmos.devicePolicyManager.getKeyguardDisabledFeatures(nullable(), eq(user.id)))

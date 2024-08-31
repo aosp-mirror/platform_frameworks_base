@@ -173,7 +173,8 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @return Height of the notifications panel without top padding when expansion completes.
+     * @return Height of the available space for the notification content, when the shade
+     * expansion completes.
      */
     public float getStackEndHeight() {
         return mStackEndHeight;
@@ -276,17 +277,18 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @see #getStackHeight()
+     * @return Height of the notification content returned by {@link #getStackEndHeight()}, but
+     * interpolated by the shade expansion fraction.
      */
-    public void setStackHeight(float stackHeight) {
-        mStackHeight = stackHeight;
+    public float getInterpolatedStackHeight() {
+        return mStackHeight;
     }
 
     /**
-     * @return Height of notifications panel interpolated by the expansion fraction.
+     * @see #getInterpolatedStackHeight()
      */
-    public float getStackHeight() {
-        return mStackHeight;
+    public void setInterpolatedStackHeight(float stackHeight) {
+        mStackHeight = stackHeight;
     }
 
     @Inject

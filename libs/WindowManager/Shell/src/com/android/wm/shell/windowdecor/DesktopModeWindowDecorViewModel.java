@@ -491,7 +491,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         } else {
             mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext,
                     Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE, "maximize_menu_resizable");
-            mDesktopTasksController.snapToHalfScreen(decoration.mTaskInfo,
+            mDesktopTasksController.snapToHalfScreen(
+                    decoration.mTaskInfo,
+                    decoration.mTaskSurface,
                     decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
                     left ? SnapPosition.LEFT : SnapPosition.RIGHT);
         }

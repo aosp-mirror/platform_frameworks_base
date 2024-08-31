@@ -18,6 +18,8 @@ package com.android.compose.animation.scene
 
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -65,7 +67,23 @@ class PredictiveBackHandlerTest {
 
     @Test
     fun testPredictiveBack() {
-        val layoutState = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val transitionFrames = 2
+        val layoutState =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    SceneA,
+                    transitions =
+                        transitions {
+                            from(SceneA, to = SceneB) {
+                                spec =
+                                    tween(
+                                        durationMillis = transitionFrames * 16,
+                                        easing = LinearEasing
+                                    )
+                            }
+                        }
+                )
+            }
         rule.setContent {
             SceneTransitionLayout(layoutState) {
                 scene(SceneA, mapOf(Back to SceneB)) { Box(Modifier.fillMaxSize()) }
@@ -94,12 +112,27 @@ class PredictiveBackHandlerTest {
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
         assertThat(layoutState.transitionState).isIdle()
 
+        rule.mainClock.autoAdvance = false
+
         // Start again and commit it.
         rule.runOnUiThread {
             dispatcher.dispatchOnBackStarted(backEvent())
             dispatcher.dispatchOnBackProgressed(backEvent(progress = 0.4f))
             dispatcher.onBackPressed()
         }
+        rule.mainClock.advanceTimeByFrame()
+        rule.waitForIdle()
+        val transition2 = assertThat(layoutState.transitionState).isSceneTransition()
+        // verify that transition picks up progress from preview
+        assertThat(transition2).hasProgress(0.4f, tolerance = 0.0001f)
+
+        rule.mainClock.advanceTimeByFrame()
+        rule.waitForIdle()
+        // verify that transition is half way between preview-end-state (0.4f) and target-state (1f)
+        // after one frame
+        assertThat(transition2).hasProgress(0.7f, tolerance = 0.0001f)
+
+        rule.mainClock.autoAdvance = true
         rule.waitForIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneB)
         assertThat(layoutState.transitionState).isIdle()

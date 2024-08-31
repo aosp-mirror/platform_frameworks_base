@@ -21,11 +21,13 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.view.Display;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IUserInitializationCompleteCallback;
 
 import androidx.annotation.MainThread;
 
@@ -68,6 +70,9 @@ public class AccessibilityFloatingMenuController implements
     private int mBtnMode;
     private String mBtnTargets;
     private boolean mIsKeyguardVisible;
+    private boolean mIsUserInInitialization;
+    @VisibleForTesting
+    Handler mHandler;
 
     @VisibleForTesting
     final KeyguardUpdateMonitorCallback mKeyguardCallback = new KeyguardUpdateMonitorCallback() {
@@ -86,17 +91,13 @@ public class AccessibilityFloatingMenuController implements
         @Override
         public void onUserSwitching(int userId) {
             destroyFloatingMenu();
-        }
-
-        @Override
-        public void onUserSwitchComplete(int userId) {
-            mContext = mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0);
-            mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
-            mBtnTargets =
-                    mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
-            handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
+            mIsUserInInitialization = true;
         }
     };
+
+    @VisibleForTesting
+    final UserInitializationCompleteCallback mUserInitializationCompleteCallback =
+            new UserInitializationCompleteCallback();
 
     @Inject
     public AccessibilityFloatingMenuController(Context context,
@@ -109,7 +110,8 @@ public class AccessibilityFloatingMenuController implements
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecureSettings secureSettings,
             DisplayTracker displayTracker,
-            NavigationModeController navigationModeController) {
+            NavigationModeController navigationModeController,
+            Handler handler) {
         mContext = context;
         mWindowManager = windowManager;
         mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
@@ -121,6 +123,7 @@ public class AccessibilityFloatingMenuController implements
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
         mNavigationModeController = navigationModeController;
+        mHandler = handler;
 
         mIsKeyguardVisible = false;
     }
@@ -159,6 +162,8 @@ public class AccessibilityFloatingMenuController implements
         mAccessibilityButtonModeObserver.addListener(this);
         mAccessibilityButtonTargetsObserver.addListener(this);
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
+        mAccessibilityManager.registerUserInitializationCompleteCallback(
+                mUserInitializationCompleteCallback);
     }
 
     /**
@@ -172,7 +177,7 @@ public class AccessibilityFloatingMenuController implements
      */
     private void handleFloatingMenuVisibility(boolean keyguardVisible,
             @AccessibilityButtonMode int mode, String targets) {
-        if (keyguardVisible) {
+        if (keyguardVisible || mIsUserInInitialization) {
             destroyFloatingMenu();
             return;
         }
@@ -209,5 +214,19 @@ public class AccessibilityFloatingMenuController implements
 
         mFloatingMenu.hide();
         mFloatingMenu = null;
+    }
+
+    class UserInitializationCompleteCallback
+            extends IUserInitializationCompleteCallback.Stub {
+        @Override
+        public void onUserInitializationComplete(int userId) {
+            mIsUserInInitialization = false;
+            mContext = mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0);
+            mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
+            mBtnTargets =
+                    mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
+            mHandler.post(
+                    () -> handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets));
+        }
     }
 }

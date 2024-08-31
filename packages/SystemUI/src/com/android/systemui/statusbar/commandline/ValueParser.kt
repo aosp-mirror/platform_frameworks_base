@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.commandline
 
+import androidx.core.graphics.toColorInt
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -164,10 +165,23 @@ private val parseFloat: ValueParser<Float> = ValueParser { value ->
         ?: Result.failure(ArgParseError("Failed to parse $value as a float"))
 }
 
+// See https://developer.android.com/reference/android/graphics/Color#parseColor(java.lang.String)
+// for the supported formats of the color string. tl;dr: #RRGGBB, #AARRGGBB, or a basic color name
+// like "red" or "green". For the RRGGBB values, the `#` needs to be escaped. Use `"\\#RRGGBB"` in
+// the command to escape the `#` correctly.
+private val parseColor: ValueParser<Int> = ValueParser { value ->
+    try {
+        Result.success(value.toColorInt())
+    } catch (e: IllegalArgumentException) {
+        Result.failure(ArgParseError("Failed to parse $value as a color: $e"))
+    }
+}
+
 /** Default parsers that can be use as-is, or [map]ped to another type */
 object Type {
     val Boolean = parseBoolean
     val Int = parseInt
     val Float = parseFloat
     val String = parseString
+    val Color = parseColor
 }
