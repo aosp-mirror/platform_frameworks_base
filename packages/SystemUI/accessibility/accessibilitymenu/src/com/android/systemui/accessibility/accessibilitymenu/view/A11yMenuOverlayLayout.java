@@ -51,6 +51,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiContext;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.Flags;
@@ -101,7 +102,6 @@ public class A11yMenuOverlayLayout {
     };
 
     private final AccessibilityMenuService mService;
-    private final WindowManager mWindowManager;
     private final DisplayManager mDisplayManager;
     private ViewGroup mLayout;
     private WindowManager.LayoutParams mLayoutParameter;
@@ -111,7 +111,6 @@ public class A11yMenuOverlayLayout {
 
     public A11yMenuOverlayLayout(AccessibilityMenuService service) {
         mService = service;
-        mWindowManager = mService.getSystemService(WindowManager.class);
         mDisplayManager = mService.getSystemService(DisplayManager.class);
         configureLayout();
         mHandler = new Handler(Looper.getMainLooper());
@@ -134,8 +133,7 @@ public class A11yMenuOverlayLayout {
         int lastVisibilityState = View.GONE;
         if (mLayout != null) {
             lastVisibilityState = mLayout.getVisibility();
-            mWindowManager.removeView(mLayout);
-            mLayout = null;
+            clearLayout();
         }
 
         if (mLayoutParameter == null) {
@@ -143,14 +141,15 @@ public class A11yMenuOverlayLayout {
         }
 
         final Display display = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
-        final Context context = mService.createDisplayContext(display).createWindowContext(
-                TYPE_ACCESSIBILITY_OVERLAY, null);
-        mLayout = new A11yMenuFrameLayout(context);
-        updateLayoutPosition();
-        inflateLayoutAndSetOnTouchListener(mLayout, context);
-        mA11yMenuViewPager = new A11yMenuViewPager(mService, context);
+        final Context uiContext = mService.createWindowContext(
+                display, TYPE_ACCESSIBILITY_OVERLAY, /* options= */null);
+        final WindowManager windowManager = uiContext.getSystemService(WindowManager.class);
+        mLayout = new A11yMenuFrameLayout(uiContext);
+        updateLayoutPosition(uiContext);
+        inflateLayoutAndSetOnTouchListener(mLayout, uiContext);
+        mA11yMenuViewPager = new A11yMenuViewPager(mService);
         mA11yMenuViewPager.configureViewPagerAndFooter(mLayout, createShortcutList(), pageIndex);
-        mWindowManager.addView(mLayout, mLayoutParameter);
+        windowManager.addView(mLayout, mLayoutParameter);
         mLayout.setVisibility(lastVisibilityState);
         mA11yMenuViewPager.updateFooterState();
 
@@ -159,7 +158,11 @@ public class A11yMenuOverlayLayout {
 
     public void clearLayout() {
         if (mLayout != null) {
-            mWindowManager.removeView(mLayout);
+            WindowManager windowManager =
+                    mLayout.getContext().getSystemService(WindowManager.class);
+            if (windowManager != null) {
+                windowManager.removeView(mLayout);
+            }
             mLayout.setOnTouchListener(null);
             mLayout = null;
         }
@@ -170,8 +173,11 @@ public class A11yMenuOverlayLayout {
         if (mLayout == null || mLayoutParameter == null) {
             return;
         }
-        updateLayoutPosition();
-        mWindowManager.updateViewLayout(mLayout, mLayoutParameter);
+        updateLayoutPosition(mLayout.getContext());
+        WindowManager windowManager = mLayout.getContext().getSystemService(WindowManager.class);
+        if (windowManager != null) {
+            windowManager.updateViewLayout(mLayout, mLayoutParameter);
+        }
     }
 
     private void initLayoutParams() {
@@ -183,8 +189,8 @@ public class A11yMenuOverlayLayout {
         mLayoutParameter.setTitle(mService.getString(R.string.accessibility_menu_service_name));
     }
 
-    private void inflateLayoutAndSetOnTouchListener(ViewGroup view, Context displayContext) {
-        LayoutInflater inflater = LayoutInflater.from(displayContext);
+    private void inflateLayoutAndSetOnTouchListener(ViewGroup view, @UiContext Context uiContext) {
+        LayoutInflater inflater = LayoutInflater.from(uiContext);
         inflater.inflate(R.layout.paged_menu, view);
         view.setOnTouchListener(mService);
     }
@@ -238,7 +244,11 @@ public class A11yMenuOverlayLayout {
     }
 
     /** Updates a11y menu layout position by configuring layout params. */
-    private void updateLayoutPosition() {
+    private void updateLayoutPosition(@UiContext @NonNull Context uiContext) {
+        WindowManager windowManager = uiContext.getSystemService(WindowManager.class);
+        if (windowManager == null) {
+            return;
+        }
         final Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         final Configuration configuration = mService.getResources().getConfiguration();
         final int orientation = configuration.orientation;
@@ -276,14 +286,13 @@ public class A11yMenuOverlayLayout {
             mLayoutParameter.height = WindowManager.LayoutParams.WRAP_CONTENT;
             mLayout.setBackgroundResource(R.drawable.shadow_0deg);
         }
-
         // Adjusts the y position of a11y menu layout to make the layout not to overlap bottom
         // navigation bar window.
-        updateLayoutByWindowInsetsIfNeeded();
+        updateLayoutByWindowInsetsIfNeeded(windowManager);
         mLayout.setOnApplyWindowInsetsListener(
                 (view, insets) -> {
-                    if (updateLayoutByWindowInsetsIfNeeded()) {
-                        mWindowManager.updateViewLayout(mLayout, mLayoutParameter);
+                    if (updateLayoutByWindowInsetsIfNeeded(windowManager)) {
+                        windowManager.updateViewLayout(mLayout, mLayoutParameter);
                     }
                     return view.onApplyWindowInsets(insets);
                 });
@@ -295,9 +304,9 @@ public class A11yMenuOverlayLayout {
      * This method adjusts the layout position and size to
      * make a11y menu not to overlap navigation bar window.
      */
-    private boolean updateLayoutByWindowInsetsIfNeeded() {
+    private boolean updateLayoutByWindowInsetsIfNeeded(@NonNull WindowManager windowManager) {
         boolean shouldUpdateLayout = false;
-        WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
         Insets windowInsets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(
                 WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
         int xOffset = max(windowInsets.left, windowInsets.right);
@@ -396,7 +405,7 @@ public class A11yMenuOverlayLayout {
     }
 
     private class A11yMenuFrameLayout extends FrameLayout {
-        A11yMenuFrameLayout(@NonNull Context context) {
+        A11yMenuFrameLayout(@UiContext @NonNull Context context) {
             super(context);
         }
 
