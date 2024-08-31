@@ -1005,7 +1005,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
         if (height == 0 && !mKeyguardStateController.canDismissLockScreen()) {
-            mDeviceEntryFaceAuthInteractor.onQsExpansionStarted();
+            mDeviceEntryFaceAuthInteractor.onShadeExpansionStarted();
         }
     }
 

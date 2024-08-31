@@ -65,7 +65,7 @@ interface DeviceEntryFaceAuthInteractor : CoreStartable {
 
     fun onDeviceLifted()
 
-    fun onQsExpansionStarted()
+    fun onShadeExpansionStarted()
 
     fun onNotificationPanelClicked()
 
