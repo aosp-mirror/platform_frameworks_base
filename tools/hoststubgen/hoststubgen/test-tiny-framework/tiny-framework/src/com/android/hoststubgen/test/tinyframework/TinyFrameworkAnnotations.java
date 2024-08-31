@@ -18,39 +18,30 @@ package com.android.hoststubgen.test.tinyframework;
 import android.hosttest.annotation.HostSideTestClassLoadHook;
 import android.hosttest.annotation.HostSideTestKeep;
 import android.hosttest.annotation.HostSideTestRemove;
-import android.hosttest.annotation.HostSideTestStub;
 import android.hosttest.annotation.HostSideTestSubstitute;
 import android.hosttest.annotation.HostSideTestThrow;
 
 /**
  * Test without class-wide annotations.
  */
-@HostSideTestStub
+@HostSideTestKeep
 @HostSideTestClassLoadHook(
         "com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded")
 public class TinyFrameworkAnnotations {
-    @HostSideTestStub
+    @HostSideTestKeep
     public TinyFrameworkAnnotations() {
     }
 
-    @HostSideTestStub
-    public int stub = 1;
-
     @HostSideTestKeep
-    public int keep = 2;
+    public int keep = 1;
 
     // Members will be deleted by default.
     // Deleted fields cannot have an initial value, because otherwise .ctor will fail to set it at
     // runtime.
     public int remove;
 
-    @HostSideTestStub
-    public int addOne(int value) {
-        return addOneInner(value);
-    }
-
     @HostSideTestKeep
-    public int addOneInner(int value) {
+    public int addOne(int value) {
         return value + 1;
     }
 
@@ -79,10 +70,5 @@ public class TinyFrameworkAnnotations {
     @HostSideTestThrow
     public String unsupportedMethod() {
         return "This value shouldn't be seen on the host side.";
-    }
-
-    @HostSideTestStub
-    public String visibleButUsesUnsupportedMethod() {
-        return unsupportedMethod();
     }
 }

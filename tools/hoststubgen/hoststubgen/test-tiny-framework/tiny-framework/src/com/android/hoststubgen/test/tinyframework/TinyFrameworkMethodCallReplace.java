@@ -15,11 +15,11 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class TinyFrameworkMethodCallReplace {
     //  This method should return true.
     public static boolean nonStaticMethodCallReplaceTester() throws Exception {
