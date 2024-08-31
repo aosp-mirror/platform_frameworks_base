@@ -58,11 +58,50 @@ public class MobileRadioPowerStatsLayout extends PowerStatsLayout {
     private int mUidRxPacketsPosition;
     private int mUidTxPacketsPosition;
 
-    public MobileRadioPowerStatsLayout() {
+    public MobileRadioPowerStatsLayout(int energyConsumerCount) {
+        addDeviceMobileActivity();
+        addDeviceSectionEnergyConsumers(energyConsumerCount);
+        addStateStats();
+        addUidNetworkStats();
+        addDeviceSectionUsageDuration();
+        addDeviceSectionPowerEstimate();
+        addUidSectionPowerEstimate();
     }
 
     public MobileRadioPowerStatsLayout(@NonNull PowerStats.Descriptor descriptor) {
         super(descriptor);
+        PersistableBundle extras = descriptor.extras;
+        mDeviceSleepTimePosition = extras.getInt(EXTRA_DEVICE_SLEEP_TIME_POSITION);
+        mDeviceIdleTimePosition = extras.getInt(EXTRA_DEVICE_IDLE_TIME_POSITION);
+        mDeviceScanTimePosition = extras.getInt(EXTRA_DEVICE_SCAN_TIME_POSITION);
+        mDeviceCallTimePosition = extras.getInt(EXTRA_DEVICE_CALL_TIME_POSITION);
+        mDeviceCallPowerPosition = extras.getInt(EXTRA_DEVICE_CALL_POWER_POSITION);
+        mStateRxTimePosition = extras.getInt(EXTRA_STATE_RX_TIME_POSITION);
+        mStateTxTimesPosition = extras.getInt(EXTRA_STATE_TX_TIMES_POSITION);
+        mStateTxTimesCount = extras.getInt(EXTRA_STATE_TX_TIMES_COUNT);
+        mUidRxBytesPosition = extras.getInt(EXTRA_UID_RX_BYTES_POSITION);
+        mUidTxBytesPosition = extras.getInt(EXTRA_UID_TX_BYTES_POSITION);
+        mUidRxPacketsPosition = extras.getInt(EXTRA_UID_RX_PACKETS_POSITION);
+        mUidTxPacketsPosition = extras.getInt(EXTRA_UID_TX_PACKETS_POSITION);
+    }
+
+    /**
+     * Copies the elements of the stats array layout into <code>extras</code>
+     */
+    public void toExtras(PersistableBundle extras) {
+        super.toExtras(extras);
+        extras.putInt(EXTRA_DEVICE_SLEEP_TIME_POSITION, mDeviceSleepTimePosition);
+        extras.putInt(EXTRA_DEVICE_IDLE_TIME_POSITION, mDeviceIdleTimePosition);
+        extras.putInt(EXTRA_DEVICE_SCAN_TIME_POSITION, mDeviceScanTimePosition);
+        extras.putInt(EXTRA_DEVICE_CALL_TIME_POSITION, mDeviceCallTimePosition);
+        extras.putInt(EXTRA_DEVICE_CALL_POWER_POSITION, mDeviceCallPowerPosition);
+        extras.putInt(EXTRA_STATE_RX_TIME_POSITION, mStateRxTimePosition);
+        extras.putInt(EXTRA_STATE_TX_TIMES_POSITION, mStateTxTimesPosition);
+        extras.putInt(EXTRA_STATE_TX_TIMES_COUNT, mStateTxTimesCount);
+        extras.putInt(EXTRA_UID_RX_BYTES_POSITION, mUidRxBytesPosition);
+        extras.putInt(EXTRA_UID_TX_BYTES_POSITION, mUidTxBytesPosition);
+        extras.putInt(EXTRA_UID_RX_PACKETS_POSITION, mUidRxPacketsPosition);
+        extras.putInt(EXTRA_UID_TX_PACKETS_POSITION, mUidTxPacketsPosition);
     }
 
     public static int makeStateKey(int rat, int freqRange) {
@@ -94,20 +133,20 @@ public class MobileRadioPowerStatsLayout extends PowerStatsLayout {
         }
     }
 
-    public void addDeviceMobileActivity() {
+    private void addDeviceMobileActivity() {
         mDeviceSleepTimePosition = addDeviceSection(1, "sleep");
         mDeviceIdleTimePosition = addDeviceSection(1, "idle");
         mDeviceScanTimePosition = addDeviceSection(1, "scan");
         mDeviceCallTimePosition = addDeviceSection(1, "call", FLAG_OPTIONAL);
     }
 
-    public void addStateStats() {
+    private void addStateStats() {
         mStateRxTimePosition = addStateSection(1, "rx");
         mStateTxTimesCount = ModemActivityInfo.getNumTxPowerLevels();
         mStateTxTimesPosition = addStateSection(mStateTxTimesCount, "tx");
     }
 
-    public void addUidNetworkStats() {
+    private void addUidNetworkStats() {
         mUidRxPacketsPosition = addUidSection(1, "rx-pkts");
         mUidRxBytesPosition = addUidSection(1, "rx-B");
         mUidTxPacketsPosition = addUidSection(1, "tx-pkts");
@@ -115,7 +154,7 @@ public class MobileRadioPowerStatsLayout extends PowerStatsLayout {
     }
 
     @Override
-    public void addDeviceSectionPowerEstimate() {
+    protected void addDeviceSectionPowerEstimate() {
         super.addDeviceSectionPowerEstimate();
         // Printed as part of the PhoneCallPowerStatsProcessor
         mDeviceCallPowerPosition = addDeviceSection(1, "call-power", FLAG_HIDDEN);
@@ -207,44 +246,6 @@ public class MobileRadioPowerStatsLayout extends PowerStatsLayout {
 
     public long getUidTxPackets(long[] stats) {
         return stats[mUidTxPacketsPosition];
-    }
-
-    /**
-     * Copies the elements of the stats array layout into <code>extras</code>
-     */
-    public void toExtras(PersistableBundle extras) {
-        super.toExtras(extras);
-        extras.putInt(EXTRA_DEVICE_SLEEP_TIME_POSITION, mDeviceSleepTimePosition);
-        extras.putInt(EXTRA_DEVICE_IDLE_TIME_POSITION, mDeviceIdleTimePosition);
-        extras.putInt(EXTRA_DEVICE_SCAN_TIME_POSITION, mDeviceScanTimePosition);
-        extras.putInt(EXTRA_DEVICE_CALL_TIME_POSITION, mDeviceCallTimePosition);
-        extras.putInt(EXTRA_DEVICE_CALL_POWER_POSITION, mDeviceCallPowerPosition);
-        extras.putInt(EXTRA_STATE_RX_TIME_POSITION, mStateRxTimePosition);
-        extras.putInt(EXTRA_STATE_TX_TIMES_POSITION, mStateTxTimesPosition);
-        extras.putInt(EXTRA_STATE_TX_TIMES_COUNT, mStateTxTimesCount);
-        extras.putInt(EXTRA_UID_RX_BYTES_POSITION, mUidRxBytesPosition);
-        extras.putInt(EXTRA_UID_TX_BYTES_POSITION, mUidTxBytesPosition);
-        extras.putInt(EXTRA_UID_RX_PACKETS_POSITION, mUidRxPacketsPosition);
-        extras.putInt(EXTRA_UID_TX_PACKETS_POSITION, mUidTxPacketsPosition);
-    }
-
-    /**
-     * Retrieves elements of the stats array layout from <code>extras</code>
-     */
-    public void fromExtras(PersistableBundle extras) {
-        super.fromExtras(extras);
-        mDeviceSleepTimePosition = extras.getInt(EXTRA_DEVICE_SLEEP_TIME_POSITION);
-        mDeviceIdleTimePosition = extras.getInt(EXTRA_DEVICE_IDLE_TIME_POSITION);
-        mDeviceScanTimePosition = extras.getInt(EXTRA_DEVICE_SCAN_TIME_POSITION);
-        mDeviceCallTimePosition = extras.getInt(EXTRA_DEVICE_CALL_TIME_POSITION);
-        mDeviceCallPowerPosition = extras.getInt(EXTRA_DEVICE_CALL_POWER_POSITION);
-        mStateRxTimePosition = extras.getInt(EXTRA_STATE_RX_TIME_POSITION);
-        mStateTxTimesPosition = extras.getInt(EXTRA_STATE_TX_TIMES_POSITION);
-        mStateTxTimesCount = extras.getInt(EXTRA_STATE_TX_TIMES_COUNT);
-        mUidRxBytesPosition = extras.getInt(EXTRA_UID_RX_BYTES_POSITION);
-        mUidTxBytesPosition = extras.getInt(EXTRA_UID_TX_BYTES_POSITION);
-        mUidRxPacketsPosition = extras.getInt(EXTRA_UID_RX_PACKETS_POSITION);
-        mUidTxPacketsPosition = extras.getInt(EXTRA_UID_TX_PACKETS_POSITION);
     }
 
     public void addRxTxTimesForRat(SparseArray<long[]> stateStats, int networkType, int freqRange,

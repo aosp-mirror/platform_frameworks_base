@@ -158,14 +158,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
         Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new MobileRadioPowerStatsLayout();
-        mLayout.addDeviceMobileActivity();
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addStateStats();
-        mLayout.addUidNetworkStats();
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new MobileRadioPowerStatsLayout(mEnergyConsumerIds.length);
 
         SparseArray<String> stateLabels = new SparseArray<>();
         for (int rat = 0; rat < BatteryStats.RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {

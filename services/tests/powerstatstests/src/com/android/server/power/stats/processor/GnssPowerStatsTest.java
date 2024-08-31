@@ -171,8 +171,7 @@ public class GnssPowerStatsTest {
         stats.finish(START_TIME + 11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
-        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
-        statsLayout.fromExtras(descriptor.extras);
+        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout(descriptor);
 
         // scr-on, GNSS-good: 2500 * 100 = 250000 mA-ms = 0.06944 mAh
         // scr-off GNSS=good: 4500 * 100 = 0.12500 mAh
@@ -251,8 +250,7 @@ public class GnssPowerStatsTest {
         stats.finish(START_TIME + 11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
-        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
-        statsLayout.fromExtras(descriptor.extras);
+        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout(descriptor);
 
         // scr-on, GNSS-good: 2500 * 100 = 250000 mA-ms = 0.06944 mAh
         // scr-off GNSS=good: 4500 * 100 = 0.12500 mAh
@@ -345,8 +343,7 @@ public class GnssPowerStatsTest {
         stats.finish(START_TIME + 11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
-        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
-        statsLayout.fromExtras(descriptor.extras);
+        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout(descriptor);
 
         // Total estimated power = 3,600,000 uC = 1.0 mAh
         // of which 3,000,000 is distributed:

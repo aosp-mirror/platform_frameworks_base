@@ -20,10 +20,10 @@ import android.os.PersistableBundle;
 
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
-import com.android.server.power.stats.format.PowerStatsLayout;
+import com.android.server.power.stats.format.PhoneCallPowerStatsLayout;
 
 class PhoneCallPowerStatsProcessor extends PowerStatsProcessor {
-    private final PowerStatsLayout mStatsLayout;
+    private final PhoneCallPowerStatsLayout mStatsLayout;
     private final PowerStats.Descriptor mDescriptor;
     private final long[] mTmpDeviceStats;
     private PowerStats.Descriptor mMobileRadioStatsDescriptor;
@@ -31,8 +31,7 @@ class PhoneCallPowerStatsProcessor extends PowerStatsProcessor {
     private long[] mTmpMobileRadioDeviceStats;
 
     PhoneCallPowerStatsProcessor() {
-        mStatsLayout = new PowerStatsLayout();
-        mStatsLayout.addDeviceSectionPowerEstimate();
+        mStatsLayout = new PhoneCallPowerStatsLayout();
         PersistableBundle extras = new PersistableBundle();
         mStatsLayout.toExtras(extras);
         mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_PHONE,

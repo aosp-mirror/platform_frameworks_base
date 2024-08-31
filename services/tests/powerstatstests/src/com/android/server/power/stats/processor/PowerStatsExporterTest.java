@@ -123,13 +123,7 @@ public class PowerStatsExporterTest {
                 mMonotonicClock, null, null);
         mPowerStatsAggregator = new PowerStatsAggregator(config);
 
-        mCpuStatsArrayLayout = new CpuPowerStatsLayout();
-        mCpuStatsArrayLayout.addDeviceSectionCpuTimeByScalingStep(1);
-        mCpuStatsArrayLayout.addDeviceSectionCpuTimeByCluster(1);
-        mCpuStatsArrayLayout.addDeviceSectionUsageDuration();
-        mCpuStatsArrayLayout.addDeviceSectionPowerEstimate();
-        mCpuStatsArrayLayout.addUidSectionCpuTimeByPowerBracket(new int[]{0});
-        mCpuStatsArrayLayout.addUidSectionPowerEstimate();
+        mCpuStatsArrayLayout = new CpuPowerStatsLayout(0, 1, new int[]{0});
         PersistableBundle extras = new PersistableBundle();
         mCpuStatsArrayLayout.toExtras(extras);
 

@@ -167,8 +167,7 @@ public class CameraPowerStatsTest {
         stats.finish(11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
-        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
-        statsLayout.fromExtras(descriptor.extras);
+        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout(descriptor);
 
         // Total estimated power = 3,600,000 uC = 1.0 mAh
         // of which 3,000,000 is distributed:

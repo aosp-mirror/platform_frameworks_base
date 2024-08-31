@@ -143,9 +143,7 @@ class PowerStatsExporter {
             return;
         }
 
-        PowerStatsLayout layout = new PowerStatsLayout();
-        layout.fromExtras(descriptor.extras);
-
+        PowerStatsLayout layout = new PowerStatsLayout(descriptor);
         long[] deviceStats = new long[descriptor.statsArrayLength];
         for (int screenState = 0; screenState < BatteryConsumer.SCREEN_STATE_COUNT; screenState++) {
             if (batteryUsageStatsBuilder.isScreenStateDataNeeded()) {

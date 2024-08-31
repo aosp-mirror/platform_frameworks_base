@@ -16,7 +16,10 @@
 
 package com.android.server.power.stats.format;
 
+import android.annotation.NonNull;
 import android.os.PersistableBundle;
+
+import com.android.internal.os.PowerStats;
 
 /**
  * Captures the positions and lengths of sections of the stats array, such as time-in-state,
@@ -40,10 +43,59 @@ public class CpuPowerStatsLayout extends PowerStatsLayout {
 
     private int[] mScalingStepToPowerBracketMap;
 
+    public CpuPowerStatsLayout(int energyConsumerCount, int cpuScalingPolicyCount,
+            int[] scalingStepToPowerBracketMap) {
+        addDeviceSectionCpuTimeByScalingStep(scalingStepToPowerBracketMap.length);
+        addDeviceSectionCpuTimeByCluster(cpuScalingPolicyCount);
+        addDeviceSectionUsageDuration();
+        addDeviceSectionEnergyConsumers(energyConsumerCount);
+        addDeviceSectionPowerEstimate();
+        addUidSectionCpuTimeByPowerBracket(scalingStepToPowerBracketMap);
+        addUidSectionPowerEstimate();
+    }
+
+    public CpuPowerStatsLayout(@NonNull PowerStats.Descriptor descriptor) {
+        super(descriptor);
+        PersistableBundle extras = descriptor.extras;
+        mDeviceCpuTimeByScalingStepPosition =
+                extras.getInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_POSITION);
+        mDeviceCpuTimeByScalingStepCount =
+                extras.getInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_COUNT);
+        mDeviceCpuTimeByClusterPosition =
+                extras.getInt(EXTRA_DEVICE_TIME_BY_CLUSTER_POSITION);
+        mDeviceCpuTimeByClusterCount =
+                extras.getInt(EXTRA_DEVICE_TIME_BY_CLUSTER_COUNT);
+        mUidPowerBracketsPosition = extras.getInt(EXTRA_UID_BRACKETS_POSITION);
+        mScalingStepToPowerBracketMap =
+                getIntArray(extras, EXTRA_UID_STATS_SCALING_STEP_TO_POWER_BRACKET);
+        if (mScalingStepToPowerBracketMap == null) {
+            mScalingStepToPowerBracketMap = new int[mDeviceCpuTimeByScalingStepCount];
+        }
+        updatePowerBracketCount();
+    }
+
+    /**
+     * Copies the elements of the stats array layout into <code>extras</code>
+     */
+    public void toExtras(PersistableBundle extras) {
+        super.toExtras(extras);
+        extras.putInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_POSITION,
+                mDeviceCpuTimeByScalingStepPosition);
+        extras.putInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_COUNT,
+                mDeviceCpuTimeByScalingStepCount);
+        extras.putInt(EXTRA_DEVICE_TIME_BY_CLUSTER_POSITION,
+                mDeviceCpuTimeByClusterPosition);
+        extras.putInt(EXTRA_DEVICE_TIME_BY_CLUSTER_COUNT,
+                mDeviceCpuTimeByClusterCount);
+        extras.putInt(EXTRA_UID_BRACKETS_POSITION, mUidPowerBracketsPosition);
+        putIntArray(extras, EXTRA_UID_STATS_SCALING_STEP_TO_POWER_BRACKET,
+                mScalingStepToPowerBracketMap);
+    }
+
     /**
      * Declare that the stats array has a section capturing CPU time per scaling step
      */
-    public void addDeviceSectionCpuTimeByScalingStep(int scalingStepCount) {
+    private void addDeviceSectionCpuTimeByScalingStep(int scalingStepCount) {
         mDeviceCpuTimeByScalingStepPosition = addDeviceSection(scalingStepCount, "steps");
         mDeviceCpuTimeByScalingStepCount = scalingStepCount;
     }
@@ -71,7 +123,7 @@ public class CpuPowerStatsLayout extends PowerStatsLayout {
     /**
      * Declare that the stats array has a section capturing CPU time in each cluster
      */
-    public void addDeviceSectionCpuTimeByCluster(int clusterCount) {
+    private void addDeviceSectionCpuTimeByCluster(int clusterCount) {
         mDeviceCpuTimeByClusterPosition = addDeviceSection(clusterCount, "clusters");
         mDeviceCpuTimeByClusterCount = clusterCount;
     }
@@ -99,7 +151,7 @@ public class CpuPowerStatsLayout extends PowerStatsLayout {
     /**
      * Declare that the UID stats array has a section capturing CPU time per power bracket.
      */
-    public void addUidSectionCpuTimeByPowerBracket(int[] scalingStepToPowerBracketMap) {
+    private void addUidSectionCpuTimeByPowerBracket(int[] scalingStepToPowerBracketMap) {
         mScalingStepToPowerBracketMap = scalingStepToPowerBracketMap;
         updatePowerBracketCount();
         mUidPowerBracketsPosition = addUidSection(mUidPowerBracketCount, "time");
@@ -134,45 +186,5 @@ public class CpuPowerStatsLayout extends PowerStatsLayout {
      */
     public long getUidTimeByPowerBracket(long[] stats, int bracket) {
         return stats[mUidPowerBracketsPosition + bracket];
-    }
-
-    /**
-     * Copies the elements of the stats array layout into <code>extras</code>
-     */
-    public void toExtras(PersistableBundle extras) {
-        super.toExtras(extras);
-        extras.putInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_POSITION,
-                mDeviceCpuTimeByScalingStepPosition);
-        extras.putInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_COUNT,
-                mDeviceCpuTimeByScalingStepCount);
-        extras.putInt(EXTRA_DEVICE_TIME_BY_CLUSTER_POSITION,
-                mDeviceCpuTimeByClusterPosition);
-        extras.putInt(EXTRA_DEVICE_TIME_BY_CLUSTER_COUNT,
-                mDeviceCpuTimeByClusterCount);
-        extras.putInt(EXTRA_UID_BRACKETS_POSITION, mUidPowerBracketsPosition);
-        putIntArray(extras, EXTRA_UID_STATS_SCALING_STEP_TO_POWER_BRACKET,
-                mScalingStepToPowerBracketMap);
-    }
-
-    /**
-     * Retrieves elements of the stats array layout from <code>extras</code>
-     */
-    public void fromExtras(PersistableBundle extras) {
-        super.fromExtras(extras);
-        mDeviceCpuTimeByScalingStepPosition =
-                extras.getInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_POSITION);
-        mDeviceCpuTimeByScalingStepCount =
-                extras.getInt(EXTRA_DEVICE_TIME_BY_SCALING_STEP_COUNT);
-        mDeviceCpuTimeByClusterPosition =
-                extras.getInt(EXTRA_DEVICE_TIME_BY_CLUSTER_POSITION);
-        mDeviceCpuTimeByClusterCount =
-                extras.getInt(EXTRA_DEVICE_TIME_BY_CLUSTER_COUNT);
-        mUidPowerBracketsPosition = extras.getInt(EXTRA_UID_BRACKETS_POSITION);
-        mScalingStepToPowerBracketMap =
-                getIntArray(extras, EXTRA_UID_STATS_SCALING_STEP_TO_POWER_BRACKET);
-        if (mScalingStepToPowerBracketMap == null) {
-            mScalingStepToPowerBracketMap = new int[mDeviceCpuTimeByScalingStepCount];
-        }
-        updatePowerBracketCount();
     }
 }

@@ -19,11 +19,11 @@ import android.os.BatteryConsumer;
 import android.os.PersistableBundle;
 
 import com.android.internal.os.PowerStats;
-import com.android.server.power.stats.format.PowerStatsLayout;
+import com.android.server.power.stats.format.AmbientDisplayPowerStatsLayout;
 import com.android.server.power.stats.format.ScreenPowerStatsLayout;
 
 class AmbientDisplayPowerStatsProcessor extends PowerStatsProcessor {
-    private final PowerStatsLayout mStatsLayout;
+    private final AmbientDisplayPowerStatsLayout mStatsLayout;
     private final PowerStats.Descriptor mDescriptor;
     private final long[] mTmpDeviceStats;
     private PowerStats.Descriptor mScreenPowerStatsDescriptor;
@@ -31,8 +31,7 @@ class AmbientDisplayPowerStatsProcessor extends PowerStatsProcessor {
     private long[] mTmpScreenStats;
 
     AmbientDisplayPowerStatsProcessor() {
-        mStatsLayout = new PowerStatsLayout();
-        mStatsLayout.addDeviceSectionPowerEstimate();
+        mStatsLayout = new AmbientDisplayPowerStatsLayout();
         PersistableBundle extras = new PersistableBundle();
         mStatsLayout.toExtras(extras);
         mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,

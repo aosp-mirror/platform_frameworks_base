@@ -111,8 +111,7 @@ public class SensorPowerStatsProcessorTest {
         stats.finish(10000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
-        SensorPowerStatsLayout statsLayout = new SensorPowerStatsLayout();
-        statsLayout.fromExtras(descriptor.extras);
+        SensorPowerStatsLayout statsLayout = new SensorPowerStatsLayout(descriptor);
 
         String dump = stats.toString();
         assertThat(dump).contains(" step_counter: ");

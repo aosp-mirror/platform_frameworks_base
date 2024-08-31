@@ -16,6 +16,8 @@
 
 package com.android.server.power.stats.format;
 
+import com.android.internal.os.PowerStats;
+
 public class EnergyConsumerPowerStatsLayout extends PowerStatsLayout {
     public EnergyConsumerPowerStatsLayout() {
         // Add a section for consumed energy, even if the specific device does not
@@ -29,5 +31,9 @@ public class EnergyConsumerPowerStatsLayout extends PowerStatsLayout {
         // PowerStatsService.
         addUidSectionEnergyConsumers(1);
         addUidSectionPowerEstimate();
+    }
+
+    public EnergyConsumerPowerStatsLayout(PowerStats.Descriptor descriptor) {
+        super(descriptor);
     }
 }

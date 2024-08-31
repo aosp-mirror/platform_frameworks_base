@@ -131,13 +131,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
         mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
         Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new BluetoothPowerStatsLayout();
-        mLayout.addDeviceBluetoothControllerActivity();
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidTrafficStats();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new BluetoothPowerStatsLayout(mEnergyConsumerIds.length);
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);

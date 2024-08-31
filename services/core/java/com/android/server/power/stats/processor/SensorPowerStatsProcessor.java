@@ -30,9 +30,9 @@ import com.android.server.power.stats.format.SensorPowerStatsLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 class SensorPowerStatsProcessor extends PowerStatsProcessor {
     private static final String TAG = "SensorPowerStatsProcessor";
@@ -80,16 +80,9 @@ class SensorPowerStatsProcessor extends PowerStatsProcessor {
             return false;
         }
 
-        mStatsLayout = new SensorPowerStatsLayout();
-        List<Sensor> sensorList = new ArrayList<>(mSensorManager.getSensorList(Sensor.TYPE_ALL));
-        sensorList.sort(Comparator.comparingInt(Sensor::getId));
-        for (int i = 0; i < sensorList.size(); i++) {
-            Sensor sensor = sensorList.get(i);
-            String label = makeLabel(sensor, sensorList);
-            mStatsLayout.addUidSensorSection(sensor.getHandle(), label);
-        }
-        mStatsLayout.addUidSectionPowerEstimate();
-        mStatsLayout.addDeviceSectionPowerEstimate();
+        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        mStatsLayout = new SensorPowerStatsLayout(sensorList.stream().collect(
+                Collectors.toMap(Sensor::getHandle, sensor -> makeLabel(sensor, sensorList))));
 
         PersistableBundle extras = new PersistableBundle();
         mStatsLayout.toExtras(extras);

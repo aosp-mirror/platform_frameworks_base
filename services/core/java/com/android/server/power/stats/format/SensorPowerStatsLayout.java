@@ -20,6 +20,11 @@ import android.os.PersistableBundle;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
+import com.android.internal.os.PowerStats;
+
+import java.util.Arrays;
+import java.util.Map;
+
 public class SensorPowerStatsLayout extends PowerStatsLayout {
     private static final String TAG = "SensorPowerStatsLayout";
     private static final String EXTRA_DEVICE_SENSOR_HANDLES = "dsh";
@@ -27,7 +32,48 @@ public class SensorPowerStatsLayout extends PowerStatsLayout {
 
     private final SparseIntArray mSensorPositions = new SparseIntArray();
 
-    public void addUidSensorSection(int handle, String label) {
+    public SensorPowerStatsLayout(Map<Integer, String> idToLabelMap) {
+        Integer[] keys = new Integer[idToLabelMap.size()];
+        idToLabelMap.keySet().toArray(keys);
+        Arrays.sort(keys);
+        for (int i = 0; i < keys.length; i++) {
+            addUidSensorSection(keys[i], idToLabelMap.get(keys[i]));
+        }
+        addUidSectionPowerEstimate();
+        addDeviceSectionPowerEstimate();
+    }
+
+    public SensorPowerStatsLayout(PowerStats.Descriptor descriptor) {
+        super(descriptor);
+
+        PersistableBundle extras = descriptor.extras;
+        int[] handlers = extras.getIntArray(EXTRA_DEVICE_SENSOR_HANDLES);
+        int[] uidDurationPositions = extras.getIntArray(EXTRA_UID_SENSOR_POSITIONS);
+
+        if (handlers != null && uidDurationPositions != null) {
+            for (int i = 0; i < handlers.length; i++) {
+                mSensorPositions.put(handlers[i], uidDurationPositions[i]);
+            }
+        }
+    }
+
+    @Override
+    public void toExtras(PersistableBundle extras) {
+        super.toExtras(extras);
+
+        int[] handlers = new int[mSensorPositions.size()];
+        int[] uidDurationPositions = new int[mSensorPositions.size()];
+
+        for (int i = 0; i < mSensorPositions.size(); i++) {
+            handlers[i] = mSensorPositions.keyAt(i);
+            uidDurationPositions[i] = mSensorPositions.valueAt(i);
+        }
+
+        extras.putIntArray(EXTRA_DEVICE_SENSOR_HANDLES, handlers);
+        extras.putIntArray(EXTRA_UID_SENSOR_POSITIONS, uidDurationPositions);
+    }
+
+    private void addUidSensorSection(int handle, String label) {
         mSensorPositions.put(handle, addUidSection(1, label, FLAG_OPTIONAL));
     }
 
@@ -49,33 +95,5 @@ public class SensorPowerStatsLayout extends PowerStatsLayout {
             return;
         }
         stats[position] += durationMs;
-    }
-
-    @Override
-    public void toExtras(PersistableBundle extras) {
-        super.toExtras(extras);
-
-        int[] handlers = new int[mSensorPositions.size()];
-        int[] uidDurationPositions = new int[mSensorPositions.size()];
-
-        for (int i = 0; i < mSensorPositions.size(); i++) {
-            handlers[i] = mSensorPositions.keyAt(i);
-            uidDurationPositions[i] = mSensorPositions.valueAt(i);
-        }
-
-        extras.putIntArray(EXTRA_DEVICE_SENSOR_HANDLES, handlers);
-        extras.putIntArray(EXTRA_UID_SENSOR_POSITIONS, uidDurationPositions);
-    }
-
-    @Override
-    public void fromExtras(PersistableBundle extras) {
-        super.fromExtras(extras);
-
-        int[] handlers = extras.getIntArray(EXTRA_DEVICE_SENSOR_HANDLES);
-        int[] uidDurationPositions = extras.getIntArray(EXTRA_UID_SENSOR_POSITIONS);
-
-        for (int i = 0; i < handlers.length; i++) {
-            mSensorPositions.put(handlers[i], uidDurationPositions[i]);
-        }
     }
 }

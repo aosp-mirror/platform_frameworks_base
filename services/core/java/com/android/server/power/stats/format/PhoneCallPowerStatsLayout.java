@@ -13,18 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.server.power.stats.format;
 
-import com.android.internal.os.PowerStats;
-
-public class BinaryStatePowerStatsLayout extends EnergyConsumerPowerStatsLayout {
-    public BinaryStatePowerStatsLayout() {
-        addDeviceSectionUsageDuration();
-        addUidSectionUsageDuration();
-    }
-
-    public BinaryStatePowerStatsLayout(PowerStats.Descriptor descriptor) {
-        super(descriptor);
+public class PhoneCallPowerStatsLayout extends PowerStatsLayout {
+    public PhoneCallPowerStatsLayout() {
+        addDeviceSectionPowerEstimate();
     }
 }

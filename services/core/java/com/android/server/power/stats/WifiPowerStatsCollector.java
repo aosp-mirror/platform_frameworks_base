@@ -141,13 +141,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
         Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new WifiPowerStatsLayout();
-        mLayout.addDeviceWifiActivity(mPowerReportingSupported);
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addUidNetworkStats();
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new WifiPowerStatsLayout(mEnergyConsumerIds.length, mPowerReportingSupported);
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);

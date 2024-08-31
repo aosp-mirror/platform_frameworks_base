@@ -63,7 +63,32 @@ public class PowerStatsLayout {
     }
 
     public PowerStatsLayout(PowerStats.Descriptor descriptor) {
-        fromExtras(descriptor.extras);
+        PersistableBundle extras = descriptor.extras;
+        mDeviceDurationPosition = extras.getInt(EXTRA_DEVICE_DURATION_POSITION);
+        mDeviceEnergyConsumerPosition = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION);
+        mDeviceEnergyConsumerCount = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT);
+        mDevicePowerEstimatePosition = extras.getInt(EXTRA_DEVICE_POWER_POSITION);
+        mUidDurationPosition = extras.getInt(EXTRA_UID_DURATION_POSITION);
+        mUidEnergyConsumerPosition = extras.getInt(EXTRA_UID_ENERGY_CONSUMERS_POSITION);
+        mUidEnergyConsumerCount = extras.getInt(EXTRA_UID_ENERGY_CONSUMERS_COUNT);
+        mUidPowerEstimatePosition = extras.getInt(EXTRA_UID_POWER_POSITION);
+    }
+
+    /**
+     * Copies the elements of the stats array layout into <code>extras</code>
+     */
+    public void toExtras(PersistableBundle extras) {
+        extras.putInt(EXTRA_DEVICE_DURATION_POSITION, mDeviceDurationPosition);
+        extras.putInt(EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION, mDeviceEnergyConsumerPosition);
+        extras.putInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT, mDeviceEnergyConsumerCount);
+        extras.putInt(EXTRA_DEVICE_POWER_POSITION, mDevicePowerEstimatePosition);
+        extras.putInt(EXTRA_UID_DURATION_POSITION, mUidDurationPosition);
+        extras.putInt(EXTRA_UID_ENERGY_CONSUMERS_POSITION, mUidEnergyConsumerPosition);
+        extras.putInt(EXTRA_UID_ENERGY_CONSUMERS_COUNT, mUidEnergyConsumerCount);
+        extras.putInt(EXTRA_UID_POWER_POSITION, mUidPowerEstimatePosition);
+        extras.putString(PowerStats.Descriptor.EXTRA_DEVICE_STATS_FORMAT, mDeviceFormat.toString());
+        extras.putString(PowerStats.Descriptor.EXTRA_STATE_STATS_FORMAT, mStateFormat.toString());
+        extras.putString(PowerStats.Descriptor.EXTRA_UID_STATS_FORMAT, mUidFormat.toString());
     }
 
     public int getDeviceStatsArrayLength() {
@@ -141,7 +166,7 @@ public class PowerStatsLayout {
     /**
      * Declare that the stats array has a section capturing usage duration
      */
-    public void addDeviceSectionUsageDuration() {
+    protected void addDeviceSectionUsageDuration() {
         mDeviceDurationPosition = addDeviceSection(1, "usage", FLAG_OPTIONAL);
     }
 
@@ -163,7 +188,7 @@ public class PowerStatsLayout {
      * Declares that the stats array has a section capturing EnergyConsumer data from
      * PowerStatsService.
      */
-    public void addDeviceSectionEnergyConsumers(int energyConsumerCount) {
+    protected void addDeviceSectionEnergyConsumers(int energyConsumerCount) {
         mDeviceEnergyConsumerPosition = addDeviceSection(energyConsumerCount, "energy",
                 FLAG_OPTIONAL);
         mDeviceEnergyConsumerCount = energyConsumerCount;
@@ -192,7 +217,7 @@ public class PowerStatsLayout {
     /**
      * Declare that the stats array has a section capturing a power estimate
      */
-    public void addDeviceSectionPowerEstimate() {
+    protected void addDeviceSectionPowerEstimate() {
         mDevicePowerEstimatePosition = addDeviceSection(1, "power",
                 FLAG_FORMAT_AS_POWER | FLAG_OPTIONAL);
     }
@@ -215,14 +240,14 @@ public class PowerStatsLayout {
     /**
      * Declare that the UID stats array has a section capturing usage duration
      */
-    public void addUidSectionUsageDuration() {
+    protected void addUidSectionUsageDuration() {
         mUidDurationPosition = addUidSection(1, "time");
     }
 
     /**
      * Declare that the UID stats array has a section capturing a power estimate
      */
-    public void addUidSectionPowerEstimate() {
+    protected void addUidSectionPowerEstimate() {
         mUidPowerEstimatePosition = addUidSection(1, "power", FLAG_FORMAT_AS_POWER | FLAG_OPTIONAL);
     }
 
@@ -251,7 +276,7 @@ public class PowerStatsLayout {
      * Declares that the UID stats array has a section capturing EnergyConsumer data from
      * PowerStatsService.
      */
-    public void addUidSectionEnergyConsumers(int energyConsumerCount) {
+    protected void addUidSectionEnergyConsumers(int energyConsumerCount) {
         mUidEnergyConsumerPosition = addUidSection(energyConsumerCount, "energy",
                 FLAG_OPTIONAL);
         mUidEnergyConsumerCount = energyConsumerCount;
@@ -290,39 +315,6 @@ public class PowerStatsLayout {
      */
     public double getUidPowerEstimate(long[] stats) {
         return stats[mUidPowerEstimatePosition] / MILLI_TO_NANO_MULTIPLIER;
-    }
-
-    /**
-     * Copies the elements of the stats array layout into <code>extras</code>
-     */
-    public void toExtras(PersistableBundle extras) {
-        extras.putInt(EXTRA_DEVICE_DURATION_POSITION, mDeviceDurationPosition);
-        extras.putInt(EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION,
-                mDeviceEnergyConsumerPosition);
-        extras.putInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT,
-                mDeviceEnergyConsumerCount);
-        extras.putInt(EXTRA_DEVICE_POWER_POSITION, mDevicePowerEstimatePosition);
-        extras.putInt(EXTRA_UID_DURATION_POSITION, mUidDurationPosition);
-        extras.putInt(EXTRA_UID_ENERGY_CONSUMERS_POSITION, mUidEnergyConsumerPosition);
-        extras.putInt(EXTRA_UID_ENERGY_CONSUMERS_COUNT, mUidEnergyConsumerCount);
-        extras.putInt(EXTRA_UID_POWER_POSITION, mUidPowerEstimatePosition);
-        extras.putString(PowerStats.Descriptor.EXTRA_DEVICE_STATS_FORMAT, mDeviceFormat.toString());
-        extras.putString(PowerStats.Descriptor.EXTRA_STATE_STATS_FORMAT, mStateFormat.toString());
-        extras.putString(PowerStats.Descriptor.EXTRA_UID_STATS_FORMAT, mUidFormat.toString());
-    }
-
-    /**
-     * Retrieves elements of the stats array layout from <code>extras</code>
-     */
-    public void fromExtras(PersistableBundle extras) {
-        mDeviceDurationPosition = extras.getInt(EXTRA_DEVICE_DURATION_POSITION);
-        mDeviceEnergyConsumerPosition = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION);
-        mDeviceEnergyConsumerCount = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT);
-        mDevicePowerEstimatePosition = extras.getInt(EXTRA_DEVICE_POWER_POSITION);
-        mUidDurationPosition = extras.getInt(EXTRA_UID_DURATION_POSITION);
-        mUidEnergyConsumerPosition = extras.getInt(EXTRA_UID_ENERGY_CONSUMERS_POSITION);
-        mUidEnergyConsumerCount = extras.getInt(EXTRA_UID_ENERGY_CONSUMERS_COUNT);
-        mUidPowerEstimatePosition = extras.getInt(EXTRA_UID_POWER_POSITION);
     }
 
     protected void putIntArray(PersistableBundle extras, String key, int[] array) {

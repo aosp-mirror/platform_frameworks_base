@@ -105,8 +105,7 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
         }
 
         mLastUsedDescriptor = descriptor;
-        mStatsLayout = new CpuPowerStatsLayout();
-        mStatsLayout.fromExtras(descriptor.extras);
+        mStatsLayout = new CpuPowerStatsLayout(descriptor);
 
         mTmpDeviceStatsArray = new long[descriptor.statsArrayLength];
         mTmpUidStatsArray = new long[descriptor.uidStatsArrayLength];

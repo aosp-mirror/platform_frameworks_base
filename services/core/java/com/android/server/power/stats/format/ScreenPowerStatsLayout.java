@@ -41,14 +41,40 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
     private int mDeviceScreenDozePowerPosition;
     private int mUidTopActivityTimePosition;
 
-    public ScreenPowerStatsLayout() {
+    public ScreenPowerStatsLayout(int energyConsumerCount, int displayCount) {
+        addDeviceScreenUsageDurationSection(displayCount);
+        addDeviceSectionEnergyConsumers(energyConsumerCount);
+        addDeviceSectionUsageDuration();
+        addDeviceSectionPowerEstimate();
+        addUidTopActivitiyDuration();
+        addUidSectionPowerEstimate();
     }
 
     public ScreenPowerStatsLayout(@NonNull PowerStats.Descriptor descriptor) {
         super(descriptor);
+        PersistableBundle extras = descriptor.extras;
+        mDisplayCount = extras.getInt(EXTRA_DEVICE_SCREEN_COUNT, 1);
+        mDeviceScreenOnDurationPosition = extras.getInt(EXTRA_DEVICE_SCREEN_ON_DURATION_POSITION);
+        mDeviceBrightnessDurationPositions = extras.getIntArray(
+                EXTRA_DEVICE_BRIGHTNESS_DURATION_POSITIONS);
+        mDeviceScreenDozeDurationPosition = extras.getInt(EXTRA_DEVICE_DOZE_DURATION_POSITION);
+        mDeviceScreenDozePowerPosition = extras.getInt(EXTRA_DEVICE_DOZE_POWER_POSITION);
+        mUidTopActivityTimePosition = extras.getInt(EXTRA_UID_FOREGROUND_DURATION);
     }
 
-    public void addDeviceScreenUsageDurationSection(int displayCount) {
+    @Override
+    public void toExtras(PersistableBundle extras) {
+        super.toExtras(extras);
+        extras.putInt(EXTRA_DEVICE_SCREEN_COUNT, mDisplayCount);
+        extras.putInt(EXTRA_DEVICE_SCREEN_ON_DURATION_POSITION, mDeviceScreenOnDurationPosition);
+        extras.putIntArray(EXTRA_DEVICE_BRIGHTNESS_DURATION_POSITIONS,
+                mDeviceBrightnessDurationPositions);
+        extras.putInt(EXTRA_DEVICE_DOZE_DURATION_POSITION, mDeviceScreenDozeDurationPosition);
+        extras.putInt(EXTRA_DEVICE_DOZE_POWER_POSITION, mDeviceScreenDozePowerPosition);
+        extras.putInt(EXTRA_UID_FOREGROUND_DURATION, mUidTopActivityTimePosition);
+    }
+
+    private void addDeviceScreenUsageDurationSection(int displayCount) {
         mDisplayCount = displayCount;
         mDeviceScreenOnDurationPosition = addDeviceSection(displayCount, "on");
         mDeviceBrightnessDurationPositions = new int[BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS];
@@ -60,7 +86,7 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
     }
 
     @Override
-    public void addDeviceSectionPowerEstimate() {
+    protected void addDeviceSectionPowerEstimate() {
         super.addDeviceSectionPowerEstimate();
         // Used by AmbientDisplayPowerStatsProcessor
         mDeviceScreenDozePowerPosition = addDeviceSection(1, "doze-power", FLAG_HIDDEN);
@@ -127,7 +153,7 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
         return stats[mDeviceScreenDozePowerPosition] / MILLI_TO_NANO_MULTIPLIER;
     }
 
-    public void addUidTopActivitiyDuration() {
+    private void addUidTopActivitiyDuration() {
         mUidTopActivityTimePosition = addUidSection(1, "top");
     }
 
@@ -143,29 +169,5 @@ public class ScreenPowerStatsLayout extends PowerStatsLayout {
      */
     public long getUidTopActivityDuration(long[] stats) {
         return stats[mUidTopActivityTimePosition];
-    }
-
-    @Override
-    public void toExtras(PersistableBundle extras) {
-        super.toExtras(extras);
-        extras.putInt(EXTRA_DEVICE_SCREEN_COUNT, mDisplayCount);
-        extras.putInt(EXTRA_DEVICE_SCREEN_ON_DURATION_POSITION, mDeviceScreenOnDurationPosition);
-        extras.putIntArray(EXTRA_DEVICE_BRIGHTNESS_DURATION_POSITIONS,
-                mDeviceBrightnessDurationPositions);
-        extras.putInt(EXTRA_DEVICE_DOZE_DURATION_POSITION, mDeviceScreenDozeDurationPosition);
-        extras.putInt(EXTRA_DEVICE_DOZE_POWER_POSITION, mDeviceScreenDozePowerPosition);
-        extras.putInt(EXTRA_UID_FOREGROUND_DURATION, mUidTopActivityTimePosition);
-    }
-
-    @Override
-    public void fromExtras(PersistableBundle extras) {
-        super.fromExtras(extras);
-        mDisplayCount = extras.getInt(EXTRA_DEVICE_SCREEN_COUNT, 1);
-        mDeviceScreenOnDurationPosition = extras.getInt(EXTRA_DEVICE_SCREEN_ON_DURATION_POSITION);
-        mDeviceBrightnessDurationPositions = extras.getIntArray(
-                EXTRA_DEVICE_BRIGHTNESS_DURATION_POSITIONS);
-        mDeviceScreenDozeDurationPosition = extras.getInt(EXTRA_DEVICE_DOZE_DURATION_POSITION);
-        mDeviceScreenDozePowerPosition = extras.getInt(EXTRA_DEVICE_DOZE_POWER_POSITION);
-        mUidTopActivityTimePosition = extras.getInt(EXTRA_UID_FOREGROUND_DURATION);
     }
 }

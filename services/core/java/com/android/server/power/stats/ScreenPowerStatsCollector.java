@@ -104,13 +104,8 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
         mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
         Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new ScreenPowerStatsLayout();
-        mLayout.addDeviceScreenUsageDurationSection(mInjector.getDisplayCount());
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidTopActivitiyDuration();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new ScreenPowerStatsLayout(mEnergyConsumerIds.length,
+                mInjector.getDisplayCount());
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);

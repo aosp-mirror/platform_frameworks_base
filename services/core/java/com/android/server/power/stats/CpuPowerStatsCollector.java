@@ -133,14 +133,8 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mTempCpuTimeByScalingStep = new long[cpuScalingStepCount];
         int[] scalingStepToPowerBracketMap = initPowerBrackets();
 
-        mLayout = new CpuPowerStatsLayout();
-        mLayout.addDeviceSectionCpuTimeByScalingStep(cpuScalingStepCount);
-        mLayout.addDeviceSectionCpuTimeByCluster(mCpuScalingPolicies.getPolicies().length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionEnergyConsumers(mCpuEnergyConsumerIds.length);
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionCpuTimeByPowerBracket(scalingStepToPowerBracketMap);
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new CpuPowerStatsLayout(mCpuEnergyConsumerIds.length,
+                mCpuScalingPolicies.getPolicies().length, scalingStepToPowerBracketMap);
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);

@@ -213,17 +213,8 @@ public class CpuPowerStatsProcessorTest {
                 AggregatedPowerStatsConfig.PowerComponent config,
                 boolean useEnergyConsumers) {
             super(new AggregatedPowerStats(new AggregatedPowerStatsConfig()), config);
-            mStatsLayout = new CpuPowerStatsLayout();
-            mStatsLayout.addDeviceSectionCpuTimeByScalingStep(3);
-            mStatsLayout.addDeviceSectionCpuTimeByCluster(2);
-            mStatsLayout.addDeviceSectionUsageDuration();
-            if (useEnergyConsumers) {
-                mStatsLayout.addDeviceSectionEnergyConsumers(2);
-            }
-            mStatsLayout.addDeviceSectionPowerEstimate();
-            mStatsLayout.addUidSectionCpuTimeByPowerBracket(new int[]{0, 1, 2});
-            mStatsLayout.addUidSectionPowerEstimate();
-
+            mStatsLayout = new CpuPowerStatsLayout(useEnergyConsumers ? 2 : 0, 2,
+                    new int[]{0, 1, 2});
             PersistableBundle extras = new PersistableBundle();
             mStatsLayout.toExtras(extras);
             mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU,

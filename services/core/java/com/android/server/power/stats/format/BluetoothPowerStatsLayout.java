@@ -37,21 +37,49 @@ public class BluetoothPowerStatsLayout extends PowerStatsLayout {
     private int mUidTxBytesPosition;
     private int mUidScanTimePosition;
 
-    public BluetoothPowerStatsLayout() {
+    public BluetoothPowerStatsLayout(int energyConsumerCount) {
+        addDeviceBluetoothControllerActivity();
+        addDeviceSectionEnergyConsumers(energyConsumerCount);
+        addDeviceSectionUsageDuration();
+        addDeviceSectionPowerEstimate();
+        addUidTrafficStats();
+        addUidSectionPowerEstimate();
     }
 
     public BluetoothPowerStatsLayout(@NonNull PowerStats.Descriptor descriptor) {
         super(descriptor);
+        PersistableBundle extras = descriptor.extras;
+        mDeviceRxTimePosition = extras.getInt(EXTRA_DEVICE_RX_TIME_POSITION);
+        mDeviceTxTimePosition = extras.getInt(EXTRA_DEVICE_TX_TIME_POSITION);
+        mDeviceIdleTimePosition = extras.getInt(EXTRA_DEVICE_IDLE_TIME_POSITION);
+        mDeviceScanTimePosition = extras.getInt(EXTRA_DEVICE_SCAN_TIME_POSITION);
+        mUidRxBytesPosition = extras.getInt(EXTRA_UID_RX_BYTES_POSITION);
+        mUidTxBytesPosition = extras.getInt(EXTRA_UID_TX_BYTES_POSITION);
+        mUidScanTimePosition = extras.getInt(EXTRA_UID_SCAN_TIME_POSITION);
     }
 
-    public void addDeviceBluetoothControllerActivity() {
+    /**
+     * Copies the elements of the stats array layout into <code>extras</code>
+     */
+    public void toExtras(PersistableBundle extras) {
+        super.toExtras(extras);
+        extras.putInt(EXTRA_DEVICE_RX_TIME_POSITION, mDeviceRxTimePosition);
+        extras.putInt(EXTRA_DEVICE_TX_TIME_POSITION, mDeviceTxTimePosition);
+        extras.putInt(EXTRA_DEVICE_IDLE_TIME_POSITION, mDeviceIdleTimePosition);
+        extras.putInt(EXTRA_DEVICE_SCAN_TIME_POSITION, mDeviceScanTimePosition);
+        extras.putInt(EXTRA_UID_RX_BYTES_POSITION, mUidRxBytesPosition);
+        extras.putInt(EXTRA_UID_TX_BYTES_POSITION, mUidTxBytesPosition);
+        extras.putInt(EXTRA_UID_SCAN_TIME_POSITION, mUidScanTimePosition);
+    }
+
+    private void addDeviceBluetoothControllerActivity() {
         mDeviceRxTimePosition = addDeviceSection(1, "rx");
         mDeviceTxTimePosition = addDeviceSection(1, "tx");
         mDeviceIdleTimePosition = addDeviceSection(1, "idle");
         mDeviceScanTimePosition = addDeviceSection(1, "scan", FLAG_OPTIONAL);
     }
 
-    public void addUidTrafficStats() {
+    private void addUidTrafficStats() {
         mUidRxBytesPosition = addUidSection(1, "rx-B");
         mUidTxBytesPosition = addUidSection(1, "tx-B");
         mUidScanTimePosition = addUidSection(1, "scan", FLAG_OPTIONAL);
@@ -111,33 +139,5 @@ public class BluetoothPowerStatsLayout extends PowerStatsLayout {
 
     public long getUidScanTime(long[] stats) {
         return stats[mUidScanTimePosition];
-    }
-
-    /**
-     * Copies the elements of the stats array layout into <code>extras</code>
-     */
-    public void toExtras(PersistableBundle extras) {
-        super.toExtras(extras);
-        extras.putInt(EXTRA_DEVICE_RX_TIME_POSITION, mDeviceRxTimePosition);
-        extras.putInt(EXTRA_DEVICE_TX_TIME_POSITION, mDeviceTxTimePosition);
-        extras.putInt(EXTRA_DEVICE_IDLE_TIME_POSITION, mDeviceIdleTimePosition);
-        extras.putInt(EXTRA_DEVICE_SCAN_TIME_POSITION, mDeviceScanTimePosition);
-        extras.putInt(EXTRA_UID_RX_BYTES_POSITION, mUidRxBytesPosition);
-        extras.putInt(EXTRA_UID_TX_BYTES_POSITION, mUidTxBytesPosition);
-        extras.putInt(EXTRA_UID_SCAN_TIME_POSITION, mUidScanTimePosition);
-    }
-
-    /**
-     * Retrieves elements of the stats array layout from <code>extras</code>
-     */
-    public void fromExtras(PersistableBundle extras) {
-        super.fromExtras(extras);
-        mDeviceRxTimePosition = extras.getInt(EXTRA_DEVICE_RX_TIME_POSITION);
-        mDeviceTxTimePosition = extras.getInt(EXTRA_DEVICE_TX_TIME_POSITION);
-        mDeviceIdleTimePosition = extras.getInt(EXTRA_DEVICE_IDLE_TIME_POSITION);
-        mDeviceScanTimePosition = extras.getInt(EXTRA_DEVICE_SCAN_TIME_POSITION);
-        mUidRxBytesPosition = extras.getInt(EXTRA_UID_RX_BYTES_POSITION);
-        mUidTxBytesPosition = extras.getInt(EXTRA_UID_TX_BYTES_POSITION);
-        mUidScanTimePosition = extras.getInt(EXTRA_UID_SCAN_TIME_POSITION);
     }
 }

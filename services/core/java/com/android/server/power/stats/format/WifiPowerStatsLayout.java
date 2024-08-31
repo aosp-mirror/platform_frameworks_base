@@ -22,7 +22,6 @@ import android.os.PersistableBundle;
 import com.android.internal.os.PowerStats;
 
 public class WifiPowerStatsLayout extends PowerStatsLayout {
-    private static final String TAG = "WifiPowerStatsLayout";
     private static final int UNSPECIFIED = -1;
     private static final String EXTRA_POWER_REPORTING_SUPPORTED = "prs";
     private static final String EXTRA_DEVICE_RX_TIME_POSITION = "dt-rx";
@@ -54,14 +53,56 @@ public class WifiPowerStatsLayout extends PowerStatsLayout {
     private int mUidScanTimePosition;
     private int mUidBatchScanTimePosition;
 
-    public WifiPowerStatsLayout() {
+    public WifiPowerStatsLayout(int energyConsumerCount, boolean powerReportingSupported) {
+        addDeviceWifiActivity(powerReportingSupported);
+        addDeviceSectionEnergyConsumers(energyConsumerCount);
+        addUidNetworkStats();
+        addDeviceSectionUsageDuration();
+        addDeviceSectionPowerEstimate();
+        addUidSectionPowerEstimate();
     }
 
     public WifiPowerStatsLayout(@NonNull PowerStats.Descriptor descriptor) {
         super(descriptor);
+        PersistableBundle extras = descriptor.extras;
+        mPowerReportingSupported = extras.getBoolean(EXTRA_POWER_REPORTING_SUPPORTED);
+        mDeviceRxTimePosition = extras.getInt(EXTRA_DEVICE_RX_TIME_POSITION);
+        mDeviceTxTimePosition = extras.getInt(EXTRA_DEVICE_TX_TIME_POSITION);
+        mDeviceScanTimePosition = extras.getInt(EXTRA_DEVICE_SCAN_TIME_POSITION);
+        mDeviceBasicScanTimePosition = extras.getInt(EXTRA_DEVICE_BASIC_SCAN_TIME_POSITION);
+        mDeviceBatchedScanTimePosition = extras.getInt(EXTRA_DEVICE_BATCHED_SCAN_TIME_POSITION);
+        mDeviceIdleTimePosition = extras.getInt(EXTRA_DEVICE_IDLE_TIME_POSITION);
+        mDeviceActiveTimePosition = extras.getInt(EXTRA_DEVICE_ACTIVE_TIME_POSITION);
+        mUidRxBytesPosition = extras.getInt(EXTRA_UID_RX_BYTES_POSITION);
+        mUidTxBytesPosition = extras.getInt(EXTRA_UID_TX_BYTES_POSITION);
+        mUidRxPacketsPosition = extras.getInt(EXTRA_UID_RX_PACKETS_POSITION);
+        mUidTxPacketsPosition = extras.getInt(EXTRA_UID_TX_PACKETS_POSITION);
+        mUidScanTimePosition = extras.getInt(EXTRA_UID_SCAN_TIME_POSITION);
+        mUidBatchScanTimePosition = extras.getInt(EXTRA_UID_BATCH_SCAN_TIME_POSITION);
     }
 
-    public void addDeviceWifiActivity(boolean powerReportingSupported) {
+    /**
+     * Copies the elements of the stats array layout into <code>extras</code>
+     */
+    public void toExtras(PersistableBundle extras) {
+        super.toExtras(extras);
+        extras.putBoolean(EXTRA_POWER_REPORTING_SUPPORTED, mPowerReportingSupported);
+        extras.putInt(EXTRA_DEVICE_RX_TIME_POSITION, mDeviceRxTimePosition);
+        extras.putInt(EXTRA_DEVICE_TX_TIME_POSITION, mDeviceTxTimePosition);
+        extras.putInt(EXTRA_DEVICE_SCAN_TIME_POSITION, mDeviceScanTimePosition);
+        extras.putInt(EXTRA_DEVICE_BASIC_SCAN_TIME_POSITION, mDeviceBasicScanTimePosition);
+        extras.putInt(EXTRA_DEVICE_BATCHED_SCAN_TIME_POSITION, mDeviceBatchedScanTimePosition);
+        extras.putInt(EXTRA_DEVICE_IDLE_TIME_POSITION, mDeviceIdleTimePosition);
+        extras.putInt(EXTRA_DEVICE_ACTIVE_TIME_POSITION, mDeviceActiveTimePosition);
+        extras.putInt(EXTRA_UID_RX_BYTES_POSITION, mUidRxBytesPosition);
+        extras.putInt(EXTRA_UID_TX_BYTES_POSITION, mUidTxBytesPosition);
+        extras.putInt(EXTRA_UID_RX_PACKETS_POSITION, mUidRxPacketsPosition);
+        extras.putInt(EXTRA_UID_TX_PACKETS_POSITION, mUidTxPacketsPosition);
+        extras.putInt(EXTRA_UID_SCAN_TIME_POSITION, mUidScanTimePosition);
+        extras.putInt(EXTRA_UID_BATCH_SCAN_TIME_POSITION, mUidBatchScanTimePosition);
+    }
+
+    private void addDeviceWifiActivity(boolean powerReportingSupported) {
         mPowerReportingSupported = powerReportingSupported;
         if (mPowerReportingSupported) {
             mDeviceActiveTimePosition = UNSPECIFIED;
@@ -80,7 +121,7 @@ public class WifiPowerStatsLayout extends PowerStatsLayout {
         mDeviceBatchedScanTimePosition = addDeviceSection(1, "batched-scan", FLAG_OPTIONAL);
     }
 
-    public void addUidNetworkStats() {
+    private void addUidNetworkStats() {
         mUidRxPacketsPosition = addUidSection(1, "rx-pkts");
         mUidRxBytesPosition = addUidSection(1, "rx-B");
         mUidTxPacketsPosition = addUidSection(1, "tx-pkts");
@@ -195,47 +236,5 @@ public class WifiPowerStatsLayout extends PowerStatsLayout {
 
     public long getUidBatchedScanTime(long[] stats) {
         return stats[mUidBatchScanTimePosition];
-    }
-
-    /**
-     * Copies the elements of the stats array layout into <code>extras</code>
-     */
-    public void toExtras(PersistableBundle extras) {
-        super.toExtras(extras);
-        extras.putBoolean(EXTRA_POWER_REPORTING_SUPPORTED, mPowerReportingSupported);
-        extras.putInt(EXTRA_DEVICE_RX_TIME_POSITION, mDeviceRxTimePosition);
-        extras.putInt(EXTRA_DEVICE_TX_TIME_POSITION, mDeviceTxTimePosition);
-        extras.putInt(EXTRA_DEVICE_SCAN_TIME_POSITION, mDeviceScanTimePosition);
-        extras.putInt(EXTRA_DEVICE_BASIC_SCAN_TIME_POSITION, mDeviceBasicScanTimePosition);
-        extras.putInt(EXTRA_DEVICE_BATCHED_SCAN_TIME_POSITION, mDeviceBatchedScanTimePosition);
-        extras.putInt(EXTRA_DEVICE_IDLE_TIME_POSITION, mDeviceIdleTimePosition);
-        extras.putInt(EXTRA_DEVICE_ACTIVE_TIME_POSITION, mDeviceActiveTimePosition);
-        extras.putInt(EXTRA_UID_RX_BYTES_POSITION, mUidRxBytesPosition);
-        extras.putInt(EXTRA_UID_TX_BYTES_POSITION, mUidTxBytesPosition);
-        extras.putInt(EXTRA_UID_RX_PACKETS_POSITION, mUidRxPacketsPosition);
-        extras.putInt(EXTRA_UID_TX_PACKETS_POSITION, mUidTxPacketsPosition);
-        extras.putInt(EXTRA_UID_SCAN_TIME_POSITION, mUidScanTimePosition);
-        extras.putInt(EXTRA_UID_BATCH_SCAN_TIME_POSITION, mUidBatchScanTimePosition);
-    }
-
-    /**
-     * Retrieves elements of the stats array layout from <code>extras</code>
-     */
-    public void fromExtras(PersistableBundle extras) {
-        super.fromExtras(extras);
-        mPowerReportingSupported = extras.getBoolean(EXTRA_POWER_REPORTING_SUPPORTED);
-        mDeviceRxTimePosition = extras.getInt(EXTRA_DEVICE_RX_TIME_POSITION);
-        mDeviceTxTimePosition = extras.getInt(EXTRA_DEVICE_TX_TIME_POSITION);
-        mDeviceScanTimePosition = extras.getInt(EXTRA_DEVICE_SCAN_TIME_POSITION);
-        mDeviceBasicScanTimePosition = extras.getInt(EXTRA_DEVICE_BASIC_SCAN_TIME_POSITION);
-        mDeviceBatchedScanTimePosition = extras.getInt(EXTRA_DEVICE_BATCHED_SCAN_TIME_POSITION);
-        mDeviceIdleTimePosition = extras.getInt(EXTRA_DEVICE_IDLE_TIME_POSITION);
-        mDeviceActiveTimePosition = extras.getInt(EXTRA_DEVICE_ACTIVE_TIME_POSITION);
-        mUidRxBytesPosition = extras.getInt(EXTRA_UID_RX_BYTES_POSITION);
-        mUidTxBytesPosition = extras.getInt(EXTRA_UID_TX_BYTES_POSITION);
-        mUidRxPacketsPosition = extras.getInt(EXTRA_UID_RX_PACKETS_POSITION);
-        mUidTxPacketsPosition = extras.getInt(EXTRA_UID_TX_PACKETS_POSITION);
-        mUidScanTimePosition = extras.getInt(EXTRA_UID_SCAN_TIME_POSITION);
-        mUidBatchScanTimePosition = extras.getInt(EXTRA_UID_BATCH_SCAN_TIME_POSITION);
     }
 }

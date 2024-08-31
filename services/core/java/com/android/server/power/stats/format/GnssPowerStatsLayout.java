@@ -16,15 +16,18 @@
 
 package com.android.server.power.stats.format;
 
+import android.annotation.NonNull;
 import android.location.GnssSignalQuality;
 import android.os.PersistableBundle;
+
+import com.android.internal.os.PowerStats;
 
 public class GnssPowerStatsLayout extends BinaryStatePowerStatsLayout {
     private static final String EXTRA_DEVICE_TIME_SIGNAL_LEVEL_POSITION = "dt-sig";
     private static final String EXTRA_UID_TIME_SIGNAL_LEVEL_POSITION = "ut-sig";
 
-    private int mDeviceSignalLevelTimePosition;
-    private int mUidSignalLevelTimePosition;
+    private final int mDeviceSignalLevelTimePosition;
+    private final int mUidSignalLevelTimePosition;
 
     public GnssPowerStatsLayout() {
         mDeviceSignalLevelTimePosition = addDeviceSection(
@@ -33,9 +36,9 @@ public class GnssPowerStatsLayout extends BinaryStatePowerStatsLayout {
                 GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS, "level");
     }
 
-    @Override
-    public void fromExtras(PersistableBundle extras) {
-        super.fromExtras(extras);
+    public GnssPowerStatsLayout(@NonNull PowerStats.Descriptor descriptor) {
+        super(descriptor);
+        PersistableBundle extras = descriptor.extras;
         mDeviceSignalLevelTimePosition = extras.getInt(EXTRA_DEVICE_TIME_SIGNAL_LEVEL_POSITION);
         mUidSignalLevelTimePosition = extras.getInt(EXTRA_UID_TIME_SIGNAL_LEVEL_POSITION);
     }
