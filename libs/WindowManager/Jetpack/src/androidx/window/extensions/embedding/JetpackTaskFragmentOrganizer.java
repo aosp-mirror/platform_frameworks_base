@@ -70,6 +70,10 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @NonNull
     private final TaskFragmentCallback mCallback;
 
+    @VisibleForTesting
+    @Nullable
+    TaskFragmentAnimationController mAnimationController;
+
     /**
      * Callback that notifies the controller about changes to task fragments.
      */
@@ -85,6 +89,25 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             @NonNull TaskFragmentCallback callback) {
         super(executor);
         mCallback = callback;
+    }
+
+    @Override
+    public void unregisterOrganizer() {
+        if (mAnimationController != null) {
+            mAnimationController.unregisterRemoteAnimations();
+            mAnimationController = null;
+        }
+        super.unregisterOrganizer();
+    }
+
+    /**
+     * Overrides the animation for transitions of embedded activities organized by this organizer.
+     */
+    void overrideSplitAnimation() {
+        if (mAnimationController == null) {
+            mAnimationController = new TaskFragmentAnimationController(this);
+        }
+        mAnimationController.registerRemoteAnimations();
     }
 
     /**

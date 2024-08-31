@@ -163,6 +163,7 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IUserInitializationCompleteCallback;
 import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.R;
@@ -365,6 +366,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final List<SendWindowStateChangedEventRunnable> mSendWindowStateChangedEventRunnables =
             new ArrayList<>();
+
+    @VisibleForTesting
+    final HashSet<IUserInitializationCompleteCallback>
+            mUserInitializationCompleteCallbacks =
+            new HashSet<IUserInitializationCompleteCallback>();
 
     @GuardedBy("mLock")
     private @UserIdInt int mCurrentUserId = UserHandle.USER_SYSTEM;
@@ -2033,6 +2039,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mMainHandler.sendMessageDelayed(
                         obtainMessage(AccessibilityManagerService::announceNewUserIfNeeded, this),
                         WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS);
+            }
+
+            for (IUserInitializationCompleteCallback callback
+                    : mUserInitializationCompleteCallbacks) {
+                try {
+                    callback.onUserInitializationComplete(mCurrentUserId);
+                } catch (RemoteException re) {
+                    Log.e("AccessibilityManagerService",
+                            "Error while dispatching userInitializationComplete callback: ",
+                            re);
+                }
             }
         }
     }
@@ -6247,6 +6264,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     service.setImeSessionEnabledLocked(sessions.get(service.mId), enabled);
                 }
             }
+        }
+    }
+
+    @Override
+    @RequiresNoPermission
+    public void registerUserInitializationCompleteCallback(
+            IUserInitializationCompleteCallback callback) {
+        synchronized (mLock) {
+            mUserInitializationCompleteCallbacks.add(callback);
+        }
+    }
+
+    @Override
+    @RequiresNoPermission
+    public void unregisterUserInitializationCompleteCallback(
+            IUserInitializationCompleteCallback callback) {
+        synchronized (mLock) {
+            mUserInitializationCompleteCallbacks.remove(callback);
         }
     }
 

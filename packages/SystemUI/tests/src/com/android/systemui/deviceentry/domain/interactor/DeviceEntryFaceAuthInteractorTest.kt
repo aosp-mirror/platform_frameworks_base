@@ -63,6 +63,7 @@ import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -365,11 +366,84 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
 
-            underTest.onQsExpansionStared()
+            underTest.onQsExpansionStarted()
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
                 .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun faceAuthIsRequestedWhenQuickSettingsIsExpandedToTheShade() =
+        testScope.runTest {
+            underTest.start()
+            faceAuthRepository.canRunFaceAuth.value = true
+            kosmos.sceneInteractor.snapToScene(toScene = Scenes.QuickSettings, "for-test")
+            runCurrent()
+
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "for-test")
+            kosmos.sceneInteractor.setTransitionState(
+                MutableStateFlow(
+                    ObservableTransitionState.Transition(
+                        fromScene = Scenes.QuickSettings,
+                        toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.QuickSettings),
+                        progress = MutableStateFlow(0.2f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            )
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value)
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun faceAuthIsRequestedOnlyOnceWhenQuickSettingsIsExpandedToTheShade() =
+        testScope.runTest {
+            underTest.start()
+            faceAuthRepository.canRunFaceAuth.value = true
+            kosmos.sceneInteractor.snapToScene(toScene = Scenes.QuickSettings, "for-test")
+            runCurrent()
+
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "for-test")
+            kosmos.sceneInteractor.setTransitionState(
+                MutableStateFlow(
+                    ObservableTransitionState.Transition(
+                        fromScene = Scenes.QuickSettings,
+                        toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.QuickSettings),
+                        progress = MutableStateFlow(0.2f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            )
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value)
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+            faceAuthRepository.runningAuthRequest.value = null
+
+            // expansion progress shouldn't trigger face auth again
+            kosmos.sceneInteractor.setTransitionState(
+                MutableStateFlow(
+                    ObservableTransitionState.Transition(
+                        fromScene = Scenes.QuickSettings,
+                        toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.QuickSettings),
+                        progress = MutableStateFlow(0.5f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            )
+
+            assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
         }
 
     @Test

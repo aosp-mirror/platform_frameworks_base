@@ -30,6 +30,7 @@ import com.android.platform.test.ravenwood.ravenizer.RavenizerInternalException
 import com.android.platform.test.ravenwood.ravenizer.classRuleAnotType
 import com.android.platform.test.ravenwood.ravenizer.isTestLookingClass
 import com.android.platform.test.ravenwood.ravenizer.innerRunnerAnotType
+import com.android.platform.test.ravenwood.ravenizer.noRavenizerAnotType
 import com.android.platform.test.ravenwood.ravenizer.ravenwoodTestRunnerType
 import com.android.platform.test.ravenwood.ravenizer.ruleAnotType
 import com.android.platform.test.ravenwood.ravenizer.runWithAnotType
@@ -435,7 +436,19 @@ class RunnerRewritingAdapter private constructor(
 
     companion object {
         fun shouldProcess(classes: ClassNodes, className: String): Boolean {
-            return isTestLookingClass(classes, className)
+            if (!isTestLookingClass(classes, className)) {
+                return false
+            }
+            // Don't process a class if it has a @NoRavenizer annotation.
+            classes.findClass(className)?.let { cn ->
+                if (cn.findAnyAnnotation(noRavenizerAnotType.descAsSet) != null) {
+                    log.w("Class ${className.toHumanReadableClassName()} has" +
+                        " @${noRavenizerAnotType.humanReadableName}. Skipping."
+                    )
+                    return false
+                }
+            }
+            return true
         }
 
         fun maybeApply(

@@ -492,6 +492,17 @@ sealed class UserActionResult(
 ) {
     internal abstract fun toContent(currentScene: SceneKey): ContentKey
 
+    internal fun userActionCopy(
+        transitionKey: TransitionKey? = this.transitionKey
+    ): UserActionResult {
+        return when (this) {
+            is ChangeScene -> copy(transitionKey = transitionKey)
+            is ShowOverlay -> copy(transitionKey = transitionKey)
+            is HideOverlay -> copy(transitionKey = transitionKey)
+            is ReplaceByOverlay -> copy(transitionKey = transitionKey)
+        }
+    }
+
     data class ChangeScene
     internal constructor(
         /** The scene we should be transitioning to during the [UserAction]. */
@@ -503,19 +514,19 @@ sealed class UserActionResult(
     }
 
     /** A [UserActionResult] that shows [overlay]. */
-    class ShowOverlay(
+    data class ShowOverlay(
         val overlay: OverlayKey,
-        transitionKey: TransitionKey? = null,
-        requiresFullDistanceSwipe: Boolean = false,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = overlay
     }
 
     /** A [UserActionResult] that hides [overlay]. */
-    class HideOverlay(
+    data class HideOverlay(
         val overlay: OverlayKey,
-        transitionKey: TransitionKey? = null,
-        requiresFullDistanceSwipe: Boolean = false,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = currentScene
     }
@@ -526,10 +537,10 @@ sealed class UserActionResult(
      * Note: This result can only be used for user actions of overlays and an exception will be
      * thrown if it is used for a scene.
      */
-    class ReplaceByOverlay(
+    data class ReplaceByOverlay(
         val overlay: OverlayKey,
-        transitionKey: TransitionKey? = null,
-        requiresFullDistanceSwipe: Boolean = false,
+        override val transitionKey: TransitionKey? = null,
+        override val requiresFullDistanceSwipe: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = overlay
     }

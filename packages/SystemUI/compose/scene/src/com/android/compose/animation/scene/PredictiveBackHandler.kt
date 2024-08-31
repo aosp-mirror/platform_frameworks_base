@@ -18,7 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import kotlin.coroutines.cancellation.CancellationException
@@ -43,7 +43,9 @@ internal fun PredictiveBackHandler(
             createSwipeAnimation(
                 layoutImpl,
                 layoutImpl.coroutineScope,
-                result,
+                result.userActionCopy(
+                    transitionKey = result.transitionKey ?: TransitionKey.PredictiveBack
+                ),
                 isUpOrLeft = false,
                 // Note that the orientation does not matter here given that it's only used to
                 // compute the distance. In our case the distance is always 1f.
@@ -60,7 +62,7 @@ private suspend fun <T : ContentKey> animate(
     animation: SwipeAnimation<T>,
     progress: Flow<BackEventCompat>,
 ) {
-    fun animateOffset(targetContent: T) {
+    fun animateOffset(targetContent: T, spec: AnimationSpec<Float>? = null) {
         if (
             layoutImpl.state.transitionState != animation.contentTransition || animation.isFinishing
         ) {
@@ -70,12 +72,7 @@ private suspend fun <T : ContentKey> animate(
         animation.animateOffset(
             initialVelocity = 0f,
             targetContent = targetContent,
-
-            // TODO(b/350705972): Allow to customize or reuse the same customization endpoints as
-            // the normal swipe transitions. We can't just reuse them here because other swipe
-            // transitions animate pixels while this transition animates progress, so the visibility
-            // thresholds will be completely different.
-            spec = spring(),
+            spec = spec,
         )
     }
 
@@ -84,9 +81,15 @@ private suspend fun <T : ContentKey> animate(
         progress.collect { backEvent -> animation.dragOffset = backEvent.progress }
 
         // Back gesture successful.
-        animateOffset(animation.toContent)
+        animateOffset(
+            animation.toContent,
+            animation.contentTransition.transformationSpec.progressSpec
+        )
     } catch (e: CancellationException) {
         // Back gesture cancelled.
+        // If the back gesture is cancelled, the progress is animated back to 0f by the system.
+        // Since the remaining change in progress is usually very small, the progressSpec is omitted
+        // and the default spring spec used instead.
         animateOffset(animation.fromContent)
     }
 }

@@ -482,6 +482,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 } else { // mode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
                     mEditButton.setVisibility(View.VISIBLE);
                     mAllowDiagonalScrollingView.setVisibility(View.VISIBLE);
+                    if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
+                        selectedButtonIndex =
+                                windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
+                    }
                 }
                 break;
 

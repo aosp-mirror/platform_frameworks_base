@@ -16,7 +16,6 @@
 
 package com.android.systemui.settings;
 
-import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
@@ -67,7 +66,7 @@ public abstract class MultiUserUtilsModule {
             @Background CoroutineDispatcher backgroundDispatcher,
             @Background Handler handler
     ) {
-        int startingUser = ActivityManager.getCurrentUser();
+        int startingUser = userManager.getBootUser().getIdentifier();
         UserTrackerImpl tracker = new UserTrackerImpl(context, featureFlagsProvider, userManager,
                 iActivityManager, dumpManager, appScope, backgroundDispatcher, handler);
         tracker.initialize(startingUser);

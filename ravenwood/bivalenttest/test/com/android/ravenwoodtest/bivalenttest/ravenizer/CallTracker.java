@@ -64,7 +64,7 @@ public class CallTracker {
     /**
      * Check the number of calls stored in {@link #mNumCalled}.
      */
-    protected void assertCalls(Object... methodNameAndCountPairs) {
+    public void assertCalls(Object... methodNameAndCountPairs) {
         // Create a local copy
         HashMap<String, Integer> counts = new HashMap<>(mNumCalled);
         for (int i = 0; i < methodNameAndCountPairs.length - 1; i += 2) {
@@ -95,7 +95,7 @@ public class CallTracker {
      * Same as {@link #assertCalls(Object...)} but it kills the process if it fails.
      * Only use in @AfterClass.
      */
-    protected void assertCallsOrDie(Object... methodNameAndCountPairs) {
+    public void assertCallsOrDie(Object... methodNameAndCountPairs) {
         try {
             assertCalls(methodNameAndCountPairs);
         } catch (Throwable th) {

@@ -108,6 +108,7 @@ cc_library_shared_for_libandroid_runtime {
         "libtracing_perfetto",
         "libharfbuzz_ng",
         "liblog",
+        "libmediautils",
         "libminikin",
         "libz",
         "server_configurable_flags",

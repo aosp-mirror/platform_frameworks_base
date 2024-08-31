@@ -123,12 +123,12 @@ import org.mockito.ArgumentMatchers.isA
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
@@ -2859,7 +2859,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun getSnapBounds_calculatesBoundsForResizable() {
+  fun snapToHalfScreen_getSnapBounds_calculatesBoundsForResizable() {
     val bounds = Rect(100, 100, 300, 300)
     val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
       topActivityInfo = ActivityInfo().apply {
@@ -2874,10 +2874,42 @@ class DesktopTasksControllerTest : ShellTestCase() {
       STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
     )
 
-    controller.snapToHalfScreen(task, currentDragBounds, SnapPosition.LEFT)
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT)
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+  }
+
+  @Test
+  fun snapToHalfScreen_snapBoundsWhenAlreadySnapped_animatesSurfaceWithoutWCT() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    // Set up task to already be in snapped-left bounds
+    val bounds = Rect(
+      STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
+    )
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
+      topActivityInfo = ActivityInfo().apply {
+        screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
+        configuration.windowConfiguration.appBounds = bounds
+      }
+      isResizeable = true
+    }
+
+    // Attempt to snap left again
+    val currentDragBounds = Rect(bounds).apply { offset(-100, 0) }
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT)
+
+    // Assert that task is NOT updated via WCT
+    verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
+
+    // Assert that task leash is updated via Surface Animations
+    verify(mReturnToDragStartAnimator).start(
+      eq(task.taskId),
+      eq(mockSurface),
+      eq(currentDragBounds),
+      eq(bounds),
+      eq(true)
+    )
   }
 
   @Test
@@ -2911,7 +2943,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
       eq(task.taskId),
       eq(mockSurface),
       eq(currentDragBounds),
-      eq(preDragBounds)
+      eq(preDragBounds),
+      eq(false)
     )
   }
 

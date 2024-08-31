@@ -31,6 +31,7 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
 import android.app.appfunctions.AppFunctionManager;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
@@ -937,8 +938,10 @@ public final class SystemServiceRegistry {
                         @Override
                         public AppFunctionManager createService(ContextImpl ctx)
                                 throws ServiceNotFoundException {
+                            if (!AppFunctionManagerConfiguration.isSupported(ctx)) {
+                                return null;
+                            }
                             IAppFunctionManager service;
-                            //TODO(b/357551503): If the feature not present avoid look up every time
                             service = IAppFunctionManager.Stub.asInterface(
                                     ServiceManager.getServiceOrThrow(Context.APP_FUNCTION_SERVICE));
                             return new AppFunctionManager(service, ctx.getOuterContext());
