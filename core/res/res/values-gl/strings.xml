@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Atrás"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Cambia o método de introdución"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Abrir o selector do método de introdución de texto"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Configuración"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Estase esgotando o espazo de almacenamento"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"É posible que algunhas funcións do sistema non funcionen"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Non hai almacenamento suficiente para o sistema. Asegúrate de ter un espazo libre de 250 MB e reinicia o dispositivo."</string>

@@ -545,21 +545,30 @@ private fun ScrollOnUpdatedLiveContentEffect(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val liveContentKeys = remember { mutableListOf<String>() }
+    var communalContentPending by remember { mutableStateOf(true) }
 
     LaunchedEffect(communalContent) {
+        // Do nothing until any communal content comes in
+        if (communalContentPending && communalContent.isEmpty()) {
+            return@LaunchedEffect
+        }
+
         val prevLiveContentKeys = liveContentKeys.toList()
+        val newLiveContentKeys = communalContent.filter { it.isLiveContent() }.map { it.key }
         liveContentKeys.clear()
-        liveContentKeys.addAll(communalContent.filter { it.isLiveContent() }.map { it.key })
+        liveContentKeys.addAll(newLiveContentKeys)
 
-        // Find the first updated content
+        // Do nothing on first communal content since we don't have a delta
+        if (communalContentPending) {
+            communalContentPending = false
+            return@LaunchedEffect
+        }
+
+        // Do nothing if there is no new live content
         val indexOfFirstUpdatedContent =
-            liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
-
-        // Scroll if current position is behind the first updated content
+            newLiveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
         if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
-            // Launching with a scope to prevent the job from being canceled in the case of a
-            // recomposition during scrolling
-            coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
+            gridState.scrollToItem(indexOfFirstUpdatedContent)
         }
     }
 }

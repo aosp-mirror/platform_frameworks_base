@@ -16,14 +16,24 @@
 
 package com.android.systemui.statusbar.chips
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModel
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
 @Module
 abstract class StatusBarChipsModule {
+    @Binds
+    @IntoMap
+    @ClassKey(DemoRonChipViewModel::class)
+    abstract fun binds(impl: DemoRonChipViewModel): CoreStartable
+
     companion object {
         @Provides
         @SysUISingleton

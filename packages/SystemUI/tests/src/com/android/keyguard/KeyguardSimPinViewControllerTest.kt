@@ -101,7 +101,8 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
                 emergencyButtonController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
-                keyguardKeyboardInteractor
+                keyguardKeyboardInteractor,
+                null,
             )
         underTest.init()
         underTest.onViewAttached()

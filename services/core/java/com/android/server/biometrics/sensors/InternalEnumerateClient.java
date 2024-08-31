@@ -55,7 +55,8 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
         // Internal enumerate does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
         super(context, lazyDaemon, token, null /* ClientMonitorCallbackConverter */, userId, owner,
-                0 /* cookie */, sensorId, logger, biometricContext);
+                0 /* cookie */, sensorId, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mEnrolledList = enrolledList;
         mInitialEnrolledSize = mEnrolledList.size();
         mUtils = utils;

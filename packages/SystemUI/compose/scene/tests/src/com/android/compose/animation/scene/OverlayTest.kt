@@ -16,6 +16,8 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -33,6 +35,7 @@ import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestOverlays.OverlayA
@@ -49,8 +52,8 @@ class OverlayTest {
     @get:Rule val rule = createComposeRule()
 
     @Composable
-    private fun ContentScope.Foo() {
-        Box(Modifier.element(TestElements.Foo).size(100.dp))
+    private fun ContentScope.Foo(width: Dp = 100.dp, height: Dp = 100.dp) {
+        Box(Modifier.element(TestElements.Foo).size(width, height))
     }
 
     @Test
@@ -272,7 +275,7 @@ class OverlayTest {
         rule.setContent {
             SceneTransitionLayout(state, Modifier.size(200.dp)) {
                 scene(SceneA) { Box(Modifier.fillMaxSize()) { Foo() } }
-                overlay(OverlayA, alignment) { Foo() }
+                overlay(OverlayA, alignment = alignment) { Foo() }
             }
         }
 
@@ -315,5 +318,210 @@ class OverlayTest {
         // Max overlay size is the size of the layout without overlays, not the (max) possible size
         // of the layout.
         rule.onNodeWithTag(contentTag).assertSizeIsEqualTo(100.dp)
+    }
+
+    @Test
+    fun showAnimation() {
+        rule.testShowOverlayTransition(
+            fromSceneContent = {
+                Box(Modifier.size(width = 180.dp, height = 120.dp)) {
+                    Foo(width = 60.dp, height = 40.dp)
+                }
+            },
+            overlayContent = { Foo(width = 100.dp, height = 80.dp) },
+            transition = {
+                // 4 frames of animation
+                spec = tween(4 * 16, easing = LinearEasing)
+            },
+        ) {
+            // Foo moves from (0,0) with a size of 60x40dp to centered (in a 180x120dp Box) with a
+            // size of 100x80dp, so at (40,20).
+            before {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(60.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+            }
+
+            at(16) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(70.dp, 50.dp)
+                    .assertPositionInRootIsEqualTo(10.dp, 5.dp)
+            }
+
+            at(32) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(80.dp, 60.dp)
+                    .assertPositionInRootIsEqualTo(20.dp, 10.dp)
+            }
+
+            at(48) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(90.dp, 70.dp)
+                    .assertPositionInRootIsEqualTo(30.dp, 15.dp)
+            }
+
+            after {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(100.dp, 80.dp)
+                    .assertPositionInRootIsEqualTo(40.dp, 20.dp)
+            }
+        }
+    }
+
+    @Test
+    fun hideAnimation() {
+        rule.testHideOverlayTransition(
+            toSceneContent = {
+                Box(Modifier.size(width = 180.dp, height = 120.dp)) {
+                    Foo(width = 60.dp, height = 40.dp)
+                }
+            },
+            overlayContent = { Foo(width = 100.dp, height = 80.dp) },
+            transition = {
+                // 4 frames of animation
+                spec = tween(4 * 16, easing = LinearEasing)
+            },
+        ) {
+            // Foo moves from centered (in a 180x120dp Box) with a size of 100x80dp, so at (40,20),
+            // to (0,0) with a size of 60x40dp.
+            before {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(100.dp, 80.dp)
+                    .assertPositionInRootIsEqualTo(40.dp, 20.dp)
+            }
+
+            at(16) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(90.dp, 70.dp)
+                    .assertPositionInRootIsEqualTo(30.dp, 15.dp)
+            }
+
+            at(32) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(80.dp, 60.dp)
+                    .assertPositionInRootIsEqualTo(20.dp, 10.dp)
+            }
+
+            at(48) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(70.dp, 50.dp)
+                    .assertPositionInRootIsEqualTo(10.dp, 5.dp)
+            }
+
+            after {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(60.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+            }
+        }
+    }
+
+    @Test
+    fun replaceAnimation() {
+        rule.testReplaceOverlayTransition(
+            currentSceneContent = { Box(Modifier.size(width = 180.dp, height = 120.dp)) },
+            fromContent = { Foo(width = 60.dp, height = 40.dp) },
+            fromAlignment = Alignment.TopStart,
+            toContent = { Foo(width = 100.dp, height = 80.dp) },
+            transition = {
+                // 4 frames of animation
+                spec = tween(4 * 16, easing = LinearEasing)
+            },
+        ) {
+            // Foo moves from (0,0) with a size of 60x40dp to centered (in a 180x120dp Box) with a
+            // size of 100x80dp, so at (40,20).
+            before {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertSizeIsEqualTo(60.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayB)).assertDoesNotExist()
+            }
+
+            at(16) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(70.dp, 50.dp)
+                    .assertPositionInRootIsEqualTo(10.dp, 5.dp)
+            }
+
+            at(32) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(80.dp, 60.dp)
+                    .assertPositionInRootIsEqualTo(20.dp, 10.dp)
+            }
+
+            at(48) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(90.dp, 70.dp)
+                    .assertPositionInRootIsEqualTo(30.dp, 15.dp)
+            }
+
+            after {
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(100.dp, 80.dp)
+                    .assertPositionInRootIsEqualTo(40.dp, 20.dp)
+            }
+        }
     }
 }

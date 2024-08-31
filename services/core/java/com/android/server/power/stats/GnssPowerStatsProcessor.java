@@ -27,15 +27,15 @@ import com.android.internal.os.PowerStats;
 import java.util.Arrays;
 
 public class GnssPowerStatsProcessor extends BinaryStatePowerStatsProcessor {
-    private int mGnssSignalLevel = GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
-    private long mGnssSignalLevelTimestamp;
-    private final long[] mGnssSignalDurations =
-            new long[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
     private static final GnssPowerStatsLayout sStatsLayout = new GnssPowerStatsLayout();
     private final UsageBasedPowerEstimator[] mSignalLevelEstimators =
             new UsageBasedPowerEstimator[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
     private final boolean mUseSignalLevelEstimators;
     private long[] mTmpDeviceStatsArray;
+    private int mGnssSignalLevel;
+    private long mGnssSignalLevelTimestamp;
+    private final long[] mGnssSignalDurations =
+            new long[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
 
     public GnssPowerStatsProcessor(PowerProfile powerProfile, PowerStatsUidResolver uidResolver) {
         super(BatteryConsumer.POWER_COMPONENT_GNSS, uidResolver,
@@ -55,20 +55,33 @@ public class GnssPowerStatsProcessor extends BinaryStatePowerStatsProcessor {
     }
 
     @Override
-    protected @BinaryState int getBinaryState(BatteryStats.HistoryItem item) {
-        if ((item.states & BatteryStats.HistoryItem.STATE_GPS_ON_FLAG) == 0) {
-            mGnssSignalLevel = GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
-            return STATE_OFF;
-        }
+    void start(PowerComponentAggregatedPowerStats stats, long timestampMs) {
+        super.start(stats, timestampMs);
 
-        noteGnssSignalLevel(item);
-        return STATE_ON;
+        mGnssSignalLevelTimestamp = timestampMs;
+        mGnssSignalLevel = GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
+        Arrays.fill(mGnssSignalDurations, 0);
     }
 
-    private void noteGnssSignalLevel(BatteryStats.HistoryItem item) {
-        int signalLevel = (item.states2 & BatteryStats.HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK)
-                >> BatteryStats.HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT;
-        if (signalLevel >= GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS) {
+    @Override
+    protected @BinaryState int getBinaryState(BatteryStats.HistoryItem item) {
+        return (item.states & BatteryStats.HistoryItem.STATE_GPS_ON_FLAG) != 0
+                ? STATE_ON : STATE_OFF;
+    }
+
+    @Override
+    void noteStateChange(PowerComponentAggregatedPowerStats stats, BatteryStats.HistoryItem item) {
+        super.noteStateChange(stats, item);
+
+        int signalLevel;
+        if ((item.states & BatteryStats.HistoryItem.STATE_GPS_ON_FLAG) != 0) {
+            signalLevel = (item.states2 & BatteryStats.HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK)
+                    >> BatteryStats.HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT;
+            if (signalLevel >= GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS) {
+                // Default GNSS signal quality to GOOD for the purposes of power attribution
+                signalLevel = GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD;
+            }
+        } else {
             signalLevel = GnssSignalQuality.GNSS_SIGNAL_QUALITY_UNKNOWN;
         }
         if (signalLevel == mGnssSignalLevel) {

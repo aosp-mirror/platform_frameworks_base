@@ -29,6 +29,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.BluetoothUtils
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -271,7 +272,7 @@ constructor(
         val intent =
             Intent(ACTION_BLUETOOTH_DEVICE_DETAILS).apply {
                 putExtra(
-                    ":settings:show_fragment_args",
+                    EXTRA_SHOW_FRAGMENT_ARGUMENTS,
                     Bundle().apply {
                         putString("device_address", deviceItem.cachedBluetoothDevice.address)
                     }
@@ -292,7 +293,16 @@ constructor(
 
     override fun onAudioSharingButtonClicked(view: View) {
         uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_AUDIO_SHARING_BUTTON_CLICKED)
-        startSettingsActivity(Intent(ACTION_AUDIO_SHARING), view)
+        val intent =
+            Intent(ACTION_AUDIO_SHARING).apply {
+                putExtra(
+                    EXTRA_SHOW_FRAGMENT_ARGUMENTS,
+                    Bundle().apply {
+                        putBoolean(LocalBluetoothLeBroadcast.EXTRA_START_LE_AUDIO_SHARING, true)
+                    }
+                )
+            }
+        startSettingsActivity(intent, view)
     }
 
     private fun cancelJob() {
@@ -320,6 +330,7 @@ constructor(
     companion object {
         private const val INTERACTION_JANK_TAG = "bluetooth_tile_dialog"
         private const val CONTENT_HEIGHT_PREF_KEY = Prefs.Key.BLUETOOTH_TILE_DIALOG_CONTENT_HEIGHT
+        private const val EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":settings:show_fragment_args"
 
         private fun getSubtitleResId(isBluetoothEnabled: Boolean) =
             if (isBluetoothEnabled) R.string.quick_settings_bluetooth_tile_subtitle

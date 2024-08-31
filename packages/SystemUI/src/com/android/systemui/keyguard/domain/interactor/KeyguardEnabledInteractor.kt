@@ -48,7 +48,7 @@ constructor(
     @Application scope: CoroutineScope,
     val repository: KeyguardRepository,
     val biometricSettingsRepository: BiometricSettingsRepository,
-    transitionInteractor: KeyguardTransitionInteractor,
+    keyguardDismissTransitionInteractor: KeyguardDismissTransitionInteractor,
     internalTransitionInteractor: InternalKeyguardTransitionInteractor,
 ) {
 
@@ -94,7 +94,9 @@ constructor(
                 showKeyguardWhenReenabled
                     .filter { shouldDismiss -> shouldDismiss }
                     .collect {
-                        transitionInteractor.startDismissKeyguardTransition("keyguard disabled")
+                        keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
+                            "keyguard disabled"
+                        )
                     }
             }
         }

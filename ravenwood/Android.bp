@@ -160,6 +160,7 @@ java_library {
         "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
+        "framework-annotations-lib",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],
@@ -211,6 +212,7 @@ java_library {
     libs: [
         "junit",
         "flag-junit",
+        "framework-annotations-lib",
     ],
     visibility: ["//visibility:public"],
 }
@@ -331,6 +333,7 @@ android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     data: [
         "framework-res",
+        "ravenwood-empty-res",
     ],
     libs: [
         "100-framework-minus-apex.ravenwood",

@@ -41,6 +41,7 @@ class BubbleInfoTest : ShellTestCase() {
                 "com.some.package",
                 "title",
                 "Some app",
+                true,
                 true
             )
         val parcel = Parcel.obtain()

@@ -308,6 +308,40 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         assertThat(backlinksData.getCompoundDrawablesRelative()[2]).isNotNull();
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_APP_CLIPS_BACKLINKS)
+    public void appClipsLaunched_backlinks_multipleBacklinksAvailable_duplicateName()
+            throws RemoteException {
+        // Set up mocking for multiple backlinks.
+        ResolveInfo resolveInfo1 = createBacklinksTaskResolveInfo();
+
+        ResolveInfo resolveInfo2 = createBacklinksTaskResolveInfo();
+        RunningTaskInfo runningTaskInfo2 = createTaskInfoForBacklinksTask();
+        int taskId2 = BACKLINKS_TASK_ID + 2;
+        runningTaskInfo2.taskId = taskId2;
+
+        when(mAtmService.getTasks(eq(Integer.MAX_VALUE), eq(false), eq(false),
+                mDisplayIdCaptor.capture()))
+                .thenReturn(List.of(TASK_THAT_SUPPORTS_BACKLINKS, runningTaskInfo2));
+        when(mPackageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(resolveInfo1,
+                resolveInfo1, resolveInfo1, resolveInfo2, resolveInfo2, resolveInfo2);
+        when(mPackageManager.loadItemIcon(any(), any())).thenReturn(FAKE_DRAWABLE);
+
+        // Using same AssistContent data for both tasks.
+        mockForAssistContent(ASSIST_CONTENT_FOR_BACKLINKS_TASK, BACKLINKS_TASK_ID);
+        mockForAssistContent(ASSIST_CONTENT_FOR_BACKLINKS_TASK, taskId2);
+
+        // Mocking complete, trigger backlinks.
+        launchActivity();
+        waitForIdleSync();
+
+        // Verify default backlink shown to user has the numerical suffix.
+        TextView backlinksData = mActivity.findViewById(R.id.backlinks_data);
+        assertThat(backlinksData.getText().toString()).isEqualTo(
+                mContext.getString(R.string.backlinks_duplicate_label_format,
+                        BACKLINKS_TASK_APP_NAME, 1));
+    }
+
     private void setUpMocksForBacklinks() throws RemoteException {
         when(mAtmService.getTasks(eq(Integer.MAX_VALUE), eq(false), eq(false),
                 mDisplayIdCaptor.capture()))

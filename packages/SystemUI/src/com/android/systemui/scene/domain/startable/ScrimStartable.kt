@@ -112,7 +112,7 @@ constructor(
                 // It
                 // happens only when unlocking or when dismissing a dismissible lockscreen.
                 val isTransitioningAwayFromKeyguard =
-                    transitionState is ObservableTransitionState.Transition.ChangeCurrentScene &&
+                    transitionState is ObservableTransitionState.Transition.ChangeScene &&
                         transitionState.fromScene.isKeyguard() &&
                         transitionState.toScene == Scenes.Gone
 
@@ -120,7 +120,7 @@ constructor(
                 val isCurrentSceneShade = currentScene.isShade()
                 // This is true when moving into one of the shade scenes when a non-shade scene.
                 val isTransitioningToShade =
-                    transitionState is ObservableTransitionState.Transition.ChangeCurrentScene &&
+                    transitionState is ObservableTransitionState.Transition.ChangeScene &&
                         !transitionState.fromScene.isShade() &&
                         transitionState.toScene.isShade()
 

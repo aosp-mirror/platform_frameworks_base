@@ -9,15 +9,7 @@
       ]
     },
     {
-      "name": "CtsPermissionTestCases",
-      "options": [
-          {
-            "include-filter": "android.permission.cts.PermissionControllerTest"
-          },
-          {
-            "exclude-annotation": "androidx.test.filters.FlakyTest"
-          }
-      ]
+      "name": "CtsPermissionTestCases_Platform"
     },
     {
       "name": "FrameworksCoreTests_internal_infra"

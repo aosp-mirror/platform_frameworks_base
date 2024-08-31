@@ -16,9 +16,9 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.recents.RecentTasks
+import com.android.wm.shell.shared.GroupedRecentTaskInfo
+import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50
-import com.android.wm.shell.util.GroupedRecentTaskInfo
-import com.android.wm.shell.util.SplitBounds
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import java.util.function.Consumer

@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"நாளை காலை புளூடூத் இயக்கப்படும்"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ஆடியோவைப் பகிர்"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ஆடியோ பகிரப்படுகிறது"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ஆடியோ பகிர்வு அமைப்புகளுக்குச் செல்லும்"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ஹெட்செட்"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"முடிந்தது"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"அமைப்புகள்"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"இயக்கப்பட்டுள்ளது"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ஆன் • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"முடக்கப்பட்டுள்ளது"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"அமையுங்கள்"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"அமைப்புகளில் நிர்வகியுங்கள்"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"சாட்டிலைட், நிலையான இணைப்பு"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"சாட்டிலைட், இணைப்பு கிடைக்கிறது"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"சாட்டிலைட் SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"பணிக் கணக்கு"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"சில வேடிக்கையாக இருந்தாலும் கவனம் தேவை"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner, Android பயனர் இடைமுகத்தை மாற்றவும் தனிப்பயனாக்கவும் கூடுதல் வழிகளை வழங்குகிறது. இந்தப் பரிசோதனைக்குரிய அம்சங்கள் எதிர்கால வெளியீடுகளில் மாற்றப்படலாம், இடைநிறுத்தப்படலாம் அல்லது தோன்றாமல் போகலாம். கவனத்துடன் தொடரவும்."</string>

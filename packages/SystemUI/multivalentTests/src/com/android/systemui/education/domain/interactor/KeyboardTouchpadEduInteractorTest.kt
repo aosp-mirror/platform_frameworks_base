@@ -17,6 +17,9 @@
 package com.android.systemui.education.domain.interactor
 
 import android.content.pm.UserInfo
+import android.hardware.input.InputManager
+import android.hardware.input.KeyGestureEvent
+import android.view.KeyEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -41,6 +44,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -201,6 +207,31 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
 
             val model = contextualEduInteractor.getEduDeviceConnectionTime()
             assertThat(model.keyboardFirstConnectionTime).isEqualTo(newUserFirstConnectionTime)
+        }
+
+    @Test
+    fun updateShortcutTimeOnKeyboardShortcutTriggered() =
+        testScope.runTest {
+            // runCurrent() to trigger inputManager#registerKeyGestureEventListener in the
+            // interactor
+            runCurrent()
+            val listenerCaptor =
+                ArgumentCaptor.forClass(InputManager.KeyGestureEventListener::class.java)
+            verify(kosmos.mockEduInputManager)
+                .registerKeyGestureEventListener(any(), listenerCaptor.capture())
+
+            val backGestureEvent =
+                KeyGestureEvent(
+                    /* deviceId= */ 1,
+                    intArrayOf(KeyEvent.KEYCODE_ESCAPE),
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_BACK
+                )
+            listenerCaptor.value.onKeyGestureEvent(backGestureEvent)
+
+            val model by
+                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
+            assertThat(model?.lastShortcutTriggeredTime).isEqualTo(eduClock.instant())
         }
 
     private suspend fun triggerMaxEducationSignals(gestureType: GestureType) {

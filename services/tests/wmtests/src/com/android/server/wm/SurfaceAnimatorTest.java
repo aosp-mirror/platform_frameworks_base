@@ -23,7 +23,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -96,18 +95,18 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     @Test
     public void testRunAnimation() {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
-                ANIMATION_TYPE_RECENTS);
+                ANIMATION_TYPE_APP_TRANSITION);
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
                 OnAnimationFinishedCallback.class);
         assertAnimating(mAnimatable);
         verify(mTransaction).reparent(eq(mAnimatable.mSurface), eq(mAnimatable.mLeash));
-        verify(mSpec).startAnimation(any(), any(), eq(ANIMATION_TYPE_RECENTS),
+        verify(mSpec).startAnimation(any(), any(), eq(ANIMATION_TYPE_APP_TRANSITION),
                 callbackCaptor.capture());
 
-        callbackCaptor.getValue().onAnimationFinished(ANIMATION_TYPE_RECENTS, mSpec);
+        callbackCaptor.getValue().onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION, mSpec);
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
-        assertEquals(ANIMATION_TYPE_RECENTS, mAnimatable.mFinishedAnimationType);
+        assertEquals(ANIMATION_TYPE_APP_TRANSITION, mAnimatable.mFinishedAnimationType);
         verify(mTransaction).remove(eq(mAnimatable.mLeash));
         // TODO: Verify reparenting once we use mPendingTransaction to reparent it back
     }

@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"मागे जा"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"इनपुट पद्धत स्विच करा"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"इनपुट पद्धत पिकर उघडा"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"सेटिंग्ज"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"संचयन स्थान संपत आहे"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"काही सिस्टम कार्ये कार्य करू शकत नाहीत"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"सिस्टीमसाठी पुरेसे संचयन नाही. आपल्याकडे 250MB मोकळे स्थान असल्याचे सुनिश्चित करा आणि रीस्टार्ट करा."</string>

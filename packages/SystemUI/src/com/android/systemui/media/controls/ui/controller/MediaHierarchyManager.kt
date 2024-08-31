@@ -46,10 +46,10 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.view.MediaHost
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.StatusBarState
@@ -119,7 +119,6 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
     private val splitShadeStateController: SplitShadeStateController,
     private val logger: MediaViewLogger,
-    private val mediaFlags: MediaFlags,
 ) {
 
     /** Track the media player setting status on lock screen. */
@@ -1111,7 +1110,7 @@ constructor(
 
     private fun updateHostAttachment() =
         traceSection("MediaHierarchyManager#updateHostAttachment") {
-            if (mediaFlags.isSceneContainerEnabled()) {
+            if (SceneContainerFlag.isEnabled) {
                 // No need to manage transition states - just update the desired location directly
                 logger.logMediaHostAttachment(desiredLocation)
                 mediaCarouselController.onDesiredLocationChanged(

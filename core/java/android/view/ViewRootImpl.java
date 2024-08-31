@@ -4388,14 +4388,7 @@ public final class ViewRootImpl implements ViewParent,
             mReportNextDraw = false;
             mLastReportNextDrawReason = null;
             mActiveSurfaceSyncGroup = null;
-            if (mHasPendingTransactions) {
-                // TODO: We shouldn't ever actually hit this, it means mPendingTransaction wasn't
-                // merged with a sync group or BLASTBufferQueue before making it to this point
-                // But better a one or two frame flicker than steady-state broken from dropping
-                // whatever is in this transaction
-                mPendingTransaction.apply();
-                mHasPendingTransactions = false;
-            }
+            mHasPendingTransactions = false;
             mSyncBuffer = false;
             if (isInWMSRequestedSync()) {
                 mWmsRequestSyncGroup.markSyncReady();
@@ -6101,6 +6094,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     boolean scrollToRectOrFocus(Rect rectangle, boolean immediate) {
+        if (mImeBackAnimationController.isAnimationInProgress()) {
+            // IME predictive back animation is currently in progress which means that scrollY is
+            // currently controlled by ImeBackAnimationController.
+            return false;
+        }
+
         final Rect ci = mAttachInfo.mContentInsets;
         final Rect vi = mAttachInfo.mVisibleInsets;
         int scrollY = 0;
