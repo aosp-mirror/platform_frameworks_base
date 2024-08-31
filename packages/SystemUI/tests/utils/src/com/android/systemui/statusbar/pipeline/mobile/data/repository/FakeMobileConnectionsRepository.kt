@@ -23,7 +23,6 @@ import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
@@ -94,9 +93,10 @@ class FakeMobileConnectionsRepository(
     private val _defaultMobileIconGroup = MutableStateFlow(DEFAULT_ICON)
     override val defaultMobileIconGroup = _defaultMobileIconGroup
 
-    override val deviceServiceState = MutableStateFlow<ServiceStateModel?>(null)
+    override val isDeviceEmergencyCallCapable = MutableStateFlow(false)
 
     override val isAnySimSecure = MutableStateFlow(false)
+
     override fun getIsAnySimSecure(): Boolean = isAnySimSecure.value
 
     private var isInEcmMode: Boolean = false

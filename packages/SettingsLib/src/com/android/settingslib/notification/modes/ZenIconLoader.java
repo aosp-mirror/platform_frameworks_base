@@ -31,7 +31,6 @@ import android.util.LruCache;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -53,25 +52,22 @@ public class ZenIconLoader {
     private final LruCache<ZenIcon.Key, Drawable> mCache;
     private final ListeningExecutorService mBackgroundExecutor;
 
+    /** Obtains the singleton {@link ZenIconLoader}. */
     public static ZenIconLoader getInstance() {
         if (sInstance == null) {
-            sInstance = new ZenIconLoader();
+            sInstance = new ZenIconLoader(Executors.newFixedThreadPool(4));
         }
         return sInstance;
     }
 
-    /** Replaces the singleton instance of {@link ZenIconLoader} by the provided one. */
-    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-    public static void setInstance(@Nullable ZenIconLoader instance) {
-        sInstance = instance;
-    }
-
-    private ZenIconLoader() {
-        this(Executors.newFixedThreadPool(4));
-    }
-
-    @VisibleForTesting
-    public ZenIconLoader(ExecutorService backgroundExecutor) {
+    /**
+     * Constructs a ZenIconLoader with the specified {@code backgroundExecutor}.
+     *
+     * <p>ZenIconLoader <em>should be a singleton</em>, so this should only be used to instantiate
+     * and provide the singleton instance in a module. If the app doesn't support dependency
+     * injection, use {@link #getInstance} instead.
+     */
+    public ZenIconLoader(@NonNull ExecutorService backgroundExecutor) {
         mCache = new LruCache<>(50);
         mBackgroundExecutor =
                 MoreExecutors.listeningDecorator(backgroundExecutor);

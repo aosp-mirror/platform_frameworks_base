@@ -71,7 +71,6 @@ import com.android.systemui.media.controls.data.repository.MediaDataRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager.Companion.isMediaNotification
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
-import com.android.systemui.media.controls.shared.MediaControlDrawables
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_SOURCE
 import com.android.systemui.media.controls.shared.model.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.shared.model.MediaAction
@@ -1229,7 +1228,7 @@ class MediaDataProcessor(
                 .loadDrawable(context),
             action,
             context.getString(R.string.controls_media_resume),
-            MediaControlDrawables.getPlayBackground(context)
+            context.getDrawable(R.drawable.ic_media_play_container)
         )
     }
 

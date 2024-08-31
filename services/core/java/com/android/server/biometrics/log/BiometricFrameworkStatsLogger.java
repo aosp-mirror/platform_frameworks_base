@@ -78,7 +78,6 @@ public class BiometricFrameworkStatsLogger {
     public void authenticate(OperationContextExt operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
             int authState, boolean requireConfirmation, int targetUserId, float ambientLightLux) {
-        Slog.d(TAG, "authenticate logging " + operationContext.getIsMandatoryBiometrics());
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                 statsModality,
                 targetUserId,
@@ -131,7 +130,6 @@ public class BiometricFrameworkStatsLogger {
     public void error(OperationContextExt operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
             int error, int vendorCode, int targetUserId) {
-        Slog.d(TAG, "error logging " + operationContext.getIsMandatoryBiometrics());
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                 statsModality,
                 targetUserId,

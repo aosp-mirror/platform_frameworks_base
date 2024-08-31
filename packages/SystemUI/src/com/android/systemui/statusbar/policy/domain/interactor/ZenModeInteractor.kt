@@ -23,16 +23,20 @@ import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.util.Log
 import androidx.concurrent.futures.await
 import com.android.settingslib.notification.data.repository.ZenModeRepository
+import com.android.settingslib.notification.modes.ZenIcon
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.shared.model.asIcon
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
+import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import java.time.Duration
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /**
@@ -45,9 +49,9 @@ constructor(
     private val context: Context,
     private val zenModeRepository: ZenModeRepository,
     private val notificationSettingsRepository: NotificationSettingsRepository,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val iconLoader: ZenIconLoader,
 ) {
-    private val iconLoader: ZenIconLoader = ZenIconLoader.getInstance()
-
     val isZenModeEnabled: Flow<Boolean> =
         zenModeRepository.globalZenMode
             .map {
@@ -76,34 +80,27 @@ constructor(
 
     val modes: Flow<List<ZenMode>> = zenModeRepository.modes
 
-    val activeModes: Flow<List<ZenMode>> =
-        modes.map { modes -> modes.filter { mode -> mode.isActive } }.distinctUntilChanged()
+    /** Flow returning the currently active mode(s), if any. */
+    val activeModes: Flow<ActiveZenModes> =
+        modes
+            .map { modes ->
+                val activeModesList =
+                    modes
+                        .filter { mode -> mode.isActive }
+                        .sortedWith(ZenMode.PRIORITIZING_COMPARATOR)
+                val mainActiveMode =
+                    activeModesList.firstOrNull()?.let { ZenModeInfo(it.name, getModeIcon(it)) }
 
-    /** Flow returning the most prioritized of the active modes, if any. */
-    val mainActiveMode: Flow<ZenMode?> =
-        activeModes.map { modes -> getMainActiveMode(modes) }.distinctUntilChanged()
+                ActiveZenModes(activeModesList.map { m -> m.name }, mainActiveMode)
+            }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
 
-    /**
-     * Given the list of modes (which may include zero or more currently active modes), returns the
-     * most prioritized of the active modes, if any.
-     */
-    private fun getMainActiveMode(modes: List<ZenMode>): ZenMode? {
-        return modes.sortedWith(ZenMode.PRIORITIZING_COMPARATOR).firstOrNull { it.isActive }
-    }
+    val mainActiveMode: Flow<ZenModeInfo?> =
+        activeModes.map { a -> a.mainMode }.distinctUntilChanged()
 
-    suspend fun getModeIcon(mode: ZenMode): Icon {
-        return iconLoader.getIcon(context, mode).await().drawable().asIcon()
-    }
-
-    /**
-     * Given the list of modes (which may include zero or more currently active modes), returns an
-     * icon representing the active mode, if any (or, if multiple modes are active, to the most
-     * prioritized one). This icon is suitable for use in the status bar or lockscreen (uses the
-     * standard DND icon for implicit modes, instead of the launcher icon of the associated
-     * package).
-     */
-    suspend fun getActiveModeIcon(modes: List<ZenMode>): Icon? {
-        return getMainActiveMode(modes)?.let { m -> getModeIcon(m) }
+    suspend fun getModeIcon(mode: ZenMode): ZenIcon {
+        return iconLoader.getIcon(context, mode).await()
     }
 
     fun activateMode(zenMode: ZenMode) {

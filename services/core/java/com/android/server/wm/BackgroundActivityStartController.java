@@ -1685,6 +1685,21 @@ public class BackgroundActivityStartController {
                             (state.mOriginatingPendingIntent != null));
         }
 
+        if (finalVerdict.getRawCode() == BAL_ALLOW_GRACE_PERIOD) {
+            if (state.realCallerExplicitOptInOrAutoOptIn()
+                    && state.mResultForRealCaller.allows()
+                    && state.mResultForRealCaller.getRawCode() != BAL_ALLOW_GRACE_PERIOD) {
+                // real caller could allow with a different exemption
+            } else if (state.callerExplicitOptInOrAutoOptIn() && state.mResultForCaller.allows()
+                    && state.mResultForCaller.getRawCode() != BAL_ALLOW_GRACE_PERIOD) {
+                // caller could allow with a different exemption
+            } else {
+                // log to determine grace period length distribution
+                Slog.wtf(TAG, "Activity start ONLY allowed by BAL_ALLOW_GRACE_PERIOD "
+                        + finalVerdict.mMessage + ": " + state);
+            }
+        }
+
         if (balImprovedMetrics()) {
             if (shouldLogStats(finalVerdict, state)) {
                 String activityName;

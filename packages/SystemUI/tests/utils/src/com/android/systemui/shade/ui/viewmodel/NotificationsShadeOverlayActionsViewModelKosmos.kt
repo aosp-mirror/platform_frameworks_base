@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.model
+package com.android.systemui.shade.ui.viewmodel
 
-import android.telephony.ServiceState
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayActionsViewModel
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-/**
- * Simplified representation of a [ServiceState] for use in SystemUI. Add any fields that we need to
- * extract from service state here for consumption downstream
- */
-data class ServiceStateModel(val isEmergencyOnly: Boolean) {
-    companion object {
-        fun fromServiceState(serviceState: ServiceState): ServiceStateModel {
-            return ServiceStateModel(isEmergencyOnly = serviceState.isEmergencyOnly)
-        }
-    }
+val Kosmos.notificationsShadeOverlayActionsViewModel:
+    NotificationsShadeOverlayActionsViewModel by Fixture {
+    NotificationsShadeOverlayActionsViewModel(
+        shadeInteractor = shadeInteractor,
+    )
 }

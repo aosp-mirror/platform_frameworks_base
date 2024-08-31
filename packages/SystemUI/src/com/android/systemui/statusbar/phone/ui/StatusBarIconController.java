@@ -70,7 +70,8 @@ public interface StatusBarIconController {
      * @param preloadedIcon optional drawable corresponding to {@code iconResId}, if known
      */
     void setResourceIcon(String slot, @Nullable String resPackage, @DrawableRes int iconResId,
-            @Nullable Drawable preloadedIcon, CharSequence contentDescription);
+            @Nullable Drawable preloadedIcon, CharSequence contentDescription,
+            StatusBarIcon.Shape shape);
 
     /**
      * Sets up a wifi icon using the new data pipeline. No effect if the wifi icon has already been

@@ -23,7 +23,6 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
-import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -35,12 +34,10 @@ import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
@@ -66,11 +63,6 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             mockDialogDelegate,
             mockDialogEventLogger
         )
-
-    @Before
-    fun setUp() {
-        ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
-    }
 
     @Test
     fun tiles_filtersOutUserDisabledModes() =
@@ -335,6 +327,83 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             assertThat(tiles!![3].subtext).isEqualTo("Off")
             assertThat(tiles!![4].subtext).isEqualTo("On")
             assertThat(tiles!![5].subtext).isEqualTo("Set up")
+        }
+
+    @Test
+    fun tiles_populatesFieldsForAccessibility() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("With description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When the going gets tough")
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When in Rome")
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When you find yourself in a hole")
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles!!).hasSize(6)
+            with(tiles?.elementAt(0)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("When the going gets tough")
+            }
+            with(tiles?.elementAt(1)!!) {
+                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.subtextDescription).isEqualTo("When in Rome")
+            }
+            with(tiles?.elementAt(2)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("Set up")
+            }
+            with(tiles?.elementAt(3)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEmpty()
+            }
+            with(tiles?.elementAt(4)!!) {
+                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.subtextDescription).isEmpty()
+            }
+            with(tiles?.elementAt(5)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("Set up")
+            }
+
+            // All tiles have the same long click info
+            tiles!!.forEach { assertThat(it.onLongClickLabel).isEqualTo("Open settings") }
         }
 
     @Test

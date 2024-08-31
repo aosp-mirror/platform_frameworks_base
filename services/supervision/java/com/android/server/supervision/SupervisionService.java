@@ -20,7 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.supervision.ISupervisionManager;
 import android.content.Context;
-
+import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
@@ -28,7 +30,9 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-/** Service for handling system supervision. */
+/**
+ * Service for handling system supervision.
+ */
 public class SupervisionService extends ISupervisionManager.Stub {
     private static final String LOG_TAG = "SupervisionService";
 
@@ -44,8 +48,20 @@ public class SupervisionService extends ISupervisionManager.Stub {
     }
 
     @Override
-    protected void dump(@NonNull FileDescriptor fd,
-            @NonNull PrintWriter fout, @Nullable String[] args) {
+    public void onShellCommand(
+            @Nullable FileDescriptor in,
+            @Nullable FileDescriptor out,
+            @Nullable FileDescriptor err,
+            @NonNull String[] args,
+            @Nullable ShellCallback callback,
+            @NonNull ResultReceiver resultReceiver) throws RemoteException {
+        new SupervisionServiceShellCommand(this)
+                .exec(this, in, out, err, args, callback, resultReceiver);
+    }
+
+    @Override
+    protected void dump(
+            @NonNull FileDescriptor fd, @NonNull PrintWriter fout, @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, fout)) return;
 
         fout.println("Supervision enabled: " + isSupervisionEnabled());

@@ -24,9 +24,10 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.modes.ZenIconLoader
+import com.android.internal.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.asIcon
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -36,7 +37,6 @@ import com.android.systemui.statusbar.policy.data.repository.fakeZenModeReposito
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toCollection
@@ -60,10 +60,10 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         context.orCreateTestableResources.apply {
-            addOverride(com.android.internal.R.drawable.ic_zen_mode_type_bedtime, BEDTIME_DRAWABLE)
-            addOverride(com.android.internal.R.drawable.ic_zen_mode_type_driving, DRIVING_DRAWABLE)
+            addOverride(MODES_DRAWABLE_ID, MODES_DRAWABLE)
+            addOverride(R.drawable.ic_zen_mode_type_bedtime, BEDTIME_DRAWABLE)
+            addOverride(R.drawable.ic_zen_mode_type_driving, DRIVING_DRAWABLE)
         }
-        ZenIconLoader.setInstance(ZenIconLoader(MoreExecutors.newDirectExecutorService()))
     }
 
     @EnableFlags(Flags.FLAG_MODES_UI)
@@ -128,28 +128,34 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS)
-    fun changesIconWhenActiveModesChange() =
+    fun tileData_iconsFlagEnabled_changesIconWhenActiveModesChange() =
         testScope.runTest {
-            val dataList: List<ModesTileModel> by
-                collectValues(
+            val tileData by
+                collectLastValue(
                     underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
                 )
-            runCurrent()
-            assertThat(dataList.map { it.icon }).containsExactly(null).inOrder()
 
-            // Add an inactive mode: state hasn't changed, so this shouldn't cause another emission
+            // Tile starts with the generic Modes icon.
+            runCurrent()
+            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
+
+            // Add an inactive mode -> Still modes icon
             zenModeRepository.addMode(id = "Mode", active = false)
             runCurrent()
-            assertThat(dataList.map { it.icon }).containsExactly(null).inOrder()
+            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
 
-            // Add an active mode: icon should be the mode icon
+            // Add an active mode: icon should be the mode icon. No iconResId, because we don't
+            // really know that it's a system icon.
             zenModeRepository.addMode(
                 id = "Bedtime",
                 type = AutomaticZenRule.TYPE_BEDTIME,
                 active = true
             )
             runCurrent()
-            assertThat(dataList.map { it.icon }).containsExactly(null, BEDTIME_ICON).inOrder()
+            assertThat(tileData?.icon).isEqualTo(BEDTIME_ICON)
+            assertThat(tileData?.iconResId).isNull()
 
             // Add another, less-prioritized mode: icon should remain the first mode icon
             zenModeRepository.addMode(
@@ -158,29 +164,58 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
                 active = true
             )
             runCurrent()
-            assertThat(dataList.map { it.icon })
-                .containsExactly(null, BEDTIME_ICON, BEDTIME_ICON)
-                .inOrder()
+            assertThat(tileData?.icon).isEqualTo(BEDTIME_ICON)
+            assertThat(tileData?.iconResId).isNull()
 
-            // Deactivate more important mode: icon should be the less important, still active mode.
+            // Deactivate more important mode: icon should be the less important, still active mode
             zenModeRepository.deactivateMode("Bedtime")
             runCurrent()
-            assertThat(dataList.map { it.icon })
-                .containsExactly(null, BEDTIME_ICON, BEDTIME_ICON, DRIVING_ICON)
-                .inOrder()
+            assertThat(tileData?.icon).isEqualTo(DRIVING_ICON)
+            assertThat(tileData?.iconResId).isNull()
 
-            // Deactivate remaining mode: no icon
+            // Deactivate remaining mode: back to the default modes icon
             zenModeRepository.deactivateMode("Driving")
             runCurrent()
-            assertThat(dataList.map { it.icon })
-                .containsExactly(null, BEDTIME_ICON, BEDTIME_ICON, DRIVING_ICON, null)
-                .inOrder()
+            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    @DisableFlags(Flags.FLAG_MODES_UI_ICONS)
+    fun tileData_iconsFlagDisabled_hasPriorityModesIcon() =
+        testScope.runTest {
+            val tileData by
+                collectLastValue(
+                    underTest.tileData(TEST_USER, flowOf(DataUpdateTrigger.InitialRequest))
+                )
+
+            runCurrent()
+            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
+
+            // Activate a Mode -> Icon doesn't change.
+            zenModeRepository.addMode(id = "Mode", active = true)
+            runCurrent()
+            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
+
+            zenModeRepository.deactivateMode(id = "Mode")
+            runCurrent()
+            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
         }
 
     private companion object {
         val TEST_USER = UserHandle.of(1)!!
+
+        val MODES_DRAWABLE_ID = R.drawable.ic_zen_priority_modes
+
+        val MODES_DRAWABLE = TestStubDrawable("modes_icon")
         val BEDTIME_DRAWABLE = TestStubDrawable("bedtime")
         val DRIVING_DRAWABLE = TestStubDrawable("driving")
+
+        val MODES_ICON = MODES_DRAWABLE.asIcon()
         val BEDTIME_ICON = BEDTIME_DRAWABLE.asIcon()
         val DRIVING_ICON = DRIVING_DRAWABLE.asIcon()
     }
