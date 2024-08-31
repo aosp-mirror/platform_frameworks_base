@@ -28,6 +28,7 @@ import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.widget.GridView;
 
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
@@ -167,7 +168,9 @@ public class A11yMenuViewPager {
         mA11yMenuShortcutList = shortcutDataList;
         initViewPager();
         initChildPage();
-        mA11yMenuFooter = new A11yMenuFooter(a11yMenuLayout, mFooterCallbacks);
+        if (mA11yMenuFooter == null) {
+            mA11yMenuFooter = new A11yMenuFooter(a11yMenuLayout, mFooterCallbacks);
+        }
         mA11yMenuFooter.updateRightToLeftDirection(
                 a11yMenuLayout.getResources().getConfiguration());
         updateFooterState();
@@ -237,11 +240,17 @@ public class A11yMenuViewPager {
                                     return;
                                 }
 
-                                if (mGridPageList.isEmpty()) {
+                                if (mViewPagerAdapter.getItemCount() == 0) {
                                     return;
                                 }
 
-                                GridView firstGridView = mGridPageList.get(0);
+                                RecyclerView.ViewHolder viewHolder =
+                                        ((RecyclerView) mViewPager.getChildAt(0))
+                                                .findViewHolderForAdapterPosition(0);
+                                if (viewHolder == null) {
+                                    return;
+                                }
+                                GridView firstGridView = (GridView) viewHolder.itemView;
                                 if (firstGridView == null
                                         || firstGridView.getChildAt(0) == null) {
                                     return;
@@ -284,10 +293,8 @@ public class A11yMenuViewPager {
             DisplayMetrics displayMetrics = mService.getResources().getDisplayMetrics();
             float densityScale = (float) displayMetrics.densityDpi
                     / DisplayMetrics.DENSITY_DEVICE_STABLE;
-            View footerLayout = mA11yMenuLayout.findViewById(R.id.footerlayout);
             // Keeps footer window height unchanged no matter the density is changed.
-            footerLayout.getLayoutParams().height =
-                    (int) (footerLayout.getLayoutParams().height / densityScale);
+            mA11yMenuFooter.adjustFooterToDensityScale(densityScale);
             // Adjust the view pager height for system bar and display cutout insets.
             WindowManager windowManager = mService.getSystemService(WindowManager.class);
             WindowMetrics windowMetric = windowManager.getCurrentWindowMetrics();
@@ -295,20 +302,18 @@ public class A11yMenuViewPager {
                     WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
             viewPagerHeight =
                     windowMetric.getBounds().height()
-                            - footerLayout.getLayoutParams().height
+                            - mA11yMenuFooter.getHeight()
                             - windowInsets.bottom;
             // Sets vertical interval between grid items.
             int interval =
                     (viewPagerHeight - topMargin - defaultMargin
                             - (rowsInGridView * gridItemHeight))
                             / (rowsInGridView + 1);
-            for (GridView gridView : mGridPageList) {
-                gridView.setVerticalSpacing(interval);
-            }
+            mViewPagerAdapter.setVerticalSpacing(interval);
 
             // Sets padding to view pager.
             final int finalMarginTop = interval + topMargin;
-            mViewPager.setPadding(defaultMargin, finalMarginTop, defaultMargin, defaultMargin);
+            mViewPager.setPadding(0, finalMarginTop, 0, defaultMargin);
         }
         final ViewGroup.LayoutParams layoutParams = mViewPager.getLayoutParams();
         layoutParams.height = viewPagerHeight;
