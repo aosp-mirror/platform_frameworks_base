@@ -314,6 +314,8 @@ public final class Display {
      * @hide
      * @see #getFlags()
      */
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int FLAG_ALWAYS_UNLOCKED = 1 << 9;
 
     /**
@@ -323,6 +325,8 @@ public final class Display {
      * @hide
      * @see #getFlags()
      */
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 10;
 
     /**
@@ -336,6 +340,8 @@ public final class Display {
      * @see #FLAG_TRUSTED
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int FLAG_OWN_FOCUS = 1 << 11;
 
     /**
@@ -642,6 +648,8 @@ public final class Display {
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int REMOVE_MODE_DESTROY_CONTENT = 1;
 
     /** @hide */
@@ -1331,7 +1339,7 @@ public final class Display {
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null) {
+            if (mDisplayInfo.hdrCapabilities == null || mDisplayInfo.isForceSdr) {
                 return null;
             }
             int[] supportedHdrTypes;
@@ -1353,6 +1361,7 @@ public final class Display {
                     supportedHdrTypes[index++] = enabledType;
                 }
             }
+
             return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,

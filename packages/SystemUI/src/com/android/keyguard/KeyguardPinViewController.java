@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
+import android.annotation.Nullable;
 import android.view.View;
 
 import com.android.internal.logging.UiEvent;
@@ -32,6 +33,8 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+
+import com.google.android.msdl.domain.MSDLPlayer;
 
 public class KeyguardPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardPINView> {
@@ -61,11 +64,12 @@ public class KeyguardPinViewController
             FalsingCollector falsingCollector,
             DevicePostureController postureController, FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor, UiEventLogger uiEventLogger,
-            KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
+            KeyguardKeyboardInteractor keyguardKeyboardInteractor,
+            @Nullable MSDLPlayer msdlPlayer) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
-                keyguardKeyboardInteractor);
+                keyguardKeyboardInteractor, msdlPlayer);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;

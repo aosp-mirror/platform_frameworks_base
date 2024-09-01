@@ -80,13 +80,16 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     private final AuthSessionCoordinator mAuthSessionCoordinator;
     @NonNull
     private final AidlResponseHandlerCallback mAidlResponseHandlerCallback;
+    @NonNull
+    private final FaceUtils mBiometricUtils;
 
     public AidlResponseHandler(@NonNull Context context,
             @NonNull BiometricScheduler scheduler, int sensorId, int userId,
             @NonNull LockoutTracker lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull AuthSessionCoordinator authSessionCoordinator,
-            @NonNull AidlResponseHandlerCallback aidlResponseHandlerCallback) {
+            @NonNull AidlResponseHandlerCallback aidlResponseHandlerCallback,
+            @NonNull FaceUtils biometricUtils) {
         mContext = context;
         mScheduler = scheduler;
         mSensorId = sensorId;
@@ -95,6 +98,7 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mAuthSessionCoordinator = authSessionCoordinator;
         mAidlResponseHandlerCallback = aidlResponseHandlerCallback;
+        mBiometricUtils = biometricUtils;
     }
 
     @Override
@@ -167,8 +171,7 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         } else {
             currentUserId = client.getTargetUserId();
         }
-        final CharSequence name = FaceUtils.getInstance(mSensorId)
-                .getUniqueName(mContext, currentUserId);
+        final CharSequence name = mBiometricUtils.getUniqueName(mContext, currentUserId);
         final Face face = new Face(name, enrollmentId, mSensorId);
 
         handleResponse(FaceEnrollClient.class, (c) -> {

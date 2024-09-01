@@ -27,12 +27,15 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ContentViewInflationResult.InflatedContentViewHolder
 import com.android.systemui.statusbar.notification.row.ContentViewInflationResult.KeepExistingView
 import com.android.systemui.statusbar.notification.row.ContentViewInflationResult.NullContentView
+import com.android.systemui.statusbar.notification.row.shared.EnRouteContentModel
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingNotificationFlag
-import com.android.systemui.statusbar.notification.row.shared.StopwatchContentModel
 import com.android.systemui.statusbar.notification.row.shared.TimerContentModel
+import com.android.systemui.statusbar.notification.row.ui.view.EnRouteView
 import com.android.systemui.statusbar.notification.row.ui.view.TimerView
+import com.android.systemui.statusbar.notification.row.ui.viewbinder.EnRouteViewBinder
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.TimerViewBinder
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.EnRouteViewModel
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.RichOngoingViewModelComponent
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.TimerViewModel
 import javax.inject.Inject
@@ -119,7 +122,15 @@ constructor(
                     parentView,
                     viewType
                 )
-            is StopwatchContentModel -> TODO("Not yet implemented")
+            is EnRouteContentModel ->
+                inflateEnRouteView(
+                    existingView,
+                    component::createEnRouteViewModel,
+                    systemUiContext,
+                    parentView,
+                    viewType
+                )
+            else -> TODO("Not yet implemented")
         }
     }
 
@@ -131,7 +142,8 @@ constructor(
         if (RichOngoingNotificationFlag.isUnexpectedlyInLegacyMode()) return false
         return when (contentModel) {
             is TimerContentModel -> canKeepTimerView(contentModel, existingView, viewType)
-            is StopwatchContentModel -> TODO("Not yet implemented")
+            is EnRouteContentModel -> canKeepEnRouteView(contentModel, existingView, viewType)
+            else -> TODO("Not yet implemented")
         }
     }
 
@@ -164,6 +176,40 @@ constructor(
 
     private fun canKeepTimerView(
         contentModel: TimerContentModel,
+        existingView: View?,
+        viewType: RichOngoingNotificationViewType
+    ): Boolean = true
+
+    private fun inflateEnRouteView(
+        existingView: View?,
+        createViewModel: () -> EnRouteViewModel,
+        systemUiContext: Context,
+        parentView: ViewGroup,
+        viewType: RichOngoingNotificationViewType,
+    ): ContentViewInflationResult {
+        if (existingView is EnRouteView && !existingView.isReinflateNeeded())
+            return KeepExistingView
+        return when (viewType) {
+            RichOngoingNotificationViewType.Contracted -> {
+                val newView =
+                    LayoutInflater.from(systemUiContext)
+                        .inflate(
+                            R.layout.notification_template_en_route_contracted,
+                            parentView,
+                            /* attachToRoot= */ false
+                        ) as EnRouteView
+
+                InflatedContentViewHolder(newView) {
+                    EnRouteViewBinder.bindWhileAttached(newView, createViewModel())
+                }
+            }
+            RichOngoingNotificationViewType.Expanded,
+            RichOngoingNotificationViewType.HeadsUp -> NullContentView
+        }
+    }
+
+    private fun canKeepEnRouteView(
+        contentModel: EnRouteContentModel,
         existingView: View?,
         viewType: RichOngoingNotificationViewType
     ): Boolean = true

@@ -74,6 +74,7 @@ public class GnssPowerStatsTest {
     private static final int APP_UID2 = Process.FIRST_APPLICATION_UID + 101;
     private static final int VOLTAGE_MV = 3500;
     private static final int ENERGY_CONSUMER_ID = 777;
+    private static final long START_TIME = 10_000_000_000L;
 
     private final PowerStatsUidResolver mUidResolver = new PowerStatsUidResolver();
     @Mock
@@ -113,11 +114,13 @@ public class GnssPowerStatsTest {
             };
 
     private MonotonicClock mMonotonicClock;
+    private final BatteryStats.HistoryItem mHistoryItem = new BatteryStats.HistoryItem();
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mMonotonicClock = new MonotonicClock(0, mStatsRule.getMockClock());
+        mMonotonicClock = new MonotonicClock(START_TIME, mStatsRule.getMockClock());
+        mHistoryItem.clear();
     }
 
     @Test
@@ -129,7 +132,6 @@ public class GnssPowerStatsTest {
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
                 () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
-        stats.start(0);
 
         GnssPowerStatsCollector collector = new GnssPowerStatsCollector(mInjector);
         collector.addConsumer(
@@ -142,9 +144,11 @@ public class GnssPowerStatsTest {
         stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
         // Turn the screen off after 2.5 seconds
-        stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
-        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
-        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
+        stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, START_TIME + 2500);
+        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND,
+                START_TIME + 2500);
+        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE,
+                START_TIME + 5000);
 
         stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
 
@@ -158,7 +162,87 @@ public class GnssPowerStatsTest {
         mStatsRule.setTime(11_000, 11_000);
         collector.collectAndDeliverStats();
 
-        stats.finish(11_000);
+        stats.finish(START_TIME + 11_000);
+
+        PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
+        BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
+        statsLayout.fromExtras(descriptor.extras);
+
+        // scr-on, GNSS-good: 2500 * 100 = 250000 mA-ms = 0.06944 mAh
+        // scr-off GNSS=good: 4500 * 100 = 0.12500 mAh
+        // scr-off GNSS=poor: 3000 * 1000 = 0.83333 mAh
+        // scr-off GNSS-on: 0.12500 + 0.83333 = 0.95833 mAh
+        long[] deviceStats = new long[descriptor.statsArrayLength];
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_ON));
+        assertThat(statsLayout.getDevicePowerEstimate(deviceStats))
+                .isWithin(PRECISION).of(0.06944);
+
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_OTHER));
+        assertThat(statsLayout.getDevicePowerEstimate(deviceStats))
+                .isWithin(PRECISION).of(0.12500 + 0.83333);
+
+        // UID1 =
+        //   scr-on FG: 2500 -> 0.06944 mAh
+        //   scr-off BG: 2500/7500 * 0.95833 = 0.31944 mAh
+        //   scr-off FGS: 1000/7500 * 0.95833 = 0.12777 mAh
+        long[] uidStats = new long[descriptor.uidStatsArrayLength];
+        stats.getUidStats(uidStats, APP_UID1,
+                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.06944);
+
+        stats.getUidStats(uidStats, APP_UID1,
+                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_BACKGROUND));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.31944);
+
+        stats.getUidStats(uidStats, APP_UID1,
+                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_FOREGROUND_SERVICE));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.12777);
+
+        // UID2 =
+        //   scr-off cached: 4000/7500 * 0.95833 = 0.51111 mAh
+        stats.getUidStats(uidStats, APP_UID2,
+                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_CACHED));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0.51111);
+
+        stats.getUidStats(uidStats, APP_UID2,
+                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED));
+        assertThat(statsLayout.getUidPowerEstimate(uidStats))
+                .isWithin(PRECISION).of(0);
+    }
+
+    @Test
+    public void initialStateGnssOn() {
+        // ODPM unsupported
+        when(mConsumedEnergyRetriever
+                .getEnergyConsumerIds(eq((int) EnergyConsumerType.GNSS), any()))
+                .thenReturn(new int[0]);
+
+        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
+                () -> new GnssPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
+
+        stats.noteStateChange(buildHistoryItemInitialStateGpsOn(0));
+
+        // Turn the screen off after 2.5 seconds
+        stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, START_TIME + 2500);
+        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND,
+                START_TIME + 2500);
+        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE,
+                START_TIME + 5000);
+
+        stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
+
+        stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2));
+        stats.noteStateChange(buildHistoryItem(7000,
+                GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD));
+        stats.noteStateChange(buildHistoryItem(8000,
+                GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR));
+        mStatsRule.setTime(11_000, 11_000);
+
+        stats.finish(START_TIME + 11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
         BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
@@ -224,8 +308,6 @@ public class GnssPowerStatsTest {
                 powerStats -> stats.addPowerStats(powerStats, mMonotonicClock.monotonicTime()));
         collector.setEnabled(true);
 
-        stats.start(0);
-
         // Establish a baseline
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 10000));
@@ -234,9 +316,11 @@ public class GnssPowerStatsTest {
         stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
         // Turn the screen off after 2.5 seconds
-        stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
-        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
-        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
+        stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, START_TIME + 2500);
+        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND,
+                START_TIME + 2500);
+        stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE,
+                START_TIME + 5000);
 
         stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
 
@@ -245,16 +329,14 @@ public class GnssPowerStatsTest {
         collector.collectAndDeliverStats();
 
         stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2));
-        stats.noteStateChange(buildHistoryItem(7000,
-                GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD));
-        stats.noteStateChange(buildHistoryItem(8000,
-                GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR));
+        stats.noteStateChange(buildHistoryItem(7000, GnssSignalQuality.GNSS_SIGNAL_QUALITY_GOOD));
+        stats.noteStateChange(buildHistoryItem(8000, GnssSignalQuality.GNSS_SIGNAL_QUALITY_POOR));
         mStatsRule.setTime(11_000, 11_000);
         when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{ENERGY_CONSUMER_ID}))
                 .thenReturn(createEnergyConsumerResults(ENERGY_CONSUMER_ID, 3_610_000));
         collector.collectAndDeliverStats();
 
-        stats.finish(11_000);
+        stats.finish(START_TIME + 11_000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
         BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
@@ -313,33 +395,45 @@ public class GnssPowerStatsTest {
                 .isWithin(PRECISION).of(0);
     }
 
-    private BatteryStats.HistoryItem buildHistoryItem(int timestamp, boolean stateOn,
-            int uid) {
+    private BatteryStats.HistoryItem buildHistoryItemInitialStateGpsOn(long timestamp) {
         mStatsRule.setTime(timestamp, timestamp);
-        BatteryStats.HistoryItem historyItem = new BatteryStats.HistoryItem();
-        historyItem.time = mMonotonicClock.monotonicTime();
-        historyItem.states = stateOn ? BatteryStats.HistoryItem.STATE_GPS_ON_FLAG : 0;
-        if (stateOn) {
-            historyItem.eventCode = BatteryStats.HistoryItem.EVENT_STATE_CHANGE
-                    | BatteryStats.HistoryItem.EVENT_FLAG_START;
-        } else {
-            historyItem.eventCode = BatteryStats.HistoryItem.EVENT_STATE_CHANGE
-                    | BatteryStats.HistoryItem.EVENT_FLAG_FINISH;
-        }
-        historyItem.eventTag = historyItem.localEventTag;
-        historyItem.eventTag.uid = uid;
-        historyItem.eventTag.string = "gnss";
-        return historyItem;
+        mHistoryItem.time = mMonotonicClock.monotonicTime();
+        mHistoryItem.states = BatteryStats.HistoryItem.STATE_GPS_ON_FLAG;
+        setGnssSignalLevel(BatteryStats.HistoryItem.GNSS_SIGNAL_QUALITY_NONE);
+        return mHistoryItem;
     }
 
-    private BatteryStats.HistoryItem buildHistoryItem(int timestamp, int signalLevel) {
+    private BatteryStats.HistoryItem buildHistoryItem(long timestamp, boolean stateOn,
+            int uid) {
         mStatsRule.setTime(timestamp, timestamp);
-        BatteryStats.HistoryItem historyItem = new BatteryStats.HistoryItem();
-        historyItem.time = mMonotonicClock.monotonicTime();
-        historyItem.states = BatteryStats.HistoryItem.STATE_GPS_ON_FLAG;
-        historyItem.states2 =
-                signalLevel << BatteryStats.HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT;
-        return historyItem;
+        mHistoryItem.time = mMonotonicClock.monotonicTime();
+        mHistoryItem.states = stateOn ? BatteryStats.HistoryItem.STATE_GPS_ON_FLAG : 0;
+        if (stateOn) {
+            mHistoryItem.eventCode = BatteryStats.HistoryItem.EVENT_STATE_CHANGE
+                    | BatteryStats.HistoryItem.EVENT_FLAG_START;
+        } else {
+            mHistoryItem.eventCode = BatteryStats.HistoryItem.EVENT_STATE_CHANGE
+                    | BatteryStats.HistoryItem.EVENT_FLAG_FINISH;
+        }
+        mHistoryItem.eventTag = mHistoryItem.localEventTag;
+        mHistoryItem.eventTag.uid = uid;
+        mHistoryItem.eventTag.string = "gnss";
+        return mHistoryItem;
+    }
+
+    private BatteryStats.HistoryItem buildHistoryItem(long timestamp, int signalLevel) {
+        mStatsRule.setTime(timestamp, timestamp);
+        mHistoryItem.time = mMonotonicClock.monotonicTime();
+        setGnssSignalLevel(signalLevel);
+        mHistoryItem.eventCode = BatteryStats.HistoryItem.EVENT_NONE;
+        mHistoryItem.eventTag = null;
+        return mHistoryItem;
+    }
+
+    private void setGnssSignalLevel(int signalLevel) {
+        mHistoryItem.states2 =
+                (mHistoryItem.states2 & ~BatteryStats.HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK)
+                        | signalLevel << BatteryStats.HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT;
     }
 
     private int[] states(int... states) {
@@ -362,12 +456,14 @@ public class GnssPowerStatsTest {
         AggregatedPowerStats aggregatedPowerStats = new AggregatedPowerStats(config);
         PowerComponentAggregatedPowerStats powerComponentStats =
                 aggregatedPowerStats.getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_GNSS);
-        powerComponentStats.start(0);
+        powerComponentStats.start(START_TIME);
 
-        powerComponentStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
-        powerComponentStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
-        powerComponentStats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
-        powerComponentStats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED, 0);
+        powerComponentStats.setState(STATE_POWER, POWER_STATE_OTHER, START_TIME);
+        powerComponentStats.setState(STATE_SCREEN, SCREEN_STATE_ON, START_TIME);
+        powerComponentStats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND,
+                START_TIME);
+        powerComponentStats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED,
+                START_TIME);
 
         return powerComponentStats;
     }

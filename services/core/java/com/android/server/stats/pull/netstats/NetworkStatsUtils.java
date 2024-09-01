@@ -24,6 +24,9 @@ import static android.net.NetworkStats.SET_ALL;
 import android.app.usage.NetworkStats;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.stats.Flags;
+
+import java.util.ArrayList;
 
 /**
  * Utility methods for accessing {@link android.net.NetworkStats}.
@@ -35,12 +38,21 @@ public class NetworkStatsUtils {
      */
     public static android.net.NetworkStats fromPublicNetworkStats(
             NetworkStats publiceNetworkStats) {
-        android.net.NetworkStats stats = new android.net.NetworkStats(0L, 0);
+        final ArrayList<android.net.NetworkStats.Entry> entries = new ArrayList<>();
         while (publiceNetworkStats.hasNextBucket()) {
             NetworkStats.Bucket bucket = new NetworkStats.Bucket();
             publiceNetworkStats.getNextBucket(bucket);
-            final android.net.NetworkStats.Entry entry = fromBucket(bucket);
-            stats = stats.addEntry(entry);
+            entries.add(fromBucket(bucket));
+        }
+        android.net.NetworkStats stats = new android.net.NetworkStats(0L, 1);
+        // The new API is only supported on devices running the mainline version of `NetworkStats`.
+        // It should always be used when available for memory efficiency.
+        if (isAddEntriesSupported()) {
+            stats = stats.addEntries(entries);
+        } else {
+            for (android.net.NetworkStats.Entry entry : entries) {
+                stats = stats.addEntry(entry);
+            }
         }
         return stats;
     }
@@ -105,5 +117,9 @@ public class NetworkStatsUtils {
                 return android.net.NetworkStats.DEFAULT_NETWORK_YES;
         }
         return 0;
+    }
+
+    public static boolean isAddEntriesSupported() {
+        return Flags.netstatsUseAddEntries();
     }
 }

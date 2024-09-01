@@ -109,6 +109,7 @@ import android.app.admin.PasswordMetrics;
 import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.WifiSsidPolicy;
+import android.app.role.RoleManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -2885,6 +2886,52 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(dpm.getMeteredDataDisabledPackages(admin1)).isEqualTo(pkgsToRestrict);
         verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
                 MockUtils.checkApps(pkgsToRestrict.toArray(new String[0])),
+                eq(CALLER_USER_HANDLE));
+    }
+
+    @Test
+    public void testSetMeteredDataDisabledPackagesExemptRoles() throws Exception {
+        // TODO(b/362545319): reference role name from role manager once it's exposed.
+        final String controllerRole = "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
+
+        setAsProfileOwner(admin1);
+
+        assertThat(dpm.getMeteredDataDisabledPackages(admin1)).isEmpty();
+
+        // Setup
+        final ArrayList<String> pkgsToRestrict = new ArrayList<>();
+        final ArrayList<String> pkgsExpectedAsNotRestricted = new ArrayList<>();
+        final String packageWithControllerRole = "com.example.controller";
+        final String packageWithKioskRole = "com.example.kiosk";
+        final String packageWithNotExemptRole = "com.example.notexempt";
+
+        pkgsToRestrict.add(packageWithControllerRole);
+        pkgsToRestrict.add(packageWithKioskRole);
+        pkgsToRestrict.add(packageWithNotExemptRole);
+
+        pkgsExpectedAsNotRestricted.add(packageWithControllerRole);
+        pkgsExpectedAsNotRestricted.add(packageWithKioskRole);
+
+        setupPackageInPackageManager(packageWithControllerRole, CALLER_USER_HANDLE, 123, 0);
+        setupPackageInPackageManager(packageWithKioskRole, CALLER_USER_HANDLE, 456, 0);
+        setupPackageInPackageManager(packageWithNotExemptRole, CALLER_USER_HANDLE, 789, 0);
+
+        when(getServices().roleManagerForMock.getRoleHoldersAsUser(controllerRole,
+                UserHandle.of(CALLER_USER_HANDLE)))
+                .thenReturn(new ArrayList<>(Arrays.asList(packageWithControllerRole)));
+        when(getServices().roleManagerForMock.getRoleHoldersAsUser(
+                RoleManager.ROLE_FINANCED_DEVICE_KIOSK,
+                UserHandle.of(CALLER_USER_HANDLE)))
+                .thenReturn(new ArrayList<>(Arrays.asList(packageWithKioskRole)));
+
+        List<String> excludedPkgs = dpm.setMeteredDataDisabledPackages(admin1, pkgsToRestrict);
+
+        // Verify
+        assertThat(excludedPkgs).containsExactlyElementsIn(pkgsExpectedAsNotRestricted);
+        assertThat(dpm.getMeteredDataDisabledPackages(admin1))
+                .isEqualTo(Arrays.asList(packageWithNotExemptRole));
+        verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
+                MockUtils.checkApps(packageWithNotExemptRole),
                 eq(CALLER_USER_HANDLE));
     }
 

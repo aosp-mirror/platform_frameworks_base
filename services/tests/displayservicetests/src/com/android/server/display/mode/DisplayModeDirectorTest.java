@@ -3556,12 +3556,16 @@ public class DisplayModeDirectorTest {
                 new RefreshRateRange(refreshRate, refreshRate);
         displayListener.onDisplayChanged(DISPLAY_ID);
 
-        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_REFRESH_RATE);
         assertVoteForPhysicalRefreshRate(vote, /* refreshRate= */ refreshRate);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, refreshRate, refreshRate);
 
         mInjector.mDisplayInfo.layoutLimitedRefreshRate = null;
         displayListener.onDisplayChanged(DISPLAY_ID);
 
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_REFRESH_RATE);
+        assertNull(vote);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
         assertNull(vote);
     }
@@ -3584,6 +3588,8 @@ public class DisplayModeDirectorTest {
         displayListener.onDisplayChanged(DISPLAY_ID);
 
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        assertNull(vote);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_REFRESH_RATE);
         assertNull(vote);
     }
 

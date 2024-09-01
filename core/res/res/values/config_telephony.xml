@@ -440,10 +440,6 @@
     <string name="config_satellite_carrier_roaming_esos_provisioned_class" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_carrier_roaming_esos_provisioned_class" />
 
-    <!-- Telephony satellite gateway intent for handling carrier roaming to satellite is using ESOS messaging. -->
-    <string name="config_satellite_carrier_roaming_esos_provisioned_intent_action" translatable="false"></string>
-    <java-symbol type="string" name="config_satellite_carrier_roaming_esos_provisioned_intent_action" />
-
     <!-- The time duration in minutes to wait before retry validating a possible change
          in satellite allowed region. The default value is 10 minutes. -->
     <integer name="config_satellite_delay_minutes_before_retry_validating_possible_change_in_allowed_region">10</integer>

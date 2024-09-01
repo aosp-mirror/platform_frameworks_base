@@ -3333,6 +3333,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             Bundle args = new Bundle();
             args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, event.getDeviceId());
             args.putLong(Intent.EXTRA_TIME, event.getEventTime());
+            args.putBoolean(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, true);
             ((SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE))
                     .launchAssist(args);
             return true;

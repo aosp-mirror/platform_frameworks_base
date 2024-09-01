@@ -1260,23 +1260,38 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testShouldSleepActivities() {
+        final Task task = new TaskBuilder(mSupervisor).build();
+        task.mDisplayContent = mock(DisplayContent.class);
         // When focused activity and keyguard is going away, we should not sleep regardless
         // of the display state, but keyguard-going-away should only take effects on default
-        // display since there is no keyguard on secondary displays (yet).
-        verifyShouldSleepActivities(true /* focusedRootTask */, true /*keyguardGoingAway*/,
+        // display because the keyguard-going-away state of secondary displays are already the
+        // same as default display.
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, true /* keyguardGoingAway */,
                 true /* displaySleeping */, true /* isDefaultDisplay */, false /* expected */);
-        verifyShouldSleepActivities(true /* focusedRootTask */, true /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, true /* keyguardGoingAway */,
                 true /* displaySleeping */, false /* isDefaultDisplay */, true /* expected */);
 
         // When not the focused root task, defer to display sleeping state.
-        verifyShouldSleepActivities(false /* focusedRootTask */, true /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, false /* isVisibleTask */, true /* keyguardGoingAway */,
                 true /* displaySleeping */, true /* isDefaultDisplay */, true /* expected */);
 
         // If keyguard is going away, defer to the display sleeping state.
-        verifyShouldSleepActivities(true /* focusedRootTask */, false /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, false /* keyguardGoingAway */,
                 true /* displaySleeping */, true /* isDefaultDisplay */, true /* expected */);
-        verifyShouldSleepActivities(true /* focusedRootTask */, false /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, false /* keyguardGoingAway */,
                 false /* displaySleeping */, true /* isDefaultDisplay */, false /* expected */);
+    }
+
+    private static void verifyShouldSleepActivities(Task task, boolean isVisibleTask,
+            boolean keyguardGoingAway, boolean displaySleeping, boolean isDefaultDisplay,
+            boolean expected) {
+        final DisplayContent display = task.mDisplayContent;
+        display.isDefaultDisplay = isDefaultDisplay;
+        doReturn(keyguardGoingAway).when(display).isKeyguardGoingAway();
+        doReturn(displaySleeping).when(display).isSleeping();
+        doReturn(isVisibleTask).when(task).shouldBeVisible(null /* starting */);
+
+        assertEquals(expected, task.shouldSleepActivities());
     }
 
     @Test
@@ -1404,21 +1419,5 @@ public class RootTaskTests extends WindowTestsBase {
         task.ensureActivitiesVisible(null /* starting */);
         verify(mSupervisor).startSpecificActivity(any(), eq(false) /* andResume */,
                 anyBoolean());
-    }
-
-    private void verifyShouldSleepActivities(boolean focusedRootTask,
-            boolean keyguardGoingAway, boolean displaySleeping, boolean isDefaultDisplay,
-            boolean expected) {
-        final Task task = new TaskBuilder(mSupervisor).build();
-        final DisplayContent display = mock(DisplayContent.class);
-        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
-        display.isDefaultDisplay = isDefaultDisplay;
-
-        task.mDisplayContent = display;
-        doReturn(keyguardGoingAway).when(display).isKeyguardGoingAway();
-        doReturn(displaySleeping).when(display).isSleeping();
-        doReturn(focusedRootTask).when(task).isFocusedRootTaskOnDisplay();
-
-        assertEquals(expected, task.shouldSleepActivities());
     }
 }

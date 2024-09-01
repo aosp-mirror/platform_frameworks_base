@@ -27,6 +27,12 @@ class RavenizerOptions(
 
     /** Output jar file */
     var outJar: SetOnce<String> = SetOnce(""),
+
+    /** Whether to enable test validation. */
+    var enableValidation: SetOnce<Boolean> = SetOnce(true),
+
+    /** Whether the validation failure is fatal or not. */
+    var fatalValidation: SetOnce<Boolean> = SetOnce(false),
 ) {
     companion object {
         fun parseArgs(args: Array<String>): RavenizerOptions {
@@ -52,6 +58,12 @@ class RavenizerOptions(
                         "--in-jar" -> ret.inJar.set(nextArg()).ensureFileExists()
                         "--out-jar" -> ret.outJar.set(nextArg())
 
+                        "--enable-validation" -> ret.enableValidation.set(true)
+                        "--disable-validation" -> ret.enableValidation.set(false)
+
+                        "--fatal-validation" -> ret.fatalValidation.set(true)
+                        "--no-fatal-validation" -> ret.fatalValidation.set(false)
+
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }
                 } catch (e: SetOnce.SetMoreThanOnceException) {
@@ -74,6 +86,8 @@ class RavenizerOptions(
             RavenizerOptions{
               inJar=$inJar,
               outJar=$outJar,
+              enableValidation=$enableValidation,
+              fatalValidation=$fatalValidation,
             }
             """.trimIndent()
     }

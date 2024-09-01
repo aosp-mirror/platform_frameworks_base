@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.Companion.device
 import com.android.systemui.keyguard.shared.model.KeyguardState.Companion.deviceIsAwakeInState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.settings.SecureSettings
@@ -181,14 +182,20 @@ constructor(
         scope.launch {
             powerInteractor.detailedWakefulness
                 .distinctUntilChangedBy { it.isAwake() }
-                .sample(transitionInteractor.currentKeyguardState, ::Pair)
-                .collect { (wakefulness, currentState) ->
+                .sample(
+                    transitionInteractor.isCurrentlyIn(
+                        Scenes.Gone,
+                        stateWithoutSceneContainer = KeyguardState.GONE
+                    ),
+                    ::Pair
+                )
+                .collect { (wakefulness, finishedInGone) ->
                     // Save isAwake for use in onDreamingStarted/onDreamingStopped.
                     this@KeyguardWakeDirectlyToGoneInteractor.isAwake = wakefulness.isAwake()
 
                     // If we're sleeping from GONE, check the timeout and lock instantly settings.
                     // These are not relevant if we're coming from non-GONE states.
-                    if (!isAwake && currentState == KeyguardState.GONE) {
+                    if (!isAwake && finishedInGone) {
                         val lockTimeoutDuration = getCanIgnoreAuthAndReturnToGoneDuration()
 
                         // If the screen timed out and went to sleep, and the lock timeout is > 0ms,

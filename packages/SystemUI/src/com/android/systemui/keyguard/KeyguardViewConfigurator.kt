@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.google.android.msdl.domain.MSDLPlayer
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
@@ -112,6 +113,7 @@ constructor(
     private val keyguardViewMediator: KeyguardViewMediator,
     private val deviceEntryUnlockTrackerViewBinder: Optional<DeviceEntryUnlockTrackerViewBinder>,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    private val msdlPlayer: MSDLPlayer,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -219,6 +221,7 @@ constructor(
                 falsingManager,
                 keyguardViewMediator,
                 mainDispatcher,
+                msdlPlayer,
             )
     }
 

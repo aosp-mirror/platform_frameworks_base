@@ -20,7 +20,7 @@ import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.zipEntryNameToClassName
 import com.android.hoststubgen.executableName
 import com.android.hoststubgen.log
-import com.android.platform.test.ravenwood.ravenizer.adapter.TestRunnerRewritingAdapter
+import com.android.platform.test.ravenwood.ravenizer.adapter.RunnerRewritingAdapter
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -43,6 +43,9 @@ data class RavenizerStats(
 
     /** Time took to build [ClasNodes] */
     var loadStructureTime: Double = .0,
+
+    /** Time took to validate the classes */
+    var validationTime: Double = .0,
 
     /** Total real time spent for converting the jar file */
     var totalProcessTime: Double = .0,
@@ -67,6 +70,7 @@ data class RavenizerStats(
             RavenizerStats{
               totalTime=$totalTime,
               loadStructureTime=$loadStructureTime,
+              validationTime=$validationTime,
               totalProcessTime=$totalProcessTime,
               totalConversionTime=$totalConversionTime,
               totalCopyTime=$totalCopyTime,
@@ -84,15 +88,43 @@ data class RavenizerStats(
 class Ravenizer(val options: RavenizerOptions) {
     fun run() {
         val stats = RavenizerStats()
+
+        val fatalValidation = options.fatalValidation.get
+
         stats.totalTime = log.nTime {
-            process(options.inJar.get, options.outJar.get, stats)
+            process(
+                options.inJar.get,
+                options.outJar.get,
+                options.enableValidation.get,
+                fatalValidation,
+                stats,
+            )
         }
         log.i(stats.toString())
     }
 
-    private fun process(inJar: String, outJar: String, stats: RavenizerStats) {
+    private fun process(
+        inJar: String,
+        outJar: String,
+        enableValidation: Boolean,
+        fatalValidation: Boolean,
+        stats: RavenizerStats,
+    ) {
         var allClasses = ClassNodes.loadClassStructures(inJar) {
             time -> stats.loadStructureTime = time
+        }
+        if (enableValidation) {
+            stats.validationTime = log.iTime("Validating classes") {
+                if (!validateClasses(allClasses)) {
+                    var message = "Invalid test class(es) detected." +
+                            " See error log for details."
+                    if (fatalValidation) {
+                        throw RavenizerInvalidTestException(message)
+                    } else {
+                        log.w("Warning: $message")
+                    }
+                }
+            }
         }
 
         stats.totalProcessTime = log.iTime("$executableName processing $inJar") {
@@ -177,7 +209,8 @@ class Ravenizer(val options: RavenizerOptions) {
      * Whether a class needs to be processed. This must be kept in sync with [processSingleClass].
      */
     private fun shouldProcessClass(classes: ClassNodes, classInternalName: String): Boolean {
-        return TestRunnerRewritingAdapter.shouldProcess(classes, classInternalName)
+        return !classInternalName.shouldByBypassed()
+                && RunnerRewritingAdapter.shouldProcess(classes, classInternalName)
     }
 
     private fun processSingleClass(
@@ -191,6 +224,9 @@ class Ravenizer(val options: RavenizerOptions) {
 
         lateinit var data: ByteArray
         stats.totalConversionTime += log.vTime("Modify ${entry.name}") {
+
+            val classInternalName = zipEntryNameToClassName(entry.name)
+                ?: throw RavenizerInternalException("Unexpected zip entry name: ${entry.name}")
             val flags = ClassWriter.COMPUTE_MAXS
             val cw = ClassWriter(flags)
             var outVisitor: ClassVisitor = cw
@@ -201,7 +237,8 @@ class Ravenizer(val options: RavenizerOptions) {
             }
 
             // This must be kept in sync with shouldProcessClass.
-            outVisitor = TestRunnerRewritingAdapter(allClasses, outVisitor)
+            outVisitor = RunnerRewritingAdapter.maybeApply(
+                classInternalName, allClasses, outVisitor)
 
             cr.accept(outVisitor, ClassReader.EXPAND_FRAMES)
 

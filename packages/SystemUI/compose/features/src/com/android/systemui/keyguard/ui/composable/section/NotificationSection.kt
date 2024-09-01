@@ -83,7 +83,7 @@ constructor(
     fun SceneScope.HeadsUpNotifications() {
         SnoozeableHeadsUpNotificationSpace(
             stackScrollView = stackScrollView.get(),
-            viewModel = rememberViewModel { viewModelFactory.create() },
+            viewModel = rememberViewModel("HeadsUpNotifications") { viewModelFactory.create() },
         )
     }
 
@@ -107,7 +107,7 @@ constructor(
 
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
-            viewModel = rememberViewModel { viewModelFactory.create() },
+            viewModel = rememberViewModel("Notifications") { viewModelFactory.create() },
             modifier =
                 modifier
                     .fillMaxWidth()

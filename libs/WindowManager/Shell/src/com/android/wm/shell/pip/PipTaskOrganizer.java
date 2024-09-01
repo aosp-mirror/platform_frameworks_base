@@ -91,6 +91,7 @@ import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
@@ -361,8 +362,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     SurfaceControl mPipOverlay;
 
     /**
-     * The app bounds used for the buffer size of the
-     * {@link com.android.wm.shell.pip.PipContentOverlay.PipAppIconOverlay}.
+     * The app bounds used for the buffer size of the {@link PipContentOverlay.PipAppIconOverlay}.
      *
      * Note that this is empty if the overlay is removed or if it's some other type of overlay
      * defined in {@link PipContentOverlay}.

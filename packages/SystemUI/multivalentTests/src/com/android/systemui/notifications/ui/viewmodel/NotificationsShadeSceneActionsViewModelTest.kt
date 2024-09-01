@@ -20,6 +20,7 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -68,7 +69,8 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
             lockDevice()
             underTest.activateIn(this)
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Down)).isNull()
             assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
                 .isEqualTo(Scenes.Lockscreen)
@@ -82,7 +84,8 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
             underTest.activateIn(this)
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value).isEqualTo(Scenes.Gone)
         }
 
@@ -94,7 +97,8 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
             unlockDevice()
             underTest.activateIn(this)
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Down)).isNull()
             assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
         }
@@ -107,7 +111,8 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
             lockDevice()
             underTest.activateIn(this)
 
-            assertThat(actions?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Up)).isNull()
             assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
                 .isEqualTo(Scenes.Lockscreen)
@@ -122,7 +127,8 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
             unlockDevice()
             underTest.activateIn(this)
 
-            assertThat(actions?.get(Swipe.Down)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(actions?.get(Swipe.Up)).isNull()
             assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
         }
@@ -138,7 +144,8 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
             underTest.activateIn(this)
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
                 .isEqualTo(Scenes.Lockscreen)
         }
@@ -156,7 +163,8 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
             sceneInteractor.changeScene(Scenes.Gone, "reason")
             underTest.activateIn(this)
 
-            assertThat(actions?.get(Swipe.Up)?.toScene).isEqualTo(SceneFamilies.Home)
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
+                .isEqualTo(SceneFamilies.Home)
             assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value).isEqualTo(Scenes.Gone)
         }
 

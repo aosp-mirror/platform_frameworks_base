@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
@@ -48,7 +47,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.IntArray;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
@@ -138,22 +136,16 @@ class BackgroundLaunchProcessController {
         if (appSwitchState == APP_SWITCH_ALLOW) {
             // Allow if any activity in the caller has either started or finished very recently, and
             // it must be started or finished after last stop app switches time.
-            final long now = SystemClock.uptimeMillis();
-            if (now - lastActivityLaunchTime < ACTIVITY_BG_START_GRACE_PERIOD_MS
-                    || now - lastActivityFinishTime < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
-                // If activity is started and finished before stop app switch time, we should not
-                // let app to be able to start background activity even it's in grace period.
-                if (lastActivityLaunchTime > lastStopAppSwitchesTime
-                        || lastActivityFinishTime > lastStopAppSwitchesTime) {
+            if (lastActivityLaunchTime > lastStopAppSwitchesTime
+                    || lastActivityFinishTime > lastStopAppSwitchesTime) {
+                final long now = SystemClock.uptimeMillis();
+                long timeSinceLastStartOrFinish = now - Math.max(lastActivityLaunchTime,
+                        lastActivityFinishTime);
+                if (timeSinceLastStartOrFinish < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
                     return new BalVerdict(BAL_ALLOW_GRACE_PERIOD, /*background*/ true,
-                            "within " + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
+                            "within " + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period ("
+                                    + timeSinceLastStartOrFinish + "ms)");
                 }
-                if (DEBUG_ACTIVITY_STARTS) {
-                    Slog.d(TAG, "[Process(" + pid + ")] Activity start within "
-                            + ACTIVITY_BG_START_GRACE_PERIOD_MS
-                            + "ms grace period but also within stop app switch window");
-                }
-
             }
         }
         return BalVerdict.BLOCK;

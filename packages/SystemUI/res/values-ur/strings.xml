@@ -153,9 +153,9 @@
     <string name="issuerecord_title" msgid="286627115110121849">"ایشو ریکارڈر"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"ایشو ریکارڈنگ پروسیس ہو رہی ہے"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"ایشو کلیکشن سیشن کے لیے جاری اطلاع"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"ریکارڈنگ ایشو"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"مسئلہ ریکارڈ ہو رہا ہے"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"اشتراک کریں"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"ایشو ریکارڈنگ محفوظ ہو گئی"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"مسئلے کی ریکارڈنگ محفوظ ہو گئی"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"دیکھنے کیلئے تھپتھپائیں"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ایشو ریکارڈنگ محفوظ کرنے میں خرابی"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ایشو ریکارڈنگ شروع کرنے میں خرابی"</string>
@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"بلوٹوتھ کل صبح آن ہو جائے گا"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"آڈیو کا اشتراک کریں"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"آڈیو کا اشتراک ہو رہا ہے"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"آڈیو کے اشتراک کی ترتیبات درج کریں"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> بیٹری"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"آڈیو"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ہیڈ سیٹ"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ہو گیا"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ترتیبات"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"آن ہے"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"آن ہے • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"آف ہے"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"سیٹ اپ کریں"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ترتیبات میں نظم کریں"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"سیٹلائٹ، کنکشن اچھا ہے"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"سیٹلائٹ، کنکشن دستیاب ہے"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"‏سیٹلائٹ SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"دفتری پروفائل"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"کچھ کیلئے دلچسپ لیکن سبھی کیلئے نہیں"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏سسٹم UI ٹیونر Android صارف انٹر فیس میں ردوبدل کرنے اور اسے حسب ضرورت بنانے کیلئے آپ کو اضافی طریقے دیتا ہے۔ یہ تجرباتی خصوصیات مستقبل کی ریلیزز میں تبدیل ہو سکتی، رک سکتی یا غائب ہو سکتی ہیں۔ احتیاط کے ساتھ آگے بڑھیں۔"</string>

@@ -60,7 +60,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             int enrollReason) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                shouldVibrate, logger, biometricContext);
+                shouldVibrate, logger, biometricContext, false /* isMandatoryBiometrics */);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;

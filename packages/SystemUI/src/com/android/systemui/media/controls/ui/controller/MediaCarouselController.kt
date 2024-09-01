@@ -45,10 +45,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -75,7 +75,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.SysUiStatsLog
@@ -103,13 +102,16 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -121,6 +123,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
  * Class that is responsible for keeping the view carousel up to date. This also handles changes in
  * state and applies them to the media carousel like the expansion.
  */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class MediaCarouselController
 @Inject
@@ -149,7 +152,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val mediaCarouselViewModel: MediaCarouselViewModel,
     private val mediaViewControllerFactory: Provider<MediaViewController>,
-    private val sceneInteractor: SceneInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
     var currentCarouselWidth: Int = 0
@@ -163,6 +166,9 @@ constructor(
 
     /** Is the player currently visible (at the end of the transformation */
     private var playersVisible: Boolean = false
+
+    /** Are we currently disabling pagination only allowing one media session to show */
+    private var currentlyDisablePagination: Boolean = false
 
     /**
      * The desired location where we'll be at the end of the transformation. Usually this matches
@@ -220,7 +226,7 @@ constructor(
     private val animationScaleObserver: ContentObserver =
         object : ContentObserver(executor, 0) {
             override fun onChange(selfChange: Boolean) {
-                if (!mediaFlags.isSceneContainerEnabled()) {
+                if (!SceneContainerFlag.isEnabled) {
                     MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
                 } else {
                     controllerById.values.forEach { it.updateAnimatorDurationScale() }
@@ -327,6 +333,11 @@ constructor(
     private val controllerById = mutableMapOf<String, MediaViewController>()
     private val commonViewModels = mutableListOf<MediaCommonViewModel>()
 
+    private val isOnGone =
+        keyguardTransitionInteractor
+            .isFinishedIn(Scenes.Gone, GONE)
+            .stateIn(applicationScope, SharingStarted.Eagerly, true)
+
     init {
         dumpManager.registerDumpable(TAG, this)
         mediaFrame = inflateMediaCarousel()
@@ -350,7 +361,7 @@ constructor(
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
         configurationController.addCallback(configListener)
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             setUpListeners()
         } else {
             val visualStabilityCallback = OnReorderingAllowedListener {
@@ -391,7 +402,7 @@ constructor(
                 listenForAnyStateToGoneKeyguardTransition(this)
                 listenForAnyStateToLockscreenTransition(this)
 
-                if (!mediaFlags.isSceneContainerEnabled()) return@repeatOnLifecycle
+                if (!SceneContainerFlag.isEnabled) return@repeatOnLifecycle
                 listenForMediaItemsChanges(this)
             }
         }
@@ -733,7 +744,7 @@ constructor(
         when (commonViewModel) {
             is MediaCommonViewModel.MediaControl -> {
                 val viewHolder = MediaViewHolder.create(LayoutInflater.from(context), mediaContent)
-                if (mediaFlags.isSceneContainerEnabled()) {
+                if (SceneContainerFlag.isEnabled) {
                     viewController.widthInSceneContainerPx = widthInSceneContainerPx
                     viewController.heightInSceneContainerPx = heightInSceneContainerPx
                 }
@@ -904,9 +915,13 @@ constructor(
 
     /** Return true if the carousel should be hidden because lockscreen is currently visible */
     fun isLockedAndHidden(): Boolean {
-        val keyguardState = keyguardTransitionInteractor.getFinishedState()
-        return !allowMediaPlayerOnLockScreen &&
-            KeyguardState.lockscreenVisibleInState(keyguardState)
+        val isOnLockscreen =
+            if (SceneContainerFlag.isEnabled) {
+                !deviceEntryInteractor.isDeviceEntered.value
+            } else {
+                !isOnGone.value
+            }
+        return !allowMediaPlayerOnLockScreen && isOnLockscreen
     }
 
     private fun reorderAllPlayers(
@@ -965,7 +980,7 @@ constructor(
                     .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
             if (existingPlayer == null) {
                 val newPlayer = mediaControlPanelFactory.get()
-                if (mediaFlags.isSceneContainerEnabled()) {
+                if (SceneContainerFlag.isEnabled) {
                     newPlayer.mediaViewController.widthInSceneContainerPx = widthInSceneContainerPx
                     newPlayer.mediaViewController.heightInSceneContainerPx =
                         heightInSceneContainerPx
@@ -1140,7 +1155,7 @@ constructor(
     }
 
     private fun updatePlayers(recreateMedia: Boolean) {
-        if (mediaFlags.isSceneContainerEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             updateMediaPlayers(recreateMedia)
             return
         }
@@ -1240,7 +1255,7 @@ constructor(
             currentStartLocation = startLocation
             currentEndLocation = endLocation
             currentTransitionProgress = progress
-            if (!mediaFlags.isSceneContainerEnabled()) {
+            if (!SceneContainerFlag.isEnabled) {
                 for (mediaPlayer in MediaPlayerData.players()) {
                     updateViewControllerToState(mediaPlayer.mediaViewController, immediately)
                 }
@@ -1300,7 +1315,7 @@ constructor(
 
     /** Update listening to seekbar. */
     private fun updateSeekbarListening(visibleToUser: Boolean) {
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             for (player in MediaPlayerData.players()) {
                 player.setListening(visibleToUser && currentlyExpanded)
             }
@@ -1313,7 +1328,7 @@ constructor(
     private fun updateCarouselDimensions() {
         var width = 0
         var height = 0
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             for (mediaPlayer in MediaPlayerData.players()) {
                 val controller = mediaPlayer.mediaViewController
                 // When transitioning the view to gone, the view gets smaller, but the translation
@@ -1347,14 +1362,20 @@ constructor(
         val endShowsActive = hostStates[currentEndLocation]?.showsOnlyActiveMedia ?: true
         val startShowsActive =
             hostStates[currentStartLocation]?.showsOnlyActiveMedia ?: endShowsActive
+        val startDisablePagination = hostStates[currentStartLocation]?.disablePagination ?: false
+        val endDisablePagination = hostStates[currentEndLocation]?.disablePagination ?: false
+
         if (
             currentlyShowingOnlyActive != endShowsActive ||
+                currentlyDisablePagination != endDisablePagination ||
                 ((currentTransitionProgress != 1.0f && currentTransitionProgress != 0.0f) &&
-                    startShowsActive != endShowsActive)
+                    (startShowsActive != endShowsActive ||
+                        startDisablePagination != endDisablePagination))
         ) {
             // Whenever we're transitioning from between differing states or the endstate differs
             // we reset the translation
             currentlyShowingOnlyActive = endShowsActive
+            currentlyDisablePagination = endDisablePagination
             mediaCarouselScrollHandler.resetTranslation(animate = true)
         }
     }
@@ -1405,7 +1426,7 @@ constructor(
                         !mediaManager.hasActiveMediaOrRecommendation() &&
                         desiredHostState.showsOnlyActiveMedia
 
-                if (!mediaFlags.isSceneContainerEnabled()) {
+                if (!SceneContainerFlag.isEnabled) {
                     for (mediaPlayer in MediaPlayerData.players()) {
                         if (animate) {
                             mediaPlayer.mediaViewController.animatePendingStateChange(
@@ -1445,7 +1466,7 @@ constructor(
         }
 
     fun closeGuts(immediate: Boolean = true) {
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             MediaPlayerData.players().forEach { it.closeGuts(immediate) }
         } else {
             controllerById.values.forEach { it.closeGuts(immediate) }
@@ -1596,7 +1617,7 @@ constructor(
 
     @VisibleForTesting
     fun onSwipeToDismiss() {
-        if (mediaFlags.isSceneContainerEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             mediaCarouselViewModel.onSwipeToDismiss(currentEndLocation)
             return
         }

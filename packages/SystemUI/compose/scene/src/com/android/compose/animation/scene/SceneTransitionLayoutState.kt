@@ -81,12 +81,15 @@ sealed interface SceneTransitionLayoutState {
 
     /**
      * Whether we are transitioning. If [from] or [to] is empty, we will also check that they match
-     * the scenes we are animating from and/or to.
+     * the contents we are animating from and/or to.
      */
-    fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean
+    fun isTransitioning(from: ContentKey? = null, to: ContentKey? = null): Boolean
 
-    /** Whether we are transitioning from [scene] to [other], or from [other] to [scene]. */
-    fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean
+    /** Whether we are transitioning from [content] to [other], or from [other] to [content]. */
+    fun isTransitioningBetween(content: ContentKey, other: ContentKey): Boolean
+
+    /** Whether we are transitioning from or to [content]. */
+    fun isTransitioningFromOrTo(content: ContentKey): Boolean
 }
 
 /** A [SceneTransitionLayoutState] whose target scene can be imperatively set. */
@@ -180,6 +183,12 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
  *   commits a transition to a new scene because of a [UserAction]. If [canChangeScene] returns
  *   `true`, then the gesture will be committed and we will animate to the other scene. Otherwise,
  *   the gesture will be cancelled and we will animate back to the current scene.
+ * @param canShowOverlay whether we should commit a user action that will result in showing the
+ *   given overlay.
+ * @param canHideOverlay whether we should commit a user action that will result in hiding the given
+ *   overlay.
+ * @param canReplaceOverlay whether we should commit a user action that will result in replacing
+ *   `from` overlay by `to` overlay.
  * @param stateLinks the [StateLink] connecting this [SceneTransitionLayoutState] to other
  *   [SceneTransitionLayoutState]s.
  */
@@ -188,6 +197,9 @@ fun MutableSceneTransitionLayoutState(
     transitions: SceneTransitions = SceneTransitions.Empty,
     initialOverlays: Set<OverlayKey> = emptySet(),
     canChangeScene: (SceneKey) -> Boolean = { true },
+    canShowOverlay: (OverlayKey) -> Boolean = { true },
+    canHideOverlay: (OverlayKey) -> Boolean = { true },
+    canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
     stateLinks: List<StateLink> = emptyList(),
     enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ): MutableSceneTransitionLayoutState {
@@ -196,6 +208,9 @@ fun MutableSceneTransitionLayoutState(
         transitions,
         initialOverlays,
         canChangeScene,
+        canShowOverlay,
+        canHideOverlay,
+        canReplaceOverlay,
         stateLinks,
         enableInterruptions,
     )
@@ -207,6 +222,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
     override var transitions: SceneTransitions = transitions {},
     initialOverlays: Set<OverlayKey> = emptySet(),
     internal val canChangeScene: (SceneKey) -> Boolean = { true },
+    internal val canShowOverlay: (OverlayKey) -> Boolean = { true },
+    internal val canHideOverlay: (OverlayKey) -> Boolean = { true },
+    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ ->
+        true
+    },
     private val stateLinks: List<StateLink> = emptyList(),
 
     // TODO(b/290930950): Remove this flag.
@@ -260,21 +280,26 @@ internal class MutableSceneTransitionLayoutStateImpl(
         }
     }
 
-    override fun isTransitioning(from: SceneKey?, to: SceneKey?): Boolean {
+    override fun isTransitioning(from: ContentKey?, to: ContentKey?): Boolean {
         val transition = currentTransition ?: return false
         return transition.isTransitioning(from, to)
     }
 
-    override fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
+    override fun isTransitioningBetween(content: ContentKey, other: ContentKey): Boolean {
         val transition = currentTransition ?: return false
-        return transition.isTransitioningBetween(scene, other)
+        return transition.isTransitioningBetween(content, other)
+    }
+
+    override fun isTransitioningFromOrTo(content: ContentKey): Boolean {
+        val transition = currentTransition ?: return false
+        return transition.isTransitioningFromOrTo(content)
     }
 
     override fun setTargetScene(
         targetScene: SceneKey,
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey?,
-    ): TransitionState.Transition.ChangeCurrentScene? {
+    ): TransitionState.Transition.ChangeScene? {
         checkThread()
 
         return coroutineScope.animateToScene(
@@ -293,10 +318,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
      *
      * Important: you *must* call [finishTransition] once the transition is finished.
      */
-    internal fun startTransition(
-        transition: TransitionState.Transition.ChangeCurrentScene,
-        chain: Boolean = true,
-    ) {
+    internal fun startTransition(transition: TransitionState.Transition, chain: Boolean = true) {
         checkThread()
 
         // Set the current scene and overlays on the transition.
@@ -305,23 +327,23 @@ internal class MutableSceneTransitionLayoutStateImpl(
         transition.currentOverlaysWhenTransitionStarted = currentState.currentOverlays
 
         // Compute the [TransformationSpec] when the transition starts.
-        val fromScene = transition.fromScene
-        val toScene = transition.toScene
+        val fromContent = transition.fromContent
+        val toContent = transition.toContent
         val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
 
         // Update the transition specs.
         transition.transformationSpec =
             transitions
-                .transitionSpec(fromScene, toScene, key = transition.key)
+                .transitionSpec(fromContent, toContent, key = transition.key)
                 .transformationSpec()
         transition.previewTransformationSpec =
             transitions
-                .transitionSpec(fromScene, toScene, key = transition.key)
+                .transitionSpec(fromContent, toContent, key = transition.key)
                 .previewTransformationSpec()
         if (orientation != null) {
             transition.updateOverscrollSpecs(
-                fromSpec = transitions.overscrollSpec(fromScene, orientation),
-                toSpec = transitions.overscrollSpec(toScene, orientation),
+                fromSpec = transitions.overscrollSpec(fromContent, orientation),
+                toSpec = transitions.overscrollSpec(toContent, orientation),
             )
         } else {
             transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
@@ -402,32 +424,27 @@ internal class MutableSceneTransitionLayoutStateImpl(
     }
 
     private fun setupTransitionLinks(transition: TransitionState.Transition) {
-        when (transition) {
-            is TransitionState.Transition.ChangeCurrentScene -> {
-                stateLinks.fastForEach { stateLink ->
-                    val matchingLinks =
-                        stateLink.transitionLinks.fastFilter { it.isMatchingLink(transition) }
-                    if (matchingLinks.isEmpty()) return@fastForEach
-                    if (matchingLinks.size > 1) error("More than one link matched.")
+        stateLinks.fastForEach { stateLink ->
+            val matchingLinks =
+                stateLink.transitionLinks.fastFilter { it.isMatchingLink(transition) }
+            if (matchingLinks.isEmpty()) return@fastForEach
+            if (matchingLinks.size > 1) error("More than one link matched.")
 
-                    val targetCurrentScene = stateLink.target.transitionState.currentScene
-                    val matchingLink = matchingLinks[0]
+            val targetCurrentScene = stateLink.target.transitionState.currentScene
+            val matchingLink = matchingLinks[0]
 
-                    if (!matchingLink.targetIsInValidState(targetCurrentScene)) return@fastForEach
+            if (!matchingLink.targetIsInValidState(targetCurrentScene)) return@fastForEach
 
-                    val linkedTransition =
-                        LinkedTransition(
-                            originalTransition = transition,
-                            fromScene = targetCurrentScene,
-                            toScene = matchingLink.targetTo,
-                            key = matchingLink.targetTransitionKey,
-                        )
+            val linkedTransition =
+                LinkedTransition(
+                    originalTransition = transition,
+                    fromScene = targetCurrentScene,
+                    toScene = matchingLink.targetTo,
+                    key = matchingLink.targetTransitionKey,
+                )
 
-                    stateLink.target.startTransition(linkedTransition)
-                    transition.activeTransitionLinks[stateLink] = linkedTransition
-                }
-            }
-            else -> error("transition links are not supported with overlays yet")
+            stateLink.target.startTransition(linkedTransition)
+            transition.activeTransitionLinks[stateLink] = linkedTransition
         }
     }
 
@@ -552,12 +569,39 @@ internal class MutableSceneTransitionLayoutStateImpl(
         checkThread()
 
         // Overlay is already shown, do nothing.
-        if (overlay in transitionState.currentOverlays) {
+        val currentState = transitionState
+        if (overlay in currentState.currentOverlays) {
             return
         }
 
-        // TODO(b/353679003): Animate the overlay instead of instantly snapping to an Idle state.
-        snapToScene(transitionState.currentScene, transitionState.currentOverlays + overlay)
+        val fromScene = currentState.currentScene
+        fun animate(
+            replacedTransition: TransitionState.Transition.ShowOrHideOverlay? = null,
+            reversed: Boolean = false,
+        ) {
+            animationScope.showOrHideOverlay(
+                layoutState = this@MutableSceneTransitionLayoutStateImpl,
+                overlay = overlay,
+                fromOrToScene = fromScene,
+                isShowing = true,
+                transitionKey = transitionKey,
+                replacedTransition = replacedTransition,
+                reversed = reversed,
+            )
+        }
+
+        if (
+            currentState is TransitionState.Transition.ShowOrHideOverlay &&
+                currentState.overlay == overlay &&
+                currentState.fromOrToScene == fromScene
+        ) {
+            animate(
+                replacedTransition = currentState,
+                reversed = overlay == currentState.fromContent
+            )
+        } else {
+            animate()
+        }
     }
 
     override fun hideOverlay(
@@ -568,12 +612,36 @@ internal class MutableSceneTransitionLayoutStateImpl(
         checkThread()
 
         // Overlay is not shown, do nothing.
-        if (!transitionState.currentOverlays.contains(overlay)) {
+        val currentState = transitionState
+        if (!currentState.currentOverlays.contains(overlay)) {
             return
         }
 
-        // TODO(b/353679003): Animate the overlay instead of instantly snapping to an Idle state.
-        snapToScene(transitionState.currentScene, transitionState.currentOverlays - overlay)
+        val toScene = currentState.currentScene
+        fun animate(
+            replacedTransition: TransitionState.Transition.ShowOrHideOverlay? = null,
+            reversed: Boolean = false,
+        ) {
+            animationScope.showOrHideOverlay(
+                layoutState = this@MutableSceneTransitionLayoutStateImpl,
+                overlay = overlay,
+                fromOrToScene = toScene,
+                isShowing = false,
+                transitionKey = transitionKey,
+                replacedTransition = replacedTransition,
+                reversed = reversed,
+            )
+        }
+
+        if (
+            currentState is TransitionState.Transition.ShowOrHideOverlay &&
+                currentState.overlay == overlay &&
+                currentState.fromOrToScene == toScene
+        ) {
+            animate(replacedTransition = currentState, reversed = overlay == currentState.toContent)
+        } else {
+            animate()
+        }
     }
 
     override fun replaceOverlay(
@@ -583,16 +651,45 @@ internal class MutableSceneTransitionLayoutStateImpl(
         transitionKey: TransitionKey?
     ) {
         checkThread()
-        require(from in currentOverlays) {
+
+        val currentState = transitionState
+        require(from != to) {
+            "replaceOverlay must be called with different overlays (from = to = ${from.debugName})"
+        }
+        require(from in currentState.currentOverlays) {
             "Overlay ${from.debugName} is not shown so it can't be replaced by ${to.debugName}"
         }
-        require(to !in currentOverlays) {
+        require(to !in currentState.currentOverlays) {
             "Overlay ${to.debugName} is already shown so it can't replace ${from.debugName}"
         }
 
-        // TODO(b/353679003): Animate from into to instead of hiding/showing the overlays
-        // separately.
-        snapToScene(transitionState.currentScene, transitionState.currentOverlays - from + to)
+        fun animate(
+            replacedTransition: TransitionState.Transition.ReplaceOverlay? = null,
+            reversed: Boolean = false,
+        ) {
+            animationScope.replaceOverlay(
+                layoutState = this@MutableSceneTransitionLayoutStateImpl,
+                fromOverlay = if (reversed) to else from,
+                toOverlay = if (reversed) from else to,
+                transitionKey = transitionKey,
+                replacedTransition = replacedTransition,
+                reversed = reversed,
+            )
+        }
+
+        if (currentState is TransitionState.Transition.ReplaceOverlay) {
+            if (currentState.fromOverlay == from && currentState.toOverlay == to) {
+                animate(replacedTransition = currentState, reversed = false)
+                return
+            }
+
+            if (currentState.fromOverlay == to && currentState.toOverlay == from) {
+                animate(replacedTransition = currentState, reversed = true)
+                return
+            }
+        }
+
+        animate()
     }
 }
 

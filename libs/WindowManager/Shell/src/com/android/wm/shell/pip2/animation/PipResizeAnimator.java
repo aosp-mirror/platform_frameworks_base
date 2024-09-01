@@ -134,9 +134,10 @@ public class PipResizeAnimator extends ValueAnimator
             Rect baseBounds, Rect targetBounds, float degrees) {
         Matrix transformTensor = new Matrix();
         final float[] mMatrixTmp = new float[9];
-        final float scale = (float) targetBounds.width() / baseBounds.width();
+        final float scaleX = (float) targetBounds.width() / baseBounds.width();
+        final float scaleY = (float) targetBounds.height() / baseBounds.height();
 
-        transformTensor.setScale(scale, scale);
+        transformTensor.setScale(scaleX, scaleY);
         transformTensor.postTranslate(targetBounds.left, targetBounds.top);
         transformTensor.postRotate(degrees, targetBounds.centerX(), targetBounds.centerY());
 

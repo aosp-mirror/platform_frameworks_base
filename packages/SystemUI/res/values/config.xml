@@ -727,6 +727,10 @@
         .75
     </item>
 
+    <!-- The last x ms of face acquired info messages to analyze to determine
+         whether to show a deferred face auth help message. -->
+    <integer name="config_face_help_msgs_defer_analyze_timeframe">500</integer>
+
     <!-- Which face help messages to surface when fingerprint is also enrolled.
          Message ids correspond with the acquired ids in BiometricFaceConstants -->
     <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">

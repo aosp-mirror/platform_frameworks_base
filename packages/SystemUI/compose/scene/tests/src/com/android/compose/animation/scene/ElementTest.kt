@@ -724,6 +724,7 @@ class ElementTest {
                 layoutHeight = layoutHeight,
                 sceneTransitions = {
                     overscroll(SceneB, Orientation.Vertical) {
+                        progressConverter = ProgressConverter.linear()
                         // On overscroll 100% -> Foo should translate by overscrollTranslateY
                         translate(TestElements.Foo, y = overscrollTranslateY)
                     }
@@ -780,6 +781,7 @@ class ElementTest {
                     transitions =
                         transitions {
                             overscroll(SceneB, Orientation.Vertical) {
+                                progressConverter = ProgressConverter.linear()
                                 translate(TestElements.Foo, y = overscrollTranslateY)
                             }
                         }
@@ -921,6 +923,7 @@ class ElementTest {
                 layoutHeight = layoutHeight,
                 sceneTransitions = {
                     overscroll(SceneB, Orientation.Vertical) {
+                        progressConverter = ProgressConverter.linear()
                         // On overscroll 100% -> Foo should translate by layoutHeight
                         translate(TestElements.Foo, y = { absoluteDistance })
                     }
@@ -1015,7 +1018,7 @@ class ElementTest {
                 layoutHeight = layoutHeight,
                 sceneTransitions = {
                     // Overscroll progress will be linear (by default)
-                    defaultOverscrollProgressConverter = ProgressConverter { it }
+                    defaultOverscrollProgressConverter = ProgressConverter.linear()
 
                     overscroll(SceneB, Orientation.Vertical) {
                         // This override the defaultOverscrollProgressConverter
@@ -1125,6 +1128,7 @@ class ElementTest {
                         )
 
                     overscroll(SceneB, Orientation.Vertical) {
+                        progressConverter = ProgressConverter.linear()
                         // On overscroll 100% -> Foo should translate by layoutHeight
                         translate(TestElements.Foo, y = { absoluteDistance })
                     }
@@ -1861,6 +1865,7 @@ class ElementTest {
                     SceneA,
                     transitions {
                         overscroll(SceneB, Orientation.Vertical) {
+                            progressConverter = ProgressConverter.linear()
                             translate(TestElements.Foo, y = 15.dp)
                         }
                     }
