@@ -169,12 +169,17 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         mController = controller;
         final Bundle outSavedState = new Bundle();
         if (Flags.aeBackStackRestore()) {
-            outSavedState.setClassLoader(TaskContainer.class.getClassLoader());
+            outSavedState.setClassLoader(ParcelableTaskContainerData.class.getClassLoader());
             registerOrganizer(false /* isSystemOrganizer */, outSavedState);
         } else {
             registerOrganizer();
         }
         mBackupHelper = new BackupHelper(controller, outSavedState);
+        if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
+            // TODO(b/207070762): cleanup with legacy app transition
+            // Animation will be handled by WM Shell when Shell transition is enabled.
+            overrideSplitAnimation();
+        }
     }
 
     void scheduleBackup() {

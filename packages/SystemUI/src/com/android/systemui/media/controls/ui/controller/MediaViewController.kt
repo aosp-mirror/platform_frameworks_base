@@ -46,8 +46,8 @@ import com.android.systemui.media.controls.ui.view.MediaViewHolder
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.MediaControlViewModel
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.surfaceeffects.PaintDrawCallback
 import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect
@@ -82,7 +82,6 @@ constructor(
     private val logger: MediaViewLogger,
     private val seekBarViewModel: SeekBarViewModel,
     @Main private val mainExecutor: DelayableExecutor,
-    private val mediaFlags: MediaFlags,
     private val globalSettings: GlobalSettings,
 ) {
 
@@ -125,7 +124,7 @@ constructor(
         set(value) {
             if (field != value) {
                 field = value
-                if (!mediaFlags.isSceneContainerEnabled()) return
+                if (!SceneContainerFlag.isEnabled) return
                 locationChangeListener(value)
             }
         }
@@ -212,7 +211,7 @@ constructor(
     private val scrubbingChangeListener =
         object : SeekBarViewModel.ScrubbingChangeListener {
             override fun onScrubbingChanged(scrubbing: Boolean) {
-                if (!mediaFlags.isSceneContainerEnabled()) return
+                if (!SceneContainerFlag.isEnabled) return
                 if (isScrubbing == scrubbing) return
                 isScrubbing = scrubbing
                 updateDisplayForScrubbingChange()
@@ -222,7 +221,7 @@ constructor(
     private val enabledChangeListener =
         object : SeekBarViewModel.EnabledChangeListener {
             override fun onEnabledChanged(enabled: Boolean) {
-                if (!mediaFlags.isSceneContainerEnabled()) return
+                if (!SceneContainerFlag.isEnabled) return
                 if (isSeekBarEnabled == enabled) return
                 isSeekBarEnabled = enabled
                 MediaControlViewBinder.updateSeekBarVisibility(expandedLayout, isSeekBarEnabled)
@@ -238,7 +237,7 @@ constructor(
      * @param listening True when player should be active. Otherwise, false.
      */
     fun setListening(listening: Boolean) {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         seekBarViewModel.listening = listening
     }
 
@@ -272,7 +271,7 @@ constructor(
                             )
                         )
                     }
-                    if (mediaFlags.isSceneContainerEnabled()) {
+                    if (SceneContainerFlag.isEnabled) {
                         if (
                             this@MediaViewController::recsConfigurationChangeListener.isInitialized
                         ) {
@@ -344,7 +343,7 @@ constructor(
      * Notify this controller that the view has been removed and all listeners should be destroyed
      */
     fun onDestroy() {
-        if (mediaFlags.isSceneContainerEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             if (this::seekBarObserver.isInitialized) {
                 seekBarViewModel.progress.removeObserver(seekBarObserver)
             }
@@ -565,7 +564,7 @@ constructor(
         state: MediaHostState?,
         isGutsAnimation: Boolean = false
     ): TransitionViewState? {
-        if (mediaFlags.isSceneContainerEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             return obtainSceneContainerViewState()
         }
 
@@ -667,7 +666,7 @@ constructor(
         }
 
     fun attachPlayer(mediaViewHolder: MediaViewHolder) {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         this.mediaViewHolder = mediaViewHolder
 
         // Setting up seek bar.
@@ -741,7 +740,7 @@ constructor(
     }
 
     fun updateAnimatorDurationScale() {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         if (this::seekBarObserver.isInitialized) {
             seekBarObserver.animationEnabled =
                 globalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
@@ -801,7 +800,7 @@ constructor(
     }
 
     fun attachRecommendations(recommendationViewHolder: RecommendationViewHolder) {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         this.recommendationViewHolder = recommendationViewHolder
 
         attach(recommendationViewHolder.recommendations, TYPE.RECOMMENDATION)
@@ -810,13 +809,13 @@ constructor(
     }
 
     fun bindSeekBar(onSeek: () -> Unit, onBindSeekBar: (SeekBarViewModel) -> Unit) {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         seekBarViewModel.logSeek = onSeek
         onBindSeekBar(seekBarViewModel)
     }
 
     fun setUpTurbulenceNoise() {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         mediaViewHolder!!.let {
             if (!this::turbulenceNoiseAnimationConfig.isInitialized) {
                 turbulenceNoiseAnimationConfig =
@@ -1049,7 +1048,7 @@ constructor(
      */
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {
         val mediaHostState = mediaHostStatesManager.mediaHostStates[location] ?: return null
-        if (mediaFlags.isSceneContainerEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             return obtainSceneContainerViewState()
         }
 
@@ -1080,7 +1079,7 @@ constructor(
     /** Clear all existing measurements and refresh the state to match the view. */
     fun refreshState() =
         traceSection("MediaViewController#refreshState") {
-            if (mediaFlags.isSceneContainerEnabled()) {
+            if (SceneContainerFlag.isEnabled) {
                 // We don't need to recreate measurements for scene container, since it's a known
                 // size. Just get the view state and update the layout controller
                 obtainSceneContainerViewState()?.let {
@@ -1169,13 +1168,13 @@ constructor(
     }
 
     fun setUpPrevButtonInfo(isAvailable: Boolean, notVisibleValue: Int = ConstraintSet.GONE) {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         isPrevButtonAvailable = isAvailable
         prevNotVisibleValue = notVisibleValue
     }
 
     fun setUpNextButtonInfo(isAvailable: Boolean, notVisibleValue: Int = ConstraintSet.GONE) {
-        if (!mediaFlags.isSceneContainerEnabled()) return
+        if (!SceneContainerFlag.isEnabled) return
         isNextButtonAvailable = isAvailable
         nextNotVisibleValue = notVisibleValue
     }

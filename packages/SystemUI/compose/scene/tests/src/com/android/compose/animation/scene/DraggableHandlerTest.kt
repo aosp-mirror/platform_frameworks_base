@@ -31,6 +31,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeAlways
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeNoPreview
 import com.android.compose.animation.scene.NestedScrollBehavior.EdgeWithPreview
+import com.android.compose.animation.scene.TestOverlays.OverlayA
+import com.android.compose.animation.scene.TestOverlays.OverlayB
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
@@ -52,7 +54,7 @@ private val LAYOUT_SIZE = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt())
 @RunWith(AndroidJUnit4::class)
 class DraggableHandlerTest {
     private class TestGestureScope(
-        private val testScope: MonotonicClockTestScope,
+        val testScope: MonotonicClockTestScope,
     ) {
         var canChangeScene: (SceneKey) -> Boolean = { true }
         val layoutState =
@@ -103,6 +105,21 @@ class DraggableHandlerTest {
             ) {
                 Text("SceneC")
             }
+            overlay(
+                key = OverlayA,
+                userActions =
+                    mapOf(
+                        Swipe.Up to UserActionResult.HideOverlay(OverlayA),
+                        Swipe.Down to UserActionResult.ReplaceByOverlay(OverlayB)
+                    ),
+            ) {
+                Text("OverlayA")
+            }
+            overlay(
+                key = OverlayB,
+            ) {
+                Text("OverlayB")
+            }
         }
 
         val transitionInterceptionThreshold = 0.05f
@@ -117,7 +134,7 @@ class DraggableHandlerTest {
                     builder = scenesBuilder,
                     coroutineScope = testScope,
                 )
-                .apply { setScenesTargetSizeForTest(LAYOUT_SIZE) }
+                .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
         val draggableHandler = layoutImpl.draggableHandler(Orientation.Vertical)
         val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
@@ -459,13 +476,14 @@ class DraggableHandlerTest {
     private fun TestGestureScope.navigateToSceneC() {
         assertIdle(currentScene = SceneA)
         val dragController = onDragStarted(overSlop = down(fractionOfScreen = 1f))
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneC)
         dragController.onDragStopped(velocity = 0f)
         advanceUntilIdle()
         assertIdle(currentScene = SceneC)
     }
 
     @Test
-    fun onAccelaratedScroll_scrollToThirdScene() = runGestureTest {
+    fun onAcceleratedScroll_scrollToThirdScene() = runGestureTest {
         // Drag A -> B with progress 0.2
         val dragController1 = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
         assertTransition(
@@ -500,7 +518,7 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun onAccelaratedScrollBothTargetsBecomeNull_settlesToIdle() = runGestureTest {
+    fun onAcceleratedScrollBothTargetsBecomeNull_settlesToIdle() = runGestureTest {
         val dragController1 = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
         dragController1.onDragDelta(pixels = up(fractionOfScreen = 0.2f))
         dragController1.onDragStopped(velocity = -velocityThreshold)
@@ -1275,5 +1293,88 @@ class DraggableHandlerTest {
         val newTransition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(newTransition).isNotSameInstanceAs(transition)
         assertThat(newTransition.replacedTransition).isSameInstanceAs(transition)
+    }
+
+    @Test
+    fun showOverlay() = runGestureTest {
+        mutableUserActionsA = mapOf(Swipe.Down to UserActionResult.ShowOverlay(OverlayA))
+
+        // Initial state.
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(/* empty */ )
+
+        // Swipe down to show overlay A.
+        val controller = onDragStarted(overSlop = down(0.1f))
+        val transition = assertThat(layoutState.transitionState).isShowOrHideOverlayTransition()
+        assertThat(transition).hasCurrentScene(SceneA)
+        assertThat(transition).hasFromOrToScene(SceneA)
+        assertThat(transition).hasOverlay(OverlayA)
+        assertThat(transition).hasCurrentOverlays(/* empty, gesture not committed yet. */ )
+        assertThat(transition).hasProgress(0.1f)
+
+        // Commit the gesture. The overlay is instantly added in the set of current overlays.
+        controller.onDragStopped(velocityThreshold)
+        assertThat(transition).hasCurrentOverlays(OverlayA)
+        advanceUntilIdle()
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayA)
+    }
+
+    @Test
+    fun hideOverlay() = runGestureTest {
+        layoutState.showOverlay(OverlayA, animationScope = testScope)
+        advanceUntilIdle()
+
+        // Initial state.
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayA)
+
+        // Swipe up to hide overlay A.
+        val controller = onDragStarted(overSlop = up(0.1f))
+        val transition = assertThat(layoutState.transitionState).isShowOrHideOverlayTransition()
+        assertThat(transition).hasCurrentScene(SceneA)
+        assertThat(transition).hasFromOrToScene(SceneA)
+        assertThat(transition).hasOverlay(OverlayA)
+        assertThat(transition).hasCurrentOverlays(OverlayA)
+        assertThat(transition).hasProgress(0.1f)
+
+        // Commit the gesture. The overlay is instantly removed from the set of current overlays.
+        controller.onDragStopped(-velocityThreshold)
+        assertThat(transition).hasCurrentOverlays(/* empty */ )
+        advanceUntilIdle()
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(/* empty */ )
+    }
+
+    @Test
+    fun replaceOverlay() = runGestureTest {
+        layoutState.showOverlay(OverlayA, animationScope = testScope)
+        advanceUntilIdle()
+
+        // Initial state.
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayA)
+
+        // Swipe down to replace overlay A by overlay B.
+        val controller = onDragStarted(overSlop = down(0.1f))
+        val transition = assertThat(layoutState.transitionState).isReplaceOverlayTransition()
+        assertThat(transition).hasCurrentScene(SceneA)
+        assertThat(transition).hasFromOverlay(OverlayA)
+        assertThat(transition).hasToOverlay(OverlayB)
+        assertThat(transition).hasCurrentOverlays(OverlayA)
+        assertThat(transition).hasProgress(0.1f)
+
+        // Commit the gesture. The overlays are instantly swapped in the set of current overlays.
+        controller.onDragStopped(velocityThreshold)
+        assertThat(transition).hasCurrentOverlays(OverlayB)
+        advanceUntilIdle()
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayB)
     }
 }

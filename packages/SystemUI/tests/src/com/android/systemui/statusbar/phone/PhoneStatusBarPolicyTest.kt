@@ -34,6 +34,7 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.StatusBarIcon
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -41,6 +42,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.screenrecord.RecordingController
@@ -71,9 +73,7 @@ import com.android.systemui.util.time.DateFormatUtil
 import com.android.systemui.util.time.FakeSystemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -145,7 +145,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     private lateinit var alarmCallbackCaptor:
         ArgumentCaptor<NextAlarmController.NextAlarmChangeCallback>
 
-    private val testScope = TestScope(UnconfinedTestDispatcher())
+    private val testScope = kosmos.testScope
     private val fakeConnectedDisplayStateProvider = FakeConnectedDisplayStateProvider()
     private val zenModeController = FakeZenModeController()
 
@@ -249,7 +249,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             statusBarPolicy.init()
             clearInvocations(iconController)
 
-            fakeConnectedDisplayStateProvider.emit(State.CONNECTED)
+            fakeConnectedDisplayStateProvider.setState(State.CONNECTED)
             runCurrent()
 
             verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
@@ -261,7 +261,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             statusBarPolicy.init()
             clearInvocations(iconController)
 
-            fakeConnectedDisplayStateProvider.emit(State.DISCONNECTED)
+            fakeConnectedDisplayStateProvider.setState(State.DISCONNECTED)
+            runCurrent()
 
             verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, false)
         }
@@ -272,9 +273,12 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             statusBarPolicy.init()
             clearInvocations(iconController)
 
-            fakeConnectedDisplayStateProvider.emit(State.CONNECTED)
-            fakeConnectedDisplayStateProvider.emit(State.DISCONNECTED)
-            fakeConnectedDisplayStateProvider.emit(State.CONNECTED)
+            fakeConnectedDisplayStateProvider.setState(State.CONNECTED)
+            runCurrent()
+            fakeConnectedDisplayStateProvider.setState(State.DISCONNECTED)
+            runCurrent()
+            fakeConnectedDisplayStateProvider.setState(State.CONNECTED)
+            runCurrent()
 
             inOrder(iconController).apply {
                 verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
@@ -289,7 +293,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             statusBarPolicy.init()
             clearInvocations(iconController)
 
-            fakeConnectedDisplayStateProvider.emit(State.CONNECTED_SECURE)
+            fakeConnectedDisplayStateProvider.setState(State.CONNECTED_SECURE)
+            runCurrent()
 
             verify(iconController).setIconVisibility(CONNECTED_DISPLAY_SLOT, true)
         }
@@ -390,7 +395,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_MODES_UI_ICONS)
+    @EnableFlags(android.app.Flags.FLAG_MODES_UI, android.app.Flags.FLAG_MODES_UI_ICONS)
     fun zenModeInteractorActiveModeChanged_showsModeIcon() =
         testScope.runTest {
             statusBarPolicy.init()
@@ -403,8 +408,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
                         .setName("Bedtime Mode")
                         .setType(AutomaticZenRule.TYPE_BEDTIME)
                         .setActive(true)
-                        .setPackage("some.package")
-                        .setIconResId(123)
+                        .setPackage(mContext.packageName)
+                        .setIconResId(android.R.drawable.ic_lock_lock)
                         .build(),
                     TestModeBuilder()
                         .setId("other")
@@ -412,7 +417,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
                         .setType(AutomaticZenRule.TYPE_OTHER)
                         .setActive(true)
                         .setPackage(SystemZenRules.PACKAGE_ANDROID)
-                        .setIconResId(456)
+                        .setIconResId(android.R.drawable.ic_media_play)
                         .build(),
                 )
             )
@@ -422,17 +427,25 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             verify(iconController)
                 .setResourceIcon(
                     eq(ZEN_SLOT),
-                    eq("some.package"),
-                    eq(123),
-                    eq(null),
-                    eq("Bedtime Mode")
+                    eq(mContext.packageName),
+                    eq(android.R.drawable.ic_lock_lock),
+                    any(), // non-null
+                    eq("Bedtime Mode"),
+                    eq(StatusBarIcon.Shape.FIXED_SPACE)
                 )
 
             zenModeRepository.deactivateMode("bedtime")
             runCurrent()
 
             verify(iconController)
-                .setResourceIcon(eq(ZEN_SLOT), eq(null), eq(456), eq(null), eq("Other Mode"))
+                .setResourceIcon(
+                    eq(ZEN_SLOT),
+                    eq(null),
+                    eq(android.R.drawable.ic_media_play),
+                    any(), // non-null
+                    eq("Other Mode"),
+                    eq(StatusBarIcon.Shape.FIXED_SPACE)
+                )
 
             zenModeRepository.deactivateMode("other")
             runCurrent()
@@ -441,7 +454,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_MODES_UI_ICONS)
+    @EnableFlags(android.app.Flags.FLAG_MODES_UI, android.app.Flags.FLAG_MODES_UI_ICONS)
     fun zenModeControllerOnGlobalZenChanged_doesNotUpdateDndIcon() {
         statusBarPolicy.init()
         reset(iconController)
@@ -450,7 +463,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
         verify(iconController, never()).setIconVisibility(eq(ZEN_SLOT), any())
         verify(iconController, never()).setIcon(eq(ZEN_SLOT), anyInt(), any())
-        verify(iconController, never()).setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any())
+        verify(iconController, never())
+            .setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any(), any())
     }
 
     @Test
@@ -466,7 +480,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             verify(iconController, never()).setIconVisibility(eq(ZEN_SLOT), any())
             verify(iconController, never()).setIcon(eq(ZEN_SLOT), anyInt(), any())
             verify(iconController, never())
-                .setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any())
+                .setResourceIcon(eq(ZEN_SLOT), any(), any(), any(), any(), any())
         }
 
     @Test
@@ -529,9 +543,11 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     }
 
     private class FakeConnectedDisplayStateProvider : ConnectedDisplayInteractor {
-        private val flow = MutableSharedFlow<State>()
+        private val flow = MutableStateFlow(State.DISCONNECTED)
 
-        suspend fun emit(value: State) = flow.emit(value)
+        fun setState(value: State) {
+            flow.value = value
+        }
 
         override val connectedDisplayState: Flow<State>
             get() = flow

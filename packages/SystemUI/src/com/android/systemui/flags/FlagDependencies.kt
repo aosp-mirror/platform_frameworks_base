@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
 
@@ -59,7 +58,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
         PriorityPeopleSection.token dependsOn SortBySectionTimeFlag.token
         NotificationMinimalismPrototype.token dependsOn NotificationThrottleHun.token
-        NotificationsHeadsUpRefactor.token dependsOn NotificationThrottleHun.token
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }

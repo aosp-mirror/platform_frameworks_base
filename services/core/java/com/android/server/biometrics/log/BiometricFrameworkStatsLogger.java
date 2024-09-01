@@ -98,7 +98,8 @@ public class BiometricFrameworkStatsLogger {
                 foldType(operationContext.getFoldState()),
                 operationContext.getOrderAndIncrement(),
                 toProtoWakeReason(operationContext),
-                toProtoWakeReasonDetails(operationContext));
+                toProtoWakeReasonDetails(operationContext),
+                operationContext.getIsMandatoryBiometrics());
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
@@ -149,7 +150,8 @@ public class BiometricFrameworkStatsLogger {
                 foldType(operationContext.getFoldState()),
                 operationContext.getOrderAndIncrement(),
                 toProtoWakeReason(operationContext),
-                toProtoWakeReasonDetails(operationContext));
+                toProtoWakeReasonDetails(operationContext),
+                operationContext.getIsMandatoryBiometrics());
     }
 
     @VisibleForTesting

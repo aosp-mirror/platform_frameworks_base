@@ -27,7 +27,7 @@ internal class LinkedTransition(
     fromScene: SceneKey,
     toScene: SceneKey,
     override val key: TransitionKey? = null,
-) : TransitionState.Transition.ChangeCurrentScene(fromScene, toScene) {
+) : TransitionState.Transition.ChangeScene(fromScene, toScene) {
 
     override val currentScene: SceneKey
         get() {

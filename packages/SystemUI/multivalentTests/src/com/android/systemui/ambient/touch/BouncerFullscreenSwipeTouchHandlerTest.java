@@ -18,6 +18,8 @@ package com.android.systemui.ambient.touch;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,15 +37,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.scrim.ScrimController;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -57,7 +58,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
 import java.util.Optional;
 
 @SmallTest
@@ -106,15 +106,13 @@ public class BouncerFullscreenSwipeTouchHandlerTest extends SysuiTestCase {
     UiEventLogger mUiEventLogger;
 
     @Mock
-    LockPatternUtils mLockPatternUtils;
-
-    @Mock
     ActivityStarter mActivityStarter;
 
     @Mock
     CommunalViewModel mCommunalViewModel;
 
-    FakeUserTracker mUserTracker;
+    @Mock
+    KeyguardInteractor mKeyguardInteractor;
 
     private static final float TOUCH_REGION = .3f;
     private static final float MIN_BOUNCER_HEIGHT = .05f;
@@ -130,7 +128,6 @@ public class BouncerFullscreenSwipeTouchHandlerTest extends SysuiTestCase {
     public void setup() {
         mKosmos = new KosmosJavaAdapter(this);
         MockitoAnnotations.initMocks(this);
-        mUserTracker = new FakeUserTracker();
         mTouchHandler = new BouncerSwipeTouchHandler(
                 mKosmos.getTestScope(),
                 mScrimManager,
@@ -138,24 +135,21 @@ public class BouncerFullscreenSwipeTouchHandlerTest extends SysuiTestCase {
                 mNotificationShadeWindowController,
                 mValueAnimatorCreator,
                 mVelocityTrackerFactory,
-                mLockPatternUtils,
-                mUserTracker,
                 mCommunalViewModel,
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION,
                 MIN_BOUNCER_HEIGHT,
                 mUiEventLogger,
-                mActivityStarter);
+                mActivityStarter,
+                mKeyguardInteractor);
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
         when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn(Float.MAX_VALUE);
         when(mTouchSession.getBounds()).thenReturn(SCREEN_BOUNDS);
-        when(mLockPatternUtils.isSecure(CURRENT_USER_INFO.id)).thenReturn(true);
-
-        mUserTracker.set(Collections.singletonList(CURRENT_USER_INFO), 0);
+        when(mKeyguardInteractor.isKeyguardDismissible()).thenReturn(MutableStateFlow(false));
     }
 
     /**

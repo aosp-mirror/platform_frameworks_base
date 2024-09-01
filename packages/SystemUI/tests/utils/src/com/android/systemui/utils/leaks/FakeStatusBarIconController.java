@@ -64,7 +64,8 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
 
     @Override
     public void setResourceIcon(String slot, @Nullable String resPackage, int iconResId,
-            @Nullable Drawable preloadedIcon, CharSequence contentDescription) {
+            @Nullable Drawable preloadedIcon, CharSequence contentDescription,
+            StatusBarIcon.Shape shape) {
     }
 
     @Override

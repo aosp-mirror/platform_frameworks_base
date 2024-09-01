@@ -30,6 +30,7 @@ import android.util.Log
 import androidx.media.utils.MediaConstants
 import com.android.systemui.media.controls.domain.pipeline.LegacyMediaDataManagerImpl.Companion.MAX_COMPACT_ACTIONS
 import com.android.systemui.media.controls.domain.pipeline.LegacyMediaDataManagerImpl.Companion.MAX_NOTIFICATION_ACTIONS
+import com.android.systemui.media.controls.shared.MediaControlDrawables
 import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.plugins.ActivityStarter
@@ -169,7 +170,7 @@ private fun getStandardAction(
         }
         PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {
             MediaAction(
-                context.getDrawable(R.drawable.ic_media_prev),
+                MediaControlDrawables.getPrevIcon(context),
                 { controller.transportControls.skipToPrevious() },
                 context.getString(R.string.controls_media_button_prev),
                 null
@@ -177,7 +178,7 @@ private fun getStandardAction(
         }
         PlaybackState.ACTION_SKIP_TO_NEXT -> {
             MediaAction(
-                context.getDrawable(R.drawable.ic_media_next),
+                MediaControlDrawables.getNextIcon(context),
                 { controller.transportControls.skipToNext() },
                 context.getString(R.string.controls_media_button_next),
                 null

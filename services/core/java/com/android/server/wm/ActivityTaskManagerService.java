@@ -795,6 +795,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowOrganizerController mWindowOrganizerController;
     TaskOrganizerController mTaskOrganizerController;
     TaskFragmentOrganizerController mTaskFragmentOrganizerController;
+    ActionChain.Tracker mChainTracker;
 
     @Nullable
     private BackgroundActivityStartCallback mBackgroundActivityStartCallback;
@@ -869,6 +870,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
         mWindowOrganizerController = new WindowOrganizerController(this);
+        mChainTracker = new ActionChain.Tracker(this);
         mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
         mTaskFragmentOrganizerController =
                 mWindowOrganizerController.mTaskFragmentOrganizerController;
@@ -3794,9 +3796,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         r.shortComponentName, Boolean.toString(isAutoEnter));
                 r.setPictureInPictureParams(params);
                 r.mAutoEnteringPip = isAutoEnter;
-                mRootWindowContainer.moveActivityToPinnedRootTask(r,
-                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
-                        transition);
+
+                if (transition != null) {
+                    mRootWindowContainer.moveActivityToPinnedRootTaskAndRequestStart(r,
+                            "enterPictureInPictureMode");
+                } else if (getTransitionController().isCollecting()
+                        || !getTransitionController().isShellTransitionsEnabled()) {
+                    mRootWindowContainer.moveActivityToPinnedRootTask(r,
+                            null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
+                            null /* bounds */);
+                } else {
+                    // Need to make a transition just for this. This shouldn't really happen
+                    // though because if transition == null, we should be part of an existing one.
+                    getTransitionController().createTransition(TRANSIT_PIP);
+                    mRootWindowContainer.moveActivityToPinnedRootTaskAndRequestStart(r,
+                            "enterPictureInPictureMode");
+                }
                 // Continue the pausing process after entering pip.
                 if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
@@ -4753,6 +4768,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 wpc.updateAssetConfiguration(assetSeq);
             }
         }
+    }
+
+    boolean mayBeLaunchingApp() {
+        return (mPowerModeReasons & POWER_MODE_REASON_START_ACTIVITY) != 0;
     }
 
     void startPowerMode(@PowerModeReason int reason) {

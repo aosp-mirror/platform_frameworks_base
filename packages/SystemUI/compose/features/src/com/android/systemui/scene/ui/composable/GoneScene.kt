@@ -75,7 +75,10 @@ constructor(
         Spacer(modifier.fillMaxSize())
         SnoozeableHeadsUpNotificationSpace(
             stackScrollView = notificationStackScrolLView.get(),
-            viewModel = rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
+            viewModel =
+                rememberViewModel("GoneScene") {
+                    notificationsPlaceholderViewModelFactory.create()
+                },
         )
     }
 }

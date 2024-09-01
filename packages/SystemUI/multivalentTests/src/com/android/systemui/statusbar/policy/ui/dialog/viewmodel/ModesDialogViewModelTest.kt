@@ -330,6 +330,83 @@ class ModesDialogViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun tiles_populatesFieldsForAccessibility() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("With description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When the going gets tough")
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When in Rome")
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When you find yourself in a hole")
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles!!).hasSize(6)
+            with(tiles?.elementAt(0)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("When the going gets tough")
+            }
+            with(tiles?.elementAt(1)!!) {
+                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.subtextDescription).isEqualTo("When in Rome")
+            }
+            with(tiles?.elementAt(2)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("Set up")
+            }
+            with(tiles?.elementAt(3)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEmpty()
+            }
+            with(tiles?.elementAt(4)!!) {
+                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.subtextDescription).isEmpty()
+            }
+            with(tiles?.elementAt(5)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("Set up")
+            }
+
+            // All tiles have the same long click info
+            tiles!!.forEach { assertThat(it.onLongClickLabel).isEqualTo("Open settings") }
+        }
+
+    @Test
     fun onClick_togglesTileState() =
         testScope.runTest {
             val tiles by collectLastValue(underTest.tiles)

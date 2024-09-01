@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 public class RavenwoodCommonUtils {
@@ -51,6 +53,8 @@ public class RavenwoodCommonUtils {
     public static final String RAVENWOOD_EMPTY_RESOURCES_APK =
             RAVENWOOD_RUNTIME_PATH + "ravenwood-data/ravenwood-empty-res.apk";
 
+    public static final String RAVENWOOD_VERSION_JAVA_SYSPROP = "android.ravenwood.version";
+
     // @GuardedBy("sLock")
     private static boolean sIntegrityChecked = false;
 
@@ -75,6 +79,18 @@ public class RavenwoodCommonUtils {
      */
     public static boolean shouldEnableExtraRuntimeCheck() {
         return sEnableExtraRuntimeCheck;
+    }
+
+    /** Simple logging method. */
+    public static void log(String tag, String message) {
+        // Avoid using Android's Log class, which could be broken for various reasons.
+        // (e.g. the JNI file doesn't exist for whatever reason)
+        System.out.print(tag + ": " + message + "\n");
+    }
+
+    /** Simple logging method. */
+    private void log(String tag, String format, Object... args) {
+        log(tag, String.format(format, args));
     }
 
     /**
@@ -235,5 +251,18 @@ public class RavenwoodCommonUtils {
     public static void closeQuietly(FileDescriptor fd) {
         var is = new FileInputStream(fd);
         RavenwoodCommonUtils.closeQuietly(is);
+    }
+
+    public static void ensureIsPublicVoidMethod(Method method, boolean isStatic) {
+        var ok = Modifier.isPublic(method.getModifiers())
+                && (Modifier.isStatic(method.getModifiers()) == isStatic)
+                && (method.getReturnType() == void.class);
+        if (ok) {
+            return; // okay
+        }
+        throw new AssertionError(String.format(
+                "Method %s.%s() expected to be public %svoid",
+                method.getDeclaringClass().getName(), method.getName(),
+                (isStatic ? "static " : "")));
     }
 }

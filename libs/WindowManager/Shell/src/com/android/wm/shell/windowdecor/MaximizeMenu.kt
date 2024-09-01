@@ -121,8 +121,14 @@ class MaximizeMenu(
 
     /** Closes the maximize window and releases its view. */
     fun close() {
-        maximizeMenuView?.animateCloseMenu {
-            maximizeMenu?.releaseView()
+        val view = maximizeMenuView
+        val menu = maximizeMenu
+        if (view == null) {
+            menu?.releaseView()
+        } else {
+            view.animateCloseMenu {
+                menu?.releaseView()
+            }
         }
         maximizeMenu = null
         maximizeMenuView = null

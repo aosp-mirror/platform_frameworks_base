@@ -234,13 +234,14 @@ public class StatusBarIconControllerImpl implements Tunable,
                 Icon.createWithResource(mContext, resourceId),
                 /* preloadedIcon= */ null,
                 contentDescription,
-                StatusBarIcon.Type.SystemIcon);
+                StatusBarIcon.Type.SystemIcon,
+                StatusBarIcon.Shape.WRAP_CONTENT);
     }
 
     @Override
     public void setResourceIcon(String slot, @Nullable String resPackage,
             @DrawableRes int iconResId, @Nullable Drawable preloadedIcon,
-            CharSequence contentDescription) {
+            CharSequence contentDescription, StatusBarIcon.Shape shape) {
         if (!usesModeIcons()) {
             Log.wtf("TAG",
                     "StatusBarIconController.setResourceIcon() should not be called without "
@@ -260,12 +261,13 @@ public class StatusBarIconControllerImpl implements Tunable,
                 icon,
                 preloadedIcon,
                 contentDescription,
-                StatusBarIcon.Type.ResourceIcon);
+                StatusBarIcon.Type.ResourceIcon,
+                shape);
     }
 
     private void setResourceIconInternal(String slot, Icon resourceIcon,
             @Nullable Drawable preloadedIcon, CharSequence contentDescription,
-            StatusBarIcon.Type type) {
+            StatusBarIcon.Type type, StatusBarIcon.Shape shape) {
         checkArgument(resourceIcon.getType() == Icon.TYPE_RESOURCE,
                 "Expected Icon of TYPE_RESOURCE, but got " + resourceIcon.getType());
         String resPackage = resourceIcon.getResPackage();
@@ -277,7 +279,7 @@ public class StatusBarIconControllerImpl implements Tunable,
         if (holder == null) {
             StatusBarIcon icon = new StatusBarIcon(UserHandle.SYSTEM, resPackage,
                     resourceIcon, /* iconLevel= */ 0, /* number=*/ 0,
-                    contentDescription, type);
+                    contentDescription, type, shape);
             icon.preloadedIcon = preloadedIcon;
             holder = StatusBarIconHolder.fromIcon(icon);
             setIcon(slot, holder);
@@ -286,6 +288,7 @@ public class StatusBarIconControllerImpl implements Tunable,
             holder.getIcon().icon = resourceIcon;
             holder.getIcon().contentDescription = contentDescription;
             holder.getIcon().type = type;
+            holder.getIcon().shape = shape;
             holder.getIcon().preloadedIcon = preloadedIcon;
             handleSet(slot, holder);
         }
@@ -578,7 +581,7 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
-    private static boolean usesModeIcons() {
+    static boolean usesModeIcons() {
         return android.app.Flags.modesApi() && android.app.Flags.modesUi()
                 && android.app.Flags.modesUiIcons();
     }

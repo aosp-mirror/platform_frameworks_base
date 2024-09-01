@@ -18,7 +18,6 @@ package com.android.systemui.model
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
-import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -107,10 +106,7 @@ constructor(
                     {
                         it.scene == Scenes.Lockscreen && it.invisibleDueToOcclusion
                     },
-                SYSUI_STATE_COMMUNAL_HUB_SHOWING to
-                    {
-                        glanceableHubBackGesture() && it.scene == Scenes.Communal
-                    }
+                SYSUI_STATE_COMMUNAL_HUB_SHOWING to { it.scene == Scenes.Communal }
             )
     }
 

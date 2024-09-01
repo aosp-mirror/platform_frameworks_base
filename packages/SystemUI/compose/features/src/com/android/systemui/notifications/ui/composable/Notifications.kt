@@ -321,7 +321,9 @@ fun SceneScope.NotificationScrollingStack(
     val minScrimOffset: () -> Float = { minScrimTop - maxScrimTop() }
 
     // The height of the scrim visible on screen when it is in its resting (collapsed) state.
-    val minVisibleScrimHeight: () -> Float = { screenHeight - maxScrimTop() }
+    val minVisibleScrimHeight: () -> Float = {
+        screenHeight - maxScrimTop() - with(density) { navBarHeight.toPx() }
+    }
 
     // we are not scrolled to the top unless the scrim is at its maximum offset.
     LaunchedEffect(viewModel, scrimOffset) {

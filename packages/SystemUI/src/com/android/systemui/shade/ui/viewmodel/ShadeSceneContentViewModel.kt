@@ -21,7 +21,6 @@ package com.android.systemui.shade.ui.viewmodel
 import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -36,12 +35,10 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Models UI state used to render the content of the shade scene.
@@ -62,7 +59,7 @@ constructor(
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val sceneInteractor: SceneInteractor,
-) : SysUiViewModel, ExclusiveActivatable() {
+) : ExclusiveActivatable() {
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
@@ -76,11 +73,9 @@ constructor(
     private val footerActionsControllerInitialized = AtomicBoolean(false)
 
     override suspend fun onActivated(): Nothing {
-        deviceEntryInteractor.isDeviceEntered.collectLatest { isDeviceEntered ->
+        deviceEntryInteractor.isDeviceEntered.collect { isDeviceEntered ->
             _isEmptySpaceClickable.value = !isDeviceEntered
         }
-
-        awaitCancellation()
     }
 
     /**

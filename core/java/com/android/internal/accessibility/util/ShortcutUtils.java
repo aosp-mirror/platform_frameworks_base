@@ -34,6 +34,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
@@ -176,24 +177,19 @@ public final class ShortcutUtils {
      * @param type The shortcut type.
      * @return Mapping key in Settings.
      */
+    @SuppressLint("SwitchIntDef")
     public static String convertToKey(@UserShortcutType int type) {
-        switch (type) {
-            case SOFTWARE:
-                return Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS;
-            case GESTURE:
-                return Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS;
-            case HARDWARE:
-                return Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
-            case TRIPLETAP:
-                return Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED;
-            case TWOFINGER_DOUBLETAP:
-                return Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED;
-            case QUICK_SETTINGS:
-                return Settings.Secure.ACCESSIBILITY_QS_TARGETS;
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported user shortcut type: " + type);
-        }
+        return switch (type) {
+            case SOFTWARE -> Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS;
+            case GESTURE -> Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS;
+            case HARDWARE -> Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
+            case TRIPLETAP -> Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED;
+            case TWOFINGER_DOUBLETAP ->
+                    Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED;
+            case QUICK_SETTINGS -> Settings.Secure.ACCESSIBILITY_QS_TARGETS;
+            default -> throw new IllegalArgumentException(
+                    "Unsupported user shortcut type: " + type);
+        };
     }
 
     /**

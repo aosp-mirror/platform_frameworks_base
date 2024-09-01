@@ -424,7 +424,14 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
     @EnableFlags(android.app.Flags.FLAG_MODES_UI, android.app.Flags.FLAG_MODES_UI_ICONS)
     fun setResourceIcon_setsIconAndPreloadedIconInHolder() {
         val drawable = ColorDrawable(1)
-        underTest.setResourceIcon("slot", "some.package", 123, drawable, "description")
+        underTest.setResourceIcon(
+            "slot",
+            "some.package",
+            123,
+            drawable,
+            "description",
+            StatusBarIcon.Shape.FIXED_SPACE
+        )
 
         val iconHolder = iconList.getIconHolder("slot", 0)
         assertThat(iconHolder).isNotNull()
@@ -432,6 +439,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
         assertThat(iconHolder?.icon?.icon?.resId).isEqualTo(123)
         assertThat(iconHolder?.icon?.icon?.resPackage).isEqualTo("some.package")
         assertThat(iconHolder?.icon?.contentDescription).isEqualTo("description")
+        assertThat(iconHolder?.icon?.shape).isEqualTo(StatusBarIcon.Shape.FIXED_SPACE)
         assertThat(iconHolder?.icon?.preloadedIcon).isEqualTo(drawable)
     }
 

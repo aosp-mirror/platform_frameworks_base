@@ -803,3 +803,11 @@ test_module_config {
     include_annotations: ["android.platform.test.annotations.PlatinumTest"],
     exclude_annotations: FLAKY_OR_IGNORED,
 }
+
+test_module_config {
+    name: "FrameworksCoreTests_android_tracing",
+    base: "FrameworksCoreTests",
+    team: "trendy_team_windowing_tools",
+    test_suites: ["device-tests"],
+    include_filters: ["android.tracing"],
+}

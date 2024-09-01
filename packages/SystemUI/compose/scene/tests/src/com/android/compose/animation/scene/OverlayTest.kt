@@ -275,7 +275,7 @@ class OverlayTest {
         rule.setContent {
             SceneTransitionLayout(state, Modifier.size(200.dp)) {
                 scene(SceneA) { Box(Modifier.fillMaxSize()) { Foo() } }
-                overlay(OverlayA, alignment) { Foo() }
+                overlay(OverlayA, alignment = alignment) { Foo() }
             }
         }
 

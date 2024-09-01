@@ -54,6 +54,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Size;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -478,6 +479,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return mCapturedLink.mUri;
         }
         return mGenericLink;
+    }
+
+    UserHandle getUser() {
+        return mUserContext.getUser();
     }
 
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {

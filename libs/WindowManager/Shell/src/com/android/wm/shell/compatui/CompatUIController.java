@@ -39,6 +39,7 @@ import android.view.InsetsState;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayController.OnDisplaysChangedListener;
@@ -67,6 +68,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -189,6 +191,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     @NonNull
     private final CompatUIStatusManager mCompatUIStatusManager;
 
+    @NonNull
+    private final IntPredicate mInDesktopModePredicate;
+
     public CompatUIController(@NonNull Context context,
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -202,7 +207,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
             @NonNull CompatUIConfiguration compatUIConfiguration,
             @NonNull CompatUIShellCommandHandler compatUIShellCommandHandler,
             @NonNull AccessibilityManager accessibilityManager,
-            @NonNull CompatUIStatusManager compatUIStatusManager) {
+            @NonNull CompatUIStatusManager compatUIStatusManager,
+            @NonNull IntPredicate isDesktopModeEnablePredicate) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -218,6 +224,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mDisappearTimeSupplier = flags -> accessibilityManager.getRecommendedTimeoutMillis(
                 DISAPPEAR_DELAY_MS, flags);
         mCompatUIStatusManager = compatUIStatusManager;
+        mInDesktopModePredicate = isDesktopModeEnablePredicate;
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -251,7 +258,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
             updateActiveTaskInfo(taskInfo);
         }
 
-        if (taskInfo.configuration == null || taskListener == null) {
+        // We close all the Compat UI educations in case we're in desktop mode.
+        if (taskInfo.configuration == null || taskListener == null
+                || isInDesktopMode(taskInfo.displayId)) {
             // Null token means the current foreground activity is not in compatibility mode.
             removeLayouts(taskInfo.taskId);
             return;
@@ -349,7 +358,6 @@ public class CompatUIController implements OnDisplaysChangedListener,
         listener.unregister();
         mOnInsetsChangedListeners.remove(displayId);
     }
-
 
     @Override
     public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
@@ -692,7 +700,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mContext.startActivityAsUser(intent, userHandle);
     }
 
-    private void removeLayouts(int taskId) {
+    @VisibleForTesting
+    void removeLayouts(int taskId) {
         final CompatUIWindowManager compatLayout = mActiveCompatLayouts.get(taskId);
         if (compatLayout != null) {
             compatLayout.release();
@@ -824,5 +833,10 @@ public class CompatUIController implements OnDisplaysChangedListener,
         boolean mHasShownSizeCompatHint;
         boolean mHasShownCameraCompatHint;
         boolean mHasShownUserAspectRatioSettingsButtonHint;
+    }
+
+    private boolean isInDesktopMode(int displayId) {
+        return Flags.skipCompatUiEducationInDesktopMode()
+                && mInDesktopModePredicate.test(displayId);
     }
 }

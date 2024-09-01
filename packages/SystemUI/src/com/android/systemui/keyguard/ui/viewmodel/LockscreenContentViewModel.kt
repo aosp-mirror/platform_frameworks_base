@@ -25,7 +25,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteract
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.SysUiViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -41,7 +40,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
@@ -60,7 +58,7 @@ constructor(
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
-) : SysUiViewModel, ExclusiveActivatable() {
+) : ExclusiveActivatable() {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
     val isUdfpsVisible: Boolean
@@ -92,13 +90,13 @@ constructor(
                             end = end,
                         )
                     }
-                    .collectLatest { _unfoldTranslations.value = it }
+                    .collect { _unfoldTranslations.value = it }
             }
 
             launch {
                 occlusionInteractor.isOccludingActivityShown
                     .map { !it }
-                    .collectLatest { _isContentVisible.value = it }
+                    .collect { _isContentVisible.value = it }
             }
 
             awaitCancellation()

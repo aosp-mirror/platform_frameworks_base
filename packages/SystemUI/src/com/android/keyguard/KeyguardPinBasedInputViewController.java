@@ -16,9 +16,11 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.Flags.msdlFeedback;
 import static com.android.systemui.Flags.pinInputFieldStyledFocusState;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -39,6 +41,9 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+
+import com.google.android.msdl.data.model.MSDLToken;
+import com.google.android.msdl.domain.MSDLPlayer;
 
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
@@ -77,10 +82,11 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             FalsingCollector falsingCollector,
             FeatureFlags featureFlags,
             SelectedUserInteractor selectedUserInteractor,
-            KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
+            KeyguardKeyboardInteractor keyguardKeyboardInteractor,
+            @Nullable MSDLPlayer msdlPlayer) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController, featureFlags, selectedUserInteractor);
+                emergencyButtonController, featureFlags, selectedUserInteractor, msdlPlayer);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mKeyguardKeyboardInteractor = keyguardKeyboardInteractor;
@@ -102,12 +108,22 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
                 return false;
             });
             button.setAnimationEnabled(showAnimations);
+            button.setMSDLPlayer(mMSDLPlayer);
         }
         mPasswordEntry.setOnKeyListener(mOnKeyListener);
         mPasswordEntry.setUserActivityListener(this::onUserInput);
 
         View deleteButton = mView.findViewById(R.id.delete_button);
-        deleteButton.setOnTouchListener(mActionButtonTouchListener);
+        if (msdlFeedback()) {
+            deleteButton.setOnTouchListener((View view, MotionEvent event) -> {
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN && mMSDLPlayer != null) {
+                    mMSDLPlayer.playToken(MSDLToken.KEYPRESS_DELETE, null);
+                }
+                return false;
+            });
+        } else {
+            deleteButton.setOnTouchListener(mActionButtonTouchListener);
+        }
         deleteButton.setOnClickListener(v -> {
             // check for time-based lockouts
             if (mPasswordEntry.isEnabled()) {
@@ -119,13 +135,19 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             if (mPasswordEntry.isEnabled()) {
                 mView.resetPasswordText(true /* animate */, true /* announce */);
             }
-            mView.doHapticKeyClick();
+            if (msdlFeedback() && mMSDLPlayer != null) {
+                mMSDLPlayer.playToken(MSDLToken.LONG_PRESS, null);
+            } else {
+                mView.doHapticKeyClick();
+            }
             return true;
         });
 
         View okButton = mView.findViewById(R.id.key_enter);
         if (okButton != null) {
-            okButton.setOnTouchListener(mActionButtonTouchListener);
+            if (!msdlFeedback()) {
+                okButton.setOnTouchListener(mActionButtonTouchListener);
+            }
             okButton.setOnClickListener(v -> {
                 if (mPasswordEntry.isEnabled()) {
                     verifyPasswordAndUnlock();
@@ -177,6 +199,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
 
         for (NumPadKey button : mView.getButtons()) {
             button.setOnTouchListener(null);
+            button.setMSDLPlayer(null);
         }
     }
 

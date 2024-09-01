@@ -17,7 +17,6 @@
 package com.android.systemui.shade
 
 import android.content.Context
-import android.graphics.Insets
 import android.graphics.Rect
 import android.os.PowerManager
 import android.os.SystemClock
@@ -26,7 +25,6 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
@@ -42,7 +40,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Flags
-import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
@@ -206,6 +203,13 @@ constructor(
      */
     private var shadeConsumingTouches = false
 
+    /**
+     * True if the shade is showing at all.
+     *
+     * Inverse of [ShadeInteractor.isShadeFullyCollapsed]
+     */
+    private var shadeShowing = false
+
     /** True if the keyguard transition state is finished on [KeyguardState.LOCKSCREEN]. */
     private var onLockscreen = false
 
@@ -322,21 +326,13 @@ constructor(
             // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
             // occluded.
             lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                // Avoid adding exclusion to end/start edges to allow back gestures.
-                val insets =
-                    if (glanceableHubBackGesture()) {
-                        containerView.rootWindowInsets.getInsets(WindowInsets.Type.systemGestures())
-                    } else {
-                        Insets.NONE
-                    }
-
                 val ltr = containerView.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
                 val backGestureInset =
                     Rect(
-                        if (ltr) 0 else insets.left,
                         0,
-                        if (ltr) insets.right else containerView.right,
+                        0,
+                        if (ltr) 0 else containerView.right,
                         containerView.bottom,
                     )
 
@@ -352,9 +348,9 @@ constructor(
                             // Only allow swipe up to bouncer and swipe down to shade in the very
                             // top/bottom to avoid conflicting with widgets in the hub grid.
                             Rect(
-                                insets.left,
+                                0,
                                 topEdgeSwipeRegionWidth,
-                                containerView.right - insets.right,
+                                containerView.right,
                                 containerView.bottom - bottomEdgeSwipeRegionWidth
                             ),
                             // Disable back gestures on the left side of the screen, to avoid
@@ -425,6 +421,7 @@ constructor(
             ),
             { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
                 shadeConsumingTouches = isUserInteracting
+                shadeShowing = !isShadeFullyCollapsed
                 val expandedAndNotInteractive = isFullyExpanded && !isUserInteracting
 
                 // If we ever are fully expanded and not interacting, capture this state as we
@@ -540,7 +537,7 @@ constructor(
         val isMove = ev.actionMasked == MotionEvent.ACTION_MOVE
         val isCancel = ev.actionMasked == MotionEvent.ACTION_CANCEL
 
-        val hubOccluded = anyBouncerShowing || shadeShowingAndConsumingTouches
+        val hubOccluded = anyBouncerShowing || shadeConsumingTouches || shadeShowing
 
         if ((isDown || isMove) && !hubOccluded) {
             if (isDown) {

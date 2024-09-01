@@ -152,7 +152,9 @@ constructor(
             notificationStackScrollView = notificationStackScrollView.get(),
             viewModelFactory = contentViewModelFactory,
             notificationsPlaceholderViewModel =
-                rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
+                rememberViewModel("QuickSettingsScene-notifPlaceholderViewModel") {
+                    notificationsPlaceholderViewModelFactory.create()
+                },
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -179,10 +181,11 @@ private fun SceneScope.QuickSettingsScene(
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
 
-    val viewModel = rememberViewModel { viewModelFactory.create() }
-    val brightnessMirrorViewModel = rememberViewModel {
-        viewModel.brightnessMirrorViewModelFactory.create()
-    }
+    val viewModel = rememberViewModel("QuickSettingsScene-viewModel") { viewModelFactory.create() }
+    val brightnessMirrorViewModel =
+        rememberViewModel("QuickSettingsScene-brightnessMirrorViewModel") {
+            viewModel.brightnessMirrorViewModelFactory.create()
+        }
     val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(

@@ -94,7 +94,8 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        val viewModel = rememberViewModel { contentViewModelFactory.create() }
+        val viewModel =
+            rememberViewModel("QuickSettingsShadeScene") { contentViewModelFactory.create() }
         OverlayShade(
             viewModelFactory = viewModel.overlayShadeViewModelFactory,
             lockscreenContent = lockscreenContent,
