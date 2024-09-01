@@ -21,6 +21,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -133,13 +134,13 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.TransitionUtil;
+import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.SplitBounds;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -684,6 +685,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
         addActivityOptions(options1, mSideStage);
+        prepareTasksForSplitScreen(new int[] {taskId1, taskId2}, wct);
         wct.startTask(taskId1, options1);
 
         startWithTask(wct, taskId2, options2, snapPosition, remoteTransition, instanceId);
@@ -714,6 +716,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         options1 = options1 != null ? options1 : new Bundle();
         addActivityOptions(options1, mSideStage);
         wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
+        prepareTasksForSplitScreen(new int[] {taskId}, wct);
 
         startWithTask(wct, taskId, options2, snapPosition, remoteTransition, instanceId);
     }
@@ -757,8 +760,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         options1 = options1 != null ? options1 : new Bundle();
         addActivityOptions(options1, mSideStage);
         wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
+        prepareTasksForSplitScreen(new int[] {taskId}, wct);
 
         startWithTask(wct, taskId, options2, snapPosition, remoteTransition, instanceId);
+    }
+
+    /**
+     * Prepares the tasks whose IDs are provided in `taskIds` for split screen by clearing their
+     * bounds and windowing mode so that they can inherit the bounds and the windowing mode of
+     * their root stages.
+     *
+     * @param taskIds an array of task IDs whose bounds will be cleared.
+     * @param wct     transaction to clear the bounds on the tasks.
+     */
+    private void prepareTasksForSplitScreen(int[] taskIds, WindowContainerTransaction wct) {
+        for (int taskId : taskIds) {
+            ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
+            if (task != null) {
+                wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
+                        .setBounds(task.token, null);
+            }
+        }
     }
 
     /**

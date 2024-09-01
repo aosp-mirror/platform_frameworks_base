@@ -56,7 +56,6 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * A helper to animate and manipulate the PiP.
@@ -133,18 +132,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** SpringConfig to use for springing PIP away from conflicting floating content. */
     private final PhysicsAnimator.SpringConfig mConflictResolutionSpringConfig =
             new PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_NO_BOUNCY);
-
-    @Nullable private Runnable mUpdateMovementBoundsRunnable;
-
-    private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
-        if (mPipBoundsState.getBounds().equals(newBounds)) {
-            return;
-        }
-
-        mMenuController.updateMenuLayout(newBounds);
-        mPipBoundsState.setBounds(newBounds);
-        maybeUpdateMovementBounds();
-    };
 
     /**
      * Whether we're springing to the touch event location (vs. moving it to that position
@@ -683,16 +670,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         cleanUpHighPerfSessionMaybe();
     }
 
-    void setUpdateMovementBoundsRunnable(Runnable updateMovementBoundsRunnable) {
-        mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
-    }
-
-    private void maybeUpdateMovementBounds() {
-        if (mUpdateMovementBoundsRunnable != null)  {
-            mUpdateMovementBoundsRunnable.run();
-        }
-    }
-
     /**
      * Notifies the floating coordinator that we're moving, and sets the animating to bounds so
      * we return these bounds from
@@ -720,7 +697,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /**
      * Directly resizes the PiP to the given {@param bounds}.
      */
-    private void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
+    void resizeAndAnimatePipUnchecked(Rect toBounds, int duration) {
         if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
             // Do not carry out any resizing if we are dragging or physics animator is running.
             return;
@@ -813,7 +790,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         cleanUpHighPerfSessionMaybe();
 
         // Signal that the transition is done - should update transition state by default.
-        mPipScheduler.scheduleFinishResizePip(false /* configAtEnd */);
+        mPipScheduler.scheduleFinishResizePip(destinationBounds, false /* configAtEnd */);
     }
 
     private void startResizeAnimation(SurfaceControl.Transaction startTx,
@@ -829,8 +806,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 startTx, finishTx, mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
                 destinationBounds, duration, 0f /* angle */);
         animator.setAnimationEndCallback(() -> {
-            mUpdateBoundsCallback.accept(destinationBounds);
-
             // In case an ongoing drag/fling was present before a deterministic resize transition
             // kicked in, we need to update the update bounds properly before cleaning in-motion
             // state.
@@ -839,7 +814,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
             cleanUpHighPerfSessionMaybe();
             // Signal that we are done with resize transition
-            mPipScheduler.scheduleFinishResizePip(true /* configAtEnd */);
+            mPipScheduler.scheduleFinishResizePip(destinationBounds, true /* configAtEnd */);
         });
         animator.start();
     }
@@ -849,7 +824,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             // The physics animation ended, though we may not necessarily be done animating, such as
             // when we're still dragging after moving out of the magnetic target. Only set the final
             // bounds state and clear motion bounds completely if the whole animation is over.
-            mPipBoundsState.setBounds(mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
             mPipBoundsState.getMotionBoundsState().onAllAnimationsEnded();
         }
         mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();

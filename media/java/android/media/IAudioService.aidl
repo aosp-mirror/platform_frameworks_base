@@ -101,6 +101,8 @@ interface IAudioService {
 
     oneway void portEvent(in int portId, in int event, in @nullable PersistableBundle extras);
 
+    void permissionUpdateBarrier();
+
     // Java-only methods below.
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
 
@@ -250,7 +252,7 @@ interface IAudioService {
 
     boolean isBluetoothA2dpOn();
 
-    int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
+    int requestAudioFocus(in AudioAttributes aa, int focusReqType, IBinder cb,
             IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
             in String attributionTag, int flags, IAudioPolicyCallback pcb, int sdk);
 
@@ -560,7 +562,7 @@ interface IAudioService {
 
     long getMaxAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
 
-    int requestAudioFocusForTest(in AudioAttributes aa, int durationHint, IBinder cb,
+    int requestAudioFocusForTest(in AudioAttributes aa, int focusReqType, IBinder cb,
             in IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
             int flags, int uid, int sdk);
 

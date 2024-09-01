@@ -66,6 +66,7 @@ import com.android.systemui.education.dagger.ContextualEducationModule;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagDependenciesModule;
 import com.android.systemui.flags.FlagsModule;
+import com.android.systemui.haptics.msdl.dagger.MSDLModule;
 import com.android.systemui.inputmethod.InputMethodModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
@@ -231,6 +232,7 @@ import javax.inject.Named;
         MediaProjectionTaskSwitcherModule.class,
         MediaRouterModule.class,
         MotionToolModule.class,
+        MSDLModule.class,
         PeopleHubModule.class,
         PeopleModule.class,
         PluginModule.class,

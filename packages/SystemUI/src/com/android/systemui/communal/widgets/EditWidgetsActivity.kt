@@ -68,7 +68,6 @@ constructor(
     companion object {
         private const val TAG = "EditWidgetsActivity"
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
-        const val EXTRA_PRESELECTED_KEY = "preselected_key"
         const val EXTRA_OPEN_WIDGET_PICKER_ON_START = "open_widget_picker_on_start"
     }
 
@@ -219,11 +218,8 @@ constructor(
         windowInsetsController?.hide(WindowInsets.Type.systemBars())
         window.setDecorFitsSystemWindows(false)
 
-        val preselectedKey = intent.getStringExtra(EXTRA_PRESELECTED_KEY)
         shouldOpenWidgetPickerOnStart =
             intent.getBooleanExtra(EXTRA_OPEN_WIDGET_PICKER_ON_START, false)
-
-        communalViewModel.setSelectedKey(preselectedKey)
 
         setContent {
             PlatformTheme {
@@ -274,11 +270,7 @@ constructor(
 
     private fun onOpenWidgetPicker() {
         lifecycleScope.launch {
-            communalViewModel.onOpenWidgetPicker(
-                resources,
-                packageManager,
-                addWidgetActivityLauncher
-            )
+            communalViewModel.onOpenWidgetPicker(resources, addWidgetActivityLauncher)
         }
     }
 

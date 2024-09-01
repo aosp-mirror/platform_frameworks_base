@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.shade
 
 import android.annotation.SuppressLint
@@ -38,6 +40,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
+import com.android.systemui.scene.ui.composable.Overlay
 import com.android.systemui.scene.ui.view.SceneWindowRootView
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
@@ -59,6 +62,7 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Module for providing views related to the shade. */
 @Module
@@ -82,6 +86,7 @@ abstract class ShadeViewProviderModule {
             viewModelFactory: SceneContainerViewModel.Factory,
             containerConfigProvider: Provider<SceneContainerConfig>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
+            overlaysProvider: Provider<Set<@JvmSuppressWildcards Overlay>>,
             layoutInsetController: NotificationInsetsController,
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
             alternateBouncerDependencies: Provider<AlternateBouncerDependencies>,
@@ -96,6 +101,7 @@ abstract class ShadeViewProviderModule {
                     sharedNotificationContainer =
                         sceneWindowRootView.requireViewById(R.id.shared_notification_container),
                     scenes = scenesProvider.get(),
+                    overlays = overlaysProvider.get(),
                     layoutInsetController = layoutInsetController,
                     sceneDataSourceDelegator = sceneDataSourceDelegator.get(),
                     alternateBouncerDependencies = alternateBouncerDependencies.get(),

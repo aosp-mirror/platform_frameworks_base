@@ -21,11 +21,11 @@ package com.android.systemui.statusbar.notification.domain.interactor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -58,7 +58,7 @@ constructor(
 
     /** Set of currently pinned top-level heads up rows to be displayed. */
     val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
             headsUpRepository.activeHeadsUpRows.flatMapLatest { repositories ->
@@ -80,7 +80,7 @@ constructor(
 
     /** Are there any pinned heads up rows to display? */
     val hasPinnedRows: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             headsUpRepository.activeHeadsUpRows.flatMapLatest { rows ->
@@ -95,7 +95,7 @@ constructor(
     }
 
     val isHeadsUpOrAnimatingAway: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             combine(hasPinnedRows, headsUpRepository.isHeadsUpAnimatingAway) {
@@ -123,7 +123,7 @@ constructor(
         }
 
     val showHeadsUpStatusBar: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             combine(hasPinnedRows, canShowHeadsUp) { hasPinnedRows, canShowHeadsUp ->

@@ -129,7 +129,6 @@ import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_R
 import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
@@ -2725,8 +2724,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.mTransitionController.mAnimatingExitWindows.add(win);
                         reason = "inTransition";
                     }
-                } else if (win.isAnimating(PARENTS | TRANSITION,
-                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+                } else if (win.isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_APP_TRANSITION)) {
                     // Already animating as part of a legacy app-transition.
                     reason = "inLegacyTransition";
                 }
@@ -7922,7 +7920,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             boolean allWindowsDrawn = false;
             synchronized (mGlobalLock) {
-                if (displayId == DEFAULT_DISPLAY
+                if ((displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY)
                         && mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
                     // Use the ready-to-play of transition as the signal.
                     return;
@@ -8947,6 +8945,22 @@ public class WindowManagerService extends IWindowManager.Stub
             // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
+
+        final ActivityRecord touchedApp = t.getActivityRecord();
+        if (touchedApp != null && touchedApp.getTask() != null) {
+            final ActivityRecord top = touchedApp.getTask().topRunningActivity();
+            if (top != null && top != touchedApp && top.getTaskFragment().getBounds().contains(
+                    touchedApp.getTaskFragment().getBounds())) {
+                // This is a special case where the pointer-down-outside focus on an Activity that's
+                // entirely occluded by the task top running activity, this is possible if the
+                // pointer-down-outside-focus event is delayed (after new activity started on top).
+                // In that case, drop the event to prevent changing focus to a background activity.
+                Slog.w(TAG, "onPointerDownOutsideFocusLocked, drop event because " + touchedApp
+                        + " is occluded and should not be focused.");
+                return;
+            }
+        }
+
         clearPointerDownOutsideFocusRunnable();
 
         if (shouldDelayTouchOutside(t)) {
@@ -8963,9 +8977,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private boolean shouldDelayTouchOutside(InputTarget t) {
-        final WindowState w = t.getWindowState();
-        final ActivityRecord activity = w != null ? w.getActivityRecord() : null;
-        final Task task = w != null ? w.getRootTask() : null;
+        final ActivityRecord activity = t.getActivityRecord();
+        final Task task = activity != null ? activity.getTask() : null;
 
         final boolean isInputTargetNotFocused =
                 mFocusedInputTarget != t && mFocusedInputTarget != null;

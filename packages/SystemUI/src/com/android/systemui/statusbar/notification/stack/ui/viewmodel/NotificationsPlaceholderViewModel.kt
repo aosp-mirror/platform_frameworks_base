@@ -20,7 +20,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -52,7 +52,7 @@ constructor(
     featureFlags: FeatureFlagsClassic,
     dumpManager: DumpManager,
 ) :
-    SysUiViewModel(),
+    ExclusiveActivatable(),
     ActivatableFlowDumper by ActivatableFlowDumperImpl(
         dumpManager = dumpManager,
         tag = "NotificationsPlaceholderViewModel",

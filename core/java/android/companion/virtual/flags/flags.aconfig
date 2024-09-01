@@ -50,6 +50,7 @@ flag {
      name: "activity_control_api"
      description: "Enable APIs for fine grained activity policy, fallback and callbacks"
      bug: "333443509"
+     is_exported: true
 }
 
 flag {
@@ -102,4 +103,11 @@ flag {
   namespace: "virtual_devices"
   description: "Expose multiple surface for the virtual camera owner for different stream resolution"
   bug: "341083465"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "device_aware_display_power"
+    description: "Device awareness in power and display APIs"
+    bug: "285020111"
 }

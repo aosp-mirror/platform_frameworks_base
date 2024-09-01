@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"பின்செல்லும்"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"உள்ளீட்டு முறையை மாற்றும்"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"உள்ளீட்டு முறைத் தேர்வுக் கருவியைத் திறக்கும்"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"அமைப்புகள்"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>

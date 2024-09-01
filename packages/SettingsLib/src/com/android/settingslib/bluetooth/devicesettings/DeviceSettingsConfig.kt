@@ -25,12 +25,13 @@ import android.os.Parcelable
  *
  * @property mainContentItems The setting items to be shown in main page.
  * @property moreSettingsItems The setting items to be shown in more settings page.
- * @property moreSettingsFooter The footer in more settings page.
+ * @property moreSettingsHelpItem The help item displayed on the top right corner of the page.
  * @property extras Extra bundle
  */
 data class DeviceSettingsConfig(
     val mainContentItems: List<DeviceSettingItem>,
     val moreSettingsItems: List<DeviceSettingItem>,
+    val moreSettingsHelpItem: DeviceSettingItem?,
     val extras: Bundle = Bundle.EMPTY,
 ) : Parcelable {
 
@@ -40,6 +41,7 @@ data class DeviceSettingsConfig(
         parcel.run {
             writeTypedList(mainContentItems)
             writeTypedList(moreSettingsItems)
+            writeParcelable(moreSettingsHelpItem, flags)
             writeBundle(extras)
         }
     }
@@ -59,7 +61,9 @@ data class DeviceSettingsConfig(
                                 arrayListOf<DeviceSettingItem>().also {
                                     readTypedList(it, DeviceSettingItem.CREATOR)
                                 },
-                            extras = readBundle((Bundle::class.java.classLoader))!!,
+                            moreSettingsHelpItem = readParcelable(
+                                DeviceSettingItem::class.java.classLoader
+                            )
                         )
                     }
 

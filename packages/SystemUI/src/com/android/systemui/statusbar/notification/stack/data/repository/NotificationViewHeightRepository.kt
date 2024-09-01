@@ -39,4 +39,7 @@ class NotificationViewHeightRepository @Inject constructor() {
      * consumed part of the gesture.
      */
     val isCurrentGestureOverscroll = MutableStateFlow(false)
+
+    /** Whether the current touch gesture is on any open notification guts. */
+    val isCurrentGestureInGuts = MutableStateFlow(false)
 }

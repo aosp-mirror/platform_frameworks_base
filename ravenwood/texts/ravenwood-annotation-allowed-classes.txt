@@ -46,6 +46,7 @@ android.util.EmptyArray
 android.util.EventLog
 android.util.FloatProperty
 android.util.FloatMath
+android.util.Half
 android.util.IndentingPrintWriter
 android.util.IntArray
 android.util.IntProperty
@@ -99,6 +100,7 @@ android.util.SparseDoubleArray
 android.util.SparseIntArray
 android.util.SparseLongArray
 android.util.SparseSetArray
+android.util.StateSet
 android.util.StringBuilderPrinter
 android.util.TeeWriter
 android.util.TimeUtils
@@ -222,9 +224,11 @@ android.content.res.ApkAssets
 android.content.res.AssetFileDescriptor
 android.content.res.AssetManager
 android.content.res.AssetManager$Builder
+android.content.res.ColorStateList
 android.content.res.ConfigurationBoundResourceCache
 android.content.res.Configuration
 android.content.res.CompatibilityInfo
+android.content.res.ComplexColor
 android.content.res.ConstantState
 android.content.res.DrawableCache
 android.content.res.Element
@@ -274,7 +278,11 @@ android.graphics.ColorSpace
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Matrix
+android.graphics.Matrix44
+android.graphics.Outline
+android.graphics.ParcelableColorSpace
 android.graphics.Path
+android.graphics.PixelFormat
 android.graphics.Point
 android.graphics.PointF
 android.graphics.Rect

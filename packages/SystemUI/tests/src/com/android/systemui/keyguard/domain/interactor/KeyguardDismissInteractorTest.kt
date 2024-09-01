@@ -23,11 +23,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.TrustGrantFlags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.TrustModel
+import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -38,14 +45,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardDismissInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var dispatcher: TestDispatcher
     private lateinit var testScope: TestScope
 
-    private lateinit var underTestDependencies: KeyguardDismissInteractorFactory.WithDependencies
-    private lateinit var underTest: KeyguardDismissInteractor
+    private val underTest = kosmos.keyguardDismissInteractor
     private val userInfo = UserInfo(0, "", 0)
 
     @Before
@@ -54,13 +63,7 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
         dispatcher = StandardTestDispatcher()
         testScope = TestScope(dispatcher)
 
-        underTestDependencies =
-            KeyguardDismissInteractorFactory.create(
-                context = context,
-                testScope = testScope,
-            )
-        underTest = underTestDependencies.interactor
-        underTestDependencies.userRepository.setUserInfos(listOf(userInfo))
+        kosmos.fakeUserRepository.setUserInfos(listOf(userInfo))
     }
 
     @Test
@@ -69,10 +72,10 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
             val dismissKeyguardRequestWithoutImmediateDismissAction by
                 collectLastValue(underTest.dismissKeyguardRequestWithoutImmediateDismissAction)
 
-            underTestDependencies.bouncerRepository.setKeyguardAuthenticatedBiometrics(null)
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(null)
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isNull()
 
-            underTestDependencies.bouncerRepository.setKeyguardAuthenticatedBiometrics(true)
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedBiometrics(true)
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isEqualTo(Unit)
         }
 
@@ -81,7 +84,7 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val dismissKeyguardRequestWithoutImmediateDismissAction by
                 collectLastValue(underTest.dismissKeyguardRequestWithoutImmediateDismissAction)
-            underTestDependencies.trustRepository.setRequestDismissKeyguard(
+            kosmos.fakeTrustRepository.setRequestDismissKeyguard(
                 TrustModel(
                     true,
                     0,
@@ -90,8 +93,8 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
             )
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isNull()
 
-            underTestDependencies.powerRepository.setInteractive(true)
-            underTestDependencies.trustRepository.setRequestDismissKeyguard(
+            kosmos.fakePowerRepository.setInteractive(true)
+            kosmos.fakeTrustRepository.setRequestDismissKeyguard(
                 TrustModel(
                     true,
                     0,
@@ -106,15 +109,15 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val dismissKeyguardRequestWithoutImmediateDismissAction by
                 collectLastValue(underTest.dismissKeyguardRequestWithoutImmediateDismissAction)
-            underTestDependencies.userRepository.setSelectedUserInfo(userInfo)
+            kosmos.fakeUserRepository.setSelectedUserInfo(userInfo)
             runCurrent()
 
             // authenticated different user
-            underTestDependencies.bouncerRepository.setKeyguardAuthenticatedPrimaryAuth(22)
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedPrimaryAuth(22)
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isNull()
 
             // authenticated correct user
-            underTestDependencies.bouncerRepository.setKeyguardAuthenticatedPrimaryAuth(userInfo.id)
+            kosmos.fakeKeyguardBouncerRepository.setKeyguardAuthenticatedPrimaryAuth(userInfo.id)
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isEqualTo(Unit)
         }
 
@@ -123,17 +126,15 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val dismissKeyguardRequestWithoutImmediateDismissAction by
                 collectLastValue(underTest.dismissKeyguardRequestWithoutImmediateDismissAction)
-            underTestDependencies.userRepository.setSelectedUserInfo(userInfo)
+            kosmos.fakeUserRepository.setSelectedUserInfo(userInfo)
             runCurrent()
 
             // requested from different user
-            underTestDependencies.bouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(
-                22
-            )
+            kosmos.fakeKeyguardBouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(22)
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isNull()
 
             // requested from correct user
-            underTestDependencies.bouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(
+            kosmos.fakeKeyguardBouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(
                 userInfo.id
             )
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isEqualTo(Unit)
@@ -159,10 +160,10 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.dismissKeyguardRequestWithoutImmediateDismissAction)
             val dismissKeyguardRequestWithImmediateDismissAction by
                 collectLastValue(underTest.dismissKeyguardRequestWithImmediateDismissAction)
-            underTestDependencies.userRepository.setSelectedUserInfo(userInfo)
+            kosmos.fakeUserRepository.setSelectedUserInfo(userInfo)
             runCurrent()
 
-            underTestDependencies.keyguardRepository.setDismissAction(
+            kosmos.fakeKeyguardRepository.setDismissAction(
                 DismissAction.RunImmediately(
                     onDismissAction = { KeyguardDone.IMMEDIATE },
                     onCancelAction = {},
@@ -170,7 +171,7 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
                     willAnimateOnLockscreen = true,
                 )
             )
-            underTestDependencies.bouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(
+            kosmos.fakeKeyguardBouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(
                 userInfo.id
             )
             assertThat(dismissKeyguardRequestWithoutImmediateDismissAction).isNull()
@@ -184,10 +185,10 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.dismissKeyguardRequestWithoutImmediateDismissAction)
             val dismissKeyguardRequestWithImmediateDismissAction by
                 collectLastValue(underTest.dismissKeyguardRequestWithImmediateDismissAction)
-            underTestDependencies.userRepository.setSelectedUserInfo(userInfo)
+            kosmos.fakeUserRepository.setSelectedUserInfo(userInfo)
             runCurrent()
 
-            underTestDependencies.keyguardRepository.setDismissAction(
+            kosmos.fakeKeyguardRepository.setDismissAction(
                 DismissAction.RunAfterKeyguardGone(
                     dismissAction = {},
                     onCancelAction = {},
@@ -195,7 +196,7 @@ class KeyguardDismissInteractorTest : SysuiTestCase() {
                     willAnimateOnLockscreen = true,
                 )
             )
-            underTestDependencies.bouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(
+            kosmos.fakeKeyguardBouncerRepository.setUserRequestedBouncerWhenAlreadyAuthenticated(
                 userInfo.id
             )
             assertThat(dismissKeyguardRequestWithImmediateDismissAction).isNull()

@@ -171,6 +171,18 @@ fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
         minOf(appBounds.height(), appBounds.width()).toFloat()
 }
 
+/** Returns true if task's width or height is maximized else returns false. */
+fun isTaskWidthOrHeightEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
+    return taskBounds.width() == stableBounds.width() ||
+            taskBounds.height() == stableBounds.height()
+}
+
+/** Returns true if task bound is equal to stable bounds else returns false. */
+fun isTaskBoundsEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
+    return taskBounds.width() == stableBounds.width() &&
+            taskBounds.height() == stableBounds.height()
+}
+
 /**
  * Calculates the desired initial bounds for applications in desktop windowing. This is done as a
  * scale of the screen bounds.

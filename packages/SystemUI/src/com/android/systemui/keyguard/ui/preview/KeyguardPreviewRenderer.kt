@@ -79,6 +79,7 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry
@@ -188,6 +189,7 @@ constructor(
     init {
         coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job())
         disposables += DisposableHandle { coroutineScope.cancel() }
+        clockController.setFallbackWeatherData(WeatherData.getPlaceholderWeatherData())
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.enablePreviewMode(
@@ -416,6 +418,7 @@ constructor(
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
                     mainDispatcher,
+                    null,
                 )
         }
         rootView.addView(

@@ -40,6 +40,8 @@ import java.util.List;
  */
 @Deprecated
 public class LogcatOnlyProtoLogImpl implements IProtoLog {
+    private static final String LOG_TAG = LogcatOnlyProtoLogImpl.class.getName();
+
     @Override
     public void log(LogLevel logLevel, IProtoLogGroup group, long messageHash, int paramsMask,
             Object[] args) {
@@ -48,19 +50,21 @@ public class LogcatOnlyProtoLogImpl implements IProtoLog {
 
     @Override
     public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object[] args) {
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new RuntimeException(
-                    "REQUIRE_PROTOLOGTOOL not set to false before the first log call.");
+        if (REQUIRE_PROTOLOGTOOL && group.isLogToProto()) {
+            Log.w(LOG_TAG, "ProtoLog message not processed. Failed to log it to proto. "
+                    + "Logging it below to logcat instead.");
         }
 
-        String formattedString = TextUtils.formatSimple(messageString, args);
-        switch (logLevel) {
-            case VERBOSE -> Log.v(group.getTag(), formattedString);
-            case INFO -> Log.i(group.getTag(), formattedString);
-            case DEBUG -> Log.d(group.getTag(), formattedString);
-            case WARN -> Log.w(group.getTag(), formattedString);
-            case ERROR -> Log.e(group.getTag(), formattedString);
-            case WTF -> Log.wtf(group.getTag(), formattedString);
+        if (group.isLogToLogcat() || group.isLogToProto()) {
+            String formattedString = TextUtils.formatSimple(messageString, args);
+            switch (logLevel) {
+                case VERBOSE -> Log.v(group.getTag(), formattedString);
+                case INFO -> Log.i(group.getTag(), formattedString);
+                case DEBUG -> Log.d(group.getTag(), formattedString);
+                case WARN -> Log.w(group.getTag(), formattedString);
+                case ERROR -> Log.e(group.getTag(), formattedString);
+                case WTF -> Log.wtf(group.getTag(), formattedString);
+            }
         }
     }
 

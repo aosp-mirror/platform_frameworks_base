@@ -109,43 +109,11 @@ public final class AccessibilityTargetHelper {
     public static List<AccessibilityTarget> getInstalledTargets(Context context,
             @UserShortcutType int shortcutType) {
         final List<AccessibilityTarget> targets = new ArrayList<>();
-        targets.addAll(getAccessibilityFilteredTargets(context, shortcutType));
+        targets.addAll(getAccessibilityServiceTargets(context, shortcutType));
+        targets.addAll(getAccessibilityActivityTargets(context, shortcutType));
         targets.addAll(getAllowListingFeatureTargets(context, shortcutType));
 
         return targets;
-    }
-
-    private static List<AccessibilityTarget> getAccessibilityFilteredTargets(Context context,
-            @UserShortcutType int shortcutType) {
-        final List<AccessibilityTarget> serviceTargets =
-                getAccessibilityServiceTargets(context, shortcutType);
-        final List<AccessibilityTarget> activityTargets =
-                getAccessibilityActivityTargets(context, shortcutType);
-
-        for (AccessibilityTarget activityTarget : activityTargets) {
-            serviceTargets.removeIf(
-                    serviceTarget -> arePackageNameAndLabelTheSame(serviceTarget, activityTarget));
-        }
-
-        final List<AccessibilityTarget> targets = new ArrayList<>();
-        targets.addAll(serviceTargets);
-        targets.addAll(activityTargets);
-
-        return targets;
-    }
-
-    private static boolean arePackageNameAndLabelTheSame(@NonNull AccessibilityTarget serviceTarget,
-            @NonNull AccessibilityTarget activityTarget) {
-        final ComponentName serviceComponentName =
-                ComponentName.unflattenFromString(serviceTarget.getId());
-        final ComponentName activityComponentName =
-                ComponentName.unflattenFromString(activityTarget.getId());
-        final boolean isSamePackageName = activityComponentName.getPackageName().equals(
-                serviceComponentName.getPackageName());
-        final boolean isSameLabel = activityTarget.getLabel().equals(
-                serviceTarget.getLabel());
-
-        return isSamePackageName && isSameLabel;
     }
 
     private static List<AccessibilityTarget> getAccessibilityServiceTargets(Context context,

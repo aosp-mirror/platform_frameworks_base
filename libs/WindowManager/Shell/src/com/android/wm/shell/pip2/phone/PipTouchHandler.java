@@ -206,7 +206,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMenuController.addListener(new PipMenuListener());
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = pipMotionHelper;
-        mMotionHelper.setUpdateMovementBoundsRunnable(this::updateMovementBounds);
+        mPipScheduler.setUpdateMovementBoundsRunnable(this::updateMovementBounds);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
@@ -219,8 +219,8 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 menuController::hideMenu,
                 mainExecutor);
         mPipResizeGestureHandler = new PipResizeGestureHandler(context, pipBoundsAlgorithm,
-                pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState,
-                this::updateMovementBounds, pipUiEventLogger, menuController, mainExecutor,
+                pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState, pipUiEventLogger,
+                menuController, mainExecutor,
                 mPipPerfHintController);
         mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
 

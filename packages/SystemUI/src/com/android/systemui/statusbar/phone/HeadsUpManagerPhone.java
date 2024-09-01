@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.notification.data.repository.HeadsUpReposi
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.AnimationStateHandler;
 import com.android.systemui.statusbar.policy.AvalancheController;
@@ -284,7 +283,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private void onShadeOrQsExpanded(Boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
-            if (!NotificationsHeadsUpRefactor.isEnabled() && isExpanded) {
+            if (!SceneContainerFlag.isEnabled() && isExpanded) {
                 mHeadsUpAnimatingAway.setValue(false);
             }
         }
@@ -517,7 +516,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Nullable
     private HeadsUpEntryPhone getTopHeadsUpEntryPhone() {
-        if (NotificationsHeadsUpRefactor.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return (HeadsUpEntryPhone) mTopHeadsUpRow.getValue();
         } else {
             return (HeadsUpEntryPhone) getTopHeadsUpEntry();
@@ -711,7 +710,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         }
 
         private NotificationEntry requireEntry() {
-            /* check if */ NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode();
+            /* check if */ SceneContainerFlag.isUnexpectedlyInLegacyMode();
             return Objects.requireNonNull(mEntry);
         }
     }

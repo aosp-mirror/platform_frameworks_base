@@ -575,7 +575,8 @@ public class StackScrollAlgorithm {
         final float shelfHeight = showingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f;
         final float scrimPadding = getScrimTopPaddingOrZero(ambientState);
 
-        final float stackHeight = ambientState.getStackHeight() - shelfHeight - scrimPadding;
+        final float stackHeight =
+                ambientState.getInterpolatedStackHeight() - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
         if (stackEndHeight == 0f) {
             // This should not happen, since even when the shade is empty we show EmptyShadeView
@@ -734,7 +735,7 @@ public class StackScrollAlgorithm {
                             || ambientState.getDozeAmount() == 1f
                             || bypassPulseNotExpanding
                             ? ambientState.getInnerHeight()
-                            : ambientState.getStackHeight();
+                            : ambientState.getInterpolatedStackHeight();
                     final float shelfStart = stackBottom
                             - ambientState.getShelf().getIntrinsicHeight()
                             - mPaddingBetweenElements;

@@ -82,6 +82,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.composable.MediaContentPicker
@@ -160,7 +161,7 @@ constructor(
     private val mediaCarouselController: MediaCarouselController,
     @Named(QUICK_QS_PANEL) private val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) private val qsMediaHost: MediaHost,
-) : ComposableScene {
+) : ExclusiveActivatable(), ComposableScene {
 
     override val key = Scenes.Shade
 
@@ -168,7 +169,7 @@ constructor(
         actionsViewModelFactory.create()
     }
 
-    override suspend fun activate(): Nothing {
+    override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()
     }
 
@@ -181,9 +182,12 @@ constructor(
     ) =
         ShadeScene(
             notificationStackScrollView.get(),
-            viewModel = rememberViewModel { contentViewModelFactory.create() },
+            viewModel =
+                rememberViewModel("ShadeScene-viewModel") { contentViewModelFactory.create() },
             notificationsPlaceholderViewModel =
-                rememberViewModel { notificationsPlaceholderViewModelFactory.create() },
+                rememberViewModel("ShadeScene-notifPlaceholderViewModel") {
+                    notificationsPlaceholderViewModelFactory.create()
+                },
             createTintedIconManager = tintedIconManagerFactory::create,
             createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
             statusBarIconController = statusBarIconController,
@@ -492,9 +496,10 @@ private fun SceneScope.SplitShade(
         }
     }
 
-    val brightnessMirrorViewModel = rememberViewModel {
-        viewModel.brightnessMirrorViewModelFactory.create()
-    }
+    val brightnessMirrorViewModel =
+        rememberViewModel("SplitShade-brightnessMirrorViewModel") {
+            viewModel.brightnessMirrorViewModelFactory.create()
+        }
     val brightnessMirrorShowing by brightnessMirrorViewModel.isShowing.collectAsStateWithLifecycle()
     val contentAlpha by
         animateFloatAsState(
