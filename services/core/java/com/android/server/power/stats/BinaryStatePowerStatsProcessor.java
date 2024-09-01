@@ -115,6 +115,12 @@ abstract class BinaryStatePowerStatsProcessor extends PowerStatsProcessor {
                 mInitiatingUid = mUidResolver.mapUid(item.eventTag.uid);
             }
         } else {
+            if (mInitiatingUid == Process.INVALID_UID) {
+                if (item.eventCode == (BatteryStats.HistoryItem.EVENT_STATE_CHANGE
+                        | BatteryStats.HistoryItem.EVENT_FLAG_FINISH)) {
+                    mInitiatingUid = mUidResolver.mapUid(item.eventTag.uid);
+                }
+            }
             recordUsageDuration(mPowerStats, mInitiatingUid, item.time);
             mInitiatingUid = Process.INVALID_UID;
             if (!mEnergyConsumerSupported) {

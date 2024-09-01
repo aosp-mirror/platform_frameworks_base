@@ -54,7 +54,8 @@ public abstract class StopUserClient<T> extends HalClientMonitor<T> {
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull UserStoppedCallback callback) {
         super(context, lazyDaemon, token, null /* listener */, userId, context.getOpPackageName(),
-                0 /* cookie */, sensorId, logger, biometricContext);
+                0 /* cookie */, sensorId, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mUserStoppedCallback = callback;
     }
 

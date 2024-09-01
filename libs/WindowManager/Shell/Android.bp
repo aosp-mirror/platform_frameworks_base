@@ -46,9 +46,6 @@ filegroup {
     srcs: [
         "src/com/android/wm/shell/common/bubbles/*.kt",
         "src/com/android/wm/shell/common/bubbles/*.java",
-        "src/com/android/wm/shell/common/desktopmode/*.kt",
-        "src/com/android/wm/shell/pip/PipContentOverlay.java",
-        "src/com/android/wm/shell/util/**/*.java",
     ],
     path: "src",
 }
@@ -208,6 +205,7 @@ android_library {
         // TODO(b/168581922) protologtool do not support kotlin(*.kt)
         ":wm_shell-sources-kt",
         ":wm_shell-aidls",
+        ":wm_shell-shared-aidls",
     ],
     resource_dirs: [
         "res",

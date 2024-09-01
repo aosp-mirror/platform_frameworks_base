@@ -161,6 +161,7 @@ public class BrightnessClamperController {
         builder.setBrightness(cappedBrightness);
         builder.setMaxBrightness(mBrightnessCap);
         builder.setCustomAnimationRate(mCustomAnimationRate);
+        builder.setBrightnessMaxReason(getBrightnessMaxReason());
 
         if (mClamperType != null) {
             builder.getBrightnessReason().addModifier(BrightnessReason.MODIFIER_THROTTLED);
@@ -185,19 +186,8 @@ public class BrightnessClamperController {
         return builder.build();
     }
 
-    /**
-     * See BrightnessThrottler.getBrightnessMaxReason:
-     * used in:
-     * 1) DPC2.CachedBrightnessInfo to determine changes
-     * 2) DPC2.logBrightnessEvent
-     * 3) HBMController - for logging
-     * Method is called in mHandler thread (DisplayControllerHandler), in the same thread
-     * recalculateBrightnessCap and DPC2.updatePowerStateInternal are called.
-     * Should be moved to DisplayBrightnessState OR derived from DisplayBrightnessState
-     * TODO: b/263362199
-     */
     @BrightnessInfo.BrightnessMaxReason
-    public int getBrightnessMaxReason() {
+    private int getBrightnessMaxReason() {
         if (mClamperType == null) {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
         } else if (mClamperType == Type.THERMAL) {

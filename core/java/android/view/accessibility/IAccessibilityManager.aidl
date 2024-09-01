@@ -29,6 +29,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IUserInitializationCompleteCallback;
 import android.view.InputEvent;
 import android.view.IWindow;
 import android.view.MagnificationSpec;
@@ -192,4 +193,10 @@ interface IAccessibilityManager {
 
     @EnforcePermission("MANAGE_ACCESSIBILITY")
     Bundle getA11yFeatureToTileMap(int userId);
+
+    @RequiresNoPermission
+    void registerUserInitializationCompleteCallback(IUserInitializationCompleteCallback callback);
+
+    @RequiresNoPermission
+    void unregisterUserInitializationCompleteCallback(IUserInitializationCompleteCallback callback);
 }

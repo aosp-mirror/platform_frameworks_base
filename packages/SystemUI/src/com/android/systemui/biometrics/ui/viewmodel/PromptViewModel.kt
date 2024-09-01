@@ -941,16 +941,16 @@ constructor(
     private fun vibrateOnSuccess() {
         _hapticsToPlay.value =
             HapticsToPlay(
-                HapticFeedbackConstants.CONFIRM,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+                HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                null,
             )
     }
 
     private fun vibrateOnError() {
         _hapticsToPlay.value =
             HapticsToPlay(
-                HapticFeedbackConstants.REJECT,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+                HapticFeedbackConstants.BIOMETRIC_REJECT,
+                null,
             )
     }
 

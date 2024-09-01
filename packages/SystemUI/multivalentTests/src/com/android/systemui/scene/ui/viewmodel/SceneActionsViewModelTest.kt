@@ -35,7 +35,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -55,7 +54,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
 
-            assertThat(underTest.isActive).isFalse()
             assertThat(actions).isEmpty()
         }
 
@@ -66,7 +64,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
             underTest.activateIn(testScope)
             runCurrent()
 
-            assertThat(underTest.isActive).isTrue()
             assertThat(actions).isEmpty()
         }
 
@@ -76,7 +73,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
             val actions by collectLastValue(underTest.actions)
             underTest.activateIn(testScope)
             runCurrent()
-            assertThat(underTest.isActive).isTrue()
 
             val expected1 =
                 mapOf(
@@ -116,7 +112,6 @@ class SceneActionsViewModelTest : SysuiTestCase() {
 
             job.cancel()
             runCurrent()
-            assertThat(underTest.isActive).isFalse()
             assertThat(actions).isEmpty()
         }
 
@@ -127,7 +122,7 @@ class SceneActionsViewModelTest : SysuiTestCase() {
         override suspend fun hydrateActions(
             setActions: (Map<UserAction, UserActionResult>) -> Unit,
         ) {
-            upstream.collectLatest { setActions(it) }
+            upstream.collect { setActions(it) }
         }
     }
 }

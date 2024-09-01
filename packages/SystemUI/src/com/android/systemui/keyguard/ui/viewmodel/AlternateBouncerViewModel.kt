@@ -70,13 +70,11 @@ constructor(
 
     fun onRemovedFromWindow() {
         statusBarKeyguardViewManager.hideAlternateBouncer(false)
-        primaryBouncerInteractor.setDismissAction(null, null)
-        dismissCallbackRegistry.notifyDismissCancelled()
     }
 
     fun onBackRequested() {
         statusBarKeyguardViewManager.hideAlternateBouncer(false)
-        primaryBouncerInteractor.setDismissAction(null, null)
         dismissCallbackRegistry.notifyDismissCancelled()
+        primaryBouncerInteractor.setDismissAction(null, null)
     }
 }

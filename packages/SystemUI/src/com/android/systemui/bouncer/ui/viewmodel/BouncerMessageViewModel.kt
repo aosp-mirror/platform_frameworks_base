@@ -38,7 +38,7 @@ import com.android.systemui.deviceentry.shared.model.FaceLockoutMessage
 import com.android.systemui.deviceentry.shared.model.FaceTimeoutMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintFailureMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R.string.kg_too_many_failed_attempts_countdown
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.util.kotlin.Utils.Companion.sample
@@ -78,8 +78,7 @@ constructor(
     private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
-    private val flags: ComposeBouncerFlags,
-) : SysUiViewModel() {
+) : ExclusiveActivatable() {
     /**
      * A message shown when the user has attempted the wrong credential too many times and now must
      * wait a while before attempting to authenticate again.
@@ -96,7 +95,7 @@ constructor(
     val message: MutableStateFlow<MessageViewModel?> = MutableStateFlow(null)
 
     override suspend fun onActivated(): Nothing {
-        if (!flags.isComposeBouncerOrSceneContainerEnabled()) {
+        if (!ComposeBouncerFlags.isComposeBouncerOrSceneContainerEnabled()) {
             return awaitCancellation()
         }
 
@@ -155,7 +154,7 @@ constructor(
                     emptyFlow()
                 }
             }
-            .collectLatest { messageViewModel -> message.value = messageViewModel }
+            .collect { messageViewModel -> message.value = messageViewModel }
     }
 
     private suspend fun listenForSimBouncerEvents() {
@@ -170,7 +169,7 @@ constructor(
                     emptyFlow()
                 }
             }
-            .collectLatest {
+            .collect {
                 if (it != null) {
                     message.value = it
                 } else {

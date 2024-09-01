@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"બ્લૂટૂથ આવતીકાલે સવારે ચાલુ થશે"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ઑડિયો શેર કરો"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ઑડિયો શેર કરી રહ્યાં છીએ"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ઑડિયો શેરિંગ સેટિંગ દાખલ કરો"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> બૅટરી"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ઑડિયો"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"હૅડસેટ"</string>
@@ -378,7 +377,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC સક્ષમ કરેલ છે"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"સ્ક્રીન રેકૉર્ડ"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"સ્ક્રીન રેકોર્ડ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"શરૂ કરો"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"રોકો"</string>
     <string name="qs_record_issue_label" msgid="8166290137285529059">"રેકોર્ડિંગમાં સમસ્યા"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"થઈ ગયું"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"સેટિંગ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ચાલુ"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ચાલુ • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"બંધ"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"સેટઅપ કરો"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"સેટિંગમાં જઈને મેનેજ કરો"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"સૅટલાઇટ, સારું કનેક્શન"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"સૅટલાઇટ, કનેક્શન ઉપલબ્ધ છે"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ઇમર્જન્સી સૅટલાઇટ સહાય"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ઑફિસની પ્રોફાઇલ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"કેટલાક માટે મજા પરંતુ બધા માટે નહીં"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"સિસ્ટમ UI ટ્યૂનર તમને Android વપરાશકર્તા ઇન્ટરફેસને ટ્વીક અને કસ્ટમાઇઝ કરવાની વધારાની રીતો આપે છે. ભાવિ રીલિઝેસમાં આ પ્રાયોગિક સુવિધાઓ બદલાઈ, ભંગ અથવા અદૃશ્ય થઈ શકે છે. સાવધાની સાથે આગળ વધો."</string>

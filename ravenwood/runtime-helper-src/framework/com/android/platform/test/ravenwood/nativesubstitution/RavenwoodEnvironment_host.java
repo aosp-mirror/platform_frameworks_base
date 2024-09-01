@@ -37,6 +37,9 @@ public class RavenwoodEnvironment_host {
      * Called from {@link RavenwoodEnvironment#ensureRavenwoodInitialized()}.
      */
     public static void ensureRavenwoodInitialized() {
+
+        // TODO Unify it with the initialization code in RavenwoodAwareTestRunnerHook.
+
         synchronized (sInitializeLock) {
             if (sInitialized) {
                 return;

@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
@@ -45,8 +46,8 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations.initMocks
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -66,6 +67,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         SensitiveNotificationProtectionController
     @Mock private lateinit var stackController: NotifStackController
     @Mock private lateinit var section: NotifSection
+    @Mock private lateinit var row: ExpandableNotificationRow
 
     @Before
     fun setUp() {
@@ -74,6 +76,8 @@ class StackCoordinatorTest : SysuiTestCase() {
         whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(false)
 
         entry = NotificationEntryBuilder().setSection(section).build()
+        entry.row = row
+        entry.setSensitive(false, false)
         coordinator =
             StackCoordinator(
                 groupExpansionManagerImpl,
@@ -187,6 +191,19 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(activeNotificationsInteractor)
             .setNotifStats(NotifStats(1, false, false, true, false))
+        verifyZeroInteractions(stackController)
+    }
+
+    @Test
+    @EnableFlags(
+        FooterViewRefactor.FLAG_NAME
+    )
+    fun testSetNotificationStats_footerFlagOn_nonClearableRedacted() {
+        entry.setSensitive(true, true)
+        whenever(section.bucket).thenReturn(BUCKET_ALERTING)
+        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        verify(activeNotificationsInteractor)
+            .setNotifStats(NotifStats(1, hasNonClearableAlertingNotifs = true, false, false, false))
         verifyZeroInteractions(stackController)
     }
 }

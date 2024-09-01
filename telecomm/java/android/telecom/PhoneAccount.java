@@ -175,8 +175,15 @@ public final class PhoneAccount implements Parcelable {
      * <p>
      * The call recording tone is a 1400 hz tone which repeats every 15 seconds while recording is
      * in progress.
+     *
+     * @deprecated this API was only intended to prevent call recording via the microphone by an app
+     * while in a phone call.  Audio policies no longer make this possible.  Further, this API was
+     * never actually used.  Call recording solutions integrated in an OEM dialer app must use
+     * appropriate recording signals to inform the caller/callee of the recording.
      * @hide
      */
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    @Deprecated
     @SystemApi
     public static final String EXTRA_PLAY_CALL_RECORDING_TONE =
             "android.telecom.extra.PLAY_CALL_RECORDING_TONE";

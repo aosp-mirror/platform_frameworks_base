@@ -1195,8 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشت"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تغییر روش ورودی"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"باز کردن انتخابگر روش ورودی"</string>
-    <!-- no translation found for input_method_switcher_settings_button (5609835654697108485) -->
-    <skip />
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"تنظیمات"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"فضای ذخیره‌سازی درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"فضای ذخیره‌سازی سیستم کافی نیست. اطمینان حاصل کنید که دارای ۲۵۰ مگابایت فضای خالی هستید و سیستم را راه‌اندازی مجدد کنید."</string>
@@ -2392,13 +2391,13 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"قرینه‌سازی روی نمایشگر ممکن نبود"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"از کابل دیگری استفاده کنید و دوباره امتحان کنید"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را روی نمایشگر قرینه‌سازی کند."</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏‫Dual Screen روشن است"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"صفحه‌نمایش دوگانه"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‫«صفحه‌نمایش دوگانه» روشن است"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"دستگاه بیش‌ازحد گرم شده است"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‏‫Dual Screen دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏Dual Screen دردسترس نیست"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏Dual Screen دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‫«صفحه‌نمایش دوگانه» دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"«صفحه‌نمایش دوگانه» دردسترس نیست"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"«صفحه‌نمایش دوگانه» دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"رفتن به تنظیمات"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"خاموش کردن"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> پیکربندی شد"</string>

@@ -233,7 +233,6 @@ import static com.android.server.wm.StartingData.AFTER_TRANSACTION_COPY_TO_CLIEN
 import static com.android.server.wm.StartingData.AFTER_TRANSACTION_REMOVE_DIRECTLY;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskPersister.DEBUG;
@@ -354,6 +353,7 @@ import android.window.SplashScreen;
 import android.window.SplashScreenView;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
+import android.window.TransitionInfo;
 import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
 import android.window.WindowOnBackInvokedDispatcher;
@@ -813,6 +813,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /** The last set {@link DropInputMode} for this activity surface. */
     @DropInputMode
     private int mLastDropInputMode = DropInputMode.NONE;
+    /** Whether the input to this activity will be dropped during the current playing animation. */
+    private boolean mIsInputDroppedForAnimation;
 
     /**
      * Whether the application has desk mode resources. Calculated and cached when
@@ -1647,6 +1649,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    /** Sets if all input will be dropped as a protection during the client-driven animation. */
+    void setDropInputForAnimation(boolean isInputDroppedForAnimation) {
+        if (mIsInputDroppedForAnimation == isInputDroppedForAnimation) {
+            return;
+        }
+        mIsInputDroppedForAnimation = isInputDroppedForAnimation;
+        updateUntrustedEmbeddingInputProtection();
+    }
+
     /**
      * Sets to drop input when obscured to activity if it is embedded in untrusted mode.
      *
@@ -1659,7 +1670,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (getSurfaceControl() == null) {
             return;
         }
-        if (isEmbeddedInUntrustedMode()) {
+        if (mIsInputDroppedForAnimation) {
+            // Disable all input during the animation.
+            setDropInputMode(DropInputMode.ALL);
+        } else if (isEmbeddedInUntrustedMode()) {
             // Set drop input to OBSCURED when untrusted embedded.
             setDropInputMode(DropInputMode.OBSCURED);
         } else {
@@ -2620,7 +2634,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || mStartingWindow == null
                 || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH
                 // skip copy splash screen to client if it was resized
-                || (mStartingData != null && mStartingData.mResizedFromTransfer)) {
+                || (mStartingData != null && mStartingData.mResizedFromTransfer)
+                || isRelaunching()) {
             return false;
         }
         if (isTransferringSplashScreen()) {
@@ -4942,9 +4957,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         newIntents.add(intent);
     }
 
-    final boolean isSleeping() {
-        final Task rootTask = getRootTask();
-        return rootTask != null ? rootTask.shouldSleepActivities() : mAtmService.isSleepingLocked();
+    boolean isSleeping() {
+        return task != null ? task.shouldSleepActivities() : mAtmService.isSleepingLocked();
     }
 
     /**
@@ -4968,7 +4982,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ReferrerIntent rintent = new ReferrerIntent(intent, getFilteredReferrer(referrer),
                 callerToken);
         boolean unsent = true;
-        final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();
+        final boolean isTopActivityWhileSleeping = isSleeping() && isTopRunningActivity();
 
         // We want to immediately deliver the intent to the activity if:
         // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
@@ -5035,7 +5049,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // controller but don't clear the animation information from the options since they
                 // need to be sent to the animating activity.
                 mTransitionController.setOverrideAnimation(
-                        AnimationOptions.makeSceneTransitionAnimOptions(), null, null);
+                        TransitionInfo.AnimationOptions.makeSceneTransitionAnimOptions(), this,
+                        null, null);
                 return;
             }
             applyOptionsAnimation(mPendingOptions, intent);
@@ -5158,7 +5173,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (options != null) {
-            mTransitionController.setOverrideAnimation(options, startCallback, finishCallback);
+            mTransitionController.setOverrideAnimation(options, this, startCallback,
+                    finishCallback);
         }
     }
 
@@ -5543,10 +5559,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         if (!mDisplayContent.mAppTransition.isTransitionSet()) {
-            // Defer committing visibility for non-home app which is animating by recents.
-            if (isActivityTypeHome() || !isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
-                return false;
-            }
+            return false;
         }
         if (mWaitForEnteringPinnedMode && mVisible == visible) {
             // If the visibility is not changed during enter PIP, we don't want to include it in
@@ -5700,8 +5713,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void postApplyAnimation(boolean visible, boolean fromTransition) {
         final boolean usingShellTransitions = mTransitionController.isShellTransitionsEnabled();
         final boolean delayed = !usingShellTransitions && isAnimating(PARENTS | CHILDREN,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
-                        | ANIMATION_TYPE_RECENTS);
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION);
         if (!delayed && !usingShellTransitions) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
@@ -5723,7 +5735,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // animation and aren't in RESUMED state. Otherwise, we'll update client visibility in
         // onAnimationFinished or activityStopped.
         if (visible || (mState != RESUMED && (usingShellTransitions || !isAnimating(
-                PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)))) {
+                PARENTS, ANIMATION_TYPE_APP_TRANSITION)))) {
             setClientVisible(visible);
         }
 
@@ -5835,7 +5847,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void setState(State state, String reason) {
         ProtoLog.v(WM_DEBUG_STATES, "State movement: %s from:%s to:%s reason:%s",
-                this, getState(), state, reason);
+                this, mState, state, reason);
 
         if (state == mState) {
             // No need to do anything if state doesn't change.
@@ -5895,6 +5907,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mAtmService.updateBatteryStats(this, false);
                 }
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
+                idle = false;
                 // Fall through.
             case DESTROYING:
                 if (app != null && !app.hasActivities()) {
@@ -6160,7 +6173,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Now for any activities that aren't visible to the user, make sure they no longer are
         // keeping the screen frozen.
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_VISIBILITY, "Making invisible: " + this + ", state=" + getState());
+            Slog.v(TAG_VISIBILITY, "Making invisible: " + this + ", state=" + mState);
         }
         try {
             final boolean canEnterPictureInPicture = checkEnterPictureInPictureState(
@@ -6176,7 +6189,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             setVisibility(false);
 
-            switch (getState()) {
+            switch (mState) {
                 case STOPPING:
                 case STOPPED:
                     // Reset the flag indicating that an app can enter picture-in-picture once the
@@ -7701,7 +7714,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Ensure that the activity content is hidden when the decor surface is boosted to
                 // prevent UI redressing attack.
                 && !isDecorSurfaceBoosted)
-                || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS
+                || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION
                         | ANIMATION_TYPE_PREDICT_BACK);
 
         if (mSurfaceControl != null) {

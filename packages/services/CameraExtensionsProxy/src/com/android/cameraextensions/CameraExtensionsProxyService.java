@@ -2605,11 +2605,7 @@ public class CameraExtensionsProxyService extends Service {
             ret.size.height = imageReaderOutputConfig.getSize().getHeight();
             ret.imageFormat = imageReaderOutputConfig.getImageFormat();
             ret.capacity = imageReaderOutputConfig.getMaxImages();
-            if (EFV_SUPPORTED) {
-                ret.usage = imageReaderOutputConfig.getUsage();
-            } else {
-                ret.usage = 0;
-            }
+            ret.usage = imageReaderOutputConfig.getUsage();
         } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
             MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
                     (MultiResolutionImageReaderOutputConfigImpl) output;

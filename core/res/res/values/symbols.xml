@@ -5466,6 +5466,8 @@
   <!-- For HapticFeedbackConstants configurability defined at HapticFeedbackCustomization -->
   <java-symbol type="string" name="config_hapticFeedbackCustomizationFile" />
   <java-symbol type="xml" name="haptic_feedback_customization" />
+  <java-symbol type="xml" name="haptic_feedback_customization_source_rotary_encoder" />
+  <java-symbol type="xml" name="haptic_feedback_customization_source_touchscreen" />
 
   <!-- For ActivityManager PSS profiling configurability -->
   <java-symbol type="bool" name="config_am_disablePssProfiling" />
@@ -5564,6 +5566,7 @@
   <java-symbol type="string"  name="recs_notification_channel_label"/>
 
   <!-- Priority Modes icons -->
+  <java-symbol type="drawable" name="ic_zen_priority_modes" />
   <java-symbol type="drawable" name="ic_zen_mode_type_bedtime" />
   <java-symbol type="drawable" name="ic_zen_mode_type_driving" />
   <java-symbol type="drawable" name="ic_zen_mode_type_immersive" />
@@ -5573,6 +5576,7 @@
   <java-symbol type="drawable" name="ic_zen_mode_type_schedule_time" />
   <java-symbol type="drawable" name="ic_zen_mode_type_theater" />
   <java-symbol type="drawable" name="ic_zen_mode_type_unknown" />
+  <java-symbol type="drawable" name="ic_zen_mode_type_special_dnd" />
 
   <!-- System notification for background user sound -->
   <java-symbol type="string" name="bg_user_sound_notification_title_alarm" />

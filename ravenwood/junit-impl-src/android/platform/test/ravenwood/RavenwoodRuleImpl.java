@@ -16,9 +16,9 @@
 
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_EMPTY_RESOURCES_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -39,24 +39,11 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.internal.os.RuntimeInit;
 import com.android.server.LocalServices;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.runner.Description;
-import org.junit.runner.RunWith;
-import org.junit.runners.model.Statement;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -109,10 +96,6 @@ public class RavenwoodRuleImpl {
 
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
-//        android.os.SystemProperties.init$ravenwood(
-//                rule.mSystemProperties.getValues(),
-//                rule.mSystemProperties.getKeyReadablePredicate(),
-//                rule.mSystemProperties.getKeyWritablePredicate());
         setSystemProperties(rule.mSystemProperties);
 
         ServiceManager.init$ravenwood();
@@ -131,11 +114,12 @@ public class RavenwoodRuleImpl {
 
         // TODO This should be integrated into LoadedApk
         final Supplier<Resources> resourcesSupplier = () -> {
-            final var resApkFile = new File(RAVENWOOD_RESOURCE_APK).getAbsoluteFile();
+            var resApkFile = new File(RAVENWOOD_RESOURCE_APK);
+            if (!resApkFile.isFile()) {
+                resApkFile = new File(RAVENWOOD_EMPTY_RESOURCES_APK);
+            }
             assertTrue(resApkFile.isFile());
-
-            final var res = resApkFile.getAbsolutePath();
-
+            final String res = resApkFile.getAbsolutePath();
             final var emptyPaths = new String[0];
 
             ResourcesManager.getInstance().initializeApplicationPaths(res, emptyPaths);
@@ -238,106 +222,6 @@ public class RavenwoodRuleImpl {
                 throw new IllegalStateException(
                         "Found an uncaught exception before this test started", pending);
             }
-        }
-    }
-
-    public static void validate(Statement base, Description description,
-            boolean enableOptionalValidation) {
-        validateTestRunner(base, description, enableOptionalValidation);
-        validateTestAnnotations(base, description, enableOptionalValidation);
-    }
-
-    private static void validateTestRunner(Statement base, Description description,
-            boolean shouldFail) {
-        final var testClass = description.getTestClass();
-        final var runWith = testClass.getAnnotation(RunWith.class);
-        if (runWith == null) {
-            return;
-        }
-
-        // Due to build dependencies, we can't directly refer to androidx classes here,
-        // so just check the class name instead.
-        if (runWith.value().getCanonicalName().equals("androidx.test.runner.AndroidJUnit4")) {
-            var message = "Test " + testClass.getCanonicalName() + " uses deprecated"
-                    + " test runner androidx.test.runner.AndroidJUnit4."
-                    + " Switch to androidx.test.ext.junit.runners.AndroidJUnit4.";
-            if (shouldFail) {
-                Assert.fail(message);
-            } else {
-                System.err.println("Warning: " + message);
-            }
-        }
-    }
-
-    /**
-     * @return if a method has any of annotations.
-     */
-    private static boolean hasAnyAnnotations(Method m, Class<? extends Annotation>... annotations) {
-        for (var anno : annotations) {
-            if (m.getAnnotation(anno) != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static void validateTestAnnotations(Statement base, Description description,
-            boolean enableOptionalValidation) {
-        final var testClass = description.getTestClass();
-
-        final var message = new StringBuilder();
-
-        boolean hasErrors = false;
-        for (Method m : collectMethods(testClass)) {
-            if (Modifier.isPublic(m.getModifiers()) && m.getName().startsWith("test")) {
-                if (!hasAnyAnnotations(m, Test.class, Before.class, After.class,
-                        BeforeClass.class, AfterClass.class)) {
-                    message.append("\nMethod " + m.getName() + "() doesn't have @Test");
-                    hasErrors = true;
-                }
-            }
-            if ("setUp".equals(m.getName())) {
-                if (!hasAnyAnnotations(m, Before.class)) {
-                    message.append("\nMethod " + m.getName() + "() doesn't have @Before");
-                    hasErrors = true;
-                }
-                if (!Modifier.isPublic(m.getModifiers())) {
-                    message.append("\nMethod " + m.getName() + "() must be public");
-                    hasErrors = true;
-                }
-            }
-            if ("tearDown".equals(m.getName())) {
-                if (!hasAnyAnnotations(m, After.class)) {
-                    message.append("\nMethod " + m.getName() + "() doesn't have @After");
-                    hasErrors = true;
-                }
-                if (!Modifier.isPublic(m.getModifiers())) {
-                    message.append("\nMethod " + m.getName() + "() must be public");
-                    hasErrors = true;
-                }
-            }
-        }
-        assertFalse("Problem(s) detected in class " + testClass.getCanonicalName() + ":"
-                + message, hasErrors);
-    }
-
-    /**
-     * Collect all (public or private or any) methods in a class, including inherited methods.
-     */
-    private static List<Method> collectMethods(Class<?> clazz) {
-        var ret = new ArrayList<Method>();
-        collectMethods(clazz, ret);
-        return ret;
-    }
-
-    private static void collectMethods(Class<?> clazz, List<Method> result) {
-        // Class.getMethods() only return public methods, so we need to use getDeclaredMethods()
-        // instead, and recurse.
-        for (var m : clazz.getDeclaredMethods()) {
-            result.add(m);
-        }
-        if (clazz.getSuperclass() != null) {
-            collectMethods(clazz.getSuperclass(), result);
         }
     }
 

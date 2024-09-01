@@ -1365,10 +1365,10 @@ public final class InputMethodManager {
                                         ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
                                 if (visible) {
                                     insetsController.show(WindowInsets.Type.ime(),
-                                            false /* fromIme */, null /* statsToken */);
+                                            false /* fromIme */, statsToken);
                                 } else {
                                     insetsController.hide(WindowInsets.Type.ime(),
-                                            false /* fromIme */, null /* statsToken */);
+                                            false /* fromIme */, statsToken);
                                 }
                             }
                         } else {

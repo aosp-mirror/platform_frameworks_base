@@ -17,6 +17,7 @@
 package com.android.systemui.scene.shared.logger
 
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
@@ -94,6 +95,34 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         }
     }
 
+    fun logOverlayChangeRequested(
+        from: OverlayKey? = null,
+        to: OverlayKey? = null,
+        reason: String,
+    ) {
+        logBuffer.log(
+            tag = TAG,
+            level = LogLevel.INFO,
+            messageInitializer = {
+                str1 = from?.toString()
+                str2 = to?.toString()
+                str3 = reason
+            },
+            messagePrinter = {
+                buildString {
+                    append("Overlay change requested: ")
+                    if (str1 != null) {
+                        append(str1)
+                        append(if (str2 == null) " (hidden)" else " → $str2")
+                    } else {
+                        append("$str2 (shown)")
+                    }
+                    append(", reason: $str3")
+                }
+            },
+        )
+    }
+
     fun logVisibilityChange(
         from: Boolean,
         to: Boolean,
@@ -115,7 +144,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logRemoteUserInteractionStarted(
+    fun logRemoteUserInputStarted(
         reason: String,
     ) {
         logBuffer.log(
@@ -126,7 +155,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logUserInteractionFinished() {
+    fun logUserInputFinished() {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,

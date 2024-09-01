@@ -881,7 +881,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         RemoteAnimationTarget[] targets = new RemoteAnimationTarget[]{animationTarget};
         if (mController.mBackAnimationAdapter != null) {
             mController.mBackAnimationAdapter.getRunner().onAnimationStart(
-                    targets, null, null, mBackAnimationFinishedCallback);
+                    targets, null /* prepareOpenTransition */, mBackAnimationFinishedCallback);
             mShellExecutor.flushAll();
         }
     }

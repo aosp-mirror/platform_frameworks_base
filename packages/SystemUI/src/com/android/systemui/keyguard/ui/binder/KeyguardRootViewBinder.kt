@@ -22,6 +22,7 @@ import android.annotation.DrawableRes
 import android.annotation.SuppressLint
 import android.graphics.Point
 import android.graphics.Rect
+import android.os.VibrationAttributes
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -40,6 +41,7 @@ import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
+import com.android.systemui.Flags.msdlFeedback
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -79,6 +81,9 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
+import com.google.android.msdl.data.model.MSDLToken
+import com.google.android.msdl.domain.InteractionProperties
+import com.google.android.msdl.domain.MSDLPlayer
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
@@ -112,6 +117,7 @@ object KeyguardRootViewBinder {
         falsingManager: FalsingManager?,
         keyguardViewMediator: KeyguardViewMediator?,
         mainImmediateDispatcher: CoroutineDispatcher,
+        msdlPlayer: MSDLPlayer?,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
@@ -351,21 +357,41 @@ object KeyguardRootViewBinder {
                     if (deviceEntryHapticsInteractor != null && vibratorHelper != null) {
                         launch {
                             deviceEntryHapticsInteractor.playSuccessHaptic.collect {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    HapticFeedbackConstants.CONFIRM,
-                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                )
+                                if (msdlFeedback()) {
+                                    val properties =
+                                        object : InteractionProperties {
+                                            override val vibrationAttributes: VibrationAttributes =
+                                                VibrationAttributes.createForUsage(
+                                                    VibrationAttributes.USAGE_HARDWARE_FEEDBACK
+                                                )
+                                        }
+                                    msdlPlayer?.playToken(MSDLToken.UNLOCK, properties)
+                                } else {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                                    )
+                                }
                             }
                         }
 
                         launch {
                             deviceEntryHapticsInteractor.playErrorHaptic.collect {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    HapticFeedbackConstants.REJECT,
-                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                )
+                                if (msdlFeedback()) {
+                                    val properties =
+                                        object : InteractionProperties {
+                                            override val vibrationAttributes: VibrationAttributes =
+                                                VibrationAttributes.createForUsage(
+                                                    VibrationAttributes.USAGE_HARDWARE_FEEDBACK
+                                                )
+                                        }
+                                    msdlPlayer?.playToken(MSDLToken.FAILURE, properties)
+                                } else {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.BIOMETRIC_REJECT,
+                                    )
+                                }
                             }
                         }
                     }

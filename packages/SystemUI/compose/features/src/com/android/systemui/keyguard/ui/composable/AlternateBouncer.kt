@@ -73,8 +73,7 @@ fun AlternateBouncer(
             initialValue = null
         )
 
-    // TODO (b/353955910): back handling doesn't work
-    BackHandler { alternateBouncerDependencies.viewModel.onBackRequested() }
+    BackHandler(enabled = isVisible) { alternateBouncerDependencies.viewModel.onBackRequested() }
 
     AnimatedVisibility(
         visible = isVisible,

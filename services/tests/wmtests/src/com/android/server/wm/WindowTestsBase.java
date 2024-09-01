@@ -2131,7 +2131,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit);
+            mController.finishTransition(ActionChain.testFinish(mLastTransit));
         }
     }
 }

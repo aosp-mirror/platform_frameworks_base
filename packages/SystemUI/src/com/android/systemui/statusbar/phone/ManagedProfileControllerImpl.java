@@ -22,6 +22,7 @@ import android.os.UserManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
@@ -43,17 +44,20 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     private final UserManager mUserManager;
     private final UserTracker mUserTracker;
     private final LinkedList<UserInfo> mProfiles;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private boolean mListening;
     private int mCurrentUser;
 
     @Inject
     public ManagedProfileControllerImpl(Context context, @Main Executor mainExecutor,
-            UserTracker userTracker, UserManager userManager) {
+            UserTracker userTracker, UserManager userManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mUserManager = userManager;
         mUserTracker = userTracker;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mProfiles = new LinkedList<>();
     }
 
@@ -80,6 +84,7 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
                     StatusBarManager statusBarManager = (StatusBarManager) mContext
                             .getSystemService(android.app.Service.STATUS_BAR_SERVICE);
                     statusBarManager.collapsePanels();
+                    mKeyguardUpdateMonitor.awakenFromDream();
                 }
             }
         }

@@ -26,15 +26,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 internal fun CoroutineScope.animateContent(
+    layoutState: MutableSceneTransitionLayoutStateImpl,
     transition: TransitionState.Transition,
     oneOffAnimation: OneOffAnimation,
     targetProgress: Float,
-    startTransition: () -> Unit,
-    finishTransition: () -> Unit,
+    chain: Boolean = true,
 ) {
     // Start the transition. This will compute the TransformationSpec associated to [transition],
     // which we need to initialize the Animatable that will actually animate it.
-    startTransition()
+    layoutState.startTransition(transition, chain)
 
     // The transition now contains the transformation spec that we should use to instantiate the
     // Animatable.
@@ -59,7 +59,7 @@ internal fun CoroutineScope.animateContent(
             try {
                 animatable.animateTo(targetProgress, animationSpec, initialVelocity)
             } finally {
-                finishTransition()
+                layoutState.finishTransition(transition)
             }
         }
 }

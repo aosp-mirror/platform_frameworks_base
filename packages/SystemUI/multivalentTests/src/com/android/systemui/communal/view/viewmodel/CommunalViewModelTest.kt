@@ -97,6 +97,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -159,24 +160,27 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         communalInteractor = spy(kosmos.communalInteractor)
 
-        underTest =
-            CommunalViewModel(
-                kosmos.testDispatcher,
-                testScope,
-                kosmos.testScope.backgroundScope,
-                context.resources,
-                kosmos.keyguardTransitionInteractor,
-                kosmos.keyguardInteractor,
-                mock<KeyguardIndicationController>(),
-                kosmos.communalSceneInteractor,
-                communalInteractor,
-                kosmos.communalSettingsInteractor,
-                kosmos.communalTutorialInteractor,
-                kosmos.shadeInteractor,
-                mediaHost,
-                logcatLogBuffer("CommunalViewModelTest"),
-                metricsLogger,
-            )
+        underTest = createViewModel()
+    }
+
+    private fun createViewModel(): CommunalViewModel {
+        return CommunalViewModel(
+            kosmos.testDispatcher,
+            testScope,
+            kosmos.testScope.backgroundScope,
+            context.resources,
+            kosmos.keyguardTransitionInteractor,
+            kosmos.keyguardInteractor,
+            mock<KeyguardIndicationController>(),
+            kosmos.communalSceneInteractor,
+            communalInteractor,
+            kosmos.communalSettingsInteractor,
+            kosmos.communalTutorialInteractor,
+            kosmos.shadeInteractor,
+            mediaHost,
+            logcatLogBuffer("CommunalViewModelTest"),
+            metricsLogger,
+        )
     }
 
     @Test
@@ -754,7 +758,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             // updateViewVisibility is called when the flow is collected.
             assertThat(communalContent).isNotNull()
-            verify(mediaHost).updateViewVisibility()
+            verify(mediaHost, atLeastOnce()).updateViewVisibility()
         }
 
     @Test
@@ -782,6 +786,21 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(touchAvailable).isFalse()
             underTest.onNestedScrolling()
             assertThat(touchAvailable).isTrue()
+        }
+
+    @Test
+    fun selectedKey_changeAffectsAllInstances() =
+        testScope.runTest {
+            val model1 = createViewModel()
+            val selectedKey1 by collectLastValue(model1.selectedKey)
+            val model2 = createViewModel()
+            val selectedKey2 by collectLastValue(model2.selectedKey)
+
+            val key = "test"
+            model1.setSelectedKey(key)
+
+            assertThat(selectedKey1).isEqualTo(key)
+            assertThat(selectedKey2).isEqualTo(key)
         }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {

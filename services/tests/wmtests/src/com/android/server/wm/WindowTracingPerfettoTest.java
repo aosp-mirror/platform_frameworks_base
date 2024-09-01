@@ -39,8 +39,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 
 import perfetto.protos.PerfettoConfig.WindowManagerConfig.LogFrequency;
 
@@ -50,9 +49,7 @@ import perfetto.protos.PerfettoConfig.WindowManagerConfig.LogFrequency;
 @SmallTest
 @Presubmit
 public class WindowTracingPerfettoTest {
-    @Mock
     private WindowManagerService mWmMock;
-    @Mock
     private Choreographer mChoreographer;
     private WindowTracing mWindowTracing;
     private PerfettoTraceMonitor mTraceMonitor;
@@ -60,7 +57,10 @@ public class WindowTracingPerfettoTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        mWmMock = Mockito.mock(WindowManagerService.class);
+        Mockito.doNothing().when(mWmMock).dumpDebugLocked(Mockito.any(), Mockito.anyInt());
+
+        mChoreographer = Mockito.mock(Choreographer.class);
 
         mWindowTracing = new WindowTracingPerfetto(mWmMock, mChoreographer,
                 new WindowManagerGlobalLock());

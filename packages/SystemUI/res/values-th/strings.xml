@@ -155,7 +155,7 @@
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการรวบรวมปัญหา"</string>
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"กำลังบันทึกปัญหา"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"แชร์"</string>
-    <string name="issuerecord_save_title" msgid="4161043023696751591">"บันทึกไฟล์บันทึกปัญหาแล้ว"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"จัดเก็บไฟล์บันทึกปัญหาแล้ว"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"แตะเพื่อดู"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"เกิดข้อผิดพลาดในการบันทึกไฟล์บันทึกปัญหา"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"เกิดข้อผิดพลาดในการเริ่มบันทึกปัญหา"</string>
@@ -308,8 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"บลูทูธจะเปิดพรุ่งนี้เช้า"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"แชร์เสียง"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"กำลังแชร์เสียง"</string>
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_accessibility (7604615019302091708) -->
-    <skip />
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"เข้าสู่การตั้งค่าการแชร์เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
@@ -436,6 +435,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"เสร็จสิ้น"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"การตั้งค่า"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"เปิด"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"เปิด • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ปิด"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"ตั้งค่า"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"จัดการในการตั้งค่า"</string>
@@ -718,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ดาวเทียม, การเชื่อมต่อดี"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ดาวเทียม, การเชื่อมต่อที่พร้อมใช้งาน"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS ดาวเทียม"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"โปรไฟล์งาน"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"เพลิดเพลินกับบางส่วนแต่ไม่ใช่ทั้งหมด"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ตัวรับสัญญาณ UI ระบบช่วยให้คุณมีวิธีพิเศษในการปรับแต่งและกำหนดค่าส่วนติดต่อผู้ใช้ Android ฟีเจอร์รุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>

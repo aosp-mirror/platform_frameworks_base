@@ -61,6 +61,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.phone.ManagedProfileController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.emitOnStart
@@ -116,6 +117,7 @@ constructor(
     sceneInteractor: SceneInteractor,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
+    private val managedProfileController: ManagedProfileController
 ) {
     private val logger = Logger(logBuffer, "CommunalInteractor")
 
@@ -139,6 +141,10 @@ constructor(
      * widget's individual configuration activity has launched.
      */
     val editActivityShowing: StateFlow<Boolean> = _editActivityShowing.asStateFlow()
+
+    private val _selectedKey: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    val selectedKey: StateFlow<String?> = _selectedKey.asStateFlow()
 
     /** Whether communal features are enabled. */
     val isCommunalEnabled: StateFlow<Boolean> = communalSettingsInteractor.isCommunalEnabled
@@ -177,6 +183,10 @@ constructor(
             delay(DISCLAIMER_RESET_MILLIS)
             _isDisclaimerDismissed.value = false
         }
+    }
+
+    fun setSelectedKey(key: String?) {
+        _selectedKey.value = key
     }
 
     /** Whether to show communal when exiting the occluded state. */
@@ -345,11 +355,10 @@ constructor(
 
     /** Show the widget editor Activity. */
     fun showWidgetEditor(
-        preselectedKey: String? = null,
         shouldOpenWidgetPickerOnStart: Boolean = false,
     ) {
         communalSceneInteractor.setEditModeState(EditModeState.STARTING)
-        editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
+        editWidgetsActivityStarter.startActivity(shouldOpenWidgetPickerOnStart)
     }
 
     /**
@@ -394,12 +403,7 @@ constructor(
 
     /** Request to unpause work profile that is currently in quiet mode. */
     fun unpauseWorkProfile() {
-        userTracker.userProfiles
-            .find { it.isManagedProfile }
-            ?.userHandle
-            ?.let { userHandle ->
-                userManager.requestQuietModeEnabled(/* enableQuietMode */ false, userHandle)
-            }
+        managedProfileController.setWorkModeEnabled(true)
     }
 
     /** Returns true if work profile is in quiet mode (disabled) for user handle. */
@@ -503,7 +507,7 @@ constructor(
      * A flow of ongoing content, including smartspace timers and umo, ordered by creation time and
      * sized dynamically.
      */
-    fun getOngoingContent(mediaHostVisible: Boolean): Flow<List<CommunalContentModel.Ongoing>> =
+    val ongoingContent: Flow<List<CommunalContentModel.Ongoing>> =
         combine(smartspaceRepository.timers, mediaRepository.mediaModel) { timers, media ->
                 val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
 
@@ -519,7 +523,7 @@ constructor(
                 )
 
                 // Add UMO
-                if (mediaHostVisible && media.hasAnyMediaOrRecommendation) {
+                if (media.hasAnyMediaOrRecommendation) {
                     ongoingContent.add(
                         CommunalContentModel.Umo(
                             createdTimestampMillis = media.createdTimestampMillis,
@@ -605,11 +609,6 @@ constructor(
     fun setScrollPosition(firstVisibleItemIndex: Int, firstVisibleItemOffset: Int) {
         _firstVisibleItemIndex = firstVisibleItemIndex
         _firstVisibleItemOffset = firstVisibleItemOffset
-    }
-
-    fun resetScrollPosition() {
-        _firstVisibleItemIndex = 0
-        _firstVisibleItemOffset = 0
     }
 
     val firstVisibleItemIndex: Int

@@ -51,16 +51,16 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
-import com.android.wm.shell.util.SplitBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

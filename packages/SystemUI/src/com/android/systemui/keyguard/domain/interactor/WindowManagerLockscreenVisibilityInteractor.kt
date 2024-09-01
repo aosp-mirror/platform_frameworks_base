@@ -63,10 +63,13 @@ constructor(
 ) {
     private val defaultSurfaceBehindVisibility =
         combine(
-            transitionInteractor.finishedKeyguardState,
+            transitionInteractor.isFinishedIn(
+                scene = Scenes.Gone,
+                stateWithoutSceneContainer = KeyguardState.GONE
+            ),
             wakeToGoneInteractor.canWakeDirectlyToGone,
-        ) { finishedState, canWakeDirectlyToGone ->
-            isSurfaceVisible(finishedState) || canWakeDirectlyToGone
+        ) { isOnGone, canWakeDirectlyToGone ->
+            isOnGone || canWakeDirectlyToGone
         }
 
     /**
@@ -196,18 +199,20 @@ constructor(
                         edge = Edge.create(to = Scenes.Gone),
                         edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE)
                     ),
-                    transitionInteractor.finishedKeyguardState,
+                    transitionInteractor.isFinishedIn(
+                        scene = Scenes.Gone,
+                        stateWithoutSceneContainer = KeyguardState.GONE
+                    ),
                     surfaceBehindInteractor.isAnimatingSurface,
                     notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
-                ) { isInTransitionToGone, finishedState, isAnimatingSurface, notifLaunchRunning ->
+                ) { isInTransitionToGone, isOnGone, isAnimatingSurface, notifLaunchRunning ->
                     // Using the animation if we're animating it directly, or if the
                     // ActivityLaunchAnimator is in the process of animating it.
                     val animationsRunning = isAnimatingSurface || notifLaunchRunning
                     // We may still be animating the surface after the keyguard is fully GONE, since
                     // some animations (like the translation spring) are not tied directly to the
                     // transition step amount.
-                    isInTransitionToGone ||
-                        (finishedState == KeyguardState.GONE && animationsRunning)
+                    isInTransitionToGone || (isOnGone && animationsRunning)
                 }
                 .distinctUntilChanged()
         }
@@ -248,7 +253,7 @@ constructor(
                         // transition. Same for waking directly to gone, due to the lockscreen being
                         // disabled or because the device was woken back up before the lock timeout
                         // duration elapsed.
-                        KeyguardState.lockscreenVisibleInState(KeyguardState.GONE)
+                        false
                     } else if (canWakeDirectlyToGone) {
                         // Never show the lockscreen if we can wake directly to GONE. This means
                         // that the lock timeout has not yet elapsed, or the keyguard is disabled.
@@ -274,8 +279,7 @@ constructor(
                         // *not* play the going away animation or related animations.
                         false
                     } else {
-                        // Otherwise, use the visibility of the current state.
-                        KeyguardState.lockscreenVisibleInState(currentState)
+                        currentState != KeyguardState.GONE
                     }
                 }
                 .distinctUntilChanged()
@@ -302,10 +306,4 @@ constructor(
                     !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
-
-    companion object {
-        fun isSurfaceVisible(state: KeyguardState): Boolean {
-            return !KeyguardState.lockscreenVisibleInState(state)
-        }
-    }
 }
