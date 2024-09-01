@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -29,12 +29,12 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class IntConstantRemainderPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeRemainderIntByConstant2() {
         int result = 1;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result %= 2;
         }
@@ -43,7 +43,7 @@ public class IntConstantRemainderPerfTest {
     @Test
     public void timeRemainderIntByConstant8() {
         int result = 1;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result %= 8;
         }
@@ -52,7 +52,7 @@ public class IntConstantRemainderPerfTest {
     @Test
     public void timeRemainderIntByConstant10() {
         int result = 1;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result %= 10;
         }
@@ -61,7 +61,7 @@ public class IntConstantRemainderPerfTest {
     @Test
     public void timeRemainderIntByConstant100() {
         int result = 1;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result %= 100;
         }
@@ -70,7 +70,7 @@ public class IntConstantRemainderPerfTest {
     @Test
     public void timeRemainderIntByConstant2048() {
         int result = 1;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result %= 2048;
         }
@@ -80,7 +80,7 @@ public class IntConstantRemainderPerfTest {
     public void timeRemainderIntByVariable2() {
         int result = 1;
         int factor = 2;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result %= factor;
         }
@@ -90,7 +90,7 @@ public class IntConstantRemainderPerfTest {
     public void timeRemainderIntByVariable10() {
         int result = 1;
         int factor = 10;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             result %= factor;
         }

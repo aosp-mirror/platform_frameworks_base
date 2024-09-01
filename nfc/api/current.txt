@@ -220,14 +220,15 @@ package android.nfc.cardemulation {
     field @Deprecated public static final String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
     field public static final String CATEGORY_OTHER = "other";
     field public static final String CATEGORY_PAYMENT = "payment";
-    field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final String DH = "DH";
-    field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final String ESE = "ESE";
     field public static final String EXTRA_CATEGORY = "category";
     field public static final String EXTRA_SERVICE_COMPONENT = "component";
+    field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_DH = 0; // 0x0
+    field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE = 1; // 0x1
+    field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_UICC = 2; // 0x2
+    field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_UNSET = -1; // 0xffffffff
     field public static final int SELECTION_MODE_ALWAYS_ASK = 1; // 0x1
     field public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2; // 0x2
     field public static final int SELECTION_MODE_PREFER_DEFAULT = 0; // 0x0
-    field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final String UICC = "UICC";
   }
 
   public abstract class HostApduService extends android.app.Service {
