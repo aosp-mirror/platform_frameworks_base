@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -32,11 +32,11 @@ import java.security.PrivilegedAction;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class DoPrivilegedPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     @Test
     public void timeDirect() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             String lineSeparator = System.getProperty("line.separator");
         }
@@ -44,7 +44,7 @@ public class DoPrivilegedPerfTest {
 
     @Test
     public void timeFastAndSlow() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             String lineSeparator;
             if (System.getSecurityManager() == null) {
@@ -61,7 +61,7 @@ public class DoPrivilegedPerfTest {
 
     @Test
     public void timeNewAction() throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             String lineSeparator = AccessController.doPrivileged(new PrivilegedAction<String>() {
                 public String run() {
@@ -74,7 +74,7 @@ public class DoPrivilegedPerfTest {
     @Test
     public void timeReusedAction() throws Exception {
         final PrivilegedAction<String> action = new ReusableAction("line.separator");
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             String lineSeparator = AccessController.doPrivileged(action);
         }

@@ -16,8 +16,8 @@
 package android.libcore.regression;
 
 import android.icu.lang.UCharacter;
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,7 +35,7 @@ import java.nio.charset.Charset;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class CharsetUtf8PerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     private void makeUnicodeRange(int startingCodePoint, int endingCodePoint) {
         StringBuilder builder = new StringBuilder();
@@ -46,7 +46,7 @@ public class CharsetUtf8PerfTest {
         }
 
         String str = builder.toString();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder builder2 = new StringBuilder();
             builder2.append(str);

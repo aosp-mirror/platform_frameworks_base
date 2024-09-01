@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -35,7 +35,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class StringToBytesPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     enum StringLengths {
         EMPTY(""),
@@ -89,7 +89,7 @@ public class StringToBytesPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeGetBytesUtf8(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.getBytes(StandardCharsets.UTF_8);
         }
@@ -98,7 +98,7 @@ public class StringToBytesPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeGetBytesIso88591(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.getBytes(StandardCharsets.ISO_8859_1);
         }
@@ -107,7 +107,7 @@ public class StringToBytesPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeGetBytesAscii(StringLengths stringLengths) {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             stringLengths.mValue.getBytes(StandardCharsets.US_ASCII);
         }
