@@ -24,6 +24,7 @@ import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterRemapper
 import com.android.hoststubgen.filters.ImplicitOutputFilter
+import com.android.hoststubgen.filters.NativeFilter
 import com.android.hoststubgen.filters.OutputFilter
 import com.android.hoststubgen.filters.createFilterFromTextPolicyFile
 import com.android.hoststubgen.filters.printAsTextPolicy
@@ -131,6 +132,9 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // The first filter is for the default policy from the command line options.
         var filter: OutputFilter = ConstantFilter(options.defaultPolicy.get, "default-by-options")
+
+        // Next, we build a filter that preserves all native methods by default
+        filter = NativeFilter(allClasses, filter)
 
         // Next, we need a filter that resolves "class-wide" policies.
         // This is used when a member (methods, fields, nested classes) don't get any polices

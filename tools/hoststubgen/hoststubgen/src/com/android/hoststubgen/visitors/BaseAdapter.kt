@@ -213,7 +213,7 @@ abstract class BaseAdapter(
             // But note, we only use it when calling the super's method,
             // but not for visitMethodInner(), because when subclass wants to change access,
             // it can do so inside visitMethodInner().
-            newAccess = updateAccessFlags(newAccess, name, descriptor)
+            newAccess = updateAccessFlags(newAccess, name, descriptor, policy.policy)
 
             val ret = visitMethodInner(
                 access, newName, descriptor, signature, exceptions, policy,
@@ -234,6 +234,7 @@ abstract class BaseAdapter(
         access: Int,
         name: String,
         descriptor: String,
+        policy: FilterPolicy,
     ): Int {
         return access
     }
