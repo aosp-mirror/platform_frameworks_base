@@ -362,33 +362,33 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun faceAuthIsRequestedWhenQsExpansionStared() =
+    fun faceAuthIsRequestedWhenShadeExpansionStarted() =
         testScope.runTest {
             underTest.start()
 
-            underTest.onQsExpansionStarted()
+            underTest.onShadeExpansionStarted()
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
-                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false))
         }
 
     @Test
     @EnableSceneContainer
-    fun faceAuthIsRequestedWhenQuickSettingsIsExpandedToTheShade() =
+    fun faceAuthIsRequestedWhenShadeExpansionIsStarted() =
         testScope.runTest {
             underTest.start()
             faceAuthRepository.canRunFaceAuth.value = true
-            kosmos.sceneInteractor.snapToScene(toScene = Scenes.QuickSettings, "for-test")
+            kosmos.sceneInteractor.snapToScene(toScene = Scenes.Lockscreen, "for-test")
             runCurrent()
 
             kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "for-test")
             kosmos.sceneInteractor.setTransitionState(
                 MutableStateFlow(
                     ObservableTransitionState.Transition(
-                        fromScene = Scenes.QuickSettings,
+                        fromScene = Scenes.Lockscreen,
                         toScene = Scenes.Shade,
-                        currentScene = flowOf(Scenes.QuickSettings),
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = MutableStateFlow(0.2f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
@@ -398,25 +398,25 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
-                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false))
         }
 
     @Test
     @EnableSceneContainer
-    fun faceAuthIsRequestedOnlyOnceWhenQuickSettingsIsExpandedToTheShade() =
+    fun faceAuthIsRequestedOnlyOnceWhenShadeExpansionStarts() =
         testScope.runTest {
             underTest.start()
             faceAuthRepository.canRunFaceAuth.value = true
-            kosmos.sceneInteractor.snapToScene(toScene = Scenes.QuickSettings, "for-test")
+            kosmos.sceneInteractor.snapToScene(toScene = Scenes.Lockscreen, "for-test")
             runCurrent()
 
             kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "for-test")
             kosmos.sceneInteractor.setTransitionState(
                 MutableStateFlow(
                     ObservableTransitionState.Transition(
-                        fromScene = Scenes.QuickSettings,
+                        fromScene = Scenes.Lockscreen,
                         toScene = Scenes.Shade,
-                        currentScene = flowOf(Scenes.QuickSettings),
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = MutableStateFlow(0.2f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
@@ -426,16 +426,16 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value)
-                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true))
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false))
             faceAuthRepository.runningAuthRequest.value = null
 
             // expansion progress shouldn't trigger face auth again
             kosmos.sceneInteractor.setTransitionState(
                 MutableStateFlow(
                     ObservableTransitionState.Transition(
-                        fromScene = Scenes.QuickSettings,
+                        fromScene = Scenes.Lockscreen,
                         toScene = Scenes.Shade,
-                        currentScene = flowOf(Scenes.QuickSettings),
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = MutableStateFlow(0.5f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
