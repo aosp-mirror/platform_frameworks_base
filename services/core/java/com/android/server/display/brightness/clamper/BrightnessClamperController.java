@@ -214,6 +214,7 @@ public class BrightnessClamperController {
      */
     public void dump(PrintWriter writer) {
         writer.println("BrightnessClamperController:");
+        writer.println("----------------------------");
         writer.println("  mBrightnessCap: " + mBrightnessCap);
         writer.println("  mClamperType: " + mClamperType);
         writer.println("  mClamperApplied: " + mClamperApplied);
