@@ -55,6 +55,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.Flags;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -1202,6 +1203,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public void hide(long startTime, long fadeoutDuration) {
         Trace.beginSection("StatusBarKeyguardViewManager#hide");
+        if (Flags.checkLockscreenGoneTransition()) {
+            DejankUtils.notifyRendererOfExpensiveFrame(
+                    mNotificationShadeWindowController.getWindowRootView(),
+                    "StatusBarKeyguardViewManager#hide");
+        }
         mKeyguardStateController.notifyKeyguardState(false,
                 mKeyguardStateController.isOccluded());
         launchPendingWakeupAction();

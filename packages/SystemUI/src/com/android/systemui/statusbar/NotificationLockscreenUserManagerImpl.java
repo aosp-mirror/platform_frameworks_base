@@ -58,6 +58,7 @@ import androidx.annotation.WorkerThread;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -802,11 +803,17 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private void notifyNotificationStateChanged() {
         if (!Looper.getMainLooper().isCurrentThread()) {
-            mMainExecutor.execute(() -> {
+            if (Flags.checkLockscreenGoneTransition()) {
                 for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
-                    listener.onNotificationStateChanged();
+                    mMainExecutor.execute(listener::onNotificationStateChanged);
                 }
-            });
+            } else {
+                mMainExecutor.execute(() -> {
+                    for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
+                        listener.onNotificationStateChanged();
+                    }
+                });
+            }
         } else {
             for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
                 listener.onNotificationStateChanged();

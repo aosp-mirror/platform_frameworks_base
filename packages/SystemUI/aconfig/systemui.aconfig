@@ -1446,3 +1446,13 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+   name: "check_lockscreen_gone_transition"
+   namespace: "systemui"
+   description: "Run notification pipeline when the lockscreen is not in gone transition for avoiding janky frames during unlocking animation"
+   bug: "358301118"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
