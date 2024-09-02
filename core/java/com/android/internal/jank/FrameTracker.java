@@ -127,7 +127,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     private Runnable mWaitForFinishTimedOut;
 
     private static class JankInfo {
-        final long frameVsyncId;
+        long frameVsyncId;
         long totalDurationNanos;
         boolean isFirstFrame;
         boolean hwuiCallbackFired;
@@ -135,37 +135,29 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         @JankType int jankType;
         @RefreshRate int refreshRate;
 
-        static JankInfo createFromHwuiCallback(
-                long frameVsyncId, long totalDurationNanos, boolean isFirstFrame) {
-            return new JankInfo(frameVsyncId).update(totalDurationNanos, isFirstFrame);
+        static JankInfo createFromHwuiCallback(long frameVsyncId, long totalDurationNanos,
+                boolean isFirstFrame) {
+            return new JankInfo(frameVsyncId, true, false, JANK_NONE, UNKNOWN_REFRESH_RATE,
+                    totalDurationNanos, isFirstFrame);
         }
 
-        static JankInfo createFromSurfaceControlCallback(SurfaceControl.JankData jankStat) {
-            return new JankInfo(jankStat.frameVsyncId).update(jankStat);
+        static JankInfo createFromSurfaceControlCallback(long frameVsyncId,
+                @JankType int jankType, @RefreshRate int refreshRate) {
+            return new JankInfo(
+                    frameVsyncId, false, true, jankType, refreshRate, 0, false /* isFirstFrame */);
         }
 
-        private JankInfo(long frameVsyncId) {
+        private JankInfo(long frameVsyncId, boolean hwuiCallbackFired,
+                boolean surfaceControlCallbackFired, @JankType int jankType,
+                @RefreshRate int refreshRate,
+                long totalDurationNanos, boolean isFirstFrame) {
             this.frameVsyncId = frameVsyncId;
-            this.hwuiCallbackFired = false;
-            this.surfaceControlCallbackFired = false;
-            this.jankType = JANK_NONE;
-            this.refreshRate = UNKNOWN_REFRESH_RATE;
-            this.totalDurationNanos = 0;
-            this.isFirstFrame = false;
-        }
-
-        private JankInfo update(SurfaceControl.JankData jankStat) {
-            this.surfaceControlCallbackFired = true;
-            this.jankType = jankStat.jankType;
-            this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.frameIntervalNs);
-            return this;
-        }
-
-        private JankInfo update(long totalDurationNanos, boolean isFirstFrame) {
-            this.hwuiCallbackFired = true;
+            this.hwuiCallbackFired = hwuiCallbackFired;
+            this.surfaceControlCallbackFired = surfaceControlCallbackFired;
+            this.jankType = jankType;
+            this.refreshRate = refreshRate;
             this.totalDurationNanos = totalDurationNanos;
             this.isFirstFrame = isFirstFrame;
-            return this;
         }
 
         @Override
@@ -465,12 +457,16 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 if (!isInRange(jankStat.frameVsyncId)) {
                     continue;
                 }
+                int refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.frameIntervalNs);
                 JankInfo info = findJankInfo(jankStat.frameVsyncId);
                 if (info != null) {
-                    info.update(jankStat);
+                    info.surfaceControlCallbackFired = true;
+                    info.jankType = jankStat.jankType;
+                    info.refreshRate = refreshRate;
                 } else {
                     mJankInfos.put((int) jankStat.frameVsyncId,
-                            JankInfo.createFromSurfaceControlCallback(jankStat));
+                            JankInfo.createFromSurfaceControlCallback(
+                                    jankStat.frameVsyncId, jankStat.jankType, refreshRate));
                 }
             }
             processJankInfos();
@@ -517,7 +513,9 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             }
             JankInfo info = findJankInfo(frameVsyncId);
             if (info != null) {
-                info.update(totalDurationNanos, isFirstFrame);
+                info.hwuiCallbackFired = true;
+                info.totalDurationNanos = totalDurationNanos;
+                info.isFirstFrame = isFirstFrame;
             } else {
                 mJankInfos.put((int) frameVsyncId, JankInfo.createFromHwuiCallback(
                         frameVsyncId, totalDurationNanos, isFirstFrame));
