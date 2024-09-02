@@ -42,9 +42,9 @@ import kotlinx.coroutines.flow.asStateFlow
  *
  * Example adb commands:
  *
- * To show a chip with the SysUI icon and custom text:
+ * To show a chip with the SysUI icon and custom text and color:
  * ```
- * adb shell cmd statusbar demo-ron -p com.android.systemui -t 10min
+ * adb shell cmd statusbar demo-ron -p com.android.systemui -t 10min -c "\\#434343"
  * ```
  *
  * To hide the chip:
@@ -87,6 +87,17 @@ constructor(
                 valueParser = Type.String,
             )
 
+        private val backgroundColor: Int? by
+            param(
+                longName = "color",
+                shortName = "c",
+                description =
+                    "The color to show as the chip background color. " +
+                        "You can either just write a basic color like 'red' or 'green', " +
+                        "or you can include a #RRGGBB string in this format: \"\\\\#434343\".",
+                valueParser = Type.Color,
+            )
+
         private val hide by
             flag(
                 longName = "hide",
@@ -119,21 +130,26 @@ constructor(
                 return
             }
 
+            val colors =
+                if (backgroundColor != null) {
+                    ColorsModel.Custom(backgroundColorInt = backgroundColor!!)
+                } else {
+                    ColorsModel.Themed
+                }
+
             val currentText = text
             if (currentText != null) {
                 _chip.value =
                     OngoingActivityChipModel.Shown.Text(
                         icon = appIcon,
-                        // TODO(b/361346412): Include a demo with a custom color theme.
-                        colors = ColorsModel.Themed,
+                        colors = colors,
                         text = currentText,
                     )
             } else {
                 _chip.value =
                     OngoingActivityChipModel.Shown.Timer(
                         icon = appIcon,
-                        // TODO(b/361346412): Include a demo with a custom color theme.
-                        colors = ColorsModel.Themed,
+                        colors = colors,
                         startTimeMs = systemClock.elapsedRealtime(),
                         onClickListener = null,
                     )

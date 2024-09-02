@@ -59,13 +59,14 @@ fun createActionsFromState(
     val playOrPause =
         if (isConnectingState(state.state)) {
             // Spinner needs to be animating to render anything. Start it here.
-            val drawable = MediaControlDrawables.getProgress(context)
+            val drawable =
+                context.getDrawable(com.android.internal.R.drawable.progress_small_material)
             (drawable as Animatable).start()
             MediaAction(
                 drawable,
                 null, // no action to perform when clicked
                 context.getString(R.string.controls_media_button_connecting),
-                MediaControlDrawables.getConnecting(context),
+                context.getDrawable(R.drawable.ic_media_connecting_container),
                 // Specify a rebind id to prevent the spinner from restarting on later binds.
                 com.android.internal.R.drawable.progress_small_material
             )
@@ -153,18 +154,18 @@ private fun getStandardAction(
     return when (action) {
         PlaybackState.ACTION_PLAY -> {
             MediaAction(
-                MediaControlDrawables.getPlayIcon(context),
+                context.getDrawable(R.drawable.ic_media_play),
                 { controller.transportControls.play() },
                 context.getString(R.string.controls_media_button_play),
-                MediaControlDrawables.getPlayBackground(context)
+                context.getDrawable(R.drawable.ic_media_play_container)
             )
         }
         PlaybackState.ACTION_PAUSE -> {
             MediaAction(
-                MediaControlDrawables.getPauseIcon(context),
+                context.getDrawable(R.drawable.ic_media_pause),
                 { controller.transportControls.pause() },
                 context.getString(R.string.controls_media_button_pause),
-                MediaControlDrawables.getPauseBackground(context)
+                context.getDrawable(R.drawable.ic_media_pause_container)
             )
         }
         PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {

@@ -375,24 +375,34 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
                 @Nullable String message, boolean shouldCollectMessage, boolean skiProxyOperation,
                 @NonNull HexFunction<Integer, AttributionSource, Boolean, String, Boolean,
                         Boolean, SyncNotedAppOp> superImpl) {
-            if (attributionSource.getUid() == mDelegateAndOwnerUid && isDelegateOp(code)) {
-                final int shellUid = UserHandle.getUid(
-                        UserHandle.getUserId(attributionSource.getUid()), Process.SHELL_UID);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    return superImpl.apply(code,
-                            new AttributionSource(shellUid, Process.INVALID_PID, SHELL_PKG,
-                                    attributionSource.getAttributionTag(),
-                                    attributionSource.getToken(), /*renouncedPermissions*/ null,
-                                    attributionSource.getDeviceId(), attributionSource.getNext()),
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            skiProxyOperation);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
+            if (!isDelegateOp(code)) {
+                return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
+                        message, shouldCollectMessage, skiProxyOperation);
             }
-            return superImpl.apply(code, attributionSource, shouldCollectAsyncNotedOp,
-                    message, shouldCollectMessage, skiProxyOperation);
+
+            final int shellUid = UserHandle.getUid(
+                    UserHandle.getUserId(attributionSource.getUid()), Process.SHELL_UID);
+            AttributionSource next = attributionSource.getNext();
+            if (next != null && next.getUid() == mDelegateAndOwnerUid) {
+                next = new AttributionSource(shellUid, Process.INVALID_PID, SHELL_PKG,
+                        next.getAttributionTag(), next.getToken(), /*renouncedPermissions*/ null,
+                        next.getDeviceId(), next.getNext());
+                attributionSource = new AttributionSource(attributionSource, next);
+            }
+            if (attributionSource.getUid() == mDelegateAndOwnerUid) {
+                attributionSource = new AttributionSource(shellUid, Process.INVALID_PID, SHELL_PKG,
+                        attributionSource.getAttributionTag(),
+                        attributionSource.getToken(), /*renouncedPermissions*/ null,
+                        attributionSource.getDeviceId(), attributionSource.getNext());
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return superImpl.apply(code, attributionSource,
+                        shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                        skiProxyOperation);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override

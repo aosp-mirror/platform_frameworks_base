@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.CarrierConfigManager
-import android.telephony.ServiceState
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
@@ -49,7 +48,6 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.Airplane
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
@@ -72,7 +70,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -175,8 +172,8 @@ constructor(
             }
             .flowOn(bgDispatcher)
 
-    /** Note that this flow is eager, so we don't miss any state */
-    override val deviceServiceState: StateFlow<ServiceStateModel?> =
+    /** Turn ACTION_SERVICE_STATE (for subId = -1) into an event */
+    private val serviceStateChangedEvent: Flow<Unit> =
         broadcastDispatcher
             .broadcastFlow(IntentFilter(Intent.ACTION_SERVICE_STATE)) { intent, _ ->
                 val subId =
@@ -185,24 +182,34 @@ constructor(
                         INVALID_SUBSCRIPTION_ID
                     )
 
-                val extras = intent.extras
-                if (extras == null) {
-                    logger.logTopLevelServiceStateBroadcastMissingExtras(subId)
-                    return@broadcastFlow null
-                }
-
-                val serviceState = ServiceState.newFromBundle(extras)
-                logger.logTopLevelServiceStateBroadcastEmergencyOnly(subId, serviceState)
+                // Only emit if the subId is not associated with an active subscription
                 if (subId == INVALID_SUBSCRIPTION_ID) {
-                    // Assume that -1 here is the device's service state. We don't care about
-                    // other ones.
-                    ServiceStateModel.fromServiceState(serviceState)
-                } else {
-                    null
+                    Unit
                 }
             }
-            .filterNotNull()
-            .stateIn(scope, SharingStarted.Eagerly, null)
+            // Emit on start so that we always check the state at least once
+            .onStart { emit(Unit) }
+
+    /** Eager flow to determine the device-based emergency calls only state */
+    override val isDeviceEmergencyCallCapable: StateFlow<Boolean> =
+        serviceStateChangedEvent
+            .mapLatest {
+                val modems = telephonyManager.activeModemCount
+                // Check the service state for every modem. If any state reports emergency calling
+                // capable, then consider the device to have emergency call capabilities
+                (0..<modems)
+                    .map { telephonyManager.getServiceStateForSlot(it) }
+                    .any { it?.isEmergencyOnly == true }
+            }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = LOGGING_PREFIX,
+                columnName = "deviceEmergencyOnly",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own

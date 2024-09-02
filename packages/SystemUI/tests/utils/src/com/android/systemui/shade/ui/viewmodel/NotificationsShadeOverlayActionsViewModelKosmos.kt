@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.bouncer.shared.flag
+package com.android.systemui.shade.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayActionsViewModel
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-var Kosmos.fakeComposeBouncerFlags by Kosmos.Fixture { FakeComposeBouncerFlags() }
-val Kosmos.composeBouncerFlags by Kosmos.Fixture<ComposeBouncerFlags> { fakeComposeBouncerFlags }
+val Kosmos.notificationsShadeOverlayActionsViewModel:
+    NotificationsShadeOverlayActionsViewModel by Fixture {
+    NotificationsShadeOverlayActionsViewModel(
+        shadeInteractor = shadeInteractor,
+    )
+}

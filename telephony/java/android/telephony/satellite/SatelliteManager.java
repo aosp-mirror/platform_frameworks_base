@@ -592,7 +592,7 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.requestSatelliteEnabled(mSubId, attributes.isEnabled(),
+                telephony.requestSatelliteEnabled(attributes.isEnabled(),
                         attributes.isDemoMode(), attributes.isEmergencyMode(), errorCallback);
             } else {
                 Rlog.e(TAG, "requestEnabled() invalid telephony");
@@ -650,7 +650,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestIsSatelliteEnabled(mSubId, receiver);
+                telephony.requestIsSatelliteEnabled(receiver);
             } else {
                 loge("requestIsEnabled() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
@@ -707,7 +707,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestIsDemoModeEnabled(mSubId, receiver);
+                telephony.requestIsDemoModeEnabled(receiver);
             } else {
                 loge("requestIsDemoModeEnabled() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
@@ -764,7 +764,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestIsEmergencyModeEnabled(mSubId, receiver);
+                telephony.requestIsEmergencyModeEnabled(receiver);
             } else {
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
@@ -821,7 +821,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestIsSatelliteSupported(mSubId, receiver);
+                telephony.requestIsSatelliteSupported(receiver);
             } else {
                 loge("requestIsSupported() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
@@ -878,7 +878,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestSatelliteCapabilities(mSubId, receiver);
+                telephony.requestSatelliteCapabilities(receiver);
             } else {
                 loge("requestCapabilities() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
@@ -1204,8 +1204,7 @@ public final class SatelliteManager {
                             }
                         };
                 sSatelliteTransmissionUpdateCallbackMap.put(callback, internalCallback);
-                telephony.startSatelliteTransmissionUpdates(mSubId, errorCallback,
-                        internalCallback);
+                telephony.startSatelliteTransmissionUpdates(errorCallback, internalCallback);
             } else {
                 loge("startTransmissionUpdates() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
@@ -1255,8 +1254,7 @@ public final class SatelliteManager {
                                     () -> resultListener.accept(result)));
                         }
                     };
-                    telephony.stopSatelliteTransmissionUpdates(mSubId, errorCallback,
-                            internalCallback);
+                    telephony.stopSatelliteTransmissionUpdates(errorCallback, internalCallback);
                     // TODO: Notify SmsHandler that pointing UI stopped
                 } else {
                     loge("stopSatelliteTransmissionUpdates: No internal callback.");
@@ -1312,7 +1310,7 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                cancelRemote = telephony.provisionSatelliteService(mSubId, token, provisionData,
+                cancelRemote = telephony.provisionSatelliteService(token, provisionData,
                         errorCallback);
             } else {
                 loge("provisionService() invalid telephony");
@@ -1364,7 +1362,7 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.deprovisionSatelliteService(mSubId, token, errorCallback);
+                telephony.deprovisionSatelliteService(token, errorCallback);
             } else {
                 loge("deprovisionService() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
@@ -1419,8 +1417,7 @@ public final class SatelliteManager {
                             }
                         };
                 sSatelliteProvisionStateCallbackMap.put(callback, internalCallback);
-                return telephony.registerForSatelliteProvisionStateChanged(
-                        mSubId, internalCallback);
+                return telephony.registerForSatelliteProvisionStateChanged(internalCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -1453,7 +1450,7 @@ public final class SatelliteManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 if (internalCallback != null) {
-                    telephony.unregisterForSatelliteProvisionStateChanged(mSubId, internalCallback);
+                    telephony.unregisterForSatelliteProvisionStateChanged(internalCallback);
                 } else {
                     loge("unregisterForProvisionStateChanged: No internal callback.");
                 }
@@ -1510,7 +1507,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestIsSatelliteProvisioned(mSubId, receiver);
+                telephony.requestIsSatelliteProvisioned(receiver);
             } else {
                 loge("requestIsProvisioned() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
@@ -1560,7 +1557,7 @@ public final class SatelliteManager {
                     }
                 };
                 sSatelliteModemStateCallbackMap.put(callback, internalCallback);
-                return telephony.registerForSatelliteModemStateChanged(mSubId, internalCallback);
+                return telephony.registerForSatelliteModemStateChanged(internalCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -1593,7 +1590,7 @@ public final class SatelliteManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 if (internalCallback != null) {
-                    telephony.unregisterForModemStateChanged(mSubId, internalCallback);
+                    telephony.unregisterForModemStateChanged(internalCallback);
                 } else {
                     loge("unregisterForModemStateChanged: No internal callback.");
                 }
@@ -1656,7 +1653,7 @@ public final class SatelliteManager {
                             }
                         };
                 sSatelliteDatagramCallbackMap.put(callback, internalCallback);
-                return telephony.registerForIncomingDatagram(mSubId, internalCallback);
+                return telephony.registerForIncomingDatagram(internalCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -1688,7 +1685,7 @@ public final class SatelliteManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 if (internalCallback != null) {
-                    telephony.unregisterForIncomingDatagram(mSubId, internalCallback);
+                    telephony.unregisterForIncomingDatagram(internalCallback);
                 } else {
                     loge("unregisterForIncomingDatagram: No internal callback.");
                 }
@@ -1732,7 +1729,7 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.pollPendingDatagrams(mSubId, internalCallback);
+                telephony.pollPendingDatagrams(internalCallback);
             } else {
                 loge("pollPendingDatagrams() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
@@ -1790,7 +1787,7 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.sendDatagram(mSubId, datagramType, datagram,
+                telephony.sendDatagram(datagramType, datagram,
                         needFullScreenPointingUI, internalCallback);
             } else {
                 loge("sendDatagram() invalid telephony");
@@ -1908,7 +1905,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestTimeForNextSatelliteVisibility(mSubId, receiver);
+                telephony.requestTimeForNextSatelliteVisibility(receiver);
             } else {
                 loge("requestTimeForNextSatelliteVisibility() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
@@ -1939,7 +1936,7 @@ public final class SatelliteManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.setDeviceAlignedWithSatellite(mSubId, isAligned);
+                telephony.setDeviceAlignedWithSatellite(isAligned);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -2203,7 +2200,7 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestNtnSignalStrength(mSubId, receiver);
+                telephony.requestNtnSignalStrength(receiver);
             } else {
                 loge("requestNtnSignalStrength() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
@@ -2254,7 +2251,7 @@ public final class SatelliteManager {
                                                 ntnSignalStrength)));
                             }
                         };
-                telephony.registerForNtnSignalStrengthChanged(mSubId, internalCallback);
+                telephony.registerForNtnSignalStrengthChanged(internalCallback);
                 sNtnSignalStrengthCallbackMap.put(callback, internalCallback);
             } else {
                 throw new IllegalStateException("Telephony service is null.");
@@ -2294,7 +2291,7 @@ public final class SatelliteManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 if (internalCallback != null) {
-                    telephony.unregisterForNtnSignalStrengthChanged(mSubId, internalCallback);
+                    telephony.unregisterForNtnSignalStrengthChanged(internalCallback);
                 } else {
                     loge("unregisterForNtnSignalStrengthChanged: No internal callback.");
                     throw new IllegalArgumentException("callback is not valid");
@@ -2339,7 +2336,7 @@ public final class SatelliteManager {
                             }
                         };
                 sSatelliteCapabilitiesCallbackMap.put(callback, internalCallback);
-                return telephony.registerForCapabilitiesChanged(mSubId, internalCallback);
+                return telephony.registerForCapabilitiesChanged(internalCallback);
             } else {
                 throw new IllegalStateException("Telephony service is null.");
             }
@@ -2372,7 +2369,7 @@ public final class SatelliteManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 if (internalCallback != null) {
-                    telephony.unregisterForCapabilitiesChanged(mSubId, internalCallback);
+                    telephony.unregisterForCapabilitiesChanged(internalCallback);
                 } else {
                     loge("unregisterForCapabilitiesChanged: No internal callback.");
                 }
@@ -2448,7 +2445,7 @@ public final class SatelliteManager {
                         };
                 sSatelliteSupportedStateCallbackMap.put(callback, internalCallback);
                 return telephony.registerForSatelliteSupportedStateChanged(
-                        mSubId, internalCallback);
+                        internalCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -2483,7 +2480,7 @@ public final class SatelliteManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 if (internalCallback != null) {
-                    telephony.unregisterForSatelliteSupportedStateChanged(mSubId, internalCallback);
+                    telephony.unregisterForSatelliteSupportedStateChanged(internalCallback);
                 } else {
                     loge("unregisterForSupportedStateChanged: No internal callback.");
                 }

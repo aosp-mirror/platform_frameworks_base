@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.navigationbar
+package com.android.wm.shell.shared.handles
+
 
 import android.graphics.Rect
 import android.testing.TestableLooper.RunWithLooper
@@ -24,16 +25,15 @@ import android.view.ViewRootImpl
 import androidx.concurrent.futures.DirectExecutor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.time.FakeSystemClock
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
+import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.TestShellExecutor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
@@ -42,11 +42,12 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.argumentCaptor
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 @RunWithLooper
-class RegionSamplingHelperTest : SysuiTestCase() {
+class RegionSamplingHelperTest : ShellTestCase() {
 
     @Mock
     lateinit var sampledView: View
@@ -72,12 +73,16 @@ class RegionSamplingHelperTest : SysuiTestCase() {
         whenever(surfaceControl.isValid).thenReturn(true)
         whenever(wrappedSurfaceControl.isValid).thenReturn(true)
         whenever(samplingCallback.isSamplingEnabled).thenReturn(true)
-        regionSamplingHelper = object : RegionSamplingHelper(sampledView, samplingCallback,
-                DirectExecutor.INSTANCE, DirectExecutor.INSTANCE, compositionListener) {
-            override fun wrap(stopLayerControl: SurfaceControl?): SurfaceControl {
-                return wrappedSurfaceControl
+        getInstrumentation().runOnMainSync(Runnable {
+            regionSamplingHelper = object : RegionSamplingHelper(
+                sampledView, samplingCallback,
+                DirectExecutor.INSTANCE, DirectExecutor.INSTANCE, compositionListener
+            ) {
+                override fun wrap(stopLayerControl: SurfaceControl?): SurfaceControl {
+                    return wrappedSurfaceControl
+                }
             }
-        }
+        })
         regionSamplingHelper.setWindowVisible(true)
     }
 
@@ -99,7 +104,7 @@ class RegionSamplingHelperTest : SysuiTestCase() {
         regionSamplingHelper.setWindowHasBlurs(true)
         regionSamplingHelper.start(Rect(0, 0, 100, 100))
         verify(compositionListener, never())
-                .register(any(), anyInt(), eq(wrappedSurfaceControl), any())
+            .register(any(), anyInt(), eq(wrappedSurfaceControl), any())
     }
 
     @Test
@@ -112,35 +117,38 @@ class RegionSamplingHelperTest : SysuiTestCase() {
     @Test
     fun testCompositionSamplingListener_has_nonEmptyRect() {
         // simulate race condition
-        val fakeExecutor = FakeExecutor(FakeSystemClock()) // pass in as backgroundExecutor
+        val fakeExecutor = TestShellExecutor() // pass in as backgroundExecutor
         val fakeSamplingCallback = mock(RegionSamplingHelper.SamplingCallback::class.java)
 
         whenever(fakeSamplingCallback.isSamplingEnabled).thenReturn(true)
         whenever(wrappedSurfaceControl.isValid).thenReturn(true)
-
-        regionSamplingHelper = object : RegionSamplingHelper(sampledView, fakeSamplingCallback,
-                DirectExecutor.INSTANCE, fakeExecutor, compositionListener) {
-            override fun wrap(stopLayerControl: SurfaceControl?): SurfaceControl {
-                return wrappedSurfaceControl
+        getInstrumentation().runOnMainSync(Runnable {
+            regionSamplingHelper = object : RegionSamplingHelper(
+                sampledView, fakeSamplingCallback,
+                DirectExecutor.INSTANCE, fakeExecutor, compositionListener
+            ) {
+                override fun wrap(stopLayerControl: SurfaceControl?): SurfaceControl {
+                    return wrappedSurfaceControl
+                }
             }
-        }
+        })
         regionSamplingHelper.setWindowVisible(true)
         regionSamplingHelper.start(Rect(0, 0, 100, 100))
 
         // make sure background task is enqueued
-        assertThat(fakeExecutor.numPending()).isEqualTo(1)
+        assertThat(fakeExecutor.getCallbacks().size).isEqualTo(1)
 
         // make sure regionSamplingHelper will have empty Rect
         whenever(fakeSamplingCallback.getSampledRegion(any())).thenReturn(Rect(0, 0, 0, 0))
         regionSamplingHelper.onLayoutChange(sampledView, 0, 0, 0, 0, 0, 0, 0, 0)
 
         // resume running of background thread
-        fakeExecutor.runAllReady()
+        fakeExecutor.flushAll()
 
         // grab Rect passed into compositionSamplingListener and make sure it's not empty
         val argumentGrabber = argumentCaptor<Rect>()
         verify(compositionListener).register(any(), anyInt(), eq(wrappedSurfaceControl),
-                argumentGrabber.capture())
-        assertThat(argumentGrabber.value.isEmpty).isFalse()
+            argumentGrabber.capture())
+        assertThat(argumentGrabber.firstValue.isEmpty).isFalse()
     }
 }

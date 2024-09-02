@@ -45,6 +45,9 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import com.google.android.msdl.domain.InteractionProperties;
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import javax.inject.Inject;
 
 /** Controller for a {@link KeyguardSecurityView}. */
@@ -63,6 +66,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {};
     private final FeatureFlags mFeatureFlags;
     protected final SelectedUserInteractor mSelectedUserInteractor;
+    protected final InteractionProperties mAuthInteractionProperties =
+            new AuthInteractionProperties();
 
     protected KeyguardInputViewController(T view, SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback,
@@ -214,6 +219,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final SelectedUserInteractor mSelectedUserInteractor;
         private final UiEventLogger mUiEventLogger;
         private final KeyguardKeyboardInteractor mKeyguardKeyboardInteractor;
+        private final MSDLPlayer mMSDLPlayer;
 
         @Inject
         public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -228,7 +234,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 KeyguardViewController keyguardViewController,
                 FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
                 UiEventLogger uiEventLogger,
-                KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
+                KeyguardKeyboardInteractor keyguardKeyboardInteractor,
+                MSDLPlayer msdlPlayer) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mLatencyTracker = latencyTracker;
@@ -246,6 +253,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mSelectedUserInteractor = selectedUserInteractor;
             mUiEventLogger = uiEventLogger;
             mKeyguardKeyboardInteractor = keyguardKeyboardInteractor;
+            mMSDLPlayer = msdlPlayer;
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
@@ -268,14 +276,14 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                         mInputMethodManager, emergencyButtonController, mMainExecutor, mResources,
                         mFalsingCollector, mKeyguardViewController,
                         mDevicePostureController, mFeatureFlags, mSelectedUserInteractor,
-                        mKeyguardKeyboardInteractor);
+                        mKeyguardKeyboardInteractor, mMSDLPlayer);
             } else if (keyguardInputView instanceof KeyguardPINView) {
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, emergencyButtonController, mFalsingCollector,
                         mDevicePostureController, mFeatureFlags, mSelectedUserInteractor,
-                        mUiEventLogger, mKeyguardKeyboardInteractor
+                        mUiEventLogger, mKeyguardKeyboardInteractor, mMSDLPlayer
                 );
             } else if (keyguardInputView instanceof KeyguardSimPinView) {
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
@@ -283,14 +291,14 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
                         emergencyButtonController, mFeatureFlags, mSelectedUserInteractor,
-                        mKeyguardKeyboardInteractor);
+                        mKeyguardKeyboardInteractor, mMSDLPlayer);
             } else if (keyguardInputView instanceof KeyguardSimPukView) {
                 return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
                         emergencyButtonController, mFeatureFlags, mSelectedUserInteractor,
-                        mKeyguardKeyboardInteractor
+                        mKeyguardKeyboardInteractor, mMSDLPlayer
                 );
             }
 

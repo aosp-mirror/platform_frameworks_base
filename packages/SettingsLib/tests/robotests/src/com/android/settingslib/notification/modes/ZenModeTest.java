@@ -359,7 +359,7 @@ public class ZenModeTest {
     }
 
     @Test
-    public void getIconKey_implicitModeWithoutCustomIcon_isSpecialIcon() {
+    public void getIconKey_implicitModeWithoutCustomIcon_isDndIcon() {
         ZenMode mode = new TestModeBuilder()
                 .setId(ZenModeConfig.implicitRuleId("some.package"))
                 .setPackage("some_package")
@@ -370,7 +370,7 @@ public class ZenModeTest {
 
         assertThat(iconKey.resPackage()).isNull();
         assertThat(iconKey.resId()).isEqualTo(
-                com.android.internal.R.drawable.ic_zen_mode_type_unknown);
+                com.android.internal.R.drawable.ic_zen_mode_type_special_dnd);
     }
 
     private static void assertUnparceledIsEqualToOriginal(String type, ZenMode original) {

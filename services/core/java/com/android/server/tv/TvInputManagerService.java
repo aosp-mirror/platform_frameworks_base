@@ -251,7 +251,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void registerBroadcastReceivers() {
-        PackageMonitor monitor = new PackageMonitor() {
+        PackageMonitor monitor = new PackageMonitor(/* supportsPackageRestartQuery */ true) {
             private void buildTvInputList(String[] packages) {
                 int userId = getChangingUserId();
                 synchronized (mLock) {

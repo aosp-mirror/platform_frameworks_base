@@ -255,8 +255,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
 
         final float stackBottom = SceneContainerFlag.isEnabled()
-                ? ambientState.getStackTop() + ambientState.getStackHeight()
-                : ambientState.getStackY() + ambientState.getStackHeight();
+                ? ambientState.getStackTop() + ambientState.getInterpolatedStackHeight()
+                : ambientState.getStackY() + ambientState.getInterpolatedStackHeight();
 
         if (viewState.hidden) {
             // if the shelf is hidden, position it at the end of the stack (plus the clip

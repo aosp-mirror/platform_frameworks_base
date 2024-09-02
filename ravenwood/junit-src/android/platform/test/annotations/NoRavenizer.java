@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.model
+package android.platform.test.annotations;
 
-import android.telephony.ServiceState
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Simplified representation of a [ServiceState] for use in SystemUI. Add any fields that we need to
- * extract from service state here for consumption downstream
+ * Disable the ravenizer preprocessor for a class. This should be only used for testing
+ * ravenizer itself, or to workaround issues with the preprocessor. A test class probably won't run
+ * properly if it's not preprocessed.
+ *
+ * @hide
  */
-data class ServiceStateModel(val isEmergencyOnly: Boolean) {
-    companion object {
-        fun fromServiceState(serviceState: ServiceState): ServiceStateModel {
-            return ServiceStateModel(isEmergencyOnly = serviceState.isEmergencyOnly)
-        }
-    }
+@Inherited
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NoRavenizer {
 }

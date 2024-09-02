@@ -16,8 +16,7 @@
 
 package com.android.server.appfunctions;
 
-import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
-
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.content.Context;
 
 import com.android.server.SystemService;
@@ -35,7 +34,7 @@ public class AppFunctionManagerService extends SystemService {
 
     @Override
     public void onStart() {
-        if (enableAppFunctionManager()) {
+        if (AppFunctionManagerConfiguration.isSupported(getContext())) {
             publishBinderService(Context.APP_FUNCTION_SERVICE, mServiceImpl);
         }
     }
