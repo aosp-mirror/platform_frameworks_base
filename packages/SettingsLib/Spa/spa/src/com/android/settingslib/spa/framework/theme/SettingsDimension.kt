@@ -25,6 +25,9 @@ object SettingsDimension {
     val paddingLarge = 16.dp
     val paddingExtraLarge = 24.dp
 
+    val spinnerHorizontalPadding = paddingExtraLarge
+    val spinnerVerticalPadding = paddingLarge
+
     val itemIconSize = 24.dp
     val itemIconContainerSize = 72.dp
     val itemPaddingStart = paddingExtraLarge
