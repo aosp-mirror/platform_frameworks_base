@@ -4,6 +4,7 @@
 package: "android.app.admin.flags"
 container: "system"
 
+# Fully rolled out and must not be used.
 flag {
   name: "policy_engine_migration_v2_enabled"
   is_exported: true
