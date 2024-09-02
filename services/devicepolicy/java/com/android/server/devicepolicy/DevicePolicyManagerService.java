@@ -16822,13 +16822,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
                 }
 
-                if (Flags.permissionMigrationForZeroTrustImplEnabled()) {
-                    final UserHandle user = UserHandle.of(userId);
-                    final String roleHolderPackage = getRoleHolderPackageNameOnUser(
-                            RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, userId);
-                    if (roleHolderPackage != null) {
-                        broadcastExplicitIntentToPackage(intent, roleHolderPackage, user);
-                    }
+                final UserHandle user = UserHandle.of(userId);
+                final String roleHolderPackage = getRoleHolderPackageNameOnUser(
+                        RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, userId);
+                if (roleHolderPackage != null) {
+                    broadcastExplicitIntentToPackage(intent, roleHolderPackage, user);
                 }
             }
         });
@@ -16836,18 +16834,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public SystemUpdateInfo getPendingSystemUpdate(ComponentName admin, String callerPackage) {
-        if (Flags.permissionMigrationForZeroTrustImplEnabled()) {
-            CallerIdentity caller = getCallerIdentity(admin, callerPackage);
-            enforcePermissions(new String[] {NOTIFY_PENDING_SYSTEM_UPDATE,
-                    MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES}, caller.getPackageName(),
-                    caller.getUserId());
-        } else {
-            Objects.requireNonNull(admin, "ComponentName is null");
-
-            final CallerIdentity caller = getCallerIdentity(admin);
-            Preconditions.checkCallAuthorization(
-                    isDefaultDeviceOwner(caller) || isProfileOwner(caller));
-        }
+        CallerIdentity caller = getCallerIdentity(admin, callerPackage);
+        enforcePermissions(new String[] {NOTIFY_PENDING_SYSTEM_UPDATE,
+                MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES}, caller.getPackageName(),
+                caller.getUserId());
         return mOwners.getSystemUpdateInfo();
     }
 
@@ -21442,13 +21432,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final CallerIdentity caller = getCallerIdentity(callerPackage);
 
-        if (Flags.permissionMigrationForZeroTrustImplEnabled()) {
-            enforcePermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getPackageName());
-        } else {
-            Preconditions.checkCallAuthorization(
-                    isDefaultDeviceOwner(caller) || isProfileOwner(caller)
-                            || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
-        }
+        enforcePermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getPackageName());
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
                     caller.getUserId());
