@@ -7648,7 +7648,8 @@
     <permission android:name="android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by an {@link android.service.watchdog.ExplicitHealthCheckService} to
+    <!-- @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY) @SystemApi
+         Must be required by an {@link android.service.watchdog.ExplicitHealthCheckService} to
          ensure that only the system can bind to it.
          @hide This is not a third-party API (intended for OEMs and system apps).
     -->
