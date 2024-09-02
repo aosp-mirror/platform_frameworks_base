@@ -170,7 +170,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
-    fun destinationScenes() =
+    fun userActions() =
         testScope.runTest {
             underTest.activateIn(this)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
@@ -193,9 +193,9 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                     },
             )
 
-            val destinationScenes by collectLastValue(underTest.actions)
+            val userActions by collectLastValue(underTest.actions)
             val downDestination =
-                destinationScenes?.get(
+                userActions?.get(
                     Swipe(
                         SwipeDirection.Down,
                         fromSource = Edge.Top.takeIf { downFromEdge },
@@ -227,11 +227,10 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
             val upScene by
                 collectLastValue(
-                    (destinationScenes?.get(Swipe(SwipeDirection.Up))
-                            as? UserActionResult.ChangeScene)
-                        ?.toScene
-                        ?.let { scene -> kosmos.sceneInteractor.resolveSceneFamily(scene) }
-                        ?: flowOf(null)
+                    (userActions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene?.let {
+                        scene ->
+                        kosmos.sceneInteractor.resolveSceneFamily(scene)
+                    } ?: flowOf(null)
                 )
 
             assertThat(upScene)
@@ -244,11 +243,10 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
             val leftScene by
                 collectLastValue(
-                    (destinationScenes?.get(Swipe(SwipeDirection.Left))
-                            as? UserActionResult.ChangeScene)
-                        ?.toScene
-                        ?.let { scene -> kosmos.sceneInteractor.resolveSceneFamily(scene) }
-                        ?: flowOf(null)
+                    (userActions?.get(Swipe.Left) as? UserActionResult.ChangeScene)?.toScene?.let {
+                        scene ->
+                        kosmos.sceneInteractor.resolveSceneFamily(scene)
+                    } ?: flowOf(null)
                 )
 
             assertThat(leftScene)

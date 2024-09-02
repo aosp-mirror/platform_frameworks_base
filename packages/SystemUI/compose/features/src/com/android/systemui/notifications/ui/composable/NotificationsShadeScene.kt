@@ -65,8 +65,7 @@ constructor(
         actionsViewModelFactory.create()
     }
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        actionsViewModel.actions
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()

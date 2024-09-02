@@ -62,21 +62,21 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
     @Test
     fun downTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.actions)
+            val userActions by collectLastValue(underTest.actions)
             shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.transitionKey)
+            assertThat(userActions?.get(Swipe(SwipeDirection.Down))?.transitionKey)
                 .isEqualTo(ToSplitShade)
         }
 
     @Test
     fun downTransitionKey_splitShadeDisabled_isNull() =
         testScope.runTest {
-            val destinationScenes by collectLastValue(underTest.actions)
+            val userActions by collectLastValue(underTest.actions)
             shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
-            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()
+            assertThat(userActions?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()
         }
 }

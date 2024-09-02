@@ -175,8 +175,7 @@ constructor(
         actionsViewModel.activate()
     }
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        actionsViewModel.actions
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     @Composable
     override fun SceneScope.Content(

@@ -25,8 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Base class for view-models that need to keep a map of user actions (also known as "destination
- * scenes") up-to-date.
+ * Base class for view-models that need to keep a map of user actions up-to-date.
  *
  * Subclasses need only to override [hydrateActions], suspending forever if they need; they don't
  * need to worry about resetting the value of [actions] when the view-model is deactivated/canceled,
