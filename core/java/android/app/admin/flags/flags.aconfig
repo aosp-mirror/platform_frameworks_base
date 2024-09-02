@@ -226,16 +226,6 @@ flag {
 }
 
 flag {
-  name: "headless_device_owner_provisioning_fix_enabled"
-  namespace: "enterprise"
-  description: "Fix provisioning for single-user headless DO"
-  bug: "289515470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "dmrh_set_app_restrictions"
   namespace: "enterprise"
   description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
