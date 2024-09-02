@@ -67,6 +67,8 @@ public:
 
     bool resourcesLoaded();
 
+    std::string dump() const;
+
 private:
     mutable std::mutex mLock;
 
