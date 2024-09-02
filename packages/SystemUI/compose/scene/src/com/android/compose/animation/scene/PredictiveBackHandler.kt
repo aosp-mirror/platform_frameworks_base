@@ -22,8 +22,10 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun PredictiveBackHandler(
@@ -42,7 +44,6 @@ internal fun PredictiveBackHandler(
         val animation =
             createSwipeAnimation(
                 layoutImpl,
-                layoutImpl.coroutineScope,
                 result.userActionCopy(
                     transitionKey = result.transitionKey ?: TransitionKey.PredictiveBack
                 ),
@@ -64,7 +65,8 @@ private suspend fun <T : ContentKey> animate(
 ) {
     fun animateOffset(targetContent: T, spec: AnimationSpec<Float>? = null) {
         if (
-            layoutImpl.state.transitionState != animation.contentTransition || animation.isFinishing
+            layoutImpl.state.transitionState != animation.contentTransition ||
+                animation.isAnimatingOffset()
         ) {
             return
         }
@@ -76,20 +78,23 @@ private suspend fun <T : ContentKey> animate(
         )
     }
 
-    layoutImpl.state.startTransition(animation.contentTransition)
-    try {
-        progress.collect { backEvent -> animation.dragOffset = backEvent.progress }
+    coroutineScope {
+        launch {
+            try {
+                progress.collect { backEvent -> animation.dragOffset = backEvent.progress }
 
-        // Back gesture successful.
-        animateOffset(
-            animation.toContent,
-            animation.contentTransition.transformationSpec.progressSpec
-        )
-    } catch (e: CancellationException) {
-        // Back gesture cancelled.
-        // If the back gesture is cancelled, the progress is animated back to 0f by the system.
-        // Since the remaining change in progress is usually very small, the progressSpec is omitted
-        // and the default spring spec used instead.
-        animateOffset(animation.fromContent)
+                // Back gesture successful.
+                animateOffset(
+                    animation.toContent,
+                    animation.contentTransition.transformationSpec.progressSpec,
+                )
+            } catch (e: CancellationException) {
+                // Back gesture cancelled.
+                animateOffset(animation.fromContent)
+            }
+        }
+
+        // Start the transition.
+        layoutImpl.state.startTransition(animation.contentTransition)
     }
 }

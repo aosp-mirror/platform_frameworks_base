@@ -28,14 +28,10 @@ import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import kotlin.math.absoluteValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CompletableDeferred
 
 internal fun createSwipeAnimation(
     layoutState: MutableSceneTransitionLayoutStateImpl,
-    animationScope: CoroutineScope,
     result: UserActionResult,
     isUpOrLeft: Boolean,
     orientation: Orientation,
@@ -43,7 +39,6 @@ internal fun createSwipeAnimation(
 ): SwipeAnimation<*> {
     return createSwipeAnimation(
         layoutState,
-        animationScope,
         result,
         isUpOrLeft,
         orientation,
@@ -56,7 +51,6 @@ internal fun createSwipeAnimation(
 
 internal fun createSwipeAnimation(
     layoutImpl: SceneTransitionLayoutImpl,
-    animationScope: CoroutineScope,
     result: UserActionResult,
     isUpOrLeft: Boolean,
     orientation: Orientation,
@@ -88,7 +82,6 @@ internal fun createSwipeAnimation(
 
     return createSwipeAnimation(
         layoutImpl.state,
-        animationScope,
         result,
         isUpOrLeft,
         orientation,
@@ -99,7 +92,6 @@ internal fun createSwipeAnimation(
 
 private fun createSwipeAnimation(
     layoutState: MutableSceneTransitionLayoutStateImpl,
-    animationScope: CoroutineScope,
     result: UserActionResult,
     isUpOrLeft: Boolean,
     orientation: Orientation,
@@ -109,7 +101,6 @@ private fun createSwipeAnimation(
     fun <T : ContentKey> swipeAnimation(fromContent: T, toContent: T): SwipeAnimation<T> {
         return SwipeAnimation(
             layoutState = layoutState,
-            animationScope = animationScope,
             fromContent = fromContent,
             toContent = toContent,
             orientation = orientation,
@@ -197,7 +188,6 @@ internal fun createSwipeAnimation(old: SwipeAnimation<*>): SwipeAnimation<*> {
 /** A helper class that contains the main logic for swipe transitions. */
 internal class SwipeAnimation<T : ContentKey>(
     val layoutState: MutableSceneTransitionLayoutStateImpl,
-    val animationScope: CoroutineScope,
     val fromContent: T,
     val toContent: T,
     override val orientation: Orientation,
@@ -210,14 +200,22 @@ internal class SwipeAnimation<T : ContentKey>(
     /** The [TransitionState.Transition] whose implementation delegates to this [SwipeAnimation]. */
     lateinit var contentTransition: TransitionState.Transition
 
-    var currentContent by mutableStateOf(currentContent)
+    private var _currentContent by mutableStateOf(currentContent)
+    var currentContent: T
+        get() = _currentContent
+        set(value) {
+            check(!isAnimatingOffset()) {
+                "currentContent can not be changed once we are animating the offset"
+            }
+            _currentContent = value
+        }
 
     val progress: Float
         get() {
             // Important: If we are going to return early because distance is equal to 0, we should
             // still make sure we read the offset before returning so that the calling code still
             // subscribes to the offset value.
-            val animatable = offsetAnimation?.animatable
+            val animatable = offsetAnimation
             val offset =
                 when {
                     animatable != null -> animatable.value
@@ -238,7 +236,7 @@ internal class SwipeAnimation<T : ContentKey>(
 
     val progressVelocity: Float
         get() {
-            val animatable = offsetAnimation?.animatable ?: return 0f
+            val animatable = offsetAnimation ?: return 0f
             val distance = distance()
             if (distance == DistanceUnspecified) {
                 return 0f
@@ -263,7 +261,8 @@ internal class SwipeAnimation<T : ContentKey>(
     var dragOffset by mutableFloatStateOf(dragOffset)
 
     /** The offset animation that animates the offset once the user lifts their finger. */
-    private var offsetAnimation: OffsetAnimation? by mutableStateOf(null)
+    private var offsetAnimation: Animatable<Float, AnimationVector1D>? by mutableStateOf(null)
+    private val offsetAnimationRunnable = CompletableDeferred<(suspend () -> Unit)?>()
 
     val isUserInputOngoing: Boolean
         get() = offsetAnimation == null
@@ -271,15 +270,10 @@ internal class SwipeAnimation<T : ContentKey>(
     override val absoluteDistance: Float
         get() = distance().absoluteValue
 
-    /** Whether [finish] was called on this animation. */
-    var isFinishing = false
-        private set
-
     constructor(
         other: SwipeAnimation<T>
     ) : this(
         layoutState = other.layoutState,
-        animationScope = other.animationScope,
         fromContent = other.fromContent,
         toContent = other.toContent,
         orientation = other.orientation,
@@ -287,8 +281,15 @@ internal class SwipeAnimation<T : ContentKey>(
         requiresFullDistanceSwipe = other.requiresFullDistanceSwipe,
         distance = other.distance,
         currentContent = other.currentContent,
-        dragOffset = other.dragOffset,
+        dragOffset = other.offsetAnimation?.value ?: other.dragOffset,
     )
+
+    suspend fun run() {
+        // When this animation is started, wait for the offset animation runnable to be set and
+        // run it.
+        val runAnimation = offsetAnimationRunnable.await() ?: return
+        runAnimation()
+    }
 
     /**
      * The signed distance between [fromContent] and [toContent]. It is negative if [fromContent] is
@@ -300,28 +301,15 @@ internal class SwipeAnimation<T : ContentKey>(
      */
     fun distance(): Float = distance(this)
 
-    /** Ends any previous [offsetAnimation] and runs the new [animation]. */
-    private fun startOffsetAnimation(animation: () -> OffsetAnimation): OffsetAnimation {
-        cancelOffsetAnimation()
-        return animation().also { offsetAnimation = it }
-    }
-
-    /** Cancel any ongoing offset animation. */
-    // TODO(b/317063114) This should be a suspended function to avoid multiple jobs running at
-    // the same time.
-    fun cancelOffsetAnimation() {
-        val animation = offsetAnimation ?: return
-        offsetAnimation = null
-
-        dragOffset = animation.animatable.value
-        animation.job.cancel()
-    }
+    fun isAnimatingOffset(): Boolean = offsetAnimation != null
 
     fun animateOffset(
         initialVelocity: Float,
         targetContent: T,
         spec: AnimationSpec<Float>? = null,
-    ): OffsetAnimation {
+    ) {
+        check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
+
         val initialProgress = progress
         // Skip the animation if we have already reached the target content and the overscroll does
         // not animate anything.
@@ -358,73 +346,75 @@ internal class SwipeAnimation<T : ContentKey>(
             currentContent = targetContent
         }
 
-        return startOffsetAnimation {
-            val startProgress =
-                if (contentTransition.previewTransformationSpec != null) 0f else dragOffset
-            val animatable = Animatable(startProgress, OffsetVisibilityThreshold)
-            val isTargetGreater = targetOffset > animatable.value
-            val startedWhenOvercrollingTargetContent =
-                if (targetContent == fromContent) initialProgress < 0f else initialProgress > 1f
-            val job =
-                animationScope
-                    // Important: We start atomically to make sure that we start the coroutine even
-                    // if it is cancelled right after it is launched, so that snapToContent() is
-                    // correctly called. Otherwise, this transition will never be stopped and we
-                    // will never settle to Idle.
-                    .launch(start = CoroutineStart.ATOMIC) {
-                        // TODO(b/327249191): Refactor the code so that we don't even launch a
-                        // coroutine if we don't need to animate.
-                        if (skipAnimation) {
-                            snapToContent(targetContent)
-                            dragOffset = targetOffset
-                            return@launch
-                        }
+        val startProgress =
+            if (contentTransition.previewTransformationSpec != null) 0f else dragOffset
 
-                        try {
-                            val swipeSpec =
-                                spec
-                                    ?: contentTransition.transformationSpec.swipeSpec
-                                    ?: layoutState.transitions.defaultSwipeSpec
-                            animatable.animateTo(
-                                targetValue = targetOffset,
-                                animationSpec = swipeSpec,
-                                initialVelocity = initialVelocity,
-                            ) {
-                                if (bouncingContent == null) {
-                                    val isBouncing =
-                                        if (isTargetGreater) {
-                                            if (startedWhenOvercrollingTargetContent) {
-                                                value >= targetOffset
-                                            } else {
-                                                value > targetOffset
-                                            }
-                                        } else {
-                                            if (startedWhenOvercrollingTargetContent) {
-                                                value <= targetOffset
-                                            } else {
-                                                value < targetOffset
-                                            }
-                                        }
+        val animatable =
+            Animatable(startProgress, OffsetVisibilityThreshold).also { offsetAnimation = it }
 
-                                    if (isBouncing) {
-                                        bouncingContent = targetContent
+        check(isAnimatingOffset())
 
-                                        // Immediately stop this transition if we are bouncing on a
-                                        // content that does not bounce.
-                                        if (!contentTransition.isWithinProgressRange(progress)) {
-                                            snapToContent(targetContent)
-                                        }
-                                    }
+        // Note: we still create the animatable and set it on offsetAnimation even when
+        // skipAnimation is true, just so that isUserInputOngoing and isAnimatingOffset() are
+        // unchanged even despite this small skip-optimization (which is just an implementation
+        // detail).
+        if (skipAnimation) {
+            // Unblock the job.
+            offsetAnimationRunnable.complete(null)
+            return
+        }
+
+        val isTargetGreater = targetOffset > animatable.value
+        val startedWhenOvercrollingTargetContent =
+            if (targetContent == fromContent) initialProgress < 0f else initialProgress > 1f
+
+        val swipeSpec =
+            spec
+                ?: contentTransition.transformationSpec.swipeSpec
+                ?: layoutState.transitions.defaultSwipeSpec
+
+        offsetAnimationRunnable.complete {
+            try {
+                animatable.animateTo(
+                    targetValue = targetOffset,
+                    animationSpec = swipeSpec,
+                    initialVelocity = initialVelocity,
+                ) {
+                    if (bouncingContent == null) {
+                        val isBouncing =
+                            if (isTargetGreater) {
+                                if (startedWhenOvercrollingTargetContent) {
+                                    value >= targetOffset
+                                } else {
+                                    value > targetOffset
+                                }
+                            } else {
+                                if (startedWhenOvercrollingTargetContent) {
+                                    value <= targetOffset
+                                } else {
+                                    value < targetOffset
                                 }
                             }
-                        } finally {
-                            snapToContent(targetContent)
+
+                        if (isBouncing) {
+                            bouncingContent = targetContent
+
+                            // Immediately stop this transition if we are bouncing on a content that
+                            // does not bounce.
+                            if (!contentTransition.isWithinProgressRange(progress)) {
+                                throw SnapException()
+                            }
                         }
                     }
-
-            OffsetAnimation(animatable, job)
+                }
+            } catch (_: SnapException) {
+                /* Ignore. */
+            }
         }
     }
+
+    /** An exception thrown during the animation to stop it immediately. */
+    private class SnapException : Exception()
 
     private fun canChangeContent(targetContent: ContentKey): Boolean {
         return when (val transition = contentTransition) {
@@ -446,34 +436,11 @@ internal class SwipeAnimation<T : ContentKey>(
         }
     }
 
-    private fun snapToContent(content: T) {
-        cancelOffsetAnimation()
-        check(currentContent == content)
-        layoutState.finishTransition(contentTransition)
+    fun freezeAndAnimateToCurrentState() {
+        if (isAnimatingOffset()) return
+
+        animateOffset(initialVelocity = 0f, targetContent = currentContent)
     }
-
-    fun finish(): Job {
-        if (isFinishing) return requireNotNull(offsetAnimation).job
-        isFinishing = true
-
-        // If we were already animating the offset, simply return the job.
-        offsetAnimation?.let {
-            return it.job
-        }
-
-        // Animate to the current content.
-        val animation = animateOffset(initialVelocity = 0f, targetContent = currentContent)
-        check(offsetAnimation == animation)
-        return animation.job
-    }
-
-    internal class OffsetAnimation(
-        /** The animatable used to animate the offset. */
-        val animatable: Animatable<Float, AnimationVector1D>,
-
-        /** The job in which [animatable] is animated. */
-        val job: Job,
-    )
 }
 
 private object DefaultSwipeDistance : UserActionDistance {
@@ -537,7 +504,13 @@ private class ChangeSceneSwipeTransition(
     override val isUserInputOngoing: Boolean
         get() = swipeAnimation.isUserInputOngoing
 
-    override fun finish(): Job = swipeAnimation.finish()
+    override suspend fun run() {
+        swipeAnimation.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        swipeAnimation.freezeAndAnimateToCurrentState()
+    }
 }
 
 private class ShowOrHideOverlaySwipeTransition(
@@ -594,7 +567,13 @@ private class ShowOrHideOverlaySwipeTransition(
     override val isUserInputOngoing: Boolean
         get() = swipeAnimation.isUserInputOngoing
 
-    override fun finish(): Job = swipeAnimation.finish()
+    override suspend fun run() {
+        swipeAnimation.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        swipeAnimation.freezeAndAnimateToCurrentState()
+    }
 }
 
 private class ReplaceOverlaySwipeTransition(
@@ -645,5 +624,11 @@ private class ReplaceOverlaySwipeTransition(
     override val isUserInputOngoing: Boolean
         get() = swipeAnimation.isUserInputOngoing
 
-    override fun finish(): Job = swipeAnimation.finish()
+    override suspend fun run() {
+        swipeAnimation.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        swipeAnimation.freezeAndAnimateToCurrentState()
+    }
 }
