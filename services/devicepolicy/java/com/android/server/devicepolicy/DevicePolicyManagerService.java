@@ -1328,9 +1328,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Bundle prevRestrictions) {
             resetCrossProfileIntentFiltersIfNeeded(userId, newRestrictions, prevRestrictions);
             resetUserVpnIfNeeded(userId, newRestrictions, prevRestrictions);
-            if (Flags.deletePrivateSpaceUnderRestriction()) {
-                removePrivateSpaceIfRestrictionIsSet(userId, newRestrictions, prevRestrictions);
-            }
+            removePrivateSpaceIfRestrictionIsSet(userId, newRestrictions, prevRestrictions);
         }
 
         private void resetUserVpnIfNeeded(

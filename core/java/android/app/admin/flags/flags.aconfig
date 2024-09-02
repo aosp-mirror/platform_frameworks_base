@@ -300,16 +300,6 @@ flag {
 }
 
 flag {
-  name: "delete_private_space_under_restriction"
-  namespace: "enterprise"
-  description: "Delete private space if user restriction is set"
-  bug: "328758346"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "unmanaged_mode_migration"
     namespace: "enterprise"
     description: "Migrate APIs for unmanaged mode"
