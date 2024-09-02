@@ -21,6 +21,10 @@ import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
+import com.android.compose.animation.scene.UserActionResult.ChangeScene
+import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -44,9 +48,11 @@ internal fun PredictiveBackHandler(
         val animation =
             createSwipeAnimation(
                 layoutImpl,
-                result.userActionCopy(
-                    transitionKey = result.transitionKey ?: TransitionKey.PredictiveBack
-                ),
+                if (result.transitionKey != null) {
+                    result
+                } else {
+                    result.copy(transitionKey = TransitionKey.PredictiveBack)
+                },
                 isUpOrLeft = false,
                 // Note that the orientation does not matter here given that it's only used to
                 // compute the distance. In our case the distance is always 1f.
@@ -96,5 +102,16 @@ private suspend fun <T : ContentKey> animate(
 
         // Start the transition.
         layoutImpl.state.startTransition(animation.contentTransition)
+    }
+}
+
+private fun UserActionResult.copy(
+    transitionKey: TransitionKey? = this.transitionKey
+): UserActionResult {
+    return when (this) {
+        is ChangeScene -> copy(transitionKey = transitionKey)
+        is ShowOverlay -> copy(transitionKey = transitionKey)
+        is HideOverlay -> copy(transitionKey = transitionKey)
+        is ReplaceByOverlay -> copy(transitionKey = transitionKey)
     }
 }
