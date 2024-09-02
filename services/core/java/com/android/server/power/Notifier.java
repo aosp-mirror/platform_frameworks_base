@@ -1064,9 +1064,9 @@ public class Notifier {
     private void notifyWakeLockListener(IWakeLockCallback callback, String tag, boolean isEnabled,
             int ownerUid, int ownerPid, int flags, WorkSource workSource, String packageName,
             String historyTag) {
+        long currentTime = mInjector.currentTimeMillis();
         mHandler.post(() -> {
             if (mFlags.improveWakelockLatency()) {
-                long currentTime = mInjector.currentTimeMillis();
                 if (isEnabled) {
                     notifyWakelockAcquisition(tag, ownerUid, ownerPid, flags,
                             workSource, packageName, historyTag, currentTime);
