@@ -285,8 +285,9 @@ internal class SwipeAnimation<T : ContentKey>(
     )
 
     suspend fun run() {
-        // When this animation is started, wait for the offset animation runnable to be set and
-        // run it.
+        // This animation will first be driven by finger, then when the user lift their finger we
+        // start an animation to the target offset (progress = 1f or progress = 0f). We await() for
+        // offsetAnimationRunnable to be completed and then run it.
         val runAnimation = offsetAnimationRunnable.await() ?: return
         runAnimation()
     }
