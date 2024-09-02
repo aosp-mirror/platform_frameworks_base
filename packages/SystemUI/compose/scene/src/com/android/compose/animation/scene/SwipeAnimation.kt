@@ -218,8 +218,8 @@ internal class SwipeAnimation<T : ContentKey>(
             val animatable = offsetAnimation
             val offset =
                 when {
+                    isInPreviewStage -> 0f
                     animatable != null -> animatable.value
-                    contentTransition.previewTransformationSpec != null -> 0f
                     else -> dragOffset
                 }
 
@@ -247,7 +247,15 @@ internal class SwipeAnimation<T : ContentKey>(
         }
 
     val previewProgress: Float
-        get() = computeProgress(dragOffset)
+        get() {
+            val offset =
+                if (isInPreviewStage) {
+                    offsetAnimation?.value ?: dragOffset
+                } else {
+                    dragOffset
+                }
+            return computeProgress(offset)
+        }
 
     val previewProgressVelocity: Float
         get() = 0f
@@ -348,7 +356,11 @@ internal class SwipeAnimation<T : ContentKey>(
         }
 
         val startProgress =
-            if (contentTransition.previewTransformationSpec != null) 0f else dragOffset
+            if (contentTransition.previewTransformationSpec != null && targetContent == toContent) {
+                0f
+            } else {
+                dragOffset
+            }
 
         val animatable =
             Animatable(startProgress, OffsetVisibilityThreshold).also { offsetAnimation = it }

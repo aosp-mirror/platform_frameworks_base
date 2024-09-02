@@ -200,6 +200,8 @@ class DraggableHandlerTest {
             fromScene: SceneKey? = null,
             toScene: SceneKey? = null,
             progress: Float? = null,
+            previewProgress: Float? = null,
+            isInPreviewStage: Boolean? = null,
             isUserInputOngoing: Boolean? = null
         ): Transition {
             val transition = assertThat(transitionState).isSceneTransition()
@@ -207,6 +209,10 @@ class DraggableHandlerTest {
             fromScene?.let { assertThat(transition).hasFromScene(it) }
             toScene?.let { assertThat(transition).hasToScene(it) }
             progress?.let { assertThat(transition).hasProgress(it) }
+            previewProgress?.let { assertThat(transition).hasPreviewProgress(it) }
+            isInPreviewStage?.let {
+                assertThat(transition).run { if (it) isInPreviewStage() else isNotInPreviewStage() }
+            }
             isUserInputOngoing?.let { assertThat(transition).hasIsUserInputOngoing(it) }
             return transition
         }
@@ -351,6 +357,32 @@ class DraggableHandlerTest {
         advanceUntilIdle()
         assertIdle(currentScene = SceneA)
     }
+
+    @Test
+    fun onDragStoppedAfterDrag_velocityLowerThanThreshold_remainSameScene_previewAnimated() =
+        runGestureTest {
+            layoutState.transitions = transitions {
+                // set a preview for the transition
+                from(SceneA, to = SceneC, preview = {}) {}
+            }
+            val dragController = onDragStarted(overSlop = down(fractionOfScreen = 0.1f))
+            assertTransition(currentScene = SceneA)
+
+            dragController.onDragStopped(velocity = velocityThreshold - 0.01f)
+            runCurrent()
+
+            // verify that transition remains in preview stage and animates back to fromScene
+            assertTransition(
+                currentScene = SceneA,
+                isInPreviewStage = true,
+                previewProgress = 0.1f,
+                progress = 0f
+            )
+
+            // wait for the stop animation
+            advanceUntilIdle()
+            assertIdle(currentScene = SceneA)
+        }
 
     @Test
     fun onDragStoppedAfterDrag_velocityAtLeastThreshold_goToNextScene() = runGestureTest {
