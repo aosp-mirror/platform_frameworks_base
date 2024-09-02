@@ -478,14 +478,14 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             // The boot animation might still be in progress, we do not want to switch states now
             // as the boot animation would end up with an incorrect size.
             if (DEBUG) {
-                Slog.d(TAG, "Postponing transition to state: " + mPendingDeviceState
-                        + " until boot is completed");
+                Slog.d(TAG, "Postponing transition to state: "
+                        + mPendingDeviceState.getIdentifier() + " until boot is completed");
             }
             mDeviceStateToBeAppliedAfterBoot = state;
             return;
         }
 
-        Slog.i(TAG, "Requesting Transition to state: " + state + ", from state="
+        Slog.i(TAG, "Requesting Transition to state: " + state.getIdentifier() + ", from state="
                 + mDeviceState.getIdentifier() + ", interactive=" + mInteractive
                 + ", mBootCompleted=" + mBootCompleted);
         // As part of a state transition, we may need to turn off some displays temporarily so that
