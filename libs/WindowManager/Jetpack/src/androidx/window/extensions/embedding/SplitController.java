@@ -920,7 +920,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // Update all TaskFragments in the Task. Make a copy of the list since some may be
         // removed on updating.
-        final List<TaskFragmentContainer> containers = taskContainer.getTaskFragmentContainers();
+        final List<TaskFragmentContainer> containers
+                = new ArrayList<>(taskContainer.getTaskFragmentContainers());
         for (int i = containers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = containers.get(i);
             // Wait until onTaskFragmentAppeared to update new container.

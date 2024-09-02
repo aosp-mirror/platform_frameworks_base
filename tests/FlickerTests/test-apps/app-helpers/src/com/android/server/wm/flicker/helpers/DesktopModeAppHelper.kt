@@ -48,6 +48,13 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         RIGHT_BOTTOM
     }
 
+    enum class Edges {
+        LEFT,
+        RIGHT,
+        TOP,
+        BOTTOM
+    }
+
     /** Wait for an app moved to desktop to finish its transition. */
     private fun waitForAppToMoveToDesktop(wmHelper: WindowManagerStateHelper) {
         wmHelper
@@ -124,7 +131,8 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
         val displayRect = getDisplayRect(wmHelper)
         val insets = getWindowInsets(
-            context, WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+            context, WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
+        )
         displayRect.inset(insets)
 
         val expectedWidth = displayRect.width() / 2
@@ -187,6 +195,40 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         dragWindow(startX, startY, endX, endY, wmHelper, device)
     }
 
+    /** Resize a desktop app from its edges. */
+    fun edgeResize(
+        wmHelper: WindowManagerStateHelper,
+        motionEvent: MotionEventHelper,
+        edge: Edges
+    ) {
+        val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
+        val (startX, startY) = getStartCoordinatesForEdgeResize(windowRect, edge)
+        val verticalChange = when (edge) {
+            Edges.LEFT -> 0
+            Edges.RIGHT -> 0
+            Edges.TOP -> -100
+            Edges.BOTTOM -> 100
+        }
+        val horizontalChange = when (edge) {
+            Edges.LEFT -> -100
+            Edges.RIGHT -> 100
+            Edges.TOP -> 0
+            Edges.BOTTOM -> 0
+        }
+
+        // The position we want to drag to
+        val endY = startY + verticalChange
+        val endX = startX + horizontalChange
+
+        motionEvent.actionDown(startX, startY)
+        motionEvent.actionMove(startX, startY, endX, endY, /* steps= */100)
+        motionEvent.actionUp(endX, endY)
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .waitForAndVerify()
+    }
+
     /** Drag a window from a source coordinate to a destination coordinate. */
     fun dragWindow(
         startX: Int, startY: Int,
@@ -234,6 +276,18 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             Corners.RIGHT_TOP -> Pair(windowRect.right, windowRect.top)
             Corners.LEFT_BOTTOM -> Pair(windowRect.left, windowRect.bottom)
             Corners.RIGHT_BOTTOM -> Pair(windowRect.right, windowRect.bottom)
+        }
+    }
+
+    private fun getStartCoordinatesForEdgeResize(
+        windowRect: Rect,
+        edge: Edges
+    ): Pair<Int, Int> {
+        return when (edge) {
+            Edges.LEFT -> Pair(windowRect.left, windowRect.bottom / 2)
+            Edges.RIGHT -> Pair(windowRect.right, windowRect.bottom / 2)
+            Edges.TOP -> Pair(windowRect.right / 2, windowRect.top)
+            Edges.BOTTOM -> Pair(windowRect.right / 2, windowRect.bottom)
         }
     }
 

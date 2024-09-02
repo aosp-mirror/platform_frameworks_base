@@ -35,7 +35,6 @@ import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transition.link.LinkedTransition
 import com.android.compose.animation.scene.transition.link.StateLink
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** The state associated to a [SceneTransitionLayout] at some specific point in time. */
@@ -300,19 +299,19 @@ sealed interface TransitionState {
             return fromContent == content || toContent == content
         }
 
+        /** Run this transition and return once it is finished. */
+        internal abstract suspend fun run()
+
         /**
-         * Force this transition to finish and animate to an [Idle] state.
+         * Freeze this transition state so that neither [currentScene] nor [currentOverlays] will
+         * change in the future, and animate the progress towards that state. For instance, a
+         * [Transition.ChangeScene] should animate the progress to 0f if its [currentScene] is equal
+         * to its [fromScene][Transition.ChangeScene.fromScene] or animate it to 1f if its equal to
+         * its [toScene][Transition.ChangeScene.toScene].
          *
-         * Important: Once this is called, the effective state of the transition should remain
-         * unchanged. For instance, in the case of a [TransitionState.Transition], its
-         * [currentScene][TransitionState.Transition.currentScene] should never change once [finish]
-         * is called.
-         *
-         * @return the [Job] that animates to the idle state. It can be used to wait until the
-         *   animation is complete or cancel it to snap the animation. Calling [finish] multiple
-         *   times will return the same [Job].
+         * This is called when this transition is interrupted (replaced) by another transition.
          */
-        internal abstract fun finish(): Job
+        internal abstract fun freezeAndAnimateToCurrentState()
 
         internal fun updateOverscrollSpecs(
             fromSpec: OverscrollSpecImpl?,
@@ -350,7 +349,7 @@ sealed interface TransitionState {
 
             fun create(): Animatable<Float, AnimationVector1D> {
                 val animatable = Animatable(1f, visibilityThreshold = ProgressVisibilityThreshold)
-                layoutImpl.coroutineScope.launch {
+                layoutImpl.animationScope.launch {
                     val swipeSpec = layoutImpl.state.transitions.defaultSwipeSpec
                     val progressSpec =
                         spring(

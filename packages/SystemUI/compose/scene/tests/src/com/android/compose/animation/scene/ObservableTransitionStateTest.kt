@@ -29,6 +29,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
@@ -139,7 +140,7 @@ class ObservableTransitionStateTest {
         var transitionCurrentScene by mutableStateOf(SceneA)
         val transition =
             transition(from = SceneA, to = SceneB, current = { transitionCurrentScene })
-        state.startTransition(transition)
+        state.startTransitionImmediately(animationScope = backgroundScope, transition)
         assertThat(currentScene.value).isEqualTo(SceneA)
 
         // Change the transition current scene.
