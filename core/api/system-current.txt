@@ -4632,6 +4632,7 @@ package android.content.rollback {
     method public int getCommittedSessionId();
     method @NonNull public java.util.List<android.content.rollback.PackageRollbackInfo> getPackages();
     method public int getRollbackId();
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public int getRollbackImpactLevel();
     method public boolean isStaged();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
