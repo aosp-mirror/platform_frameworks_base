@@ -2,7 +2,6 @@ package com.android.systemui.scene
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.scene.shared.model.FakeScene
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
@@ -18,10 +17,6 @@ var Kosmos.sceneKeys by Fixture {
         Scenes.Communal,
     )
 }
-
-val Kosmos.fakeScenes by Fixture { sceneKeys.map { key -> FakeScene(key) }.toSet() }
-
-val Kosmos.scenes by Fixture { fakeScenes }
 
 val Kosmos.initialSceneKey by Fixture { Scenes.Lockscreen }
 

@@ -121,7 +121,7 @@ Should a variant owner or OEM want to replace or add a new scene, they could
 do so by defining their own scene. This section describes how to do that.
 
 Each scene is defined as an implementation of the
-[`ComposableScene`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/ComposableScene.kt)
+[`Scene`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/Scene.kt)
 interface, which has three parts: 1. The `key` property returns the
 [`SceneKey`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/scene/shared/model/SceneKey.kt)
 that uniquely identifies that scene 2. The `destinationScenes` `Flow` returns
@@ -138,7 +138,7 @@ see the [Scene transition animations](#Scene-transition-animations) section
 For example:
 
 ```kotlin
-@SysUISingleton class YourScene @Inject constructor( /* your dependencies here */ ) : ComposableScene {
+@SysUISingleton class YourScene @Inject constructor( /* your dependencies here */ ) : Scene {
     override val key = SceneKey.YourScene
 
     override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =

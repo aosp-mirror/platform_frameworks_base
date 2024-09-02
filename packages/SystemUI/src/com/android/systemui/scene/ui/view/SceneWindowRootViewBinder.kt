@@ -44,11 +44,10 @@ import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
-import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.scene.ui.composable.Overlay
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -187,8 +186,7 @@ object SceneWindowRootViewBinder {
                     ) {
                         SceneContainer(
                             viewModel = viewModel,
-                            sceneByKey =
-                                sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
+                            sceneByKey = sceneByKey,
                             overlayByKey = overlayByKey,
                             initialSceneKey = containerConfig.initialSceneKey,
                             dataSourceDelegator = dataSourceDelegator,

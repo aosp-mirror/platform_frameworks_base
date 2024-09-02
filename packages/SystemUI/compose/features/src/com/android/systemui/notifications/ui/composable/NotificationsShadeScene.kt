@@ -32,7 +32,7 @@ import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
@@ -57,7 +57,7 @@ constructor(
     private val statusBarIconController: StatusBarIconController,
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
 
     override val key = Scenes.NotificationsShade
 

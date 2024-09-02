@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.compose.animation.scene.animateSceneDpAsState
-import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.animation.scene.animateContentDpAsState
+import com.android.compose.animation.scene.animateContentFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
@@ -51,7 +51,7 @@ constructor(
     private val notificationStackScrolLView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val viewModelFactory: GoneSceneActionsViewModel.Factory,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Gone
 
     private val actionsViewModel: GoneSceneActionsViewModel by lazy { viewModelFactory.create() }
@@ -67,11 +67,11 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        animateSceneFloatAsState(
+        animateContentFloatAsState(
             value = QuickSettings.SharedValues.SquishinessValues.GoneSceneStarting,
             key = QuickSettings.SharedValues.TilesSquishiness,
         )
-        animateSceneDpAsState(value = Default, key = MediaLandscapeTopOffset, canOverflow = false)
+        animateContentDpAsState(value = Default, key = MediaLandscapeTopOffset, canOverflow = false)
         Spacer(modifier.fillMaxSize())
         SnoozeableHeadsUpNotificationSpace(
             stackScrollView = notificationStackScrolLView.get(),
