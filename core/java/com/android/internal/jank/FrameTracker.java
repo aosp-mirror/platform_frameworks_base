@@ -158,17 +158,12 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             this.surfaceControlCallbackFired = true;
             this.jankType = jankStat.jankType;
             this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.frameIntervalNs);
-            if (Flags.useSfFrameDuration()) {
-                this.totalDurationNanos = jankStat.actualAppFrameTimeNs;
-            }
             return this;
         }
 
         private JankInfo update(long totalDurationNanos, boolean isFirstFrame) {
             this.hwuiCallbackFired = true;
-            if (!Flags.useSfFrameDuration()) {
-                this.totalDurationNanos = totalDurationNanos;
-            }
+            this.totalDurationNanos = totalDurationNanos;
             this.isFirstFrame = isFirstFrame;
             return this;
         }
