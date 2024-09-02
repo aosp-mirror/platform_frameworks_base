@@ -12452,12 +12452,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (packageList != null) {
-            if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                for (String pkg : packageList) {
-                    PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
-                }
-            }
-
             List<InputMethodInfo> enabledImes = mInjector.binderWithCleanCallingIdentity(() ->
                     InputMethodManagerInternal.get().getEnabledInputMethodListAsUser(userId));
             if (enabledImes != null) {
@@ -14320,10 +14314,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            PolicySizeVerifier.enforceMaxStringLength(accountType, "account type");
-        }
-
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
         synchronized (getLockObject()) {
             int affectedUser = getAffectedUser(parent);
@@ -14934,11 +14924,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setLockTaskPackages(ComponentName who, String callerPackageName, String[] packages)
             throws SecurityException {
         Objects.requireNonNull(packages, "packages is null");
-        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            for (String pkg : packages) {
-                PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
-            }
-        }
 
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_PACKAGES);
@@ -24875,9 +24860,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
-        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            return;
-        }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
         enforcePermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, caller.getPackageName(),
                 caller.getUserId());
@@ -24891,9 +24873,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getMaxPolicyStorageLimit(String callerPackageName) {
-        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            return -1;
-        }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
         enforcePermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, caller.getPackageName(),
                 caller.getUserId());
@@ -24903,9 +24882,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void forceSetMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
-        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            return;
-        }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
         enforcePermission(MANAGE_DEVICE_POLICY_STORAGE_LIMIT, caller.getPackageName(),
                 caller.getUserId());
@@ -24916,9 +24892,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public int getPolicySizeForAdmin(
             String callerPackageName, android.app.admin.EnforcingAdmin admin) {
-        if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            return -1;
-        }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
         enforcePermission(MANAGE_DEVICE_POLICY_STORAGE_LIMIT, caller.getPackageName(),
                 caller.getUserId());
