@@ -18,13 +18,16 @@ package com.android.server.display.brightness.clamper;
 
 import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
+import android.os.IBinder;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.PowerManager;
@@ -33,12 +36,14 @@ import android.os.Temperature;
 import android.provider.DeviceConfig;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.Keep;
+import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.clamper.BrightnessClamperController.ModifiersAggregatedState;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.testutils.FakeDeviceConfigInterface;
@@ -54,10 +59,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(JUnitParamsRunner.class)
-public class BrightnessThermalClamperTest {
+public class BrightnessThermalModifierTest {
+    private static final int NO_MODIFIER = 0;
 
     private static final float FLOAT_TOLERANCE = 0.001f;
 
@@ -66,28 +74,35 @@ public class BrightnessThermalClamperTest {
     private IThermalService mMockThermalService;
     @Mock
     private BrightnessClamperController.ClamperChangeListener mMockClamperChangeListener;
+    @Mock
+    private DisplayManagerInternal.DisplayPowerRequest mMockRequest;
+    @Mock
+    private DisplayDeviceConfig mMockDisplayDeviceConfig;
+    @Mock
+    private IBinder mMockBinder;
 
     private final FakeDeviceConfigInterface mFakeDeviceConfigInterface =
             new FakeDeviceConfigInterface();
     private final TestHandler mTestHandler = new TestHandler(null);
-    private BrightnessThermalClamper mClamper;
+    private BrightnessThermalModifier mModifier;
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mClamper = new BrightnessThermalClamper(new TestInjector(), mTestHandler,
-                mMockClamperChangeListener, new TestThermalData());
+        when(mMockDisplayDeviceConfig.getTempSensor())
+                .thenReturn(SensorData.loadTempSensorUnspecifiedConfig());
+        mModifier = new BrightnessThermalModifier(new TestInjector(), mTestHandler,
+                mMockClamperChangeListener,
+                ClamperTestUtilsKt.createDisplayDeviceData(mMockDisplayDeviceConfig, mMockBinder));
         mTestHandler.flush();
     }
 
-    @Test
-    public void testTypeIsThermal() {
-        assertEquals(BrightnessClamper.Type.THERMAL, mClamper.getType());
-    }
 
     @Test
     public void testNoThrottlingData() {
-        assertFalse(mClamper.isActive());
-        assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                0.3f, true,
+                PowerManager.BRIGHTNESS_MAX, 0.3f,
+                false, true);
     }
 
     @Keep
@@ -129,15 +144,19 @@ public class BrightnessThermalClamperTest {
             @Temperature.ThrottlingStatus int throttlingStatus,
             boolean expectedActive, float expectedBrightness) throws RemoteException {
         IThermalEventListener thermalEventListener = captureSkinThermalEventListener();
-        mClamper.onDisplayChanged(new TestThermalData(throttlingLevels));
+        onDisplayChange(throttlingLevels);
         mTestHandler.flush();
-        assertFalse(mClamper.isActive());
-        assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_MAX,
+                false, true);
 
         thermalEventListener.notifyThrottling(createSkinTemperature(throttlingStatus));
         mTestHandler.flush();
-        assertEquals(expectedActive, mClamper.isActive());
-        assertEquals(expectedBrightness, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                expectedBrightness, expectedBrightness,
+                expectedActive, !expectedActive);
     }
 
     @Test
@@ -148,13 +167,56 @@ public class BrightnessThermalClamperTest {
         IThermalEventListener thermalEventListener = captureSkinThermalEventListener();
         thermalEventListener.notifyThrottling(createSkinTemperature(throttlingStatus));
         mTestHandler.flush();
-        assertFalse(mClamper.isActive());
-        assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
 
-        mClamper.onDisplayChanged(new TestThermalData(throttlingLevels));
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_MAX,
+                false, true);
+
+        onDisplayChange(throttlingLevels);
         mTestHandler.flush();
-        assertEquals(expectedActive, mClamper.isActive());
-        assertEquals(expectedBrightness, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                expectedBrightness, expectedBrightness,
+                expectedActive, !expectedActive);
+    }
+
+    @Test
+    public void testAppliesFastChangeOnlyOnActivation() throws RemoteException  {
+        IThermalEventListener thermalEventListener = captureSkinThermalEventListener();
+        onDisplayChange(List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_SEVERE, 0.5f)));
+        mTestHandler.flush();
+
+        thermalEventListener.notifyThrottling(createSkinTemperature(Temperature.THROTTLING_SEVERE));
+        mTestHandler.flush();
+
+        // expectedSlowChange = false
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                0.5f, 0.5f,
+                true, false);
+
+        // slowChange is unchanged
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                0.5f, 0.5f,
+                true, true);
+    }
+
+    @Test
+    public void testCapsMaxBrightnessOnly_currentBrightnessIsLowAndFastChange()
+            throws RemoteException {
+        IThermalEventListener thermalEventListener = captureSkinThermalEventListener();
+        onDisplayChange(List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_SEVERE, 0.5f)));
+        mTestHandler.flush();
+
+        thermalEventListener.notifyThrottling(createSkinTemperature(Temperature.THROTTLING_SEVERE));
+        mTestHandler.flush();
+
+        assertModifierState(
+                0.1f, false,
+                0.5f, 0.1f,
+                true, false);
     }
 
     @Test
@@ -162,28 +224,37 @@ public class BrightnessThermalClamperTest {
         IThermalEventListener thermalEventListener = captureSkinThermalEventListener();
         thermalEventListener.notifyThrottling(createSkinTemperature(Temperature.THROTTLING_SEVERE));
         mTestHandler.flush();
-        assertFalse(mClamper.isActive());
-        assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
 
-        mClamper.onDisplayChanged(new TestThermalData(
-                List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_SEVERE, 0.5f))));
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_MAX,
+                false, true);
+
+        onDisplayChange(List.of(new ThrottlingLevel(PowerManager.THERMAL_STATUS_SEVERE, 0.5f)));
         mTestHandler.flush();
-        assertTrue(mClamper.isActive());
-        assertEquals(0.5f, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                0.5f, 0.5f,
+                true, false);
 
         overrideThrottlingData("displayId,1,emergency,0.4");
-        mClamper.onDeviceConfigChanged();
+        mModifier.onDeviceConfigChanged();
         mTestHandler.flush();
 
-        assertFalse(mClamper.isActive());
-        assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_MAX,
+                false, true);
 
         overrideThrottlingData("displayId,1,moderate,0.4");
-        mClamper.onDeviceConfigChanged();
+        mModifier.onDeviceConfigChanged();
         mTestHandler.flush();
 
-        assertTrue(mClamper.isActive());
-        assertEquals(0.4f, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                0.4f, 0.4f,
+                true, false);
     }
 
     @Test
@@ -191,35 +262,41 @@ public class BrightnessThermalClamperTest {
         final int severity = PowerManager.THERMAL_STATUS_SEVERE;
         IThermalEventListener thermalEventListener = captureSkinThermalEventListener();
         // Update config to listen to display type sensor.
-        final SensorData tempSensor = createSensorData("DISPLAY", "VIRTUAL-SKIN-DISPLAY");
-        final TestThermalData thermalData =
-                    new TestThermalData(
-                        DISPLAY_ID,
-                        DisplayDeviceConfig.DEFAULT_ID,
-                        List.of(new ThrottlingLevel(severity, 0.5f)),
-                        tempSensor);
-        mClamper.onDisplayChanged(thermalData);
+        SensorData tempSensor = createSensorData("DISPLAY", "VIRTUAL-SKIN-DISPLAY");
+
+        when(mMockDisplayDeviceConfig.getTempSensor()).thenReturn(tempSensor);
+        onDisplayChange(List.of(new ThrottlingLevel(severity, 0.5f)));
         mTestHandler.flush();
+
         verify(mMockThermalService).unregisterThermalEventListener(thermalEventListener);
         thermalEventListener = captureThermalEventListener(Temperature.TYPE_DISPLAY);
-        assertFalse(mClamper.isActive());
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_MAX,
+                false, true);
 
         // Verify no throttling triggered when any other sensor notification received.
         thermalEventListener.notifyThrottling(createSkinTemperature(severity));
         mTestHandler.flush();
-        assertFalse(mClamper.isActive());
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_MAX,
+                false, true);
 
         thermalEventListener.notifyThrottling(createDisplayTemperature("OTHER-SENSOR", severity));
         mTestHandler.flush();
-        assertFalse(mClamper.isActive());
-
-        assertEquals(PowerManager.BRIGHTNESS_MAX, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                PowerManager.BRIGHTNESS_MAX, PowerManager.BRIGHTNESS_MAX,
+                false, true);
 
         // Verify throttling triggered when display sensor of given name throttled.
         thermalEventListener.notifyThrottling(createDisplayTemperature(tempSensor.name, severity));
         mTestHandler.flush();
-        assertTrue(mClamper.isActive());
-        assertEquals(0.5f, mClamper.getBrightnessCap(), FLOAT_TOLERANCE);
+        assertModifierState(
+                PowerManager.BRIGHTNESS_MAX, true,
+                0.5f, 0.5f,
+                true, false);
     }
 
     private IThermalEventListener captureSkinThermalEventListener() throws RemoteException {
@@ -248,7 +325,46 @@ public class BrightnessThermalClamperTest {
                 DisplayManager.DeviceConfig.KEY_BRIGHTNESS_THROTTLING_DATA, data);
     }
 
-    private class TestInjector extends BrightnessThermalClamper.Injector {
+    private void onDisplayChange(List<ThrottlingLevel> throttlingLevels) {
+        Map<String, ThermalBrightnessThrottlingData> throttlingLevelsMap = new HashMap<>();
+        throttlingLevelsMap.put(DisplayDeviceConfig.DEFAULT_ID,
+                ThermalBrightnessThrottlingData.create(throttlingLevels));
+        when(mMockDisplayDeviceConfig.getThermalBrightnessThrottlingDataMapByThrottlingId())
+                .thenReturn(throttlingLevelsMap);
+        mModifier.onDisplayChanged(ClamperTestUtilsKt.createDisplayDeviceData(
+                mMockDisplayDeviceConfig, mMockBinder, DISPLAY_ID, DisplayDeviceConfig.DEFAULT_ID));
+    }
+
+    private void assertModifierState(
+            float currentBrightness,
+            boolean currentSlowChange,
+            float maxBrightness, float brightness,
+            boolean isActive,
+            boolean isSlowChange) {
+        ModifiersAggregatedState modifierState = new ModifiersAggregatedState();
+        DisplayBrightnessState.Builder stateBuilder = DisplayBrightnessState.builder();
+        stateBuilder.setBrightness(currentBrightness);
+        stateBuilder.setIsSlowChange(currentSlowChange);
+
+        int maxBrightnessReason = isActive ? BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL
+                : BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
+        int modifier = isActive ? BrightnessReason.MODIFIER_THROTTLED : NO_MODIFIER;
+
+        mModifier.applyStateChange(modifierState);
+        assertThat(modifierState.mMaxBrightness).isEqualTo(maxBrightness);
+        assertThat(modifierState.mMaxBrightnessReason).isEqualTo(maxBrightnessReason);
+
+        mModifier.apply(mMockRequest, stateBuilder);
+
+        assertThat(stateBuilder.getMaxBrightness()).isWithin(FLOAT_TOLERANCE).of(maxBrightness);
+        assertThat(stateBuilder.getBrightness()).isWithin(FLOAT_TOLERANCE).of(brightness);
+        assertThat(stateBuilder.getBrightnessMaxReason()).isEqualTo(maxBrightnessReason);
+        assertThat(stateBuilder.getBrightnessReason().getModifier()).isEqualTo(modifier);
+        assertThat(stateBuilder.isSlowChange()).isEqualTo(isSlowChange);
+    }
+
+
+    private class TestInjector extends BrightnessThermalModifier.Injector {
         @Override
         IThermalService getThermalService() {
             return mMockThermalService;
@@ -257,56 +373,6 @@ public class BrightnessThermalClamperTest {
         @Override
         DeviceConfigParameterProvider getDeviceConfigParameterProvider() {
             return new DeviceConfigParameterProvider(mFakeDeviceConfigInterface);
-        }
-    }
-
-    private static class TestThermalData implements BrightnessThermalClamper.ThermalData {
-
-        private final String mUniqueDisplayId;
-        private final String mDataId;
-        private final ThermalBrightnessThrottlingData mData;
-        private final SensorData mTempSensor;
-
-        private TestThermalData() {
-            this(DISPLAY_ID, DisplayDeviceConfig.DEFAULT_ID, null,
-                    SensorData.loadTempSensorUnspecifiedConfig());
-        }
-
-        private TestThermalData(List<ThrottlingLevel> data) {
-            this(DISPLAY_ID, DisplayDeviceConfig.DEFAULT_ID, data,
-                    SensorData.loadTempSensorUnspecifiedConfig());
-        }
-
-        private TestThermalData(String uniqueDisplayId, String dataId, List<ThrottlingLevel> data,
-                    SensorData tempSensor) {
-            mUniqueDisplayId = uniqueDisplayId;
-            mDataId = dataId;
-            mData = ThermalBrightnessThrottlingData.create(data);
-            mTempSensor = tempSensor;
-        }
-
-        @NonNull
-        @Override
-        public String getUniqueDisplayId() {
-            return mUniqueDisplayId;
-        }
-
-        @NonNull
-        @Override
-        public String getThermalThrottlingDataId() {
-            return mDataId;
-        }
-
-        @Nullable
-        @Override
-        public ThermalBrightnessThrottlingData getThermalBrightnessThrottlingData() {
-            return mData;
-        }
-
-        @NonNull
-        @Override
-        public SensorData getTempSensor() {
-            return mTempSensor;
         }
     }
 }
