@@ -37,7 +37,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.ui.viewmodel.notificationsShadeSceneActionsViewModel
+import com.android.systemui.shade.ui.viewmodel.notificationsShadeUserActionsViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,14 +52,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
+class NotificationsShadeUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
 
-    private val underTest by lazy { kosmos.notificationsShadeSceneActionsViewModel }
+    private val underTest by lazy { kosmos.notificationsShadeUserActionsViewModel }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockscreen() =

@@ -22,7 +22,7 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.map
@@ -31,11 +31,11 @@ import kotlinx.coroutines.flow.map
  * Models UI state for user actions that can lead to navigation to other scenes when showing the
  * bouncer scene.
  */
-class BouncerSceneActionsViewModel
+class BouncerUserActionsViewModel
 @AssistedInject
 constructor(
     private val bouncerInteractor: BouncerInteractor,
-) : SceneActionsViewModel() {
+) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         bouncerInteractor.dismissDestination
@@ -50,6 +50,6 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(): BouncerSceneActionsViewModel
+        fun create(): BouncerUserActionsViewModel
     }
 }

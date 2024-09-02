@@ -21,8 +21,8 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-val Kosmos.shadeSceneActionsViewModel: ShadeSceneActionsViewModel by Fixture {
-    ShadeSceneActionsViewModel(
+val Kosmos.shadeUserActionsViewModel: ShadeUserActionsViewModel by Fixture {
+    ShadeUserActionsViewModel(
         qsSceneAdapter = qsSceneAdapter,
         shadeInteractor = shadeInteractor,
     )

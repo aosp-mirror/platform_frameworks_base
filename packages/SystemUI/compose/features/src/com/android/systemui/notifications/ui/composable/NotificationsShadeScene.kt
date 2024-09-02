@@ -29,7 +29,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
-import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeUserActionsViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.Flow
 class NotificationsShadeScene
 @Inject
 constructor(
-    private val actionsViewModelFactory: NotificationsShadeSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: NotificationsShadeUserActionsViewModel.Factory,
     private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -61,7 +61,7 @@ constructor(
 
     override val key = Scenes.NotificationsShade
 
-    private val actionsViewModel: NotificationsShadeSceneActionsViewModel by lazy {
+    private val actionsViewModel: NotificationsShadeUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 

@@ -42,12 +42,12 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class SceneActionsViewModelTest : SysuiTestCase() {
+class UserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    private val underTest = FakeSceneActionsViewModel()
+    private val underTest = FakeUserActionsViewModel()
 
     @Test
     fun actions_emptyBeforeActivation() =
@@ -115,7 +115,7 @@ class SceneActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isEmpty()
         }
 
-    private class FakeSceneActionsViewModel : SceneActionsViewModel() {
+    private class FakeUserActionsViewModel : UserActionsViewModel() {
 
         val upstream = MutableStateFlow<Map<UserAction, UserActionResult>>(emptyMap())
 

@@ -27,7 +27,7 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
@@ -42,12 +42,12 @@ import kotlinx.coroutines.flow.map
  * Different from [QuickSettingsSceneContentViewModel] that models UI state needed for rendering the
  * content of the quick settings scene.
  */
-class QuickSettingsSceneActionsViewModel
+class QuickSettingsUserActionsViewModel
 @AssistedInject
 constructor(
     private val qsSceneAdapter: QSSceneAdapter,
     sceneBackInteractor: SceneBackInteractor,
-) : SceneActionsViewModel() {
+) : UserActionsViewModel() {
 
     private val backScene: Flow<SceneKey> =
         sceneBackInteractor.backScene
@@ -82,6 +82,6 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(): QuickSettingsSceneActionsViewModel
+        fun create(): QuickSettingsUserActionsViewModel
     }
 }

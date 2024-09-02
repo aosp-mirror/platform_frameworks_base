@@ -63,7 +63,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
 @EnableSceneContainer
-class LockscreenSceneActionsViewModelTest : SysuiTestCase() {
+class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
     companion object {
         private const val parameterCount = 6
@@ -260,8 +260,8 @@ class LockscreenSceneActionsViewModelTest : SysuiTestCase() {
                 )
         }
 
-    private fun createLockscreenSceneViewModel(): LockscreenSceneActionsViewModel {
-        return LockscreenSceneActionsViewModel(
+    private fun createLockscreenSceneViewModel(): LockscreenUserActionsViewModel {
+        return LockscreenUserActionsViewModel(
             deviceEntryInteractor = kosmos.deviceEntryInteractor,
             communalInteractor = kosmos.communalInteractor,
             shadeInteractor = kosmos.shadeInteractor,

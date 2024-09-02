@@ -53,14 +53,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-class QuickSettingsShadeSceneActionsViewModelTest : SysuiTestCase() {
+class QuickSettingsShadeUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor = kosmos.sceneInteractor
     private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
 
-    private val underTest by lazy { kosmos.quickSettingsShadeSceneActionsViewModel }
+    private val underTest by lazy { kosmos.quickSettingsShadeUserActionsViewModel }
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockscreen() =

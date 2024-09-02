@@ -27,8 +27,8 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneContentViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeUserActionsViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.Flow
 class QuickSettingsShadeScene
 @Inject
 constructor(
-    private val actionsViewModelFactory: QuickSettingsShadeSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: QuickSettingsShadeUserActionsViewModel.Factory,
     private val contentViewModelFactory: QuickSettingsShadeSceneContentViewModel.Factory,
     private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -53,7 +53,7 @@ constructor(
 
     override val key = Scenes.QuickSettingsShade
 
-    private val actionsViewModel: QuickSettingsShadeSceneActionsViewModel by lazy {
+    private val actionsViewModel: QuickSettingsShadeUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 
