@@ -270,16 +270,6 @@ flag {
 }
 
 flag {
-  name: "headless_device_owner_delegate_security_logging_bug_fix"
-  namespace: "enterprise"
-  description: "Fix delegate security logging for single user headless DO."
-  bug: "289515470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "headless_single_user_bad_device_admin_state_fix"
   namespace: "enterprise"
   description: "Fix the bad state in DPMS caused by an earlier bug related to the headless single user change"
