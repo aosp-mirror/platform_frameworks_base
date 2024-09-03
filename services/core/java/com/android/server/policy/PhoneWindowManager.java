@@ -3581,18 +3581,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down) {
                     int direction = keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP ? 1 : -1;
 
-                    // Disable autobrightness if it's on
-                    int auto = Settings.System.getIntForUser(
-                            mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS_MODE,
-                            Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                            UserHandle.USER_CURRENT_OR_SELF);
-                    if (auto != 0) {
-                        Settings.System.putIntForUser(mContext.getContentResolver(),
-                                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                                UserHandle.USER_CURRENT_OR_SELF);
-                    }
                     int screenDisplayId = displayId < 0 ? DEFAULT_DISPLAY : displayId;
 
                     float minLinearBrightness = mPowerManager.getBrightnessConstraint(
