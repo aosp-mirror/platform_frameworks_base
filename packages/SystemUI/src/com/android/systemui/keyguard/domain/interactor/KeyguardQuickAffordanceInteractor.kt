@@ -119,7 +119,8 @@ constructor(
                             is ObservableTransitionState.Idle ->
                                 it.currentScene == Scenes.Lockscreen
                             is ObservableTransitionState.Transition ->
-                                it.fromScene == Scenes.Lockscreen || it.toScene == Scenes.Lockscreen
+                                it.fromContent == Scenes.Lockscreen ||
+                                    it.toContent == Scenes.Lockscreen
                         }
                     }
                     .distinctUntilChanged()

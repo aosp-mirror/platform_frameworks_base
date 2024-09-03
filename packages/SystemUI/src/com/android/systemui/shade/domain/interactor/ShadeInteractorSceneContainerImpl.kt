@@ -90,8 +90,8 @@ constructor(
                         when (state) {
                             is ObservableTransitionState.Idle -> false
                             is ObservableTransitionState.Transition ->
-                                state.toScene == quickSettingsScene &&
-                                    state.fromScene != notificationsScene
+                                state.toContent == quickSettingsScene &&
+                                    state.fromContent != notificationsScene
                         }
                     }
                     .distinctUntilChanged()
@@ -147,9 +147,9 @@ constructor(
                                     flowOf(0f)
                                 }
                             is ObservableTransitionState.Transition ->
-                                if (state.toScene == resolvedSceneKey) {
+                                if (state.toContent == resolvedSceneKey) {
                                     state.progress
-                                } else if (state.fromScene == resolvedSceneKey) {
+                                } else if (state.fromContent == resolvedSceneKey) {
                                     state.progress.map { progress -> 1 - progress }
                                 } else {
                                     flowOf(0f)
@@ -172,8 +172,8 @@ constructor(
                     is ObservableTransitionState.Transition ->
                         sceneInteractor.resolveSceneFamily(sceneKey).map { resolvedSceneKey ->
                             state.isInitiatedByUserInput &&
-                                (state.toScene == resolvedSceneKey ||
-                                    state.fromScene == resolvedSceneKey)
+                                (state.toContent == resolvedSceneKey ||
+                                    state.fromContent == resolvedSceneKey)
                         }
                 }
             }

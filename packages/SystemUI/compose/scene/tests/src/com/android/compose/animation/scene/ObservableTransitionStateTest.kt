@@ -90,16 +90,16 @@ class ObservableTransitionStateTest {
             at(0) {
                 val state = observableState()
                 assertThat(state).isInstanceOf(ObservableTransitionState.Transition::class.java)
-                assertThat((state as ObservableTransitionState.Transition).fromScene)
+                assertThat((state as ObservableTransitionState.Transition).fromContent)
                     .isEqualTo(SceneA)
-                assertThat(state.toScene).isEqualTo(SceneB)
+                assertThat(state.toContent).isEqualTo(SceneB)
                 assertThat(state.progress()).isEqualTo(0f)
             }
             at(TestTransitionDuration / 2) {
                 val state = observableState()
-                assertThat((state as ObservableTransitionState.Transition).fromScene)
+                assertThat((state as ObservableTransitionState.Transition).fromContent)
                     .isEqualTo(SceneA)
-                assertThat(state.toScene).isEqualTo(SceneB)
+                assertThat(state.toContent).isEqualTo(SceneB)
                 assertThat(state.progress()).isEqualTo(0.5f)
             }
             after {
@@ -200,7 +200,7 @@ class ObservableTransitionStateTest {
 
         var state = observableState()
         assertThat(state).isInstanceOf(ObservableTransitionState.Transition::class.java)
-        assertThat((state as ObservableTransitionState.Transition).fromScene).isEqualTo(SceneA)
+        assertThat((state as ObservableTransitionState.Transition).fromContent).isEqualTo(SceneA)
         assertThat(state.previewProgress()).isEqualTo(0.4f)
         assertThat(state.isInPreviewStage()).isEqualTo(true)
 
@@ -218,7 +218,7 @@ class ObservableTransitionStateTest {
         }
         state = observableState()
         assertThat(state).isInstanceOf(ObservableTransitionState.Transition::class.java)
-        assertThat((state as ObservableTransitionState.Transition).fromScene).isEqualTo(SceneA)
+        assertThat((state as ObservableTransitionState.Transition).fromContent).isEqualTo(SceneA)
         assertThat(state.previewProgress()).isEqualTo(0.4f)
         assertThat(state.isInPreviewStage()).isEqualTo(false)
 

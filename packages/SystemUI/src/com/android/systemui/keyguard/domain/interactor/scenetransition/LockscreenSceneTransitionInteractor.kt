@@ -111,7 +111,7 @@ constructor(
         if (currentTransitionId == null) return
         if (prevTransition !is ObservableTransitionState.Transition) return
 
-        if (idle.currentScene == prevTransition.toScene) {
+        if (idle.currentScene == prevTransition.toContent) {
             finishCurrentTransition()
         } else {
             val targetState =
@@ -150,7 +150,7 @@ constructor(
     }
 
     private suspend fun handleTransition(transition: ObservableTransitionState.Transition) {
-        if (transition.fromScene == Scenes.Lockscreen) {
+        if (transition.fromContent == Scenes.Lockscreen) {
             if (currentTransitionId != null) {
                 val currentToState =
                     internalTransitionInteractor.currentTransitionInfoInternal.value.to
@@ -160,7 +160,7 @@ constructor(
             }
             startTransitionFromLockscreen()
             collectProgress(transition)
-        } else if (transition.toScene == Scenes.Lockscreen) {
+        } else if (transition.toContent == Scenes.Lockscreen) {
             if (currentTransitionId != null) {
                 transitionKtfTo(UNDEFINED)
             }
