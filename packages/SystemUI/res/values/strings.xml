@@ -721,8 +721,8 @@
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
     <!-- QuickSettings: Do not disturb - Total silence [CHAR LIMIT=NONE] -->
-    <!-- QuickSettings: Priority modes [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_modes_label">Priority modes</string>
+    <!-- QuickSettings: Modes [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_modes_label">Modes</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
@@ -1097,28 +1097,28 @@
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
 
-    <!-- Priority modes dialog title [CHAR LIMIT=35] -->
-    <string name="zen_modes_dialog_title">Priority modes</string>
+    <!-- Modes dialog title [CHAR LIMIT=35] -->
+    <string name="zen_modes_dialog_title">Modes</string>
 
-    <!-- Priority modes dialog confirmation button [CHAR LIMIT=15] -->
+    <!-- Modes dialog confirmation button [CHAR LIMIT=15] -->
     <string name="zen_modes_dialog_done">Done</string>
 
-    <!-- Priority modes dialog settings shortcut button [CHAR LIMIT=15] -->
+    <!-- Modes dialog settings shortcut button [CHAR LIMIT=15] -->
     <string name="zen_modes_dialog_settings">Settings</string>
 
-    <!-- Priority modes: label for an active mode [CHAR LIMIT=35] -->
+    <!-- Modes: label for an active mode [CHAR LIMIT=35] -->
     <string name="zen_mode_on">On</string>
 
-    <!-- Priority modes: label for an active mode, with details [CHAR LIMIT=10] -->
+    <!-- Modes: label for an active mode, with details [CHAR LIMIT=10] -->
     <string name="zen_mode_on_with_details">On • <xliff:g id="trigger_description" example="Mon-Fri, 23:00-7:00">%1$s</xliff:g></string>
 
-    <!-- Priority modes: label for an inactive mode [CHAR LIMIT=35] -->
+    <!-- Modes: label for an inactive mode [CHAR LIMIT=35] -->
     <string name="zen_mode_off">Off</string>
 
-    <!-- Priority modes: label for a mode that needs to be set up [CHAR LIMIT=35] -->
+    <!-- Modes: label for a mode that needs to be set up [CHAR LIMIT=35] -->
     <string name="zen_mode_set_up">Set up</string>
 
-    <!-- Priority modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
+    <!-- Modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
     <string name="zen_mode_no_manual_invocation">Manage in settings</string>
 
     <string name="zen_mode_active_modes">

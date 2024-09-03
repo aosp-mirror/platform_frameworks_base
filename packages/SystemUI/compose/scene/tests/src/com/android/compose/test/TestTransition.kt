@@ -14,17 +14,35 @@
  * limitations under the License.
  */
 
-package com.android.compose.animation.scene
+package com.android.compose.test
 
 import androidx.compose.foundation.gestures.Orientation
+import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.test.TestScope
+import com.android.compose.animation.scene.content.state.TransitionState.Transition
+import kotlinx.coroutines.CompletableDeferred
 
-/** A utility to easily create a [TransitionState.Transition] in tests. */
+/** A transition for tests that will be finished once [finish] is called. */
+abstract class TestTransition(
+    fromScene: SceneKey,
+    toScene: SceneKey,
+    replacedTransition: Transition?,
+) : Transition.ChangeScene(fromScene, toScene, replacedTransition) {
+    private val finishCompletable = CompletableDeferred<Unit>()
+
+    override suspend fun run() {
+        finishCompletable.await()
+    }
+
+    /** Finish this transition. */
+    fun finish() {
+        finishCompletable.complete(Unit)
+    }
+}
+
+/** A utility to easily create a [TestTransition] in tests. */
 fun transition(
     from: SceneKey,
     to: SceneKey,
@@ -40,12 +58,11 @@ fun transition(
     isUpOrLeft: Boolean = false,
     bouncingContent: ContentKey? = null,
     orientation: Orientation = Orientation.Horizontal,
-    onFinish: ((TransitionState.Transition) -> Job)? = null,
-    replacedTransition: TransitionState.Transition? = null,
-): TransitionState.Transition.ChangeScene {
+    onFreezeAndAnimate: ((TestTransition) -> Unit)? = null,
+    replacedTransition: Transition? = null,
+): TestTransition {
     return object :
-        TransitionState.Transition.ChangeScene(from, to, replacedTransition),
-        TransitionState.HasOverscrollProperties {
+        TestTransition(from, to, replacedTransition), TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey
             get() = current()
 
@@ -71,31 +88,16 @@ fun transition(
         override val orientation: Orientation = orientation
         override val absoluteDistance = 0f
 
-        override fun finish(): Job {
-            val onFinish =
-                onFinish
-                    ?: error(
-                        "onFinish() must be provided if finish() is called on test transitions"
-                    )
-
-            return onFinish(this)
+        override fun freezeAndAnimateToCurrentState() {
+            if (onFreezeAndAnimate != null) {
+                onFreezeAndAnimate(this)
+            } else {
+                finish()
+            }
         }
 
         override fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
             return interruptionProgress()
-        }
-    }
-}
-
-/**
- * Return a onFinish lambda that can be used with [transition] so that the transition never
- * finishes. This allows to keep the transition in the current transitions list.
- */
-fun TestScope.neverFinish(): (TransitionState.Transition) -> Job {
-    return {
-        backgroundScope.launch {
-            // Try to acquire a locked mutex so that this code never completes.
-            Mutex(locked = true).withLock {}
         }
     }
 }

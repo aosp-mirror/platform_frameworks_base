@@ -55,12 +55,11 @@ constructor(
 class BouncerViewBinder
 @Inject
 constructor(
-    private val composeBouncerFlags: ComposeBouncerFlags,
     private val legacyBouncerDependencies: Lazy<LegacyBouncerDependencies>,
     private val composeBouncerDependencies: Lazy<ComposeBouncerDependencies>,
 ) {
     fun bind(view: ViewGroup) {
-        if (composeBouncerFlags.isOnlyComposeBouncerEnabled()) {
+        if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
             val deps = composeBouncerDependencies.get()
             ComposeBouncerViewBinder.bind(
                 view,

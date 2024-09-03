@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.bouncer.shared.flag
+package com.android.wm.shell.shared.bubbles;
 
-import com.android.systemui.kosmos.Kosmos
-
-var Kosmos.fakeComposeBouncerFlags by Kosmos.Fixture { FakeComposeBouncerFlags() }
-val Kosmos.composeBouncerFlags by Kosmos.Fixture<ComposeBouncerFlags> { fakeComposeBouncerFlags }
+parcelable BubbleBarLocation;

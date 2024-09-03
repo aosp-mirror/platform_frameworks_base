@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common.bubbles;
+package com.android.systemui.qs.ui.viewmodel
 
-parcelable BubbleBarLocation;
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+
+val Kosmos.quickSettingsShadeOverlayActionsViewModel:
+    QuickSettingsShadeOverlayActionsViewModel by Fixture {
+    QuickSettingsShadeOverlayActionsViewModel(
+        shadeInteractor = shadeInteractor,
+    )
+}

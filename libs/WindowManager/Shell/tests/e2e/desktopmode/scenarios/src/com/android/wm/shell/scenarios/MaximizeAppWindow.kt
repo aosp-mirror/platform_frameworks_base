@@ -16,10 +16,11 @@
 
 package com.android.wm.shell.scenarios
 
-import android.platform.test.annotations.Postsubmit
 import android.app.Instrumentation
+import android.platform.test.annotations.Postsubmit
 import android.tools.NavBar
 import android.tools.Rotation
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -36,11 +37,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.BlockJUnit4ClassRunner
+
 @RunWith(BlockJUnit4ClassRunner::class)
 @Postsubmit
 open class MaximizeAppWindow
 @JvmOverloads
-constructor(rotation: Rotation = Rotation.ROTATION_0, isResizable: Boolean = true) {
+constructor(private val rotation: Rotation = Rotation.ROTATION_0, isResizable: Boolean = true) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
@@ -57,6 +59,9 @@ constructor(rotation: Rotation = Rotation.ROTATION_0, isResizable: Boolean = tru
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
+        tapl.setEnableRotation(true)
+        tapl.setExpectedRotation(rotation.value)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         testApp.enterDesktopWithDrag(wmHelper, device)
     }
 

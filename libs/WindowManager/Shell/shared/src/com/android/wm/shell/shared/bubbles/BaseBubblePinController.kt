@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common.bubbles
+package com.android.wm.shell.shared.bubbles
 
 import android.graphics.Point
 import android.graphics.RectF
@@ -23,9 +23,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.animation.Animator
 import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.ObjectAnimator
-import com.android.wm.shell.common.bubbles.BaseBubblePinController.LocationChangeListener
-import com.android.wm.shell.common.bubbles.BubbleBarLocation.LEFT
-import com.android.wm.shell.common.bubbles.BubbleBarLocation.RIGHT
+import com.android.wm.shell.shared.bubbles.BaseBubblePinController.LocationChangeListener
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation.LEFT
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation.RIGHT
 
 /**
  * Base class for common logic shared between different bubble views to support pinning bubble bar

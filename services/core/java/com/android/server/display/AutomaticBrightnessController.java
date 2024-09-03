@@ -45,6 +45,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.EventLog;
+import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -562,6 +563,7 @@ public class AutomaticBrightnessController {
     public void resetShortTermModel() {
         mCurrentBrightnessMapper.clearUserDataPoints();
         mShortTermModel.reset();
+        Slog.i(TAG, "Resetting short term model");
     }
 
     public boolean setBrightnessConfiguration(BrightnessConfiguration configuration,
@@ -598,74 +600,79 @@ public class AutomaticBrightnessController {
     }
 
     public void dump(PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+        ipw.increaseIndent();
         pw.println();
         pw.println("Automatic Brightness Controller Configuration:");
-        pw.println("  mState=" + configStateToString(mState));
-        pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
-        pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
-        pw.println("  mDozeScaleFactor=" + mDozeScaleFactor);
-        pw.println("  mInitialLightSensorRate=" + mInitialLightSensorRate);
-        pw.println("  mNormalLightSensorRate=" + mNormalLightSensorRate);
-        pw.println("  mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
-        pw.println("  mBrighteningLightDebounceConfig=" + mBrighteningLightDebounceConfig);
-        pw.println("  mDarkeningLightDebounceConfig=" + mDarkeningLightDebounceConfig);
-        pw.println("  mBrighteningLightDebounceConfigIdle=" + mBrighteningLightDebounceConfigIdle);
-        pw.println("  mDarkeningLightDebounceConfigIdle=" + mDarkeningLightDebounceConfigIdle);
-        pw.println("  mResetAmbientLuxAfterWarmUpConfig=" + mResetAmbientLuxAfterWarmUpConfig);
-        pw.println("  mAmbientLightHorizonLong=" + mAmbientLightHorizonLong);
-        pw.println("  mAmbientLightHorizonShort=" + mAmbientLightHorizonShort);
-        pw.println("  mWeightingIntercept=" + mWeightingIntercept);
+        pw.println("----------------------------------------------");
+        ipw.println("mState=" + configStateToString(mState));
+        ipw.println("mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
+        ipw.println("mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
+        ipw.println("mDozeScaleFactor=" + mDozeScaleFactor);
+        ipw.println("mInitialLightSensorRate=" + mInitialLightSensorRate);
+        ipw.println("mNormalLightSensorRate=" + mNormalLightSensorRate);
+        ipw.println("mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
+        ipw.println("mBrighteningLightDebounceConfig=" + mBrighteningLightDebounceConfig);
+        ipw.println("mDarkeningLightDebounceConfig=" + mDarkeningLightDebounceConfig);
+        ipw.println("mBrighteningLightDebounceConfigIdle=" + mBrighteningLightDebounceConfigIdle);
+        ipw.println("mDarkeningLightDebounceConfigIdle=" + mDarkeningLightDebounceConfigIdle);
+        ipw.println("mResetAmbientLuxAfterWarmUpConfig=" + mResetAmbientLuxAfterWarmUpConfig);
+        ipw.println("mAmbientLightHorizonLong=" + mAmbientLightHorizonLong);
+        ipw.println("mAmbientLightHorizonShort=" + mAmbientLightHorizonShort);
+        ipw.println("mWeightingIntercept=" + mWeightingIntercept);
 
         pw.println();
         pw.println("Automatic Brightness Controller State:");
-        pw.println("  mLightSensor=" + mLightSensor);
-        pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
-        pw.println("  mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
-        pw.println("  mCurrentLightSensorRate=" + mCurrentLightSensorRate);
-        pw.println("  mAmbientLux=" + mAmbientLux);
-        pw.println("  mAmbientLuxValid=" + mAmbientLuxValid);
-        pw.println("  mPreThresholdLux=" + mPreThresholdLux);
-        pw.println("  mPreThresholdBrightness=" + mPreThresholdBrightness);
-        pw.println("  mAmbientBrighteningThreshold=" + mAmbientBrighteningThreshold);
-        pw.println("  mAmbientDarkeningThreshold=" + mAmbientDarkeningThreshold);
-        pw.println("  mScreenBrighteningThreshold=" + mScreenBrighteningThreshold);
-        pw.println("  mScreenDarkeningThreshold=" + mScreenDarkeningThreshold);
-        pw.println("  mLastObservedLux=" + mLastObservedLux);
-        pw.println("  mLastObservedLuxTime=" + TimeUtils.formatUptime(mLastObservedLuxTime));
-        pw.println("  mRecentLightSamples=" + mRecentLightSamples);
-        pw.println("  mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
-        pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
-        pw.println("  mDisplayPolicy=" + DisplayPowerRequest.policyToString(mDisplayPolicy));
-        pw.println("  mShortTermModel=");
-        mShortTermModel.dump(pw);
-        pw.println("  mPausedShortTermModel=");
-        mPausedShortTermModel.dump(pw);
+        pw.println("--------------------------------------");
+        ipw.println("mLightSensor=" + mLightSensor);
+        ipw.println("mLightSensorEnabled=" + mLightSensorEnabled);
+        ipw.println("mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
+        ipw.println("mCurrentLightSensorRate=" + mCurrentLightSensorRate);
+        ipw.println("mAmbientLux=" + mAmbientLux);
+        ipw.println("mAmbientLuxValid=" + mAmbientLuxValid);
+        ipw.println("mPreThresholdLux=" + mPreThresholdLux);
+        ipw.println("mPreThresholdBrightness=" + mPreThresholdBrightness);
+        ipw.println("mAmbientBrighteningThreshold=" + mAmbientBrighteningThreshold);
+        ipw.println("mAmbientDarkeningThreshold=" + mAmbientDarkeningThreshold);
+        ipw.println("mScreenBrighteningThreshold=" + mScreenBrighteningThreshold);
+        ipw.println("mScreenDarkeningThreshold=" + mScreenDarkeningThreshold);
+        ipw.println("mLastObservedLux=" + mLastObservedLux);
+        ipw.println("mLastObservedLuxTime=" + TimeUtils.formatUptime(mLastObservedLuxTime));
+        ipw.println("mRecentLightSamples=" + mRecentLightSamples);
+        ipw.println("mAmbientLightRingBuffer=" + mAmbientLightRingBuffer);
+        ipw.println("mScreenAutoBrightness=" + mScreenAutoBrightness);
+        ipw.println("mDisplayPolicy=" + DisplayPowerRequest.policyToString(mDisplayPolicy));
+        ipw.println("mShortTermModel=");
 
-        pw.println();
-        pw.println("  mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
-        pw.println("  mBrightnessAdjustmentSampleOldLux=" + mBrightnessAdjustmentSampleOldLux);
-        pw.println("  mBrightnessAdjustmentSampleOldBrightness="
+        mShortTermModel.dump(ipw);
+        ipw.println("mPausedShortTermModel=");
+        mPausedShortTermModel.dump(ipw);
+
+        ipw.println();
+        ipw.println("mBrightnessAdjustmentSamplePending=" + mBrightnessAdjustmentSamplePending);
+        ipw.println("mBrightnessAdjustmentSampleOldLux=" + mBrightnessAdjustmentSampleOldLux);
+        ipw.println("mBrightnessAdjustmentSampleOldBrightness="
                 + mBrightnessAdjustmentSampleOldBrightness);
-        pw.println("  mForegroundAppPackageName=" + mForegroundAppPackageName);
-        pw.println("  mPendingForegroundAppPackageName=" + mPendingForegroundAppPackageName);
-        pw.println("  mForegroundAppCategory=" + mForegroundAppCategory);
-        pw.println("  mPendingForegroundAppCategory=" + mPendingForegroundAppCategory);
-        pw.println("  Current mode="
+        ipw.println("mForegroundAppPackageName=" + mForegroundAppPackageName);
+        ipw.println("mPendingForegroundAppPackageName=" + mPendingForegroundAppPackageName);
+        ipw.println("mForegroundAppCategory=" + mForegroundAppCategory);
+        ipw.println("mPendingForegroundAppCategory=" + mPendingForegroundAppCategory);
+        ipw.println("Current mode="
                 + autoBrightnessModeToString(mCurrentBrightnessMapper.getMode()));
 
         for (int i = 0; i < mBrightnessMappingStrategyMap.size(); i++) {
-            pw.println();
-            pw.println("  Mapper for mode "
+            ipw.println();
+            ipw.println("Mapper for mode "
                     + autoBrightnessModeToString(mBrightnessMappingStrategyMap.keyAt(i)) + ":");
-            mBrightnessMappingStrategyMap.valueAt(i).dump(pw,
+            mBrightnessMappingStrategyMap.valueAt(i).dump(ipw,
                     mBrightnessRangeController.getNormalBrightnessMax());
         }
 
-        pw.println();
-        pw.println("  mAmbientBrightnessThresholds=" + mAmbientBrightnessThresholds);
-        pw.println("  mAmbientBrightnessThresholdsIdle=" + mAmbientBrightnessThresholdsIdle);
-        pw.println("  mScreenBrightnessThresholds=" + mScreenBrightnessThresholds);
-        pw.println("  mScreenBrightnessThresholdsIdle=" + mScreenBrightnessThresholdsIdle);
+        ipw.println();
+        ipw.println("mAmbientBrightnessThresholds=" + mAmbientBrightnessThresholds);
+        ipw.println("mAmbientBrightnessThresholdsIdle=" + mAmbientBrightnessThresholdsIdle);
+        ipw.println("mScreenBrightnessThresholds=" + mScreenBrightnessThresholds);
+        ipw.println("mScreenBrightnessThresholdsIdle=" + mScreenBrightnessThresholdsIdle);
     }
 
     public float[] getLastSensorValues() {
@@ -1339,8 +1346,10 @@ public class AutomaticBrightnessController {
                     + "\n mIsValid: " + mIsValid;
         }
 
-        void dump(PrintWriter pw) {
-            pw.println(this);
+        void dump(IndentingPrintWriter ipw) {
+            ipw.increaseIndent();
+            ipw.println(this);
+            ipw.decreaseIndent();
         }
 
     }
