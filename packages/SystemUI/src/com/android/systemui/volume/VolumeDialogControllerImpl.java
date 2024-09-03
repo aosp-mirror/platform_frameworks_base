@@ -1280,6 +1280,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     private final class Receiver extends BroadcastReceiver {
 
+        private static final int STREAM_UNKNOWN = -1;
+
         public void init() {
             final IntentFilter filter = new IntentFilter();
             filter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
@@ -1301,30 +1303,39 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             final String action = intent.getAction();
             boolean changed = false;
             if (action.equals(AudioManager.VOLUME_CHANGED_ACTION)) {
-                final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+                final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                        STREAM_UNKNOWN);
                 final int level = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
                 final int oldLevel = intent
                         .getIntExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, -1);
                 if (D.BUG) Log.d(TAG, "onReceive VOLUME_CHANGED_ACTION stream=" + stream
                         + " level=" + level + " oldLevel=" + oldLevel);
-                changed = updateStreamLevelW(stream, level);
+                if (stream != STREAM_UNKNOWN) {
+                    changed = updateStreamLevelW(stream, level);
+                }
             } else if (action.equals(AudioManager.STREAM_DEVICES_CHANGED_ACTION)) {
-                final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+                final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                        STREAM_UNKNOWN);
                 final int devices = intent
                         .getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_DEVICES, -1);
                 final int oldDevices = intent
                         .getIntExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_DEVICES, -1);
                 if (D.BUG) Log.d(TAG, "onReceive STREAM_DEVICES_CHANGED_ACTION stream="
                         + stream + " devices=" + devices + " oldDevices=" + oldDevices);
-                changed = checkRoutedToBluetoothW(stream);
-                changed |= onVolumeChangedW(stream, 0);
+                if (stream != STREAM_UNKNOWN) {
+                    changed |= checkRoutedToBluetoothW(stream);
+                    changed |= onVolumeChangedW(stream, 0);
+                }
             } else if (action.equals(AudioManager.STREAM_MUTE_CHANGED_ACTION)) {
-                final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+                final int stream = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                        STREAM_UNKNOWN);
                 final boolean muted = intent
                         .getBooleanExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, false);
                 if (D.BUG) Log.d(TAG, "onReceive STREAM_MUTE_CHANGED_ACTION stream=" + stream
                         + " muted=" + muted);
-                changed = updateStreamMuteW(stream, muted);
+                if (stream != STREAM_UNKNOWN) {
+                    changed = updateStreamMuteW(stream, muted);
+                }
             } else if (action.equals(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)) {
                 if (D.BUG) Log.d(TAG, "onReceive ACTION_EFFECTS_SUPPRESSOR_CHANGED");
                 changed = updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());
