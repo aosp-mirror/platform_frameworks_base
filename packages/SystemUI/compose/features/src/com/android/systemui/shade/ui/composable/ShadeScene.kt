@@ -106,7 +106,7 @@ import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOff
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneActionsViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneContentViewModel
@@ -120,6 +120,7 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 object Shade {
@@ -146,6 +147,7 @@ object Shade {
 }
 
 /** The shade scene shows scrolling list of notifications and some of the quick setting tiles. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class ShadeScene
 @Inject
@@ -161,7 +163,7 @@ constructor(
     private val mediaCarouselController: MediaCarouselController,
     @Named(QUICK_QS_PANEL) private val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) private val qsMediaHost: MediaHost,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
 
     override val key = Scenes.Shade
 

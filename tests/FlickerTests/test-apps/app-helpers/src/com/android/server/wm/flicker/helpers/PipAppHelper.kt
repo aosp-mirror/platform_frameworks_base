@@ -269,9 +269,23 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     /** Expand the PIP window back to full screen via intent and wait until the app is visible */
     fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) = launchViaIntent(wmHelper)
 
-    fun changeAspectRatio() {
+    fun changeAspectRatio(wmHelper: WindowManagerStateHelper) {
         val intent = Intent("com.android.wm.shell.flicker.testapp.ASPECT_RATIO")
         context.sendBroadcast(intent)
+        // Wait on WMHelper on size change upon aspect ratio change
+        val windowRect = getWindowRect(wmHelper)
+        wmHelper
+            .StateSyncBuilder()
+            .add("pipAspectRatioChanged") {
+                val pipAppWindow =
+                    it.wmState.visibleWindows.firstOrNull { window ->
+                        this.windowMatchesAnyOf(window)
+                    }
+                        ?: return@add false
+                val pipRegion = pipAppWindow.frameRegion
+                return@add pipRegion != Region(windowRect)
+            }
+            .waitForAndVerify()
     }
 
     fun clickEnterPipButton(wmHelper: WindowManagerStateHelper) {

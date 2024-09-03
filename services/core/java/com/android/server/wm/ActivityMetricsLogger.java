@@ -838,12 +838,13 @@ class ActivityMetricsLogger {
         }
 
         if (android.app.Flags.appStartInfoTimestamps()) {
+            final int pid = r.getPid();
             // Log here to match StatsD for time to first frame.
             mLoggerHandler.post(
                     () -> mSupervisor.mService.mWindowManager.mAmInternal.addStartInfoTimestamp(
                             ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME,
-                            timestampNs, r.getUid(), r.getPid(),
-                            info.mLastLaunchedActivity.mUserId));
+                            timestampNs, infoSnapshot.applicationInfo.uid, pid,
+                            infoSnapshot.userId));
         }
 
         return infoSnapshot;

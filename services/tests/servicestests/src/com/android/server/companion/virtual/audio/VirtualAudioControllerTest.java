@@ -87,9 +87,6 @@ public class VirtualAudioControllerTest {
                         /* crossTaskNavigationAllowedByDefault= */ true,
                         /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                         /* activityListener= */ null,
-                        /* activityBlockedCallback= */ null,
-                        /* secureWindowCallback= */ null,
-                        /* intentListenerCallback= */ null,
                         /* displayCategories= */ new ArraySet<>(),
                         /* showTasksInHostDeviceRecents= */ true,
                         /* customHomeComponent= */ null);

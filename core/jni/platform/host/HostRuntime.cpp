@@ -391,6 +391,7 @@ public:
 
 } // namespace android
 
+#ifndef _WIN32
 using namespace android;
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
@@ -407,3 +408,4 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
 
     return JNI_VERSION_1_6;
 }
+#endif

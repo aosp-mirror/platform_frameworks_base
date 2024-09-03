@@ -38,7 +38,9 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
- * Helper class for interacting with a system server local appsearch session synchronously.
+ * Helper class for interacting with a system server local appsearch session asynchronously.
+ *
+ * <p>Converts the AppSearch Callback API to {@link AndroidFuture}.
  */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public class SyncAppSearchCallHelper implements Closeable {
@@ -47,9 +49,10 @@ public class SyncAppSearchCallHelper implements Closeable {
     private final AppSearchManager mAppSearchManager;
     private final AndroidFuture<AppSearchResult<AppSearchSession>> mSettableSessionFuture;
 
-    public SyncAppSearchCallHelper(@NonNull AppSearchManager appSearchManager,
-                                   @NonNull Executor executor,
-                                   @NonNull SearchContext appSearchContext) {
+    public SyncAppSearchCallHelper(
+            @NonNull AppSearchManager appSearchManager,
+            @NonNull Executor executor,
+            @NonNull SearchContext appSearchContext) {
         Objects.requireNonNull(appSearchManager);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(appSearchContext);
@@ -61,68 +64,81 @@ public class SyncAppSearchCallHelper implements Closeable {
                 appSearchContext, mExecutor, mSettableSessionFuture::complete);
     }
 
-    /**
-     * Converts a failed app search result codes into an exception.
-     */
+    /** Converts a failed app search result codes into an exception. */
     @NonNull
     private static Exception failedResultToException(@NonNull AppSearchResult appSearchResult) {
         return switch (appSearchResult.getResultCode()) {
-            case AppSearchResult.RESULT_INVALID_ARGUMENT -> new IllegalArgumentException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_IO_ERROR -> new IOException(
-                    appSearchResult.getErrorMessage());
-            case AppSearchResult.RESULT_SECURITY_ERROR -> new SecurityException(
-                    appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_INVALID_ARGUMENT ->
+                    new IllegalArgumentException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_IO_ERROR ->
+                    new IOException(appSearchResult.getErrorMessage());
+            case AppSearchResult.RESULT_SECURITY_ERROR ->
+                    new SecurityException(appSearchResult.getErrorMessage());
             default -> new IllegalStateException(appSearchResult.getErrorMessage());
         };
     }
 
-    private AppSearchSession getSession() throws Exception {
-        AppSearchResult<AppSearchSession> sessionResult = mSettableSessionFuture.get();
-        if (!sessionResult.isSuccess()) {
-            throw failedResultToException(sessionResult);
-        }
-        return sessionResult.getResultValue();
+    private AndroidFuture<AppSearchSession> getSessionAsync() {
+        return mSettableSessionFuture.thenApply(
+                result -> {
+                    if (result.isSuccess()) {
+                        return result.getResultValue();
+                    } else {
+                        throw new RuntimeException(failedResultToException(result));
+                    }
+                });
     }
 
-    /**
-     * Gets the schema for a given app search session.
-     */
-    @WorkerThread
-    public GetSchemaResponse getSchema() throws Exception {
-        AndroidFuture<AppSearchResult<GetSchemaResponse>> settableSchemaResponse =
-                new AndroidFuture<>();
-        getSession().getSchema(mExecutor, settableSchemaResponse::complete);
-        AppSearchResult<GetSchemaResponse> schemaResponse = settableSchemaResponse.get();
-        if (schemaResponse.isSuccess()) {
-            return schemaResponse.getResultValue();
-        } else {
-            throw failedResultToException(schemaResponse);
-        }
+    /** Gets the schema for a given app search session. */
+    public AndroidFuture<GetSchemaResponse> getSchema() {
+        return getSessionAsync()
+                .thenComposeAsync(
+                        session -> {
+                            AndroidFuture<AppSearchResult<GetSchemaResponse>>
+                                    settableSchemaResponse = new AndroidFuture<>();
+                            session.getSchema(mExecutor, settableSchemaResponse::complete);
+                            return settableSchemaResponse.thenApply(
+                                    result -> {
+                                        if (result.isSuccess()) {
+                                            return result.getResultValue();
+                                        } else {
+                                            throw new RuntimeException(
+                                                    failedResultToException(result));
+                                        }
+                                    });
+                        },
+                        mExecutor);
     }
 
-    /**
-     * Sets the schema for a given app search session.
-     */
-    @WorkerThread
-    public SetSchemaResponse setSchema(
-            @NonNull SetSchemaRequest setSchemaRequest) throws Exception {
-        AndroidFuture<AppSearchResult<SetSchemaResponse>> settableSchemaResponse =
-                new AndroidFuture<>();
-        getSession().setSchema(
-                setSchemaRequest, mExecutor, mExecutor, settableSchemaResponse::complete);
-        AppSearchResult<SetSchemaResponse> schemaResponse = settableSchemaResponse.get();
-        if (schemaResponse.isSuccess()) {
-            return schemaResponse.getResultValue();
-        } else {
-            throw failedResultToException(schemaResponse);
-        }
+    /** Sets the schema for a given app search session. */
+    public AndroidFuture<SetSchemaResponse> setSchema(@NonNull SetSchemaRequest setSchemaRequest) {
+        return getSessionAsync()
+                .thenComposeAsync(
+                        session -> {
+                            AndroidFuture<AppSearchResult<SetSchemaResponse>>
+                                    settableSchemaResponse = new AndroidFuture<>();
+                            session.setSchema(
+                                    setSchemaRequest,
+                                    mExecutor,
+                                    mExecutor,
+                                    settableSchemaResponse::complete);
+                            return settableSchemaResponse.thenApply(
+                                    result -> {
+                                        if (result.isSuccess()) {
+                                            return result.getResultValue();
+                                        } else {
+                                            throw new RuntimeException(
+                                                    failedResultToException(result));
+                                        }
+                                    });
+                        },
+                        mExecutor);
     }
 
     @Override
     public void close() throws IOException {
         try {
-            getSession().close();
+            getSessionAsync().get().close();
         } catch (Exception ex) {
             Slog.e(TAG, "Failed to close app search session", ex);
         }

@@ -17,6 +17,7 @@
 package com.android.wm.shell.taskview;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.annotation.NonNull;
@@ -254,6 +255,24 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                 null /* finishTransaction */, taskInfo, leash, wct);
         mTransaction.apply();
         mTaskViewTransitions.startInstantTransition(TRANSIT_CHANGE, wct);
+    }
+
+    /**
+     * Moves the current task in TaskView out of the view and back to fullscreen.
+     */
+    public void moveToFullscreen() {
+        if (mTaskToken == null) return;
+        mShellExecutor.execute(() -> {
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.setWindowingMode(mTaskToken, WINDOWING_MODE_UNDEFINED);
+            wct.setAlwaysOnTop(mTaskToken, false);
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
+            mTaskViewTransitions.moveTaskViewToFullscreen(wct, this);
+            if (mListener != null) {
+                // Task is being "removed" from the clients perspective
+                mListener.onTaskRemovalStarted(mTaskInfo.taskId);
+            }
+        });
     }
 
     private void prepareActivityOptions(ActivityOptions options, Rect launchBounds) {

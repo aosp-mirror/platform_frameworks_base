@@ -104,23 +104,23 @@ interface SceneTransitionsBuilder {
     ): TransitionSpec
 
     /**
-     * Define the animation to be played when the [scene] is overscrolled in the given
+     * Define the animation to be played when the [content] is overscrolled in the given
      * [orientation].
      *
      * The overscroll animation always starts from a progress of 0f, and reaches 1f when moving the
      * [distance] down/right, -1f when moving in the opposite direction.
      */
     fun overscroll(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
         builder: OverscrollBuilder.() -> Unit,
     ): OverscrollSpec
 
     /**
-     * Prevents overscroll the [scene] in the given [orientation], allowing ancestors to eventually
-     * consume the remaining gesture.
+     * Prevents overscroll the [content] in the given [orientation], allowing ancestors to
+     * eventually consume the remaining gesture.
      */
-    fun overscrollDisabled(scene: SceneKey, orientation: Orientation): OverscrollSpec
+    fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {

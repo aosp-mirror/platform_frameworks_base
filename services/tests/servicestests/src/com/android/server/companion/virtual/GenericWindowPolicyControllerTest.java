@@ -37,7 +37,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.WindowConfiguration;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
-import android.companion.virtual.VirtualDeviceManager;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
@@ -94,15 +93,9 @@ public class GenericWindowPolicyControllerTest {
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
-    private VirtualDeviceManager.ActivityListener mActivityListener;
-    @Mock
-    private GenericWindowPolicyController.IntentListenerCallback mIntentListenerCallback;
-    @Mock
-    private GenericWindowPolicyController.ActivityBlockedCallback mActivityBlockedCallback;
+    private GenericWindowPolicyController.ActivityListener mActivityListener;
     @Mock
     private GenericWindowPolicyController.RunningAppsChangedListener mRunningAppsChangedListener;
-    @Mock
-    private GenericWindowPolicyController.SecureWindowCallback mSecureWindowCallback;
 
     @Before
     public void setUp() throws Exception {
@@ -669,14 +662,14 @@ public class GenericWindowPolicyControllerTest {
                 /* targetDisplayCategory */ null);
 
         // register interceptor and intercept intent
-        when(mIntentListenerCallback.shouldInterceptIntent(any(Intent.class))).thenReturn(true);
+        when(mActivityListener.shouldInterceptIntent(any(Intent.class))).thenReturn(true);
         assertThat(gwpc.canActivityBeLaunched(activityInfo, intent,
                 WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
                 /* isResultExpected = */ false, /* intentSender= */ null))
                 .isFalse();
 
         // unregister interceptor and launch activity
-        when(mIntentListenerCallback.shouldInterceptIntent(any(Intent.class))).thenReturn(false);
+        when(mActivityListener.shouldInterceptIntent(any(Intent.class))).thenReturn(false);
         assertThat(gwpc.canActivityBeLaunched(activityInfo, intent,
                 WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
                 /* isResultExpected = */ false, /* intentSender= */ null))
@@ -696,13 +689,12 @@ public class GenericWindowPolicyControllerTest {
                 /* targetDisplayCategory */ null);
 
         // register interceptor with different filter
-        when(mIntentListenerCallback.shouldInterceptIntent(any(Intent.class))).thenReturn(false);
+        when(mActivityListener.shouldInterceptIntent(any(Intent.class))).thenReturn(false);
         assertThat(gwpc.canActivityBeLaunched(activityInfo, intent,
                 WindowConfiguration.WINDOWING_MODE_FULLSCREEN, DISPLAY_ID, /* isNewTask= */false,
                 /* isResultExpected = */ false, /* intentSender= */ null))
                 .isTrue();
-        verify(mIntentListenerCallback, timeout(TIMEOUT_MILLIS))
-                .shouldInterceptIntent(any(Intent.class));
+        verify(mActivityListener, timeout(TIMEOUT_MILLIS)).shouldInterceptIntent(any(Intent.class));
     }
 
     @Test
@@ -723,8 +715,8 @@ public class GenericWindowPolicyControllerTest {
                 /* isResultExpected = */ true, /* intentSender= */ () -> intentSender))
                 .isFalse();
 
-        verify(mActivityBlockedCallback, timeout(TIMEOUT_MILLIS))
-                .onActivityBlocked(DISPLAY_ID, activityInfo, /* intentSender= */ null);
+        verify(mActivityListener, timeout(TIMEOUT_MILLIS))
+                .onActivityLaunchBlocked(DISPLAY_ID, activityInfo, /* intentSender= */ null);
     }
 
     @Test
@@ -761,10 +753,10 @@ public class GenericWindowPolicyControllerTest {
 
         assertThat(gwpc.keepActivityOnWindowFlagsChanged(activityInfo, 0, 0)).isTrue();
 
-        verify(mSecureWindowCallback, after(TIMEOUT_MILLIS).never())
-                .onSecureWindowShown(DISPLAY_ID, activityInfo.applicationInfo.uid);
-        verify(mActivityBlockedCallback, never())
-                .onActivityBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
+        verify(mActivityListener, after(TIMEOUT_MILLIS).never())
+                .onSecureWindowShown(eq(DISPLAY_ID), eq(activityInfo));
+        verify(mActivityListener, never())
+                .onActivityLaunchBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
 
     @Test
@@ -780,10 +772,10 @@ public class GenericWindowPolicyControllerTest {
 
         assertThat(gwpc.keepActivityOnWindowFlagsChanged(activityInfo, FLAG_SECURE, 0)).isTrue();
 
-        verify(mSecureWindowCallback, timeout(TIMEOUT_MILLIS)).onSecureWindowShown(DISPLAY_ID,
-                activityInfo.applicationInfo.uid);
-        verify(mActivityBlockedCallback, after(TIMEOUT_MILLIS).never())
-                .onActivityBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
+        verify(mActivityListener, timeout(TIMEOUT_MILLIS))
+                .onSecureWindowShown(eq(DISPLAY_ID), eq(activityInfo));
+        verify(mActivityListener, after(TIMEOUT_MILLIS).never())
+                .onActivityLaunchBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
 
     @Test
@@ -800,10 +792,10 @@ public class GenericWindowPolicyControllerTest {
         assertThat(gwpc.keepActivityOnWindowFlagsChanged(activityInfo, 0,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS)).isTrue();
 
-        verify(mSecureWindowCallback, after(TIMEOUT_MILLIS).never())
-                .onSecureWindowShown(DISPLAY_ID, activityInfo.applicationInfo.uid);
-        verify(mActivityBlockedCallback, never())
-                .onActivityBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
+        verify(mActivityListener, after(TIMEOUT_MILLIS).never())
+                .onSecureWindowShown(eq(DISPLAY_ID), eq(activityInfo));
+        verify(mActivityListener, never())
+                .onActivityLaunchBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
 
     @Test
@@ -835,9 +827,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ mSecureWindowCallback,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ new ArraySet<>(),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ null);
@@ -855,9 +844,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ mSecureWindowCallback,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ new ArraySet<>(),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ null);
@@ -876,9 +862,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ null,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ new ArraySet<>(),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ homeComponent);
@@ -897,9 +880,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ null,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ new ArraySet<>(),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ null);
@@ -918,9 +898,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ null,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ new ArraySet<>(),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ null);
@@ -939,9 +916,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ new ArraySet<>(),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ null,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ Collections.singleton(displayCategory),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ null);
@@ -960,9 +934,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ true,
                 /* crossTaskNavigationExemptions= */ Collections.singleton(blockedComponent),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ null,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ new ArraySet<>(),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ null);
@@ -981,9 +952,6 @@ public class GenericWindowPolicyControllerTest {
                 /* crossTaskNavigationAllowedByDefault= */ false,
                 /* crossTaskNavigationExemptions= */ Collections.singleton(allowedComponent),
                 /* activityListener= */ mActivityListener,
-                /* activityBlockedCallback= */ mActivityBlockedCallback,
-                /* secureWindowCallback= */ null,
-                /* intentListenerCallback= */ mIntentListenerCallback,
                 /* displayCategories= */ new ArraySet<>(),
                 /* showTasksInHostDeviceRecents= */ true,
                 /* customHomeComponent= */ null);
@@ -1029,9 +997,9 @@ public class GenericWindowPolicyControllerTest {
         assertThat(gwpc.canActivityBeLaunched(activityInfo, null, windowingMode, fromDisplay,
                 isNewTask, /* isResultExpected= */ false, () -> intentSender)).isTrue();
 
-        verify(mActivityBlockedCallback, after(TIMEOUT_MILLIS).never())
-                .onActivityBlocked(fromDisplay, activityInfo, intentSender);
-        verify(mIntentListenerCallback, never()).shouldInterceptIntent(any(Intent.class));
+        verify(mActivityListener, after(TIMEOUT_MILLIS).never())
+                .onActivityLaunchBlocked(fromDisplay, activityInfo, intentSender);
+        verify(mActivityListener, never()).shouldInterceptIntent(any(Intent.class));
     }
 
     private void assertActivityIsBlocked(GenericWindowPolicyController gwpc,
@@ -1046,9 +1014,9 @@ public class GenericWindowPolicyControllerTest {
         assertThat(gwpc.canActivityBeLaunched(activityInfo, null, windowingMode, fromDisplay,
                 isNewTask, /* isResultExpected= */ false, () -> intentSender)).isFalse();
 
-        verify(mActivityBlockedCallback, timeout(TIMEOUT_MILLIS))
-                .onActivityBlocked(fromDisplay, activityInfo, intentSender);
-        verify(mIntentListenerCallback, after(TIMEOUT_MILLIS).never())
+        verify(mActivityListener, timeout(TIMEOUT_MILLIS))
+                .onActivityLaunchBlocked(fromDisplay, activityInfo, intentSender);
+        verify(mActivityListener, after(TIMEOUT_MILLIS).never())
                 .shouldInterceptIntent(any(Intent.class));
     }
 
@@ -1060,8 +1028,8 @@ public class GenericWindowPolicyControllerTest {
                 /* isResultExpected= */ false, () -> intentSender))
                 .isFalse();
 
-        verify(mActivityBlockedCallback, after(TIMEOUT_MILLIS).never())
-                .onActivityBlocked(eq(fromDisplay), eq(activityInfo), any());
-        verify(mIntentListenerCallback, never()).shouldInterceptIntent(any(Intent.class));
+        verify(mActivityListener, after(TIMEOUT_MILLIS).never())
+                .onActivityLaunchBlocked(eq(fromDisplay), eq(activityInfo), any());
+        verify(mActivityListener, never()).shouldInterceptIntent(any(Intent.class));
     }
 }

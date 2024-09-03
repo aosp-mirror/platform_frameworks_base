@@ -18,11 +18,8 @@ package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 
 val Kosmos.quickSettingsShadeOverlayActionsViewModel:
     QuickSettingsShadeOverlayActionsViewModel by Fixture {
-    QuickSettingsShadeOverlayActionsViewModel(
-        shadeInteractor = shadeInteractor,
-    )
+    QuickSettingsShadeOverlayActionsViewModel()
 }

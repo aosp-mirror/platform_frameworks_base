@@ -21,34 +21,18 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.scene.shared.model.TransitionKeys
 import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeAlignment
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /** Models the UI state for the user actions for navigating to other scenes or overlays. */
-class QuickSettingsShadeOverlayActionsViewModel
-@AssistedInject
-constructor(
-    private val shadeInteractor: ShadeInteractor,
-) : SceneActionsViewModel() {
+class QuickSettingsShadeOverlayActionsViewModel @AssistedInject constructor() :
+    SceneActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         setActions(
             buildMap {
-                if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
-                    put(Swipe.Up, UserActionResult.HideOverlay(Overlays.QuickSettingsShade))
-                } else {
-                    put(
-                        Swipe.Down,
-                        UserActionResult.HideOverlay(
-                            overlay = Overlays.QuickSettingsShade,
-                            transitionKey = TransitionKeys.OpenBottomShade,
-                        )
-                    )
-                }
+                put(Swipe.Up, UserActionResult.HideOverlay(Overlays.QuickSettingsShade))
                 put(Back, UserActionResult.HideOverlay(Overlays.QuickSettingsShade))
             }
         )

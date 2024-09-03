@@ -156,6 +156,25 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun qsFullscreen_falseWhenIdleSplitShadeQs() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.isQsFullscreen)
+
+            // WHEN split shade is enabled and Idle on QuickSettings scene
+            shadeTestUtil.setSplitShade(true)
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(Scenes.QuickSettings)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN QS is not fullscreen
+            Truth.assertThat(actual).isFalse()
+        }
+
+    @Test
     fun qsFullscreen_trueWhenIdleQS() =
         testScope.runTest {
             val actual by collectLastValue(underTest.isQsFullscreen)

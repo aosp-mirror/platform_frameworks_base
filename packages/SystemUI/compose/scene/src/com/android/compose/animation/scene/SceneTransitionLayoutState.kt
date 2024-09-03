@@ -121,14 +121,13 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
      * might still be interrupted, for instance by another call to [setTargetScene] or by a user
      * gesture.
      *
-     * If [coroutineScope] is cancelled during the transition and that the transition was still
+     * If [animationScope] is cancelled during the transition and that the transition was still
      * active, then the [transitionState] of this [MutableSceneTransitionLayoutState] will be set to
      * `TransitionState.Idle(targetScene)`.
      */
     fun setTargetScene(
         targetScene: SceneKey,
-        // TODO(b/362727477): Rename to animationScope.
-        coroutineScope: CoroutineScope,
+        animationScope: CoroutineScope,
         transitionKey: TransitionKey? = null,
     ): Pair<TransitionState.Transition, Job>?
 
@@ -302,12 +301,12 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
     override fun setTargetScene(
         targetScene: SceneKey,
-        coroutineScope: CoroutineScope,
+        animationScope: CoroutineScope,
         transitionKey: TransitionKey?,
     ): Pair<TransitionState.Transition.ChangeScene, Job>? {
         checkThread()
 
-        return coroutineScope.animateToScene(
+        return animationScope.animateToScene(
             layoutState = this@MutableSceneTransitionLayoutStateImpl,
             target = targetScene,
             transitionKey = transitionKey,
