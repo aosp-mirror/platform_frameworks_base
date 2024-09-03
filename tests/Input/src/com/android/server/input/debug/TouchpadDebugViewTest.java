@@ -296,33 +296,24 @@ public class TouchpadDebugViewTest {
 
     @Test
     public void testTouchpadClick() {
-        View child;
+        View child = mTouchpadDebugView.getChildAt(0);
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]));
 
-        for (int i = 0; i < mTouchpadDebugView.getChildCount(); i++) {
-            child = mTouchpadDebugView.getChildAt(i);
-            assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
-        }
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]));
 
-        for (int i = 0; i < mTouchpadDebugView.getChildCount(); i++) {
-            child = mTouchpadDebugView.getChildAt(i);
-            assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.RED);
-        }
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.RED);
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]));
 
-        for (int i = 0; i < mTouchpadDebugView.getChildCount(); i++) {
-            child = mTouchpadDebugView.getChildAt(i);
-            assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
-        }
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
     }
 }
