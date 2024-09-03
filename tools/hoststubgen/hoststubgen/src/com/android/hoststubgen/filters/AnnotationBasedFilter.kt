@@ -41,9 +41,7 @@ import org.objectweb.asm.tree.ClassNode
 class AnnotationBasedFilter(
     private val errors: HostStubGenErrors,
     private val classes: ClassNodes,
-    stubAnnotations_: Set<String>,
     keepAnnotations_: Set<String>,
-    stubClassAnnotations_: Set<String>,
     keepClassAnnotations_: Set<String>,
     throwAnnotations_: Set<String>,
     removeAnnotations_: Set<String>,
@@ -54,9 +52,7 @@ class AnnotationBasedFilter(
     private val annotationAllowedClassesFilter: ClassFilter,
     fallback: OutputFilter,
 ) : DelegatingFilter(fallback) {
-    private val stubAnnotations = convertToInternalNames(stubAnnotations_)
     private val keepAnnotations = convertToInternalNames(keepAnnotations_)
-    private val stubClassAnnotations = convertToInternalNames(stubClassAnnotations_)
     private val keepClassAnnotations = convertToInternalNames(keepClassAnnotations_)
     private val throwAnnotations = convertToInternalNames(throwAnnotations_)
     private val removeAnnotations = convertToInternalNames(removeAnnotations_)
@@ -67,9 +63,7 @@ class AnnotationBasedFilter(
         convertToInternalNames(keepStaticInitializerAnnotations_)
 
     /** Annotations that control API visibility. */
-    private val visibilityAnnotations = stubAnnotations +
-            keepAnnotations +
-            stubClassAnnotations +
+    private val visibilityAnnotations = keepAnnotations +
             keepClassAnnotations +
             throwAnnotations +
             removeAnnotations +
@@ -86,9 +80,7 @@ class AnnotationBasedFilter(
      * other ones, because of how it's used.
      */
     private val allAnnotationClasses: Set<String> = convertToJvmNames(
-        stubAnnotations_ +
-                keepAnnotations_ +
-                stubClassAnnotations_ +
+        keepAnnotations_ +
                 keepClassAnnotations_ +
                 throwAnnotations_ +
                 removeAnnotations_ +
@@ -102,8 +94,6 @@ class AnnotationBasedFilter(
 
     private val AnnotationNode.policy: FilterPolicyWithReason? get() {
         return when (desc) {
-            in stubAnnotations -> FilterPolicy.Stub.withReason(REASON_ANNOTATION)
-            in stubClassAnnotations -> FilterPolicy.StubClass.withReason(REASON_CLASS_ANNOTATION)
             in keepAnnotations -> FilterPolicy.Keep.withReason(REASON_ANNOTATION)
             in keepClassAnnotations -> FilterPolicy.KeepClass.withReason(REASON_CLASS_ANNOTATION)
             in substituteAnnotations -> FilterPolicy.Substitute.withReason(REASON_ANNOTATION)
@@ -248,7 +238,7 @@ class AnnotationBasedFilter(
                 } else {
                     // The replacement method has to be renamed
                     methodPolicies[MethodKey(replacement, mn.desc)] =
-                        FilterPolicy.Stub.withReason(REASON_ANNOTATION)
+                        FilterPolicy.Keep.withReason(REASON_ANNOTATION)
                     renamedMethods[MethodKey(replacement, mn.desc)] = mn.name
 
                     log.v("Substitution found: %s%s -> %s", replacement, mn.desc, mn.name)

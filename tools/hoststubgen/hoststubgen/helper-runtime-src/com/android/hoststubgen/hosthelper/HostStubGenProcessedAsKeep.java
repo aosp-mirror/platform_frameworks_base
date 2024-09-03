@@ -25,14 +25,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation injected to all classes/methods/fields that are kept in the "stub" jar.
- *
- * All items in the stub jar are automatically kept in the impl jar as well, so
- * the items with this annotation will all have {@link HostStubGenKeptInImpl} too.
+ * Annotation injected to all classes/methods/fields that are kept in the processes jar.
  */
 @Target({TYPE, METHOD, CONSTRUCTOR, FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HostStubGenKeptInStub {
-    String CLASS_INTERNAL_NAME = HostTestUtils.getInternalName(HostStubGenKeptInStub.class);
+public @interface HostStubGenProcessedAsKeep {
+    String CLASS_INTERNAL_NAME = HostTestUtils.getInternalName(HostStubGenProcessedAsKeep.class);
     String CLASS_DESCRIPTOR = "L" + CLASS_INTERNAL_NAME + ";";
 }

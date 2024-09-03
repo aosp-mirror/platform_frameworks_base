@@ -18,7 +18,6 @@ package com.android.hoststubgen.visitors
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_DESC
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
 import com.android.hoststubgen.asm.ClassNodes
-import com.android.hoststubgen.asm.isVisibilityPrivateOrPackagePrivate
 import com.android.hoststubgen.asm.prependArgTypeToMethodDescriptor
 import com.android.hoststubgen.asm.writeByteCodeToPushArguments
 import com.android.hoststubgen.asm.writeByteCodeToReturn
@@ -47,10 +46,6 @@ class ImplGeneratingAdapter(
         filter: OutputFilter,
         options: Options,
 ) : BaseAdapter(classes, nextVisitor, filter, options) {
-
-    override fun shouldEmit(policy: FilterPolicy): Boolean {
-        return policy.needsInImpl
-    }
 
     private var classLoadHooks: List<String> = emptyList()
 
@@ -176,19 +171,6 @@ class ImplGeneratingAdapter(
             )
         }
 
-        // If non-stub method call detection is enabled, then inject a call to the checker.
-        if (options.enableNonStubMethodCallDetection && doesMethodNeedNonStubCallCheck(
-                access, name, descriptor, policy) ) {
-            innerVisitor = NonStubMethodCallDetectingAdapter(
-                    access,
-                    name,
-                    descriptor,
-                    signature,
-                    exceptions,
-                    innerVisitor,
-            )
-        }
-
         fun MethodVisitor.withAnnotation(descriptor: String): MethodVisitor {
             this.visitAnnotation(descriptor, true)
             return this
@@ -229,27 +211,6 @@ class ImplGeneratingAdapter(
         }
 
         return innerVisitor
-    }
-
-    fun doesMethodNeedNonStubCallCheck(
-            access: Int,
-            name: String,
-            descriptor: String,
-            policy: FilterPolicyWithReason,
-    ): Boolean {
-        // If a method is in the stub, then no need to check.
-        if (policy.policy.needsInStub) {
-            return false
-        }
-        // If a method is private or package-private, no need to check.
-        // Technically test code can use framework package name, so it's a bit too lenient.
-        if (isVisibilityPrivateOrPackagePrivate(access)) {
-            return false
-        }
-        // TODO: If the method overrides a method that's accessible by tests, then we shouldn't
-        // do the check. (e.g. overrides a stub method or java standard method.)
-
-        return true
     }
 
     /**
@@ -429,47 +390,6 @@ class ImplGeneratingAdapter(
             super.visitCode()
 
             writeClassLoadHookCalls(this)
-        }
-    }
-
-    /**
-     * A method adapter that detects calls to non-stub methods.
-     */
-    private inner class NonStubMethodCallDetectingAdapter(
-            access: Int,
-            val name: String,
-            val descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
-            next: MethodVisitor?
-    ) : MethodVisitor(OPCODE_VERSION, next) {
-        override fun visitCode() {
-            super.visitCode()
-
-            // First three arguments to HostTestUtils.onNonStubMethodCalled().
-            visitLdcInsn(currentClassName)
-            visitLdcInsn(name)
-            visitLdcInsn(descriptor)
-
-            // Call: HostTestUtils.getStackWalker().getCallerClass().
-            // This push the caller Class in the stack.
-            visitMethodInsn(Opcodes.INVOKESTATIC,
-                    HostTestUtils.CLASS_INTERNAL_NAME,
-                    "getStackWalker",
-                    "()Ljava/lang/StackWalker;",
-                    false)
-            visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                    "java/lang/StackWalker",
-                    "getCallerClass",
-                    "()Ljava/lang/Class;",
-                    false)
-
-            // Then call onNonStubMethodCalled().
-            visitMethodInsn(Opcodes.INVOKESTATIC,
-                    HostTestUtils.CLASS_INTERNAL_NAME,
-                    "onNonStubMethodCalled",
-                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)V",
-                    false)
         }
     }
 

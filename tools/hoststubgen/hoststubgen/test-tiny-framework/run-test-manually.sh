@@ -86,7 +86,7 @@ echo "# Generating the stub and impl jars..."
 run $HOSTSTUBGEN \
     @../hoststubgen-standard-options.txt \
     --in-jar $tiny_framework_jar \
-    --out-impl-jar $tiny_framework_host_jar \
+    --out-jar $tiny_framework_host_jar \
     --policy-override-file policy-override-tiny-framework.txt \
     --gen-keep-all-file out/tiny-framework_keep_all.txt \
     --gen-input-dump-file out/tiny-framework_dump.txt \

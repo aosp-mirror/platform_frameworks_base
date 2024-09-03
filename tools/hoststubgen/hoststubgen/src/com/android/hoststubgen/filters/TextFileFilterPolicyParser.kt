@@ -250,7 +250,7 @@ fun createFilterFromTextPolicyFile(
 
                                 // Set the policy for the "from" method.
                                 imf.setPolicyForMethod(className, fromName, signature,
-                                    FilterPolicy.Stub.withReason(FILTER_REASON))
+                                    FilterPolicy.Keep.withReason(FILTER_REASON))
 
                                 val classAndMethod = splitWithLastPeriod(fromName)
                                 if (classAndMethod != null) {
@@ -345,11 +345,9 @@ private fun resolveExtendingClass(className: String): String? {
 
 private fun parsePolicy(s: String): FilterPolicy {
     return when (s.lowercase()) {
-        "s", "stub" -> FilterPolicy.Stub
         "k", "keep" -> FilterPolicy.Keep
         "t", "throw" -> FilterPolicy.Throw
         "r", "remove" -> FilterPolicy.Remove
-        "sc", "stubclass" -> FilterPolicy.StubClass
         "kc", "keepclass" -> FilterPolicy.KeepClass
         "i", "ignore" -> FilterPolicy.Ignore
         else -> {
