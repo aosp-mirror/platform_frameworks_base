@@ -100,6 +100,7 @@ aconfig_declarations_group {
         "framework-jobscheduler-job.flags-aconfig-java",
         "framework_graphics_flags_java_lib",
         "hwui_flags_java_lib",
+        "interaction_jank_monitor_flags_lib",
         "libcore_exported_aconfig_flags_lib",
         "libgui_flags_java_lib",
         "power_flags_lib",
@@ -1576,5 +1577,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "dropbox_flags_lib",
     aconfig_declarations: "dropbox_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Zero Jank
+aconfig_declarations {
+    name: "interaction_jank_monitor_flags",
+    package: "com.android.internal.jank",
+    container: "system",
+    srcs: ["core/java/com/android/internal/jank/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "interaction_jank_monitor_flags_lib",
+    aconfig_declarations: "interaction_jank_monitor_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
