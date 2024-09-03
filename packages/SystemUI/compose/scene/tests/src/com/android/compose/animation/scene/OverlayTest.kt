@@ -22,10 +22,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -42,6 +44,8 @@ import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestOverlays.OverlayB
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.test.assertSizeIsEqualTo
+import com.android.compose.test.subjects.assertThat
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import org.junit.Rule
 import org.junit.Test
@@ -521,6 +525,126 @@ class OverlayTest {
                     .onNode(isElement(TestElements.Foo, content = OverlayB))
                     .assertSizeIsEqualTo(100.dp, 80.dp)
                     .assertPositionInRootIsEqualTo(40.dp, 20.dp)
+            }
+        }
+    }
+
+    @Test
+    fun replaceAnimation_elementInCurrentSceneAndOneOverlay() {
+        val sharedIntKey = ValueKey("sharedInt")
+        val sharedIntValueByContent = mutableMapOf<ContentKey, Int>()
+
+        @Composable
+        fun SceneScope.animateContentInt(targetValue: Int) {
+            val animatedValue = animateContentIntAsState(targetValue, sharedIntKey)
+            LaunchedEffect(animatedValue) {
+                try {
+                    snapshotFlow { animatedValue.value }
+                        .collect { sharedIntValueByContent[contentKey] = it }
+                } finally {
+                    sharedIntValueByContent.remove(contentKey)
+                }
+            }
+        }
+
+        rule.testReplaceOverlayTransition(
+            currentSceneContent = {
+                Box(Modifier.size(width = 180.dp, height = 120.dp)) {
+                    animateContentInt(targetValue = 1_000)
+                    Foo(width = 60.dp, height = 40.dp)
+                }
+            },
+            fromContent = {},
+            fromAlignment = Alignment.TopStart,
+            toContent = {
+                animateContentInt(targetValue = 2_000)
+                Foo(width = 100.dp, height = 80.dp)
+            },
+            transition = {
+                // 4 frames of animation
+                spec = tween(4 * 16, easing = LinearEasing)
+            },
+        ) {
+            // Foo moves from (0,0) with a size of 60x40dp to centered (in a 180x120dp Box) with a
+            // size of 100x80dp, so at (40,20).
+            //
+            // The animated Int goes from 1_000 to 2_000.
+            before {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertSizeIsEqualTo(60.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayB)).assertDoesNotExist()
+
+                assertThat(sharedIntValueByContent).containsEntry(SceneA, 1_000)
+                assertThat(sharedIntValueByContent).doesNotContainKey(OverlayA)
+                assertThat(sharedIntValueByContent).doesNotContainKey(OverlayB)
+            }
+
+            at(16) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(70.dp, 50.dp)
+                    .assertPositionInRootIsEqualTo(10.dp, 5.dp)
+
+                assertThat(sharedIntValueByContent).containsEntry(SceneA, 1_250)
+                assertThat(sharedIntValueByContent).doesNotContainKey(OverlayA)
+                assertThat(sharedIntValueByContent).containsEntry(OverlayB, 1_250)
+            }
+
+            at(32) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(80.dp, 60.dp)
+                    .assertPositionInRootIsEqualTo(20.dp, 10.dp)
+
+                assertThat(sharedIntValueByContent).containsEntry(SceneA, 1_500)
+                assertThat(sharedIntValueByContent).doesNotContainKey(OverlayA)
+                assertThat(sharedIntValueByContent).containsEntry(OverlayB, 1_500)
+            }
+
+            at(48) {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(90.dp, 70.dp)
+                    .assertPositionInRootIsEqualTo(30.dp, 15.dp)
+
+                assertThat(sharedIntValueByContent).containsEntry(SceneA, 1_750)
+                assertThat(sharedIntValueByContent).doesNotContainKey(OverlayA)
+                assertThat(sharedIntValueByContent).containsEntry(OverlayB, 1_750)
+            }
+
+            after {
+                rule
+                    .onNode(isElement(TestElements.Foo, content = SceneA))
+                    .assertExists()
+                    .assertIsNotDisplayed()
+                rule.onNode(isElement(TestElements.Foo, content = OverlayA)).assertDoesNotExist()
+                rule
+                    .onNode(isElement(TestElements.Foo, content = OverlayB))
+                    .assertSizeIsEqualTo(100.dp, 80.dp)
+                    .assertPositionInRootIsEqualTo(40.dp, 20.dp)
+
+                // Outside of transitions, the value is equal to the target value in each content.
+                assertThat(sharedIntValueByContent).containsEntry(SceneA, 1_000)
+                assertThat(sharedIntValueByContent).doesNotContainKey(OverlayA)
+                assertThat(sharedIntValueByContent).containsEntry(OverlayB, 2_000)
             }
         }
     }

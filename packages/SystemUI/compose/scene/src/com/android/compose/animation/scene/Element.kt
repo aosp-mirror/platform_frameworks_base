@@ -313,10 +313,27 @@ internal class ElementNode(
         // If this element is not supposed to be laid out now, either because it is not part of any
         // ongoing transition or the other content of its transition is overscrolling, then lay out
         // the element normally and don't place it.
-        val overscrollScene = transition?.currentOverscrollSpec?.content
-        val isOtherSceneOverscrolling = overscrollScene != null && overscrollScene != content.key
-        if (isOtherSceneOverscrolling) {
-            return doNotPlace(measurable, constraints)
+        val overscrollContent = transition?.currentOverscrollSpec?.content
+        if (overscrollContent != null && overscrollContent != content.key) {
+            when (transition) {
+                is TransitionState.Transition.ChangeScene ->
+                    return doNotPlace(measurable, constraints)
+
+                // If we are overscrolling an overlay that does not contain an element that is in
+                // the current scene, place it in that scene otherwise the element won't be placed
+                // at all.
+                is TransitionState.Transition.ShowOrHideOverlay,
+                is TransitionState.Transition.ReplaceOverlay -> {
+                    if (
+                        content.key == transition.currentScene &&
+                            overscrollContent !in element.stateByContent
+                    ) {
+                        return placeNormally(measurable, constraints)
+                    } else {
+                        return doNotPlace(measurable, constraints)
+                    }
+                }
+            }
         }
 
         val placeable =
@@ -1230,17 +1247,30 @@ private inline fun <T> computeValue(
     // elements follow the finger direction.
     val isSharedElement = fromState != null && toState != null
     if (isSharedElement && isSharedElementEnabled(element.key, transition)) {
-        val start = contentValue(fromState!!)
-        val end = contentValue(toState!!)
+        return interpolateSharedElement(
+            transition = transition,
+            contentValue = contentValue,
+            fromState = fromState!!,
+            toState = toState!!,
+            isSpecified = isSpecified,
+            lerp = lerp,
+        )
+    }
 
-        // TODO(b/316901148): Remove checks to isSpecified() once the lookahead pass runs for all
-        // nodes before the intermediate layout pass.
-        if (!isSpecified(start)) return end
-        if (!isSpecified(end)) return start
-
-        // Make sure we don't read progress if values are the same and we don't need to interpolate,
-        // so we don't invalidate the phase where this is read.
-        return if (start == end) start else lerp(start, end, transition.progress)
+    // If we are replacing an overlay and the element is both in a single overlay and in the current
+    // scene, interpolate the state of the element using the current scene as the other scene.
+    if (!isSharedElement && transition is TransitionState.Transition.ReplaceOverlay) {
+        val currentSceneState = element.stateByContent[transition.currentScene]
+        if (currentSceneState != null) {
+            return interpolateSharedElement(
+                transition = transition,
+                contentValue = contentValue,
+                fromState = fromState ?: currentSceneState,
+                toState = toState ?: currentSceneState,
+                isSpecified = isSpecified,
+                lerp = lerp,
+            )
+        }
     }
 
     // Get the transformed value, i.e. the target value at the beginning (for entering elements) or
@@ -1382,4 +1412,25 @@ private inline fun <T> computeValue(
     } else {
         lerp(idleValue, targetValue, rangeProgress)
     }
+}
+
+private inline fun <T> interpolateSharedElement(
+    transition: TransitionState.Transition,
+    contentValue: (Element.State) -> T,
+    fromState: Element.State,
+    toState: Element.State,
+    isSpecified: (T) -> Boolean,
+    lerp: (T, T, Float) -> T
+): T {
+    val start = contentValue(fromState)
+    val end = contentValue(toState)
+
+    // TODO(b/316901148): Remove checks to isSpecified() once the lookahead pass runs for all
+    // nodes before the intermediate layout pass.
+    if (!isSpecified(start)) return end
+    if (!isSpecified(end)) return start
+
+    // Make sure we don't read progress if values are the same and we don't need to interpolate,
+    // so we don't invalidate the phase where this is read.
+    return if (start == end) start else lerp(start, end, transition.progress)
 }
