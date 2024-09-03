@@ -578,7 +578,8 @@ public class DisplayModeDirector {
      * @param pw The stream to dump information to.
      */
     public void dump(PrintWriter pw) {
-        pw.println("DisplayModeDirector");
+        pw.println("DisplayModeDirector:");
+        pw.println("--------------------");
         synchronized (mLock) {
             pw.println("  mSupportedModesByDisplay:");
             for (int i = 0; i < mSupportedModesByDisplay.size(); i++) {

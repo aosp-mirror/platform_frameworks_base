@@ -53,9 +53,9 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
-import com.android.wm.shell.common.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.bubbles.BubbleInfo;
 
 import java.io.PrintWriter;
 import java.util.List;

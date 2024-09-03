@@ -55,10 +55,13 @@ import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
+import com.android.compose.test.setContentAndCreateMainScope
 import com.android.compose.test.subjects.DpOffsetSubject
 import com.android.compose.test.subjects.assertThat
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
@@ -327,17 +330,18 @@ class SceneTransitionLayoutTest {
             }
 
         val layoutTag = "layout"
-        rule.setContent {
-            SceneTransitionLayout(state, Modifier.testTag(layoutTag)) {
-                scene(SceneA) { Box(Modifier.size(50.dp)) }
-                scene(SceneB) { Box(Modifier.size(70.dp)) }
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state, Modifier.testTag(layoutTag)) {
+                    scene(SceneA) { Box(Modifier.size(50.dp)) }
+                    scene(SceneB) { Box(Modifier.size(70.dp)) }
+                }
             }
-        }
 
         // Overscroll on A at -100%: size should be interpolated given that there is no overscroll
         // defined for scene A.
         var progress by mutableStateOf(-1f)
-        rule.runOnIdle {
+        scope.launch {
             state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
         }
         rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(30.dp)

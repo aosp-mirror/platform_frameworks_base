@@ -49,7 +49,7 @@ public final class AppFunctionManager {
     /**
      * Creates an instance.
      *
-     * @param mService An interface to the backing service.
+     * @param service An interface to the backing service.
      * @param context  A {@link Context}.
      * @hide
      */

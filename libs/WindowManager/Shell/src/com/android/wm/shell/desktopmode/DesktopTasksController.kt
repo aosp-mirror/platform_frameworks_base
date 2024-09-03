@@ -913,6 +913,7 @@ class DesktopTasksController(
         val intent = Intent(context, DesktopWallpaperActivity::class.java)
         val options =
             ActivityOptions.makeBasic().apply {
+                launchWindowingMode = WINDOWING_MODE_FULLSCREEN
                 pendingIntentBackgroundActivityStartMode =
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
             }

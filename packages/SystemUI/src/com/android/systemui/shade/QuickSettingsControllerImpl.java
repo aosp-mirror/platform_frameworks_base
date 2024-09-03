@@ -1063,13 +1063,17 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
         setClippingBounds();
 
-        if (mSplitShadeEnabled) {
-            // In split shade we want to pretend that QS are always collapsed so their behaviour and
-            // interactions don't influence notifications as they do in portrait. But we want to set
-            // 0 explicitly in case we're rotating from non-split shade with QS expansion of 1.
-            mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
-        } else {
-            mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
+        if (!SceneContainerFlag.isEnabled()) {
+            if (mSplitShadeEnabled) {
+                // In split shade we want to pretend that QS are always collapsed so their
+                // behaviour and interactions don't influence notifications as they do in portrait.
+                // But we want to set 0 explicitly in case we're rotating from non-split shade with
+                // QS expansion of 1.
+                mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
+            } else {
+                mNotificationStackScrollLayoutController.setQsExpansionFraction(
+                        qsExpansionFraction);
+            }
         }
 
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
