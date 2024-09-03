@@ -528,7 +528,7 @@ private fun FoldAware(
     // Update state whenever currentSceneKey has changed.
     LaunchedEffect(state, currentSceneKey) {
         if (currentSceneKey != state.transitionState.currentScene) {
-            state.setTargetScene(currentSceneKey, coroutineScope = this)
+            state.setTargetScene(currentSceneKey, animationScope = this)
         }
     }
 

@@ -80,13 +80,13 @@ class SceneTransitionLayoutStateTest {
     @Test
     fun setTargetScene_idleToSameScene() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutState(SceneA)
-        assertThat(state.setTargetScene(SceneA, coroutineScope = this)).isNull()
+        assertThat(state.setTargetScene(SceneA, animationScope = this)).isNull()
     }
 
     @Test
     fun setTargetScene_idleToDifferentScene() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutState(SceneA)
-        val (transition, job) = checkNotNull(state.setTargetScene(SceneB, coroutineScope = this))
+        val (transition, job) = checkNotNull(state.setTargetScene(SceneB, animationScope = this))
         assertThat(state.transitionState).isEqualTo(transition)
 
         job.join()
@@ -97,8 +97,8 @@ class SceneTransitionLayoutStateTest {
     fun setTargetScene_transitionToSameScene() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutState(SceneA)
 
-        val (_, job) = checkNotNull(state.setTargetScene(SceneB, coroutineScope = this))
-        assertThat(state.setTargetScene(SceneB, coroutineScope = this)).isNull()
+        val (_, job) = checkNotNull(state.setTargetScene(SceneB, animationScope = this))
+        assertThat(state.setTargetScene(SceneB, animationScope = this)).isNull()
 
         job.join()
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneB))
@@ -108,8 +108,8 @@ class SceneTransitionLayoutStateTest {
     fun setTargetScene_transitionToDifferentScene() = runMonotonicClockTest {
         val state = MutableSceneTransitionLayoutState(SceneA)
 
-        assertThat(state.setTargetScene(SceneB, coroutineScope = this)).isNotNull()
-        val (_, job) = checkNotNull(state.setTargetScene(SceneC, coroutineScope = this))
+        assertThat(state.setTargetScene(SceneB, animationScope = this)).isNotNull()
+        val (_, job) = checkNotNull(state.setTargetScene(SceneC, animationScope = this))
 
         job.join()
         assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneC))
@@ -122,7 +122,7 @@ class SceneTransitionLayoutStateTest {
         lateinit var transition: TransitionState.Transition
         val job =
             launch(start = CoroutineStart.UNDISPATCHED) {
-                transition = checkNotNull(state.setTargetScene(SceneB, coroutineScope = this)).first
+                transition = checkNotNull(state.setTargetScene(SceneB, animationScope = this)).first
             }
         assertThat(state.transitionState).isEqualTo(transition)
 
@@ -289,11 +289,11 @@ class SceneTransitionLayoutStateTest {
             )
 
         // Default transition from A to B.
-        assertThat(state.setTargetScene(SceneB, coroutineScope = this)).isNotNull()
+        assertThat(state.setTargetScene(SceneB, animationScope = this)).isNotNull()
         assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(1)
 
         // Go back to A.
-        state.setTargetScene(SceneA, coroutineScope = this)
+        state.setTargetScene(SceneA, animationScope = this)
         testScheduler.advanceUntilIdle()
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentScene(SceneA)
@@ -302,7 +302,7 @@ class SceneTransitionLayoutStateTest {
         assertThat(
                 state.setTargetScene(
                     SceneB,
-                    coroutineScope = this,
+                    animationScope = this,
                     transitionKey = transitionkey,
                 )
             )
@@ -638,7 +638,7 @@ class SceneTransitionLayoutStateTest {
         val state = MutableSceneTransitionLayoutState(SceneA)
 
         // Transition to B.
-        state.setTargetScene(SceneB, coroutineScope = this)
+        state.setTargetScene(SceneB, animationScope = this)
         val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasCurrentScene(SceneB)
 
@@ -730,7 +730,7 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.transitionState).isSceneTransition()
 
         // Start a new transition, interrupting the seek transition.
-        state.setTargetScene(SceneB, coroutineScope = this)
+        state.setTargetScene(SceneB, animationScope = this)
 
         // The previous job is cancelled and does not infinitely collect the progress.
         job.join()

@@ -246,7 +246,7 @@ fun MotionTestRule<ComposeToolkit>.recordTransition(
         content = { play ->
             LaunchedEffect(play) {
                 if (play) {
-                    state.setTargetScene(toScene, coroutineScope = this)
+                    state.setTargetScene(toScene, animationScope = this)
                 }
             }
 
@@ -284,7 +284,7 @@ fun ComposeContentTestRule.testTransition(
 
     testTransition(
         state = state,
-        changeState = { state -> state.setTargetScene(to, coroutineScope = this) },
+        changeState = { state -> state.setTargetScene(to, animationScope = this) },
         transitionLayout = transitionLayout,
         builder = builder,
     )

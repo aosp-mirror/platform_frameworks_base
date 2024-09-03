@@ -44,8 +44,8 @@ class InterruptionHandlerTest {
                 transitions { /* default interruption handler */ },
             )
 
-        state.setTargetScene(SceneB, coroutineScope = this)
-        state.setTargetScene(SceneC, coroutineScope = this)
+        state.setTargetScene(SceneB, animationScope = this)
+        state.setTargetScene(SceneC, animationScope = this)
 
         assertThat(state.currentTransitions)
             .comparingElementsUsing(FromToCurrentTriple)
@@ -81,8 +81,8 @@ class InterruptionHandlerTest {
                 },
             )
 
-        state.setTargetScene(SceneB, coroutineScope = this)
-        state.setTargetScene(SceneC, coroutineScope = this)
+        state.setTargetScene(SceneB, animationScope = this)
+        state.setTargetScene(SceneC, animationScope = this)
 
         assertThat(state.currentTransitions)
             .comparingElementsUsing(FromToCurrentTriple)
@@ -124,10 +124,10 @@ class InterruptionHandlerTest {
 
         // Animate to B and advance the transition a little bit so that progress > visibility
         // threshold and that reversing from B back to A won't immediately snap to A.
-        state.setTargetScene(SceneB, coroutineScope = this)
+        state.setTargetScene(SceneB, animationScope = this)
         testScheduler.advanceTimeBy(duration / 2L)
 
-        state.setTargetScene(SceneC, coroutineScope = this)
+        state.setTargetScene(SceneC, animationScope = this)
 
         assertThat(state.currentTransitions)
             .comparingElementsUsing(FromToCurrentTriple)
@@ -166,7 +166,7 @@ class InterruptionHandlerTest {
                         SceneA,
                         // We use testScope here and not backgroundScope because setTargetScene
                         // needs the monotonic clock that is only available in the test scope.
-                        coroutineScope = this,
+                        animationScope = this,
                     )
                 )
                 .first
@@ -200,7 +200,7 @@ class InterruptionHandlerTest {
                         SceneB,
                         // We use testScope here and not backgroundScope because setTargetScene
                         // needs the monotonic clock that is only available in the test scope.
-                        coroutineScope = this,
+                        animationScope = this,
                     )
                 )
                 .first
