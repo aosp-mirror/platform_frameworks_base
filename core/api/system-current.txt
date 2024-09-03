@@ -3469,6 +3469,7 @@ package android.companion.virtual {
   public static interface VirtualDeviceManager.ActivityListener {
     method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public default void onActivityLaunchBlocked(int, @NonNull android.content.ComponentName, @NonNull android.os.UserHandle, @Nullable android.content.IntentSender);
     method public void onDisplayEmpty(int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public default void onSecureWindowShown(int, @NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
     method @Deprecated public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
     method public default void onTopActivityChanged(int, @NonNull android.content.ComponentName, int);
   }
