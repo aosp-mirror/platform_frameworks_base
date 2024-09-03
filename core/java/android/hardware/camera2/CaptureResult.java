@@ -2821,8 +2821,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * boost when the light level threshold is exceeded.</p>
      * <p>This state indicates when low light boost is 'ACTIVE' and applied. Similarly, it can
      * indicate when it is not being applied by returning 'INACTIVE'.</p>
-     * <p>This key will be absent from the CaptureResult if AE mode is not set to
-     * 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY.</p>
      * <p>The default value will always be 'INACTIVE'.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
