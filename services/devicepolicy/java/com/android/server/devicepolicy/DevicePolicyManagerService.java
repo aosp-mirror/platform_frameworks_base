@@ -9374,8 +9374,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void sendDeviceOwnerOrProfileOwnerCommand(String action, Bundle extras, int userId) {
         if (userId == UserHandle.USER_ALL) {
-            if (Flags.headlessDeviceOwnerDelegateSecurityLoggingBugFix()
-                    && getHeadlessDeviceOwnerModeForDeviceOwner()
+            if (getHeadlessDeviceOwnerModeForDeviceOwner()
                     == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
                 userId = mOwners.getDeviceOwnerUserId();
             } else {
