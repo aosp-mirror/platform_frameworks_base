@@ -151,7 +151,24 @@ public class VirtualDeviceInternal {
                         Binder.restoreCallingIdentity(token);
                     }
                 }
+
+                @Override
+                public void onSecureWindowShown(int displayId, ComponentName componentName,
+                        UserHandle user) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mActivityListenersLock) {
+                            for (int i = 0; i < mActivityListeners.size(); i++) {
+                                mActivityListeners.valueAt(i)
+                                        .onSecureWindowShown(displayId, componentName, user);
+                            }
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
             };
+
     private final IVirtualDeviceSoundEffectListener mSoundEffectListener =
             new IVirtualDeviceSoundEffectListener.Stub() {
                 @Override
@@ -583,6 +600,12 @@ public class VirtualDeviceInternal {
             mExecutor.execute(() ->
                     mActivityListener.onActivityLaunchBlocked(
                             displayId, componentName, user, intentSender));
+        }
+
+        public void onSecureWindowShown(int displayId, ComponentName componentName,
+                UserHandle user) {
+            mExecutor.execute(() ->
+                    mActivityListener.onSecureWindowShown(displayId, componentName, user));
         }
     }
 
