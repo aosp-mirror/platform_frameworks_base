@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.view.accessibility.data.repository
+package com.android.systemui.accessibility.domain.interactor
 
-import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
+import com.android.systemui.accessibility.data.repository.captioningRepository
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.captioningRepository by Kosmos.Fixture { FakeCaptioningRepository() }
 val Kosmos.captioningInteractor by Kosmos.Fixture { CaptioningInteractor(captioningRepository) }
