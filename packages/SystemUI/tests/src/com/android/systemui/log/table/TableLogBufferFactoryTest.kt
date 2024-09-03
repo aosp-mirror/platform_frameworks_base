@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogcatEchoTrackerAlways
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -31,7 +32,8 @@ import org.mockito.kotlin.mock
 class TableLogBufferFactoryTest : SysuiTestCase() {
     private val dumpManager: DumpManager = mock()
     private val systemClock = FakeSystemClock()
-    private val underTest = TableLogBufferFactory(dumpManager, systemClock, mock())
+    private val underTest =
+        TableLogBufferFactory(dumpManager, systemClock, LogcatEchoTrackerAlways())
 
     @Test
     fun create_alwaysCreatesNewInstance() {

@@ -75,7 +75,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -90,7 +90,6 @@ import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.captureMany
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -199,21 +198,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         fmOverride: FaceManager? = faceManager,
         bypassControllerOverride: KeyguardBypassController? = bypassController
     ): DeviceEntryFaceAuthRepositoryImpl {
-        val systemClock = FakeSystemClock()
-        val faceAuthBuffer =
-            TableLogBuffer(
-                10,
-                "face auth",
-                systemClock,
-                mock(),
-            )
-        val faceDetectBuffer =
-            TableLogBuffer(
-                10,
-                "face detect",
-                systemClock,
-                mock(),
-            )
+        val faceAuthBuffer = logcatTableLogBuffer(kosmos, "face auth")
+        val faceDetectBuffer = logcatTableLogBuffer(kosmos, "face detect")
 
         return DeviceEntryFaceAuthRepositoryImpl(
             mContext,
