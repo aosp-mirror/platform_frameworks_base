@@ -57,6 +57,11 @@ struct ResourceParserOptions {
   std::optional<Visibility::Level> visibility;
 
   FeatureFlagValues feature_flag_values;
+
+  // The flag that should be applied to all resources parsed
+  std::optional<FeatureFlagAttribute> flag;
+
+  FlagStatus flag_status = FlagStatus::NoFlag;
 };
 
 struct FlattenedXmlSubTree {

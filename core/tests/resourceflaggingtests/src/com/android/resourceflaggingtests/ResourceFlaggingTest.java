@@ -104,6 +104,26 @@ public class ResourceFlaggingTest {
     }
 
     @Test
+    public void testDirectoryEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool8)).isTrue();
+    }
+
+    @Test
+    public void testDirectoryDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool7)).isTrue();
+    }
+
+    @Test
+    public void testDirectoryNegatedEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool9)).isTrue();
+    }
+
+    @Test
+    public void testDirectoryNegatedDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool10)).isTrue();
+    }
+
+    @Test
     public void testLayoutWithDisabledElements() {
         LinearLayout ll = (LinearLayout) getLayoutInflater().inflate(R.layout.layout1, null);
         assertThat(ll).isNotNull();
