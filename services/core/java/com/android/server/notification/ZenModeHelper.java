@@ -226,10 +226,8 @@ public class ZenModeHelper {
         mDefaultConfig = Flags.modesUi()
                 ? ZenModeConfig.getDefaultConfig()
                 : readDefaultConfig(mContext.getResources());
-        updateDefaultConfigAutomaticRules();
-        if (Flags.modesApi()) {
-            updateDefaultAutomaticRulePolicies();
-        }
+        updateDefaultConfig(mContext, mDefaultConfig);
+
         mConfig = mDefaultConfig.copy();
         synchronized (mConfigsArrayLock) {
             mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
@@ -1073,7 +1071,7 @@ public class ZenModeHelper {
     }
 
     void updateZenRulesOnLocaleChange() {
-        updateDefaultConfigAutomaticRules();
+        updateRuleStringsForCurrentLocale(mContext, mDefaultConfig);
         synchronized (mConfigLock) {
             if (mConfig == null) {
                 return;
@@ -2229,30 +2227,49 @@ public class ZenModeHelper {
         }
     }
 
-    private void updateDefaultConfigAutomaticRules() {
-        for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
+    /**
+     * Apply changes to the <em>default</em> {@link ZenModeConfig} so that the rules included by
+     * default (Events / Sleeping) support the latest Zen features and are ready for new users.
+     *
+     * <p>This includes: setting a fully populated ZenPolicy, setting correct type and
+     * allowManualInvocation=true, and ensuring default names and trigger descriptions correspond
+     * to the current locale.
+     */
+    private static void updateDefaultConfig(Context context, ZenModeConfig defaultConfig) {
+        if (Flags.modesApi()) {
+            updateDefaultAutomaticRulePolicies(defaultConfig);
+        }
+        if (Flags.modesApi() && Flags.modesUi()) {
+            SystemZenRules.maybeUpgradeRules(context, defaultConfig);
+        }
+        updateRuleStringsForCurrentLocale(context, defaultConfig);
+    }
+
+    private static void updateRuleStringsForCurrentLocale(Context context,
+            ZenModeConfig defaultConfig) {
+        for (ZenRule rule : defaultConfig.automaticRules.values()) {
             if (ZenModeConfig.EVENTS_DEFAULT_RULE_ID.equals(rule.id)) {
-                rule.name = mContext.getResources()
+                rule.name = context.getResources()
                         .getString(R.string.zen_mode_default_events_name);
             } else if (ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID.equals(rule.id)) {
-                rule.name = mContext.getResources()
+                rule.name = context.getResources()
                         .getString(R.string.zen_mode_default_every_night_name);
             }
             if (Flags.modesApi() && Flags.modesUi()) {
-                SystemZenRules.updateTriggerDescription(mContext, rule);
+                SystemZenRules.updateTriggerDescription(context, rule);
             }
         }
     }
 
     // Updates the policies in the default automatic rules (provided via default XML config) to
     // be fully filled in default values.
-    private void updateDefaultAutomaticRulePolicies() {
+    private static void updateDefaultAutomaticRulePolicies(ZenModeConfig defaultConfig) {
         if (!Flags.modesApi()) {
             // Should be checked before calling, but just in case.
             return;
         }
-        ZenPolicy defaultPolicy = mDefaultConfig.getZenPolicy();
-        for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
+        ZenPolicy defaultPolicy = defaultConfig.getZenPolicy();
+        for (ZenRule rule : defaultConfig.automaticRules.values()) {
             if (ZenModeConfig.DEFAULT_RULE_IDS.contains(rule.id) && rule.zenPolicy == null) {
                 rule.zenPolicy = defaultPolicy.copy();
             }
