@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.repository
+package com.android.systemui.log.table
 
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.log.table.logcatTableLogBuffer
+import com.android.systemui.log.LogcatEchoTrackerAlways
+import com.android.systemui.util.time.fakeSystemClock
 
-val Kosmos.fakeMobileConnectionsRepository by Fixture {
-    FakeMobileConnectionsRepository(
-        tableLogBuffer = logcatTableLogBuffer(this, "FakeMobileConnectionsRepository"),
-    )
-}
-
-val Kosmos.mobileConnectionsRepository by
-    Fixture<MobileConnectionsRepository> { fakeMobileConnectionsRepository }
+val Kosmos.tableLogBufferFactory: TableLogBufferFactory by
+    Kosmos.Fixture {
+        TableLogBufferFactory(
+            dumpManager = dumpManager,
+            systemClock = fakeSystemClock,
+            logcatEchoTracker = LogcatEchoTrackerAlways(),
+        )
+    }
