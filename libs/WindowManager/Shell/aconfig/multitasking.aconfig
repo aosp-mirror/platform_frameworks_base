@@ -145,3 +145,10 @@ flag {
    description: "Enable an option to move bubbles to fullscreen"
    bug: "363326492"
 }
+
+flag {
+    name: "enable_flexible_split"
+    namespace: "multitasking"
+    description: "Enables flexibile split feature for split screen"
+    bug: "349828130"
+}
