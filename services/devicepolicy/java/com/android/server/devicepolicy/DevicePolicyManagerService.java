@@ -14799,7 +14799,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled) {
+    public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled,
+            PersistableBundle options) {
         Objects.requireNonNull(who, "ComponentName is null");
 
         // Check can set secondary lockscreen enabled
