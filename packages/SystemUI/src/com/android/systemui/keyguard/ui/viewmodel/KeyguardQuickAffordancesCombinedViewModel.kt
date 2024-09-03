@@ -20,7 +20,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.FlowTracing.traceEmissionCount
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.NewPickerUiKeyguardPreview
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -29,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shared.Flags
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
@@ -169,7 +169,7 @@ constructor(
 
     /** An observable for the view-model of the "start button" quick affordance. */
     val startButton: Flow<KeyguardQuickAffordanceViewModel> =
-        if (NewPickerUiKeyguardPreview.isEnabled) {
+        if (Flags.newCustomizationPickerUi()) {
             previewAffordances.flatMapLatestConflated {
                 button(
                     position = KeyguardQuickAffordancePosition.BOTTOM_START,
@@ -184,7 +184,7 @@ constructor(
 
     /** An observable for the view-model of the "end button" quick affordance. */
     val endButton: Flow<KeyguardQuickAffordanceViewModel> =
-        if (NewPickerUiKeyguardPreview.isEnabled) {
+        if (Flags.newCustomizationPickerUi()) {
             previewAffordances.flatMapLatestConflated {
                 button(
                     position = KeyguardQuickAffordancePosition.BOTTOM_END,
