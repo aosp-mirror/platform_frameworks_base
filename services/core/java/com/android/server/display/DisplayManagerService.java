@@ -354,7 +354,7 @@ public final class DisplayManagerService extends SystemService {
             new CopyOnWriteArrayList<>();
 
     /** All {@link DisplayPowerController}s indexed by {@link LogicalDisplay} ID. */
-    private final SparseArray<DisplayPowerControllerInterface> mDisplayPowerControllers =
+    private final SparseArray<DisplayPowerController> mDisplayPowerControllers =
             new SparseArray<>();
 
     /** {@link DisplayBlanker} used by all {@link DisplayPowerController}s. */
@@ -726,7 +726,7 @@ public final class DisplayManagerService extends SystemService {
                 if (logicalDisplay.getDisplayInfoLocked().type != Display.TYPE_INTERNAL) {
                     return;
                 }
-                final DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(
+                final DisplayPowerController dpc = mDisplayPowerControllers.get(
                         logicalDisplay.getDisplayIdLocked());
                 if (dpc == null) {
                     return;
@@ -2058,7 +2058,7 @@ public final class DisplayManagerService extends SystemService {
             configurePreferredDisplayModeLocked(display);
         }
 
-        DisplayPowerControllerInterface dpc = addDisplayPowerControllerLocked(display);
+        DisplayPowerController dpc = addDisplayPowerControllerLocked(display);
         if (dpc != null) {
             final int leadDisplayId = display.getLeadDisplayIdLocked();
             updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
@@ -2067,7 +2067,7 @@ public final class DisplayManagerService extends SystemService {
             // that the follower display was added before the lead display.
             mLogicalDisplayMapper.forEachLocked(d -> {
                 if (d.getLeadDisplayIdLocked() == displayId) {
-                    DisplayPowerControllerInterface followerDpc =
+                    DisplayPowerController followerDpc =
                             mDisplayPowerControllers.get(d.getDisplayIdLocked());
                     if (followerDpc != null) {
                         updateDisplayPowerControllerLeaderLocked(followerDpc, displayId);
@@ -2151,7 +2151,7 @@ public final class DisplayManagerService extends SystemService {
         scheduleTraversalLocked(false);
         mPersistentDataStore.saveIfNeeded();
 
-        DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
+        DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
             final int leadDisplayId = display.getLeadDisplayIdLocked();
             updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
@@ -2165,7 +2165,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void updateDisplayPowerControllerLeaderLocked(
-            @NonNull DisplayPowerControllerInterface dpc, int leadDisplayId) {
+            @NonNull DisplayPowerController dpc, int leadDisplayId) {
         if (dpc.getLeadDisplayId() == leadDisplayId) {
             // Lead display hasn't changed, nothing to do.
             return;
@@ -2174,7 +2174,7 @@ public final class DisplayManagerService extends SystemService {
         // If it has changed, then we need to unregister from the previous leader if there was one.
         final int prevLeaderId = dpc.getLeadDisplayId();
         if (prevLeaderId != Layout.NO_LEAD_DISPLAY) {
-            final DisplayPowerControllerInterface prevLeader =
+            final DisplayPowerController prevLeader =
                     mDisplayPowerControllers.get(prevLeaderId);
             if (prevLeader != null) {
                 prevLeader.removeDisplayBrightnessFollower(dpc);
@@ -2183,7 +2183,7 @@ public final class DisplayManagerService extends SystemService {
 
         // And then, if it's following, register it with the new one.
         if (leadDisplayId != Layout.NO_LEAD_DISPLAY) {
-            final DisplayPowerControllerInterface newLeader =
+            final DisplayPowerController newLeader =
                     mDisplayPowerControllers.get(leadDisplayId);
             if (newLeader != null) {
                 newLeader.addDisplayBrightnessFollower(dpc);
@@ -2224,7 +2224,7 @@ public final class DisplayManagerService extends SystemService {
     private void releaseDisplayAndEmitEvent(LogicalDisplay display, int event) {
         final int displayId = display.getDisplayIdLocked();
 
-        final DisplayPowerControllerInterface dpc =
+        final DisplayPowerController dpc =
                 mDisplayPowerControllers.removeReturnOld(displayId);
         if (dpc != null) {
             updateDisplayPowerControllerLeaderLocked(dpc, Layout.NO_LEAD_DISPLAY);
@@ -2271,7 +2271,7 @@ public final class DisplayManagerService extends SystemService {
 
     private void handleLogicalDisplayDeviceStateTransitionLocked(@NonNull LogicalDisplay display) {
         final int displayId = display.getDisplayIdLocked();
-        final DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
+        final DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
             final int leadDisplayId = display.getLeadDisplayIdLocked();
             updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
@@ -2692,14 +2692,14 @@ public final class DisplayManagerService extends SystemService {
             if (userId != mCurrentUserId) {
                 return;
             }
-            DisplayPowerControllerInterface dpc = getDpcFromUniqueIdLocked(uniqueId);
+            DisplayPowerController dpc = getDpcFromUniqueIdLocked(uniqueId);
             if (dpc != null) {
                 dpc.setBrightnessConfiguration(c, /* shouldResetShortTermModel= */ true);
             }
         }
     }
 
-    private DisplayPowerControllerInterface getDpcFromUniqueIdLocked(String uniqueId) {
+    private DisplayPowerController getDpcFromUniqueIdLocked(String uniqueId) {
         final DisplayDevice displayDevice = mDisplayDeviceRepo.getByUniqueIdLocked(uniqueId);
         final LogicalDisplay logicalDisplay = mLogicalDisplayMapper.getDisplayLocked(displayDevice);
         if (logicalDisplay != null) {
@@ -2740,7 +2740,7 @@ public final class DisplayManagerService extends SystemService {
                 final BrightnessConfiguration config =
                         getBrightnessConfigForDisplayWithPdsFallbackLocked(uniqueId, userSerial);
                 if (config != null) {
-                    final DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(
+                    final DisplayPowerController dpc = mDisplayPowerControllers.get(
                             logicalDisplay.getDisplayIdLocked());
                     if (dpc != null) {
                         dpc.setBrightnessConfiguration(config,
@@ -2987,7 +2987,7 @@ public final class DisplayManagerService extends SystemService {
 
     void setAutoBrightnessLoggingEnabled(boolean enabled) {
         synchronized (mSyncRoot) {
-            final DisplayPowerControllerInterface displayPowerController =
+            final DisplayPowerController displayPowerController =
                     mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY);
             if (displayPowerController != null) {
                 displayPowerController.setAutoBrightnessLoggingEnabled(enabled);
@@ -2997,7 +2997,7 @@ public final class DisplayManagerService extends SystemService {
 
     void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
         synchronized (mSyncRoot) {
-            final DisplayPowerControllerInterface displayPowerController =
+            final DisplayPowerController displayPowerController =
                     mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY);
             if (displayPowerController != null) {
                 displayPowerController.setDisplayWhiteBalanceLoggingEnabled(enabled);
@@ -3023,7 +3023,7 @@ public final class DisplayManagerService extends SystemService {
 
     void setAmbientColorTemperatureOverride(float cct) {
         synchronized (mSyncRoot) {
-            final DisplayPowerControllerInterface displayPowerController =
+            final DisplayPowerController displayPowerController =
                     mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY);
             if (displayPowerController != null) {
                 displayPowerController.setAmbientColorTemperatureOverride(cct);
@@ -3033,7 +3033,7 @@ public final class DisplayManagerService extends SystemService {
 
     void setDockedAndIdleEnabled(boolean enabled, int displayId) {
         synchronized (mSyncRoot) {
-            final DisplayPowerControllerInterface displayPowerController =
+            final DisplayPowerController displayPowerController =
                     mDisplayPowerControllers.get(displayId);
             if (displayPowerController != null) {
                 displayPowerController.setAutomaticScreenBrightnessMode(enabled
@@ -3564,7 +3564,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-    private DisplayPowerControllerInterface addDisplayPowerControllerLocked(
+    private DisplayPowerController addDisplayPowerControllerLocked(
             LogicalDisplay display) {
         if (mPowerHandler == null) {
             // initPowerManagement has not yet been called.
@@ -3578,7 +3578,7 @@ public final class DisplayManagerService extends SystemService {
         final int userSerial = getUserManager().getUserSerialNumber(mContext.getUserId());
         final BrightnessSetting brightnessSetting = new BrightnessSetting(userSerial,
                 mPersistentDataStore, display, mSyncRoot);
-        final DisplayPowerControllerInterface displayPowerController;
+        final DisplayPowerController displayPowerController;
 
         // If display is internal and has a HighBrightnessModeMetadata mapping, use that.
         // Or create a new one and use that.
@@ -4366,7 +4366,7 @@ public final class DisplayManagerService extends SystemService {
                                     uniqueId, userSerial);
                     if (config == null) {
                         // Get default configuration
-                        DisplayPowerControllerInterface dpc = getDpcFromUniqueIdLocked(uniqueId);
+                        DisplayPowerController dpc = getDpcFromUniqueIdLocked(uniqueId);
                         if (dpc != null) {
                             config = dpc.getDefaultBrightnessConfiguration();
                         }
@@ -4420,7 +4420,7 @@ public final class DisplayManagerService extends SystemService {
                     if (display == null || !display.isEnabledLocked()) {
                         return null;
                     }
-                    DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
                     if (dpc != null) {
                         return dpc.getBrightnessInfo();
                     }
@@ -4465,7 +4465,7 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
                     if (dpc != null) {
                         dpc.setBrightness(brightness);
                     }
@@ -4485,7 +4485,7 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
-                    DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
+                    DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
                     if (dpc != null) {
                         brightness = dpc.getScreenBrightnessSetting();
                     }
@@ -4812,7 +4812,7 @@ public final class DisplayManagerService extends SystemService {
                             id).getPrimaryDisplayDeviceLocked();
                     final int flags = displayDevice.getDisplayDeviceInfoLocked().flags;
                     if ((flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
-                        final DisplayPowerControllerInterface displayPowerController =
+                        final DisplayPowerController displayPowerController =
                                 mDisplayPowerControllers.get(id);
                         if (displayPowerController != null) {
                             ready &= displayPowerController.requestPowerState(request,
@@ -5193,7 +5193,7 @@ public final class DisplayManagerService extends SystemService {
                     return null;
                 }
 
-                DisplayPowerControllerInterface displayPowerController =
+                DisplayPowerController displayPowerController =
                         mDisplayPowerControllers.get(logicalDisplay.getDisplayIdLocked());
                 if (displayPowerController == null) {
                     Slog.w(TAG,
