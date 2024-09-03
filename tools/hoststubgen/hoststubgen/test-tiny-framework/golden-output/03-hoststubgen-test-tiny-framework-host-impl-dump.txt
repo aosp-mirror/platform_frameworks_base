@@ -98,6 +98,28 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Retention(
       value=Ljava/lang/annotation/RetentionPolicy;.CLASS
     )
+## Class: android/hosttest/annotation/HostSideTestStaticInitializerKeep.class
+  Compiled from "HostSideTestStaticInitializerKeep.java"
+public interface android.hosttest.annotation.HostSideTestStaticInitializerKeep extends java.lang.annotation.Annotation
+  minor version: 0
+  major version: 61
+  flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
+  this_class: #x                          // android/hosttest/annotation/HostSideTestStaticInitializerKeep
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+}
+SourceFile: "HostSideTestStaticInitializerKeep.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+  x: #x(#x=[e#x.#x,e#x.#x,e#x.#x,e#x.#x])
+    java.lang.annotation.Target(
+      value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
+    )
+  x: #x(#x=e#x.#x)
+    java.lang.annotation.Retention(
+      value=Ljava/lang/annotation/RetentionPolicy;.CLASS
+    )
 ## Class: android/hosttest/annotation/HostSideTestStub.class
   Compiled from "HostSideTestStub.java"
 public interface android.hosttest.annotation.HostSideTestStub extends java.lang.annotation.Annotation

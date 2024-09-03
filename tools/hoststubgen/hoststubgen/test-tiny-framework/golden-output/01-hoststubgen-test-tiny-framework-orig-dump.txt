@@ -513,8 +513,6 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
             0      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkAnnotations;
             0      10     1 value   I
     RuntimeInvisibleAnnotations:
-      x: #x()
-        android.hosttest.annotation.HostSideTestStub
       x: #x(#x=s#x)
         android.hosttest.annotation.HostSideTestSubstitute(
           suffix="_host"
@@ -539,8 +537,6 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
     descriptor: (I)I
     flags: (0x0109) ACC_PUBLIC, ACC_STATIC, ACC_NATIVE
     RuntimeInvisibleAnnotations:
-      x: #x()
-        android.hosttest.annotation.HostSideTestStub
       x: #x(#x=s#x)
         android.hosttest.annotation.HostSideTestSubstitute(
           suffix="_host"

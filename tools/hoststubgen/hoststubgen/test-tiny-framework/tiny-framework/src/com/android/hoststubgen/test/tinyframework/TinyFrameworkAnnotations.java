@@ -59,7 +59,6 @@ public class TinyFrameworkAnnotations {
         throw new RuntimeException();
     }
 
-    @HostSideTestStub
     @HostSideTestSubstitute(suffix = "_host")
     public int addTwo(int value) {
         throw new RuntimeException("not supported on host side");
@@ -69,7 +68,6 @@ public class TinyFrameworkAnnotations {
         return value + 2;
     }
 
-    @HostSideTestStub
     @HostSideTestSubstitute(suffix = "_host")
     public static native int nativeAddThree(int value);
 

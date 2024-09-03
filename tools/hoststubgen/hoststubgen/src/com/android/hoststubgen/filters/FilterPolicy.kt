@@ -40,14 +40,9 @@ enum class FilterPolicy {
     KeepClass,
 
     /**
-     * Same as [Stub], but replace it with a "substitution" method. Only usable with methods.
+     * Only usable with methods. Replace a method with a "substitution" method.
      */
-    SubstituteAndStub,
-
-    /**
-     * Same as [Keep], but replace it with a "substitution" method. Only usable with methods.
-     */
-    SubstituteAndKeep,
+    Substitute,
 
     /**
      * Only usable with methods. The item will be kept in the impl jar file, but when called,
@@ -57,7 +52,7 @@ enum class FilterPolicy {
 
     /**
      * Only usable with methods. The item will be kept in the impl jar file, but when called,
-     * it'll no-op.  Currently only supported for methods returning `void`.
+     * it'll no-op.
      */
     Ignore,
 
@@ -66,11 +61,8 @@ enum class FilterPolicy {
      */
     Remove;
 
-    val isSubstitute: Boolean
-        get() = this == SubstituteAndStub || this == SubstituteAndKeep
-
     val needsInStub: Boolean
-        get() = this == Stub || this == StubClass || this == SubstituteAndStub || this == Ignore
+        get() = this == Stub || this == StubClass || this == Substitute || this == Ignore
 
     val needsInImpl: Boolean
         get() = this != Remove
@@ -102,6 +94,15 @@ enum class FilterPolicy {
             }
         }
 
+    /** Returns whether a policy can be used as default policy. */
+    val isUsableWithDefault: Boolean
+        get() {
+            return when (this) {
+                Stub, Keep, Throw, Remove -> true
+                else -> false
+            }
+        }
+
     /** Returns whether a policy is a class-wide one. */
     val isClassWidePolicy: Boolean
         get() {
@@ -116,18 +117,10 @@ enum class FilterPolicy {
         get() {
             return when (this) {
                 // TODO: handle native method with no substitution as being unsupported
-                Stub, StubClass, Keep, KeepClass, SubstituteAndStub, SubstituteAndKeep -> true
+                Stub, StubClass, Keep, KeepClass, Substitute -> true
                 else -> false
             }
         }
-
-    fun getSubstitutionBasePolicy(): FilterPolicy {
-        return when (this) {
-            SubstituteAndKeep -> Keep
-            SubstituteAndStub -> Stub
-            else -> this
-        }
-    }
 
     /**
      * Convert {Stub,Keep}Class to the corresponding Stub or Keep.
