@@ -84,7 +84,7 @@ import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -141,6 +141,11 @@ private fun <T> anyObject(): T {
 @RunWith(ParameterizedAndroidJunit4::class)
 @EnableSceneContainer
 class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
+
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     @Mock lateinit var controller: MediaController
     @Mock lateinit var transportControls: MediaController.TransportControls
@@ -193,9 +198,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         mSetFlagsRule.setFlagsParameterization(flags)
     }
 
-    private val kosmos = testKosmos()
-    private val testDispatcher = kosmos.testDispatcher
-    private val testScope = kosmos.testScope
     private val fakeFeatureFlags = kosmos.fakeFeatureFlagsClassic
     private val activityStarter = kosmos.activityStarter
     private val mediaControllerFactory = kosmos.fakeMediaControllerFactory
@@ -203,7 +205,6 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val mediaFilterRepository = kosmos.mediaFilterRepository
     private val mediaDataFilter = kosmos.mediaDataFilter
 
-    private val settings = FakeSettings()
     private val instanceIdSequence = InstanceIdSequenceFake(1 shl 20)
 
     private val originalSmartspaceSetting =
