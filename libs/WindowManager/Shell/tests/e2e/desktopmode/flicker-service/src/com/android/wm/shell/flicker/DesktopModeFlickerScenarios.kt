@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.flicker
 
+import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_HEIGHT
+import android.tools.PlatformConsts.DESKTOP_MODE_MINIMUM_WINDOW_WIDTH
 import android.tools.flicker.AssertionInvocationGroup
 import android.tools.flicker.assertors.assertions.AppLayerIncreasesInSize
 import android.tools.flicker.assertors.assertions.AppLayerIsInvisibleAtEnd
@@ -181,7 +183,13 @@ class DesktopModeFlickerScenarios {
                     .build(),
                 assertions =
                 AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowHasSizeOfAtLeast(DESKTOP_MODE_APP, 770, 700))
+                        listOf(
+                            AppWindowHasSizeOfAtLeast(
+                                DESKTOP_MODE_APP,
+                                DESKTOP_MODE_MINIMUM_WINDOW_WIDTH,
+                                DESKTOP_MODE_MINIMUM_WINDOW_HEIGHT
+                            )
+                        )
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
