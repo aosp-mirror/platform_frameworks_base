@@ -636,10 +636,13 @@ flag {
 }
 
 flag {
-   name: "smartspace_remoteviews_rendering"
+   name: "smartspace_remoteviews_rendering_fix"
    namespace: "systemui"
    description: "Indicate Smartspace RemoteViews rendering"
    bug: "326292691"
+   metadata {
+     purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
