@@ -45,13 +45,13 @@ import android.util.proto.ProtoInputStream;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.protolog.ProtoLogConfigurationService.ViewerConfigFileTracer;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
 
 import com.google.common.truth.Truth;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +76,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RunWith(JUnit4.class)
 public class PerfettoProtoLogImplTest {
     private static final String TEST_PROTOLOG_DATASOURCE_NAME = "test.android.protolog";
+    private static final String MOCK_VIEWER_CONFIG_FILE = "my/mock/viewer/config/file.pb";
     private final File mTracingDirectory = InstrumentationRegistry.getInstrumentation()
             .getTargetContext().getFilesDir();
 
@@ -168,18 +169,25 @@ public class PerfettoProtoLogImplTest {
         final ProtoLogDataSourceBuilder dataSourceBuilder =
                 (onStart, onFlush, onStop) -> new ProtoLogDataSource(
                         onStart, onFlush, onStop, TEST_PROTOLOG_DATASOURCE_NAME);
-        mProtoLogConfigurationService =
-                new ProtoLogConfigurationService(dataSourceBuilder);
-        mProtoLog = new PerfettoProtoLogImpl(
-                viewerConfigInputStreamProvider, mReader, () -> mCacheUpdater.run(),
-                TestProtoLogGroup.values(), dataSourceBuilder, mProtoLogConfigurationService);
-    }
+        final ViewerConfigFileTracer tracer = (dataSource, viewerConfigFilePath) -> {
+            Utils.dumpViewerConfig(dataSource, () -> {
+                if (!viewerConfigFilePath.equals(MOCK_VIEWER_CONFIG_FILE)) {
+                    throw new RuntimeException(
+                            "Unexpected viewer config file path provided");
+                }
+                return new ProtoInputStream(mViewerConfigBuilder.build().toByteArray());
+            });
+        };
+        mProtoLogConfigurationService = new ProtoLogConfigurationService(dataSourceBuilder, tracer);
 
-    @After
-    public void tearDown() {
-        if (mFile != null) {
-            //noinspection ResultOfMethodCallIgnored
-            mFile.delete();
+        if (android.tracing.Flags.clientSideProtoLogging()) {
+            mProtoLog = new PerfettoProtoLogImpl(
+                    MOCK_VIEWER_CONFIG_FILE, mReader, () -> mCacheUpdater.run(),
+                    TestProtoLogGroup.values(), dataSourceBuilder, mProtoLogConfigurationService);
+        } else {
+            mProtoLog = new PerfettoProtoLogImpl(
+                    viewerConfigInputStreamProvider, mReader, () -> mCacheUpdater.run(),
+                    TestProtoLogGroup.values(), dataSourceBuilder, mProtoLogConfigurationService);
         }
         ProtoLogImpl.setSingleInstance(null);
     }
