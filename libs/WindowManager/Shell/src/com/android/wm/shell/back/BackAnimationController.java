@@ -1390,6 +1390,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 mergePendingTransitions(info);
             }
 
+            if (info.getType() == TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION
+                    && !mCloseTransitionRequested && info.getChanges().isEmpty() && mApps != null) {
+                // Wait for post animation finish
+                finishCallback.onTransitionFinished(null);
+                t.apply();
+                return;
+            }
             if (isNotGestureBackTransition(info) || shouldCancelAnimation(info)
                     || !mCloseTransitionRequested) {
                 if (mPrepareOpenTransition != null) {
@@ -1497,14 +1504,27 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 }
             }
             if (openingLeash != null) {
+                int rootIdx = -1;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change c = info.getChanges().get(i);
+                    if (c.hasFlags(FLAG_IS_WALLPAPER)) {
+                        st.setAlpha(c.getLeash(), 1.0f);
+                        continue;
+                    }
                     if (TransitionUtil.isOpeningMode(c.getMode())) {
                         final Point offset = c.getEndRelOffset();
                         st.setPosition(c.getLeash(), offset.x, offset.y);
                         st.reparent(c.getLeash(), openingLeash);
                         st.setAlpha(c.getLeash(), 1.0f);
+                        rootIdx = TransitionUtil.rootIndexFor(c, info);
                     }
+                }
+                // The root leash and the leash of opening target should actually in the same level,
+                // but since the root leash is created after opening target, it will have higher
+                // layer in surface flinger. Move the root leash to lower level, so it won't affect
+                // the playing animation.
+                if (rootIdx >= 0 && info.getRootCount() > 0) {
+                    st.setLayer(info.getRoot(rootIdx).getLeash(), -1);
                 }
             }
             st.apply();
@@ -1548,6 +1568,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             if (openingLeash != null && closingLeash != null) {
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change c = info.getChanges().get(i);
+                    if (c.hasFlags(FLAG_IS_WALLPAPER)) {
+                        st.setAlpha(c.getLeash(), 1.0f);
+                        continue;
+                    }
                     if (TransitionUtil.isOpeningMode(c.getMode())) {
                         final Point offset = c.getEndRelOffset();
                         st.setPosition(c.getLeash(), offset.x, offset.y);
