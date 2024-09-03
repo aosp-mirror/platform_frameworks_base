@@ -69,23 +69,6 @@ public class ZenMode implements Parcelable {
     static final String MANUAL_DND_MODE_ID = ZenModeConfig.MANUAL_RULE_ID;
     static final String TEMP_NEW_MODE_ID = "temp_new_mode";
 
-    // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
-    static final ZenPolicy POLICY_INTERRUPTION_FILTER_ALARMS =
-            new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .allowAlarms(true)
-                    .allowMedia(true)
-                    .allowPriorityChannels(false)
-                    .build();
-
-    // Must match com.android.server.notification.ZenModeHelper#applyCustomPolicy.
-    static final ZenPolicy POLICY_INTERRUPTION_FILTER_NONE =
-            new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .hideAllVisualEffects()
-                    .allowPriorityChannels(false)
-                    .build();
-
     private static final Comparator<Integer> PRIORITIZED_TYPE_COMPARATOR = new Comparator<>() {
 
         private static final ImmutableList</* @AutomaticZenRule.Type */ Integer>
@@ -320,10 +303,12 @@ public class ZenMode implements Parcelable {
                 return requireNonNull(mRule.getZenPolicy());
 
             case NotificationManager.INTERRUPTION_FILTER_ALARMS:
-                return POLICY_INTERRUPTION_FILTER_ALARMS;
+                return new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy()).build()
+                        .overwrittenWith(ZenPolicy.getBasePolicyInterruptionFilterAlarms());
 
             case NotificationManager.INTERRUPTION_FILTER_NONE:
-                return POLICY_INTERRUPTION_FILTER_NONE;
+                return new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy()).build()
+                        .overwrittenWith(ZenPolicy.getBasePolicyInterruptionFilterNone());
 
             case NotificationManager.INTERRUPTION_FILTER_UNKNOWN:
             default:

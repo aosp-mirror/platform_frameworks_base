@@ -213,7 +213,7 @@ public class ZenModeTest {
         ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         assertThat(zenMode.getPolicy()).isEqualTo(
-                new ZenPolicy.Builder()
+                new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy())
                         .disallowAllSounds()
                         .allowAlarms(true)
                         .allowMedia(true)
@@ -230,9 +230,8 @@ public class ZenModeTest {
         ZenMode zenMode = new ZenMode("id", azr, zenConfigRuleFor(azr, false));
 
         assertThat(zenMode.getPolicy()).isEqualTo(
-                new ZenPolicy.Builder()
+                new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy())
                         .disallowAllSounds()
-                        .hideAllVisualEffects()
                         .allowPriorityChannels(false)
                         .build());
     }
