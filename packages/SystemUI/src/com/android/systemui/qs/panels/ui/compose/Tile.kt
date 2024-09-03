@@ -34,6 +34,7 @@ import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -96,6 +97,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
 import com.android.compose.modifiers.background
@@ -116,6 +119,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.groupAndSort
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.res.R
 import java.util.function.Supplier
@@ -473,31 +477,39 @@ private fun AvailableTileGrid(
     onClick: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState,
 ) {
-    // Available tiles aren't visible during drag and drop, so the row isn't needed
-    val (otherTilesStock, otherTilesCustom) =
-        tiles.map { TileGridCell(it, 0) }.partition { it.tile.appName == null }
     val availableTileHeight = tileHeight(true)
     val availableGridHeight = gridHeight(tiles.size, availableTileHeight, columns, tilePadding)
 
+    // Available tiles aren't visible during drag and drop, so the row isn't needed
+    val groupedTiles =
+        remember(tiles.fastMap { it.tile.category }, tiles.fastMap { it.tile.label }) {
+            groupAndSort(tiles.fastMap { TileGridCell(it, 0) })
+        }
+    val labelColors = TileDefaults.inactiveTileColors()
     // Available tiles
     TileLazyGrid(
         modifier = Modifier.height(availableGridHeight).testTag(AVAILABLE_TILES_GRID_TEST_TAG),
         columns = GridCells.Fixed(columns)
     ) {
-        editTiles(
-            otherTilesStock,
-            ClickAction.ADD,
-            onClick,
-            dragAndDropState = dragAndDropState,
-            showLabels = true,
-        )
-        editTiles(
-            otherTilesCustom,
-            ClickAction.ADD,
-            onClick,
-            dragAndDropState = dragAndDropState,
-            showLabels = true,
-        )
+        groupedTiles.forEach { category, tiles ->
+            stickyHeader {
+                Text(
+                    text = category.label.load() ?: "",
+                    fontSize = 20.sp,
+                    color = labelColors.label,
+                    modifier =
+                        Modifier.background(Color.Black)
+                            .padding(start = 16.dp, bottom = 8.dp, top = 8.dp)
+                )
+            }
+            editTiles(
+                tiles,
+                ClickAction.ADD,
+                onClick,
+                dragAndDropState = dragAndDropState,
+                showLabels = true,
+            )
+        }
     }
 }
 
@@ -619,7 +631,7 @@ fun EditTile(
     showLabels: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val label = tileViewModel.label.load() ?: tileViewModel.tileSpec.spec
+    val label = tileViewModel.label.text
     val colors = TileDefaults.inactiveTileColors()
 
     TileContainer(
@@ -639,7 +651,7 @@ fun EditTile(
         } else {
             LargeTileContent(
                 label = label,
-                secondaryLabel = tileViewModel.appName?.load(),
+                secondaryLabel = tileViewModel.appName?.text,
                 icon = tileViewModel.icon,
                 colors = colors,
                 iconShape = RoundedCornerShape(TileDefaults.InactiveCornerRadius),

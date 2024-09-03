@@ -16,11 +16,11 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
+import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.shared.model.Text
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.model.GridCell
@@ -28,6 +28,7 @@ import com.android.systemui.qs.panels.ui.model.SpacerGridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -141,10 +142,11 @@ class EditTileListStateTest : SysuiTestCase() {
                 EditTileViewModel(
                     tileSpec = TileSpec.create(tileSpec),
                     icon = Icon.Resource(0, null),
-                    label = Text.Loaded("unused"),
+                    label = AnnotatedString("unused"),
                     appName = null,
                     isCurrent = true,
                     availableEditActions = emptySet(),
+                    category = TileCategory.UNKNOWN,
                 ),
                 width,
             )
