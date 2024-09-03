@@ -358,7 +358,7 @@ public class BrightnessClamperControllerTest {
 
     private BrightnessClamperController createBrightnessClamperController() {
         return new BrightnessClamperController(mTestInjector, mTestHandler, mMockExternalListener,
-                mMockDisplayDeviceData, mMockContext, mFlags, mSensorManager);
+                mMockDisplayDeviceData, mMockContext, mFlags, mSensorManager, 0);
     }
 
     interface TestDisplayListenerModifier extends BrightnessStateModifier,
@@ -396,7 +396,7 @@ public class BrightnessClamperControllerTest {
                 Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data,
-                DisplayManagerFlags flags, Context context) {
+                DisplayManagerFlags flags, Context context, float currentBrightness) {
             mCapturedChangeListener = clamperChangeListener;
             return mClampers;
         }

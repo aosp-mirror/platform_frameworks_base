@@ -591,7 +591,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         mThermalBrightnessThrottlingDataId,
                         logicalDisplay.getPowerThrottlingDataIdLocked(),
                         mDisplayDeviceConfig, displayDeviceInfo.width, displayDeviceInfo.height,
-                        displayToken, mDisplayId), mContext, flags, mSensorManager);
+                        displayToken, mDisplayId), mContext, flags, mSensorManager,
+                        mDisplayBrightnessController.getCurrentBrightness());
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
         mAutomaticBrightnessStrategy =
@@ -3305,10 +3306,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         BrightnessClamperController getBrightnessClamperController(Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data, Context context,
-                DisplayManagerFlags flags, SensorManager sensorManager) {
+                DisplayManagerFlags flags, SensorManager sensorManager, float currentBrightness) {
 
             return new BrightnessClamperController(handler, clamperChangeListener, data, context,
-                    flags, sensorManager);
+                    flags, sensorManager, currentBrightness);
         }
 
         DisplayWhiteBalanceController getDisplayWhiteBalanceController(Handler handler,
