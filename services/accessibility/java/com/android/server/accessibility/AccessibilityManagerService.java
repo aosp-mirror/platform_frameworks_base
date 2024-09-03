@@ -4903,40 +4903,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    @RequiresNoPermission
-    public boolean startFlashNotificationSequence(String opPkg,
-            @FlashNotificationReason int reason, IBinder token) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mFlashNotificationsController.startFlashNotificationSequence(opPkg,
-                    reason, token);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
+    public boolean startFlashNotificationSequence(String opPkg, @FlashNotificationReason int reason,
+            IBinder token) {
+        startFlashNotificationSequence_enforcePermission();
+        return mFlashNotificationsController.startFlashNotificationSequence(opPkg, reason, token);
     }
 
     @Override
-    @RequiresNoPermission
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public boolean stopFlashNotificationSequence(String opPkg) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mFlashNotificationsController.stopFlashNotificationSequence(opPkg);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+        stopFlashNotificationSequence_enforcePermission();
+        return mFlashNotificationsController.stopFlashNotificationSequence(opPkg);
     }
 
     @Override
-    @RequiresNoPermission
-    public boolean startFlashNotificationEvent(String opPkg,
-            @FlashNotificationReason int reason, String reasonPkg) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mFlashNotificationsController.startFlashNotificationEvent(opPkg,
-                    reason, reasonPkg);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
+    public boolean startFlashNotificationEvent(String opPkg, @FlashNotificationReason int reason,
+            String reasonPkg) {
+        startFlashNotificationEvent_enforcePermission();
+        return mFlashNotificationsController.startFlashNotificationEvent(opPkg, reason, reasonPkg);
     }
 
     @Override

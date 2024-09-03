@@ -3,7 +3,6 @@ package com.android.internal.protolog;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.GROUPS;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Group.ID;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Group.NAME;
-
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE_ID;
@@ -11,7 +10,6 @@ import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Mes
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.proto.ProtoInputStream;
 
@@ -38,6 +36,7 @@ public class ProtoLogViewerConfigReader {
      * Returns message format string for its hash or null if unavailable
      * or the viewer config is not loaded into memory.
      */
+    @Nullable
     public synchronized String getViewerString(long messageHash) {
         return mLogMessageMap.get(messageHash);
     }

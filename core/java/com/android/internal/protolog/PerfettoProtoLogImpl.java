@@ -930,37 +930,47 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     }
 
     private static class Message {
+        @Nullable
         private final Long mMessageHash;
+        @Nullable
         private final Integer mMessageMask;
+        @Nullable
         private final String mMessageString;
 
-        private Message(Long messageHash, int messageMask) {
+        private Message(long messageHash, int messageMask) {
             this.mMessageHash = messageHash;
             this.mMessageMask = messageMask;
             this.mMessageString = null;
         }
 
-        private Message(String messageString) {
+        private Message(@NonNull String messageString) {
             this.mMessageHash = null;
             final List<Integer> argTypes = LogDataType.parseFormatString(messageString);
             this.mMessageMask = LogDataType.logDataTypesToBitMask(argTypes);
             this.mMessageString = messageString;
         }
 
-        private int getMessageMask() {
+        @Nullable
+        private Integer getMessageMask() {
             return mMessageMask;
         }
 
+        @Nullable
         private String getMessage() {
             return mMessageString;
         }
 
+        @Nullable
         private String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
             if (mMessageString != null) {
                 return mMessageString;
             }
 
-            return viewerConfigReader.getViewerString(mMessageHash);
+            if (mMessageHash != null) {
+                return viewerConfigReader.getViewerString(mMessageHash);
+            }
+
+            throw new RuntimeException("Both mMessageString and mMessageHash should never be null");
         }
     }
 }

@@ -153,6 +153,22 @@ class DesktopModeFlickerScenarios {
                 assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS
             )
 
+        val EDGE_RESIZE =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("EDGE_RESIZE"),
+                extractor =
+                TaggedScenarioExtractorBuilder()
+                    .setTargetTag(CujType.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
+                    .setTransitionMatcher(
+                        TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                    )
+                    .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
+                        listOf(
+                            AppLayerIncreasesInSize(DESKTOP_MODE_APP),
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
         val CORNER_RESIZE_TO_MINIMUM_SIZE =
             FlickerConfigEntry(
                 scenarioId = ScenarioId("CORNER_RESIZE_TO_MINIMUM_SIZE"),

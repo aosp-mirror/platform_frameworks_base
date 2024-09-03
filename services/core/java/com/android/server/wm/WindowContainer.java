@@ -1731,13 +1731,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         last time {@link #getOrientation(int) was called.
      */
     @Nullable
-    WindowContainer getLastOrientationSource() {
-        final WindowContainer source = mLastOrientationSource;
-        if (source != null && source != this) {
-            final WindowContainer nextSource = source.getLastOrientationSource();
-            if (nextSource != null) {
-                return nextSource;
-            }
+    final WindowContainer<?> getLastOrientationSource() {
+        if (mLastOrientationSource == null) {
+            return null;
+        }
+        WindowContainer<?> source = this;
+        while (source != source.mLastOrientationSource && source.mLastOrientationSource != null) {
+            source = source.mLastOrientationSource;
         }
         return source;
     }

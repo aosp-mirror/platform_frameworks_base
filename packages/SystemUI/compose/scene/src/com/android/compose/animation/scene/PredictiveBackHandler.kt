@@ -21,9 +21,15 @@ import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
+import com.android.compose.animation.scene.UserActionResult.ChangeScene
+import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun PredictiveBackHandler(
@@ -42,10 +48,11 @@ internal fun PredictiveBackHandler(
         val animation =
             createSwipeAnimation(
                 layoutImpl,
-                layoutImpl.coroutineScope,
-                result.userActionCopy(
-                    transitionKey = result.transitionKey ?: TransitionKey.PredictiveBack
-                ),
+                if (result.transitionKey != null) {
+                    result
+                } else {
+                    result.copy(transitionKey = TransitionKey.PredictiveBack)
+                },
                 isUpOrLeft = false,
                 // Note that the orientation does not matter here given that it's only used to
                 // compute the distance. In our case the distance is always 1f.
@@ -64,7 +71,8 @@ private suspend fun <T : ContentKey> animate(
 ) {
     fun animateOffset(targetContent: T, spec: AnimationSpec<Float>? = null) {
         if (
-            layoutImpl.state.transitionState != animation.contentTransition || animation.isFinishing
+            layoutImpl.state.transitionState != animation.contentTransition ||
+                animation.isAnimatingOffset()
         ) {
             return
         }
@@ -76,20 +84,34 @@ private suspend fun <T : ContentKey> animate(
         )
     }
 
-    layoutImpl.state.startTransition(animation.contentTransition)
-    try {
-        progress.collect { backEvent -> animation.dragOffset = backEvent.progress }
+    coroutineScope {
+        launch {
+            try {
+                progress.collect { backEvent -> animation.dragOffset = backEvent.progress }
 
-        // Back gesture successful.
-        animateOffset(
-            animation.toContent,
-            animation.contentTransition.transformationSpec.progressSpec
-        )
-    } catch (e: CancellationException) {
-        // Back gesture cancelled.
-        // If the back gesture is cancelled, the progress is animated back to 0f by the system.
-        // Since the remaining change in progress is usually very small, the progressSpec is omitted
-        // and the default spring spec used instead.
-        animateOffset(animation.fromContent)
+                // Back gesture successful.
+                animateOffset(
+                    animation.toContent,
+                    animation.contentTransition.transformationSpec.progressSpec,
+                )
+            } catch (e: CancellationException) {
+                // Back gesture cancelled.
+                animateOffset(animation.fromContent)
+            }
+        }
+
+        // Start the transition.
+        layoutImpl.state.startTransition(animation.contentTransition)
+    }
+}
+
+private fun UserActionResult.copy(
+    transitionKey: TransitionKey? = this.transitionKey
+): UserActionResult {
+    return when (this) {
+        is ChangeScene -> copy(transitionKey = transitionKey)
+        is ShowOverlay -> copy(transitionKey = transitionKey)
+        is HideOverlay -> copy(transitionKey = transitionKey)
+        is ReplaceByOverlay -> copy(transitionKey = transitionKey)
     }
 }

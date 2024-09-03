@@ -28,6 +28,7 @@ val Kosmos.initialSceneKey by Fixture { Scenes.Lockscreen }
 var Kosmos.overlayKeys by Fixture {
     listOf(
         Overlays.NotificationsShade,
+        Overlays.QuickSettingsShade,
     )
 }
 
