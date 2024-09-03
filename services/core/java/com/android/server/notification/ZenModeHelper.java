@@ -2125,17 +2125,25 @@ public class ZenModeHelper {
     @GuardedBy("mConfigLock")
     private void applyCustomPolicy(ZenPolicy policy, ZenRule rule, boolean useManualConfig) {
         if (rule.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-            policy.apply(new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .allowPriorityChannels(false)
-                    .build());
+            if (Flags.modesApi() && Flags.modesUi()) {
+                policy.apply(ZenPolicy.getBasePolicyInterruptionFilterNone());
+            } else {
+                policy.apply(new ZenPolicy.Builder()
+                        .disallowAllSounds()
+                        .allowPriorityChannels(false)
+                        .build());
+            }
         } else if (rule.zenMode == Global.ZEN_MODE_ALARMS) {
-            policy.apply(new ZenPolicy.Builder()
-                    .disallowAllSounds()
-                    .allowAlarms(true)
-                    .allowMedia(true)
-                    .allowPriorityChannels(false)
-                    .build());
+            if (Flags.modesApi() && Flags.modesUi()) {
+                policy.apply(ZenPolicy.getBasePolicyInterruptionFilterAlarms());
+            } else {
+                policy.apply(new ZenPolicy.Builder()
+                        .disallowAllSounds()
+                        .allowAlarms(true)
+                        .allowMedia(true)
+                        .allowPriorityChannels(false)
+                        .build());
+            }
         } else if (rule.zenPolicy != null) {
             policy.apply(rule.zenPolicy);
         } else {

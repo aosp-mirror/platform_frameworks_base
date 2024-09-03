@@ -238,9 +238,16 @@ public class ZenModesBackendTest {
         assertThat(mode.isManualDnd()).isTrue();
         assertThat(mode.isEnabled()).isTrue();
         assertThat(mode.isActive()).isTrue();
+
         // Mode itself has a special fixed policy, different to the rule.
         assertThat(mode.canEditPolicy()).isFalse();
-        assertThat(mode.getPolicy()).isEqualTo(ZenMode.POLICY_INTERRUPTION_FILTER_ALARMS);
+        assertThat(mode.getPolicy()).isEqualTo(
+                new ZenPolicy.Builder(ZenModeConfig.getDefaultZenPolicy())
+                        .disallowAllSounds()
+                        .allowAlarms(true)
+                        .allowMedia(true)
+                        .allowPriorityChannels(false)
+                        .build());
     }
 
     @Test
