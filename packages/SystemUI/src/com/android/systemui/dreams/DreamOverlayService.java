@@ -473,7 +473,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mLifecycleOwner,
                 new HashSet<>(Arrays.asList(
                         dreamComplicationComponent.getHideComplicationTouchHandler(),
-                        dreamOverlayComponent.getCommunalTouchHandler())));
+                        dreamOverlayComponent.getCommunalTouchHandler())), TAG);
 
         setLifecycleStateLocked(Lifecycle.State.STARTED);
 

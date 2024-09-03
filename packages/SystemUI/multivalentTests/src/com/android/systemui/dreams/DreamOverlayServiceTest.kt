@@ -233,7 +233,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             .thenReturn(dreamOverlayComponent)
 
         val ambientTouchComponent = mock<AmbientTouchComponent>()
-        whenever(ambientTouchComponentFactory.create(any(), any()))
+        whenever(ambientTouchComponentFactory.create(any(), any(), any()))
             .thenReturn(ambientTouchComponent)
         whenever(ambientTouchComponent.getTouchMonitor()).thenReturn(mTouchMonitor)
 

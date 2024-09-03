@@ -118,7 +118,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             object : AmbientTouchComponent.Factory {
                 override fun create(
                     lifecycleOwner: LifecycleOwner,
-                    touchHandlers: Set<TouchHandler>
+                    touchHandlers: Set<TouchHandler>,
+                    loggingName: String
                 ): AmbientTouchComponent =
                     object : AmbientTouchComponent {
                         override fun getTouchMonitor(): TouchMonitor = touchMonitor
