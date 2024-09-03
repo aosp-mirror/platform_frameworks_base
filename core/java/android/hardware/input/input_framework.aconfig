@@ -99,3 +99,10 @@ flag {
   description: "Refactor ModifierShortcutManager internal representation of shortcuts."
   bug: "358603902"
 }
+
+flag {
+  name: "keyboard_repeat_keys"
+  namespace: "input"
+  description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
+  bug: "336585002"
+}

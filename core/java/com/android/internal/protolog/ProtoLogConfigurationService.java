@@ -23,6 +23,7 @@ import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.Gro
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MESSAGES;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.GROUP_ID;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LEVEL;
+import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.LOCATION;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static android.internal.perfetto.protos.Protolog.ProtoLogViewerConfig.MessageData.MESSAGE_ID;
 import static android.internal.perfetto.protos.TracePacketOuterClass.TracePacket.PROTOLOG_VIEWER_CONFIG;
@@ -210,8 +211,7 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
          *                             want to write to the trace buffer.
          * @throws FileNotFoundException if the viewerConfigFilePath is invalid.
          */
-        void trace(@NonNull ProtoLogDataSource dataSource, @NonNull String viewerConfigFilePath)
-                throws FileNotFoundException;
+        void trace(@NonNull ProtoLogDataSource dataSource, @NonNull String viewerConfigFilePath);
     }
 
     @Override
@@ -351,11 +351,7 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
 
     private void onTracingInstanceFlush() {
         for (String fileName : mConfigFileCounts.keySet()) {
-            try {
-                mViewerConfigFileTracer.trace(mDataSource, fileName);
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            mViewerConfigFileTracer.trace(mDataSource, fileName);
         }
     }
 
@@ -364,10 +360,16 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
     }
 
     private static void dumpTransitionTraceConfig(@NonNull ProtoLogDataSource dataSource,
-            @NonNull String viewerConfigFilePath) throws FileNotFoundException {
-        final var pis = new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
-
+            @NonNull String viewerConfigFilePath) {
         dataSource.trace(ctx -> {
+            final ProtoInputStream pis;
+            try {
+                pis = new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(
+                        "Failed to load viewer config file " + viewerConfigFilePath, e);
+            }
+
             try {
                 final ProtoOutputStream os = ctx.newTracePacket();
 
@@ -396,11 +398,7 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
             mConfigFileCounts.put(configFile, newCount);
             boolean lastProcessWithViewerConfig = newCount == 0;
             if (lastProcessWithViewerConfig) {
-                try {
-                    mViewerConfigFileTracer.trace(mDataSource, configFile);
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
+                mViewerConfigFileTracer.trace(mDataSource, configFile);
             }
         }
     }
@@ -446,6 +444,7 @@ public final class ProtoLogConfigurationService extends IProtoLogConfigurationSe
                 case (int) MESSAGE -> os.write(MESSAGE, pis.readString(MESSAGE));
                 case (int) LEVEL -> os.write(LEVEL, pis.readInt(LEVEL));
                 case (int) GROUP_ID -> os.write(GROUP_ID, pis.readInt(GROUP_ID));
+                case (int) LOCATION -> os.write(LOCATION, pis.readString(LOCATION));
                 default ->
                     throw new RuntimeException(
                             "Unexpected field id " + pis.getFieldNumber());

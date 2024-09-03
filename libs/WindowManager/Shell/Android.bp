@@ -39,17 +39,6 @@ filegroup {
     path: "src",
 }
 
-// Sources that have no dependencies that can be used directly downstream of this library
-// TODO(b/322791067): move these sources to WindowManager-Shell-shared
-filegroup {
-    name: "wm_shell_util-sources",
-    srcs: [
-        "src/com/android/wm/shell/common/bubbles/*.kt",
-        "src/com/android/wm/shell/common/bubbles/*.java",
-    ],
-    path: "src",
-}
-
 // Aidls which can be used directly downstream of this library
 filegroup {
     name: "wm_shell-aidls",
@@ -184,9 +173,11 @@ java_library {
         ":wm_shell-shared-aidls",
     ],
     static_libs: [
+        "androidx.core_core-animation",
         "androidx.dynamicanimation_dynamicanimation",
         "jsr330",
     ],
+    kotlincflags: ["-Xjvm-default=all"],
 }
 
 java_library {
@@ -212,7 +203,6 @@ android_library {
     ],
     static_libs: [
         "androidx.appcompat_appcompat",
-        "androidx.core_core-animation",
         "androidx.core_core-ktx",
         "androidx.arch.core_core-runtime",
         "androidx.datastore_datastore",

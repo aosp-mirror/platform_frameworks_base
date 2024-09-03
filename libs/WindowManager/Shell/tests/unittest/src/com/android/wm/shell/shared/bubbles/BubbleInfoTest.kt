@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common.bubbles
+package com.android.wm.shell.shared.bubbles
 
 import android.os.Parcel
 import android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.wm.shell.common.bubbles
+package com.android.wm.shell.shared.bubbles
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.common.bubbles.BubbleBarLocation.DEFAULT
-import com.android.wm.shell.common.bubbles.BubbleBarLocation.LEFT
-import com.android.wm.shell.common.bubbles.BubbleBarLocation.RIGHT
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation.DEFAULT
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation.LEFT
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation.RIGHT
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
