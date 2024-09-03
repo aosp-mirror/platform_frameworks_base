@@ -57,7 +57,7 @@ class ViewPagerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         A11yMenuAdapter adapter = new A11yMenuAdapter(
-                mService, holder.itemView.getContext(), mShortcutList.get(position));
+                mService, mShortcutList.get(position));
         GridView gridView = (GridView) holder.itemView;
         gridView.setNumColumns(A11yMenuViewPager.GridViewParams.getGridColumnCount(mService));
         gridView.setAdapter(adapter);
