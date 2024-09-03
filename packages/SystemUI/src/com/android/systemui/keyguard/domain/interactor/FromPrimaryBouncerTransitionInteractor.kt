@@ -35,7 +35,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
-import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -112,14 +112,18 @@ constructor(
                         keyguardInteractor.isActiveDreamLockscreenHosted,
                         communalSceneInteractor.isIdleOnCommunal
                     )
-                    .filterRelevantKeyguardState()
-                    .collect {
-                        (isBouncerShowing, isAwake, isActiveDreamLockscreenHosted, isIdleOnCommunal)
-                        ->
+                    .filterRelevantKeyguardStateAnd { (isBouncerShowing, _, _, _) ->
+                        // TODO(b/307976454) - See if we need to listen for SHOW_WHEN_LOCKED
+                        // activities showing up over the bouncer. Camera launch can't show up over
+                        // bouncer since the first power press hides bouncer. Do occluding
+                        // activities auto hide bouncer? Not sure.
+                        !isBouncerShowing
+                    }
+                    .collect { (_, isAwake, isActiveDreamLockscreenHosted, isIdleOnCommunal) ->
                         if (
                             !maybeStartTransitionToOccludedOrInsecureCamera { state, reason ->
                                 startTransitionTo(state, ownerReason = reason)
-                            } && !isBouncerShowing && isAwake && !isActiveDreamLockscreenHosted
+                            } && isAwake && !isActiveDreamLockscreenHosted
                         ) {
                             val toState =
                                 if (isIdleOnCommunal) {
@@ -171,7 +175,10 @@ constructor(
                 !communalSceneInteractor.isLaunchingWidget.value &&
                 communalSceneInteractor.editModeState.value == null
         ) {
-            communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+            communalSceneInteractor.snapToScene(
+                newScene = CommunalScenes.Blank,
+                loggingReason = "FromPrimaryBouncerTransitionInteractor",
+            )
         }
     }
 
@@ -241,6 +248,7 @@ constructor(
                     KeyguardState.GONE -> TO_GONE_DURATION
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -253,7 +261,8 @@ constructor(
         val TO_GONE_DURATION = 500.milliseconds
         val TO_GONE_SHORT_DURATION = 200.milliseconds
         val TO_LOCKSCREEN_DURATION = 450.milliseconds
+        val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_GLANCEABLE_HUB_DURATION = DEFAULT_DURATION
-        val TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD = 0.5f
+        val TO_GONE_SURFACE_BEHIND_VISIBLE_THRESHOLD = 0.1f
     }
 }

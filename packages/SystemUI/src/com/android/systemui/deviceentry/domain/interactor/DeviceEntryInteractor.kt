@@ -119,21 +119,24 @@ constructor(
      * Note: `true` doesn't mean the lockscreen is visible. It may be occluded or covered by other
      * UI.
      */
-    val canSwipeToEnter: StateFlow<Boolean?> =
+    val canSwipeToEnter: StateFlow<Boolean?> by lazy {
         combine(
                 authenticationInteractor.authenticationMethod.map {
                     it == AuthenticationMethodModel.None
                 },
                 isLockscreenEnabled,
                 deviceUnlockedInteractor.deviceUnlockStatus,
-                isDeviceEntered
-            ) { isNoneAuthMethod, isLockscreenEnabled, deviceUnlockStatus, isDeviceEntered ->
-                val isSwipeAuthMethod = isNoneAuthMethod && isLockscreenEnabled
-                (isSwipeAuthMethod ||
-                    (deviceUnlockStatus.isUnlocked &&
-                        deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen == false)) &&
-                    !isDeviceEntered
-            }
+                isDeviceEntered) {
+                    isNoneAuthMethod,
+                    isLockscreenEnabled,
+                    deviceUnlockStatus,
+                    isDeviceEntered ->
+                    val isSwipeAuthMethod = isNoneAuthMethod && isLockscreenEnabled
+                    (isSwipeAuthMethod ||
+                        (deviceUnlockStatus.isUnlocked &&
+                            deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen == false)) &&
+                        !isDeviceEntered
+                }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -142,6 +145,7 @@ constructor(
                 // from upstream data sources.
                 initialValue = null,
             )
+    }
 
     /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to

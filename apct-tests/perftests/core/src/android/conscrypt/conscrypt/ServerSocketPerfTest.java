@@ -130,8 +130,7 @@ public final class ServerSocketPerfTest {
 
         final ChannelType channelType = config.channelType();
 
-        server = config.serverFactory().newServer(
-            channelType, config.messageSize(),
+        server = config.serverFactory().newServer(config.messageSize(),
             new String[] {"TLSv1.3", "TLSv1.2"}, ciphers(config));
         server.setMessageProcessor(new MessageProcessor() {
             @Override

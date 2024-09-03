@@ -37,6 +37,7 @@ import java.util.Locale;
  * LocaleList is an immutable list of Locales, typically used to keep an ordered list of user
  * preferences for locales.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class LocaleList implements Parcelable {
     private final Locale[] mList;
     // This is a comma-separated list of the locales in the LocaleList created at construction time,

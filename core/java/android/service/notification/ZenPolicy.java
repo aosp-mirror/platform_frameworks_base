@@ -1240,7 +1240,10 @@ public final class ZenPolicy implements Parcelable {
         return "invalidState{" + state + "}";
     }
 
-    private String peopleTypeToString(@PeopleType int peopleType) {
+    /**
+     * @hide
+     */
+    public static String peopleTypeToString(@PeopleType int peopleType) {
         switch (peopleType) {
             case PEOPLE_TYPE_ANYONE:
                 return "anyone";

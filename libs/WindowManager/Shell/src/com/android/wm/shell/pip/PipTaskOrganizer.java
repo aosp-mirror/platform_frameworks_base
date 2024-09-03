@@ -25,8 +25,6 @@ import static android.util.RotationUtils.rotateBounds;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.FRACTION_START;
@@ -42,6 +40,8 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isRemovePipDirection;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP_TO_SPLIT;
@@ -76,7 +76,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
@@ -90,7 +89,9 @@ import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
@@ -361,8 +362,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     SurfaceControl mPipOverlay;
 
     /**
-     * The app bounds used for the buffer size of the
-     * {@link com.android.wm.shell.pip.PipContentOverlay.PipAppIconOverlay}.
+     * The app bounds used for the buffer size of the {@link PipContentOverlay.PipAppIconOverlay}.
      *
      * Note that this is empty if the overlay is removed or if it's some other type of overlay
      * defined in {@link PipContentOverlay}.
@@ -496,7 +496,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
-        if (!ENABLE_SHELL_TRANSITIONS) {
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.onStartSwipePipToHome();
+        } else {
             sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
         }
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);

@@ -199,10 +199,8 @@ public class WifiPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI))
                 .thenReturn(new int[0]);
 
-        WifiPowerStatsProcessor processor =
-                new WifiPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
+                () -> new WifiPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
@@ -210,6 +208,8 @@ public class WifiPowerStatsProcessorTest {
         // Initial empty WifiActivityEnergyInfo.
         mockWifiActivityEnergyInfo(new WifiActivityEnergyInfo(0L,
                 WifiActivityEnergyInfo.STACK_STATE_INVALID, 0L, 0L, 0L, 0L));
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -238,7 +238,7 @@ public class WifiPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
 
         WifiPowerStatsLayout statsLayout =
                 new WifiPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -311,10 +311,8 @@ public class WifiPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI))
                 .thenReturn(new int[] {WIFI_ENERGY_CONSUMER_ID});
 
-        WifiPowerStatsProcessor processor =
-                new WifiPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
+                () -> new WifiPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
@@ -326,6 +324,8 @@ public class WifiPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getConsumedEnergyUws(
                 new int[]{WIFI_ENERGY_CONSUMER_ID}))
                 .thenReturn(new long[]{0});
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -359,7 +359,7 @@ public class WifiPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
 
         WifiPowerStatsLayout statsLayout =
                 new WifiPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -424,13 +424,13 @@ public class WifiPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI))
                 .thenReturn(new int[0]);
 
-        WifiPowerStatsProcessor processor =
-                new WifiPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
+                () -> new WifiPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         WifiPowerStatsCollector collector = new WifiPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -458,7 +458,7 @@ public class WifiPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
 
         WifiPowerStatsLayout statsLayout =
                 new WifiPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -524,12 +524,12 @@ public class WifiPowerStatsProcessorTest {
     }
 
     private static PowerComponentAggregatedPowerStats createAggregatedPowerStats(
-            WifiPowerStatsProcessor processor) {
+            Supplier<PowerStatsProcessor> processorSupplier) {
         AggregatedPowerStatsConfig.PowerComponent config =
                 new AggregatedPowerStatsConfig.PowerComponent(BatteryConsumer.POWER_COMPONENT_WIFI)
                         .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                         .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
-                        .setProcessor(processor);
+                        .setProcessorSupplier(processorSupplier);
 
         PowerComponentAggregatedPowerStats aggregatedStats =
                 new PowerComponentAggregatedPowerStats(

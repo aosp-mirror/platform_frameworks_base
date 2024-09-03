@@ -103,7 +103,7 @@ abstract class OpenAppFromLockscreenTransition(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     open fun navBarLayerPositionAtEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.navBarLayerPositionAtEnd()
     }
 

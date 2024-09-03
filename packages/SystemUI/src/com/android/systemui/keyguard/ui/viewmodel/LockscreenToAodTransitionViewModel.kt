@@ -70,6 +70,7 @@ constructor(
                 transitionAnimation.sharedFlow(
                     duration = 300.milliseconds,
                     onStep = { 1 - it },
+                    onCancel = { 0f },
                     onFinish = { 0f },
                 ),
         )
@@ -153,6 +154,7 @@ constructor(
                     transitionAnimation.sharedFlow(
                             duration = 300.milliseconds,
                             onStep = { it },
+                            onCancel = { 1f },
                             onFinish = { 1f },
                         ),
                     flowWhenShadeIsNotExpanded = transitionAnimation.immediatelyTransitionTo(1f),
@@ -164,6 +166,7 @@ constructor(
                     transitionAnimation.sharedFlow(
                             duration = 200.milliseconds,
                             onStep = { 1f - it },
+                            onCancel = { 0f },
                             onFinish = { 0f },
                         ),
                 )

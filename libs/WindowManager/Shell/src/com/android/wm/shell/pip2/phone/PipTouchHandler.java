@@ -38,6 +38,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.util.Size;
 import android.view.DisplayCutout;
@@ -78,6 +79,8 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
 
     private static final String TAG = "PipTouchHandler";
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
+    private static final long PIP_KEEP_CLEAR_AREAS_DELAY =
+            SystemProperties.getLong("persist.wm.debug.pip_keep_clear_areas_delay", 200);
 
     // Allow PIP to resize to a slightly bigger state upon touch
     private boolean mEnableResize;
@@ -133,6 +136,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
 
     // Temp vars
     private final Rect mTmpBounds = new Rect();
+
+    // Callbacks
+    private final Runnable mMoveOnShelVisibilityChanged;
+
 
     /**
      * A listener for the PIP menu activity.
@@ -199,6 +206,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMenuController.addListener(new PipMenuListener());
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = pipMotionHelper;
+        mPipScheduler.setUpdateMovementBoundsRunnable(this::updateMovementBounds);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
@@ -211,10 +219,30 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 menuController::hideMenu,
                 mainExecutor);
         mPipResizeGestureHandler = new PipResizeGestureHandler(context, pipBoundsAlgorithm,
-                pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState,
-                this::updateMovementBounds, pipUiEventLogger, menuController, mainExecutor,
+                pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState, pipUiEventLogger,
+                menuController, mainExecutor,
                 mPipPerfHintController);
         mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
+
+        mMoveOnShelVisibilityChanged = () -> {
+            if (mIsImeShowing && mImeHeight > mShelfHeight) {
+                // Early bail-out if IME is visible with a larger height present;
+                // this should block unnecessary PiP movement since we delay checking for
+                // KCA triggered movement to wait for other transitions (e.g. due to IME changes).
+                return;
+            }
+            mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
+                boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
+                        || mPipBoundsState.hasUserResizedPip());
+                int delta = mPipBoundsAlgorithm.getEntryDestinationBounds().top
+                        - mPipBoundsState.getBounds().top;
+
+                if (!mIsImeShowing && !hasUserInteracted && delta != 0) {
+                    // If the user hasn't interacted with PiP, we respect the keep clear areas
+                    mMotionHelper.animateToOffset(mPipBoundsState.getBounds(), delta);
+                }
+            });
+        };
 
         if (PipUtils.isPip2ExperimentEnabled()) {
             shellInit.addInitCallback(this::onInit, this);
@@ -317,6 +345,8 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mFloatingContentCoordinator.onContentRemoved(mMotionHelper);
         mPipResizeGestureHandler.onActivityUnpinned();
         mPipInputConsumer.unregisterInputConsumer();
+        mPipBoundsState.setHasUserMovedPip(false);
+        mPipBoundsState.setHasUserResizedPip(false);
     }
 
     void onPinnedStackAnimationEnded(
@@ -346,11 +376,42 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
         mIsImeShowing = imeVisible;
         mImeHeight = imeHeight;
+
+        // Cache new movement bounds using the new potential IME height.
+        updateMovementBounds();
+
+        mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
+            int delta = mPipBoundsState.getMovementBounds().bottom
+                    - mPipBoundsState.getBounds().top;
+            boolean hasUserInteracted = (mPipBoundsState.hasUserMovedPip()
+                    || mPipBoundsState.hasUserResizedPip());
+
+            if (!imeVisible && !hasUserInteracted) {
+                delta = mPipBoundsAlgorithm.getEntryDestinationBounds().top
+                        - mPipBoundsState.getBounds().top;
+            }
+
+            if ((imeVisible && delta < 0) || (!imeVisible && !hasUserInteracted)) {
+                // The policy is to ignore an IME disappearing if user has interacted with PiP.
+                // Otherwise, only offset due to an appearing IME if PiP occludes it.
+                mMotionHelper.animateToOffset(mPipBoundsState.getBounds(), delta);
+            }
+        });
     }
 
     void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
         mIsShelfShowing = shelfVisible;
         mShelfHeight = shelfHeight;
+
+        // We need to remove the callback even if the shelf is visible, in case it the delayed
+        // callback hasn't been executed yet to avoid the wrong final state.
+        mMainExecutor.removeCallbacks(mMoveOnShelVisibilityChanged);
+        if (shelfVisible) {
+            mMoveOnShelVisibilityChanged.run();
+        } else {
+            // Postpone moving in response to hide of Launcher in case there's another change
+            mMainExecutor.executeDelayed(mMoveOnShelVisibilityChanged, PIP_KEEP_CLEAR_AREAS_DELAY);
+        }
     }
 
     /**
@@ -1020,7 +1081,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
      * Updates the current movement bounds based on whether the menu is currently visible and
      * resized.
      */
-    private void updateMovementBounds() {
+    void updateMovementBounds() {
         Rect insetBounds = new Rect();
         mPipBoundsAlgorithm.getInsetBounds(insetBounds);
         mPipBoundsAlgorithm.getMovementBounds(mPipBoundsState.getBounds(),
@@ -1077,6 +1138,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         switch (newState) {
             case PipTransitionState.ENTERED_PIP:
                 onActivityPinned();
+                updateMovementBounds();
                 mTouchState.setAllowInputEvents(true);
                 mTouchState.reset();
                 break;

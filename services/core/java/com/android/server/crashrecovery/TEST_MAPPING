@@ -1,9 +1,4 @@
 {
-  "presubmit": [
-    {
-      "name": "CrashRecoveryModuleTests"
-    }
-  ],
   "postsubmit": [
     {
       "name": "FrameworksMockingServicesTests",
@@ -12,6 +7,9 @@
           "include-filter": "com.android.server.RescuePartyTest"
         }
       ]
+    },
+    {
+      "name": "CrashRecoveryModuleTests"
     }
   ]
 }

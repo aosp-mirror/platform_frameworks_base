@@ -116,7 +116,7 @@ public class CreateUserActivity extends Activity {
         return mCreateUserDialogController.createDialog(
                 this,
                 this::startActivity,
-                (mUserCreator.isMultipleAdminEnabled() && mUserCreator.isUserAdmin()
+                (mUserCreator.canCreateAdminUser() && mUserCreator.isUserAdmin()
                         && !isKeyguardShowing),
                 this::addUserNow,
                 this::finish

@@ -717,9 +717,13 @@ import java.util.concurrent.atomic.AtomicInteger;
         }
         mReliableMessageHostEndpointIdActiveSet.remove(transaction.getHostEndpointId());
 
-        Log.d(TAG, "Successfully completed reliable message transaction with "
-                + "message sequence number: " + transaction.getMessageSequenceNumber()
-                + " and result: " + result);
+    Log.d(
+        TAG,
+        "Successfully completed reliable message transaction with "
+            + "message sequence number = "
+            + transaction.getMessageSequenceNumber()
+            + " and result = "
+            + result);
     }
 
     /**
@@ -732,15 +736,20 @@ import java.util.concurrent.atomic.AtomicInteger;
         int numCompletedStartCalls = transaction.getNumCompletedStartCalls();
         @ContextHubTransaction.Result int result = transaction.onTransact();
         if (result == ContextHubTransaction.RESULT_SUCCESS) {
-            Log.d(TAG, "Successfully "
-                    + (numCompletedStartCalls == 0 ? "started" : "retried")
-                    + " reliable message transaction with message sequence number: "
-                    + transaction.getMessageSequenceNumber());
+      Log.d(
+          TAG,
+          "Successfully "
+              + (numCompletedStartCalls == 0 ? "started" : "retried")
+              + " reliable message transaction with message sequence number = "
+              + transaction.getMessageSequenceNumber());
         } else {
-            Log.w(TAG, "Could not start reliable message transaction with "
-                    + "message sequence number: "
-                    + transaction.getMessageSequenceNumber()
-                    + ", result: " + result);
+      Log.w(
+          TAG,
+          "Could not start reliable message transaction with "
+              + "message sequence number = "
+              + transaction.getMessageSequenceNumber()
+              + ", result = "
+              + result);
         }
 
         transaction.setNextRetryTime(now + RELIABLE_MESSAGE_RETRY_WAIT_TIME.toNanos());

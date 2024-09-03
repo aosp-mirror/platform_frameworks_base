@@ -45,7 +45,6 @@ import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.Display.STATE_UNKNOWN;
 import static android.view.Display.isSuspendedState;
 import static android.view.InsetsSource.ID_IME;
@@ -80,6 +79,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -159,7 +159,6 @@ import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELD
 import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
-import static com.android.window.flags.Flags.deferDisplayUpdates;
 import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import android.annotation.IntDef;
@@ -478,7 +477,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     AppCompatCameraPolicy mAppCompatCameraPolicy;
 
     DisplayFrames mDisplayFrames;
-    final DisplayUpdater mDisplayUpdater;
+    final DeferredDisplayUpdater mDisplayUpdater;
 
     private boolean mInTouchMode;
 
@@ -623,7 +622,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     final DeviceStateController mDeviceStateController;
     final Consumer<DeviceStateController.DeviceState> mDeviceStateConsumer;
-    final PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
     final RemoteDisplayChangeController mRemoteDisplayChangeController;
 
     /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
@@ -859,8 +857,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
         if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
-                && !mImeLayeringTarget.isRequestedVisible(ime())
-                && !mImeLayeringTarget.isVisibleRequested()) {
+                && !(mImeLayeringTarget.isRequestedVisible(ime())
+                        && mImeLayeringTarget.isVisibleRequested())) {
             return false;
         }
 
@@ -953,6 +951,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     w.updateLastFrames();
                     mWmService.mFrameChangingWindows.remove(w);
                 }
+                w.updateSurfacePositionNonOrganized();
                 w.onResizeHandled();
             }
 
@@ -1140,11 +1139,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
-        if (deferDisplayUpdates()) {
-            mDisplayUpdater = new DeferredDisplayUpdater(this);
-        } else {
-            mDisplayUpdater = new ImmediateDisplayUpdater(this);
-        }
+        mDisplayUpdater = new DeferredDisplayUpdater(this);
         mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
@@ -1168,8 +1163,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mAppTransitionController = new AppTransitionController(mWmService, this);
         mTransitionController.registerLegacyListener(mFixedRotationTransitionListener);
         mUnknownAppVisibilityController = new UnknownAppVisibilityController(mWmService, this);
-        mDisplaySwitchTransitionLauncher = new PhysicalDisplaySwitchTransitionLauncher(this,
-                mTransitionController);
         mRemoteDisplayChangeController = new RemoteDisplayChangeController(this);
 
         final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
@@ -1190,7 +1183,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mDeviceStateConsumer =
                 (@NonNull DeviceStateController.DeviceState newFoldState) -> {
-                    mDisplaySwitchTransitionLauncher.foldStateChanged(newFoldState);
                     mDisplayRotation.foldStateChanged(newFoldState);
                 };
         mDeviceStateController.registerDeviceStateCallback(mDeviceStateConsumer,
@@ -1813,9 +1805,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
         final int displayRotation = getRotation();
-        final int rotation = ar.isVisible()
-                ? ar.getWindowConfiguration().getDisplayRotation()
-                : mDisplayRotation.rotationForOrientation(orientation, displayRotation);
+        final int rotation = mDisplayRotation.rotationForOrientation(orientation, displayRotation);
         if (rotation == displayRotation) {
             return;
         }
@@ -1845,7 +1835,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mTransitionController.useShellTransitionsRotation()) {
             return ROTATION_UNDEFINED;
         }
-        final int activityOrientation = r.getOverrideOrientation();
+        int activityOrientation = r.getOverrideOrientation();
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM
                 || shouldIgnoreOrientationRequest(activityOrientation)) {
             return ROTATION_UNDEFINED;
@@ -1856,14 +1846,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     r /* boundary */, false /* includeBoundary */, true /* traverseTopToBottom */);
             if (nextCandidate != null) {
                 r = nextCandidate;
+                activityOrientation = r.getOverrideOrientation();
             }
         }
-        if (r.inMultiWindowMode() || r.getRequestedConfigurationOrientation(true /* forDisplay */)
-                == getConfiguration().orientation) {
+        if (r.inMultiWindowMode() || r.getRequestedConfigurationOrientation(true /* forDisplay */,
+                activityOrientation) == getConfiguration().orientation) {
             return ROTATION_UNDEFINED;
         }
         final int currentRotation = getRotation();
-        final int rotation = mDisplayRotation.rotationForOrientation(r.getRequestedOrientation(),
+        final int rotation = mDisplayRotation.rotationForOrientation(activityOrientation,
                 currentRotation);
         if (rotation == currentRotation) {
             return ROTATION_UNDEFINED;
@@ -1946,7 +1937,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return false;
         }
         if (mLastWallpaperVisible && r.windowsCanBeWallpaperTarget()
-                && mFixedRotationTransitionListener.mAnimatingRecents == null
                 && !mTransitionController.isTransientLaunch(r)) {
             // Use normal rotation animation for orientation change of visible wallpaper if recents
             // animation is not running (it may be swiping to home).
@@ -1972,9 +1962,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Returns {@code true} if the top activity is transformed with the new rotation of display. */
     boolean hasTopFixedRotationLaunchingApp() {
-        return mFixedRotationLaunchingApp != null
-                // Ignore animating recents because it hasn't really become the top.
-                && mFixedRotationLaunchingApp != mFixedRotationTransitionListener.mAnimatingRecents;
+        return mFixedRotationLaunchingApp != null;
     }
 
     /** It usually means whether the recents activity is launching with a different rotation. */
@@ -2001,8 +1989,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
             // Delay the hide animation to avoid blinking by clicking navigation bar that may
             // toggle fixed rotation in a short time.
-            final boolean shouldDebounce = r == mFixedRotationTransitionListener.mAnimatingRecents
-                    || mTransitionController.isTransientLaunch(r);
+            final boolean shouldDebounce = mTransitionController.isTransientLaunch(r);
             startAsyncRotation(shouldDebounce);
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
@@ -2034,12 +2021,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // the heavy operations. This also benefits that the states of multiple activities
             // are handled together.
             r.linkFixedRotationTransform(prevRotatedLaunchingApp);
-            if (r != mFixedRotationTransitionListener.mAnimatingRecents) {
-                // Only update the record for normal activity so the display orientation can be
-                // updated when the transition is done if it becomes the top. And the case of
-                // recents can be handled when the recents animation is finished.
-                setFixedRotationLaunchingAppUnchecked(r, rotation);
-            }
+            // Only update the record for normal activity so the display orientation can be
+            // updated when the transition is done if it becomes the top.
+            setFixedRotationLaunchingAppUnchecked(r, rotation);
             return;
         }
 
@@ -3094,8 +3078,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // metrics are updated as rotation settings might depend on them
                 mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this,
                         /* includeRotationSettings */ false);
-                mDisplayUpdater.onDisplayContentDisplayPropertiesPreChanged(mDisplayId,
-                        mInitialDisplayWidth, mInitialDisplayHeight, newWidth, newHeight);
                 mDisplayRotation.physicalDisplayChanged();
                 mDisplayPolicy.physicalDisplayChanged();
             }
@@ -3130,8 +3112,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
             if (physicalDisplayChanged) {
                 mDisplayPolicy.physicalDisplayUpdated();
-                mDisplayUpdater.onDisplayContentDisplayPropertiesPostChanged(currentRotation,
-                        getRotation(), getDisplayAreaInfo());
+                mDisplayUpdater.onDisplayContentDisplayPropertiesPostChanged();
             }
         }
     }
@@ -3510,10 +3491,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void collectDisplayChange(@NonNull Transition transition) {
         if (!mLastHasContent) return;
-        if (!transition.isCollecting()) {
-            throw new IllegalArgumentException("Can only collect display change if transition"
-                    + " is collecting");
-        }
+        if (!transition.isCollecting()) return;
         if (!transition.mParticipants.contains(this)) {
             transition.collect(this);
             startAsyncRotationIfNeeded();
@@ -3579,9 +3557,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 
@@ -4427,13 +4405,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                                 mWmService.dispatchImeInputTargetVisibilityChanged(
                                         targetWin.mClient.asBinder(), isVisibleRequested,
                                         targetWin.mActivityRecord != null
-                                                && targetWin.mActivityRecord.finishing);
+                                                && targetWin.mActivityRecord.finishing,
+                                        mDisplayId);
                             }
                         });
                 targetWin.mToken.registerWindowContainerListener(
                         mImeTargetTokenListenerPair.second);
                 mWmService.dispatchImeInputTargetVisibilityChanged(targetWin.mClient.asBinder(),
-                        targetWin.isVisible() /* visible */, false /* removed */);
+                        targetWin.isVisible() /* visible */, false /* removed */, mDisplayId);
             }
         }
         if (refreshImeSecureFlag(getPendingTransaction())) {
@@ -5093,9 +5072,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        // This should be called after the insets have been dispatched to clients and we have
-        // committed finish drawing windows.
-        mInsetsStateController.getImeSourceProvider().checkAndStartShowImePostLayout();
+        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+            // This should be called after the insets have been dispatched to clients and we have
+            // committed finish drawing windows.
+            mInsetsStateController.getImeSourceProvider().checkAndStartShowImePostLayout();
+        }
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
         if (!inTransition() && !mDisplayRotation.isRotatingSeamlessly()) {
@@ -5912,18 +5893,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Region local = Region.obtain();
         final int[] remainingLeftRight =
                 {mSystemGestureExclusionLimit, mSystemGestureExclusionLimit};
-        final RecentsAnimationController recentsAnimationController =
-                mWmService.getRecentsAnimationController();
 
         // Traverse all windows top down to assemble the gesture exclusion rects.
         // For each window, we only take the rects that fall within its touchable region.
         forAllWindows(w -> {
-            final boolean ignoreRecentsAnimationTarget = recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(w.getActivityRecord());
             if (!w.canReceiveTouchInput() || !w.isVisible()
                     || (w.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0
-                    || unhandled.isEmpty()
-                    || ignoreRecentsAnimationTarget) {
+                    || unhandled.isEmpty()) {
                 return;
             }
 
@@ -6135,16 +6111,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void getKeepClearAreas(Set<Rect> outRestricted, Set<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
-        final RecentsAnimationController recentsAnimationController =
-                mWmService.getRecentsAnimationController();
         forAllWindows(w -> {
-            // Skip the window if it is part of Recents animation
-            final boolean ignoreRecentsAnimationTarget = recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(w.getActivityRecord());
-            if (ignoreRecentsAnimationTarget) {
-                return false;  // continue traversal
-            }
-
             if (w.isVisible() && !w.inPinnedWindowingMode()) {
                 w.getKeepClearAreas(outRestricted, outUnrestricted, tmpMatrix, tmpFloat9);
 
@@ -6278,7 +6245,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // by looping the children, so that we don't miss any root tasks after the children size
         // changed or reordered.
         final ArrayList<Task> rootTasks = new ArrayList<>();
-        forAllRootTasks(rootTask -> {
+        getDefaultTaskDisplayArea().forAllRootTasks(rootTask -> {
             for (int activityType : activityTypes) {
                 // Collect the root tasks that are currently being organized.
                 if (rootTask.mCreatedByOrganizer) {
@@ -6319,14 +6286,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     boolean updateDisplayOverrideConfigurationLocked() {
-        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
-        // case properly since the signals it receives all happen post-change
-        final RecentsAnimationController recentsAnimationController =
-                mWmService.getRecentsAnimationController();
-        if (recentsAnimationController != null) {
-            recentsAnimationController.cancelAnimationForDisplayChange();
-        }
-
         Configuration values = new Configuration();
         computeScreenConfiguration(values);
 
@@ -6567,7 +6526,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @VisibleForTesting
     boolean shouldDestroyContentOnRemove() {
-        return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
+        return getRemoveContentMode() == REMOVE_CONTENT_MODE_DESTROY;
+    }
+
+    @WindowManager.RemoveContentMode
+    int getRemoveContentMode() {
+        return mWmService.mDisplayWindowSettings.getRemoveContentModeLocked(this);
     }
 
     boolean shouldSleep() {
@@ -6719,6 +6683,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final boolean rotationChanged = super.setIgnoreOrientationRequest(ignoreOrientationRequest);
         mWmService.mDisplayWindowSettings.setIgnoreOrientationRequest(
                 this, mSetIgnoreOrientationRequest);
+        if (ignoreOrientationRequest && mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
+            forAllActivities(r -> {
+                r.finishFixedRotationTransform();
+            });
+        }
         return rotationChanged;
     }
 
@@ -6917,76 +6886,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** The entry for proceeding to handle {@link #mFixedRotationLaunchingApp}. */
     class FixedRotationTransitionListener extends WindowManagerInternal.AppTransitionListener {
 
-        /**
-         * The animating activity which shows the recents task list. It is set between
-         * {@link RecentsAnimationController#initialize} and
-         * {@link RecentsAnimationController#cleanupAnimation}.
-         */
-        private ActivityRecord mAnimatingRecents;
-
-        /** Whether {@link #mAnimatingRecents} is going to be the top activity. */
-        private boolean mRecentsWillBeTop;
-
         FixedRotationTransitionListener(int displayId) {
             super(displayId);
-        }
-
-        /**
-         * If the recents activity has a fixed orientation which is different from the current top
-         * activity, it will be rotated before being shown so we avoid a screen rotation animation
-         * when showing the Recents view.
-         */
-        void onStartRecentsAnimation(@NonNull ActivityRecord r) {
-            mAnimatingRecents = r;
-            if (r.isVisible() && mFocusedApp != null && !mFocusedApp.occludesParent()) {
-                // The recents activity has shown with the orientation determined by the top
-                // activity, keep its current orientation to avoid flicking by the configuration
-                // change of visible activity.
-                return;
-            }
-            rotateInDifferentOrientationIfNeeded(r);
-            if (r.hasFixedRotationTransform()) {
-                // Set the record so we can recognize it to continue to update display orientation
-                // if the recents activity becomes the top later.
-                setFixedRotationLaunchingApp(r, r.getWindowConfiguration().getRotation());
-            }
-        }
-
-        /**
-         * If {@link #mAnimatingRecents} still has fixed rotation, it should be moved to top so we
-         * don't clear {@link #mFixedRotationLaunchingApp} that will be handled by transition.
-         */
-        void onFinishRecentsAnimation() {
-            final ActivityRecord animatingRecents = mAnimatingRecents;
-            final boolean recentsWillBeTop = mRecentsWillBeTop;
-            mAnimatingRecents = null;
-            mRecentsWillBeTop = false;
-            if (recentsWillBeTop) {
-                // The recents activity will be the top, such as staying at recents list or
-                // returning to home (if home and recents are the same activity).
-                return;
-            }
-
-            if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp
-                    && animatingRecents.isVisible() && animatingRecents != topRunningActivity()) {
-                // The recents activity should be going to be invisible (switch to another app or
-                // return to original top). Only clear the top launching record without finishing
-                // the transform immediately because it won't affect display orientation. And before
-                // the visibility is committed, the recents activity may perform relayout which may
-                // cause unexpected configuration change if the rotated configuration is restored.
-                // The transform will be finished when the transition is done.
-                setFixedRotationLaunchingAppUnchecked(null);
-            } else {
-                // If there is already a launching activity that is not the recents, before its
-                // transition is completed, the recents animation may be started. So if the recents
-                // activity won't be the top, the display orientation should be updated according
-                // to the current top activity.
-                continueUpdateOrientationForDiffOrienLaunchingApp();
-            }
-        }
-
-        void notifyRecentsWillBeTop() {
-            mRecentsWillBeTop = true;
         }
 
         /**
@@ -6999,8 +6900,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 if (hasFixedRotationTransientLaunch()) {
                     source = mFixedRotationLaunchingApp;
                 }
-            } else if (mAnimatingRecents != null && !hasTopFixedRotationLaunchingApp()) {
-                source = mAnimatingRecents;
             }
             if (source == null || source.getRequestedConfigurationOrientation(
                     true /* forDisplay */) == ORIENTATION_UNDEFINED) {
@@ -7013,19 +6912,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
             final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            // Ignore the animating recents so the fixed rotation transform won't be switched twice
-            // by finishing the recents animation and moving it to top. That also avoids flickering
-            // due to wait for previous activity to be paused if it supports PiP that ignores the
-            // effect of resume-while-pausing.
-            if (r == null || r == mAnimatingRecents) {
-                return;
-            }
-            if (mAnimatingRecents != null && mRecentsWillBeTop) {
-                // The activity is not the recents and it should be moved to back later, so it is
-                // better to keep its current appearance for the next transition. Otherwise the
-                // display orientation may be updated too early and the layout procedures at the
-                // end of finishing recents animation is skipped. That causes flickering because
-                // the surface of closing app hasn't updated to invisible.
+            if (r == null) {
                 return;
             }
             if (mFixedRotationLaunchingApp == null) {

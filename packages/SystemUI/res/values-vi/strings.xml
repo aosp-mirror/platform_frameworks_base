@@ -107,10 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Trình ghi màn hình"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Đang xử lý video ghi màn hình"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Thông báo đang diễn ra về phiên ghi màn hình"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Bắt đầu ghi?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Khi bạn ghi, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Khi bạn ghi một ứng dụng, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Bắt đầu ghi"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ghi màn hình?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Ghi một ứng dụng"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Ghi toàn màn hình"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Khi bạn ghi toàn màn hình, mọi nội dung trên màn hình của bạn đều được ghi. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Khi bạn ghi một ứng dụng, mọi nội dung xuất hiện hoặc phát trong ứng dụng đó sẽ đều được ghi. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ghi màn hình"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Chọn ứng dụng để ghi"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ghi âm"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Âm thanh trên thiết bị"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Âm thanh trên thiết bị, chẳng hạn như nhạc, cuộc gọi và nhạc chuông"</string>
@@ -150,7 +153,7 @@
     <string name="issuerecord_title" msgid="286627115110121849">"Trình ghi sự cố"</string>
     <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Đang xử lý bản ghi sự cố"</string>
     <string name="issuerecord_channel_description" msgid="6142326363431474632">"Thông báo hiển thị liên tục cho một phiên thu thập sự cố"</string>
-    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Ghi sự cố"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Đang ghi sự cố"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"Chia sẻ"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"Đã lưu bản ghi sự cố"</string>
     <string name="issuerecord_save_text" msgid="1205985304551521495">"Nhấn để xem"</string>
@@ -176,8 +179,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Gửi"</string>
     <string name="cancel" msgid="1089011503403416730">"Hủy"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"Biểu trưng của ứng dụng"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Xác nhận"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Thử lại"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Nhấn để hủy quá trình xác thực"</string>
@@ -307,6 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth sẽ bật vào sáng mai"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Chia sẻ âm thanh"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Đang chia sẻ âm thanh"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"mở chế độ cài đặt chia sẻ âm thanh"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> pin"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Âm thanh"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Tai nghe"</string>
@@ -378,16 +380,19 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ghi màn hình"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Bắt đầu"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Dừng"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Ghi lại vấn đề"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Ghi sự cố"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Bắt đầu"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Dừng"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Báo cáo lỗi"</string>
-    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Bạn gặp loại vấn đề gì khi dùng thiết bị?"</string>
-    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Chọn loại vấn đề"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Bạn gặp loại sự cố gì khi dùng thiết bị?"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Chọn loại sự cố"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Ghi màn hình"</string>
     <string name="performance" msgid="6552785217174378320">"Hiệu suất"</string>
     <string name="user_interface" msgid="3712869377953950887">"Giao diện người dùng"</string>
     <string name="thermal" msgid="6758074791325414831">"Nhiệt"</string>
+    <string name="custom" msgid="3337456985275158299">"Tuỳ chỉnh"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Cài đặt dấu vết tuỳ chỉnh"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Khôi phục giá trị mặc định"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Chế độ một tay"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Thiết bị trợ thính"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Đang hoạt động"</string>
@@ -397,7 +402,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Nhấp để ghép nối thiết bị mới"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Không cập nhật được giá trị đặt trước"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Chế độ đặt sẵn"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"Phụ đề trực tiếp"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Phụ đề trực tiếp"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn camera của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
@@ -429,10 +434,12 @@
     <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Chế độ ưu tiên"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Xong"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Cài đặt"</string>
-    <!-- no translation found for zen_mode_on (9085304934016242591) -->
-    <skip />
-    <!-- no translation found for zen_mode_off (1736604456618147306) -->
-    <skip />
+    <string name="zen_mode_on" msgid="9085304934016242591">"Đang bật"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Bật • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Đang tắt"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Thiết lập"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Quản lý trong phần cài đặt"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Không có chế độ nào đang hoạt động}=1{{mode} đang hoạt động}other{# chế độ đang hoạt động}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức, lời nhắc, sự kiện và người gọi mà bạn chỉ định. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Bạn sẽ không bị làm phiền bởi âm thanh và tiếng rung, ngoại trừ báo thức. Bạn sẽ vẫn nghe thấy mọi thứ bạn chọn phát, bao gồm nhạc, video và trò chơi."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Tùy chỉnh"</string>
@@ -471,10 +478,11 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Đang sạc chậm • Sẽ đầy sau <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Đang sạc • Sẽ đầy sau <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Các tiện ích trên màn hình khoá"</string>
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"Đã thêm tiện ích <xliff:g id="WIDGET_NAME">%1$s</xliff:g> vào màn hình khoá"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Vuốt sang trái để bắt đầu xem hướng dẫn chung"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Tuỳ chỉnh"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Đóng"</string>
-    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Thêm, xoá và sắp xếp lại các tiện ích trong không gian này."</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Thêm, xoá và sắp xếp tiện ích trong không gian này."</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Thêm tiện ích khác"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Nhấn và giữ để tuỳ chỉnh tiện ích"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Tuỳ chỉnh tiện ích"</string>
@@ -498,9 +506,8 @@
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"xoá tiện ích"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"đặt tiện ích đã chọn vào vị trí"</string>
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Tiện ích trên màn hình khoá"</string>
-    <string name="communal_widget_picker_description" msgid="490515450110487871">"Ai cũng thấy được các tiện ích trên màn hình khoá, dù bạn đã khoá máy tính bảng."</string>
-    <!-- no translation found for accessibility_action_label_unselect_widget (1041811747619468698) -->
-    <skip />
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Ai cũng thấy được tiện ích trên màn hình khoá, kể cả khi khoá máy tính bảng."</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"bỏ chọn tiện ích"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Tiện ích trên màn hình khoá"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Để dùng tiện ích mở một ứng dụng, bạn cần xác minh danh tính của mình. Ngoài ra, hãy lưu ý rằng bất kỳ ai cũng có thể xem các tiện ích này, ngay cả khi máy tính bảng của bạn được khoá. Một số tiện ích có thể không dành cho màn hình khoá và không an toàn khi thêm vào đây."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Tôi hiểu"</string>
@@ -523,22 +530,27 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào tất cả thông tin xuất hiện trên màn hình của bạn hoặc phát trên thiết bị của bạn trong khi ghi âm/ghi hình hoặc truyền, bao gồm cả thông tin như mật khẩu, thông tin thanh toán, ảnh, tin nhắn và âm thanh mà bạn phát."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Bắt đầu ghi hoặc truyền?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Dịch vụ cung cấp chức năng này có quyền truy cập vào tất cả thông tin xuất hiện trên màn hình của bạn hoặc phát trên thiết bị của bạn trong khi ghi hoặc truyền, bao gồm cả thông tin như mật khẩu, thông tin thanh toán, ảnh, tin nhắn và âm thanh mà bạn phát."</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Toàn màn hình"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Một ứng dụng"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Chia sẻ hoặc ghi màn hình ứng dụng"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Bắt đầu ghi hoặc truyền bằng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Khi bạn chia sẻ, ghi hoặc truyền, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Khi bạn chia sẻ, ghi hoặc truyền ứng dụng, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ các thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Bắt đầu"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Chia sẻ hoặc ghi một ứng dụng"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Chia sẻ màn hình của bạn với <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Chia sẻ một ứng dụng"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Chia sẻ toàn bộ màn hình"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Khi bạn chia sẻ toàn bộ màn hình, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ thấy được mọi nội dung trên màn hình của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Khi bạn chia sẻ một ứng dụng, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ thấy được mọi nội dung hiển thị hoặc phát trong ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Chia sẻ màn hình"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> đã tắt lựa chọn này"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Bắt đầu truyền?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Khi bạn truyền, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Khi bạn truyền một ứng dụng, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ các thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Bắt đầu truyền"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Chọn ứng dụng để chia sẻ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Truyền màn hình?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Truyền một ứng dụng"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Truyền toàn bộ màn hình"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Khi bạn truyền toàn bộ màn hình thì người khác sẽ thấy được mọi nội dung trên màn hình của bạn. Vì vậy, hãy thận trọng đối với những thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Khi bạn truyền một ứng dụng, thì người khác sẽ thấy được mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng đối với những thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Màn hình truyền"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Chọn ứng dụng để truyền"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Bắt đầu chia sẻ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Khi bạn chia sẻ, ghi hoặc truyền, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Khi bạn chia sẻ, ghi hoặc truyền ứng dụng, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ các thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Bắt đầu"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"Tiếp theo"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Quá trình chia sẻ sẽ tạm dừng khi bạn chuyển đổi ứng dụng"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Chia sẻ ứng dụng này"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Chuyển trở lại"</string>
@@ -557,10 +569,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Bắt đầu ngay"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Không có thông báo nào"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Không có thông báo mới"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (7790738150177329960) -->
-    <skip />
-    <!-- no translation found for adaptive_notification_edu_hun_text (7743367744129536610) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Chế độ Giảm dần âm lượng thông báo đang bật"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Khi bạn nhận quá nhiều thông báo cùng lúc, âm lượng và cảnh báo tự động giảm trong tối đa 2 phút."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Tắt"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Mở khoá để xem thông báo cũ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Thiết bị này do cha mẹ của bạn quản lý"</string>
@@ -708,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Kết nối vệ tinh tốt"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Hiện có kết nối vệ tinh"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Liên lạc khẩn cấp qua vệ tinh"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Hồ sơ công việc"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Thú vị đối với một số người nhưng không phải tất cả"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Bộ điều hướng giao diện người dùng hệ thống cung cấp thêm cho bạn những cách chỉnh sửa và tùy chỉnh giao diện người dùng Android. Những tính năng thử nghiệm này có thể thay đổi, hỏng hoặc biến mất trong các phiên bản tương lai. Hãy thận trọng khi tiếp tục."</string>
@@ -1226,7 +1238,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Bạn cần phải xác thực. Hãy chạm vào cảm biến vân tay để xác thực."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Đang gọi điện thoại"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dữ liệu di động"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Đã kết nối"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Tạm thời có kết nối"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Kết nối kém"</string>
@@ -1371,6 +1382,7 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Hỗ trợ tiếp cận"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Phím tắt"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Lối tắt tìm kiếm"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Không có kết quả tìm kiếm nào"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"hoặc"</string>
@@ -1378,38 +1390,39 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Cử chỉ chuyển đến màn hình chính"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Phím hành động"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Xong"</string>
-    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Tuyệt vời!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Quay lại"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="4222430588599527272">"Để quay lại, hãy vuốt sang trái hoặc sang phải bằng 3 ngón tay ở vị trí bất kỳ trên bàn di chuột."</string>
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Minh hoạ thao tác di chuyển sang phải và sang trái bằng 3 ngón tay trên bàn di chuột"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Màn hình thiết bị hiện ảnh động minh hoạ cử chỉ quay lại"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Để quay lại, hãy dùng 3 ngón tay vuốt sang trái hoặc sang phải ở vị trí bất kỳ trên bàn di chuột.\n\nBạn cũng có thể dùng phím tắt Hành động + ESC cho thao tác này."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Tuyệt vời!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Bạn đã thực hiện xong cử chỉ quay lại."</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Chuyển đến màn hình chính"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Để chuyển đến màn hình chính bất cứ lúc nào, hãy dùng 3 ngón tay vuốt lên từ cuối màn hình lên."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Tốt lắm!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Bạn đã thực hiện xong cử chỉ chuyển đến màn hình chính."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Phím hành động"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Để truy cập vào các ứng dụng của bạn, hãy nhấn phím hành động trên bàn phím."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Xin chúc mừng!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Bạn đã thực hiện xong cử chỉ nhấn phím hành động.\n\nThao tác + / sẽ hiển thị tất cả phím tắt bạn hiện có."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Đèn nền bàn phím"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Độ sáng %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Điều khiển nhà"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Điều khiển nhà nhanh bằng trình bảo vệ màn hình"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Huỷ"</string>
-    <!-- no translation found for back_edu_toast_content (4530314597378982956) -->
-    <skip />
-    <!-- no translation found for home_edu_toast_content (3381071147871955415) -->
-    <skip />
-    <!-- no translation found for overview_edu_toast_content (5797030644017804518) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_toast_content (8807496014667211562) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_title (5624780717751357278) -->
-    <skip />
-    <!-- no translation found for back_edu_notification_content (2497557451540954068) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_title (6097902076909654045) -->
-    <skip />
-    <!-- no translation found for home_edu_notification_content (6631697734535766588) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_title (1265824157319562406) -->
-    <skip />
-    <!-- no translation found for overview_edu_notification_content (3578204677648432500) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_title (372262997265569063) -->
-    <skip />
-    <!-- no translation found for all_apps_edu_notification_content (3255070575694025585) -->
-    <skip />
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Để quay lại, hãy dùng 3 ngón tay vuốt sang trái hoặc phải trên bàn di chuột"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Để trở về màn hình chính, hãy dùng 3 ngón tay vuốt lên trên bàn di chuột"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Để xem các ứng dụng gần đây, hãy dùng 3 ngón tay vuốt lên và giữ trên bàn di chuột"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Để xem tất cả ứng dụng của bạn, hãy nhấn phím hành động trên bàn phím"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Bị loại bỏ"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Mở khoá để xem"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Dùng bàn di chuột để quay lại"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Dùng 3 ngón tay vuốt sang trái hoặc sang phải. Hãy nhấn để tìm hiểu các cử chỉ khác."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Dùng bàn di chuột để chuyển đến màn hình chính"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Dùng 3 ngón tay vuốt lên. Hãy nhấn để tìm hiểu các cử chỉ khác."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Dùng bàn di chuột để xem các ứng dụng gần đây"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Dùng 3 ngón tay vuốt lên và giữ. Hãy nhấn để tìm hiểu các cử chỉ khác."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Sử dụng bàn phím để xem tất cả ứng dụng"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Nhấn phím hành động bất cứ lúc nào. Hãy nhấn để tìm hiểu các cử chỉ khác."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"Chế độ siêu tối hiện đã có trên thanh độ sáng"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Giờ đây, bạn có thể đặt màn hình ở chế độ siêu tối bằng cách giảm thêm độ sáng từ đầu màn hình.\n\nChế độ này hoạt động hiệu quả nhất khi bạn ở trong một môi trường tối."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Xoá lối tắt của chế độ siêu tối"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Đã xoá lối tắt của chế độ siêu tối. Để giảm độ sáng, hãy dùng thanh độ sáng như thông thường."</string>
 </resources>

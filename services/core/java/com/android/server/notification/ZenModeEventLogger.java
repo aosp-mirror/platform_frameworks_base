@@ -34,7 +34,7 @@ import android.os.Process;
 import android.service.notification.DNDPolicyProto;
 import android.service.notification.ZenAdapters;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
+import android.service.notification.ZenModeConfig.ConfigOrigin;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
@@ -113,7 +113,7 @@ class ZenModeEventLogger {
      * @param origin     The origin of the Zen change.
      */
     public final void maybeLogZenChange(ZenModeInfo prevInfo, ZenModeInfo newInfo, int callingUid,
-            @ConfigChangeOrigin int origin) {
+            @ConfigOrigin int origin) {
         mChangeState.init(prevInfo, newInfo, callingUid, origin);
         if (mChangeState.shouldLogChanges()) {
             maybeReassignCallingUid();
@@ -250,11 +250,11 @@ class ZenModeEventLogger {
         ZenModeConfig mPrevConfig, mNewConfig;
         NotificationManager.Policy mPrevPolicy, mNewPolicy;
         int mCallingUid = Process.INVALID_UID;
-        @ConfigChangeOrigin
-        int mOrigin = ZenModeConfig.UPDATE_ORIGIN_UNKNOWN;
+        @ConfigOrigin
+        int mOrigin = ZenModeConfig.ORIGIN_UNKNOWN;
 
         private void init(ZenModeInfo prevInfo, ZenModeInfo newInfo, int callingUid,
-                @ConfigChangeOrigin int origin) {
+                @ConfigOrigin int origin) {
             // previous & new may be the same -- that would indicate that zen mode hasn't changed.
             mPrevZenMode = prevInfo.mZenMode;
             mNewZenMode = newInfo.mZenMode;
@@ -484,7 +484,8 @@ class ZenModeEventLogger {
          */
         boolean getIsUserAction() {
             if (Flags.modesApi()) {
-                return mOrigin == ZenModeConfig.UPDATE_ORIGIN_USER;
+                return mOrigin == ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI
+                        || mOrigin == ZenModeConfig.ORIGIN_USER_IN_APP;
             }
 
             // Approach for pre-MODES_API:
@@ -549,10 +550,10 @@ class ZenModeEventLogger {
         }
 
         boolean isFromSystemOrSystemUi() {
-            return mOrigin == ZenModeConfig.UPDATE_ORIGIN_INIT
-                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_INIT_USER
-                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_RESTORE_BACKUP;
+            return mOrigin == ZenModeConfig.ORIGIN_INIT
+                    || mOrigin == ZenModeConfig.ORIGIN_INIT_USER
+                    || mOrigin == ZenModeConfig.ORIGIN_SYSTEM
+                    || mOrigin == ZenModeConfig.ORIGIN_RESTORE_BACKUP;
         }
 
         /**

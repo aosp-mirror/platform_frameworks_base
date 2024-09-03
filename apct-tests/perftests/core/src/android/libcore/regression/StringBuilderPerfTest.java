@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -30,13 +30,13 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class StringBuilderPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public int mLength = 100;
 
     @Test
     public void timeAppendBoolean() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -47,7 +47,7 @@ public class StringBuilderPerfTest {
 
     @Test
     public void timeAppendChar() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -59,7 +59,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendCharArray() {
         char[] chars = "chars".toCharArray();
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -71,7 +71,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendCharSequence() {
         CharSequence cs = "chars";
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -83,7 +83,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendSubCharSequence() {
         CharSequence cs = "chars";
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -95,7 +95,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendDouble() {
         double d = 1.2;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -107,7 +107,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendFloat() {
         float f = 1.2f;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -119,7 +119,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendInt() {
         int n = 123;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -131,7 +131,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendLong() {
         long l = 123;
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -150,7 +150,7 @@ public class StringBuilderPerfTest {
                         return "constant";
                     }
                 };
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {
@@ -162,7 +162,7 @@ public class StringBuilderPerfTest {
     @Test
     public void timeAppendString() {
         String s = "chars";
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < mLength; ++j) {

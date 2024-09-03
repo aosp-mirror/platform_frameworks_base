@@ -77,8 +77,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import android.content.res.CompatibilityInfo;
@@ -111,6 +113,7 @@ import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.testutils.StubTransaction;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 
@@ -307,10 +310,8 @@ public class WindowStateTests extends WindowTestsBase {
         // Simulate the window is in split screen root task.
         final Task rootTask = createTask(mDisplayContent,
                 WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        spyOn(appWindow);
-        spyOn(rootTask);
         rootTask.setFocusable(false);
-        doReturn(rootTask).when(appWindow).getRootTask();
+        appWindow.mActivityRecord.reparent(rootTask, 0 /* position */, "test");
 
         // Make sure canBeImeTarget is false;
         assertFalse(appWindow.canBeImeTarget());
@@ -1032,7 +1033,7 @@ public class WindowStateTests extends WindowTestsBase {
                 mDisplayContent,
                 "SystemDialog", true);
         mDisplayContent.setImeLayeringTarget(mAppWindow);
-        mAppWindow.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        mAppWindow.getTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         makeWindowVisible(mImeWindow);
         systemDialogWindow.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
         assertTrue(systemDialogWindow.needsRelativeLayeringToIme());
@@ -1337,8 +1338,8 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testImeTargetChangeListener_OnImeInputTargetVisibilityChanged() {
-        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
-        mWm.mImeTargetChangeListener = listener;
+        final InputMethodManagerInternal immi = InputMethodManagerInternal.get();
+        spyOn(immi);
 
         final WindowState imeTarget = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
                 createActivityRecord(mDisplayContent), "imeTarget");
@@ -1347,29 +1348,26 @@ public class WindowStateTests extends WindowTestsBase {
         makeWindowVisible(imeTarget);
         mDisplayContent.setImeInputTarget(imeTarget);
         waitHandlerIdle(mWm.mH);
-
-        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
-        assertThat(listener.mIsRemoved).isFalse();
-        assertThat(listener.mIsVisibleForImeInputTarget).isTrue();
+        verify(immi).onImeInputTargetVisibilityChanged(imeTarget.mClient.asBinder(),
+                true /* visibleAndNotRemoved */, mDisplayContent.getDisplayId());
+        reset(immi);
 
         imeTarget.mActivityRecord.setVisibleRequested(false);
         waitHandlerIdle(mWm.mH);
-
-        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
-        assertThat(listener.mIsRemoved).isFalse();
-        assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+        verify(immi).onImeInputTargetVisibilityChanged(imeTarget.mClient.asBinder(),
+                false /* visibleAndNotRemoved */, mDisplayContent.getDisplayId());
+        reset(immi);
 
         imeTarget.removeImmediately();
-        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
-        assertThat(listener.mIsRemoved).isTrue();
-        assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+        verify(immi).onImeInputTargetVisibilityChanged(imeTarget.mClient.asBinder(),
+                false /* visibleAndNotRemoved */, mDisplayContent.getDisplayId());
     }
 
     @SetupWindows(addWindows = {W_INPUT_METHOD})
     @Test
     public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
-        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
-        mWm.mImeTargetChangeListener = listener;
+        final InputMethodManagerInternal immi = InputMethodManagerInternal.get();
+        spyOn(immi);
 
         // Scenario 1: test addWindow/relayoutWindow to add Ime layering overlay window as visible.
         final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
@@ -1399,9 +1397,10 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState imeLayeringTargetOverlay = mDisplayContent.getWindow(
                 w -> w.mClient.asBinder() == client.asBinder());
         assertThat(imeLayeringTargetOverlay.isVisible()).isTrue();
-        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
-        assertThat(listener.mIsRemoved).isFalse();
-        assertThat(listener.mIsVisibleForImeTargetOverlay).isTrue();
+        verify(immi, atLeast(1))
+                .setHasVisibleImeLayeringOverlay(true /* hasVisibleOverlay */,
+                        mDisplayContent.getDisplayId());
+        reset(immi);
 
         // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
         mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
@@ -1409,17 +1408,16 @@ public class WindowStateTests extends WindowTestsBase {
         waitHandlerIdle(mWm.mH);
 
         assertThat(imeLayeringTargetOverlay.isVisible()).isFalse();
-        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
-        assertThat(listener.mIsRemoved).isFalse();
-        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+        verify(immi).setHasVisibleImeLayeringOverlay(false /* hasVisibleOverlay */,
+                mDisplayContent.getDisplayId());
+        reset(immi);
 
         // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
         mWm.removeClientToken(session, client.asBinder());
         waitHandlerIdle(mWm.mH);
 
-        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
-        assertThat(listener.mIsRemoved).isTrue();
-        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+        verify(immi).setHasVisibleImeLayeringOverlay(false /* hasVisibleOverlay */,
+                mDisplayContent.getDisplayId());
     }
 
     @Test
@@ -1461,29 +1459,5 @@ public class WindowStateTests extends WindowTestsBase {
 
         mWm.mSensitiveContentPackages.removeBlockScreenCaptureForApps(blockedPackages);
         assertFalse(window.isSecureLocked());
-    }
-
-    private static class TestImeTargetChangeListener implements ImeTargetChangeListener {
-        private IBinder mImeTargetToken;
-        private boolean mIsRemoved;
-        private boolean mIsVisibleForImeTargetOverlay;
-        private boolean mIsVisibleForImeInputTarget;
-
-        @Override
-        public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
-                @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
-                boolean removed) {
-            mImeTargetToken = overlayWindowToken;
-            mIsVisibleForImeTargetOverlay = visible;
-            mIsRemoved = removed;
-        }
-
-        @Override
-        public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
-                boolean visibleRequested, boolean removed) {
-            mImeTargetToken = imeInputTarget;
-            mIsVisibleForImeInputTarget = visibleRequested;
-            mIsRemoved = removed;
-        }
     }
 }

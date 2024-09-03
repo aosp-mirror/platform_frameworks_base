@@ -149,6 +149,12 @@ public class PipTransitionState {
     @Nullable
     private SurfaceControl mSwipePipToHomeOverlay;
 
+    //
+    // Scheduling-related state
+    //
+    @Nullable
+    private Runnable mOnIdlePipTransitionStateRunnable;
+
     /**
      * An interface to track state updates as we progress through PiP transitions.
      */
@@ -197,6 +203,8 @@ public class PipTransitionState {
             mState = state;
             dispatchPipTransitionStateChanged(prevState, mState, extra);
         }
+
+        maybeRunOnIdlePipTransitionStateCallback();
     }
 
     /**
@@ -228,6 +236,29 @@ public class PipTransitionState {
     private void dispatchPipTransitionStateChanged(@TransitionState int oldState,
             @TransitionState int newState, @Nullable Bundle extra) {
         mCallbacks.forEach(l -> l.onPipTransitionStateChanged(oldState, newState, extra));
+    }
+
+    /**
+     * Schedule a callback to run when in a valid idle PiP state.
+     *
+     * <p>We only allow for one callback to be scheduled to avoid cases with multiple transitions
+     * being scheduled. For instance, if user double taps and IME shows, this would
+     * schedule a bounds change transition for IME appearing. But if some other transition would
+     * want to animate PiP before the scheduled callback executes, we would rather want to replace
+     * the existing callback with a new one, to avoid multiple animations
+     * as soon as we are idle.</p>
+     */
+    public void setOnIdlePipTransitionStateRunnable(
+            @Nullable Runnable onIdlePipTransitionStateRunnable) {
+        mOnIdlePipTransitionStateRunnable = onIdlePipTransitionStateRunnable;
+        maybeRunOnIdlePipTransitionStateCallback();
+    }
+
+    private void maybeRunOnIdlePipTransitionStateCallback() {
+        if (mOnIdlePipTransitionStateRunnable != null && isPipStateIdle()) {
+            mOnIdlePipTransitionStateRunnable.run();
+            mOnIdlePipTransitionStateRunnable = null;
+        }
     }
 
     /**
@@ -316,6 +347,11 @@ public class PipTransitionState {
             case EXITED_PIP: return "exited-pip";
         }
         throw new IllegalStateException("Unknown state: " + state);
+    }
+
+    public boolean isPipStateIdle() {
+        // This needs to be a valid in-PiP state that isn't a transient state.
+        return mState == ENTERED_PIP || mState == CHANGED_PIP_BOUNDS;
     }
 
     @Override

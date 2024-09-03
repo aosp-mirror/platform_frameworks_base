@@ -53,7 +53,7 @@ public class IntIntMap {
     /**
      * Put a item in the map
      *
-     * @param key   item'values key
+     * @param key item's key
      * @param value item's value
      * @return old value if exist
      */

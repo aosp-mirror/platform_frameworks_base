@@ -17,6 +17,7 @@
 package com.android.systemui.shared.notifications.data.repository
 
 import android.provider.Settings
+import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import com.android.systemui.shared.settings.data.repository.SecureSettingsRepository
 import com.android.systemui.shared.settings.data.repository.SystemSettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -32,10 +33,10 @@ import kotlinx.coroutines.withContext
 
 /** Provides access to state related to notification settings. */
 class NotificationSettingsRepository(
-    private val scope: CoroutineScope,
+    private val backgroundScope: CoroutineScope,
     private val backgroundDispatcher: CoroutineDispatcher,
     private val secureSettingsRepository: SecureSettingsRepository,
-    private val systemSettingsRepository: SystemSettingsRepository,
+    systemSettingsRepository: SystemSettingsRepository,
 ) {
     val isNotificationHistoryEnabled: Flow<Boolean> =
         secureSettingsRepository
@@ -51,9 +52,7 @@ class NotificationSettingsRepository(
             )
             .map { it == 1 }
             .flowOn(backgroundDispatcher)
-            .stateIn(
-                scope = scope,
-            )
+            .stateIn(scope = backgroundScope)
 
     suspend fun setShowNotificationsOnLockscreenEnabled(enabled: Boolean) {
         withContext(backgroundDispatcher) {
@@ -70,8 +69,20 @@ class NotificationSettingsRepository(
             .map { it == 1 }
             .flowOn(backgroundDispatcher)
             .stateIn(
-                scope = scope,
+                scope = backgroundScope,
                 started = SharingStarted.Eagerly,
-                initialValue = false,
+                initialValue = true,
+            )
+
+    /** The default duration for DND mode when enabled. See [Settings.Secure.ZEN_DURATION]. */
+    val zenDuration: StateFlow<Int> =
+        secureSettingsRepository
+            .intSetting(name = Settings.Secure.ZEN_DURATION)
+            .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
+            .stateIn(
+                backgroundScope,
+                started = SharingStarted.Eagerly,
+                initialValue = ZEN_DURATION_PROMPT,
             )
 }

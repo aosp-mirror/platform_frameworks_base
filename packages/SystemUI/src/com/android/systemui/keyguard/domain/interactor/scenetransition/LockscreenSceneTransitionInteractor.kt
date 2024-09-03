@@ -116,7 +116,7 @@ constructor(
         } else {
             val targetState =
                 if (idle.currentScene == Scenes.Lockscreen) {
-                    transitionInteractor.getStartedFromState()
+                    transitionInteractor.startedKeyguardTransitionStep.value.from
                 } else {
                     UNDEFINED
                 }
@@ -124,7 +124,7 @@ constructor(
         }
     }
 
-    private fun finishCurrentTransition() {
+    private suspend fun finishCurrentTransition() {
         internalTransitionInteractor.updateTransition(currentTransitionId!!, 1f, FINISHED)
         resetTransitionData()
     }
@@ -155,7 +155,7 @@ constructor(
                 val currentToState =
                     internalTransitionInteractor.currentTransitionInfoInternal.value.to
                 if (currentToState == UNDEFINED) {
-                    transitionKtfTo(transitionInteractor.getStartedFromState())
+                    transitionKtfTo(transitionInteractor.startedKeyguardTransitionStep.value.from)
                 }
             }
             startTransitionFromLockscreen()
@@ -223,7 +223,7 @@ constructor(
         currentTransitionId = internalTransitionInteractor.startTransition(transitionInfo)
     }
 
-    private fun updateProgress(progress: Float) {
+    private suspend fun updateProgress(progress: Float) {
         if (currentTransitionId == null) return
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,

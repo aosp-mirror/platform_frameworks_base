@@ -204,7 +204,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਨੂੰ ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਇਸ ਪ੍ਰਬੰਧਿਤ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸਾਂ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦੀ।"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦੀ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ਐਪਾਂ ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ਭੂਗੋਲਿਕ-ਘੇਰੇ ਸੰਬੰਧੀ ਸੇਵਾ"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"ਪਾਸਵਰਡ ਖੇਤਰਾਂ ਵਿੱਚ ਲਿਖਾਈ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ਪਿੱਛੇ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ਇਨਪੁੱਟ ਵਿਧੀ ਨੂੰ ਸਵਿੱਚ ਕਰੋ"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ਇਨਪੁੱਟ ਵਿਧੀ ਚੋਣਕਾਰ ਨੂੰ ਖੋਲ੍ਹੋ"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ਸਟੋਰੇਜ ਦੀ ਜਗ੍ਹਾ ਖਤਮ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ਕੁਝ ਸਿਸਟਮ ਫੰਕਸ਼ਨ ਕੰਮ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ਸਿਸਟਮ ਲਈ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਕੋਲ 250MB ਖਾਲੀ ਜਗ੍ਹਾ ਹੈ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ਐਪ ਸਮੱਗਰੀ ਨੂੰ ਸੁਰੱਖਿਆ ਲਈ ਸਕ੍ਰੀਨ ਸਾਂਝਾਕਰਨ ਤੋਂ ਲੁਕਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ਸੈਟੇਲਾਈਟ ਨਾਲ ਸਵੈ-ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ਤੁਸੀਂ ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ਕੀ ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ਵਿਚਾਰ-ਅਧੀਨ..."</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ਐਪਲੀਕੇਸ਼ਨਾਂ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"ਤੁਹਾਡੇ ਫਿੰਗਰਪ੍ਰਿੰਟਾਂ ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ।"</string>
 </resources>

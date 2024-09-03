@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static androidx.core.math.MathUtils.clamp;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -577,7 +575,8 @@ public class StackScrollAlgorithm {
         final float shelfHeight = showingShelf ? ambientState.getShelf().getIntrinsicHeight() : 0f;
         final float scrimPadding = getScrimTopPaddingOrZero(ambientState);
 
-        final float stackHeight = ambientState.getStackHeight() - shelfHeight - scrimPadding;
+        final float stackHeight =
+                ambientState.getInterpolatedStackHeight() - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
         if (stackEndHeight == 0f) {
             // This should not happen, since even when the shade is empty we show EmptyShadeView
@@ -736,7 +735,7 @@ public class StackScrollAlgorithm {
                             || ambientState.getDozeAmount() == 1f
                             || bypassPulseNotExpanding
                             ? ambientState.getInnerHeight()
-                            : ambientState.getStackHeight();
+                            : ambientState.getInterpolatedStackHeight();
                     final float shelfStart = stackBottom
                             - ambientState.getShelf().getIntrinsicHeight()
                             - mPaddingBetweenElements;
@@ -890,7 +889,14 @@ public class StackScrollAlgorithm {
                 continue;
             }
             ExpandableViewState childState = row.getViewState();
-            if (topHeadsUpEntry == null && row.mustStayOnScreen() && !childState.headsUpIsVisible) {
+            boolean shouldSetTopHeadsUpEntry;
+            if (SceneContainerFlag.isEnabled()) {
+                shouldSetTopHeadsUpEntry = row.isHeadsUp();
+            } else {
+                shouldSetTopHeadsUpEntry = row.mustStayOnScreen();
+            }
+            if (topHeadsUpEntry == null && shouldSetTopHeadsUpEntry
+                    && !childState.headsUpIsVisible) {
                 topHeadsUpEntry = row;
                 childState.location = ExpandableViewState.LOCATION_FIRST_HUN;
             }
@@ -898,7 +904,7 @@ public class StackScrollAlgorithm {
             float unmodifiedEndLocation = childState.getYTranslation() + childState.height;
             if (mIsExpanded) {
                 if (SceneContainerFlag.isEnabled()) {
-                    if (shouldHunBeVisibleWhenScrolled(row.mustStayOnScreen(),
+                    if (shouldHunBeVisibleWhenScrolled(row.isHeadsUp(),
                             childState.headsUpIsVisible, row.showingPulsing(),
                             ambientState.isOnKeyguard(), row.getEntry().isStickyAndNotDemoted())) {
                         // the height of this child before clamping it to the top
@@ -909,10 +915,19 @@ public class StackScrollAlgorithm {
                                 /* viewState = */ childState
                         );
                         float baseZ = ambientState.getBaseZHeight();
-                        if (headsUpTranslation < ambientState.getStackTop()) {
-                            // HUN displayed above the stack top, it needs a fix shadow
-                            childState.setZTranslation(baseZ + mPinnedZTranslationExtra);
-                        } else {
+                        if (headsUpTranslation > ambientState.getStackTop()
+                                && row.isAboveShelf()) {
+                            // HUN displayed outside of the stack during transition from Gone/LS;
+                            // add a shadow that corresponds to the transition progress.
+                            float fraction = 1 - ambientState.getExpansionFraction();
+                            childState.setZTranslation(baseZ + fraction * mPinnedZTranslationExtra);
+                        } else if (headsUpTranslation < ambientState.getStackTop()
+                                && row.isAboveShelf()) {
+                            // HUN displayed outside of the stack during transition from QS;
+                            // add a shadow that corresponds to the transition progress.
+                            float fraction = ambientState.getQsExpansionFraction();
+                            childState.setZTranslation(baseZ + fraction * mPinnedZTranslationExtra);
+                        } else if (headsUpTranslation > ambientState.getStackTop()) {
                             // HUN displayed within the stack, add a shadow if it overlaps with
                             // other elements.
                             //
@@ -927,6 +942,8 @@ public class StackScrollAlgorithm {
                                     /* baseZ = */ baseZ,
                                     /* viewState = */ childState
                             );
+                        } else {
+                            childState.setZTranslation(baseZ);
                         }
                         if (isTopEntry && row.isAboveShelf()) {
                             clampHunToMaxTranslation(
@@ -1081,7 +1098,7 @@ public class StackScrollAlgorithm {
         if (scrollingContentTopPadding > 0f) {
             // scrollingContentTopPadding makes a gap between the bottom of the HUN and the top
             // of the scrolling content. Use this to animate to the full shadow.
-            shadowFraction = clamp(overlap / scrollingContentTopPadding, 0f, 1f);
+            shadowFraction = Math.clamp(overlap / scrollingContentTopPadding, 0f, 1f);
         }
 
         if (overlap > 0.0f) {

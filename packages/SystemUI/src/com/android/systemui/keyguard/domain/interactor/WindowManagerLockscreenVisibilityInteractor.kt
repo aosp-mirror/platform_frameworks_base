@@ -63,10 +63,13 @@ constructor(
 ) {
     private val defaultSurfaceBehindVisibility =
         combine(
-            transitionInteractor.finishedKeyguardState,
+            transitionInteractor.isFinishedIn(
+                scene = Scenes.Gone,
+                stateWithoutSceneContainer = KeyguardState.GONE
+            ),
             wakeToGoneInteractor.canWakeDirectlyToGone,
-        ) { finishedState, canWakeDirectlyToGone ->
-            isSurfaceVisible(finishedState) || canWakeDirectlyToGone
+        ) { isOnGone, canWakeDirectlyToGone ->
+            isOnGone || canWakeDirectlyToGone
         }
 
     /**
@@ -92,6 +95,14 @@ constructor(
                     }
                     KeyguardState.ALTERNATE_BOUNCER -> {
                         fromAlternateBouncerInteractor.surfaceBehindVisibility
+                    }
+                    KeyguardState.OCCLUDED -> {
+                        // OCCLUDED -> GONE occurs when an app is on top of the keyguard, and then
+                        // requests manual dismissal of the keyguard in the background. The app will
+                        // remain visible on top of the stack throughout this transition, so we
+                        // should not trigger the keyguard going away animation by returning
+                        // surfaceBehindVisibility = true.
+                        flowOf(false)
                     }
                     else -> flowOf(null)
                 }
@@ -188,18 +199,20 @@ constructor(
                         edge = Edge.create(to = Scenes.Gone),
                         edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE)
                     ),
-                    transitionInteractor.finishedKeyguardState,
+                    transitionInteractor.isFinishedIn(
+                        scene = Scenes.Gone,
+                        stateWithoutSceneContainer = KeyguardState.GONE
+                    ),
                     surfaceBehindInteractor.isAnimatingSurface,
                     notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
-                ) { isInTransitionToGone, finishedState, isAnimatingSurface, notifLaunchRunning ->
+                ) { isInTransitionToGone, isOnGone, isAnimatingSurface, notifLaunchRunning ->
                     // Using the animation if we're animating it directly, or if the
                     // ActivityLaunchAnimator is in the process of animating it.
                     val animationsRunning = isAnimatingSurface || notifLaunchRunning
                     // We may still be animating the surface after the keyguard is fully GONE, since
                     // some animations (like the translation spring) are not tied directly to the
                     // transition step amount.
-                    isInTransitionToGone ||
-                        (finishedState == KeyguardState.GONE && animationsRunning)
+                    isInTransitionToGone || (isOnGone && animationsRunning)
                 }
                 .distinctUntilChanged()
         }
@@ -240,7 +253,7 @@ constructor(
                         // transition. Same for waking directly to gone, due to the lockscreen being
                         // disabled or because the device was woken back up before the lock timeout
                         // duration elapsed.
-                        KeyguardState.lockscreenVisibleInState(KeyguardState.GONE)
+                        false
                     } else if (canWakeDirectlyToGone) {
                         // Never show the lockscreen if we can wake directly to GONE. This means
                         // that the lock timeout has not yet elapsed, or the keyguard is disabled.
@@ -253,9 +266,20 @@ constructor(
                     ) {
                         // Dreams dismiss keyguard and return to GONE if they can.
                         false
+                    } else if (
+                        startedWithPrev.newValue.from == KeyguardState.OCCLUDED &&
+                            startedWithPrev.newValue.to == KeyguardState.GONE
+                    ) {
+                        // OCCLUDED -> GONE directly, without transiting a *_BOUNCER state, occurs
+                        // when an app uses intent flags to launch over an insecure keyguard without
+                        // dismissing it, and then manually requests keyguard dismissal while
+                        // OCCLUDED. This transition is not user-visible; the device unlocks in the
+                        // background and the app remains on top, while we're now GONE. In this case
+                        // we should simply tell WM that the lockscreen is no longer visible, and
+                        // *not* play the going away animation or related animations.
+                        false
                     } else {
-                        // Otherwise, use the visibility of the current state.
-                        KeyguardState.lockscreenVisibleInState(currentState)
+                        currentState != KeyguardState.GONE
                     }
                 }
                 .distinctUntilChanged()
@@ -282,10 +306,4 @@ constructor(
                     !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
-
-    companion object {
-        fun isSurfaceVisible(state: KeyguardState): Boolean {
-            return !KeyguardState.lockscreenVisibleInState(state)
-        }
-    }
 }

@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.os.FileUtils.MemoryPipe;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.DocumentsContract.Document;
 import android.system.Os;
@@ -156,7 +156,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
+    @DisabledOnRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_FileToPipe() throws Exception {
         for (int size : DATA_SIZES) {
             final File src = new File(mTarget, "src");
@@ -177,7 +177,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
+    @DisabledOnRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_PipeToFile() throws Exception {
         for (int size : DATA_SIZES) {
             final File dest = new File(mTarget, "dest");
@@ -197,7 +197,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
+    @DisabledOnRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_PipeToPipe() throws Exception {
         for (int size : DATA_SIZES) {
             byte[] expected = new byte[size];
@@ -215,7 +215,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = MemoryPipe.class)
+    @DisabledOnRavenwood(blockedBy = MemoryPipe.class)
     public void testCopy_ShortPipeToFile() throws Exception {
         byte[] source = new byte[33_000_000];
         new Random().nextBytes(source);
@@ -257,9 +257,9 @@ public class FileUtilsTest {
         assertArrayEquals(expected, actual);
     }
 
-    //TODO(ravenwood) Remove the _$noRavenwood suffix and add @RavenwoodIgnore instead
     @Test
-    public void testCopy_SocketToFile_FileToSocket$noRavenwood() throws Exception {
+    @DisabledOnRavenwood(reason = "Missing Os methods in Ravenwood")
+    public void testCopy_SocketToFile_FileToSocket() throws Exception {
         for (int size : DATA_SIZES ) {
             final File src = new File(mTarget, "src");
             final File dest = new File(mTarget, "dest");
@@ -510,7 +510,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
+    @DisabledOnRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_normal() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test"));
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
@@ -530,7 +530,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
+    @DisabledOnRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_unknown() throws Exception {
         assertNameEquals("test",
                 FileUtils.buildUniqueFile(mTarget, "application/octet-stream", "test"));
@@ -544,7 +544,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
+    @DisabledOnRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_dir() throws Exception {
         assertNameEquals("test", FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test"));
         new File(mTarget, "test").mkdir();
@@ -559,7 +559,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
+    @DisabledOnRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_increment() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
         new File(mTarget, "test.jpg").createNewFile();
@@ -579,7 +579,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
+    @DisabledOnRavenwood(blockedBy = android.webkit.MimeTypeMap.class)
     public void testBuildUniqueFile_mimeless() throws Exception {
         assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "test.jpg"));
         new File(mTarget, "test.jpg").createNewFile();
@@ -675,8 +675,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Requires kernel support")
-    public void testTranslateMode() throws Exception {
+    public void testTranslateMode() {
         assertTranslate("r", O_RDONLY, MODE_READ_ONLY);
 
         assertTranslate("rw", O_RDWR | O_CREAT,
@@ -695,8 +694,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Requires kernel support")
-    public void testMalformedTransate_int() throws Exception {
+    public void testMalformedTransate_int() {
         try {
             // The non-standard Linux access mode 3 should throw
             // an IllegalArgumentException.
@@ -707,8 +705,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Requires kernel support")
-    public void testMalformedTransate_string() throws Exception {
+    public void testMalformedTransate_string() {
         try {
             // The non-standard Linux access mode 3 should throw
             // an IllegalArgumentException.
@@ -719,8 +716,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Requires kernel support")
-    public void testTranslateMode_Invalid() throws Exception {
+    public void testTranslateMode_Invalid() {
         try {
             translateModeStringToPosix("rwx");
             fail();
@@ -734,8 +730,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Requires kernel support")
-    public void testTranslateMode_Access() throws Exception {
+    public void testTranslateMode_Access() {
         assertEquals(O_RDONLY, translateModeAccessToPosix(F_OK));
         assertEquals(O_RDONLY, translateModeAccessToPosix(R_OK));
         assertEquals(O_WRONLY, translateModeAccessToPosix(W_OK));
@@ -744,7 +739,7 @@ public class FileUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Requires kernel support")
+    @DisabledOnRavenwood(reason = "Requires kernel support")
     public void testConvertToModernFd() throws Exception {
         final String nonce = String.valueOf(System.nanoTime());
 

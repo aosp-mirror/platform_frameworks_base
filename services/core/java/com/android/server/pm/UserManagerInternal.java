@@ -497,6 +497,17 @@ public abstract class UserManagerInternal {
     public abstract boolean isUserVisible(@UserIdInt int userId, int displayId);
 
     /**
+     * Checks if the given user is a visible background full user, which is a full background user
+     * assigned to secondary displays on the devices that have
+     * {@link UserManager#isVisibleBackgroundUsersEnabled()
+     * config_multiuserVisibleBackgroundUsers enabled} (for example, passenger users on
+     * automotive builds, using the display associated with their seats).
+     *
+     * @see UserManager#isUserVisible()
+     */
+    public abstract boolean isVisibleBackgroundFullUser(@UserIdInt int userId);
+
+    /**
      * Returns the main display id assigned to the user, or {@code Display.INVALID_DISPLAY} if the
      * user is not assigned to any main display.
      *

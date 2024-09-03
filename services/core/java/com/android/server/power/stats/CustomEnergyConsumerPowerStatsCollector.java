@@ -68,6 +68,16 @@ public class CustomEnergyConsumerPowerStatsCollector extends PowerStatsCollector
     }
 
     @Override
+    public boolean forceSchedule() {
+        ensureInitialized();
+        boolean success = false;
+        for (int i = 0; i < mCollectors.size(); i++) {
+            success |= mCollectors.get(i).forceSchedule();
+        }
+        return success;
+    }
+
+    @Override
     public void collectAndDump(PrintWriter pw) {
         ensureInitialized();
         for (int i = 0; i < mCollectors.size(); i++) {

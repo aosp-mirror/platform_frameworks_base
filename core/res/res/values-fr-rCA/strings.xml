@@ -622,7 +622,7 @@
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permet à l\'appli de désactiver le verrouillage des touches et toute mesure de sécurité par mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"demander la complexité du verrouillage d\'écran"</string>
-    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Autorise l\'appli à apprendre le niveau de complexité de l\'écran de verrouillage (élevé, moyen, faible ou aucun), qui indique la gamme possible de longueur et de type de verrouillage d\'écran. L\'appli peut aussi suggérer aux utilisateurs de mettre à jour l\'écran de verrouillage afin d\'utiliser un certain niveau de complexité, mais ils peuvent ignorer la suggestion. Notez que le verrouillage d\'écran n\'est pas stocké en texte brut pour de manière à ce que l\'appli n\'ait pas accès au mot de passe exact."</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Autorise l\'appli à apprendre le niveau de complexité du Verrouillage de l\'écran (élevé, moyen, faible ou aucun), ce qui indique les différentes possibilités de longueur et de type de verrouillage d\'écran. L\'appli peut aussi suggérer aux utilisateurs de mettre à jour le Verrouillage de l\'écran afin d\'atteindre un certain niveau de complexité, mais ces derniers peuvent ignorer la suggestion. Notez que le Verrouillage de l\'écran n\'est pas stocké en texte brut pour que l\'appli n\'ait pas accès au mot de passe exact."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"afficher les notifications"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permet à l\'appli d\'afficher les notifications"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"allumer l\'écran"</string>
@@ -829,7 +829,7 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet au détenteur de commencer à afficher les renseignements sur les fonctionnalités d\'une appli."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accéder aux données des capteurs à un taux d’échantillonnage élevé"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permet à l’appli d’échantillonner les données des capteurs à une fréquence supérieure à 200 Hz"</string>
-    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"Mettre à jour l\'appli sans intervention de l\'utilisateur"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"mettre à jour l\'appli sans intervention de l\'utilisateur"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permet à une appli précédemment installée de se mettre à jour sans intervention de l\'utilisateur"</string>
     <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"mettre à jour les états des vérifications des clés de contact chiffrées de bout en bout qui appartiennent à d\'autres applis"</string>
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Autorise l\'appli à mettre à jour les états des vérifications des clés de contact chiffrées de bout en bout qui appartiennent à d\'autres applis"</string>
@@ -1195,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Les champs de mot de passe ne prennent pas en charge l\'écriture manuscrite"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Retour"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Changer de méthode d\'entrée"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Ouvrir le sélecteur de méthode d\'entrée"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Paramètres"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Espace de stockage bientôt saturé"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Il est possible que certaines fonctionnalités du système ne soient pas opérationnelles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Espace de stockage insuffisant pour le système. Assurez-vous de disposer de 250 Mo d\'espace libre, puis redémarrez."</string>
@@ -1417,7 +1419,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"La console série est activée"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"La performance est réduite. Pour désactiver cette fonction, vérifier le programme d\'amorçage."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Extension MTE expérimentale activée"</string>
-    <string name="mte_override_notification_message" msgid="2441170442725738942">"La performance et la stabilité pourraient être affectées. Redémarrez l\'appareil pour la désactiver. Si vous l\'activez au moyen de la propriété arm64.memtag.bootctl, définissez d\'abord celle-ci à « none »."</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"La performance et la stabilité pourraient être affectées. Redémarrez pour désactiver. Si vous l\'activez au moyen de la propriété arm64.memtag.bootctl, définissez d\'abord celle-ci à « none »."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Liquide ou débris dans le port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Le port USB est désactivé automatiquement. Touchez ici pour en savoir plus."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Autorisation d\'utiliser le port USB"</string>
@@ -1480,10 +1482,10 @@
     <string name="ext_media_move_success_message" msgid="9159542002276982979">"Contenu déplacé vers <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="3184577479181333665">"Impossible de déplacer le contenu"</string>
     <string name="ext_media_move_failure_message" msgid="4197306718121869335">"Essayez de déplacer le contenu de nouveau"</string>
-    <string name="ext_media_status_removed" msgid="241223931135751691">"Supprimée"</string>
+    <string name="ext_media_status_removed" msgid="241223931135751691">"Supprimé"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"Éjectée"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"Vérification en cours…"</string>
-    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Prête"</string>
+    <string name="ext_media_status_mounted" msgid="3459448555811203459">"Prêt"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"En lecture seule"</string>
     <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Retrait risqué"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"Corrompue"</string>
@@ -1537,7 +1539,7 @@
     <string name="vpn_title" msgid="5906991595291514182">"RPV activé"</string>
     <string name="vpn_title_long" msgid="6834144390504619998">"RPV activé par <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="2275388920267251078">"Appuyez ici pour gérer le réseau."</string>
-    <string name="vpn_text_long" msgid="278540576806169831">"Connecté à <xliff:g id="SESSION">%s</xliff:g>. Appuyez ici pour gérer le réseau."</string>
+    <string name="vpn_text_long" msgid="278540576806169831">"Connecté à <xliff:g id="SESSION">%s</xliff:g>. Touchez ici pour gérer le réseau."</string>
     <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"RPV permanent en cours de connexion…"</string>
     <string name="vpn_lockdown_connected" msgid="2853127976590658469">"RPV permanent connecté"</string>
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Déconnecté du RPV permanent"</string>
@@ -2151,7 +2153,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponses, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponse, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Économiseur de pile activé"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Réduction de l\'utilisation de la pile pour en prolonger l\'autonomie"</string>
@@ -2423,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Le contenu de l\'appli est masqué du Partage d\'écran par mesure de sécurité"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Connecté au satellite automatiquement"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Vous pouvez envoyer et recevoir des messages sans avoir recours à un appareil mobile ou à un réseau Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Utiliser la messagerie par satellite?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envoyez et recevez des messages sans réseau cellulaire ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ouvrir Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"En attente…"</string>
@@ -2448,4 +2452,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Calculatrice"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Applications"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Vos empreintes digitales ne peuvent plus être reconnues. Reconfigurez le Déverrouillage par empreinte digitale."</string>
 </resources>

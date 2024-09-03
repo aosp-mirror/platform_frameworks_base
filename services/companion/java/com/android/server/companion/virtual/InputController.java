@@ -689,13 +689,15 @@ class InputController {
     }
 
     /** A helper class used to wait for an input device to be registered. */
-    private class WaitForDevice implements  AutoCloseable {
+    private class WaitForDevice implements AutoCloseable {
         private final CountDownLatch mDeviceAddedLatch = new CountDownLatch(1);
+        private final String mDeviceName;
         private final InputManager.InputDeviceListener mListener;
 
         private int mInputDeviceId = IInputConstants.INVALID_INPUT_DEVICE_ID;
 
         WaitForDevice(String deviceName, int vendorId, int productId, int associatedDisplayId) {
+            mDeviceName = deviceName;
             mListener = new InputManager.InputDeviceListener() {
                 @Override
                 public void onInputDeviceAdded(int deviceId) {
@@ -741,15 +743,17 @@ class InputController {
             try {
                 if (!mDeviceAddedLatch.await(1, TimeUnit.MINUTES)) {
                     throw new DeviceCreationException(
-                            "Timed out waiting for virtual device to be created.");
+                            "Timed out waiting for virtual input device " + mDeviceName
+                                    + " to be created.");
                 }
             } catch (InterruptedException e) {
                 throw new DeviceCreationException(
-                        "Interrupted while waiting for virtual device to be created.", e);
+                        "Interrupted while waiting for virtual input device " + mDeviceName
+                                + " to be created.", e);
             }
             if (mInputDeviceId == IInputConstants.INVALID_INPUT_DEVICE_ID) {
                 throw new IllegalStateException(
-                        "Virtual input device was created with an invalid "
+                        "Virtual input device " + mDeviceName + " was created with an invalid "
                                 + "id=" + mInputDeviceId);
             }
             return mInputDeviceId;
@@ -842,11 +846,9 @@ class InputController {
                             deviceName, inputDeviceId));
         }
 
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            String metricId = getMetricIdForInputType(type);
-            if (metricId != null) {
-                Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
-            }
+        String metricId = getMetricIdForInputType(type);
+        if (metricId != null) {
+            Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
         }
     }
 

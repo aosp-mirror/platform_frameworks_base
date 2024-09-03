@@ -65,6 +65,12 @@ constructor(
     var preconditionListener =
         object : SmartspacePrecondition.Listener {
             override fun onCriteriaChanged() {
+                if (session == null && hasActiveSessionListeners()) {
+                    Log.d(TAG, "Precondition criteria changed. Attempting to connect session.")
+                    connectSession()
+                    return
+                }
+
                 reloadSmartspace()
             }
         }

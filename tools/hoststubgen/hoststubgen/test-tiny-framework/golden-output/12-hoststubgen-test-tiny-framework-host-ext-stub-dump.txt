@@ -216,6 +216,129 @@ RuntimeVisibleAnnotations:
     com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestMembers:
   com/android/hoststubgen/test/tinyframework/R$Nested
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkAnnotations.class
+  Compiled from "TinyFrameworkAnnotations.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkAnnotations
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 5, attributes: 3
+  public int stub;
+    descriptor: I
+    flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public int addOne(int);
+    descriptor: (I)I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=2, args_size=2
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public int addTwo(int);
+    descriptor: (I)I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=2, args_size=2
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static int nativeAddThree(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public java.lang.String visibleButUsesUnsupportedMethod();
+    descriptor: ()Ljava/lang/String;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+}
+SourceFile: "TinyFrameworkAnnotations.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+  x: #x(#x=s#x)
+    android.hosttest.annotation.HostSideTestClassLoadHook(
+      value="com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded"
+    )
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl.class
   Compiled from "TinyFrameworkCallerCheck.java"
 class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl
@@ -339,302 +462,6 @@ RuntimeInvisibleAnnotations:
     android.hosttest.annotation.HostSideTestWholeClassStub
 NestMembers:
   com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl
-## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassAnnotations.class
-  Compiled from "TinyFrameworkClassAnnotations.java"
-public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnotations
-  minor version: 0
-  major version: 61
-  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
-  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassAnnotations
-  super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 5, attributes: 3
-  public int stub;
-    descriptor: I
-    flags: (0x0001) ACC_PUBLIC
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-    RuntimeInvisibleAnnotations:
-      x: #x()
-        android.hosttest.annotation.HostSideTestStub
-
-  public com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnotations();
-    descriptor: ()V
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-    RuntimeInvisibleAnnotations:
-      x: #x()
-        android.hosttest.annotation.HostSideTestStub
-
-  public int addOne(int);
-    descriptor: (I)I
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=2, args_size=2
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-    RuntimeInvisibleAnnotations:
-      x: #x()
-        android.hosttest.annotation.HostSideTestStub
-
-  public int addTwo(int);
-    descriptor: (I)I
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=2, args_size=2
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public static int nativeAddThree(int);
-    descriptor: (I)I
-    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
-    Code:
-      stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public java.lang.String visibleButUsesUnsupportedMethod();
-    descriptor: ()Ljava/lang/String;
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-    RuntimeInvisibleAnnotations:
-      x: #x()
-        android.hosttest.annotation.HostSideTestStub
-}
-SourceFile: "TinyFrameworkClassAnnotations.java"
-RuntimeVisibleAnnotations:
-  x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-  x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-RuntimeInvisibleAnnotations:
-  x: #x()
-    android.hosttest.annotation.HostSideTestStub
-  x: #x(#x=s#x)
-    android.hosttest.annotation.HostSideTestClassLoadHook(
-      value="com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded"
-    )
-## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations.class
-  Compiled from "TinyFrameworkClassClassWideAnnotations.java"
-public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassWideAnnotations
-  minor version: 0
-  major version: 61
-  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
-  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations
-  super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 3, methods: 8, attributes: 3
-  public int stub;
-    descriptor: I
-    flags: (0x0001) ACC_PUBLIC
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public int keep;
-    descriptor: I
-    flags: (0x0001) ACC_PUBLIC
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public int remove;
-    descriptor: I
-    flags: (0x0001) ACC_PUBLIC
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassWideAnnotations();
-    descriptor: ()V
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public int addOne(int);
-    descriptor: (I)I
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=2, args_size=2
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public int addOneInner(int);
-    descriptor: (I)I
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=2, args_size=2
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public void toBeRemoved(java.lang.String);
-    descriptor: (Ljava/lang/String;)V
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=2, args_size=2
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public int addTwo(int);
-    descriptor: (I)I
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=2, args_size=2
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public static int nativeAddThree(int);
-    descriptor: (I)I
-    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
-    Code:
-      stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public java.lang.String unsupportedMethod();
-    descriptor: ()Ljava/lang/String;
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-
-  public java.lang.String visibleButUsesUnsupportedMethod();
-    descriptor: ()Ljava/lang/String;
-    flags: (0x0001) ACC_PUBLIC
-    Code:
-      stack=3, locals=1, args_size=1
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
-    RuntimeVisibleAnnotations:
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-      x: #x()
-        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-}
-SourceFile: "TinyFrameworkClassClassWideAnnotations.java"
-RuntimeVisibleAnnotations:
-  x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
-  x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-RuntimeInvisibleAnnotations:
-  x: #x()
-    android.hosttest.annotation.HostSideTestWholeClassStub
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassLoadHook.class
   Compiled from "TinyFrameworkClassLoadHook.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook
@@ -704,6 +531,97 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHo
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkClassLoadHook.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWideAnnotations.class
+  Compiled from "TinyFrameworkClassWideAnnotations.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWideAnnotations
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWideAnnotations
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 4, attributes: 3
+  public int stub;
+    descriptor: I
+    flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWideAnnotations();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public int addOne(int);
+    descriptor: (I)I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=2, args_size=2
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public int addTwo(int);
+    descriptor: (I)I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=2, args_size=2
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public java.lang.String visibleButUsesUnsupportedMethod();
+    descriptor: ()Ljava/lang/String;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+}
+SourceFile: "TinyFrameworkClassWideAnnotations.java"
 RuntimeVisibleAnnotations:
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
@@ -1197,7 +1115,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 5, attributes: 2
+  interfaces: 0, fields: 1, methods: 14, attributes: 2
   public int stub;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -1228,6 +1146,150 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
     flags: (0x0001) ACC_PUBLIC
     Code:
       stack=3, locals=2, args_size=2
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public java.lang.String toBeIgnoredObj();
+    descriptor: ()Ljava/lang/String;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public void toBeIgnoredV();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public boolean toBeIgnoredZ();
+    descriptor: ()Z
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public byte toBeIgnoredB();
+    descriptor: ()B
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public char toBeIgnoredC();
+    descriptor: ()C
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public short toBeIgnoredS();
+    descriptor: ()S
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public int toBeIgnoredI();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public float toBeIgnoredF();
+    descriptor: ()F
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public double toBeIgnoredD();
+    descriptor: ()D
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
          x: new           #x                 // class java/lang/RuntimeException
          x: dup
          x: ldc           #x                 // String Stub!
@@ -1640,6 +1702,161 @@ RuntimeInvisibleAnnotations:
     android.hosttest.annotation.HostSideTestStaticInitializerKeep
 NestMembers:
   com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo.class
+  Compiled from "TinyFrameworkMethodCallReplace.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 3, attributes: 4
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static void startThread(java.lang.Thread);
+    descriptor: (Ljava/lang/Thread;)V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static int add(int, int);
+    descriptor: (II)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=2, args_size=2
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+}
+InnerClasses:
+  public static #x= #x of #x;            // ReplaceTo=class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo of class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
+SourceFile: "TinyFrameworkMethodCallReplace.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace.class
+  Compiled from "TinyFrameworkMethodCallReplace.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 4, attributes: 5
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static boolean nonStaticMethodCallReplaceTester() throws java.lang.Exception;
+    descriptor: ()Z
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    Exceptions:
+      throws java.lang.Exception
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static int staticMethodCallReplaceTester();
+    descriptor: ()I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  private static void lambda$nonStaticMethodCallReplaceTester$0(java.util.concurrent.atomic.AtomicBoolean);
+    descriptor: (Ljava/util/concurrent/atomic/AtomicBoolean;)V
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+}
+InnerClasses:
+  public static #x= #x of #x;           // ReplaceTo=class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo of class com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace
+  public static final #x= #x of #x;    // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
+SourceFile: "TinyFrameworkMethodCallReplace.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub
+NestMembers:
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkMethodCallReplace$ReplaceTo
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNative.class
   Compiled from "TinyFrameworkNative.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
@@ -1854,7 +2071,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 2, methods: 1, attributes: 5
+  interfaces: 0, fields: 2, methods: 1, attributes: 4
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -1900,9 +2117,50 @@ RuntimeVisibleAnnotations:
     com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-RuntimeInvisibleAnnotations:
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass.class
+  Compiled from "TinyFrameworkNestedClasses.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 1, attributes: 4
+  public int value;
+    descriptor: I
+    flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+}
+InnerClasses:
+  public static #x= #x of #x;           // StaticNestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
+  public static #x= #x of #x;           // Double$NestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass
+SourceFile: "TinyFrameworkNestedClasses.java"
+RuntimeVisibleAnnotations:
   x: #x()
-    android.hosttest.annotation.HostSideTestWholeClassStub
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -1912,7 +2170,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 2, attributes: 5
+  interfaces: 0, fields: 1, methods: 2, attributes: 4
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -1958,15 +2216,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
 InnerClasses:
   public static #x= #x of #x;            // StaticNestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
   #x;                                    // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1
+  public static #x= #x of #x;           // Double$NestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-RuntimeInvisibleAnnotations:
-  x: #x()
-    android.hosttest.annotation.HostSideTestWholeClassStub
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$SubClass.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -2107,6 +2363,7 @@ InnerClasses:
   public static #x= #x of #x;           // BaseClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
   public static #x= #x of #x;           // StaticNestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
   public #x= #x of #x;                  // InnerClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
+  public static #x= #x of #x;          // Double$NestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass
   #x;                                    // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
@@ -2121,6 +2378,7 @@ NestMembers:
   com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$SubClass
   com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass
   com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$Double$NestedClass
   com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1
   com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass
   com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$4
@@ -2169,6 +2427,56 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPackageRedi
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkPackageRedirect.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller.class
+  Compiled from "TinyFrameworkRenamedClassCaller.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkRenamedClassCaller
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 2, attributes: 3
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkRenamedClassCaller();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static int foo(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+}
+SourceFile: "TinyFrameworkRenamedClassCaller.java"
 RuntimeVisibleAnnotations:
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
@@ -2411,6 +2719,65 @@ public class com.unsupported.UnsupportedClass
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "UnsupportedClass.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestWholeClassStub
+## Class: rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed.class
+  Compiled from "TinyFrameworkToBeRenamed.java"
+public class rename_prefix.com.android.hoststubgen.test.tinyframework.TinyFrameworkToBeRenamed
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // rename_prefix/com/android/hoststubgen/test/tinyframework/TinyFrameworkToBeRenamed
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 2, attributes: 3
+  private final int mValue;
+    descriptor: I
+    flags: (0x0012) ACC_PRIVATE, ACC_FINAL
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public rename_prefix.com.android.hoststubgen.test.tinyframework.TinyFrameworkToBeRenamed(int);
+    descriptor: (I)V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=2, args_size=2
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public int getValue();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+}
+SourceFile: "TinyFrameworkToBeRenamed.java"
 RuntimeVisibleAnnotations:
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenKeptInStub

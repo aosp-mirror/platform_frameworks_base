@@ -67,7 +67,7 @@ class CommunalMediaRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val mediaModel = collectLastValue(underTest.mediaModel)
             runCurrent()
-            assertThat(mediaModel()?.hasActiveMediaOrRecommendation).isFalse()
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isFalse()
         }
 
     @Test
@@ -81,16 +81,16 @@ class CommunalMediaRepositoryImplTest : SysuiTestCase() {
             // Initial value is false.
             val mediaModel = collectLastValue(underTest.mediaModel)
             runCurrent()
-            assertThat(mediaModel()?.hasActiveMediaOrRecommendation).isFalse()
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isFalse()
 
             // Change to media available and notify the listener.
-            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true)
+            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
             whenever(mediaData.createdTimestampMillis).thenReturn(1234L)
             mediaDataListenerCaptor.firstValue.onMediaDataLoaded("key", null, mediaData)
             runCurrent()
 
             // Media active now returns true.
-            assertThat(mediaModel()?.hasActiveMediaOrRecommendation).isTrue()
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isTrue()
             assertThat(mediaModel()?.createdTimestampMillis).isEqualTo(1234L)
         }
 
@@ -103,20 +103,20 @@ class CommunalMediaRepositoryImplTest : SysuiTestCase() {
             verify(mediaDataManager).addListener(mediaDataListenerCaptor.capture())
 
             // Change to media available and notify the listener.
-            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true)
+            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
             mediaDataListenerCaptor.firstValue.onMediaDataLoaded("key", null, mediaData)
             runCurrent()
 
             // Media active now returns true.
             val mediaModel = collectLastValue(underTest.mediaModel)
-            assertThat(mediaModel()?.hasActiveMediaOrRecommendation).isTrue()
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isTrue()
 
             // Change to media unavailable and notify the listener.
-            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(false)
+            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(false)
             mediaDataListenerCaptor.firstValue.onMediaDataRemoved("key", false)
             runCurrent()
 
             // Media active now returns false.
-            assertThat(mediaModel()?.hasActiveMediaOrRecommendation).isFalse()
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isFalse()
         }
 }

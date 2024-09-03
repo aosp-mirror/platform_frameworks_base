@@ -19,11 +19,8 @@
 package com.android.credentialmanager.ui.screens.single.passkey
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.R
@@ -75,7 +72,6 @@ fun SinglePasskeyScreen(
             }
         },
         columnState = columnState,
-        modifier = Modifier.padding(horizontal = 10.dp)
     ) {
         item {
             val selectEntry = flowEngine.getEntrySelector()

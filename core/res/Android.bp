@@ -156,6 +156,7 @@ android_app {
     generate_product_characteristics_rro: true,
 
     flags_packages: [
+        "android.app.appfunctions.flags-aconfig",
         "android.app.contextualsearch.flags-aconfig",
         "android.content.pm.flags-aconfig",
         "android.provider.flags-aconfig",
@@ -164,6 +165,8 @@ android_app {
         "com.android.window.flags.window-aconfig",
         "android.permission.flags-aconfig",
         "android.os.flags-aconfig",
+        "android.os.vibrator.flags-aconfig",
+        "android.media.tv.flags-aconfig",
     ],
 }
 

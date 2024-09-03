@@ -16,20 +16,13 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
-import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
 import android.graphics.Rect;
 import android.platform.test.annotations.RequiresFlagsDisabled;
@@ -52,7 +45,6 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 import com.android.wm.shell.compatui.api.CompatUIEvent;
-import com.android.wm.shell.compatui.impl.CompatUIEvents;
 
 import junit.framework.Assert;
 
@@ -97,7 +89,7 @@ public class CompatUILayoutTest extends ShellTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         doReturn(100).when(mCompatUIConfiguration).getHideSizeCompatRestartButtonTolerance();
-        mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false);
         mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
                 mCallback, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
                 mCompatUIConfiguration, mOnRestartButtonClicked);
@@ -151,113 +143,13 @@ public class CompatUILayoutTest extends ShellTestCase {
         verify(mLayout).setSizeCompatHintVisibility(/* show= */ false);
     }
 
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
-    public void testUpdateCameraTreatmentButton_treatmentAppliedByDefault() {
-        mWindowManager.mCameraCompatControlState = CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-        mWindowManager.createLayout(/* canShow= */ true);
-        final ImageButton button =
-                mLayout.findViewById(R.id.camera_compat_treatment_button);
-        button.performClick();
-
-        verify(mWindowManager).onCameraTreatmentButtonClicked();
-        verifyOnCameraControlStateUpdatedInvokedWith(TASK_ID,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        button.performClick();
-
-        verifyOnCameraControlStateUpdatedInvokedWith(TASK_ID,
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
-    public void testUpdateCameraTreatmentButton_treatmentSuggestedByDefault() {
-        mWindowManager.mCameraCompatControlState = CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        mWindowManager.createLayout(/* canShow= */ true);
-        final ImageButton button =
-                mLayout.findViewById(R.id.camera_compat_treatment_button);
-        button.performClick();
-
-        verify(mWindowManager).onCameraTreatmentButtonClicked();
-        verifyOnCameraControlStateUpdatedInvokedWith(TASK_ID,
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
-
-        button.performClick();
-
-        verifyOnCameraControlStateUpdatedInvokedWith(TASK_ID,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
-    public void testOnCameraDismissButtonClicked() {
-        mWindowManager.mCameraCompatControlState = CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        mWindowManager.createLayout(/* canShow= */ true);
-        final ImageButton button =
-                mLayout.findViewById(R.id.camera_compat_dismiss_button);
-        button.performClick();
-
-        verify(mWindowManager).onCameraDismissButtonClicked();
-        verifyOnCameraControlStateUpdatedInvokedWith(TASK_ID, CAMERA_COMPAT_CONTROL_DISMISSED);
-        verify(mLayout).setCameraControlVisibility(/* show */ false);
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
-    public void testOnLongClickForCameraTreatmentButton() {
-        doNothing().when(mWindowManager).onCameraButtonLongClicked();
-
-        final ImageButton button =
-                mLayout.findViewById(R.id.camera_compat_treatment_button);
-        button.performLongClick();
-
-        verify(mWindowManager).onCameraButtonLongClicked();
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
-    public void testOnLongClickForCameraDismissButton() {
-        doNothing().when(mWindowManager).onCameraButtonLongClicked();
-
-        final ImageButton button = mLayout.findViewById(R.id.camera_compat_dismiss_button);
-        button.performLongClick();
-
-        verify(mWindowManager).onCameraButtonLongClicked();
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
-    public void testOnClickForCameraCompatHint() {
-        mWindowManager.mCameraCompatControlState = CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        mWindowManager.createLayout(/* canShow= */ true);
-        final LinearLayout hint = mLayout.findViewById(R.id.camera_compat_hint);
-        hint.performClick();
-
-        verify(mLayout).setCameraCompatHintVisibility(/* show= */ false);
-    }
-
-    private static TaskInfo createTaskInfo(boolean hasSizeCompat,
-            @CameraCompatControlState int cameraCompatControlState) {
+    private static TaskInfo createTaskInfo(boolean hasSizeCompat) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
-        taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                cameraCompatControlState;
+        taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.appCompatTaskInfo.topActivityLetterboxHeight = 1000;
         taskInfo.appCompatTaskInfo.topActivityLetterboxWidth = 1000;
         taskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 2000, 2000));
         return taskInfo;
-    }
-
-    private void verifyOnCameraControlStateUpdatedInvokedWith(int taskId, int state) {
-        final ArgumentCaptor<CompatUIEvent> captureValue = ArgumentCaptor.forClass(
-                CompatUIEvent.class);
-        verify(mCallback).accept(captureValue.capture());
-        final CompatUIEvents.CameraControlStateUpdated compatUIEvent =
-                (CompatUIEvents.CameraControlStateUpdated) captureValue.getValue();
-        Assert.assertEquals((compatUIEvent).getTaskId(), taskId);
-        Assert.assertEquals((compatUIEvent).getState(), state);
-        clearInvocations(mCallback);
     }
 }

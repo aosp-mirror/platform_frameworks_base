@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -29,7 +30,6 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalCleanupClient;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 import com.android.server.biometrics.sensors.RemovalClient;
-import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,12 @@ public class FaceInternalCleanupClient extends InternalCleanupClient<Face, AidlS
     @Override
     protected void onAddUnknownTemplate(int userId,
             @NonNull BiometricAuthenticator.Identifier identifier) {
-        FaceUtils.getInstance(getSensorId()).addBiometricForUser(
+        mBiometricUtils.addBiometricForUser(
                 getContext(), getTargetUserId(), (Face) identifier);
+    }
+
+    @Override
+    protected int getModality() {
+        return BiometricsProtoEnums.MODALITY_FACE;
     }
 }

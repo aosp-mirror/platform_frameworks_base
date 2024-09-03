@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -64,7 +65,8 @@ constructor(
     @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
 
-    private val internalChip =
+    /** A direct mapping from [ScreenRecordChipModel] to [OngoingActivityChipModel]. */
+    private val simpleChip =
         interactor.screenRecordState
             .map { state ->
                 when (state) {
@@ -78,11 +80,13 @@ constructor(
                     is ScreenRecordChipModel.Recording -> {
                         OngoingActivityChipModel.Shown.Timer(
                             icon =
-                                Icon.Resource(
-                                    ICON,
-                                    ContentDescription.Resource(
-                                        R.string.screenrecord_ongoing_screen_only,
-                                    ),
+                                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+                                    Icon.Resource(
+                                        ICON,
+                                        ContentDescription.Resource(
+                                            R.string.screenrecord_ongoing_screen_only,
+                                        ),
+                                    )
                                 ),
                             colors = ColorsModel.Red,
                             startTimeMs = systemClock.elapsedRealtime(),
@@ -103,10 +107,31 @@ constructor(
             // See b/347726238 for [SharingStarted.Lazily] reasoning.
             .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
 
+    /**
+     * The screen record chip to show that also ensures that the start time doesn't change once we
+     * enter the recording state. If we change the start time while we're recording, the chronometer
+     * could skip a second. See b/349620526.
+     */
+    private val chipWithConsistentTimer: StateFlow<OngoingActivityChipModel> =
+        simpleChip
+            .pairwise(initialValue = OngoingActivityChipModel.Hidden())
+            .map { (old, new) ->
+                if (
+                    old is OngoingActivityChipModel.Shown.Timer &&
+                        new is OngoingActivityChipModel.Shown.Timer
+                ) {
+                    new.copy(startTimeMs = old.startTimeMs)
+                } else {
+                    new
+                }
+            }
+            // See b/347726238 for [SharingStarted.Lazily] reasoning.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+
     private val chipTransitionHelper = ChipTransitionHelper(scope)
 
     override val chip: StateFlow<OngoingActivityChipModel> =
-        chipTransitionHelper.createChipFlow(internalChip)
+        chipTransitionHelper.createChipFlow(chipWithConsistentTimer)
 
     private fun createDelegate(
         recordedTask: ActivityManager.RunningTaskInfo?

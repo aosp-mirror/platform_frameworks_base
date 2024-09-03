@@ -313,6 +313,7 @@ class SnapshotPersistQueue {
             proto.appearance = mSnapshot.getAppearance();
             proto.isTranslucent = mSnapshot.isTranslucent();
             proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
+            proto.uiMode = mSnapshot.getUiMode();
             proto.id = mSnapshot.getId();
             final byte[] bytes = TaskSnapshotProto.toByteArray(proto);
             final File file = mPersistInfoProvider.getProtoFile(mId, mUserId);

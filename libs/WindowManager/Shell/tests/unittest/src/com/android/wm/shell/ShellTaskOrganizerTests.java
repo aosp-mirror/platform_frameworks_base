@@ -16,10 +16,6 @@
 
 package com.android.wm.shell;
 
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -369,7 +365,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo1 = createTaskInfo(/* taskId= */ 12,
                 WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.appCompatTaskInfo.topActivityInSizeCompat = false;
+        taskInfo1.appCompatTaskInfo.setTopActivityInSizeCompat(false);
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, /* leash= */ null);
@@ -382,7 +378,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.appCompatTaskInfo.topActivityInSizeCompat = true;
+        taskInfo2.appCompatTaskInfo.setTopActivityInSizeCompat(true);
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verifyOnCompatInfoChangedInvokedWith(taskInfo2, taskListener);
@@ -392,7 +388,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.appCompatTaskInfo.topActivityInSizeCompat = true;
+        taskInfo3.appCompatTaskInfo.setTopActivityInSizeCompat(true);
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
         verifyOnCompatInfoChangedInvokedWith(taskInfo3, null /* taskListener */);
@@ -407,7 +403,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo1 = createTaskInfo(/* taskId= */ 12,
                 WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = false;
+        taskInfo1.appCompatTaskInfo.setEligibleForLetterboxEducation(false);
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, /* leash= */ null);
@@ -422,7 +418,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = true;
+        taskInfo2.appCompatTaskInfo.setEligibleForLetterboxEducation(true);
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verifyOnCompatInfoChangedInvokedWith(taskInfo2, taskListener);
@@ -432,88 +428,10 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = true;
+        taskInfo3.appCompatTaskInfo.setEligibleForLetterboxEducation(true);
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
         verifyOnCompatInfoChangedInvokedWith(taskInfo3, null /* taskListener */);
-
-        clearInvocations(mCompatUI);
-        mOrganizer.onTaskVanished(taskInfo1);
-        verifyOnCompatInfoChangedInvokedWith(taskInfo1, null /* taskListener */);
-    }
-
-    @Test
-    public void testOnCameraCompatActivityChanged() {
-        final RunningTaskInfo taskInfo1 = createTaskInfo(/* taskId= */ 1,
-                WINDOWING_MODE_FULLSCREEN);
-        taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                CAMERA_COMPAT_CONTROL_HIDDEN;
-        final TrackingTaskListener taskListener = new TrackingTaskListener();
-        mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
-        mOrganizer.onTaskAppeared(taskInfo1, /* leash= */ null);
-
-        // Task listener sent to compat UI is null if top activity doesn't request a camera
-        // compat control.
-        verifyOnCompatInfoChangedInvokedWith(taskInfo1, null /* taskListener */);
-
-        // Task listener is non-null when request a camera compat control for a visible task.
-        clearInvocations(mCompatUI);
-        final RunningTaskInfo taskInfo2 =
-                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
-        taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        taskInfo2.isVisible = true;
-        mOrganizer.onTaskInfoChanged(taskInfo2);
-        verifyOnCompatInfoChangedInvokedWith(taskInfo2, taskListener);
-
-        // CompatUIController#onCompatInfoChanged is called when requested state for a camera
-        // compat control changes for a visible task.
-        clearInvocations(mCompatUI);
-        final RunningTaskInfo taskInfo3 =
-                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
-        taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-        taskInfo3.isVisible = true;
-        mOrganizer.onTaskInfoChanged(taskInfo3);
-        verifyOnCompatInfoChangedInvokedWith(taskInfo3, taskListener);
-
-        // CompatUIController#onCompatInfoChanged is called when a top activity goes in size compat
-        // mode for a visible task that has a compat control.
-        clearInvocations(mCompatUI);
-        final RunningTaskInfo taskInfo4 =
-                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
-        taskInfo4.displayId = taskInfo1.displayId;
-        taskInfo4.appCompatTaskInfo.topActivityInSizeCompat = true;
-        taskInfo4.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-        taskInfo4.isVisible = true;
-        mOrganizer.onTaskInfoChanged(taskInfo4);
-        verifyOnCompatInfoChangedInvokedWith(taskInfo4, taskListener);
-
-        // Task linster is null when a camera compat control is dimissed for a visible task.
-        clearInvocations(mCompatUI);
-        final RunningTaskInfo taskInfo5 =
-                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
-        taskInfo5.displayId = taskInfo1.displayId;
-        taskInfo5.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                CAMERA_COMPAT_CONTROL_DISMISSED;
-        taskInfo5.isVisible = true;
-        mOrganizer.onTaskInfoChanged(taskInfo5);
-        verifyOnCompatInfoChangedInvokedWith(taskInfo5, null /* taskListener */);
-
-        // Task linster is null when request a camera compat control for a invisible task.
-        clearInvocations(mCompatUI);
-        final RunningTaskInfo taskInfo6 =
-                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
-        taskInfo6.displayId = taskInfo1.displayId;
-        taskInfo6.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
-        taskInfo6.isVisible = false;
-        mOrganizer.onTaskInfoChanged(taskInfo6);
-        verifyOnCompatInfoChangedInvokedWith(taskInfo6, null /* taskListener */);
 
         clearInvocations(mCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);

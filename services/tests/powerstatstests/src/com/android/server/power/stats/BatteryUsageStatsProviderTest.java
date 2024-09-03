@@ -532,15 +532,15 @@ public class BatteryUsageStatsProviderTest {
                     BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
             assertThat(device.getCustomPowerComponentName(componentId0)).isEqualTo("FOO");
             assertThat(device.getCustomPowerComponentName(componentId1)).isEqualTo("BAR");
-            assertThat(device.getConsumedPowerForCustomComponent(componentId0))
+            assertThat(device.getConsumedPower(componentId0))
                     .isWithin(PRECISION).of(27.77777);
-            assertThat(device.getConsumedPowerForCustomComponent(componentId1))
+            assertThat(device.getConsumedPower(componentId1))
                     .isWithin(PRECISION).of(55.55555);
 
             UidBatteryConsumer uid = stats.getUidBatteryConsumers().get(0);
-            assertThat(uid.getConsumedPowerForCustomComponent(componentId0))
+            assertThat(uid.getConsumedPower(componentId0))
                     .isWithin(PRECISION).of(8.33333);
-            assertThat(uid.getConsumedPowerForCustomComponent(componentId1))
+            assertThat(uid.getConsumedPower(componentId1))
                     .isWithin(PRECISION).of(8.33333);
             return null;
         }).when(powerStatsStore).storeBatteryUsageStats(anyLong(), any());

@@ -78,6 +78,12 @@ prebuilt_etc {
     src: "package-shareduid-allowlist.xml",
 }
 
+prebuilt_etc {
+    name: "oem-defined-uids.xml",
+    sub_dir: "sysconfig",
+    src: "oem-defined-uids.xml",
+}
+
 // Privapp permission whitelist files
 
 prebuilt_etc {

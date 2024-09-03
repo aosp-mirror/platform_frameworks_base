@@ -3,8 +3,10 @@ package com.android.systemui.scene
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.scene.shared.model.FakeScene
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.FakeOverlay
 
 var Kosmos.sceneKeys by Fixture {
     listOf(
@@ -22,6 +24,18 @@ val Kosmos.fakeScenes by Fixture { sceneKeys.map { key -> FakeScene(key) }.toSet
 val Kosmos.scenes by Fixture { fakeScenes }
 
 val Kosmos.initialSceneKey by Fixture { Scenes.Lockscreen }
+
+var Kosmos.overlayKeys by Fixture {
+    listOf(
+        Overlays.NotificationsShade,
+        Overlays.QuickSettingsShade,
+    )
+}
+
+val Kosmos.fakeOverlays by Fixture { overlayKeys.map { key -> FakeOverlay(key) }.toSet() }
+
+val Kosmos.overlays by Fixture { fakeOverlays }
+
 var Kosmos.sceneContainerConfig by Fixture {
     val navigationDistances =
         mapOf(
@@ -32,5 +46,11 @@ var Kosmos.sceneContainerConfig by Fixture {
             Scenes.QuickSettings to 3,
             Scenes.Bouncer to 4,
         )
-    SceneContainerConfig(sceneKeys, initialSceneKey, navigationDistances)
+
+    SceneContainerConfig(
+        sceneKeys = sceneKeys,
+        initialSceneKey = initialSceneKey,
+        overlayKeys = overlayKeys,
+        navigationDistances = navigationDistances,
+    )
 }

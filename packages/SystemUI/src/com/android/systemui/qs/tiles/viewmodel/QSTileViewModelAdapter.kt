@@ -34,15 +34,14 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.function.Supplier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 // TODO(b/http://b/299909989): Use QSTileViewModel directly after the rollout
@@ -70,7 +69,7 @@ constructor(
             applicationScope.launch {
                 launch {
                     qsTileViewModel.isAvailable.collectIndexed { index, isAvailable ->
-                        if (!isAvailable) {
+                        if (!isAvailable && qsTileViewModel.config.autoRemoveOnUnavailable) {
                             qsHost.removeTile(tileSpec)
                         }
                         // qsTileViewModel.isAvailable flow often starts with isAvailable == true.
@@ -87,8 +86,9 @@ constructor(
                         }
                     }
                 }
-                // Warm up tile with some initial state
-                launch { qsTileViewModel.state.first() }
+                // Warm up tile with some initial state. Because `state` is a StateFlow with initial
+                // state `null`, we collect until it's not null.
+                launch { qsTileViewModel.state.takeWhile { it == null }.collect {} }
             }
 
         // QSTileHost doesn't call this when userId is initialized
@@ -131,8 +131,8 @@ constructor(
     }
 
     override fun secondaryClick(expandable: Expandable?) {
-        if (isActionSupported(QSTileState.UserAction.CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(expandable))
+        if (isActionSupported(QSTileState.UserAction.TOGGLE_CLICK)) {
+            qsTileViewModel.onActionPerformed(QSTileUserAction.ToggleClick(expandable))
         }
     }
 
@@ -157,17 +157,22 @@ constructor(
 
     override fun isTileReady(): Boolean = qsTileViewModel.currentState != null
 
+    private var cachedState = QSTile.AdapterState()
+
     override fun setListening(client: Any?, listening: Boolean) {
         client ?: return
         if (listening) {
-            listeningClients.add(client)
-            if (listeningClients.size == 1) {
+            val clientWasNotAlreadyListening = listeningClients.add(client)
+            if (clientWasNotAlreadyListening && listeningClients.size == 1) {
                 stateJob =
                     qsTileViewModel.state
                         .filterNotNull()
                         .map { mapState(context, it, qsTileViewModel.config) }
                         .onEach { legacyState ->
-                            callbacks.forEach { it.onStateChanged(legacyState) }
+                            val changed = legacyState.copyTo(cachedState)
+                            if (changed) {
+                                callbacks.forEach { it.onStateChanged(legacyState) }
+                            }
                         }
                         .launchIn(applicationScope)
             }
@@ -179,8 +184,7 @@ constructor(
         }
     }
 
-    override fun isListening(): Boolean =
-        listeningClients.isNotEmpty()
+    override fun isListening(): Boolean = listeningClients.isNotEmpty()
 
     override fun setDetailListening(show: Boolean) {
         // do nothing like QSTileImpl
@@ -233,8 +237,10 @@ constructor(
                 secondaryLabel = viewModelState.secondaryLabel
                 handlesLongClick =
                     viewModelState.supportedActions.contains(QSTileState.UserAction.LONG_CLICK)
+                handlesSecondaryClick =
+                    viewModelState.supportedActions.contains(QSTileState.UserAction.TOGGLE_CLICK)
 
-                iconSupplier = Supplier {
+                icon =
                     when (val stateIcon = viewModelState.icon()) {
                         is Icon.Loaded ->
                             if (viewModelState.iconRes == null) DrawableIcon(stateIcon.drawable)
@@ -242,7 +248,7 @@ constructor(
                         is Icon.Resource -> ResourceIcon.get(stateIcon.res)
                         null -> null
                     }
-                }
+
                 state = viewModelState.activationState.legacyState
 
                 contentDescription = viewModelState.contentDescription

@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.app.Flags.FLAG_SORT_SECTION_BY_TIME;
 import static android.app.Notification.COLOR_DEFAULT;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
@@ -31,10 +32,12 @@ import static android.app.Notification.VISIBILITY_PUBLIC;
 import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION;
 import static android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 
-import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
+import static com.android.server.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS;
 import static com.android.server.notification.GroupHelper.AGGREGATE_GROUP_KEY;
 import static com.android.server.notification.GroupHelper.AUTOGROUP_KEY;
 import static com.android.server.notification.GroupHelper.BASE_FLAGS;
@@ -2203,7 +2206,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
                 eq(expectedGroupKey_silent), anyInt(), eq(getNotificationAttributes(BASE_FLAGS)));
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
-                eq(expectedGroupKey_silent), eq(false));
+                eq(expectedGroupKey_silent), eq(true));
 
         // Check that the alerting section group is removed
         verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), eq(pkg),
@@ -2263,13 +2266,15 @@ public class GroupHelperTest extends UiServiceTestCase {
                 notificationList);
 
         // Check that channel1's notifications are moved to the silent section group
-        expectedSummaryAttr = new NotificationAttributes(BASE_FLAGS,
-                mSmallIcon, COLOR_DEFAULT, DEFAULT_VISIBILITY, DEFAULT_GROUP_ALERT,
-                "TEST_CHANNEL_ID1");
-        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
-                eq(expectedGroupKey_silent), anyInt(), eq(expectedSummaryAttr));
-        verify(mCallback, times(AUTOGROUP_AT_COUNT/2 + 1)).addAutoGroup(anyString(),
-                eq(expectedGroupKey_silent), eq(false));
+        // But not enough to auto-group => remove override group key
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+        for (NotificationRecord record: notificationList) {
+            if (record.getChannel().getId().equals(channel1.getId())) {
+                assertThat(record.getSbn().getOverrideGroupKey()).isNull();
+            }
+        }
 
         // Check that the alerting section group is not removed, only updated
         expectedSummaryAttr = new NotificationAttributes(BASE_FLAGS,
@@ -2342,13 +2347,67 @@ public class GroupHelperTest extends UiServiceTestCase {
         verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
                 eq(expectedGroupKey_silent), anyInt(), eq(getNotificationAttributes(BASE_FLAGS)));
         verify(mCallback, times(numSilentGroupNotifications)).addAutoGroup(anyString(),
-                eq(expectedGroupKey_silent), eq(false));
+                eq(expectedGroupKey_silent), eq(true));
 
         // Check that the alerting section group is removed
         verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), eq(pkg),
                 eq(expectedGroupKey_alerting));
         verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
                 any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testAutogroup_updateChannel_reachedMinAutogroupCount() {
+        final String pkg = "package";
+        final NotificationChannel channel1 = new NotificationChannel("TEST_CHANNEL_ID1",
+                "TEST_CHANNEL_ID1", IMPORTANCE_DEFAULT);
+        final NotificationChannel channel2 = new NotificationChannel("TEST_CHANNEL_ID2",
+                "TEST_CHANNEL_ID2", IMPORTANCE_LOW);
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        // Post notifications with different channels that would autogroup in different sections
+        NotificationRecord r;
+        // Not enough notifications to autogroup initially
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            if (i % 2 == 0) {
+                r = getNotificationRecord(pkg, i, String.valueOf(i),
+                    UserHandle.SYSTEM, null, false, channel1);
+            } else {
+                r = getNotificationRecord(pkg, i, String.valueOf(i),
+                    UserHandle.SYSTEM, null, false, channel2);
+            }
+            notificationList.add(r);
+            mGroupHelper.onNotificationPosted(r, false);
+        }
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+        Mockito.reset(mCallback);
+
+        // Update channel1's importance
+        final String expectedGroupKey_silent = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SilentSection", UserHandle.SYSTEM.getIdentifier());
+        channel1.setImportance(IMPORTANCE_LOW);
+        for (NotificationRecord record: notificationList) {
+            if (record.getChannel().getId().equals(channel1.getId())) {
+                record.updateNotificationChannel(channel1);
+            }
+        }
+        mGroupHelper.onChannelUpdated(UserHandle.SYSTEM.getIdentifier(), pkg, channel1,
+                notificationList);
+
+        // Check that channel1's notifications are moved to the silent section & autogroup all
+        NotificationAttributes expectedSummaryAttr = new NotificationAttributes(BASE_FLAGS,
+                mSmallIcon, COLOR_DEFAULT, DEFAULT_VISIBILITY, DEFAULT_GROUP_ALERT,
+                "TEST_CHANNEL_ID1");
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey_silent), eq(true));
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey_silent), anyInt(), eq(expectedSummaryAttr));
     }
 
     @Test
@@ -2520,15 +2579,9 @@ public class GroupHelperTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
-    public void testGroupSectioners() {
-        final NotificationRecord notification_alerting = getNotificationRecord(mPkg, 0, "", mUser,
-            "", false, IMPORTANCE_DEFAULT);
-        assertThat(GroupHelper.getSection(notification_alerting).mName).isEqualTo("AlertingSection");
-
-        final NotificationRecord notification_silent = getNotificationRecord(mPkg, 0, "", mUser,
-            "", false, IMPORTANCE_LOW);
-        assertThat(GroupHelper.getSection(notification_silent).mName).isEqualTo("SilentSection");
-
+    @DisableFlags(FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS)
+    public void testNonGroupableNotifications() {
+        // Check that there is no valid section for: conversations, calls, foreground services
         NotificationRecord notification_conversation = mock(NotificationRecord.class);
         when(notification_conversation.isConversation()).thenReturn(true);
         assertThat(GroupHelper.getSection(notification_conversation)).isNull();
@@ -2545,7 +2598,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         assertThat(GroupHelper.getSection(notification_call)).isNull();
 
         NotificationRecord notification_colorFg = spy(getNotificationRecord(mPkg, 0, "", mUser,
-            "", false, IMPORTANCE_LOW));
+                "", false, IMPORTANCE_LOW));
         sbn = spy(getSbn("package", 0, "0", UserHandle.SYSTEM));
         n = mock(Notification.class);
         when(notification_colorFg.isConversation()).thenReturn(false);
@@ -2556,6 +2609,175 @@ public class GroupHelperTest extends UiServiceTestCase {
         when(n.isColorized()).thenReturn(true);
         when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
         assertThat(GroupHelper.getSection(notification_colorFg)).isNull();
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    @DisableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testGroupSectioners() {
+        final NotificationRecord notification_alerting = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_DEFAULT);
+        assertThat(GroupHelper.getSection(notification_alerting).mName).isEqualTo(
+                "AlertingSection");
+
+        final NotificationRecord notification_silent = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_LOW);
+        assertThat(GroupHelper.getSection(notification_silent).mName).isEqualTo("SilentSection");
+
+        // Check that special categories are grouped by their importance
+        final NotificationChannel promoChannel = new NotificationChannel(
+                NotificationChannel.PROMOTIONS_ID, NotificationChannel.PROMOTIONS_ID,
+                IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_promotion = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, promoChannel);
+        assertThat(GroupHelper.getSection(notification_promotion).mName).isEqualTo(
+                "AlertingSection");
+
+        final NotificationChannel newsChannel = new NotificationChannel(NotificationChannel.NEWS_ID,
+                NotificationChannel.NEWS_ID, IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_news = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, newsChannel);
+        assertThat(GroupHelper.getSection(notification_news).mName).isEqualTo(
+                "AlertingSection");
+
+        final NotificationChannel socialChannel = new NotificationChannel(
+                NotificationChannel.SOCIAL_MEDIA_ID, NotificationChannel.SOCIAL_MEDIA_ID,
+                IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_social = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, socialChannel);
+        assertThat(GroupHelper.getSection(notification_social).mName).isEqualTo(
+                "AlertingSection");
+
+        final NotificationChannel recsChannel = new NotificationChannel(NotificationChannel.RECS_ID,
+                NotificationChannel.RECS_ID, IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_recs = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, recsChannel);
+        assertThat(GroupHelper.getSection(notification_recs).mName).isEqualTo(
+                "AlertingSection");
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_CLASSIFICATION})
+    public void testGroupSectioners_withClassificationSections() {
+        final NotificationRecord notification_alerting = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_DEFAULT);
+        assertThat(GroupHelper.getSection(notification_alerting).mName).isEqualTo(
+                "AlertingSection");
+
+        final NotificationRecord notification_silent = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_LOW);
+        assertThat(GroupHelper.getSection(notification_silent).mName).isEqualTo("SilentSection");
+
+        // Check that special categories are grouped in their own sections
+        final NotificationChannel promoChannel = new NotificationChannel(
+                NotificationChannel.PROMOTIONS_ID, NotificationChannel.PROMOTIONS_ID,
+                IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_promotion = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, promoChannel);
+        assertThat(GroupHelper.getSection(notification_promotion).mName).isEqualTo(
+                "PromotionsSection");
+
+        final NotificationChannel newsChannel = new NotificationChannel(NotificationChannel.NEWS_ID,
+                NotificationChannel.NEWS_ID, IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_news = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, newsChannel);
+        assertThat(GroupHelper.getSection(notification_news).mName).isEqualTo(
+                "NewsSection");
+
+        final NotificationChannel socialChannel = new NotificationChannel(
+                NotificationChannel.SOCIAL_MEDIA_ID, NotificationChannel.SOCIAL_MEDIA_ID,
+                IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_social = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, socialChannel);
+        assertThat(GroupHelper.getSection(notification_social).mName).isEqualTo(
+                "SocialSection");
+
+        final NotificationChannel recsChannel = new NotificationChannel(NotificationChannel.RECS_ID,
+                NotificationChannel.RECS_ID, IMPORTANCE_DEFAULT);
+        final NotificationRecord notification_recs = getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, recsChannel);
+        assertThat(GroupHelper.getSection(notification_recs).mName).isEqualTo(
+                "RecsSection");
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS})
+    public void testNonGroupableNotifications_forceGroupConversations() {
+        // Check that there is no valid section for: calls, foreground services
+        NotificationRecord notification_call = spy(getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_LOW));
+        Notification n = mock(Notification.class);
+        StatusBarNotification sbn = spy(getSbn("package", 0, "0", UserHandle.SYSTEM));
+        when(notification_call.isConversation()).thenReturn(false);
+        when(notification_call.getNotification()).thenReturn(n);
+        when(notification_call.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(n);
+        when(n.isStyle(Notification.CallStyle.class)).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification_call)).isNull();
+
+        NotificationRecord notification_colorFg = spy(getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_LOW));
+        sbn = spy(getSbn("package", 0, "0", UserHandle.SYSTEM));
+        n = mock(Notification.class);
+        when(notification_colorFg.isConversation()).thenReturn(false);
+        when(notification_colorFg.getNotification()).thenReturn(n);
+        when(notification_colorFg.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(n);
+        when(n.isForegroundService()).thenReturn(true);
+        when(n.isColorized()).thenReturn(true);
+        when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
+        assertThat(GroupHelper.getSection(notification_colorFg)).isNull();
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS})
+    @DisableFlags(FLAG_SORT_SECTION_BY_TIME)
+    public void testConversationGroupSections_disableSortSectionByTime() {
+        // Check that there are separate sections for conversations: alerting and silent
+        NotificationRecord notification_conversation_silent = getNotificationRecord(mPkg, 0, "",
+                mUser, "", false, IMPORTANCE_LOW);
+        notification_conversation_silent = spy(notification_conversation_silent);
+        when(notification_conversation_silent.isConversation()).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification_conversation_silent).mName).isEqualTo(
+                "PeopleSection(silent)");
+
+        // Check that there is a correct section for conversations
+        NotificationRecord notification_conversation_alerting = getNotificationRecord(mPkg, 0, "",
+                mUser, "", false, IMPORTANCE_DEFAULT);
+        notification_conversation_alerting = spy(notification_conversation_alerting);
+        when(notification_conversation_alerting.isConversation()).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification_conversation_alerting).mName).isEqualTo(
+                "PeopleSection(alerting)");
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS,
+            FLAG_SORT_SECTION_BY_TIME})
+    public void testConversationGroupSections() {
+        // Check that there is a single section for silent/alerting conversations
+        NotificationRecord notification_conversation_silent = getNotificationRecord(mPkg, 0, "",
+                mUser, "", false, IMPORTANCE_LOW);
+        notification_conversation_silent = spy(notification_conversation_silent);
+        when(notification_conversation_silent.isConversation()).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification_conversation_silent).mName).isEqualTo(
+                "PeopleSection");
+
+        NotificationRecord notification_conversation_alerting = getNotificationRecord(mPkg, 0, "",
+                mUser, "", false, IMPORTANCE_DEFAULT);
+        notification_conversation_alerting = spy(notification_conversation_alerting);
+        when(notification_conversation_alerting.isConversation()).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification_conversation_alerting).mName).isEqualTo(
+                "PeopleSection");
+
+        // Check that there is a section for priority conversations
+        NotificationRecord notification_conversation_prio = getNotificationRecord(mPkg, 0, "",
+                mUser, "", false, IMPORTANCE_DEFAULT);
+        notification_conversation_prio = spy(notification_conversation_prio);
+        when(notification_conversation_prio.isConversation()).thenReturn(true);
+        notification_conversation_prio.getChannel().setImportantConversation(true);
+        assertThat(GroupHelper.getSection(notification_conversation_prio).mName).isEqualTo(
+                "PeopleSection(priority)");
     }
 
 }

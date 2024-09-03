@@ -140,15 +140,6 @@ interface IWindowSession {
     oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
             int seqId);
 
-    @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, int flags, int privFlags);
-
-    /**
-     * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
-     * permission.
-     */
-    oneway void performHapticFeedbackAsync(int effectId, int flags, int privFlags);
-
     /**
      * Initiate the drag operation itself
      *

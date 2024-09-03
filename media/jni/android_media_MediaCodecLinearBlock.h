@@ -62,7 +62,7 @@ struct JMediaCodecLinearBlock {
             std::shared_ptr<C2Buffer> buffer =
                 C2Buffer::CreateLinearBuffer(block.subBlock(offset, size));
             for (const std::shared_ptr<const C2Info> &info : mBuffer->info()) {
-                std::shared_ptr<C2Param> param = std::move(C2Param::Copy(*info));
+                std::shared_ptr<C2Param> param = C2Param::Copy(*info);
                 buffer->setInfo(std::static_pointer_cast<C2Info>(param));
             }
             return buffer;

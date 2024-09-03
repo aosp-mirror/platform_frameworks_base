@@ -22,7 +22,6 @@ import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.os.UserHandle
 import android.view.WindowManager.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI
-import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL
@@ -41,7 +40,6 @@ class MultiInstanceHelper @JvmOverloads constructor(
     /**
      * Returns whether a specific component desires to be launched in multiple instances.
      */
-    @VisibleForTesting
     fun supportsMultiInstanceSplit(componentName: ComponentName?): Boolean {
         if (componentName == null || componentName.packageName == null) {
             // TODO(b/262864589): Handle empty component case
@@ -60,7 +58,7 @@ class MultiInstanceHelper @JvmOverloads constructor(
 
         if (!supportsMultiInstanceProperty) {
             // If not checking the multi-instance properties, then return early
-            return false;
+            return false
         }
 
         // Check the activity property first

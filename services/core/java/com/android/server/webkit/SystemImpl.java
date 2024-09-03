@@ -19,14 +19,12 @@ package com.android.server.webkit;
 import static android.webkit.Flags.updateServiceV2;
 
 import android.app.ActivityManager;
-import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.RemoteException;
@@ -79,7 +77,7 @@ public class SystemImpl implements SystemInterface {
         XmlResourceParser parser = null;
         List<WebViewProviderInfo> webViewProviders = new ArrayList<WebViewProviderInfo>();
         try {
-            parser = AppGlobals.getInitialApplication().getResources().getXml(
+            parser = mContext.getResources().getXml(
                     com.android.internal.R.xml.config_webview_packages);
             XmlUtils.beginDocument(parser, TAG_START);
             while(true) {
@@ -148,7 +146,7 @@ public class SystemImpl implements SystemInterface {
     }
 
     public long getFactoryPackageVersion(String packageName) throws NameNotFoundException {
-        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+        PackageManager pm = mContext.getPackageManager();
         return pm.getPackageInfo(packageName, PackageManager.MATCH_FACTORY_ONLY)
                 .getLongVersionCode();
     }
@@ -203,47 +201,48 @@ public class SystemImpl implements SystemInterface {
     @Override
     public void enablePackageForAllUsers(String packageName, boolean enable) {
         UserManager userManager = mContext.getSystemService(UserManager.class);
-        for(UserInfo userInfo : userManager.getUsers()) {
-            enablePackageForUser(packageName, enable, userInfo.id);
+        for (UserHandle user : userManager.getUserHandles(false)) {
+            enablePackageForUser(packageName, enable, user);
         }
     }
 
-    private void enablePackageForUser(String packageName, boolean enable, int userId) {
+    private void enablePackageForUser(String packageName, boolean enable, UserHandle user) {
+        Context contextAsUser = mContext.createContextAsUser(user, 0);
+        PackageManager pm = contextAsUser.getPackageManager();
         try {
-            AppGlobals.getPackageManager().setApplicationEnabledSetting(
+            pm.setApplicationEnabledSetting(
                     packageName,
                     enable ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0,
-                    userId, null);
-        } catch (RemoteException | IllegalArgumentException e) {
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+        } catch (IllegalArgumentException e) {
             Log.w(TAG, "Tried to " + (enable ? "enable " : "disable ") + packageName
-                    + " for user " + userId + ": " + e);
+                    + " for user " + user + ": " + e);
         }
     }
 
     @Override
     public void installExistingPackageForAllUsers(String packageName) {
         UserManager userManager = mContext.getSystemService(UserManager.class);
-        for (UserInfo userInfo : userManager.getUsers()) {
-            installPackageForUser(packageName, userInfo.id);
+        for (UserHandle user : userManager.getUserHandles(false)) {
+            installPackageForUser(packageName, user);
         }
     }
 
-    private void installPackageForUser(String packageName, int userId) {
-        final Context contextAsUser = mContext.createContextAsUser(UserHandle.of(userId), 0);
-        final PackageInstaller installer = contextAsUser.getPackageManager().getPackageInstaller();
+    private void installPackageForUser(String packageName, UserHandle user) {
+        Context contextAsUser = mContext.createContextAsUser(user, 0);
+        PackageInstaller installer = contextAsUser.getPackageManager().getPackageInstaller();
         installer.installExistingPackage(packageName, PackageManager.INSTALL_REASON_UNKNOWN, null);
     }
 
     @Override
     public boolean systemIsDebuggable() {
-        return Build.IS_DEBUGGABLE;
+        return Build.isDebuggable();
     }
 
     @Override
     public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
             throws NameNotFoundException {
-        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+        PackageManager pm = mContext.getPackageManager();
         return pm.getPackageInfo(configInfo.packageName, PACKAGE_FLAGS);
     }
 

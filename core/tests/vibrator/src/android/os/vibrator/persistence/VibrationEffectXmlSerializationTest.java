@@ -24,22 +24,32 @@ import static android.os.vibrator.persistence.VibrationXmlParser.isSupportedMime
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
 
+import android.os.PersistableBundle;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Xml;
 
 import com.android.modules.utils.TypedXmlPullParser;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.xmlpull.v1.XmlPullParser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +62,9 @@ import java.util.Set;
  */
 @RunWith(JUnit4.class)
 public class VibrationEffectXmlSerializationTest {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void isSupportedMimeType_onlySupportsVibrationXmlMimeType() {
@@ -422,6 +435,97 @@ public class VibrationEffectXmlSerializationTest {
         }
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testVendorEffect_featureFlagEnabled_allSucceed() throws Exception {
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("id", 1);
+        vendorData.putDouble("scale", 0.5);
+        vendorData.putBoolean("loop", false);
+        vendorData.putLongArray("amplitudes", new long[] { 0, 255, 128 });
+        vendorData.putString("label", "vibration");
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        vendorData.writeToStream(outputStream);
+        String vendorDataStr = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+
+        VibrationEffect effect = VibrationEffect.createVendorEffect(vendorData);
+        String xml = "<vibration-effect><vendor-effect>  " // test trailing whitespace is ignored
+                + vendorDataStr
+                + " \n </vendor-effect></vibration-effect>";
+
+        assertPublicApisParserSucceeds(xml, effect);
+        assertPublicApisSerializerSucceeds(effect, vendorDataStr);
+        assertPublicApisRoundTrip(effect);
+
+        assertHiddenApisParserSucceeds(xml, effect);
+        assertHiddenApisSerializerSucceeds(effect, vendorDataStr);
+        assertHiddenApisRoundTrip(effect);
+
+        // Check PersistableBundle from round-trip
+        PersistableBundle parsedVendorData =
+                ((VibrationEffect.VendorEffect) parseVibrationEffect(serialize(effect),
+                        /* flags= */ 0)).getVendorData();
+        assertThat(parsedVendorData.size()).isEqualTo(vendorData.size());
+        assertThat(parsedVendorData.getInt("id")).isEqualTo(1);
+        assertThat(parsedVendorData.getDouble("scale")).isEqualTo(0.5);
+        assertThat(parsedVendorData.getBoolean("loop")).isFalse();
+        assertArrayEquals(parsedVendorData.getLongArray("amplitudes"), new long[] { 0, 255, 128 });
+        assertThat(parsedVendorData.getString("label")).isEqualTo("vibration");
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testInvalidVendorEffect_featureFlagEnabled_allFail() throws IOException {
+        String emptyTag = "<vibration-effect><vendor-effect/></vibration-effect>";
+        assertPublicApisParserFails(emptyTag);
+        assertHiddenApisParserFails(emptyTag);
+
+        String emptyStringTag =
+                "<vibration-effect><vendor-effect> \n </vendor-effect></vibration-effect>";
+        assertPublicApisParserFails(emptyStringTag);
+        assertHiddenApisParserFails(emptyStringTag);
+
+        String invalidString =
+                "<vibration-effect><vendor-effect>invalid</vendor-effect></vibration-effect>";
+        assertPublicApisParserFails(invalidString);
+        assertHiddenApisParserFails(invalidString);
+
+        String validBase64String =
+                "<vibration-effect><vendor-effect>c29tZXNh</vendor-effect></vibration-effect>";
+        assertPublicApisParserFails(validBase64String);
+        assertHiddenApisParserFails(validBase64String);
+
+        PersistableBundle emptyData = new PersistableBundle();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        emptyData.writeToStream(outputStream);
+        String emptyBundleString = "<vibration-effect><vendor-effect>"
+                + Base64.getEncoder().encodeToString(outputStream.toByteArray())
+                + "</vendor-effect></vibration-effect>";
+        assertPublicApisParserFails(emptyBundleString);
+        assertHiddenApisParserFails(emptyBundleString);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public void testVendorEffect_featureFlagDisabled_allFail() throws Exception {
+        PersistableBundle vendorData = new PersistableBundle();
+        vendorData.putInt("id", 1);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        vendorData.writeToStream(outputStream);
+        String vendorDataStr = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+        String xml = "<vibration-effect><vendor-effect>"
+                + vendorDataStr
+                + "</vendor-effect></vibration-effect>";
+        VibrationEffect vendorEffect = VibrationEffect.createVendorEffect(vendorData);
+
+        assertPublicApisParserFails(xml);
+        assertPublicApisSerializerFails(vendorEffect);
+
+        assertHiddenApisParserFails(xml);
+        assertHiddenApisSerializerFails(vendorEffect);
+    }
+
     private void assertPublicApisParserFails(String xml) {
         assertThrows("Expected parseVibrationEffect to fail for " + xml,
                 VibrationXmlParser.ParseFailedException.class,
@@ -491,6 +595,12 @@ public class VibrationEffectXmlSerializationTest {
         assertThrows("Expected serialization to fail for " + effect,
                 VibrationXmlSerializer.SerializationFailedException.class,
                 () -> serialize(effect));
+    }
+
+    private void assertHiddenApisSerializerFails(VibrationEffect effect) {
+        assertThrows("Expected serialization to fail for " + effect,
+                VibrationXmlSerializer.SerializationFailedException.class,
+                () -> serialize(effect, VibrationXmlSerializer.FLAG_ALLOW_HIDDEN_APIS));
     }
 
     private void assertPublicApisSerializerSucceeds(VibrationEffect effect,

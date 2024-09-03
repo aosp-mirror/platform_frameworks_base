@@ -918,7 +918,7 @@ public class CameraDeviceImpl extends CameraDevice
             checkIfCameraClosedOrInError();
 
             for (String physicalId : physicalCameraIdSet) {
-                if (physicalId == getId()) {
+                if (Objects.equals(physicalId, getId())) {
                     throw new IllegalStateException("Physical id matches the logical id!");
                 }
             }
@@ -2272,6 +2272,19 @@ public class CameraDeviceImpl extends CameraDevice
                 // TODO: Handle CameraCharacteristics access from CaptureResult correctly.
                 result.set(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE,
                         getCharacteristics().get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE));
+                Map<String, CameraCharacteristics> physicalIdToChars = getPhysicalIdToChars();
+                for (PhysicalCaptureResultInfo oneResultInfo : physicalResults) {
+                    String physicalId = oneResultInfo.getCameraId();
+                    CameraMetadataNative physicalResult = oneResultInfo.getCameraMetadata();
+                    CameraCharacteristics ch = physicalIdToChars.get(physicalId);
+                    if (ch != null)  {
+                        physicalResult.set(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE,
+                                ch.get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE));
+                    } else {
+                        Log.e(TAG, "Unable to find characteristics for physical camera "
+                                + physicalId);
+                    }
+                }
 
                 final CaptureCallbackHolder holder =
                         CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);

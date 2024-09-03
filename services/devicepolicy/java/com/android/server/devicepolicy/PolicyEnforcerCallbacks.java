@@ -238,9 +238,7 @@ final class PolicyEnforcerCallbacks {
             }
 
             for (int user : resolveUsers(userId)) {
-                if (Flags.disallowUserControlBgUsageFix()) {
-                    setBgUsageAppOp(packages, pmi, user, appOpsManager);
-                }
+                setBgUsageAppOp(packages, pmi, user, appOpsManager);
                 if (Flags.disallowUserControlStoppedStateFix()) {
                     for (String packageName : packages) {
                         pmi.setPackageStoppedState(packageName, false, user);

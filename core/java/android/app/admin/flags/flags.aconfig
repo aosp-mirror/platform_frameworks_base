@@ -37,7 +37,6 @@ flag {
   }
 }
 
-
 flag {
   name: "onboarding_bugreport_v2_enabled"
   is_exported: true
@@ -107,6 +106,15 @@ flag {
 }
 
 flag {
+  name: "coexistence_migration_for_supervision_enabled"
+  is_exported: true
+  namespace: "enterprise"
+  description: "Migrate existing APIs that are used by supervision (Kids Module) to be coexistable."
+  bug: "356894721"
+}
+
+# Fully rolled out and must not be used.
+flag {
   name: "security_log_v2_enabled"
   is_exported: true
   namespace: "enterprise"
@@ -122,13 +130,6 @@ flag {
   metadata {
       purpose: PURPOSE_BUGFIX
   }
-}
-
-flag {
-  name: "dumpsys_policy_engine_migration_enabled"
-  namespace: "enterprise"
-  description: "Update DumpSys to include information about migrated APIs in DPE"
-  bug: "304999634"
 }
 
 flag {
@@ -180,6 +181,7 @@ flag {
   bug: "295301164"
 }
 
+# Fully rolled out and must not be used.
 flag {
   name: "headless_device_owner_single_user_enabled"
   is_exported: true
@@ -203,26 +205,6 @@ flag {
   bug: "329424312"
   metadata {
       purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "power_exemption_bg_usage_fix"
-  namespace: "enterprise"
-  description: "Ensure aps with EXEMPT_FROM_POWER_RESTRICTIONS can execute in the background"
-  bug: "333379020"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "disallow_user_control_bg_usage_fix"
-  namespace: "enterprise"
-  description: "Make DPM.setUserControlDisabledPackages() ensure background usage is allowed"
-  bug: "326031059"
-  metadata {
-    purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -261,13 +243,6 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
-}
-
-flag {
-  name: "allow_screen_brightness_control_on_cope"
-  namespace: "enterprise"
-  description: "Allow COPE admin to control screen brightness and timeout."
-  bug: "323894620"
 }
 
 flag {
@@ -399,6 +374,16 @@ flag {
     namespace: "enterprise"
     description: "Add provisioningContext to store metadata about when the admin was set"
     bug: "326525847"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "dont_read_policy_definition"
+    namespace: "enterprise"
+    description: "Rely on <policy-key-entry> to determine policy definition and ignore <policy-definition-entry>"
+    bug: "335663055"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

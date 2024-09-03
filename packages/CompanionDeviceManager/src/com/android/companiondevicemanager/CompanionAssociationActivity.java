@@ -19,6 +19,7 @@ package com.android.companiondevicemanager;
 import static android.companion.CompanionDeviceManager.RESULT_CANCELED;
 import static android.companion.CompanionDeviceManager.RESULT_DISCOVERY_TIMEOUT;
 import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
+import static android.companion.CompanionDeviceManager.RESULT_SECURITY_ERROR;
 import static android.companion.CompanionDeviceManager.RESULT_USER_REJECTED;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
@@ -33,6 +34,7 @@ import static com.android.companiondevicemanager.CompanionDeviceResources.PROFIL
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_TITLES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_PROFILES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_SELF_MANAGED_PROFILES;
+import static com.android.companiondevicemanager.Utils.RESULT_CODE_TO_REASON;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
@@ -51,6 +53,7 @@ import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
+import android.companion.Flags;
 import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -231,7 +234,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         boolean forCancelDialog = intent.getBooleanExtra(EXTRA_FORCE_CANCEL_CONFIRMATION, false);
         if (forCancelDialog) {
             Slog.i(TAG, "Cancelling the user confirmation");
-            cancel(RESULT_CANCELED);
+            cancel(RESULT_CANCELED, null);
             return;
         }
 
@@ -243,10 +246,15 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         if (appCallback == null) {
             return;
         }
-        Slog.e(TAG, "More than one AssociationRequests are processing.");
 
         try {
-            appCallback.onFailure(RESULT_INTERNAL_ERROR);
+            if (Flags.associationFailureCode()) {
+                appCallback.onFailure(
+                        RESULT_SECURITY_ERROR, "More than one AssociationRequests are processing.");
+            } else {
+                appCallback.onFailure(
+                        RESULT_INTERNAL_ERROR, "More than one AssociationRequests are processing.");
+            }
         } catch (RemoteException ignore) {
         }
     }
@@ -257,7 +265,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
         // TODO: handle config changes without cancelling.
         if (!isDone()) {
-            cancel(RESULT_CANCELED); // will finish()
+            cancel(RESULT_CANCELED, null); // will finish()
         }
     }
 
@@ -331,7 +339,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
                 && CompanionDeviceDiscoveryService.getScanResult().getValue().isEmpty()) {
             synchronized (LOCK) {
                 if (sDiscoveryStarted) {
-                    cancel(RESULT_DISCOVERY_TIMEOUT);
+                    cancel(RESULT_DISCOVERY_TIMEOUT, null);
                 }
             }
         }
@@ -371,7 +379,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         mCdmServiceReceiver.send(RESULT_CODE_ASSOCIATION_APPROVED, data);
     }
 
-    private void cancel(int failureCode) {
+    private void cancel(int errorCode, @Nullable CharSequence error) {
         if (isDone()) {
             Slog.w(TAG, "Already done: " + (mApproved ? "Approved" : "Cancelled"));
             return;
@@ -385,13 +393,14 @@ public class CompanionAssociationActivity extends FragmentActivity implements
 
         // First send callback to the app directly...
         try {
-            Slog.i(TAG, "Sending onFailure to app due to failureCode=" + failureCode);
-            mAppCallback.onFailure(failureCode);
+            CharSequence errorMessage = error != null
+                    ? error : RESULT_CODE_TO_REASON.get(errorCode);
+            mAppCallback.onFailure(errorCode, errorMessage);
         } catch (RemoteException ignore) {
         }
 
         // ... then set result and finish ("sending" onActivityResult()).
-        setResultAndFinish(null, failureCode);
+        setResultAndFinish(null, errorCode);
     }
 
     private void setResultAndFinish(@Nullable AssociationInfo association, int resultCode) {
@@ -436,16 +445,17 @@ public class CompanionAssociationActivity extends FragmentActivity implements
             }
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
-            cancel(RESULT_INTERNAL_ERROR);
+            cancel(RESULT_INTERNAL_ERROR, e.getMessage());
             return;
         }
 
-        title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), deviceName);
+        title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), mAppLabel,
+                getString(R.string.device_type), deviceName);
 
         if (PROFILE_SUMMARIES.containsKey(deviceProfile)) {
             final int summaryResourceId = PROFILE_SUMMARIES.get(deviceProfile);
             final Spanned summary = getHtmlFromResources(this, summaryResourceId,
-                    deviceName);
+                    mAppLabel, getString(R.string.device_type), deviceName);
             mSummary.setText(summary);
         } else {
             mSummary.setVisibility(View.GONE);
@@ -624,7 +634,7 @@ public class CompanionAssociationActivity extends FragmentActivity implements
         // Disable the button, to prevent more clicks.
         v.setEnabled(false);
 
-        cancel(RESULT_USER_REJECTED);
+        cancel(RESULT_USER_REJECTED, null);
     }
 
     private void onShowHelperDialog(View view) {
@@ -646,6 +656,11 @@ public class CompanionAssociationActivity extends FragmentActivity implements
     // and when mPermissionListRecyclerView is fully populated.
     // Lastly, disable the Allow and Don't allow buttons.
     private void setupPermissionList(String deviceProfile) {
+        if (!PROFILE_PERMISSIONS.containsKey(deviceProfile)) {
+            // Nothing to do if there are no permission types.
+            return;
+        }
+
         final List<Integer> permissionTypes = new ArrayList<>(
                 PROFILE_PERMISSIONS.get(deviceProfile));
         if (permissionTypes.isEmpty()) {
@@ -749,8 +764,8 @@ public class CompanionAssociationActivity extends FragmentActivity implements
             };
 
     @Override
-    public void onShowHelperDialogFailed() {
-        cancel(RESULT_INTERNAL_ERROR);
+    public void onShowHelperDialogFailed(CharSequence errorMessage) {
+        cancel(RESULT_INTERNAL_ERROR, errorMessage);
     }
 
     @Override

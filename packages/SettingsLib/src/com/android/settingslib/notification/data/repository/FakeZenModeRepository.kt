@@ -16,6 +16,7 @@
 
 package com.android.settingslib.notification.data.repository
 
+import android.app.AutomaticZenRule
 import android.app.NotificationManager
 import android.provider.Settings
 import com.android.settingslib.notification.modes.TestModeBuilder
@@ -40,6 +41,8 @@ class FakeZenModeRepository : ZenModeRepository {
     override val modes: Flow<List<ZenMode>>
         get() = mutableModesFlow.asStateFlow()
 
+    private val activeModesDurations = mutableMapOf<String, Duration?>()
+
     init {
         updateNotificationPolicy()
     }
@@ -56,16 +59,31 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableModesFlow.value += zenModes
     }
 
-    fun addMode(id: String, active: Boolean = false) {
-        mutableModesFlow.value += newMode(id, active)
+    fun addMode(id: String, @AutomaticZenRule.Type type: Int = AutomaticZenRule.TYPE_UNKNOWN,
+        active: Boolean = false) {
+        mutableModesFlow.value += newMode(id, type, active)
     }
 
     fun removeMode(id: String) {
         mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
     }
 
+    fun getMode(id: String): ZenMode? {
+        return mutableModesFlow.value.find { it.id == id }
+    }
+
     override fun activateMode(zenMode: ZenMode, duration: Duration?) {
         activateMode(zenMode.id)
+        activeModesDurations[zenMode.id] = duration
+    }
+
+    fun getModeActiveDuration(id: String): Duration? {
+        if (!activeModesDurations.containsKey(id)) {
+            throw IllegalArgumentException(
+                "mode $id not manually activated, you need to call activateMode"
+            )
+        }
+        return activeModesDurations[id]
     }
 
     override fun deactivateMode(zenMode: ZenMode) {
@@ -78,6 +96,7 @@ class FakeZenModeRepository : ZenModeRepository {
 
     fun deactivateMode(id: String) {
         updateModeActiveState(id = id, isActive = false)
+        activeModesDurations.remove(id)
     }
 
     // Update the active state while maintaining the mode's position in the list
@@ -111,6 +130,6 @@ fun FakeZenModeRepository.updateNotificationPolicy(
         )
     )
 
-private fun newMode(id: String, active: Boolean = false): ZenMode {
-    return TestModeBuilder().setId(id).setName("Mode $id").setActive(active).build()
+private fun newMode(id: String, @AutomaticZenRule.Type type: Int, active: Boolean): ZenMode {
+    return TestModeBuilder().setId(id).setName("Mode $id").setType(type).setActive(active).build()
 }

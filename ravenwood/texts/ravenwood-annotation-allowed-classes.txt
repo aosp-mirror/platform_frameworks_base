@@ -39,12 +39,14 @@ android.util.ContainerHelpers
 android.util.DataUnit
 android.util.DayOfMonthCursor
 android.util.DebugUtils
+android.util.DisplayMetrics
 android.util.Dumpable
 android.util.DumpableContainer
 android.util.EmptyArray
 android.util.EventLog
 android.util.FloatProperty
 android.util.FloatMath
+android.util.Half
 android.util.IndentingPrintWriter
 android.util.IntArray
 android.util.IntProperty
@@ -98,10 +100,12 @@ android.util.SparseDoubleArray
 android.util.SparseIntArray
 android.util.SparseLongArray
 android.util.SparseSetArray
+android.util.StateSet
 android.util.StringBuilderPrinter
 android.util.TeeWriter
 android.util.TimeUtils
 android.util.TimingsTraceLog
+android.util.TypedValue
 android.util.UtilConfig
 android.util.Xml
 
@@ -143,6 +147,7 @@ android.os.Handler
 android.os.HandlerExecutor
 android.os.HandlerThread
 android.os.IBinder
+android.os.LocaleList
 android.os.Looper
 android.os.Message
 android.os.MessageQueue
@@ -192,6 +197,7 @@ android.content.ClipboardManager
 android.content.ComponentName
 android.content.ContentUris
 android.content.ContentValues
+android.content.Context
 android.content.ContextWrapper
 android.content.Intent
 android.content.IntentFilter
@@ -213,6 +219,34 @@ android.content.pm.ResolveInfo
 android.content.pm.ServiceInfo
 android.content.pm.Signature
 android.content.pm.UserInfo
+
+android.content.res.ApkAssets
+android.content.res.AssetFileDescriptor
+android.content.res.AssetManager
+android.content.res.AssetManager$Builder
+android.content.res.ColorStateList
+android.content.res.ConfigurationBoundResourceCache
+android.content.res.Configuration
+android.content.res.CompatibilityInfo
+android.content.res.ComplexColor
+android.content.res.ConstantState
+android.content.res.DrawableCache
+android.content.res.Element
+android.content.res.FontResourcesParser
+android.content.res.FontScaleConverter
+android.content.res.FontScaleConverterImpl
+android.content.res.FontScaleConverterFactory
+android.content.res.Resources
+android.content.res.Resources$Theme
+android.content.res.ResourceId
+android.content.res.ResourcesImpl
+android.content.res.ResourcesKey
+android.content.res.StringBlock
+android.content.res.TagCounter
+android.content.res.ThemedResourceCache
+android.content.res.TypedArray
+android.content.res.Validator
+android.content.res.XmlBlock
 
 android.database.AbstractCursor
 android.database.CharArrayBuffer
@@ -244,7 +278,11 @@ android.graphics.ColorSpace
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Matrix
+android.graphics.Matrix44
+android.graphics.Outline
+android.graphics.ParcelableColorSpace
 android.graphics.Path
+android.graphics.PixelFormat
 android.graphics.Point
 android.graphics.PointF
 android.graphics.Rect
@@ -254,15 +292,21 @@ android.content.ContentProvider
 
 android.app.ActivityManager
 android.app.ActivityOptions
+android.app.ApplicationPackageManager
 android.app.BroadcastOptions
 android.app.ComponentOptions
 android.app.Instrumentation
+android.app.LocaleConfig
+android.app.ResourcesManager
+android.app.ResourcesManager$UpdateHandler
+android.app.WindowConfiguration
 
 android.metrics.LogMaker
 
 android.view.Display
 android.view.Display$HdrCapabilities
 android.view.Display$Mode
+android.view.DisplayAdjustments
 android.view.DisplayInfo
 android.view.inputmethod.InputBinding
 
@@ -279,6 +323,12 @@ android.os.connectivity.WifiActivityEnergyInfo
 android.os.connectivity.WifiBatteryStats
 
 com.android.server.LocalServices
+
+com.android.internal.graphics.cam.Cam
+com.android.internal.graphics.cam.CamUtils
+com.android.internal.graphics.cam.Frame
+com.android.internal.graphics.cam.HctSolver
+com.android.internal.graphics.ColorUtils
 
 com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream
@@ -304,6 +354,7 @@ com.android.internal.util.ProcFileReader
 com.android.internal.util.QuickSelect
 com.android.internal.util.RingBuffer
 com.android.internal.util.SizedInputStream
+com.android.internal.util.RateLimitingCache
 com.android.internal.util.StringPool
 com.android.internal.util.TokenBucket
 com.android.internal.util.XmlPullParserWrapper

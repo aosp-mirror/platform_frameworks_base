@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.domain.interactor
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.domain.model.ComponentModel
+import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import javax.inject.Inject
 import javax.inject.Provider
@@ -26,8 +27,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 
 interface ComponentsInteractor {
 
@@ -45,6 +50,7 @@ constructor(
     enabledComponents: Collection<VolumePanelComponentKey>,
     defaultCriteria: Provider<ComponentAvailabilityCriteria>,
     @VolumePanelScope coroutineScope: CoroutineScope,
+    private val logger: VolumePanelLogger,
     private val criteriaByKey:
         Map<
             VolumePanelComponentKey,
@@ -57,12 +63,18 @@ constructor(
         combine(
                 enabledComponents.map { componentKey ->
                     val componentCriteria = (criteriaByKey[componentKey] ?: defaultCriteria).get()
-                    componentCriteria.isAvailable().map { isAvailable ->
-                        ComponentModel(componentKey, isAvailable = isAvailable)
-                    }
+                    componentCriteria
+                        .isAvailable()
+                        .distinctUntilChanged()
+                        .conflate()
+                        .onEach { logger.onComponentAvailabilityChanged(componentKey, it) }
+                        .map { isAvailable ->
+                            ComponentModel(componentKey, isAvailable = isAvailable)
+                        }
                 }
             ) {
                 it.asList()
             }
-            .shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
 }

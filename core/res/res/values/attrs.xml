@@ -1078,6 +1078,11 @@
         <!-- Background color to use for tooltip popups. -->
         <attr name="tooltipBackgroundColor" format="reference|color" />
 
+        <attr name="tooltipCornerRadius" format="dimension" />
+        <attr name="tooltipHorizontalPadding" format="dimension" />
+        <attr name="tooltipVerticalPadding" format="dimension" />
+        <attr name="tooltipFontSize" format="dimension" />
+
         <!-- Theme to use for Search Dialogs. -->
         <attr name="searchDialogTheme" format="reference" />
 

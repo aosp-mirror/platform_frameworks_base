@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastLastOrNull
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.roundToInt
 
 /**
@@ -67,15 +68,15 @@ interface AnimatedState<T> : State<T> {
 /**
  * Animate a scene Int value.
  *
- * @see SceneScope.animateSceneValueAsState
+ * @see ContentScope.animateContentValueAsState
  */
 @Composable
-fun SceneScope.animateSceneIntAsState(
+fun ContentScope.animateContentIntAsState(
     value: Int,
     key: ValueKey,
     canOverflow: Boolean = true,
 ): AnimatedState<Int> {
-    return animateSceneValueAsState(value, key, SharedIntType, canOverflow)
+    return animateContentValueAsState(value, key, SharedIntType, canOverflow)
 }
 
 /**
@@ -107,16 +108,27 @@ private object SharedIntType : SharedValueType<Int, Int> {
 /**
  * Animate a scene Float value.
  *
- * @see SceneScope.animateSceneValueAsState
+ * @see ContentScope.animateContentValueAsState
  */
 @Composable
-fun SceneScope.animateSceneFloatAsState(
+fun ContentScope.animateContentFloatAsState(
     value: Float,
     key: ValueKey,
     canOverflow: Boolean = true,
 ): AnimatedState<Float> {
-    return animateSceneValueAsState(value, key, SharedFloatType, canOverflow)
+    return animateContentValueAsState(value, key, SharedFloatType, canOverflow)
 }
+
+@Deprecated(
+    "Use animateContentFloatAsState() instead",
+    replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)")
+)
+@Composable
+fun ContentScope.animateSceneFloatAsState(
+    value: Float,
+    key: ValueKey,
+    canOverflow: Boolean = true,
+) = animateContentFloatAsState(value, key, canOverflow)
 
 /**
  * Animate a shared element Float value.
@@ -147,16 +159,27 @@ private object SharedFloatType : SharedValueType<Float, Float> {
 /**
  * Animate a scene Dp value.
  *
- * @see SceneScope.animateSceneValueAsState
+ * @see ContentScope.animateContentValueAsState
  */
 @Composable
-fun SceneScope.animateSceneDpAsState(
+fun ContentScope.animateContentDpAsState(
     value: Dp,
     key: ValueKey,
     canOverflow: Boolean = true,
 ): AnimatedState<Dp> {
-    return animateSceneValueAsState(value, key, SharedDpType, canOverflow)
+    return animateContentValueAsState(value, key, SharedDpType, canOverflow)
 }
+
+@Deprecated(
+    "Use animateContentDpAsState() instead",
+    replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)")
+)
+@Composable
+fun ContentScope.animateSceneDpAsState(
+    value: Dp,
+    key: ValueKey,
+    canOverflow: Boolean = true,
+) = animateContentDpAsState(value, key, canOverflow)
 
 /**
  * Animate a shared element Dp value.
@@ -188,14 +211,14 @@ private object SharedDpType : SharedValueType<Dp, Dp> {
 /**
  * Animate a scene Color value.
  *
- * @see SceneScope.animateSceneValueAsState
+ * @see ContentScope.animateContentValueAsState
  */
 @Composable
-fun SceneScope.animateSceneColorAsState(
+fun ContentScope.animateContentColorAsState(
     value: Color,
     key: ValueKey,
 ): AnimatedState<Color> {
-    return animateSceneValueAsState(value, key, SharedColorType, canOverflow = false)
+    return animateContentValueAsState(value, key, SharedColorType, canOverflow = false)
 }
 
 /**
@@ -261,24 +284,24 @@ private class ColorDelta(
 @Composable
 internal fun <T> animateSharedValueAsState(
     layoutImpl: SceneTransitionLayoutImpl,
-    scene: SceneKey,
+    content: ContentKey,
     element: ElementKey?,
     key: ValueKey,
     value: T,
     type: SharedValueType<T, *>,
     canOverflow: Boolean,
 ): AnimatedState<T> {
-    DisposableEffect(layoutImpl, scene, element, key) {
-        // Create the associated maps that hold the current value for each (element, scene) pair.
+    DisposableEffect(layoutImpl, content, element, key) {
+        // Create the associated maps that hold the current value for each (element, content) pair.
         val valueMap = layoutImpl.sharedValues.getOrPut(key) { mutableMapOf() }
         val sharedValue = valueMap.getOrPut(element) { SharedValue(type) } as SharedValue<T, *>
         val targetValues = sharedValue.targetValues
-        targetValues[scene] = value
+        targetValues[content] = value
 
         onDispose {
             // Remove the value associated to the current scene, and eventually remove the maps if
             // they are empty.
-            targetValues.remove(scene)
+            targetValues.remove(content)
 
             if (targetValues.isEmpty() && valueMap[element] === sharedValue) {
                 valueMap.remove(element)
@@ -297,11 +320,11 @@ internal fun <T> animateSharedValueAsState(
             error("value is equal to $value, which is the undefined value for this type.")
         }
 
-        sharedValue<T, Any>(layoutImpl, key, element).targetValues[scene] = value
+        sharedValue<T, Any>(layoutImpl, key, element).targetValues[content] = value
     }
 
-    return remember(layoutImpl, scene, element, canOverflow) {
-        AnimatedStateImpl<T, Any>(layoutImpl, scene, element, key, canOverflow)
+    return remember(layoutImpl, content, element, canOverflow) {
+        AnimatedStateImpl<T, Any>(layoutImpl, content, element, key, canOverflow)
     }
 }
 
@@ -322,8 +345,8 @@ private fun valueReadTooEarlyMessage(key: ValueKey) =
 internal class SharedValue<T, Delta>(
     val type: SharedValueType<T, Delta>,
 ) {
-    /** The target value of this shared value for each scene. */
-    val targetValues = SnapshotStateMap<SceneKey, T>()
+    /** The target value of this shared value for each content. */
+    val targetValues = SnapshotStateMap<ContentKey, T>()
 
     /** The last value of this shared value. */
     var lastValue: T = type.unspecifiedValue
@@ -340,7 +363,7 @@ internal class SharedValue<T, Delta>(
 
 private class AnimatedStateImpl<T, Delta>(
     private val layoutImpl: SceneTransitionLayoutImpl,
-    private val scene: SceneKey,
+    private val content: ContentKey,
     private val element: ElementKey?,
     private val key: ValueKey,
     private val canOverflow: Boolean,
@@ -356,25 +379,26 @@ private class AnimatedStateImpl<T, Delta>(
                 // TODO(b/311600838): Remove this. We should not have to fallback to the current
                 // scene value, but we have to because code of removed nodes can still run if they
                 // are placed with a graphics layer.
-                ?: sharedValue[scene]
+                ?: sharedValue[content]
                 ?: error(valueReadTooEarlyMessage(key))
         val interruptedValue = computeInterruptedValue(sharedValue, transition, value)
         sharedValue.lastValue = interruptedValue
         return interruptedValue
     }
 
-    private operator fun SharedValue<T, *>.get(scene: SceneKey): T? = targetValues[scene]
+    private operator fun SharedValue<T, *>.get(content: ContentKey): T? = targetValues[content]
 
     private fun valueOrNull(
         sharedValue: SharedValue<T, *>,
         transition: TransitionState.Transition?,
     ): T? {
         if (transition == null) {
-            return sharedValue[layoutImpl.state.transitionState.currentScene]
+            return sharedValue[content]
+                ?: sharedValue[layoutImpl.state.transitionState.currentScene]
         }
 
-        val fromValue = sharedValue[transition.fromScene]
-        val toValue = sharedValue[transition.toScene]
+        val fromValue = sharedValue[transition.fromContent]
+        val toValue = sharedValue[transition.toContent]
         return if (fromValue != null && toValue != null) {
             if (fromValue == toValue) {
                 // Optimization: avoid reading progress if the values are the same, so we don't
@@ -388,7 +412,7 @@ private class AnimatedStateImpl<T, Delta>(
                             if (canOverflow) transition.progress
                             else transition.progress.fastCoerceIn(0f, 1f)
                         }
-                        overscrollSpec.scene == transition.toScene -> 1f
+                        overscrollSpec.content == transition.toContent -> 1f
                         else -> 0f
                     }
 
@@ -401,14 +425,16 @@ private class AnimatedStateImpl<T, Delta>(
         val targetValues = sharedValue.targetValues
         val transition =
             if (element != null) {
-                layoutImpl.elements[element]?.sceneStates?.let { sceneStates ->
-                    layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                        transition.fromScene in sceneStates || transition.toScene in sceneStates
-                    }
+                layoutImpl.elements[element]?.let { element ->
+                    elementState(
+                        layoutImpl.state.transitionStates,
+                        isInContent = { it in element.stateByContent },
+                    )
+                        as? TransitionState.Transition
                 }
             } else {
                 layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                    transition.fromScene in targetValues || transition.toScene in targetValues
+                    transition.fromContent in targetValues || transition.toContent in targetValues
                 }
             }
 

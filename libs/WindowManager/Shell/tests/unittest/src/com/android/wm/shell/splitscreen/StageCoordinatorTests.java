@@ -19,13 +19,12 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
-import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -69,9 +68,9 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -245,38 +244,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testExitSplitScreen() {
-        when(mMainStage.isActive()).thenReturn(true);
-        mStageCoordinator.exitSplitScreen(INVALID_TASK_ID, EXIT_REASON_RETURN_HOME);
-        verify(mSideStage).removeAllTasks(any(WindowContainerTransaction.class), eq(false));
-        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
-    }
-
-    @Test
-    public void testExitSplitScreenToMainStage() {
-        when(mMainStage.isActive()).thenReturn(true);
-        final int testTaskId = 12345;
-        when(mMainStage.containsTask(eq(testTaskId))).thenReturn(true);
-        when(mSideStage.containsTask(eq(testTaskId))).thenReturn(false);
-        mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
-        verify(mMainStage).reorderChild(eq(testTaskId), eq(true),
-                any(WindowContainerTransaction.class));
-        verify(mMainStage).resetBounds(any(WindowContainerTransaction.class));
-    }
-
-    @Test
-    public void testExitSplitScreenToSideStage() {
-        when(mMainStage.isActive()).thenReturn(true);
-        final int testTaskId = 12345;
-        when(mMainStage.containsTask(eq(testTaskId))).thenReturn(false);
-        when(mSideStage.containsTask(eq(testTaskId))).thenReturn(true);
-        mStageCoordinator.exitSplitScreen(testTaskId, EXIT_REASON_RETURN_HOME);
-        verify(mSideStage).reorderChild(eq(testTaskId), eq(true),
-                any(WindowContainerTransaction.class));
-        verify(mSideStage).resetBounds(any(WindowContainerTransaction.class));
-    }
-
-    @Test
     public void testResolveStartStage_beforeSplitActivated_setsStagePosition() {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null /* wct */);
 
@@ -367,12 +334,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.onFinishedWakingUp();
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());
-        } else {
-            verify(mStageCoordinator).onSplitScreenExit();
-            verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
-        }
+        verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
+import androidx.annotation.DrawableRes
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
@@ -50,7 +51,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val newChip =
                 OngoingActivityChipModel.Shown.Timer(
-                    icon = Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                    icon = createIcon(R.drawable.ic_cake),
                     colors = ColorsModel.Themed,
                     startTimeMs = 100L,
                     onClickListener = null,
@@ -62,7 +63,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val newerChip =
                 OngoingActivityChipModel.Shown.IconOnly(
-                    icon = Icon.Resource(R.drawable.ic_hotspot, contentDescription = null),
+                    icon = createIcon(R.drawable.ic_hotspot),
                     colors = ColorsModel.Themed,
                     onClickListener = null,
                 )
@@ -82,7 +83,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val shownChip =
                 OngoingActivityChipModel.Shown.Timer(
-                    icon = Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                    icon = createIcon(R.drawable.ic_cake),
                     colors = ColorsModel.Themed,
                     startTimeMs = 100L,
                     onClickListener = null,
@@ -122,7 +123,7 @@ class ChipTransitionHelperTest : SysuiTestCase() {
 
             val shownChip =
                 OngoingActivityChipModel.Shown.Timer(
-                    icon = Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                    icon = createIcon(R.drawable.ic_cake),
                     colors = ColorsModel.Themed,
                     startTimeMs = 100L,
                     onClickListener = null,
@@ -151,4 +152,9 @@ class ChipTransitionHelperTest : SysuiTestCase() {
             advanceTimeBy(2)
             assertThat(latest).isEqualTo(shownChip)
         }
+
+    private fun createIcon(@DrawableRes drawable: Int) =
+        OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+            Icon.Resource(drawable, contentDescription = null)
+        )
 }

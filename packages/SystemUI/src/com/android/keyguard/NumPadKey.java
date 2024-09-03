@@ -15,6 +15,7 @@
  */
 package com.android.keyguard;
 
+import static com.android.systemui.Flags.msdlFeedback;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
 
 import android.content.Context;
@@ -38,6 +39,9 @@ import androidx.annotation.Nullable;
 import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
 
+import com.google.android.msdl.data.model.MSDLToken;
+import com.google.android.msdl.domain.MSDLPlayer;
+
 /**
  * Viewgroup for the bouncer numpad button, specifically for digits.
  */
@@ -57,6 +61,8 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
     @Nullable
     private NumPadAnimator mAnimator;
     private int mOrientation;
+    @Nullable
+    private MSDLPlayer mMSDLPlayer;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -221,8 +227,12 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
 
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
-        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        if (msdlFeedback() && mMSDLPlayer != null) {
+            mMSDLPlayer.playToken(MSDLToken.KEYPRESS_STANDARD, null);
+        } else {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        }
     }
 
     @Override
@@ -243,5 +253,9 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setTextEntryKey(true);
+    }
+
+    public void setMSDLPlayer(@Nullable MSDLPlayer player) {
+        mMSDLPlayer = player;
     }
 }

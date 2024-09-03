@@ -44,6 +44,7 @@ import com.android.settingslib.testutils.OverpoweredReflectionHelper;
 import com.android.settingslib.widget.preference.banner.R;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -53,6 +54,7 @@ import org.robolectric.shadows.ShadowDrawable;
 import org.robolectric.shadows.ShadowTouchDelegate;
 import org.robolectric.util.ReflectionHelpers;
 
+@Ignore("b/359066481")
 @RunWith(RobolectricTestRunner.class)
 public class BannerMessagePreferenceTest {
 

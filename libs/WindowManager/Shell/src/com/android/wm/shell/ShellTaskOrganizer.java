@@ -24,7 +24,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.CAMERA_CONTROL_STATE_UPDATE;
 import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.SIZE_COMPAT_RESTART_BUTTON_APPEARED;
 import static com.android.wm.shell.compatui.impl.CompatUIEventsKt.SIZE_COMPAT_RESTART_BUTTON_CLICKED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
@@ -61,7 +60,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.api.CompatUIHandler;
 import com.android.wm.shell.compatui.api.CompatUIInfo;
-import com.android.wm.shell.compatui.impl.CompatUIEvents.CameraControlStateUpdated;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonClicked;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -264,9 +262,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
                         break;
                     case SIZE_COMPAT_RESTART_BUTTON_CLICKED:
                         onSizeCompatRestartButtonClicked(compatUIEvent.asType());
-                        break;
-                    case CAMERA_CONTROL_STATE_UPDATE:
-                        onCameraControlStateUpdated(compatUIEvent.asType());
                         break;
                     default:
 
@@ -690,6 +685,15 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         return result;
     }
 
+    /** Return list of {@link RunningTaskInfo}s on all the displays. */
+    public ArrayList<RunningTaskInfo> getRunningTasks() {
+        ArrayList<RunningTaskInfo> result = new ArrayList<>();
+        for (int i = 0; i < mTasks.size(); i++) {
+            result.add(mTasks.valueAt(i).getTaskInfo());
+        }
+        return result;
+    }
+
     /** Gets running task by taskId. Returns {@code null} if no such task observed. */
     @Nullable
     public RunningTaskInfo getRunningTaskInfo(int taskId) {
@@ -807,21 +811,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
                 FrameworkStatsLog.SIZE_COMPAT_RESTART_BUTTON_EVENT_REPORTED__EVENT__CLICKED);
         restartTaskTopActivityProcessIfVisible(info.getTaskInfo().token);
     }
-
-    @VisibleForTesting
-    void onCameraControlStateUpdated(@NonNull CameraControlStateUpdated compatUIEvent) {
-        final int taskId = compatUIEvent.getTaskId();
-        final int state = compatUIEvent.getState();
-        final TaskAppearedInfo info;
-        synchronized (mLock) {
-            info = mTasks.get(taskId);
-        }
-        if (info == null) {
-            return;
-        }
-        updateCameraCompatControlState(info.getTaskInfo().token, state);
-    }
-
 
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
             int event) {

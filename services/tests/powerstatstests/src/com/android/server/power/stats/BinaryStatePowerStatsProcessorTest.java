@@ -44,6 +44,8 @@ import com.android.internal.os.PowerStats;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.function.Supplier;
+
 public class BinaryStatePowerStatsProcessorTest {
     @Rule(order = 0)
     public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
@@ -74,25 +76,24 @@ public class BinaryStatePowerStatsProcessorTest {
 
     @Test
     public void powerProfileModel() {
-        TestBinaryStatePowerStatsProcessor processor = new TestBinaryStatePowerStatsProcessor(
-                POWER_COMPONENT,  /* averagePowerMilliAmp */ 100, mUidResolver);
-
         BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
 
-        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
+                () -> new TestBinaryStatePowerStatsProcessor(
+                        POWER_COMPONENT,  /* averagePowerMilliAmp */ 100, mUidResolver));
 
-        processor.noteStateChange(stats, buildHistoryItem(0, true, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
         // Turn the screen off after 2.5 seconds
         stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
 
-        processor.noteStateChange(stats, buildHistoryItem(6000, false, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
 
-        processor.noteStateChange(stats, buildHistoryItem(7000, true, APP_UID2));
+        stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2));
 
-        processor.finish(stats, 11000);
+        stats.finish(11000);
 
         // Total usage duration is 10000
         // Total estimated power = 10000 * 100 = 1000000 mA-ms = 0.277777 mAh
@@ -145,9 +146,6 @@ public class BinaryStatePowerStatsProcessorTest {
 
     @Test
     public void energyConsumerModel() {
-        TestBinaryStatePowerStatsProcessor processor = new TestBinaryStatePowerStatsProcessor(
-                POWER_COMPONENT,  /* averagePowerMilliAmp */ 100, mUidResolver);
-
         BinaryStatePowerStatsLayout statsLayout = new BinaryStatePowerStatsLayout();
         PersistableBundle extras = new PersistableBundle();
         statsLayout.toExtras(extras);
@@ -157,30 +155,34 @@ public class BinaryStatePowerStatsProcessorTest {
         PowerStats powerStats = new PowerStats(descriptor);
         powerStats.stats = new long[descriptor.statsArrayLength];
 
-        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
+                () -> new TestBinaryStatePowerStatsProcessor(
+                        POWER_COMPONENT,  /* averagePowerMilliAmp */ 100, mUidResolver));
+
+        stats.start(0);
 
         // Establish a baseline
-        processor.addPowerStats(stats, powerStats, mMonotonicClock.monotonicTime());
+        stats.addPowerStats(powerStats, mMonotonicClock.monotonicTime());
 
-        processor.noteStateChange(stats, buildHistoryItem(0, true, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(0, true, APP_UID1));
 
         // Turn the screen off after 2.5 seconds
         stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
 
-        processor.noteStateChange(stats, buildHistoryItem(6000, false, APP_UID1));
+        stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1));
 
         statsLayout.setConsumedEnergy(powerStats.stats, 0, 2_160_000);
-        processor.addPowerStats(stats, powerStats, mMonotonicClock.monotonicTime());
+        stats.addPowerStats(powerStats, mMonotonicClock.monotonicTime());
 
-        processor.noteStateChange(stats, buildHistoryItem(7000, true, APP_UID2));
+        stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2));
 
         mClock.realtime = 11000;
         statsLayout.setConsumedEnergy(powerStats.stats, 0, 1_440_000);
-        processor.addPowerStats(stats, powerStats, mMonotonicClock.monotonicTime());
+        stats.addPowerStats(powerStats, mMonotonicClock.monotonicTime());
 
-        processor.finish(stats, 11000);
+        stats.finish(11000);
 
         // Total estimated power = 3,600,000 uC = 1.0 mAh
         // of which 3,000,000 is distributed:
@@ -261,17 +263,17 @@ public class BinaryStatePowerStatsProcessorTest {
     }
 
     private static PowerComponentAggregatedPowerStats createAggregatedPowerStats(
-            BinaryStatePowerStatsProcessor processor) {
+            Supplier<PowerStatsProcessor> processorSupplier) {
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(POWER_COMPONENT)
                 .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                 .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
-                .setProcessor(processor);
+                .setProcessorSupplier(processorSupplier);
 
         AggregatedPowerStats aggregatedPowerStats = new AggregatedPowerStats(config);
         PowerComponentAggregatedPowerStats powerComponentStats =
                 aggregatedPowerStats.getPowerComponentStats(POWER_COMPONENT);
-        processor.start(powerComponentStats, 0);
+        powerComponentStats.start(0);
 
         powerComponentStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         powerComponentStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);

@@ -2229,7 +2229,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     for (Record r : mRecords) {
                         if (r.matchTelephonyCallbackEvent(
                                 TelephonyCallback.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED)
-                                && idMatch(r, subId, phoneId)) {
+                                && idMatchRelaxed(r, subId, phoneId)) {
                             try {
                                 r.callback.onPreciseDataConnectionStateChanged(preciseState);
                             } catch (RemoteException ex) {
@@ -3535,6 +3535,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         synchronized (mRecords) {
             int phoneId = getPhoneIdFromSubId(subId);
+            if (!validatePhoneId(phoneId)) {
+                loge("Invalid phone ID " + phoneId + " for " + subId);
+                return;
+            }
             mCarrierRoamingNtnMode[phoneId] = active;
             for (Record r : mRecords) {
                 if (r.matchTelephonyCallbackEvent(
@@ -3582,6 +3586,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         synchronized (mRecords) {
             int phoneId = getPhoneIdFromSubId(subId);
+            if (!validatePhoneId(phoneId)) {
+                loge("Invalid phone ID " + phoneId + " for " + subId);
+                return;
+            }
             mCarrierRoamingNtnEligible[phoneId] = eligible;
             for (Record r : mRecords) {
                 if (r.matchTelephonyCallbackEvent(

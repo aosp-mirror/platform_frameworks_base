@@ -76,6 +76,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     @ScreenOrientation
     private int mLastReportedOrientation = SCREEN_ORIENTATION_UNSET;
 
+    /**
+     * Value toggled on {@link #start()} to {@code true} and on {@link #dispose()} to {@code false}.
+     */
+    private boolean mIsRunning;
+
     DisplayRotationCompatPolicy(@NonNull DisplayContent displayContent,
             @NonNull CameraStateMonitor cameraStateMonitor,
             @NonNull ActivityRefresher activityRefresher) {
@@ -90,12 +95,19 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     void start() {
         mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher.addEvaluator(this);
+        mIsRunning = true;
     }
 
     /** Releases camera state listener. */
     void dispose() {
         mCameraStateMonitor.removeCameraStateListener(this);
         mActivityRefresher.removeEvaluator(this);
+        mIsRunning = false;
+    }
+
+    @VisibleForTesting
+    boolean isRunning() {
+        return mIsRunning;
     }
 
     /**
@@ -298,7 +310,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     }
 
     @Override
-    public boolean onCameraOpened(@NonNull ActivityRecord cameraActivity,
+    public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
             @NonNull String cameraId) {
         mCameraTask = cameraActivity.getTask();
         // Checking whether an activity in fullscreen rather than the task as this camera
@@ -306,7 +318,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         if (cameraActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
             recomputeConfigurationForCameraCompatIfNeeded(cameraActivity);
             mDisplayContent.updateOrientation();
-            return true;
+            return;
         }
         // Checking that the whole app is in multi-window mode as we shouldn't show toast
         // for the activity embedding case.
@@ -320,7 +332,6 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                         (String) packageManager.getApplicationLabel(
                                 packageManager.getApplicationInfo(cameraActivity.packageName,
                                         /* flags */ 0)));
-                return true;
             } catch (PackageManager.NameNotFoundException e) {
                 ProtoLog.e(WM_DEBUG_ORIENTATION,
                         "DisplayRotationCompatPolicy: Multi-window toast not shown as "
@@ -328,7 +339,6 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                         cameraActivity.packageName);
             }
         }
-        return false;
     }
 
     @VisibleForTesting

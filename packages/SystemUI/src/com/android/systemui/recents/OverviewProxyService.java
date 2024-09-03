@@ -26,7 +26,6 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
-import static com.android.systemui.Flags.glanceableHubBackGesture;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
@@ -86,9 +85,11 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.contextualeducation.GestureType;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -160,6 +161,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final NotificationShadeWindowController mStatusBarWinController;
     private final Provider<SceneInteractor> mSceneInteractor;
 
+    private final KeyboardTouchpadEduStatsInteractor mKeyboardTouchpadEduStatsInteractor;
+
     private final Runnable mConnectionRunnable = () ->
             internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
     private final ComponentName mRecentsComponentName;
@@ -227,7 +230,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         // If scene framework is enabled, set the scene container window to
                         // visible and let the touch "slip" into that window.
                         if (SceneContainerFlag.isEnabled()) {
-                            mSceneInteractor.get().onRemoteUserInteractionStarted("launcher swipe");
+                            mSceneInteractor.get().onRemoteUserInputStarted("launcher swipe");
                         } else {
                             mShadeViewControllerLazy.get().startInputFocusTransfer();
                         }
@@ -263,7 +266,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 if (SceneContainerFlag.isEnabled()) {
                     int action = event.getActionMasked();
                     if (action == ACTION_DOWN) {
-                        mSceneInteractor.get().onRemoteUserInteractionStarted(
+                        mSceneInteractor.get().onRemoteUserInputStarted(
                                 "trackpad swipe");
                     } else if (action == ACTION_UP) {
                         mSceneInteractor.get().changeScene(
@@ -326,6 +329,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             mDisplayTracker.getDefaultDisplayId());
             mUiEventLogger.log(
                     KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS);
+        }
+
+        @Override
+        public void updateContextualEduStats(boolean isTrackpadGesture, String gestureType) {
+            verifyCallerAndClearCallingIdentityPostMain("updateContextualEduStats",
+                    () -> mHandler.post(() -> OverviewProxyService.this.updateContextualEduStats(
+                            isTrackpadGesture, GestureType.valueOf(gestureType))));
         }
 
         @Override
@@ -661,7 +671,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             AssistUtils assistUtils,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
-            BroadcastDispatcher broadcastDispatcher
+            BroadcastDispatcher broadcastDispatcher,
+            KeyboardTouchpadEduStatsInteractor keyboardTouchpadEduStatsInteractor
     ) {
         // b/241601880: This component should only be running for primary users or
         // secondaryUsers when visibleBackgroundUsers are supported.
@@ -698,6 +709,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mDisplayTracker = displayTracker;
         mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
         mBroadcastDispatcher = broadcastDispatcher;
+        mKeyboardTouchpadEduStatsInteractor = keyboardTouchpadEduStatsInteractor;
 
         if (!KeyguardWmStateRefactor.isEnabled()) {
             mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
@@ -824,8 +836,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 .setFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing)
                 .setFlag(SYSUI_STATE_DEVICE_DOZING, isDozing)
                 .setFlag(SYSUI_STATE_DEVICE_DREAMING, isDreaming)
-                .setFlag(SYSUI_STATE_COMMUNAL_HUB_SHOWING,
-                        glanceableHubBackGesture() && communalShowing)
+                .setFlag(SYSUI_STATE_COMMUNAL_HUB_SHOWING, communalShowing)
                 .commitUpdate(mContext.getDisplayId());
     }
 
@@ -883,11 +894,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             return;
         }
         mHandler.removeCallbacks(mConnectionRunnable);
+
+        // Avoid creating TouchInteractionService because the System user in HSUM mode does not
+        // interact with UI elements
+        UserHandle currentUser = UserHandle.of(mUserTracker.getUserId());
+        if (UserManager.isHeadlessSystemUserMode() && currentUser.isSystem()) {
+            Log.w(TAG_OPS,
+                    "Skipping connection to TouchInteractionService for the System user in HSUM "
+                            + "mode.");
+            return;
+        }
         try {
             mBound = mContext.bindServiceAsUser(mQuickStepIntent,
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    UserHandle.of(mUserTracker.getUserId()));
+                    currentUser);
         } catch (SecurityException e) {
             Log.e(TAG_OPS, "Unable to bind because of security error", e);
         }
@@ -927,6 +948,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public boolean shouldShowSwipeUpUI() {
         return isEnabled() && !QuickStepContract.isLegacyMode(mNavBarMode);
+    }
+
+    /**
+     * Updates contextual education stats when a gesture is triggered
+     * @param isTrackpadGesture indicates if the gesture is triggered by trackpad
+     * @param gestureType type of gesture triggered
+     */
+    public void updateContextualEduStats(boolean isTrackpadGesture, GestureType gestureType) {
+        if (isTrackpadGesture) {
+            mKeyboardTouchpadEduStatsInteractor.updateShortcutTriggerTime(gestureType);
+        } else {
+            mKeyboardTouchpadEduStatsInteractor.incrementSignalCount(gestureType);
+        }
     }
 
     public boolean isEnabled() {

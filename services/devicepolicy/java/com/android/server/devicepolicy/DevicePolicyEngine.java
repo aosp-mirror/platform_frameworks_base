@@ -2080,10 +2080,14 @@ final class DevicePolicyEngine {
                 String tag = parser.getName();
                 switch (tag) {
                     case TAG_LOCAL_POLICY_ENTRY:
-                        readLocalPoliciesInner(parser);
+                        int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
+                        if (!mLocalPolicies.contains(userId)) {
+                            mLocalPolicies.put(userId, new HashMap<>());
+                        }
+                        readPoliciesInner(parser, mLocalPolicies.get(userId));
                         break;
                     case TAG_GLOBAL_POLICY_ENTRY:
-                        readGlobalPoliciesInner(parser);
+                        readPoliciesInner(parser, mGlobalPolicies);
                         break;
                     case TAG_ENFORCING_ADMINS_ENTRY:
                         readEnforcingAdminsInner(parser);
@@ -2100,64 +2104,45 @@ final class DevicePolicyEngine {
             }
         }
 
-        private void readLocalPoliciesInner(TypedXmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
-            PolicyKey policyKey = null;
-            PolicyState<?> policyState = null;
-            int outerDepth = parser.getDepth();
-            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                String tag = parser.getName();
-                switch (tag) {
-                    case TAG_POLICY_KEY_ENTRY:
-                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
-                        break;
-                    case TAG_POLICY_STATE_ENTRY:
-                        policyState = PolicyState.readFromXml(parser);
-                        break;
-                    default:
-                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
-                }
-            }
-
-            if (policyKey != null && policyState != null) {
-                if (!mLocalPolicies.contains(userId)) {
-                    mLocalPolicies.put(userId, new HashMap<>());
-                }
-                mLocalPolicies.get(userId).put(policyKey, policyState);
-            } else {
-                Slogf.wtf(TAG, "Error parsing local policy, policyKey is "
-                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
-                        + (policyState == null ? "null" : policyState) + ".");
-            }
-        }
-
-        private void readGlobalPoliciesInner(TypedXmlPullParser parser)
+        private static void readPoliciesInner(
+                TypedXmlPullParser parser, Map<PolicyKey, PolicyState<?>> policyStateMap)
                 throws IOException, XmlPullParserException {
             PolicyKey policyKey = null;
+            PolicyDefinition<?> policyDefinition = null;
             PolicyState<?> policyState = null;
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 String tag = parser.getName();
                 switch (tag) {
                     case TAG_POLICY_KEY_ENTRY:
-                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        if (Flags.dontReadPolicyDefinition()) {
+                            policyDefinition = PolicyDefinition.readFromXml(parser);
+                            if (policyDefinition != null) {
+                                policyKey = policyDefinition.getPolicyKey();
+                            }
+                        } else {
+                            policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        }
                         break;
                     case TAG_POLICY_STATE_ENTRY:
-                        policyState = PolicyState.readFromXml(parser);
+                        if (Flags.dontReadPolicyDefinition() && policyDefinition == null) {
+                            Slogf.w(TAG, "Skipping policy state - unknown policy definition");
+                        } else {
+                            policyState = PolicyState.readFromXml(policyDefinition, parser);
+                        }
                         break;
                     default:
-                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
+                        Slogf.wtf(TAG, "Unknown tag for policy entry" + tag);
                 }
             }
 
-            if (policyKey != null && policyState != null) {
-                mGlobalPolicies.put(policyKey, policyState);
-            } else {
-                Slogf.wtf(TAG, "Error parsing global policy, policyKey is "
-                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
-                        + (policyState == null ? "null" : policyState) + ".");
+            if (policyKey == null || policyState == null) {
+                Slogf.wtf(TAG, "Error parsing policy, policyKey is %s, and policyState is %s.",
+                        policyKey, policyState);
+                return;
             }
+
+            policyStateMap.put(policyKey, policyState);
         }
 
         private void readEnforcingAdminsInner(TypedXmlPullParser parser)

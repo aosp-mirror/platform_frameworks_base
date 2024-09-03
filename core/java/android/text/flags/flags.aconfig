@@ -118,6 +118,13 @@ flag {
 }
 
 flag {
+  name: "insert_mode_highlight_range"
+  namespace: "text"
+  description: "Make the highlight range stick after editing, this handles the corner cases where the entire text is replaced with itself(or transformed by developer) after each editing."
+  bug: "355137282"
+}
+
+flag {
   name: "insert_mode_not_update_selection"
   namespace: "text"
   description: "Fix that InputService#onUpdateSelection is not called when insert mode gesture is performed."
@@ -259,4 +266,41 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "handwriting_gesture_with_transformation"
+  namespace: "text"
+  description: "Fix handwriting gesture is not working when view has transformation."
+  bug: "342619429"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "typeface_cache_for_var_settings"
+  namespace: "text"
+  description: "Cache Typeface instance for font variation settings."
+  bug: "355462362"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "context_menu_hide_unavailable_items"
+  namespace: "text"
+  description: "Hide rather than disable unavailable Editor context menu items."
+  bug: "345709107"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "typeface_redesign"
+  namespace: "text"
+  description: "Decouple variation settings, weight and style information from Typeface class"
+  bug: "361260253"
 }

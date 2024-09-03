@@ -18,9 +18,12 @@ package com.android.internal.graphics.cam;
 
 import static org.junit.Assert.assertEquals;
 
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.LargeTest;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -34,6 +37,9 @@ public final class CamTest {
     static final int RED = 0xffff0000;
     static final int GREEN = 0xff00ff00;
     static final int BLUE = 0xff0000ff;
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void camFromIntToInt() {

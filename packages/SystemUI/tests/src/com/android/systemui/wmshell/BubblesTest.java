@@ -102,6 +102,7 @@ import com.android.app.viewcapture.ViewCapture;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.systemui.SysuiTestCase;
@@ -123,6 +124,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.ui.viewmodel.NotificationShadeWindowModel;
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationEntryHelper;
@@ -167,7 +169,6 @@ import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEducationController;
 import com.android.wm.shell.bubbles.BubbleEntry;
-import com.android.wm.shell.bubbles.BubbleExpandedViewManager;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubbleStackView;
@@ -183,11 +184,11 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
-import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -351,6 +352,7 @@ public class BubblesTest extends SysuiTestCase {
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private ShadeInteractor mShadeInteractor;
+    private NotificationShadeWindowModel mNotificationShadeWindowModel;
     private ShellTaskOrganizer mShellTaskOrganizer;
     private TaskViewTransitions mTaskViewTransitions;
 
@@ -379,6 +381,9 @@ public class BubblesTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        // Make sure ProtoLog is initialized before any logging occurs.
+        ProtoLog.init();
+
         MockitoAnnotations.initMocks(this);
         PhysicsAnimatorTestUtils.prepareForTest();
 
@@ -409,6 +414,7 @@ public class BubblesTest extends SysuiTestCase {
         when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(MutableStateFlow(false));
 
         mShadeInteractor = mKosmos.getShadeInteractor();
+        mNotificationShadeWindowModel = mKosmos.getNotificationShadeWindowModel();
 
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
                 mContext,
@@ -431,6 +437,7 @@ public class BubblesTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
+                mNotificationShadeWindowModel,
                 mKosmos::getCommunalInteractor
         );
         mNotificationShadeWindowController.fetchWindowRootView();
@@ -455,7 +462,7 @@ public class BubblesTest extends SysuiTestCase {
                 mContext.getSystemService(WindowManager.class));
         mPositioner.setMaxBubbles(5);
         mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, mEducationController,
-                syncExecutor);
+                syncExecutor, syncExecutor);
 
         when(mUserManager.getProfiles(ActivityManager.getCurrentUser())).thenReturn(
                 Collections.singletonList(mock(UserInfo.class)));
@@ -1400,7 +1407,6 @@ public class BubblesTest extends SysuiTestCase {
                 .thenReturn(userContext);
 
         BubbleViewInfoTask.BubbleViewInfo info = BubbleViewInfoTask.BubbleViewInfo.populate(context,
-                BubbleExpandedViewManager.fromBubbleController(mBubbleController),
                 () -> new BubbleTaskView(mock(TaskView.class), mock(Executor.class)),
                 mPositioner,
                 mBubbleController.getStackView(),
@@ -2461,9 +2467,10 @@ public class BubblesTest extends SysuiTestCase {
         workEntry.setBubbleMetadata(getMetadata());
         workEntry.setFlagBubble(true);
 
+        SyncExecutor executor = new SyncExecutor();
         return new Bubble(mBubblesManager.notifToBubbleEntry(workEntry),
                 null,
-                mock(Bubbles.PendingIntentCanceledListener.class), new SyncExecutor());
+                mock(Bubbles.PendingIntentCanceledListener.class), executor, executor);
     }
 
     private BubbleEntry createBubbleEntry(boolean isConversation) {

@@ -16,9 +16,17 @@
 
 package com.android.settingslib.notification.modes;
 
+import static android.app.AutomaticZenRule.TYPE_BEDTIME;
+import static android.app.AutomaticZenRule.TYPE_DRIVING;
+import static android.app.AutomaticZenRule.TYPE_IMMERSIVE;
+import static android.app.AutomaticZenRule.TYPE_OTHER;
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
+import static android.app.AutomaticZenRule.TYPE_THEATER;
+import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -37,6 +45,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RunWith(RobolectricTestRunner.class)
 public class ZenModeTest {
 
@@ -45,9 +56,16 @@ public class ZenModeTest {
     private static final AutomaticZenRule ZEN_RULE =
             new AutomaticZenRule.Builder("Driving", Uri.parse("drive"))
                     .setPackage("com.some.driving.thing")
-                    .setType(AutomaticZenRule.TYPE_DRIVING)
+                    .setType(TYPE_DRIVING)
                     .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                     .setZenPolicy(ZEN_POLICY)
+                    .build();
+
+    private static final String IMPLICIT_RULE_ID = ZenModeConfig.implicitRuleId("some.package");
+    private static final AutomaticZenRule IMPLICIT_ZEN_RULE =
+            new AutomaticZenRule.Builder("Implicit", Uri.parse("implicit/some.package"))
+                    .setPackage("some.package")
+                    .setType(TYPE_OTHER)
                     .build();
 
     @Test
@@ -67,6 +85,7 @@ public class ZenModeTest {
         assertThat(manualMode.canEditNameAndIcon()).isFalse();
         assertThat(manualMode.canBeDeleted()).isFalse();
         assertThat(manualMode.isActive()).isFalse();
+        assertThat(manualMode.getRule().getPackageName()).isEqualTo(PACKAGE_ANDROID);
     }
 
     @Test
@@ -93,7 +112,7 @@ public class ZenModeTest {
     public void constructor_disabledRuleByUser_statusDisabledByUser() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_USER;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_USER);
@@ -103,7 +122,7 @@ public class ZenModeTest {
     public void constructor_disabledRuleByOther_statusDisabledByOther() {
         AutomaticZenRule azr = new AutomaticZenRule.Builder(ZEN_RULE).setEnabled(false).build();
         ZenModeConfig.ZenRule configZenRule = zenConfigRuleFor(azr, false);
-        configZenRule.disabledOrigin = ZenModeConfig.UPDATE_ORIGIN_APP;
+        configZenRule.disabledOrigin = ZenModeConfig.ORIGIN_APP;
 
         ZenMode mode = new ZenMode("id", azr, configZenRule);
         assertThat(mode.getStatus()).isEqualTo(ZenMode.Status.DISABLED_BY_OTHER);
@@ -224,6 +243,28 @@ public class ZenModeTest {
     }
 
     @Test
+    public void comparator_prioritizes() {
+        ZenMode manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE;
+        ZenMode driving1 = new TestModeBuilder().setName("b1").setType(TYPE_DRIVING).build();
+        ZenMode driving2 = new TestModeBuilder().setName("b2").setType(TYPE_DRIVING).build();
+        ZenMode bedtime1 = new TestModeBuilder().setName("c1").setType(TYPE_BEDTIME).build();
+        ZenMode bedtime2 = new TestModeBuilder().setName("c2").setType(TYPE_BEDTIME).build();
+        ZenMode other = new TestModeBuilder().setName("a1").setType(TYPE_OTHER).build();
+        ZenMode immersive = new TestModeBuilder().setName("a2").setType(TYPE_IMMERSIVE).build();
+        ZenMode unknown = new TestModeBuilder().setName("a3").setType(TYPE_UNKNOWN).build();
+        ZenMode theater = new TestModeBuilder().setName("a4").setType(TYPE_THEATER).build();
+
+        ArrayList<ZenMode> list = new ArrayList<>(List.of(other, theater, bedtime1, unknown,
+                driving2, manualDnd, driving1, bedtime2, immersive));
+        list.sort(ZenMode.PRIORITIZING_COMPARATOR);
+
+        assertThat(list)
+                .containsExactly(manualDnd, bedtime1, bedtime2, driving1, driving2, other,
+                        immersive, unknown, theater)
+                .inOrder();
+    }
+
+    @Test
     public void writeToParcel_equals() {
         assertUnparceledIsEqualToOriginal("example",
                 new ZenMode("id", ZEN_RULE, zenConfigRuleFor(ZEN_RULE, false)));
@@ -232,6 +273,104 @@ public class ZenModeTest {
 
         assertUnparceledIsEqualToOriginal("custom_manual",
                 ZenMode.newCustomManual("New mode", R.drawable.ic_zen_mode_type_immersive));
+
+        assertUnparceledIsEqualToOriginal("implicit",
+                new ZenMode(IMPLICIT_RULE_ID, IMPLICIT_ZEN_RULE,
+                        zenConfigRuleFor(IMPLICIT_ZEN_RULE, false)));
+    }
+
+    @Test
+    public void getIconKey_normalModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_BEDTIME)
+                .setPackage("some.package")
+                .setIconResId(123)
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isEqualTo("some.package");
+        assertThat(iconKey.resId()).isEqualTo(123);
+    }
+
+    @Test
+    public void getIconKey_systemOwnedModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_SCHEDULE_CALENDAR)
+                .setPackage(PACKAGE_ANDROID)
+                .setIconResId(123)
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(123);
+    }
+
+    @Test
+    public void getIconKey_implicitModeWithCustomIcon_isCustomIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setId(ZenModeConfig.implicitRuleId("some.package"))
+                .setPackage("some.package")
+                .setIconResId(123)
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isEqualTo("some.package");
+        assertThat(iconKey.resId()).isEqualTo(123);
+    }
+
+    @Test
+    public void getIconKey_manualDnd_isDndIcon() {
+        ZenIcon.Key iconKey = TestModeBuilder.MANUAL_DND_INACTIVE.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_special_dnd);
+    }
+
+    @Test
+    public void getIconKey_normalModeWithoutCustomIcon_isModeTypeIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_BEDTIME)
+                .setPackage("some.package")
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_bedtime);
+    }
+
+    @Test
+    public void getIconKey_systemOwnedModeWithoutCustomIcon_isModeTypeIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setType(TYPE_SCHEDULE_CALENDAR)
+                .setPackage(PACKAGE_ANDROID)
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_schedule_calendar);
+    }
+
+    @Test
+    public void getIconKey_implicitModeWithoutCustomIcon_isDndIcon() {
+        ZenMode mode = new TestModeBuilder()
+                .setId(ZenModeConfig.implicitRuleId("some.package"))
+                .setPackage("some_package")
+                .setType(TYPE_BEDTIME) // Type should be ignored.
+                .build();
+
+        ZenIcon.Key iconKey = mode.getIconKey();
+
+        assertThat(iconKey.resPackage()).isNull();
+        assertThat(iconKey.resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_special_dnd);
     }
 
     private static void assertUnparceledIsEqualToOriginal(String type, ZenMode original) {

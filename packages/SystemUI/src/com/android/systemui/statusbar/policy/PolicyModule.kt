@@ -289,6 +289,7 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_work_mode_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                autoRemoveOnUnavailable = false,
             )
 
         /** Inject work mode into tileViewModelMap in QSModule */
@@ -402,7 +403,7 @@ interface PolicyModule {
                     tileSpec = TileSpec.create(DND_TILE_SPEC),
                     uiConfig =
                         QSTileUIConfig.Resource(
-                            iconRes = R.drawable.qs_dnd_icon_off,
+                            iconRes = com.android.internal.R.drawable.ic_zen_priority_modes,
                             labelRes = R.string.quick_settings_modes_label,
                         ),
                     instanceId = uiEventLogger.getNewInstanceId(),

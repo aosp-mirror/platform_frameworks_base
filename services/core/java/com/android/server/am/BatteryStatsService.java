@@ -488,8 +488,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
+                .setProcessorSupplier(
+                        () -> new CpuPowerStatsProcessor(mPowerProfile, mCpuScalingPolicies));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SCREEN)
                 .trackDeviceStates(
@@ -498,12 +498,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .trackUidStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN)
-                .setProcessor(
-                        new ScreenPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new ScreenPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
                         BatteryConsumer.POWER_COMPONENT_SCREEN)
-                .setProcessor(new AmbientDisplayPowerStatsProcessor());
+                .setProcessorSupplier(AmbientDisplayPowerStatsProcessor::new);
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                 .trackDeviceStates(
@@ -513,12 +513,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new MobileRadioPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new MobileRadioPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_PHONE,
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
-                .setProcessor(new PhoneCallPowerStatsProcessor());
+                .setProcessorSupplier(PhoneCallPowerStatsProcessor::new);
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WIFI)
                 .trackDeviceStates(
@@ -528,8 +528,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new WifiPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new WifiPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_BLUETOOTH)
                 .trackDeviceStates(
@@ -539,8 +539,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new BluetoothPowerStatsProcessor(mPowerProfile));
+                .setProcessorSupplier(
+                        () -> new BluetoothPowerStatsProcessor(mPowerProfile));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_AUDIO)
                 .trackDeviceStates(
@@ -550,8 +550,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new AudioPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new AudioPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_VIDEO)
                 .trackDeviceStates(
@@ -561,7 +561,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(new VideoPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new VideoPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT)
                 .trackDeviceStates(
@@ -571,8 +572,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new FlashlightPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new FlashlightPowerStatsProcessor(mPowerProfile,
+                                mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CAMERA)
                 .trackDeviceStates(
@@ -582,8 +584,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new CameraPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new CameraPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_GNSS)
                 .trackDeviceStates(
@@ -593,8 +595,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(
-                        new GnssPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
+                .setProcessorSupplier(
+                        () -> new GnssPowerStatsProcessor(mPowerProfile, mPowerStatsUidResolver));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SENSORS)
                 .trackDeviceStates(
@@ -604,7 +606,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(new SensorPowerStatsProcessor(
+                .setProcessorSupplier(() -> new SensorPowerStatsProcessor(
                         () -> mContext.getSystemService(SensorManager.class)));
 
         config.trackCustomPowerComponents(CustomEnergyConsumerPowerStatsProcessor::new)
@@ -620,6 +622,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private void setPowerStatsThrottlePeriods(BatteryStatsImpl.BatteryStatsConfig.Builder builder,
             String configString) {
+        if (configString == null) {
+            return;
+        }
+
         Matcher matcher = Pattern.compile("([^:]+):(\\d+)\\s*").matcher(configString);
         while (matcher.find()) {
             String powerComponentName = matcher.group(1);
@@ -681,6 +687,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
                 BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                 Flags.streamlinedConnectivityBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_PHONE,
+                Flags.streamlinedConnectivityBatteryStats());
 
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_WIFI,
                 Flags.streamlinedConnectivityBatteryStats());
@@ -730,6 +739,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         // By convention POWER_COMPONENT_ANY represents custom Energy Consumers
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_ANY,
+                Flags.streamlinedMiscBatteryStats());
+        mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(
+                BatteryConsumer.POWER_COMPONENT_ANY,
                 Flags.streamlinedMiscBatteryStats());
 
         mWorker.systemServicesReady();
@@ -1256,7 +1268,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
                                     .build();
                     bus = getBatteryUsageStats(List.of(query)).get(0);
-                    return new StatsPerUidLogger(new FrameworkStatsLogger()).logStats(bus, data);
+                    final int pullResult =
+                            new StatsPerUidLogger(new FrameworkStatsLogger()).logStats(bus, data);
+                    try {
+                        bus.close();
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Failure close BatteryUsageStats", e);
+                    }
+                    return pullResult;
                 }
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
@@ -1336,7 +1355,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                             bus.getStatsDuration(),
                             bus.getDischargePercentage(),
                             bus.getDischargeDurationMs());
-
             if (DBG) {
                 Slog.d(TAG, "BatteryUsageStats dump = " + bus);
             }
@@ -1346,42 +1364,22 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
             final float totalDeviceConsumedPowerMah = (float) deviceConsumer.getConsumedPower();
 
-            for (@BatteryConsumer.PowerComponent int componentId = 0;
-                    componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
-                    componentId++) {
+            for (@BatteryConsumer.PowerComponentId int componentIndex :
+                    deviceConsumer.getPowerComponentIds()) {
 
                 for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
 
-                    if (!addStatsForPredefinedComponent(
+                    if (!addStatsForPowerComponent(
                             data,
                             sessionInfo,
                             Process.INVALID_UID,
                             processState,
                             totalDeviceConsumedPowerMah,
+                            0,
                             deviceConsumer,
-                            componentId)) {
+                            componentIndex)) {
                         return StatsManager.PULL_SUCCESS;
                     }
-                }
-            }
-
-            final int customPowerComponentCount = deviceConsumer.getCustomPowerComponentCount();
-            for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
-                    componentId
-                            < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                                    + customPowerComponentCount;
-                    componentId++) {
-
-                if (!addStatsForCustomComponent(
-                        data,
-                        sessionInfo,
-                        Process.INVALID_UID,
-                        BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
-                        0,
-                        totalDeviceConsumedPowerMah,
-                        deviceConsumer,
-                        componentId)) {
-                    return StatsManager.PULL_SUCCESS;
                 }
             }
 
@@ -1395,47 +1393,22 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 final int uid = uidConsumer.getUid();
                 final float totalConsumedPowerMah = (float) uidConsumer.getConsumedPower();
 
-                for (@BatteryConsumer.PowerComponent int componentId = 0;
-                        componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
-                        componentId++) {
+                for (@BatteryConsumer.PowerComponentId int componentIndex :
+                        uidConsumer.getPowerComponentIds()) {
 
                     for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
 
-                        if (!addStatsForPredefinedComponent(
+                        long timeInProcessStateMs = uidConsumer.getTimeInProcessStateMs(
+                                processState);
+                        if (!addStatsForPowerComponent(
                                 data,
                                 sessionInfo,
                                 uid,
                                 processState,
                                 totalConsumedPowerMah,
+                                timeInProcessStateMs,
                                 uidConsumer,
-                                componentId)) {
-                            return StatsManager.PULL_SUCCESS;
-                        }
-                    }
-                }
-
-                // looping over custom components
-                for (int componentId = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
-                        componentId
-                                < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID
-                                        + customPowerComponentCount;
-                        componentId++) {
-                    for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
-                        final long timeInStateMillis =
-                                uidConsumer.getTimeInProcessStateMs(processState);
-                        if (timeInStateMillis <= 0) {
-                            continue;
-                        }
-
-                        if (!addStatsForCustomComponent(
-                                data,
-                                sessionInfo,
-                                uid,
-                                processState,
-                                timeInStateMillis,
-                                totalConsumedPowerMah,
-                                uidConsumer,
-                                componentId)) {
+                                componentIndex)) {
                             return StatsManager.PULL_SUCCESS;
                         }
                     }
@@ -1444,32 +1417,26 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             return StatsManager.PULL_SUCCESS;
         }
 
-        private boolean addStatsForPredefinedComponent(
+        private boolean addStatsForPowerComponent(
                 List<StatsEvent> data,
                 SessionInfo sessionInfo,
                 int uid,
                 @BatteryConsumer.ProcessState int processState,
                 float totalConsumedPowerMah,
+                long timeInState,
                 BatteryConsumer batteryConsumer,
-                @BatteryConsumer.PowerComponent int componentId) {
+                @BatteryConsumer.PowerComponentId int componentId) {
             final BatteryConsumer.Key key = batteryConsumer.getKey(componentId, processState);
             if (key == null) {
                 return true;
             }
 
-            final String powerComponentName = BatteryConsumer.powerComponentIdToString(componentId);
+            final String powerComponentName = batteryConsumer.getPowerComponentName(componentId);
             final float powerMah = (float) batteryConsumer.getConsumedPower(key);
             final long powerComponentDurationMillis = batteryConsumer.getUsageDurationMillis(key);
 
             if (powerMah == 0 && powerComponentDurationMillis == 0) {
                 return true;
-            }
-
-            long timeInState = 0;
-            if (batteryConsumer instanceof UidBatteryConsumer) {
-                timeInState =
-                        ((UidBatteryConsumer) batteryConsumer)
-                                .getTimeInProcessStateMs(processState);
             }
 
             return addStatsAtom(
@@ -1478,44 +1445,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     uid,
                     processState,
                     timeInState,
-                    powerComponentName,
-                    totalConsumedPowerMah,
-                    powerMah,
-                    powerComponentDurationMillis);
-        }
-
-        private boolean addStatsForCustomComponent(
-                List<StatsEvent> data,
-                SessionInfo sessionInfo,
-                int uid,
-                @BatteryConsumer.ProcessState int processState,
-                long timeInStateMillis,
-                float totalConsumedPowerMah,
-                BatteryConsumer batteryConsumer,
-                int componentId) {
-
-            if (componentId < BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
-                throw new IllegalArgumentException("Invalid custom component id: " + componentId);
-            }
-
-            final float powerMah =
-                    (float) batteryConsumer.getConsumedPowerForCustomComponent(componentId);
-            if (powerMah == 0) {
-                return true;
-            }
-
-            final String powerComponentName =
-                    batteryConsumer.getCustomPowerComponentName(componentId);
-
-            final long powerComponentDurationMillis =
-                    batteryConsumer.getUsageDurationForCustomComponentMillis(componentId);
-
-            return addStatsAtom(
-                    data,
-                    sessionInfo,
-                    uid,
-                    processState,
-                    timeInStateMillis,
                     powerComponentName,
                     totalConsumedPowerMah,
                     powerMah,

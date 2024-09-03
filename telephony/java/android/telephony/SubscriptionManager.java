@@ -1177,6 +1177,16 @@ public class SubscriptionManager {
      */
     public static final String SATELLITE_ESOS_SUPPORTED = SimInfo.COLUMN_SATELLITE_ESOS_SUPPORTED;
 
+    /**
+     * TelephonyProvider column name for satellite provisioned status. The value of this
+     * column is set based on whether carrier roaming NB-IOT satellite service is provisioned or
+     * not. By default, it's disabled.
+     *
+     * @hide
+     */
+    public static final String IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM =
+            SimInfo.COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},

@@ -156,26 +156,24 @@ public class PhoneCallPowerStatsProcessorTest {
 
     @Test
     public void copyEstimatesFromMobileRadioPowerStats() {
-        MobileRadioPowerStatsProcessor mobileStatsProcessor =
-                new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PhoneCallPowerStatsProcessor phoneStatsProcessor =
-                new PhoneCallPowerStatsProcessor();
 
         AggregatedPowerStatsConfig aggregatedPowerStatsConfig = new AggregatedPowerStatsConfig();
         aggregatedPowerStatsConfig.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
                 .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                 .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
-                .setProcessor(mobileStatsProcessor);
+                .setProcessorSupplier(
+                        () -> new MobileRadioPowerStatsProcessor(mStatsRule.getPowerProfile()));
         aggregatedPowerStatsConfig.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_PHONE,
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)
-                .setProcessor(phoneStatsProcessor);
+                .setProcessorSupplier(PhoneCallPowerStatsProcessor::new);
 
         AggregatedPowerStats aggregatedPowerStats =
                 new AggregatedPowerStats(aggregatedPowerStatsConfig);
         PowerComponentAggregatedPowerStats mobileRadioStats =
                 aggregatedPowerStats.getPowerComponentStats(
                         BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO);
+
+        aggregatedPowerStats.start(0);
 
         aggregatedPowerStats.setDeviceState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedPowerStats.setDeviceState(STATE_SCREEN, SCREEN_STATE_ON, 0);
@@ -204,11 +202,11 @@ public class PhoneCallPowerStatsProcessorTest {
 
         aggregatedPowerStats.addPowerStats(collector.collectStats(), 10_000);
 
-        mobileStatsProcessor.finish(mobileRadioStats, 10_000);
+        mobileRadioStats.finish(10_000);
 
         PowerComponentAggregatedPowerStats stats =
                 aggregatedPowerStats.getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_PHONE);
-        phoneStatsProcessor.finish(stats, 10_000);
+        stats.finish(10_000);
 
         PowerStatsLayout statsLayout =
                 new PowerStatsLayout(stats.getPowerStatsDescriptor());

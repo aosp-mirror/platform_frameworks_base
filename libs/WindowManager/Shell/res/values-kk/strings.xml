@@ -65,6 +65,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жоғары оң жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Төменгі сол жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төменгі оң жаққа жылжыту"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"мәзірді жаю"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"мәзірді жию"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"Солға жылжыту"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"Оңға жылжыту"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>: жаю"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>: жию"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> параметрлері"</string>
@@ -107,7 +111,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Кішірейту"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Жабу"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Артқа"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Идентификатор"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Қолданба идентификаторы"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Қолданба белгішесі"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Толық экран"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Компьютер режимі"</string>
@@ -117,9 +121,11 @@
     <string name="select_text" msgid="5139083974039906583">"Таңдау"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Скриншот"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Браузерден ашу"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"Жаңа терезе"</string>
     <string name="close_text" msgid="4986518933445178928">"Жабу"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Мәзірді жабу"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Мәзірді ашу"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Экранды ұлғайту"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Экранды бөлу"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Бұл қолданбаның өлшемі өзгертілмейді."</string>
 </resources>

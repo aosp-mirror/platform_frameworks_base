@@ -999,4 +999,31 @@ public class SQLiteRawStatementTest {
             mDatabase.endTransaction();
         }
     }
+
+    /**
+     * This test verifies that the JNI exception thrown because of a bad column is actually thrown
+     * and does not crash the VM.
+     */
+    @Test
+    public void testJniExceptions() {
+        // Create the t1 table.
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (i int, j int);");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
+            s.step();
+            s.getColumnText(5); // out-of-range column
+            fail("JNI exception not thrown");
+        } catch (SQLiteBindOrColumnIndexOutOfRangeException e) {
+            // Passing case.
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
 }

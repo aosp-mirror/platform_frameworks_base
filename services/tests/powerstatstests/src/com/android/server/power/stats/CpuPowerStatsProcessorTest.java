@@ -78,22 +78,22 @@ public class CpuPowerStatsProcessorTest {
             .setCpuPowerBracket(2, 0, 2);
 
     private AggregatedPowerStatsConfig.PowerComponent mConfig;
-    private CpuPowerStatsProcessor mProcessor;
     private MockPowerComponentAggregatedPowerStats mStats;
 
     @Before
     public void setup() {
         mConfig = new AggregatedPowerStatsConfig.PowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
                 .trackDeviceStates(STATE_POWER, STATE_SCREEN)
-                .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE);
-
-        mProcessor = new CpuPowerStatsProcessor(
-                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies());
+                .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
+                .setProcessorSupplier(() -> new CpuPowerStatsProcessor(mStatsRule.getPowerProfile(),
+                        mStatsRule.getCpuScalingPolicies()));
     }
 
     @Test
     public void powerProfileModel() {
         mStats = new MockPowerComponentAggregatedPowerStats(mConfig, false);
+        mStats.start(0);
+
         mStats.setDeviceStats(
                 states(POWER_STATE_BATTERY, SCREEN_STATE_ON),
                 concat(
@@ -128,7 +128,7 @@ public class CpuPowerStatsProcessorTest {
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED),
                 values(1500, 2000, 1000), 1.252578);
 
-        mProcessor.finish(mStats, 10_000);
+        mStats.finish(10_000);
 
         mStats.verifyPowerEstimates();
     }
@@ -136,6 +136,8 @@ public class CpuPowerStatsProcessorTest {
     @Test
     public void energyConsumerModel() {
         mStats = new MockPowerComponentAggregatedPowerStats(mConfig, true);
+        mStats.start(0);
+
         mStats.setDeviceStats(
                 states(POWER_STATE_BATTERY, SCREEN_STATE_ON),
                 concat(
@@ -173,7 +175,7 @@ public class CpuPowerStatsProcessorTest {
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED),
                 values(1500, 2000, 1000), 0.80773);
 
-        mProcessor.finish(mStats, 10_000);
+        mStats.finish(10_000);
 
         mStats.verifyPowerEstimates();
     }

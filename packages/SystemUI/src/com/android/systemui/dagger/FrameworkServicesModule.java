@@ -42,6 +42,7 @@ import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
+import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -542,6 +543,13 @@ public class FrameworkServicesModule {
     @Singleton
     static UiModeManager provideUiModeManager(Context context) {
         return context.getSystemService(UiModeManager.class);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    static UsageStatsManager provideUsageStatsManager(Context context) {
+        return context.getSystemService(UsageStatsManager.class);
     }
 
     @Provides

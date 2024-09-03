@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Сырсөз киргизилүүчү жерге кол менен жаза албайсыз"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артка"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Киргизүү ыкмасын өзгөртүү"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Киргизүү ыкмасын тандоо"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Параметрлер"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Системада сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Коопсуздук үчүн колдонмодогу контент бөлүшүлгөн экрандан жашырылды"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Спутникке автоматтык түрдө туташтырылган"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Сиз мобилдик же Wi-Fi тармагы жок эле билдирүүлөрдү жөнөтүп, ала аласыз"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Спутник аркылуу байланышасызбы?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Мобилдик же Wi-Fi тармагына туташпай эле билдирүүлөрдү жөнөтүп, алыңыз"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ал кантип иштейт"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Кезекте турат..."</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Эсептегич"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Карталар"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Колдонмолор"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Манжаңыздын изи мындан ары таанылбайт. Манжа изи менен ачуу функциясын кайрадан тууралаңыз."</string>
 </resources>

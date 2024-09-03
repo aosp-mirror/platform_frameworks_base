@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.chips.ui.model
 
 import android.view.View
+import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.statusbar.StatusBarIconView
 
 /** Model representing the display of an ongoing activity as a chip in the status bar. */
 sealed class OngoingActivityChipModel {
@@ -38,7 +40,7 @@ sealed class OngoingActivityChipModel {
     /** This chip should be shown with the given information. */
     abstract class Shown(
         /** The icon to show on the chip. If null, no icon will be shown. */
-        open val icon: Icon?,
+        open val icon: ChipIcon?,
         /** What colors to use for the chip. */
         open val colors: ColorsModel,
         /**
@@ -50,7 +52,7 @@ sealed class OngoingActivityChipModel {
 
         /** This chip shows only an icon and nothing else. */
         data class IconOnly(
-            override val icon: Icon,
+            override val icon: ChipIcon,
             override val colors: ColorsModel,
             override val onClickListener: View.OnClickListener?,
         ) : Shown(icon, colors, onClickListener) {
@@ -59,7 +61,7 @@ sealed class OngoingActivityChipModel {
 
         /** The chip shows a timer, counting up from [startTimeMs]. */
         data class Timer(
-            override val icon: Icon,
+            override val icon: ChipIcon,
             override val colors: ColorsModel,
             /**
              * The time this event started, used to show the timer.
@@ -87,5 +89,40 @@ sealed class OngoingActivityChipModel {
         ) : Shown(icon = null, colors, onClickListener = null) {
             override val logName = "Shown.Countdown"
         }
+
+        /** This chip shows the specified [text] in the chip. */
+        data class Text(
+            override val icon: ChipIcon,
+            override val colors: ColorsModel,
+            // TODO(b/361346412): Enforce a max length requirement?
+            val text: String,
+        ) : Shown(icon, colors, onClickListener = null) {
+            override val logName = "Shown.Text"
+        }
+    }
+
+    /** Represents an icon to show on the chip. */
+    sealed interface ChipIcon {
+        /**
+         * The icon is a custom icon, which is set on [impl]. The icon was likely created by an
+         * external app.
+         */
+        data class StatusBarView(val impl: StatusBarIconView) : ChipIcon {
+            init {
+                check(Flags.statusBarCallChipNotificationIcon()) {
+                    "OngoingActivityChipModel.ChipIcon.StatusBarView created even though " +
+                        "Flags.statusBarCallChipNotificationIcon is not enabled"
+                }
+            }
+        }
+
+        /**
+         * This icon is a single color and it came from basic resource or drawable icon that System
+         * UI created internally.
+         */
+        data class SingleColorIcon(val impl: Icon) : ChipIcon
+
+        /** This icon is an app icon in full color (so it should not get tinted in any way). */
+        data class FullColorAppIcon(val impl: Icon) : ChipIcon
     }
 }

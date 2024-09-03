@@ -973,8 +973,12 @@ public final class InputMethodManager {
 
         @GuardedBy("mH")
         private void setCurrentRootViewLocked(ViewRootImpl rootView) {
+            final boolean wasEmpty = mCurRootView == null;
             mImeDispatcher.switchRootView(mCurRootView, rootView);
             mCurRootView = rootView;
+            if (wasEmpty && mCurRootView != null) {
+                mImeDispatcher.updateReceivingDispatcher(mCurRootView.getOnBackInvokedDispatcher());
+            }
         }
     }
 
@@ -1361,10 +1365,10 @@ public final class InputMethodManager {
                                         ImeTracker.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY);
                                 if (visible) {
                                     insetsController.show(WindowInsets.Type.ime(),
-                                            false /* fromIme */, null /* statsToken */);
+                                            false /* fromIme */, statsToken);
                                 } else {
                                     insetsController.hide(WindowInsets.Type.ime(),
-                                            false /* fromIme */, null /* statsToken */);
+                                            false /* fromIme */, statsToken);
                                 }
                             }
                         } else {
@@ -2883,6 +2887,11 @@ public final class InputMethodManager {
      * initiation delegation was previously requested using
      * {@link #prepareStylusHandwritingDelegation(View)} from the delegator.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * <p>Note: If delegator and delegate are in different application packages, use
      * {@link #acceptStylusHandwritingDelegation(View, String)} instead.</p>
      *
@@ -2891,14 +2900,9 @@ public final class InputMethodManager {
      *  {@link #prepareStylusHandwritingDelegation(View)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View)
      * @see #acceptStylusHandwritingDelegation(View, String)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, Executor,
+     *     ConnectionlessHandwritingCallback)
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Otherwise, if the delegator view previously started delegation using {@link
-    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo)},
-    // requests the IME to commit the recognised handwritten text from the connectionless session to
-    // the delegate view.
-    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
-    //     CursorAnchorInfo)
     public boolean acceptStylusHandwritingDelegation(@NonNull View delegateView) {
         return startStylusHandwritingInternal(
                 delegateView, delegateView.getContext().getOpPackageName(),
@@ -2911,6 +2915,11 @@ public final class InputMethodManager {
      * {@link #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view
      * belongs to a specified delegate package.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * <p>Note: If delegator and delegate are in the same application package, use
      * {@link #acceptStylusHandwritingDelegation(View)} instead.</p>
      *
@@ -2920,15 +2929,10 @@ public final class InputMethodManager {
      *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String,
+     *     Executor, ConnectionlessHandwritingCallback)
      * TODO (b/293640003): deprecate this method once flag is enabled.
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Otherwise, if the delegator view previously started delegation using {@link
-    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
-    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
-    // session to the delegate view.
-    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
-    //     CursorAnchorInfo, String)
     public boolean acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName) {
         Objects.requireNonNull(delegatorPackageName);
@@ -2942,6 +2946,11 @@ public final class InputMethodManager {
      * {@link #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view
      * belongs to a specified delegate package.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * @param delegateView delegate view capable of receiving input via {@link InputConnection}
      *  on which {@link #startStylusHandwriting(View)} will be called.
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
@@ -2949,9 +2958,12 @@ public final class InputMethodManager {
      * @param callback Consumer callback that provides {@code true} if view belongs to allowed
      *                delegate package declared in
      *                {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting
-     *                session can start.
+     *                session can start. Note: The caller should hold a reference to the callback.
+     *                The framework only holds a weak reference.
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String,
+     *     Executor, ConnectionlessHandwritingCallback)
      */
     @FlaggedApi(Flags.FLAG_USE_ZERO_JANK_PROXY)
     public void acceptStylusHandwritingDelegation(
@@ -2972,6 +2984,11 @@ public final class InputMethodManager {
      * #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view belongs to
      * a specified delegate package.
      *
+     * <p>Otherwise, if the delegator view previously started delegation using {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)}, requests the IME to commit the recognised handwritten
+     * text from the connectionless session to the delegate view.
+     *
      * <p>Note: If delegator and delegate are in the same application package, use {@link
      * #acceptStylusHandwritingDelegation(View)} instead.
      *
@@ -2979,18 +2996,13 @@ public final class InputMethodManager {
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
      * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
      * @param executor The executor to run the callback on.
-     * @param callback {@code true>} would be received if delegation was accepted.
+     * @param callback {@code true} would be received if delegation was accepted. The caller should
+     *                 hold a reference to the callback. The framework only holds a weak reference.
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
+     * @see #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String,
+     *     Executor, ConnectionlessHandwritingCallback)
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Otherwise, if the delegator view previously started delegation using {@link
-    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
-    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
-    // session to the delegate view.
-    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
-    //     CursorAnchorInfo, String)
-    //
     @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
     public void acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName,

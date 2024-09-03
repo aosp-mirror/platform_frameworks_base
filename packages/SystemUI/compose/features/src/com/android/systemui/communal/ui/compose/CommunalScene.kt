@@ -23,13 +23,16 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +45,8 @@ constructor(
     private val viewModel: CommunalViewModel,
     private val dialogFactory: SystemUIDialogFactory,
     private val interactionHandler: WidgetInteractionHandler,
-) : ComposableScene {
+    private val widgetSection: CommunalAppWidgetSection,
+) : ExclusiveActivatable(), ComposableScene {
     override val key = Scenes.Communal
 
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
@@ -53,8 +57,18 @@ constructor(
             )
             .asStateFlow()
 
+    override suspend fun onActivated(): Nothing {
+        awaitCancellation()
+    }
+
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        CommunalHub(modifier, viewModel, interactionHandler, dialogFactory)
+        CommunalHub(
+            modifier = modifier,
+            viewModel = viewModel,
+            interactionHandler = interactionHandler,
+            widgetSection = widgetSection,
+            dialogFactory = dialogFactory,
+        )
     }
 }

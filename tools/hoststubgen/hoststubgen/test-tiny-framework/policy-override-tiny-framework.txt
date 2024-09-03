@@ -12,6 +12,16 @@ class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
   # method addThree_host	(I)I	# used as a substitute
   method unsupportedMethod	()Ljava/lang/String;	throw
   method visibleButUsesUnsupportedMethod	()Ljava/lang/String;	stub
+  method toBeIgnoredObj	()Ljava/lang/String;	ignore
+  method toBeIgnoredV	()V	ignore
+  method toBeIgnoredZ	()Z	ignore
+  method toBeIgnoredB	()B	ignore
+  method toBeIgnoredC	()C	ignore
+  method toBeIgnoredS	()S	ignore
+  method toBeIgnoredI	()I	ignore
+  method toBeIgnoredL	()L	ignore
+  method toBeIgnoredF	()F	ignore
+  method toBeIgnoredD	()D	ignore
 
 # Class load hook
 class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded
@@ -48,3 +58,19 @@ class com.android.hoststubgen.test.tinyframework.packagetest.sub.B remove
 # The following rules are the same as above
 # class com.android.hoststubgen.test.tinyframework.packagetest.A stub
 # class com.android.hoststubgen.test.tinyframework.packagetest.sub.A stub
+
+# Used to test method call replacement.
+class com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace stubclass
+  method originalAdd (II)I @com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo.add
+
+# Used to test method call replacement.
+# Note because java.lang.Thread is _not_ within the tiny-framework jar, the policy ("keep")
+# doesn't realy matter.
+class java.lang.Thread keep
+  method start ()V @com.android.hoststubgen.test.tinyframework.TinyFrameworkMethodCallReplace$ReplaceTo.startThread
+
+
+# "rename" takes a type internal name, so '/'s is used as a separator.
+# The leading / in the prefix is not needed (it'll be stripped), but it's added to make
+# sure the stripping works.
+rename ^.*/TinyFrameworkToBeRenamed$ /rename_prefix/

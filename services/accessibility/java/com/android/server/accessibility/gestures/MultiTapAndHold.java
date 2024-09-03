@@ -30,6 +30,11 @@ public class MultiTapAndHold extends MultiTap {
         super(context, taps, gesture, listener);
     }
 
+    public MultiTapAndHold(Context context, int taps, int gesture, int multiTapTimeout,
+            GestureMatcher.StateChangeListener listener) {
+        super(context, taps, gesture, multiTapTimeout, listener);
+    }
+
     @Override
     protected void onDown(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         super.onDown(event, rawEvent, policyFlags);
@@ -41,7 +46,6 @@ public class MultiTapAndHold extends MultiTap {
     @Override
     protected void onUp(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         super.onUp(event, rawEvent, policyFlags);
-        cancelAfterDoubleTapTimeout(event, rawEvent, policyFlags);
     }
 
     @Override

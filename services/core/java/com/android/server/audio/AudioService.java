@@ -63,6 +63,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.media.audio.Flags.absVolumeIndexFix;
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
+import static com.android.media.audio.Flags.asDeviceConnectionFailure;
 import static com.android.media.audio.Flags.audioserverPermissions;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.media.audio.Flags.replaceStreamBtSco;
@@ -283,11 +284,16 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -784,6 +790,8 @@ public class AudioService extends IAudioService.Stub
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
     private final Executor mAudioServerLifecycleExecutor;
+    private long mSysPropListenerNativeHandle;
+    private final List<Future> mScheduledPermissionTasks = new ArrayList();
 
     private IMediaProjectionManager mProjectionService; // to validate projection token
 
@@ -1091,7 +1099,8 @@ public class AudioService extends IAudioService.Stub
 
         public Lifecycle(Context context) {
             super(context);
-            var audioserverLifecycleExecutor = Executors.newSingleThreadExecutor();
+            var audioserverLifecycleExecutor = Executors.newSingleThreadScheduledExecutor(
+                    (Runnable r) -> new Thread(r, "audioserver_lifecycle"));
             var audioPolicyFacade = new DefaultAudioPolicyFacade(audioserverLifecycleExecutor);
             mService = new AudioService(context,
                               AudioSystemAdapter.getDefaultAdapter(),
@@ -1220,34 +1229,6 @@ public class AudioService extends IAudioService.Stub
 
         mBroadcastHandlerThread = new HandlerThread("AudioService Broadcast");
         mBroadcastHandlerThread.start();
-
-        // Listen to permission invalidations for the PermissionProvider
-        if (audioserverPermissions()) {
-            final Handler broadcastHandler = mBroadcastHandlerThread.getThreadHandler();
-            mAudioSystem.listenForSystemPropertyChange(PermissionManager.CACHE_KEY_PACKAGE_INFO,
-                    new Runnable() {
-                        // Roughly chosen to be long enough to suppress the autocork behavior
-                        // of the permission cache (50ms), and longer than the task could reasonably
-                        // take, even with many packages and users, while not introducing visible
-                        // permission leaks - since the app needs to restart, and trigger an action
-                        // which requires permissions from audioserver before this delay.
-                        // For RECORD_AUDIO, we are additionally protected by appops.
-                        final long UPDATE_DELAY_MS = 110;
-                        final AtomicLong scheduledUpdateTimestamp = new AtomicLong(0);
-                        @Override
-                        public void run() {
-                            var currentTime = SystemClock.uptimeMillis();
-                            if (currentTime > scheduledUpdateTimestamp.get()) {
-                                scheduledUpdateTimestamp.set(currentTime + UPDATE_DELAY_MS);
-                                broadcastHandler.postAtTime( () ->
-                                        mAudioServerLifecycleExecutor.execute(mPermissionProvider
-                                            ::onPermissionStateChanged),
-                                        currentTime + UPDATE_DELAY_MS
-                                    );
-                            }
-                        }
-            });
-        }
 
         mDeviceBroker = new AudioDeviceBroker(mContext, this, mAudioSystem);
 
@@ -1716,8 +1697,10 @@ public class AudioService extends IAudioService.Stub
 
     public void onSystemReady() {
         mSystemReady = true;
+        if (audioserverPermissions()) {
+            setupPermissionListener();
+        }
         scheduleLoadSoundEffects();
-
         mDeviceBroker.onSystemReady();
 
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
@@ -2031,8 +2014,11 @@ public class AudioService extends IAudioService.Stub
 
         synchronized (mCachedAbsVolDrivingStreamsLock) {
             mCachedAbsVolDrivingStreams.forEach((dev, stream) -> {
-                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", /*enabled=*/true,
-                        stream);
+                boolean enabled = true;
+                if (dev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    enabled = mAvrcpAbsVolSupported;
+                }
+                mAudioSystem.setDeviceAbsoluteVolumeEnabled(dev, /*address=*/"", enabled, stream);
             });
         }
 
@@ -4306,7 +4292,8 @@ public class AudioService extends IAudioService.Stub
         super.getVolumeGroupVolumeIndex_enforcePermission();
         synchronized (VolumeStreamState.class) {
             if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
-                throw new IllegalArgumentException("No volume group for id " + groupId);
+                Log.e(TAG, "No volume group for id " + groupId);
+                return 0;
             }
             VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
             // Return 0 when muted, not min index since for e.g. Voice Call, it has a non zero
@@ -4322,7 +4309,8 @@ public class AudioService extends IAudioService.Stub
         super.getVolumeGroupMaxVolumeIndex_enforcePermission();
         synchronized (VolumeStreamState.class) {
             if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
-                throw new IllegalArgumentException("No volume group for id " + groupId);
+                Log.e(TAG, "No volume group for id " + groupId);
+                return 0;
             }
             VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
             return vgs.getMaxIndex();
@@ -4336,7 +4324,8 @@ public class AudioService extends IAudioService.Stub
         super.getVolumeGroupMinVolumeIndex_enforcePermission();
         synchronized (VolumeStreamState.class) {
             if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
-                throw new IllegalArgumentException("No volume group for id " + groupId);
+                Log.e(TAG, "No volume group for id " + groupId);
+                return 0;
             }
             VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
             return vgs.getMinIndex();
@@ -4765,6 +4754,8 @@ public class AudioService extends IAudioService.Stub
     private void dumpFlags(PrintWriter pw) {
 
         pw.println("\nFun with Flags:");
+        pw.println("\tcom.android.media.audio.as_device_connection_failure:"
+                + asDeviceConnectionFailure());
         pw.println("\tandroid.media.audio.autoPublicVolumeApiHardening:"
                 + autoPublicVolumeApiHardening());
         pw.println("\tandroid.media.audio.Flags.automaticBtDeviceType:"
@@ -4824,6 +4815,20 @@ public class AudioService extends IAudioService.Stub
 
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
+
+        synchronized (mCachedAbsVolDrivingStreamsLock) {
+            mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
+                boolean enabled = true;
+                if (absDev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    enabled = mAvrcpAbsVolSupported;
+                }
+                if (stream != streamType) {
+                    mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev, /*address=*/"",
+                            enabled, streamType);
+                }
+                return streamType;
+            });
+        }
 
         final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
         final Set<Integer> absVolumeMultiModeCaseDevices =
@@ -6443,17 +6448,6 @@ public class AudioService extends IAudioService.Stub
 
                 // change of mode may require volume to be re-applied on some devices
                 onUpdateContextualVolumes();
-
-                synchronized (mCachedAbsVolDrivingStreamsLock) {
-                    mCachedAbsVolDrivingStreams.replaceAll((absDev, stream) -> {
-                        int streamToDriveAbs = getBluetoothContextualVolumeStream();
-                        if (stream != streamToDriveAbs) {
-                            mAudioSystem.setDeviceAbsoluteVolumeEnabled(absDev, /*address=*/
-                                    "", /*enabled*/true, streamToDriveAbs);
-                        }
-                        return streamToDriveAbs;
-                    });
-                }
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
@@ -8259,11 +8253,21 @@ public class AudioService extends IAudioService.Stub
     private static final SparseArray<VolumeGroupState> sVolumeGroupStates = new SparseArray<>();
 
     private void initVolumeGroupStates() {
+        int btScoGroupId = -1;
+        VolumeGroupState voiceCallGroup = null;
         for (final AudioVolumeGroup avg : getAudioVolumeGroups()) {
             try {
-                // if no valid attributes, this volume group is not controllable
-                if (ensureValidAttributes(avg)) {
-                    sVolumeGroupStates.append(avg.getId(), new VolumeGroupState(avg));
+                if (ensureValidVolumeGroup(avg)) {
+                    final VolumeGroupState vgs = new VolumeGroupState(avg);
+                    sVolumeGroupStates.append(avg.getId(), vgs);
+                    if (vgs.isVoiceCall()) {
+                        voiceCallGroup = vgs;
+                    }
+                } else {
+                    // invalid volume group will be reported for bt sco group with no other
+                    // legacy stream type, we try to replace it in sVolumeGroupStates with the
+                    // voice call volume group
+                    btScoGroupId = avg.getId();
                 }
             } catch (IllegalArgumentException e) {
                 // Volume Groups without attributes are not controllable through set/get volume
@@ -8271,8 +8275,13 @@ public class AudioService extends IAudioService.Stub
                 if (DEBUG_VOL) {
                     Log.d(TAG, "volume group " + avg.name() + " for internal policy needs");
                 }
-                continue;
             }
+        }
+
+        if (replaceStreamBtSco() && btScoGroupId >= 0 && voiceCallGroup != null) {
+            // the bt sco group is deprecated, storing the voice call group instead
+            // to keep the code backwards compatible when calling the volume group APIs
+            sVolumeGroupStates.append(btScoGroupId, voiceCallGroup);
         }
 
         // need mSettingsLock for vgs.applyAllVolumes -> vss.setIndex which grabs this lock after
@@ -8285,7 +8294,15 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private boolean ensureValidAttributes(AudioVolumeGroup avg) {
+    /**
+     * Returns false if the legacy stream types only contains the deprecated
+     * {@link AudioSystem#STREAM_BLUETOOTH_SCO}.
+     *
+     * @throws IllegalArgumentException if it has more than one non-default {@link AudioAttributes}
+     *
+     * @param avg the volume group to check
+     */
+    private boolean ensureValidVolumeGroup(AudioVolumeGroup avg) {
         boolean hasAtLeastOneValidAudioAttributes = avg.getAudioAttributes().stream()
                 .anyMatch(aa -> !aa.equals(AudioProductStrategy.getDefaultAttributes()));
         if (!hasAtLeastOneValidAudioAttributes) {
@@ -8293,10 +8310,11 @@ public class AudioService extends IAudioService.Stub
                     + " has no valid audio attributes");
         }
         if (replaceStreamBtSco()) {
-            for (int streamType : avg.getLegacyStreamTypes()) {
-                if (streamType == AudioSystem.STREAM_BLUETOOTH_SCO) {
-                    return false;
-                }
+            // if there are multiple legacy stream types associated we can omit stream bt sco
+            // otherwise this is not a valid volume group
+            if (avg.getLegacyStreamTypes().length == 1
+                    && avg.getLegacyStreamTypes()[0] == AudioSystem.STREAM_BLUETOOTH_SCO) {
+                return false;
             }
         }
         return true;
@@ -8635,6 +8653,10 @@ public class AudioService extends IAudioService.Stub
 
         public boolean isMusic() {
             return mHasValidStreamType && mPublicStreamType == AudioSystem.STREAM_MUSIC;
+        }
+
+        public boolean isVoiceCall() {
+            return mHasValidStreamType && mPublicStreamType == AudioSystem.STREAM_VOICE_CALL;
         }
 
         public void applyAllVolumes(boolean userSwitch) {
@@ -10568,6 +10590,67 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /* Listen to permission invalidations for the PermissionProvider */
+    private void setupPermissionListener() {
+        // Roughly chosen to be long enough to suppress the autocork behavior of the permission
+        // cache (50ms), while not introducing visible permission leaks - since the app needs to
+        // restart, and trigger an action which requires permissions from audioserver before this
+        // delay. For RECORD_AUDIO, we are additionally protected by appops.
+        final long UPDATE_DELAY_MS = 60;
+        // instanceof to simplify the construction requirements of AudioService for testing: no
+        // delayed execution during unit tests.
+        if (mAudioServerLifecycleExecutor instanceof ScheduledExecutorService exec) {
+            // The order on the task list is an embedding on the scheduling order of the executor,
+            // since we synchronously add the scheduled task to our local queue. This list should
+            // almost always have only two elements, except in cases of serious system contention.
+            Runnable task = () -> {
+                synchronized (mScheduledPermissionTasks) {
+                    mScheduledPermissionTasks.add(exec.schedule(() -> {
+                        try {
+                            // Our goal is to remove all tasks which don't correspond to ourselves
+                            // on this queue. Either they are already done (ahead of us), or we
+                            // should cancel them (behind us), since their work is redundant after
+                            // we fire.
+                            // We must be the first non-completed task in the queue, since the
+                            // execution order matches the queue order. Note, this task is the only
+                            // writer on elements in the queue, and the task is serialized, so
+                            //  => no in-flight cancellation
+                            //  => exists at least one non-completed task (ourselves)
+                            //  => the queue is non-empty (only completed tasks removed)
+                            synchronized (mScheduledPermissionTasks) {
+                                final var iter = mScheduledPermissionTasks.iterator();
+                                while (iter.next().isDone()) {
+                                    iter.remove();
+                                }
+                                // iter is on the first element which is not completed (us)
+                                while (iter.hasNext()) {
+                                    if (!iter.next().cancel(false)) {
+                                        throw new AssertionError(
+                                                "Cancel should be infallible since we" +
+                                                "cancel from the executor");
+                                    }
+                                    iter.remove();
+                                }
+                            }
+                            mPermissionProvider.onPermissionStateChanged();
+                        } catch (Exception e) {
+                            // Handle executor routing exceptions to nowhere
+                            Thread.getDefaultUncaughtExceptionHandler()
+                                    .uncaughtException(Thread.currentThread(), e);
+                        }
+                    }, UPDATE_DELAY_MS, TimeUnit.MILLISECONDS));
+                }
+            };
+            mSysPropListenerNativeHandle = mAudioSystem.listenForSystemPropertyChange(
+                    PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    task);
+        } else {
+            mAudioSystem.listenForSystemPropertyChange(
+                    PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    () -> mAudioServerLifecycleExecutor.execute(
+                                mPermissionProvider::onPermissionStateChanged));
+        }
+    }
 
     //==========================================================================================
     // Audio Focus
@@ -10651,7 +10734,7 @@ public class AudioService extends IAudioService.Stub
         return true;
     }
 
-    public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
+    public int requestAudioFocus(AudioAttributes aa, int focusReqType, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName,
             String attributionTag, int flags, IAudioPolicyCallback pcb, int sdk) {
         if ((flags & AudioManager.AUDIOFOCUS_FLAG_TEST) != 0) {
@@ -10660,7 +10743,7 @@ public class AudioService extends IAudioService.Stub
         final int uid = Binder.getCallingUid();
         MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "focus")
                 .setUid(uid)
-                //.putInt("durationHint", durationHint)
+                //.putInt("focusReqType", focusReqType)
                 .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
                 .set(MediaMetrics.Property.CLIENT_NAME, clientId)
                 .set(MediaMetrics.Property.EVENT, "requestAudioFocus")
@@ -10720,9 +10803,14 @@ public class AudioService extends IAudioService.Stub
 
         final long token = Binder.clearCallingIdentity();
         try {
+            //TODO move inside HardeningEnforcer after refactor that moves permission checks
+            //     in the blockFocusMethod
+            if (permissionOverridesCheck) {
+                mHardeningEnforcer.metricsLogFocusReq(/*blocked*/false, focusReqType, uid);
+            }
             if (!permissionOverridesCheck && mHardeningEnforcer.blockFocusMethod(uid,
                     HardeningEnforcer.METHOD_AUDIO_MANAGER_REQUEST_AUDIO_FOCUS,
-                    clientId, durationHint, callingPackageName, attributionTag, sdk)) {
+                    clientId, focusReqType, callingPackageName, attributionTag, sdk)) {
                 final String reason = "Audio focus request blocked by hardening";
                 Log.w(TAG, reason);
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, reason).record();
@@ -10733,14 +10821,14 @@ public class AudioService extends IAudioService.Stub
         }
 
         mmi.record();
-        return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
+        return mMediaFocusControl.requestAudioFocus(aa, focusReqType, cb, fd,
                 clientId, callingPackageName, flags, sdk,
-                forceFocusDuckingForAccessibility(aa, durationHint, uid), -1 /*testUid, ignored*/,
+                forceFocusDuckingForAccessibility(aa, focusReqType, uid), -1 /*testUid, ignored*/,
                 permissionOverridesCheck);
     }
 
     /** see {@link AudioManager#requestAudioFocusForTest(AudioFocusRequest, String, int, int)} */
-    public int requestAudioFocusForTest(AudioAttributes aa, int durationHint, IBinder cb,
+    public int requestAudioFocusForTest(AudioAttributes aa, int focusReqType, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName,
             int flags, int fakeUid, int sdk) {
         if (!enforceQueryAudioStateForTest("focus request")) {
@@ -10751,7 +10839,7 @@ public class AudioService extends IAudioService.Stub
             Log.e(TAG, reason);
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
-        return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
+        return mMediaFocusControl.requestAudioFocus(aa, focusReqType, cb, fd,
                 clientId, callingPackageName, flags,
                 sdk, false /*forceDuck*/, fakeUid, true /*permissionOverridesCheck*/);
     }
@@ -14621,6 +14709,25 @@ public class AudioService extends IAudioService.Stub
             activeAssistantUids = mActiveAssistantServiceUids.clone();
         }
         return activeAssistantUids;
+    }
+
+    @Override
+    /** @see AudioManager#permissionUpdateBarrier() */
+    public void permissionUpdateBarrier() {
+        mAudioSystem.triggerSystemPropertyUpdate(mSysPropListenerNativeHandle);
+        List<Future> snapshot;
+        synchronized (mScheduledPermissionTasks) {
+            snapshot = List.copyOf(mScheduledPermissionTasks);
+        }
+        for (var x : snapshot) {
+            try {
+                x.get();
+            } catch (CancellationException e) {
+                // Task completed
+            } catch (InterruptedException | ExecutionException e) {
+                Log.wtf(TAG, "Exception which should never occur", e);
+            }
+        }
     }
 
     List<String> getDeviceIdentityAddresses(AudioDeviceAttributes device) {

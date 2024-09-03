@@ -17,8 +17,11 @@
 package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
 import android.app.PendingIntent
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -26,11 +29,13 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -73,7 +78,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 0))
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
         }
@@ -83,7 +88,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = -2, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = -2))
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
         }
@@ -93,7 +98,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 345, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 345))
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
         }
@@ -106,7 +111,7 @@ class CallChipViewModelTest : SysuiTestCase() {
             kosmos.fakeSystemClock.setCurrentTimeMillis(3000)
             kosmos.fakeSystemClock.setElapsedRealtime(400_000)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000))
 
             // The OngoingCallModel start time is relative to currentTimeMillis, so this call
             // started 2000ms ago (1000 - 3000). The OngoingActivityChipModel start time needs to be
@@ -117,29 +122,97 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_positiveStartTime_iconIsPhone() =
+    @DisableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
+    fun chip_positiveStartTime_notifIconFlagOff_iconIsPhone() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = null))
+            repo.setOngoingCallState(
+                inCallModel(startTimeMs = 1000, notificationIcon = mock<StatusBarIconView>())
+            )
 
-            assertThat(((latest as OngoingActivityChipModel.Shown).icon as Icon.Resource).res)
-                .isEqualTo(com.android.internal.R.drawable.ic_phone)
-            assertThat((latest as OngoingActivityChipModel.Shown).icon!!.contentDescription)
-                .isNotNull()
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
+            assertThat(icon.contentDescription).isNotNull()
         }
 
     @Test
-    fun chip_zeroStartTime_iconIsPhone() =
+    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
+    fun chip_positiveStartTime_notifIconFlagOn_iconIsNotifIcon() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = null))
+            val notifIcon = mock<StatusBarIconView>()
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, notificationIcon = notifIcon))
 
-            assertThat(((latest as OngoingActivityChipModel.Shown).icon as Icon.Resource).res)
-                .isEqualTo(com.android.internal.R.drawable.ic_phone)
-            assertThat((latest as OngoingActivityChipModel.Shown).icon!!.contentDescription)
-                .isNotNull()
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.StatusBarView::class.java)
+            val actualIcon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.StatusBarView)
+                    .impl
+            assertThat(actualIcon).isEqualTo(notifIcon)
+        }
+
+    @Test
+    @DisableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
+    fun chip_zeroStartTime_notifIconFlagOff_iconIsPhone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(
+                inCallModel(startTimeMs = 0, notificationIcon = mock<StatusBarIconView>())
+            )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
+            assertThat(icon.contentDescription).isNotNull()
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
+    fun chip_zeroStartTime_notifIconFlagOn_iconIsNotifIcon() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            val notifIcon = mock<StatusBarIconView>()
+            repo.setOngoingCallState(inCallModel(startTimeMs = 0, notificationIcon = notifIcon))
+
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.StatusBarView::class.java)
+            val actualIcon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.StatusBarView)
+                    .impl
+            assertThat(actualIcon).isEqualTo(notifIcon)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
+    fun chip_notifIconFlagOn_butNullNotifIcon_iconIsPhone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, notificationIcon = null))
+
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
+            assertThat(icon.contentDescription).isNotNull()
         }
 
     @Test
@@ -147,7 +220,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000))
 
             assertThat((latest as OngoingActivityChipModel.Shown).colors)
                 .isEqualTo(ColorsModel.Themed)
@@ -158,7 +231,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 0))
 
             assertThat((latest as OngoingActivityChipModel.Shown).colors)
                 .isEqualTo(ColorsModel.Themed)
@@ -172,7 +245,7 @@ class CallChipViewModelTest : SysuiTestCase() {
             kosmos.fakeSystemClock.setElapsedRealtime(400_000)
 
             // Start a call
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000))
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs)
                 .isEqualTo(398_000)
@@ -186,7 +259,7 @@ class CallChipViewModelTest : SysuiTestCase() {
             kosmos.fakeSystemClock.setElapsedRealtime(500_000)
 
             // Start a new call, which started 1000ms ago
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 102_000, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 102_000))
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs)
                 .isEqualTo(499_000)
@@ -197,7 +270,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = null))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = null))
 
             assertThat((latest as OngoingActivityChipModel.Shown).onClickListener).isNull()
         }
@@ -208,7 +281,7 @@ class CallChipViewModelTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.chip)
 
             val intent = mock<PendingIntent>()
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 1000, intent = intent))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = intent))
             val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
             assertThat(clickListener).isNotNull()
 
@@ -223,7 +296,7 @@ class CallChipViewModelTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.chip)
 
             val intent = mock<PendingIntent>()
-            repo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 0, intent = intent))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 0, intent = intent))
             val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
             assertThat(clickListener).isNotNull()
 

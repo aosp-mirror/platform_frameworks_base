@@ -47,17 +47,10 @@ flag {
 
 flag {
      namespace: "virtual_devices"
-     name: "metrics_collection"
-     description: "Enable collection of VDM-related metrics"
-     bug: "324842215"
-     is_fixed_read_only: true
-}
-
-flag {
-     namespace: "virtual_devices"
      name: "activity_control_api"
      description: "Enable APIs for fine grained activity policy, fallback and callbacks"
      bug: "333443509"
+     is_exported: true
 }
 
 flag {
@@ -84,24 +77,10 @@ flag {
 }
 
 flag {
-    namespace: "virtual_devices"
-    name: "virtual_display_multi_window_mode_support"
-    description: "Add support for WINDOWING_MODE_MULTI_WINDOW to virtual displays by default"
-    is_fixed_read_only: true
-    bug: "341151395"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "virtual_devices"
-    name: "intent_interception_action_matching_fix"
-    description: "Do not match intents without actions if the filter has actions"
-    bug: "343805037"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
+     namespace: "virtual_devices"
+     name: "enforce_remote_device_opt_out_on_all_virtual_displays"
+     description: "Respect canDisplayOnRemoteDevices on all virtual displays"
+     bug: "338973239"
 }
 
 flag {
@@ -124,4 +103,11 @@ flag {
   namespace: "virtual_devices"
   description: "Expose multiple surface for the virtual camera owner for different stream resolution"
   bug: "341083465"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "device_aware_display_power"
+    description: "Device awareness in power and display APIs"
+    bug: "285020111"
 }

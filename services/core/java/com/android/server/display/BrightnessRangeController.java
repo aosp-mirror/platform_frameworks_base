@@ -60,7 +60,7 @@ class BrightnessRangeController {
         mModeChangeCallback = modeChangeCallback;
         mHdrClamper = hdrClamper;
         mNormalBrightnessModeController = normalBrightnessModeController;
-        mUseHdrClamper = flags.isHdrClamperEnabled();
+        mUseHdrClamper = flags.isHdrClamperEnabled() && !flags.useNewHdrBrightnessModifier();
         mUseNbmController = flags.isNbmControllerEnabled();
         if (mUseNbmController) {
             mNormalBrightnessModeController.resetNbmData(

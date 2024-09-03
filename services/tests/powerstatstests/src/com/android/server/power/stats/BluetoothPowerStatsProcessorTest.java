@@ -59,6 +59,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class BluetoothPowerStatsProcessorTest {
 
@@ -166,10 +167,8 @@ public class BluetoothPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.BLUETOOTH))
                 .thenReturn(new int[0]);
 
-        BluetoothPowerStatsProcessor processor =
-                new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
+                () -> new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector);
         collector.setEnabled(true);
@@ -178,6 +177,8 @@ public class BluetoothPowerStatsProcessorTest {
                 mockUidTraffic(APP_UID2, 300, 400));
 
         mUidScanTimes.put(APP_UID1, 100);
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -200,7 +201,7 @@ public class BluetoothPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
 
         BluetoothPowerStatsLayout statsLayout =
                 new BluetoothPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -267,10 +268,8 @@ public class BluetoothPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.BLUETOOTH))
                 .thenReturn(new int[0]);
 
-        BluetoothPowerStatsProcessor processor =
-                new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
+                () -> new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector);
         collector.setEnabled(true);
@@ -279,6 +278,8 @@ public class BluetoothPowerStatsProcessorTest {
                 mockUidTraffic(APP_UID2, 300, 400));
 
         mUidScanTimes.put(APP_UID1, 100);
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -301,7 +302,7 @@ public class BluetoothPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
 
         BluetoothPowerStatsLayout statsLayout =
                 new BluetoothPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -366,10 +367,8 @@ public class BluetoothPowerStatsProcessorTest {
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.BLUETOOTH))
                 .thenReturn(new int[]{BLUETOOTH_ENERGY_CONSUMER_ID});
 
-        BluetoothPowerStatsProcessor processor =
-                new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile());
-
-        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(processor);
+        PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
+                () -> new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector);
         collector.setEnabled(true);
@@ -381,6 +380,8 @@ public class BluetoothPowerStatsProcessorTest {
 
         when(mConsumedEnergyRetriever.getConsumedEnergyUws(
                 new int[]{BLUETOOTH_ENERGY_CONSUMER_ID})).thenReturn(new long[]{0});
+
+        aggregatedStats.start(0);
 
         // Establish a baseline
         aggregatedStats.addPowerStats(collector.collectStats(), 0);
@@ -408,7 +409,7 @@ public class BluetoothPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats, 10_000);
+        aggregatedStats.finish(10_000);
 
         BluetoothPowerStatsLayout statsLayout =
                 new BluetoothPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -466,13 +467,13 @@ public class BluetoothPowerStatsProcessorTest {
     }
 
     private static PowerComponentAggregatedPowerStats createAggregatedPowerStats(
-            BluetoothPowerStatsProcessor processor) {
+            Supplier<PowerStatsProcessor> processorSupplier) {
         AggregatedPowerStatsConfig.PowerComponent config =
                 new AggregatedPowerStatsConfig.PowerComponent(
                         BatteryConsumer.POWER_COMPONENT_BLUETOOTH)
                         .trackDeviceStates(STATE_POWER, STATE_SCREEN)
                         .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
-                        .setProcessor(processor);
+                        .setProcessorSupplier(processorSupplier);
 
         PowerComponentAggregatedPowerStats aggregatedStats =
                 new PowerComponentAggregatedPowerStats(

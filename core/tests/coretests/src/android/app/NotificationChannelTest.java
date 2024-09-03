@@ -23,7 +23,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,7 +30,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.annotation.FlaggedApi;
 import android.content.AttributionSource;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -54,8 +52,8 @@ import android.provider.MediaStore.Audio.AudioColumns;
 import android.test.mock.MockContentResolver;
 import android.util.Xml;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;

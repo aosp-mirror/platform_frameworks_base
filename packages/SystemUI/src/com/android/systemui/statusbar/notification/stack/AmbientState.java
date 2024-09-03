@@ -94,7 +94,6 @@ public class AmbientState implements Dumpable {
     private boolean mIsSmallScreen;
     private boolean mPulsing;
     private float mHideAmount;
-    private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
     /**
@@ -139,6 +138,9 @@ public class AmbientState implements Dumpable {
     /** Fraction of shade expansion. */
     private float mExpansionFraction;
 
+    /** Fraction of QS expansion. 0 when in shade, 1 when in QS. */
+    private float mQsExpansionFraction;
+
     /** Height of the notifications panel when expansion completes. */
     private float mStackEndHeight;
 
@@ -171,7 +173,8 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @return Height of the notifications panel without top padding when expansion completes.
+     * @return Height of the available space for the notification content, when the shade
+     * expansion completes.
      */
     public float getStackEndHeight() {
         return mStackEndHeight;
@@ -205,6 +208,14 @@ public class AmbientState implements Dumpable {
      */
     public void setExpansionFraction(float expansionFraction) {
         mExpansionFraction = expansionFraction;
+    }
+
+    /**
+     * @param expansionFraction Fraction of QS expansion.
+     */
+    public void setQsExpansionFraction(float expansionFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mQsExpansionFraction = expansionFraction;
     }
 
     /**
@@ -258,17 +269,26 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @see #getStackHeight()
+     * @return Fraction of QS expansion.
      */
-    public void setStackHeight(float stackHeight) {
-        mStackHeight = stackHeight;
+    public float getQsExpansionFraction() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mQsExpansionFraction;
     }
 
     /**
-     * @return Height of notifications panel interpolated by the expansion fraction.
+     * @return Height of the notification content returned by {@link #getStackEndHeight()}, but
+     * interpolated by the shade expansion fraction.
      */
-    public float getStackHeight() {
+    public float getInterpolatedStackHeight() {
         return mStackHeight;
+    }
+
+    /**
+     * @see #getInterpolatedStackHeight()
+     */
+    public void setInterpolatedStackHeight(float stackHeight) {
+        mStackHeight = stackHeight;
     }
 
     @Inject
@@ -492,10 +512,12 @@ public class AmbientState implements Dumpable {
     }
 
     public int getTopPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mTopPadding;
     }
 
     public void setTopPadding(int topPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mTopPadding = topPadding;
     }
 
@@ -697,14 +719,6 @@ public class AmbientState implements Dumpable {
         return mHideAmount != 0;
     }
 
-    public void setAppearing(boolean appearing) {
-        mAppearing = appearing;
-    }
-
-    public boolean isAppearing() {
-        return mAppearing;
-    }
-
     public void setPulseHeight(float height) {
         if (height != mPulseHeight) {
             mPulseHeight = height;
@@ -835,8 +849,8 @@ public class AmbientState implements Dumpable {
         pw.println("mFractionToShade=" + mFractionToShade);
         pw.println("mHideAmount=" + mHideAmount);
         pw.println("mAppearFraction=" + mAppearFraction);
-        pw.println("mAppearing=" + mAppearing);
         pw.println("mExpansionFraction=" + mExpansionFraction);
+        pw.println("mQsExpansionFraction=" + mQsExpansionFraction);
         pw.println("mExpandingVelocity=" + mExpandingVelocity);
         pw.println("mOverScrollTopAmount=" + mOverScrollTopAmount);
         pw.println("mOverScrollBottomAmount=" + mOverScrollBottomAmount);

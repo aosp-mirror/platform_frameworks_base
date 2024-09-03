@@ -19,7 +19,7 @@ package com.android.systemui.scene.shared.model
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.activatable.Activatable
+import com.android.systemui.lifecycle.Activatable
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -34,8 +34,6 @@ interface Scene : Activatable {
 
     /** Uniquely-identifying key for this scene. The key must be unique within its container. */
     val key: SceneKey
-
-    override suspend fun activate() = Unit
 
     /**
      * The mapping between [UserAction] and destination [UserActionResult]s.

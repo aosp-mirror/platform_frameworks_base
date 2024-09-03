@@ -62,6 +62,10 @@ class AppCompatTransparentActivityRobot {
         consumer.accept(mActivityRobot);
     }
 
+    void setDisplayContentBounds(int left, int top, int right, int bottom) {
+        mActivityRobot.displayContent().setBounds(left, top, right, bottom);
+    }
+
     void launchTransparentActivity() {
         mActivityRobot.launchActivity(/*minAspectRatio */ -1, /* maxAspectRatio */ -1,
                 SCREEN_ORIENTATION_PORTRAIT, /* transparent */ true,

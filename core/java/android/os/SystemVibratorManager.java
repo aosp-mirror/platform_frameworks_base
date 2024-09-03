@@ -161,6 +161,22 @@ public class SystemVibratorManager extends VibratorManager {
     }
 
     @Override
+    public void performHapticFeedbackForInputDevice(int constant, int inputDeviceId,
+            int inputSource, String reason, int flags, int privFlags) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to perform haptic feedback for input device;"
+                            + " no vibrator manager service.");
+            return;
+        }
+        try {
+            mService.performHapticFeedbackForInputDevice(mUid, mContext.getDeviceId(), mPackageName,
+                    constant, inputDeviceId, inputSource, reason, flags, privFlags);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to perform haptic feedback for input device.", e);
+        }
+    }
+
+    @Override
     public void cancel() {
         cancelVibration(VibrationAttributes.USAGE_FILTER_MATCH_ALL);
     }

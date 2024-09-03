@@ -19,13 +19,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "fullscreen_dim_flag"
-    description: "Whether to allow showing fullscreen dim on ActivityEmbedding split"
-    bug: "293797706"
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "activity_embedding_interactive_divider_flag"
     description: "Whether the interactive divider feature is enabled"
     bug: "293654166"
@@ -51,13 +44,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "embedded_activity_back_nav_flag"
-    description: "Refines embedded activity back navigation behavior"
-    bug: "293642394"
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "cover_display_opt_in"
     is_exported: true
     description: "Properties to allow apps and activities to opt-in to cover display rendering"
@@ -71,16 +57,6 @@ flag {
     description: "Whether to enable WM Extensions for all devices"
     bug: "306666082"
     is_fixed_read_only: true
-}
-
-flag {
-    namespace: "windowing_sdk"
-    name: "fix_pip_restore_to_overlay"
-    description: "Restore exit-pip activity back to ActivityEmbedding overlay"
-    bug: "297887697"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
 }
 
 flag {
@@ -134,22 +110,8 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "fix_no_container_update_without_resize"
-    description: "Fix the containers not being updated when the Task is brought to front and has the same configuration"
-    bug: "344721335"
+    name: "ae_back_stack_restore"
+    description: "Allow the ActivityEmbedding back stack to be restored after process restarted"
+    bug: "289875940"
     is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "windowing_sdk"
-    name: "per_user_display_window_settings"
-    description: "Whether to store display window settings per user to avoid conflicts"
-    bug: "346668297"
-    is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
 }

@@ -233,7 +233,7 @@ public class SensorPowerStatsProcessor extends PowerStatsProcessor {
 
     private void flushPowerStats(PowerComponentAggregatedPowerStats stats, long timestamp) {
         mPowerStats.durationMs = timestamp - mLastUpdateTimestamp;
-        stats.addPowerStats(mPowerStats, timestamp);
+        stats.addProcessedPowerStats(mPowerStats, timestamp);
 
         Arrays.fill(mPowerStats.stats, 0);
         mPowerStats.uidStats.clear();

@@ -19,9 +19,10 @@ package com.android.systemui.bouncer.domain.interactor
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.deviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -42,7 +43,7 @@ val Kosmos.alternateBouncerInteractor: AlternateBouncerInteractor by
             biometricSettingsRepository = biometricSettingsRepository,
             systemClock = systemClock,
             keyguardUpdateMonitor = keyguardUpdateMonitor,
-            deviceEntryFingerprintAuthInteractor = { deviceEntryFingerprintAuthInteractor },
+            deviceEntryBiometricsAllowedInteractor = { deviceEntryBiometricsAllowedInteractor },
             keyguardInteractor = { keyguardInteractor },
             keyguardTransitionInteractor = { keyguardTransitionInteractor },
             scope = testScope.backgroundScope,
@@ -55,6 +56,7 @@ fun Kosmos.givenCanShowAlternateBouncer() {
     this.keyguardBouncerRepository.setPrimaryShow(false)
     this.biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
     this.biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
+    this.deviceEntryFaceAuthRepository.setLockedOut(false)
     whenever(this.keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
     whenever(this.keyguardStateController.isUnlocked).thenReturn(false)
 }

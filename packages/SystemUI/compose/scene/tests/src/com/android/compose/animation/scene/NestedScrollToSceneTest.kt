@@ -23,6 +23,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -48,7 +51,7 @@ class NestedScrollToSceneTest {
     private val layoutHeight = 400.dp
 
     private fun setup2ScenesAndScrollTouchSlop(
-        modifierSceneA: @Composable SceneScope.() -> Modifier = { Modifier },
+        modifierSceneA: @Composable ContentScope.() -> Modifier = { Modifier },
     ): MutableSceneTransitionLayoutState {
         val state =
             rule.runOnUiThread {
@@ -122,38 +125,11 @@ class NestedScrollToSceneTest {
 
         scrollUp(percent = 0.5f)
         // STL will start a transition with the remaining scroll
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         scrollUp(percent = 1f)
         assertThat(transition).hasProgress(1.5f)
-    }
-
-    @Test
-    fun customizeStlNestedScrollBehavior_DuringTransitionBetweenScenes() {
-        var canScroll = true
-        val state = setup2ScenesAndScrollTouchSlop {
-            Modifier.verticalNestedScrollToScene(
-                    bottomBehavior = NestedScrollBehavior.DuringTransitionBetweenScenes
-                )
-                .scrollable(rememberScrollableState { if (canScroll) it else 0f }, Vertical)
-        }
-
-        scrollUp(percent = 0.5f)
-        assertThat(state.transitionState).isIdle()
-
-        // Reach the end of the scrollable element
-        canScroll = false
-        scrollUp(percent = 0.5f)
-        assertThat(state.transitionState).isIdle()
-
-        pointerUp()
-        assertThat(state.transitionState).isIdle()
-
-        // Start a new gesture
-        pointerDownAndScrollTouchSlop()
-        scrollUp(percent = 0.5f)
-        assertThat(state.transitionState).isIdle()
     }
 
     @Test
@@ -180,7 +156,7 @@ class NestedScrollToSceneTest {
         // Start a new gesture
         pointerDownAndScrollTouchSlop()
         scrollUp(percent = 0.5f)
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         pointerUp()
@@ -205,7 +181,7 @@ class NestedScrollToSceneTest {
         // Reach the end of the scrollable element
         canScroll = false
         scrollUp(percent = 0.5f)
-        val transition1 = assertThat(state.transitionState).isTransition()
+        val transition1 = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition1).hasProgress(0.5f)
 
         pointerUp()
@@ -216,7 +192,7 @@ class NestedScrollToSceneTest {
         // Start a new gesture
         pointerDownAndScrollTouchSlop()
         scrollUp(percent = 0.5f)
-        val transition2 = assertThat(state.transitionState).isTransition()
+        val transition2 = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition2).hasProgress(0.5f)
 
         pointerUp()
@@ -239,7 +215,7 @@ class NestedScrollToSceneTest {
         // Reach the end of the scrollable element
         canScroll = false
         scrollUp(percent = 0.5f)
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
 
         pointerUp()
@@ -250,20 +226,59 @@ class NestedScrollToSceneTest {
 
     @Test
     fun customizeStlNestedScrollBehavior_multipleRequests() {
+        var canScroll = true
         val state = setup2ScenesAndScrollTouchSlop {
             Modifier
                 // This verticalNestedScrollToScene is closer the STL (an ancestor node)
                 .verticalNestedScrollToScene(bottomBehavior = NestedScrollBehavior.EdgeAlways)
                 // Another verticalNestedScrollToScene modifier
-                .verticalNestedScrollToScene(
-                    bottomBehavior = NestedScrollBehavior.DuringTransitionBetweenScenes
-                )
-                .scrollable(rememberScrollableState { 0f }, Vertical)
+                .verticalNestedScrollToScene(bottomBehavior = NestedScrollBehavior.EdgeNoPreview)
+                .scrollable(rememberScrollableState { if (canScroll) it else 0f }, Vertical)
         }
 
         scrollUp(percent = 0.5f)
-        // EdgeAlways always consume the remaining scroll, DuringTransitionBetweenScenes does not.
-        val transition = assertThat(state.transitionState).isTransition()
+        assertThat(state.transitionState).isIdle()
+
+        // Reach the end of the scrollable element
+        canScroll = false
+
+        scrollUp(percent = 0.5f)
+        // EdgeAlways always consume the remaining scroll, EdgeNoPreview does not.
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasProgress(0.5f)
+    }
+
+    @Test
+    fun resetScrollTracking_afterMissingPointerUpEvent() {
+        var canScroll = true
+        var hasScrollable by mutableStateOf(true)
+        val state = setup2ScenesAndScrollTouchSlop {
+            if (hasScrollable) {
+                Modifier.scrollable(rememberScrollableState { if (canScroll) it else 0f }, Vertical)
+            } else {
+                Modifier
+            }
+        }
+
+        // The gesture is consumed by the component in the scene.
+        scrollUp(percent = 0.2f)
+
+        // STL keeps track of the scroll consumed. The scene remains in Idle.
+        assertThat(state.transitionState).isIdle()
+
+        // The scrollable component disappears, and does not send the signal (pointer up) to reset
+        // the consumed amount.
+        hasScrollable = false
+        pointerUp()
+
+        // A new scrollable component appears and allows the scene to consume the scroll.
+        hasScrollable = true
+        canScroll = false
+        pointerDownAndScrollTouchSlop()
+        scrollUp(percent = 0.2f)
+
+        // STL can only start the transition if it has reset the amount of scroll consumed.
+        val transition = assertThat(state.transitionState).isSceneTransition()
+        assertThat(transition).hasProgress(0.2f)
     }
 }

@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -54,15 +56,12 @@ public interface StatusBarManagerInternal {
      * Used by InputMethodManagerService to notify the IME status.
      *
      * @param displayId The display to which the IME is bound to.
-     * @param token The IME token.
-     * @param vis Bit flags about the IME visibility.
-     *            (e.g. {@link android.inputmethodservice.InputMethodService#IME_ACTIVE})
-     * @param backDisposition Bit flags about the IME back disposition.
-     *         (e.g. {@link android.inputmethodservice.InputMethodService#BACK_DISPOSITION_DEFAULT})
+     * @param vis The IME visibility.
+     * @param backDisposition The IME back disposition.
      * @param showImeSwitcher {@code true} when the IME switcher button should be shown.
      */
-    void setImeWindowStatus(int displayId, IBinder token, int vis,
-            int backDisposition, boolean showImeSwitcher);
+    void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition, boolean showImeSwitcher);
 
     /**
      * See {@link android.app.StatusBarManager#setIcon(String, int, int, String)}.
@@ -168,11 +167,6 @@ public interface StatusBarManagerInternal {
      * @param displayId display ID
      */
     void onDisplayReady(int displayId);
-
-    /**
-     * Notifies System UI whether the recents animation is running.
-     */
-    void onRecentsAnimationStateChanged(boolean running);
 
     /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
     void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,

@@ -941,7 +941,7 @@ package android.companion.virtual {
     method public int getAudioRecordingSessionId(int);
     method public int getDeviceIdForDisplayId(int);
     method public int getDevicePolicy(int, int);
-    method @FlaggedApi("android.companion.virtual.flags.interactive_screen_mirror") public boolean isVirtualDeviceOwnedMirrorDisplay(int);
+    method public boolean isVirtualDeviceOwnedMirrorDisplay(int);
     method public void playSoundEffect(int, int);
   }
 
@@ -1269,10 +1269,6 @@ package android.content.res {
 
 package android.content.rollback {
 
-  public final class RollbackInfo implements android.os.Parcelable {
-    method @FlaggedApi("android.content.pm.recoverability_detection") public int getRollbackImpactLevel();
-  }
-
   public final class RollbackManager {
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void blockRollbackManager(long);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
@@ -1542,6 +1538,10 @@ package android.hardware {
     method @Deprecated public final void setPreviewSurface(android.view.Surface) throws java.io.IOException;
   }
 
+  public final class Sensor {
+    method public int getHandle();
+  }
+
   public final class SensorPrivacyManager {
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setCameraPrivacyAllowlist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
@@ -1797,11 +1797,15 @@ package android.hardware.input {
 
   public class InputSettings {
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") public static int getAccessibilityBounceKeysThreshold(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") public static int getAccessibilityRepeatKeysDelay(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") public static int getAccessibilityRepeatKeysTimeout(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") public static int getAccessibilitySlowKeysThreshold(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") public static boolean isAccessibilityMouseKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") public static boolean isAccessibilityStickyKeysEnabled(@NonNull android.content.Context);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_bounce_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityBounceKeysThreshold(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_mouse_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityMouseKeysEnabled(@NonNull android.content.Context, boolean);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityRepeatKeysDelay(@NonNull android.content.Context, int);
+    method @FlaggedApi("com.android.hardware.input.keyboard_repeat_keys") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityRepeatKeysTimeout(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_slow_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilitySlowKeysThreshold(@NonNull android.content.Context, int);
     method @FlaggedApi("com.android.hardware.input.keyboard_a11y_sticky_keys_flag") @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void setAccessibilityStickyKeysEnabled(@NonNull android.content.Context, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
@@ -1992,6 +1996,7 @@ package android.media {
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE, android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED}) public boolean isFullVolumeDevice();
     method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public boolean isVolumeControlUsingVolumeGroups();
+    method public void permissionUpdateBarrier();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setCsd(float);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setNotifAliasRingForTest(boolean);
@@ -2579,9 +2584,10 @@ package android.os {
 
   @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final class VibrationEffect.VendorEffect extends android.os.VibrationEffect {
     method @Nullable public long[] computeCreateWaveformOffOnTimingsOrNull();
+    method public float getAdaptiveScale();
     method public long getDuration();
     method public int getEffectStrength();
-    method public float getLinearScale();
+    method public float getScale();
     method @NonNull public android.os.PersistableBundle getVendorData();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.VendorEffect> CREATOR;
@@ -3132,6 +3138,7 @@ package android.service.dreams {
 
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
+    method @FlaggedApi("android.service.dreams.publish_preview_state_to_overlay") public final boolean isDreamInPreviewMode();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onEndDream();
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
@@ -3664,7 +3671,11 @@ package android.view {
     method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean hasAccess(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void setUserPreferredDisplayMode(@NonNull android.view.Display.Mode);
+    field public static final int FLAG_ALWAYS_UNLOCKED = 512; // 0x200
+    field public static final int FLAG_OWN_FOCUS = 2048; // 0x800
+    field public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1024; // 0x400
     field public static final int FLAG_TRUSTED = 128; // 0x80
+    field public static final int REMOVE_MODE_DESTROY_CONTENT = 1; // 0x1
     field public static final int TYPE_EXTERNAL = 2; // 0x2
     field public static final int TYPE_INTERNAL = 1; // 0x1
     field public static final int TYPE_OVERLAY = 4; // 0x4
@@ -3675,6 +3686,7 @@ package android.view {
 
   public static final class Display.Mode implements android.os.Parcelable {
     ctor public Display.Mode(int, int, float);
+    method public boolean isSynthetic();
     method public boolean matches(int, int, float);
   }
 
@@ -4425,8 +4437,15 @@ package android.window {
 
   public class WindowInfosListenerForTest {
     ctor public WindowInfosListenerForTest();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
-    method public void removeWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+    method @Deprecated public void removeWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method public void removeWindowInfosListener(@NonNull java.util.function.BiConsumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>,java.util.List<android.window.WindowInfosListenerForTest.DisplayInfo>>);
+  }
+
+  public static class WindowInfosListenerForTest.DisplayInfo {
+    field public final int displayId;
+    field @NonNull public final android.graphics.Matrix transform;
   }
 
   public static class WindowInfosListenerForTest.WindowInfo {

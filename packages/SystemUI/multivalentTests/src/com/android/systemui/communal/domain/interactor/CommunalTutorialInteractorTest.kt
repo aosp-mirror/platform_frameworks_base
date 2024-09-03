@@ -36,11 +36,15 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalTutorialInteractorTest : SysuiTestCase() {
@@ -50,14 +54,14 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     private lateinit var underTest: CommunalTutorialInteractor
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var communalTutorialRepository: FakeCommunalTutorialRepository
-    private lateinit var communalInteractor: CommunalInteractor
+    private lateinit var communalSceneInteractor: CommunalSceneInteractor
     private lateinit var userRepository: FakeUserRepository
 
     @Before
     fun setUp() {
         keyguardRepository = kosmos.fakeKeyguardRepository
         communalTutorialRepository = kosmos.fakeCommunalTutorialRepository
-        communalInteractor = kosmos.communalInteractor
+        communalSceneInteractor = kosmos.communalSceneInteractor
         userRepository = kosmos.fakeUserRepository
 
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
@@ -158,7 +162,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             kosmos.setCommunalAvailable(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
 
-            communalInteractor.changeScene(CommunalScenes.Blank)
+            communalSceneInteractor.changeScene(CommunalScenes.Blank, "test")
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_NOT_STARTED)
         }
@@ -171,7 +175,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
 
-            communalInteractor.changeScene(CommunalScenes.Blank)
+            communalSceneInteractor.changeScene(CommunalScenes.Blank, "test")
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
@@ -184,13 +188,14 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            communalInteractor.changeScene(CommunalScenes.Blank)
+            communalSceneInteractor.changeScene(CommunalScenes.Blank, "test")
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
 
-    private suspend fun goToCommunal() {
+    private suspend fun TestScope.goToCommunal() {
         kosmos.setCommunalAvailable(true)
-        communalInteractor.changeScene(CommunalScenes.Communal)
+        communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
+        runCurrent()
     }
 }

@@ -217,7 +217,9 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         resetSelectRequestBuffer();
         launchDeviceDiscovery();
         startQueuedActions();
-        if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
+        List<HdmiCecMessage> bufferedActiveSource = mDelayedMessageBuffer
+                .getBufferedMessagesWithOpcode(Constants.MESSAGE_ACTIVE_SOURCE);
+        if (bufferedActiveSource.isEmpty()) {
             if (hasAction(RequestActiveSourceAction.class)) {
                 Slog.i(TAG, "RequestActiveSourceAction is in progress. Restarting.");
                 removeAction(RequestActiveSourceAction.class);
@@ -236,7 +238,31 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     }
                 }
             }));
+        } else {
+            addCecDeviceForBufferedActiveSource(bufferedActiveSource.get(0));
         }
+    }
+
+    // Add a new CEC device with known information from the buffered <Active Source> message. This
+    // helps TvInputCallback#onInputAdded to be called such that the message can be processed and
+    // the TV to switch to the new active input.
+    @ServiceThreadOnly
+    private void addCecDeviceForBufferedActiveSource(HdmiCecMessage bufferedActiveSource) {
+        assertRunOnServiceThread();
+        if (bufferedActiveSource == null) {
+            return;
+        }
+        int source = bufferedActiveSource.getSource();
+        int physicalAddress = HdmiUtils.twoBytesToInt(bufferedActiveSource.getParams());
+        List<Integer> deviceTypes = HdmiUtils.getTypeFromAddress(source);
+        HdmiDeviceInfo newDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(source)
+                .setPhysicalAddress(physicalAddress)
+                .setDisplayName(HdmiUtils.getDefaultDeviceName(source))
+                .setDeviceType(deviceTypes.get(0))
+                .setVendorId(Constants.VENDOR_ID_UNKNOWN)
+                .build();
+        mService.getHdmiCecNetwork().addCecDevice(newDevice);
     }
 
     @ServiceThreadOnly
@@ -1199,11 +1225,15 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         boolean avrSystemAudioMode = HdmiUtils.parseCommandParamSystemAudioStatus(message);
         // Set System Audio Mode according to TV's settings.
         // Handle <System Audio Mode Status> here only when
-        // SystemAudioAutoInitiationAction timeout
+        // SystemAudioAutoInitiationAction timeout.
+        // If AVR reports SAM on and it is in standby, the action SystemAudioActionFromTv
+        // triggers a <SAM Request> that will wake-up the AVR.
         HdmiDeviceInfo avr = getAvrDeviceInfo();
         if (avr == null) {
             setSystemAudioMode(false);
-        } else if (avrSystemAudioMode != tvSystemAudioMode) {
+        } else if (avrSystemAudioMode != tvSystemAudioMode
+                    || (avrSystemAudioMode && avr.getDevicePowerStatus()
+                        == HdmiControlManager.POWER_STATUS_STANDBY)) {
             addAndStartAction(new SystemAudioActionFromTv(this, avr.getLogicalAddress(),
                     tvSystemAudioMode, null));
         } else {

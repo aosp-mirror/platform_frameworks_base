@@ -16,7 +16,9 @@
 package com.android.server.power.stats;
 
 import android.annotation.NonNull;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
@@ -32,6 +34,8 @@ public class PowerStatsAggregator {
     private static final long UNINITIALIZED = -1;
     private final AggregatedPowerStatsConfig mAggregatedPowerStatsConfig;
     private final BatteryStatsHistory mHistory;
+    private final SparseBooleanArray mEnabledComponents =
+            new SparseBooleanArray(BatteryConsumer.POWER_COMPONENT_COUNT + 10);
     private AggregatedPowerStats mStats;
     private int mCurrentBatteryState = AggregatedPowerStatsConfig.POWER_STATE_BATTERY;
     private int mCurrentScreenState = AggregatedPowerStatsConfig.SCREEN_STATE_OTHER;
@@ -42,8 +46,17 @@ public class PowerStatsAggregator {
         mHistory = history;
     }
 
-    AggregatedPowerStatsConfig getConfig() {
+    public AggregatedPowerStatsConfig getConfig() {
         return mAggregatedPowerStatsConfig;
+    }
+
+    void setPowerComponentEnabled(int powerComponentId, boolean enabled) {
+        synchronized (this) {
+            if (mStats != null) {
+                mStats = null;
+            }
+            mEnabledComponents.put(powerComponentId, enabled);
+        }
     }
 
     /**
@@ -62,7 +75,7 @@ public class PowerStatsAggregator {
             Consumer<AggregatedPowerStats> consumer) {
         synchronized (this) {
             if (mStats == null) {
-                mStats = new AggregatedPowerStats(mAggregatedPowerStatsConfig);
+                mStats = new AggregatedPowerStats(mAggregatedPowerStatsConfig, mEnabledComponents);
             }
 
             mStats.start(startTimeMs);

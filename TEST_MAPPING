@@ -137,9 +137,16 @@
       "name": "CtsStrictJavaPackagesTestCases"
     }
   ],
-  "postsubmit-ravenwood": [
+  "ravenwood-presubmit": [
     {
       "name": "CtsUtilTestCasesRavenwood",
+      "host": true,
+      "file_patterns": [
+        "[Rr]avenwood"
+      ]
+    },
+    {
+      "name": "RavenwoodBivalentTest",
       "host": true,
       "file_patterns": [
         "[Rr]avenwood"

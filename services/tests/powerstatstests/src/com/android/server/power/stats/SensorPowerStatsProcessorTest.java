@@ -51,6 +51,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class SensorPowerStatsProcessorTest {
     @Rule(order = 0)
@@ -90,23 +91,22 @@ public class SensorPowerStatsProcessorTest {
 
     @Test
     public void testPowerEstimation() {
-        SensorPowerStatsProcessor processor = new SensorPowerStatsProcessor(() -> mSensorManager);
+        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
+                () -> new SensorPowerStatsProcessor(() -> mSensorManager));
 
-        PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(processor);
-
-        processor.noteStateChange(stats, buildHistoryItem(0, true, APP_UID1, SENSOR_HANDLE_1));
+        stats.noteStateChange(buildHistoryItem(0, true, APP_UID1, SENSOR_HANDLE_1));
 
         // Turn the screen off after 2.5 seconds
         stats.setState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
 
-        processor.noteStateChange(stats, buildHistoryItem(6000, false, APP_UID1, SENSOR_HANDLE_1));
-        processor.noteStateChange(stats, buildHistoryItem(7000, true, APP_UID2, SENSOR_HANDLE_1));
-        processor.noteStateChange(stats, buildHistoryItem(8000, true, APP_UID2, SENSOR_HANDLE_2));
-        processor.noteStateChange(stats, buildHistoryItem(9000, false, APP_UID2, SENSOR_HANDLE_1));
+        stats.noteStateChange(buildHistoryItem(6000, false, APP_UID1, SENSOR_HANDLE_1));
+        stats.noteStateChange(buildHistoryItem(7000, true, APP_UID2, SENSOR_HANDLE_1));
+        stats.noteStateChange(buildHistoryItem(8000, true, APP_UID2, SENSOR_HANDLE_2));
+        stats.noteStateChange(buildHistoryItem(9000, false, APP_UID2, SENSOR_HANDLE_1));
 
-        processor.finish(stats, 10000);
+        stats.finish(10000);
 
         PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
         SensorPowerStatsLayout statsLayout = new SensorPowerStatsLayout();
@@ -195,7 +195,7 @@ public class SensorPowerStatsProcessorTest {
     }
 
     private static PowerComponentAggregatedPowerStats createAggregatedPowerStats(
-            SensorPowerStatsProcessor processor) {
+            Supplier<PowerStatsProcessor> processorSupplier) {
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_SENSORS)
                 .trackDeviceStates(
@@ -205,13 +205,13 @@ public class SensorPowerStatsProcessorTest {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessor(processor);
+                .setProcessorSupplier(processorSupplier);
 
         AggregatedPowerStats aggregatedPowerStats = new AggregatedPowerStats(config);
         PowerComponentAggregatedPowerStats powerComponentStats =
                 aggregatedPowerStats.getPowerComponentStats(
                         BatteryConsumer.POWER_COMPONENT_SENSORS);
-        processor.start(powerComponentStats, 0);
+        powerComponentStats.start(0);
 
         powerComponentStats.setState(STATE_POWER, POWER_STATE_OTHER, 0);
         powerComponentStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);

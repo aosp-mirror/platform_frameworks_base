@@ -1167,7 +1167,6 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int USB_DATA_CONNECTED = 2;
     int mUsbDataState = USB_DATA_UNKNOWN;
 
-    private static final int GPS_SIGNAL_QUALITY_NONE = 2;
     int mGpsSignalQualityBin = -1;
     final StopwatchTimer[] mGpsSignalQualityTimer =
         new StopwatchTimer[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
@@ -2131,13 +2130,13 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public LongSupplier getCallDurationSupplier() {
             return () -> mPhoneOnTimer.getTotalTimeLocked(mClock.elapsedRealtime() * 1000,
-                    STATS_SINCE_CHARGED);
+                    STATS_SINCE_CHARGED) / 1000;
         }
 
         @Override
         public LongSupplier getPhoneSignalScanDurationSupplier() {
             return () -> mPhoneSignalScanningTimer.getTotalTimeLocked(
-                    mClock.elapsedRealtime() * 1000, STATS_SINCE_CHARGED);
+                    mClock.elapsedRealtime() * 1000, STATS_SINCE_CHARGED) / 1000;
         }
     }
 
@@ -5528,7 +5527,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistory.recordStateStopEvent(elapsedRealtimeMs, uptimeMs,
                     HistoryItem.STATE_GPS_ON_FLAG, uid, "gnss");
             mHistory.recordGpsSignalQualityEvent(elapsedRealtimeMs, uptimeMs,
-                    GPS_SIGNAL_QUALITY_NONE);
+                    HistoryItem.GNSS_SIGNAL_QUALITY_NONE);
             stopAllGpsSignalQualityTimersLocked(-1, elapsedRealtimeMs);
             mGpsSignalQualityBin = -1;
             if (mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_GNSS)) {
@@ -15301,15 +15300,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHistory.writeHistoryItem(elapsedRealtimeMs, uptimeMs);
             }
         }
-        if (!onBattery &&
-                (status == BatteryManager.BATTERY_STATUS_FULL ||
-                        status == BatteryManager.BATTERY_STATUS_UNKNOWN)) {
-            // We don't record history while we are plugged in and fully charged
-            // (or when battery is not present).  The next time we are
-            // unplugged, history will be cleared.
-            mHistory.setHistoryRecordingEnabled(DEBUG);
-        }
-
         mLastLearnedBatteryCapacityUah = chargeFullUah;
         if (mMinLearnedBatteryCapacityUah == -1) {
             mMinLearnedBatteryCapacityUah = chargeFullUah;
@@ -15487,7 +15477,8 @@ public class BatteryStatsImpl extends BatteryStats {
         final long txTimeMs = counter.getTxTimeCounters()[0].getCountLocked(which);
         final long totalControllerActivityTimeMs =
                 computeBatteryRealtime(mClock.elapsedRealtime() * 1000, which) / 1000;
-        final long sleepTimeMs = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + txTimeMs);
+        final long sleepTimeMs = Math.max(0,
+                totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + txTimeMs));
         final long energyConsumedMaMs = counter.getPowerCounter().getCountLocked(which);
         final long monitoredRailChargeConsumedMaMs =
                 counter.getMonitoredRailChargeConsumedMaMs().getCountLocked(which);
@@ -16393,6 +16384,10 @@ public class BatteryStatsImpl extends BatteryStats {
      * Callers will need to wait for the collection to complete on the handler thread.
      */
     public void schedulePowerStatsSampleCollection() {
+        if (!mSystemReady) {
+            return;
+        }
+
         mCpuPowerStatsCollector.forceSchedule();
         mScreenPowerStatsCollector.forceSchedule();
         mMobileRadioPowerStatsCollector.forceSchedule();
@@ -16400,6 +16395,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothPowerStatsCollector.forceSchedule();
         mCameraPowerStatsCollector.forceSchedule();
         mGnssPowerStatsCollector.forceSchedule();
+        mCustomEnergyConsumerPowerStatsCollector.forceSchedule();
     }
 
     /**

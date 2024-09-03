@@ -45,15 +45,24 @@ class ToggleResizeDesktopTaskTransitionHandler(
     private lateinit var onTaskResizeAnimationListener: OnTaskResizeAnimationListener
 
     private var boundsAnimator: Animator? = null
+    private var initialBounds: Rect? = null
 
     constructor(
         transitions: Transitions,
         interactionJankMonitor: InteractionJankMonitor
     ) : this(transitions, Supplier { SurfaceControl.Transaction() }, interactionJankMonitor)
 
-    /** Starts a quick resize transition. */
-    fun startTransition(wct: WindowContainerTransaction) {
+    /**
+     * Starts a quick resize transition.
+     *
+     *  @param wct WindowContainerTransaction that will update core about the task changes applied
+     *  @param taskLeashBounds current bounds of the task leash (Note: not guaranteed to be the
+     *                         bounds of the actual task). This is provided so that the animation
+     *                         resizing can begin where the task leash currently is for smoother UX.
+     */
+    fun startTransition(wct: WindowContainerTransaction, taskLeashBounds: Rect? = null) {
         transitions.startTransition(TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE, wct, this)
+        initialBounds = taskLeashBounds
     }
 
     fun setOnTaskResizeAnimationListener(listener: OnTaskResizeAnimationListener) {
@@ -70,7 +79,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
         val change = findRelevantChange(info)
         val leash = change.leash
         val taskId = checkNotNull(change.taskInfo).taskId
-        val startBounds = change.startAbsBounds
+        val startBounds = initialBounds ?: change.startAbsBounds
         val endBounds = change.endAbsBounds
 
         val tx = transactionSupplier.get()
@@ -92,7 +101,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                             onTaskResizeAnimationListener.onAnimationStart(
                                 taskId,
                                 startTransaction,
-                                startBounds
+                                startBounds,
                             )
                         },
                         onEnd = {
@@ -106,9 +115,10 @@ class ToggleResizeDesktopTaskTransitionHandler(
                                 .show(leash)
                             onTaskResizeAnimationListener.onAnimationEnd(taskId)
                             finishCallback.onTransitionFinished(null)
+                            initialBounds = null
                             boundsAnimator = null
-                            interactionJankMonitor.end(
-                                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
                         }
                     )
                     addUpdateListener { anim ->

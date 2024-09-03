@@ -102,6 +102,45 @@ class FakeKeyguardTransitionRepository(
     }
 
     /**
+     * Sends the provided [step] and makes sure that all previous [TransitionState]'s are sent when
+     * [fillInSteps] is true. e.g. when a step FINISHED is provided, a step with STARTED and RUNNING
+     * is also sent.
+     */
+    suspend fun sendTransitionSteps(
+        step: TransitionStep,
+        testScope: TestScope,
+        fillInSteps: Boolean = true,
+    ) {
+        if (fillInSteps && step.transitionState != TransitionState.STARTED) {
+            sendTransitionStep(
+                step =
+                    TransitionStep(
+                        transitionState = TransitionState.STARTED,
+                        from = step.from,
+                        to = step.to,
+                        value = 0f,
+                    )
+            )
+            testScope.testScheduler.runCurrent()
+
+            if (step.transitionState != TransitionState.RUNNING) {
+                sendTransitionStep(
+                    step =
+                        TransitionStep(
+                            transitionState = TransitionState.RUNNING,
+                            from = step.from,
+                            to = step.to,
+                            value = 0.6f,
+                        )
+                )
+                testScope.testScheduler.runCurrent()
+            }
+        }
+        sendTransitionStep(step = step)
+        testScope.testScheduler.runCurrent()
+    }
+
+    /**
      * Sends TransitionSteps between [from] and [to], calling [runCurrent] after each step.
      *
      * By default, sends steps through FINISHED (STARTED, RUNNING, FINISHED) but can be halted part
@@ -283,7 +322,7 @@ class FakeKeyguardTransitionRepository(
         )
     }
 
-    override fun updateTransition(
+    override suspend fun updateTransition(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState

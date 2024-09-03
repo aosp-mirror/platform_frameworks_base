@@ -27,6 +27,11 @@ import org.objectweb.asm.tree.TypeAnnotationNode
 import java.io.BufferedInputStream
 import java.io.PrintWriter
 import java.util.Arrays
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
+import java.util.function.Consumer
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 /**
@@ -183,49 +188,85 @@ class ClassNodes {
         /**
          * Load all the classes, without code.
          */
-        fun loadClassStructures(inJar: String): ClassNodes {
-            log.i("Reading class structure from $inJar ...")
-            val start = System.currentTimeMillis()
-
+        fun loadClassStructures(
+            inJar: String,
+            timeCollector: Consumer<Double>? = null,
+        ): ClassNodes {
             val allClasses = ClassNodes()
 
-            log.withIndent {
-                ZipFile(inJar).use { inZip ->
-                    val inEntries = inZip.entries()
+            // Load classes in parallel.
+            val executor = Executors.newFixedThreadPool(4)
 
-                    while (inEntries.hasMoreElements()) {
-                        val entry = inEntries.nextElement()
+            // First exception defected.
+            val exception = AtomicReference<Throwable>()
 
-                        BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
+            // Called on a BG thread. Read a single jar entry and add it to [allClasses].
+            fun parseClass(inZip: ZipFile, entry: ZipEntry) {
+                try {
+                    inZip.getInputStream(entry).use { ins ->
+                        val cr = ClassReader(BufferedInputStream(ins))
+                        val cn = ClassNode()
+                        cr.accept(
+                            cn, ClassReader.SKIP_CODE
+                                    or ClassReader.SKIP_DEBUG
+                                    or ClassReader.SKIP_FRAMES
+                        )
+                        synchronized(allClasses) {
+                            if (!allClasses.addClass(cn)) {
+                                log.w("Duplicate class found: ${cn.name}")
+                            }
+                        }
+                    }
+                } catch (e: Throwable) {
+                    log.e("Failed to load class: $e")
+                    exception.compareAndSet(null, e)
+                }
+            }
+
+            // Actually open the jar and read it on worker threads.
+            val time = log.iTime("Reading class structure from $inJar") {
+                log.withIndent {
+                    ZipFile(inJar).use { inZip ->
+                        val inEntries = inZip.entries()
+
+                        while (inEntries.hasMoreElements()) {
+                            val entry = inEntries.nextElement()
+
                             if (entry.name.endsWith(".class")) {
-                                val cr = ClassReader(bis)
-                                val cn = ClassNode()
-                                cr.accept(cn, ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG
-                                        or ClassReader.SKIP_FRAMES)
-                                if (!allClasses.addClass(cn)) {
-                                    log.w("Duplicate class found: ${cn.name}")
+                                executor.submit {
+                                    parseClass(inZip, entry)
                                 }
                             } else if (entry.name.endsWith(".dex")) {
                                 // Seems like it's an ART jar file. We can't process it.
                                 // It's a fatal error.
                                 throw InvalidJarFileException(
-                                    "$inJar is not a desktop jar file. It contains a *.dex file.")
+                                    "$inJar is not a desktop jar file."
+                                            + " It contains a *.dex file."
+                                )
                             } else {
                                 // Unknown file type. Skip.
-                                while (bis.available() > 0) {
-                                    bis.skip((1024 * 1024).toLong())
-                                }
                             }
                         }
+                        // Wait for all the work to complete. (must do it before closing the zip)
+                        log.i("Waiting for all loaders to finish...")
+                        executor.shutdown()
+                        executor.awaitTermination(5, TimeUnit.MINUTES)
+                        log.i("All loaders to finished.")
                     }
                 }
-            }
-            if (allClasses.size == 0) {
-                log.w("$inJar contains no *.class files.")
-            }
 
-            val end = System.currentTimeMillis()
-            log.i("Done reading class structure in %.1f second(s).", (end - start) / 1000.0)
+                // If any exception is detected, throw it.
+                exception.get()?.let {
+                    throw it
+                }
+
+                if (allClasses.size == 0) {
+                    log.w("$inJar contains no *.class files.")
+                } else {
+                    log.i("Loaded ${allClasses.size} classes from $inJar.")
+                }
+            }
+            timeCollector?.accept(time)
             return allClasses
         }
     }

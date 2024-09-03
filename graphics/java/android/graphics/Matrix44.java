@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import com.android.graphics.hwui.flags.Flags;
 
@@ -30,6 +31,7 @@ import java.util.Arrays;
  * in row-major order. The values and operations are treated as column vectors.
  */
 @FlaggedApi(Flags.FLAG_MATRIX_44)
+@RavenwoodKeepWholeClass
 public class Matrix44 {
     final float[] mBackingArray;
     /**

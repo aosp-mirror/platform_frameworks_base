@@ -25,7 +25,7 @@ import com.android.systemui.shared.settings.data.repository.systemSettingsReposi
 val Kosmos.notificationSettingsRepository by
     Kosmos.Fixture {
         NotificationSettingsRepository(
-            scope = testScope.backgroundScope,
+            backgroundScope = testScope.backgroundScope,
             backgroundDispatcher = testDispatcher,
             secureSettingsRepository = secureSettingsRepository,
             systemSettingsRepository = systemSettingsRepository,

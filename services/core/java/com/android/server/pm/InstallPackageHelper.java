@@ -501,9 +501,9 @@ final class InstallPackageHelper {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
-        // When upgrading a package, pkgSetting is copied from oldPkgSetting. Clear the app
-        // metadata file path for the new package.
-        if (oldPkgSetting != null) {
+        // When upgrading a package, clear the app metadata file path for the new package.
+        if (oldPkgSetting != null
+                && oldPkgSetting.getLastUpdateTime() < pkgSetting.getLastUpdateTime()) {
             pkgSetting.setAppMetadataFilePath(null);
             pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
         }
@@ -686,6 +686,9 @@ final class InstallPackageHelper {
                     (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
             final boolean fullApp =
                     (installFlags & PackageManager.INSTALL_FULL_APP) != 0;
+            final boolean isPackageDeviceAdmin = mPm.isPackageDeviceAdmin(packageName, userId);
+            final boolean isProtectedPackage = mPm.mProtectedPackages != null
+                    && mPm.mProtectedPackages.isPackageStateProtected(userId, packageName);
 
             // writer
             synchronized (mPm.mLock) {
@@ -694,7 +697,8 @@ final class InstallPackageHelper {
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
                     return Pair.create(PackageManager.INSTALL_FAILED_INVALID_URI, intentSender);
                 }
-                if (instantApp && (pkgSetting.isSystem() || pkgSetting.isUpdatedSystemApp())) {
+                if (instantApp && (pkgSetting.isSystem() || pkgSetting.isUpdatedSystemApp()
+                        || isPackageDeviceAdmin || isProtectedPackage)) {
                     return Pair.create(PackageManager.INSTALL_FAILED_INVALID_URI, intentSender);
                 }
                 if (!snapshot.canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
@@ -1395,7 +1399,34 @@ final class InstallPackageHelper {
                                 "Package " + pkgName + " is a persistent app. "
                                         + "Persistent apps are not updateable.");
                     }
+                    // When updating an sdk library, make sure that the versionMajor is
+                    // changed if the targetSdkVersion and minSdkVersion have changed
+                    if (parsedPackage.isSdkLibrary() && ps.getPkg() != null
+                            && ps.getPkg().isSdkLibrary()) {
+                        final int oldMinSdk = ps.getPkg().getMinSdkVersion();
+                        final int newMinSdk = parsedPackage.getMinSdkVersion();
+                        if (oldTargetSdk != newTargetSdk || oldMinSdk != newMinSdk) {
+                            final int oldVersionMajor = ps.getPkg().getSdkLibVersionMajor();
+                            final int newVersionMajor = parsedPackage.getSdkLibVersionMajor();
+                            if (oldVersionMajor == newVersionMajor) {
+                                throw new PrepareFailure(
+                                        PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                        "Failure updating " + pkgName + " as it updates"
+                                                + " an sdk library <"
+                                                + parsedPackage.getSdkLibraryName() + ">"
+                                                + " without changing the versionMajor, but the"
+                                                + " targetSdkVersion or minSdkVersion has changed:"
+                                                + " Old targetSdkVersion: " + oldTargetSdk
+                                                + " new targetSdkVersion: " + newTargetSdk
+                                                + " Old minSdkVersion: " + oldMinSdk
+                                                + " new minSdkVersion: " + newMinSdk
+                                                + " versionMajor: " + newVersionMajor
+                                    );
+                            }
+                        }
+                    }
                 }
+
             }
 
             PackageSetting signatureCheckPs = ps;
@@ -1801,26 +1832,37 @@ final class InstallPackageHelper {
                                 oldPackageState.getRestrictUpdateHash());
                     }
 
-                    if (oldPackage != null) {
-                        // APK should not change its sharedUserId declarations
-                        final var oldSharedUid = oldPackage.getSharedUserId() != null
-                                ? oldPackage.getSharedUserId() : "<nothing>";
-                        final var newSharedUid = parsedPackage.getSharedUserId() != null
-                                ? parsedPackage.getSharedUserId() : "<nothing>";
-                        if (!oldSharedUid.equals(newSharedUid)) {
-                            throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
-                                    "Package " + parsedPackage.getPackageName()
-                                            + " shared user changed from "
-                                            + oldSharedUid + " to " + newSharedUid);
+                    // APK should not change its sharedUserId declarations
+                    final String oldSharedUid;
+                    if (mPm.mSettings.getSharedUserSettingLPr(oldPackageState) != null) {
+                        oldSharedUid = mPm.mSettings.getSharedUserSettingLPr(oldPackageState).name;
+                    } else {
+                        oldSharedUid = "<nothing>";
+                    }
+                    String newSharedUid = parsedPackage.getSharedUserId() != null
+                            ? parsedPackage.getSharedUserId() : "<nothing>";
+                    // If the previously installed app version doesn't have sharedUserSetting,
+                    // check that the new apk either doesn't have sharedUserId or it is leaving one.
+                    // If it contains sharedUserId but it is also leaving it, it's ok to proceed.
+                    if (oldSharedUid.equals("<nothing>")) {
+                        if (parsedPackage.isLeavingSharedUser()) {
+                            newSharedUid = "<nothing>";
                         }
+                    }
 
-                        // APK should not re-join shared UID
-                        if (oldPackage.isLeavingSharedUser()
-                                && !parsedPackage.isLeavingSharedUser()) {
-                            throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
-                                    "Package " + parsedPackage.getPackageName()
-                                            + " attempting to rejoin " + newSharedUid);
-                        }
+                    if (!oldSharedUid.equals(newSharedUid)) {
+                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                "Package " + parsedPackage.getPackageName()
+                                        + " shared user changed from "
+                                        + oldSharedUid + " to " + newSharedUid);
+                    }
+
+                    // APK should not re-join shared UID
+                    if (oldPackageState.isLeavingSharedUser()
+                            && !parsedPackage.isLeavingSharedUser()) {
+                        throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
+                                "Package " + parsedPackage.getPackageName()
+                                        + " attempting to rejoin " + newSharedUid);
                     }
 
                     // In case of rollback, remember per-user/profile install state
@@ -2194,8 +2236,9 @@ final class InstallPackageHelper {
                 //  by apexd to be more accurate.
                 installRequest.setScannedPackageSettingFirstInstallTimeFromReplaced(
                         deletedPkgSetting, allUsers);
-                installRequest.setScannedPackageSettingLastUpdateTime(
-                        System.currentTimeMillis());
+                long currentTime = System.currentTimeMillis();
+                installRequest.setScannedPackageSettingLastUpdateTime(currentTime);
+                installRequest.setScannedPackageSettingFirstInstallTime(currentTime);
 
                 installRequest.getRemovedInfo().mBroadcastAllowList =
                         mPm.mAppsFilter.getVisibilityAllowList(mPm.snapshotComputer(),

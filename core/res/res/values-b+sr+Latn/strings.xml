@@ -643,7 +643,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Dozvoljava aplikaciji da čita lokacije iz medijske kolekcije."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Koristite biometriju"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Koristite biometriju ili otključavanje ekrana"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrdite svoj identitet"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrdite identitet"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Koristite biometrijski podatak da biste nastavili"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Koristite biometrijski podatak ili otključavanje ekrana da biste nastavili"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrijski hardver nije dostupan"</string>
@@ -1195,6 +1195,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Pisanje rukom nije podržano u poljima za lozinke"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Nazad"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Promenite metod unosa"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Otvori birač metoda unosa"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Podešavanja"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Memorijski prostor je na izmaku"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Neke sistemske funkcije možda ne funkcionišu"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Nema dovoljno memorijskog prostora za sistem. Uverite se da imate 250 MB slobodnog prostora i ponovo pokrenite."</string>
@@ -2423,6 +2425,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sadržaj aplikacije je skriven za deljenje sadržaja ekrana zbog bezbednosti"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatski povezano sa satelitom"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Možete da šaljete i primate poruke bez mobilne ili WiFi mreže"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Želite da koristite satelitsku razmenu poruka?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Šaljite i primajte poruke bez mobilne ili WiFi mreže"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvori Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Princip rada"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Na čekanju..."</string>
@@ -2448,4 +2452,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Mape"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikacije"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Otisci prstiju više ne mogu da se prepoznaju. Ponovo podesite otključavanje otiskom prsta."</string>
 </resources>

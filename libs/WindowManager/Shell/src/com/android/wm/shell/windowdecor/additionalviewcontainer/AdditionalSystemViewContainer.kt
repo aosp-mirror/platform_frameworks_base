@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor.additionalviewcontainer
 
+import android.annotation.LayoutRes
 import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
@@ -29,24 +30,52 @@ import android.view.WindowManager
  * for view containers that should be above the status bar layer.
  */
 class AdditionalSystemViewContainer(
-    private val context: Context,
+    context: Context,
     taskId: Int,
     x: Int,
     y: Int,
     width: Int,
     height: Int,
     flags: Int,
-    layoutId: Int? = null
-) : AdditionalViewContainer() {
     override val view: View
+) : AdditionalViewContainer() {
+
+    constructor(
+        context: Context,
+        taskId: Int,
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        flags: Int,
+        @LayoutRes layoutId: Int
+    ) : this(
+        context = context,
+        taskId = taskId,
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        flags = flags,
+        view = LayoutInflater.from(context).inflate(layoutId, null /* parent */)
+    )
+
+    constructor(
+        context: Context, taskId: Int, x: Int, y: Int, width: Int, height: Int, flags: Int
+    ) : this(
+        context = context,
+        taskId = taskId,
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        flags = flags,
+        view = View(context)
+    )
+
     val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
 
     init {
-        if (layoutId != null) {
-            view = LayoutInflater.from(context).inflate(layoutId, null)
-        } else {
-            view = View(context)
-        }
         val lp = WindowManager.LayoutParams(
             width, height, x, y,
             WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,

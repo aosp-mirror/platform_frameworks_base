@@ -27,6 +27,7 @@ import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
 import com.android.internal.os.PowerStats;
@@ -73,14 +74,21 @@ class AggregatedPowerStats {
     private long mDurationMs;
 
     AggregatedPowerStats(@NonNull AggregatedPowerStatsConfig aggregatedPowerStatsConfig) {
+        this(aggregatedPowerStatsConfig, new SparseBooleanArray());
+    }
+
+    AggregatedPowerStats(@NonNull AggregatedPowerStatsConfig aggregatedPowerStatsConfig,
+            @NonNull SparseBooleanArray enabledComponents) {
         mConfig = aggregatedPowerStatsConfig;
         List<PowerComponent> configs =
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs();
         mPowerComponentStats = new SparseArray<>(configs.size());
         for (int i = 0; i < configs.size(); i++) {
             PowerComponent powerComponent = configs.get(i);
-            mPowerComponentStats.put(powerComponent.getPowerComponentId(),
-                    new PowerComponentAggregatedPowerStats(this, powerComponent));
+            if (enabledComponents.get(powerComponent.getPowerComponentId(), true)) {
+                mPowerComponentStats.put(powerComponent.getPowerComponentId(),
+                        new PowerComponentAggregatedPowerStats(this, powerComponent));
+            }
         }
         mGenericPowerComponent = createGenericPowerComponent();
         mPowerComponentStats.put(BatteryConsumer.POWER_COMPONENT_ANY, mGenericPowerComponent);
@@ -166,8 +174,7 @@ class AggregatedPowerStats {
 
     void start(long timestampMs) {
         for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats component = mPowerComponentStats.valueAt(i);
-            component.getConfig().getProcessor().start(component, timestampMs);
+            mPowerComponentStats.valueAt(i).start(timestampMs);
         }
     }
 
@@ -203,24 +210,23 @@ class AggregatedPowerStats {
             stats = new PowerComponentAggregatedPowerStats(this, powerComponent);
             stats.setPowerStatsDescriptor(powerStats.descriptor);
             stats.copyStatesFrom(mGenericPowerComponent);
+            stats.start(time);
             mPowerComponentStats.put(powerComponentId, stats);
         }
 
-        PowerStatsProcessor processor = stats.getConfig().getProcessor();
-        processor.addPowerStats(stats, powerStats, time);
+        stats.addPowerStats(powerStats, time);
     }
 
     public void noteStateChange(BatteryStats.HistoryItem item) {
         for (int i = 0; i < mPowerComponentStats.size(); i++) {
-            PowerComponentAggregatedPowerStats stats = mPowerComponentStats.valueAt(i);
-            stats.getConfig().getProcessor().noteStateChange(stats, item);
+            mPowerComponentStats.valueAt(i).noteStateChange(item);
         }
     }
 
     void finish(long timestampMs) {
         for (int i = 0; i < mPowerComponentStats.size(); i++) {
             PowerComponentAggregatedPowerStats component = mPowerComponentStats.valueAt(i);
-            component.getConfig().getProcessor().finish(component, timestampMs);
+            component.finish(timestampMs);
         }
     }
 

@@ -255,6 +255,7 @@ interface IDevicePolicyManager {
     ComponentName getRestrictionsProvider(int userHandle);
 
     void setUserRestriction(in ComponentName who, in String callerPackage, in String key, boolean enable, boolean parent);
+    void setUserRestrictionForUser(in String systemEntity, in String key, boolean enable, int targetUser);
     void setUserRestrictionGlobally(in String callerPackage, in String key);
     Bundle getUserRestrictions(in ComponentName who, in String callerPackage, boolean parent);
     Bundle getUserRestrictionsGlobally(in String callerPackage);
@@ -620,7 +621,7 @@ interface IDevicePolicyManager {
     void calculateHasIncompatibleAccounts();
 
     void setContentProtectionPolicy(in ComponentName who, String callerPackageName, int policy);
-    int getContentProtectionPolicy(in ComponentName who, String callerPackageName);
+    int getContentProtectionPolicy(in ComponentName who, String callerPackageName, int userId);
 
     int[] getSubscriptionIds(String callerPackageName);
 

@@ -258,6 +258,6 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
                 Surface.ROTATION_0, new Point(100, 100), new Rect() /* contentInsets */,
                 new Rect() /* letterboxInsets*/, false /* isLowResolution */,
                 true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN, 0 /* mSystemUiVisibility */,
-                false /* isTranslucent */, false /* hasImeSurface */);
+                false /* isTranslucent */, false /* hasImeSurface */, 0 /* uiMode */);
     }
 }

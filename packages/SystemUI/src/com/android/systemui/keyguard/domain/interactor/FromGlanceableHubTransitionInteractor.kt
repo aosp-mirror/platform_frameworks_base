@@ -37,16 +37,21 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.noneOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
+import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@OptIn(FlowPreview::class)
 @SysUISingleton
 class FromGlanceableHubTransitionInteractor
 @Inject
@@ -96,6 +101,8 @@ constructor(
                 when (toState) {
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
+                    KeyguardState.ALTERNATE_BOUNCER -> TO_BOUNCER_DURATION
+                    KeyguardState.PRIMARY_BOUNCER -> TO_BOUNCER_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -157,6 +164,7 @@ constructor(
                     if (communalSceneKtfRefactor()) {
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to dozing",
                             transitionKey = CommunalTransitionKeys.Immediately,
                             keyguardState = KeyguardState.DOZING,
                         )
@@ -180,6 +188,7 @@ constructor(
                             if (communalSceneKtfRefactor()) {
                                 communalSceneInteractor.changeScene(
                                     newScene = CommunalScenes.Blank,
+                                    loggingReason = "hub to occluded (KeyguardWmStateRefactor)",
                                     transitionKey = CommunalTransitionKeys.SimpleFade,
                                     keyguardState = state,
                                 )
@@ -192,23 +201,31 @@ constructor(
             }
         } else if (communalSceneKtfRefactor()) {
             scope.launch {
-                allOf(
+                combine(
                         keyguardInteractor.isKeyguardOccluded,
-                        noneOf(
-                            // Dream is a special-case of occluded, so filter out the dreaming
-                            // case here.
-                            keyguardInteractor.isDreaming,
-                            // When launching activities from widgets on the hub, we have a
-                            // custom occlusion animation.
-                            communalSceneInteractor.isLaunchingWidget,
-                        ),
+                        keyguardInteractor.isAbleToDream
+                            // Debounce the dreaming signal since there is a race condition between
+                            // the occluded and dreaming signals. We therefore add a small delay
+                            // to give enough time for occluded to flip to false when the dream
+                            // ends, to avoid transitioning to OCCLUDED erroneously when exiting
+                            // the dream.
+                            .debounce(100.milliseconds),
+                        ::Pair
                     )
-                    .filterRelevantKeyguardStateAnd { isOccludedAndNotDreamingNorLaunchingWidget ->
-                        isOccludedAndNotDreamingNorLaunchingWidget
+                    .sampleFilter(
+                        // When launching activities from widgets on the hub, we have a
+                        // custom occlusion animation.
+                        communalSceneInteractor.isLaunchingWidget,
+                    ) { launchingWidget ->
+                        !launchingWidget
+                    }
+                    .filterRelevantKeyguardStateAnd { (isOccluded, isDreaming) ->
+                        isOccluded && !isDreaming
                     }
                     .collect { _ ->
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
+                            loggingReason = "hub to occluded",
                             transitionKey = CommunalTransitionKeys.SimpleFade,
                             keyguardState = KeyguardState.OCCLUDED,
                         )
@@ -226,7 +243,6 @@ constructor(
     }
 
     private fun listenForHubToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (communalSceneKtfRefactor()) {
             scope.launch {
@@ -252,6 +268,7 @@ constructor(
                         } else {
                             communalSceneInteractor.changeScene(
                                 newScene = CommunalScenes.Blank,
+                                loggingReason = "hub to gone",
                                 transitionKey = CommunalTransitionKeys.SimpleFade,
                                 keyguardState = KeyguardState.GONE
                             )
@@ -269,8 +286,16 @@ constructor(
 
     companion object {
         const val TAG = "FromGlanceableHubTransitionInteractor"
-        val DEFAULT_DURATION = 1.seconds
-        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
+
+        /**
+         * DEFAULT_DURATION controls the timing for all animations other than those with overrides
+         * in [getDefaultAnimatorForTransitionsToState].
+         *
+         * Set at 400ms for parity with [FromLockscreenTransitionInteractor]
+         */
+        val DEFAULT_DURATION = 400.milliseconds
+        val TO_LOCKSCREEN_DURATION = 1.seconds
+        val TO_BOUNCER_DURATION = 400.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
     }
 }

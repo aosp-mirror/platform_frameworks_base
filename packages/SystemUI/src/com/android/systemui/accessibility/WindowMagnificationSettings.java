@@ -56,6 +56,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.Flags;
@@ -75,6 +76,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final SecureSettings mSecureSettings;
 
     private final Runnable mWindowInsetChangeRunnable;
@@ -135,10 +137,12 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     @VisibleForTesting
     WindowMagnificationSettings(Context context, WindowMagnificationSettingsCallback callback,
-            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, SecureSettings secureSettings) {
+            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, SecureSettings secureSettings,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = mContext.getSystemService(WindowManager.class);
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mCallback = callback;
         mSecureSettings = secureSettings;
@@ -320,7 +324,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
         // Unregister observer before removing view
         mSecureSettings.unregisterContentObserverSync(mMagnificationCapabilityObserver);
-        mWindowManager.removeView(mSettingView);
+        mViewCaptureAwareWindowManager.removeView(mSettingView);
         mIsVisible = false;
         if (resetPosition) {
             mParams.x = 0;
@@ -378,7 +382,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 mParams.y = mDraggableWindowBounds.bottom;
             }
 
-            mWindowManager.addView(mSettingView, mParams);
+            mViewCaptureAwareWindowManager.addView(mSettingView, mParams);
 
             mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
@@ -478,6 +482,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 } else { // mode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
                     mEditButton.setVisibility(View.VISIBLE);
                     mAllowDiagonalScrollingView.setVisibility(View.VISIBLE);
+                    if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
+                        selectedButtonIndex =
+                                windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
+                    }
                 }
                 break;
 

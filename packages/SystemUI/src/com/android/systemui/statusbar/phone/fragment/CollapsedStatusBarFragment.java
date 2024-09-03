@@ -59,8 +59,6 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableSta
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -140,7 +138,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mLocationPublisher;
-    private final NotificationIconAreaController mNotificationIconAreaController;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
@@ -237,7 +234,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             StatusBarLocationPublisher locationPublisher,
-            NotificationIconAreaController notificationIconAreaController,
             ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarIconController statusBarIconController,
             DarkIconManager.Factory darkIconManagerFactory,
@@ -262,7 +258,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mLocationPublisher = locationPublisher;
-        mNotificationIconAreaController = notificationIconAreaController;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarIconController = statusBarIconController;
         mCollapsedStatusBarViewModel = collapsedStatusBarViewModel;
@@ -313,18 +308,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mStatusBarWindowStateController.addListener(mStatusBarWindowStateListener);
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            mDemoModeController.addCallback(mDemoModeCallback);
-        }
+        mDemoModeController.addCallback(mDemoModeCallback);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mStatusBarWindowStateController.removeListener(mStatusBarWindowStateListener);
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            mDemoModeController.removeCallback(mDemoModeCallback);
-        }
+        mDemoModeController.removeCallback(mDemoModeCallback);
     }
 
     @Override
@@ -471,11 +462,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStartableStates.put(startable, Startable.State.STOPPED);
         }
         mDumpManager.unregisterDumpable(getClass().getSimpleName());
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            if (mNicBindingDisposable != null) {
-                mNicBindingDisposable.dispose();
-                mNicBindingDisposable = null;
-            }
+        if (mNicBindingDisposable != null) {
+            mNicBindingDisposable.dispose();
+            mNicBindingDisposable = null;
         }
     }
 
@@ -483,22 +472,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void initNotificationIconArea() {
         Trace.beginSection("CollapsedStatusBarFragment#initNotifIconArea");
         ViewGroup notificationIconArea = mStatusBar.requireViewById(R.id.notification_icon_area);
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            LayoutInflater.from(getContext())
-                    .inflate(R.layout.notification_icon_area, notificationIconArea, true);
-            NotificationIconContainer notificationIcons =
-                    notificationIconArea.requireViewById(R.id.notificationIcons);
-            mNotificationIconAreaInner = notificationIcons;
-            mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons);
-        } else {
-            mNotificationIconAreaInner =
-                    mNotificationIconAreaController.getNotificationInnerAreaView();
-            if (mNotificationIconAreaInner.getParent() != null) {
-                ((ViewGroup) mNotificationIconAreaInner.getParent())
-                        .removeView(mNotificationIconAreaInner);
-            }
-            notificationIconArea.addView(mNotificationIconAreaInner);
-        }
+        LayoutInflater.from(getContext())
+                .inflate(R.layout.notification_icon_area, notificationIconArea, true);
+        NotificationIconContainer notificationIcons =
+                notificationIconArea.requireViewById(R.id.notificationIcons);
+        mNotificationIconAreaInner = notificationIcons;
+        mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons);
 
         updateNotificationIconAreaAndOngoingActivityChip(/* animate= */ false);
         Trace.endSection();

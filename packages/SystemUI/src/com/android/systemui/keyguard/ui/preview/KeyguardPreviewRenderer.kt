@@ -50,7 +50,6 @@ import androidx.core.view.isInvisible
 import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
-import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -79,8 +78,8 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry
@@ -89,7 +88,6 @@ import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
 import com.android.systemui.statusbar.KeyguardIndicationController
-import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -133,8 +131,6 @@ constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
-    private val falsingManager: FalsingManager,
-    private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val keyguardRootViewModel: KeyguardRootViewModel,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
@@ -148,7 +144,7 @@ constructor(
     private val defaultShortcutsSection: DefaultShortcutsSection,
     private val keyguardClockInteractor: KeyguardClockInteractor,
     private val keyguardClockViewModel: KeyguardClockViewModel,
-    private val quickAffordancesLogger: KeyguardQuickAffordancesLogger,
+    private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -193,6 +189,7 @@ constructor(
     init {
         coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job())
         disposables += DisposableHandle { coroutineScope.cancel() }
+        clockController.setFallbackWeatherData(WeatherData.getPlaceholderWeatherData())
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.enablePreviewMode(
@@ -280,12 +277,36 @@ constructor(
         }
     }
 
+    fun onStartCustomizingQuickAffordances(
+        initiallySelectedSlotId: String?,
+    ) {
+        quickAffordancesCombinedViewModel.enablePreviewMode(
+            initiallySelectedSlotId = initiallySelectedSlotId,
+            shouldHighlightSelectedAffordance = true,
+        )
+    }
+
     fun onSlotSelected(slotId: String) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.onPreviewSlotSelected(slotId = slotId)
         } else {
             bottomAreaViewModel.onPreviewSlotSelected(slotId = slotId)
         }
+    }
+
+    fun onPreviewQuickAffordanceSelected(slotId: String, quickAffordanceId: String) {
+        quickAffordancesCombinedViewModel.onPreviewQuickAffordanceSelected(
+            slotId,
+            quickAffordanceId,
+        )
+    }
+
+    fun onDefaultPreview() {
+        quickAffordancesCombinedViewModel.onClearPreviewQuickAffordances()
+        quickAffordancesCombinedViewModel.enablePreviewMode(
+            initiallySelectedSlotId = null,
+            shouldHighlightSelectedAffordance = false,
+        )
     }
 
     fun destroy() {
@@ -397,6 +418,7 @@ constructor(
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
                     mainDispatcher,
+                    null,
                 )
         }
         rootView.addView(
@@ -458,13 +480,10 @@ constructor(
 
         keyguardRootView.findViewById<LaunchableImageView?>(R.id.start_button)?.let { imageView ->
             shortcutsBindings.add(
-                KeyguardQuickAffordanceViewBinder.bind(
+                keyguardQuickAffordanceViewBinder.bind(
                     view = imageView,
                     viewModel = quickAffordancesCombinedViewModel.startButton,
                     alpha = flowOf(1f),
-                    falsingManager = falsingManager,
-                    vibratorHelper = vibratorHelper,
-                    logger = quickAffordancesLogger,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }
@@ -473,13 +492,10 @@ constructor(
 
         keyguardRootView.findViewById<LaunchableImageView?>(R.id.end_button)?.let { imageView ->
             shortcutsBindings.add(
-                KeyguardQuickAffordanceViewBinder.bind(
+                keyguardQuickAffordanceViewBinder.bind(
                     view = imageView,
                     viewModel = quickAffordancesCombinedViewModel.endButton,
                     alpha = flowOf(1f),
-                    falsingManager = falsingManager,
-                    vibratorHelper = vibratorHelper,
-                    logger = quickAffordancesLogger,
                 ) { message ->
                     indicationController.showTransientIndication(message)
                 }

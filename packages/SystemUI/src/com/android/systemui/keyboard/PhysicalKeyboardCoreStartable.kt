@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyboard
 
-import android.hardware.input.InputSettings
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
@@ -40,11 +39,9 @@ constructor(
     private val featureFlags: FeatureFlags,
 ) : CoreStartable {
     override fun start() {
+        stickyKeysIndicatorCoordinator.get().startListening()
         if (featureFlags.isEnabled(LegacyFlag.KEYBOARD_BACKLIGHT_INDICATOR)) {
             keyboardBacklightDialogCoordinator.get().startListening()
-        }
-        if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
-            stickyKeysIndicatorCoordinator.get().startListening()
         }
         if (Flags.keyboardDockingIndicator()) {
             keyboardDockingIndicationViewBinder.get().startListening()

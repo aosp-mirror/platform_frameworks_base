@@ -27,15 +27,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -46,7 +46,6 @@ import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.internal.R.attr.focusable
-import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -61,7 +60,7 @@ import kotlin.time.DurationUnit
 
 object Communal {
     object Elements {
-        val Scrim = ElementKey("Scrim", scenePicker = LowestZIndexScenePicker)
+        val Scrim = ElementKey("Scrim", contentPicker = LowestZIndexContentPicker)
         val Grid = ElementKey("CommunalContent")
         val LockIcon = ElementKey("CommunalLockIcon")
         val IndicationArea = ElementKey("CommunalIndicationArea")
@@ -70,7 +69,7 @@ object Communal {
 }
 
 object AllElements : ElementMatcher {
-    override fun matches(key: ElementKey, scene: SceneKey) = true
+    override fun matches(key: ElementKey, content: ContentKey) = true
 }
 
 private object TransitionDuration {
@@ -133,7 +132,7 @@ val sceneTransitions = transitions {
     }
     // Disable horizontal overscroll. If the scene is overscrolled too soon after showing, this
     // can lead to inconsistent KeyguardState changes.
-    overscroll(CommunalScenes.Communal, Orientation.Horizontal) {}
+    overscrollDisabled(CommunalScenes.Communal, Orientation.Horizontal)
 }
 
 /**
@@ -197,15 +196,7 @@ fun CommunalContainer(
             Box(modifier = Modifier.fillMaxSize())
         }
 
-        val userActions =
-            if (glanceableHubBackGesture()) {
-                mapOf(
-                    Swipe(SwipeDirection.End) to CommunalScenes.Blank,
-                    Back to CommunalScenes.Blank,
-                )
-            } else {
-                mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
-            }
+        val userActions = mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
 
         scene(CommunalScenes.Communal, userActions = userActions) {
             CommunalScene(
@@ -242,7 +233,7 @@ private fun SceneScope.CommunalScene(
                     if (isFocusable) {
                         Modifier.focusable()
                     } else {
-                        Modifier.semantics { contentDescription = "" }.clearAndSetSemantics {}
+                        Modifier.semantics { disabled() }.clearAndSetSemantics {}
                     }
                 )
     ) {
@@ -258,7 +249,7 @@ private fun SceneScope.CommunalScene(
                 modifier =
                     modifier.focusable(isFocusable).semantics {
                         if (!isFocusable) {
-                            contentDescription = ""
+                            disabled()
                         }
                     }
             )

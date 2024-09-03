@@ -19,9 +19,12 @@ package com.android.systemui.statusbar.chips.ui.viewmodel
 import android.content.DialogInterface
 import android.content.packageManager
 import android.content.pm.PackageManager
+import android.graphics.drawable.BitmapDrawable
+import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_RON_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -36,14 +39,20 @@ import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModelTest.Companion.addDemoRonChip
+import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.demoRonChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -67,10 +76,13 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
     private val systemClock = kosmos.fakeSystemClock
+    private val commandRegistry = kosmos.commandRegistry
 
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
     private val mediaProjectionState = kosmos.fakeMediaProjectionRepository.mediaProjectionState
     private val callRepo = kosmos.ongoingCallRepository
+
+    private val pw = PrintWriter(StringWriter())
 
     private val mockSystemUIDialog = mock<SystemUIDialog>()
     private val chipBackgroundView = mock<ChipBackgroundContainer>()
@@ -89,6 +101,9 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
+        kosmos.demoRonChipViewModel.start()
+        whenever(kosmos.packageManager.getApplicationIcon(any<String>()))
+            .thenReturn(BitmapDrawable())
     }
 
     @Test
@@ -120,7 +135,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
 
-            callRepo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 34, intent = null))
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
             val latest by collectLastValue(underTest.chip)
 
@@ -146,7 +161,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
-            callRepo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 34, intent = null))
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
             val latest by collectLastValue(underTest.chip)
 
@@ -160,7 +175,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             // MediaProjection covers both share-to-app and cast-to-other-device
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            callRepo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 34, intent = null))
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
             val latest by collectLastValue(underTest.chip)
 
@@ -168,15 +183,24 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
         testScope.runTest {
-            // Start with just the lower priority call chip
-            callRepo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 34, intent = null))
+            // Start with just the lowest priority chip shown
+            addDemoRonChip(commandRegistry, pw)
+            // And everything else hidden
+            callRepo.setOngoingCallState(OngoingCallModel.NoCall)
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             screenRecordState.value = ScreenRecordModel.DoingNothing
 
             val latest by collectLastValue(underTest.chip)
 
+            assertIsDemoRonChip(latest)
+
+            // WHEN the higher priority call chip is added
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+
+            // THEN the higher priority call chip is used
             assertIsCallChip(latest)
 
             // WHEN the higher priority media projection chip is added
@@ -198,14 +222,15 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_STATUS_BAR_RON_CHIPS)
     fun chip_highestPriorityChipRemoved_showsNextPriorityChip() =
         testScope.runTest {
             // WHEN all chips are active
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
-
-            callRepo.setOngoingCallState(OngoingCallModel.InCall(startTimeMs = 34, intent = null))
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            addDemoRonChip(commandRegistry, pw)
 
             val latest by collectLastValue(underTest.chip)
 
@@ -223,6 +248,12 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             // THEN the lower priority call is used
             assertIsCallChip(latest)
+
+            // WHEN the higher priority call is removed
+            callRepo.setOngoingCallState(OngoingCallModel.NoCall)
+
+            // THEN the lower priority demo RON is used
+            assertIsDemoRonChip(latest)
         }
 
     /** Regression test for b/347726238. */
@@ -335,21 +366,35 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
         fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_screenrecord)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_screenrecord)
         }
 
         fun assertIsShareToAppChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_present_to_all)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_present_to_all)
         }
 
         fun assertIsCallChip(latest: OngoingActivityChipModel?) {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-            val icon = (latest as OngoingActivityChipModel.Shown).icon
-            assertThat((icon as Icon.Resource).res)
-                .isEqualTo(com.android.internal.R.drawable.ic_phone)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
+        }
+
+        fun assertIsDemoRonChip(latest: OngoingActivityChipModel?) {
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.FullColorAppIcon::class.java)
         }
     }
 }

@@ -1578,6 +1578,22 @@ public class Notification implements Parcelable
     public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
 
     /**
+     * {@link #extras} key: {@link Icon} of an image used as an overlay Icon on
+     * {@link Notification#mLargeIcon} for {@link EnRouteStyle} notifications.
+     * This extra is an {@code Icon}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_ENROUTE_OVERLAY_ICON = "android.enrouteOverlayIcon";
+
+    /**
+     * {@link #extras} key: text used as a sub-text for the largeIcon of
+     * {@link EnRouteStyle} notification. This extra is a {@code CharSequence}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_ENROUTE_LARGE_ICON_SUBTEXT = "android.enrouteLargeIconSubText";
+    /**
      * {@link #extras} key: whether the notification should be colorized as
      * supplied to {@link Builder#setColorized(boolean)}.
      */
@@ -3037,6 +3053,10 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
+        }
+
+        if (Flags.apiRichOngoing()) {
+            visitIconUri(visitor, extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class));
         }
 
         if (mBubbleMetadata != null) {
@@ -10979,15 +10999,141 @@ public class Notification implements Parcelable
     }
 
     /**
-     * An object that can apply a rich ongoing notification style to a {@link Notification.Builder}
-     * object.
+     * TODO(b/360827871): Make EnRouteStyle public.
+     * A style used to represent the progress of a real-world journey with a known destination.
+     * For example:
+     * <ul>
+     *     <li>Delivery tracking</li>
+     *     <li>Ride progress</li>
+     *     <li>Flight tracking</li>
+     * </ul>
+     *
+     * The exact fields from {@link Notification} that are shown with this style may vary by
+     * the surface where this update appears, but the following fields are recommended:
+     * <ul>
+     *     <li>{@link Notification.Builder#setContentTitle}</li>
+     *     <li>{@link Notification.Builder#setContentText}</li>
+     *     <li>{@link Notification.Builder#setSubText}</li>
+     *     <li>{@link Notification.Builder#setLargeIcon}</li>
+     *     <li>{@link Notification.Builder#setProgress}</li>
+     *     <li>{@link Notification.Builder#setWhen} - This should be the future time of the next,
+     *     final, or most important stop on this journey.</li>
+     * </ul>
+     * @hide
      */
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public abstract static class RichOngoingStyle extends Notification.Style {
+    public static class EnRouteStyle extends Notification.Style {
+
+        @Nullable
+        private Icon mOverlayIcon = null;
+
+        @Nullable
+        private CharSequence mLargeIconSubText = null;
+
+        public EnRouteStyle() {
+        }
+
+        /**
+         * Returns the overlay icon to be displayed on {@link Notification#mLargeIcon}.
+         * @see EnRouteStyle#setOverlayIcon
+         */
+        @Nullable
+        public Icon getOverlayIcon() {
+            return mOverlayIcon;
+        }
+
+        /**
+         * Optional icon to be displayed on {@link Notification#mLargeIcon}.
+         *
+         * This image will be cropped to a circle and will obscure
+         * a semicircle of the right side of the large icon.
+         */
+        @NonNull
+        public EnRouteStyle setOverlayIcon(@Nullable Icon overlayIcon) {
+            mOverlayIcon = overlayIcon;
+            return this;
+        }
+
+        /**
+         * Returns the sub-text for {@link Notification#mLargeIcon}.
+         * @see EnRouteStyle#setLargeIconSubText
+         */
+        @Nullable
+        public CharSequence getLargeIconSubText() {
+            return mLargeIconSubText;
+        }
+
+        /**
+         * Optional text which generally related to
+         * the {@link Notification.Builder#setLargeIcon} or {@link #setOverlayIcon} or both.
+         */
+        @NonNull
+        public EnRouteStyle setLargeIconSubText(@Nullable CharSequence largeIconSubText) {
+            mLargeIconSubText = stripStyling(largeIconSubText);
+            return this;
+        }
+
+         /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+
+            final EnRouteStyle enRouteStyle = (EnRouteStyle) other;
+            return !Objects.equals(mOverlayIcon, enRouteStyle.mOverlayIcon)
+                    || !Objects.equals(mLargeIconSubText, enRouteStyle.mLargeIconSubText);
+        }
+
         /**
          * @hide
          */
-        public RichOngoingStyle() {}
+        @Override
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+            extras.putParcelable(EXTRA_ENROUTE_OVERLAY_ICON, mOverlayIcon);
+            extras.putCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT, mLargeIconSubText);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+            mOverlayIcon = extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class);
+            mLargeIconSubText = extras.getCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void purgeResources() {
+            super.purgeResources();
+            if (mOverlayIcon != null) {
+                mOverlayIcon.convertToAshmem();
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void reduceImageSizes(Context context) {
+            super.reduceImageSizes(context);
+            if (mOverlayIcon != null) {
+                final Resources resources = context.getResources();
+                final boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+
+                int rightIconSize = resources.getDimensionPixelSize(isLowRam
+                        ? R.dimen.notification_right_icon_size_low_ram
+                        : R.dimen.notification_right_icon_size);
+                mOverlayIcon.scaleDownIfNecessary(rightIconSize, rightIconSize);
+            }
+        }
     }
 
     /**

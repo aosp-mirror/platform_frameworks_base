@@ -134,16 +134,12 @@ constructor(
                 .filterRelevantKeyguardState()
                 .sampleCombine(
                     internalTransitionInteractor.currentTransitionInfoInternal,
-                    finishedKeyguardState,
+                    transitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
                     keyguardInteractor.isActiveDreamLockscreenHosted,
                 )
                 .collect {
-                    (
-                        isAbleToDream,
-                        transitionInfo,
-                        finishedKeyguardState,
-                        isActiveDreamLockscreenHosted) ->
-                    val isOnLockscreen = finishedKeyguardState == KeyguardState.LOCKSCREEN
+                    (isAbleToDream, transitionInfo, isOnLockscreen, isActiveDreamLockscreenHosted)
+                    ->
                     val isTransitionInterruptible =
                         transitionInfo.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(transitionInfo.from)
@@ -189,7 +185,7 @@ constructor(
         scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
             shadeRepository.legacyShadeExpansion
                 .sampleCombine(
-                    startedKeyguardTransitionStep,
+                    transitionInteractor.startedKeyguardTransitionStep,
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
@@ -276,7 +272,6 @@ constructor(
     }
 
     private fun listenForLockscreenToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) return
         scope.launch("$TAG#listenForLockscreenToGone") {
@@ -292,7 +287,6 @@ constructor(
     }
 
     private fun listenForLockscreenToGoneDragging() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // When the refactor is enabled, we no longer use isKeyguardGoingAway.
@@ -300,7 +294,9 @@ constructor(
                 swipeToDismissInteractor.dismissFling
                     .filterNotNull()
                     .filterRelevantKeyguardState()
-                    .collect { _ -> startTransitionTo(KeyguardState.GONE) }
+                    .collect { _ ->
+                        startTransitionTo(KeyguardState.GONE, ownerReason = "dismissFling != null")
+                    }
             }
         }
     }
@@ -334,7 +330,7 @@ constructor(
             listenForSleepTransition(
                 modeOnCanceledFromStartedStep = { startedStep ->
                     if (
-                        transitionInteractor.asleepKeyguardState.value == KeyguardState.AOD &&
+                        keyguardInteractor.asleepKeyguardState.value == KeyguardState.AOD &&
                             startedStep.from == KeyguardState.AOD
                     ) {
                         TransitionModeOnCanceled.REVERSE
@@ -393,7 +389,7 @@ constructor(
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
-        val TO_OCCLUDED_DURATION = 450.milliseconds
+        val TO_OCCLUDED_DURATION = 550.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_AOD_FOLD_DURATION = 1100.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
