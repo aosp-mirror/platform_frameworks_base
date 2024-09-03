@@ -55,7 +55,6 @@ import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import com.android.systemui.util.kotlin.getOrNull
 import dagger.Lazy
@@ -84,12 +83,7 @@ fun SceneScope.OverlayShade(
 
         Box(
             modifier = Modifier.fillMaxSize().panelPadding(),
-            contentAlignment =
-                if (viewModel.panelAlignment == ShadeAlignment.Top) {
-                    Alignment.TopEnd
-                } else {
-                    Alignment.BottomEnd
-                },
+            contentAlignment = Alignment.TopEnd,
         ) {
             Panel(
                 modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),

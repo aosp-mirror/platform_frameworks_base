@@ -19,12 +19,9 @@ package com.android.systemui.scene.ui.composable.transitions
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.UserActionDistance
-import com.android.compose.animation.scene.UserActionDistanceScope
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
@@ -32,11 +29,6 @@ import com.android.systemui.shade.ui.composable.ShadeHeader
 import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.toNotificationsShadeTransition(
-    /**
-     * The edge where the shade will animate from. This is statically determined (i.e. doesn't
-     * change during runtime).
-     */
-    edge: Edge = Edge.Top,
     durationScale: Double = 1.0,
 ) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
@@ -45,17 +37,11 @@ fun TransitionBuilder.toNotificationsShadeTransition(
             stiffness = Spring.StiffnessMediumLow,
             visibilityThreshold = Shade.Dimensions.ScrimVisibilityThreshold,
         )
-    distance =
-        object : UserActionDistance {
-            override fun UserActionDistanceScope.absoluteDistance(
-                fromSceneSize: IntSize,
-                orientation: Orientation,
-            ): Float {
-                return fromSceneSize.height.toFloat() * 2 / 3f
-            }
-        }
+    distance = UserActionDistance { fromSceneSize, orientation ->
+        fromSceneSize.height.toFloat() * 2 / 3f
+    }
 
-    translate(OverlayShade.Elements.Panel, edge)
+    translate(OverlayShade.Elements.Panel, Edge.Top)
 
     fractionRange(end = .5f) { fade(OverlayShade.Elements.Scrim) }
 
