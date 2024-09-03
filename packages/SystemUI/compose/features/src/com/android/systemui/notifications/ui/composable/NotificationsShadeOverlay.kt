@@ -27,20 +27,17 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayActionsViewModel
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayContentViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
-import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
-import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
-import java.util.Optional
 import javax.inject.Inject
 
 @SysUISingleton
@@ -48,9 +45,7 @@ class NotificationsShadeOverlay
 @Inject
 constructor(
     private val actionsViewModelFactory: NotificationsShadeOverlayActionsViewModel.Factory,
-    private val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
-    private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
-    private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
+    private val contentViewModelFactory: NotificationsShadeOverlayContentViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
@@ -72,19 +67,22 @@ constructor(
     override fun ContentScope.Content(
         modifier: Modifier,
     ) {
+        val viewModel =
+            rememberViewModel("NotificationsShadeOverlay-viewModel") {
+                contentViewModelFactory.create()
+            }
+        val placeholderViewModel =
+            rememberViewModel("NotificationsShadeOverlay-notifPlaceholderViewModel") {
+                viewModel.notificationsPlaceholderViewModelFactory.create()
+            }
+
         OverlayShade(
             modifier = modifier,
-            viewModelFactory = overlayShadeViewModelFactory,
-            lockscreenContent = { Optional.empty() },
+            onScrimClicked = viewModel::onScrimClicked,
         ) {
             Column {
-                val placeholderViewModel =
-                    rememberViewModel("NotificationsShadeOverlay") {
-                        notificationsPlaceholderViewModelFactory.create()
-                    }
-
                 ExpandedShadeHeader(
-                    viewModelFactory = shadeHeaderViewModelFactory,
+                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
                     createTintedIconManager = tintedIconManagerFactory::create,
                     createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
                     statusBarIconController = statusBarIconController,

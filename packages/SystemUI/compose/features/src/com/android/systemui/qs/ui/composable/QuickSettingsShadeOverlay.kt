@@ -16,14 +16,32 @@
 
 package com.android.systemui.qs.ui.composable
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.qs.panels.ui.compose.EditMode
+import com.android.systemui.qs.panels.ui.compose.TileGrid
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeOverlayActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeOverlayContentViewModel
 import com.android.systemui.scene.shared.model.Overlays
@@ -32,7 +50,6 @@ import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
-import java.util.Optional
 import javax.inject.Inject
 
 @SysUISingleton
@@ -62,10 +79,10 @@ constructor(
     ) {
         val viewModel =
             rememberViewModel("QuickSettingsShadeOverlay") { contentViewModelFactory.create() }
+
         OverlayShade(
             modifier = modifier,
-            viewModelFactory = viewModel.overlayShadeViewModelFactory,
-            lockscreenContent = { Optional.empty() },
+            onScrimClicked = viewModel::onScrimClicked,
         ) {
             Column {
                 ExpandedShadeHeader(
@@ -81,5 +98,63 @@ constructor(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun ShadeBody(
+    viewModel: QuickSettingsContainerViewModel,
+) {
+    val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
+
+    AnimatedContent(
+        targetState = isEditing,
+        transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) }
+    ) { editing ->
+        if (editing) {
+            EditMode(
+                viewModel = viewModel.editModeViewModel,
+                modifier = Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding)
+            )
+        } else {
+            QuickSettingsLayout(
+                viewModel = viewModel,
+                modifier = Modifier.sysuiResTag("quick_settings_panel")
+            )
+        }
+    }
+}
+
+@Composable
+private fun QuickSettingsLayout(
+    viewModel: QuickSettingsContainerViewModel,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(QuickSettingsShade.Dimensions.Padding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding),
+    ) {
+        BrightnessSliderContainer(
+            viewModel = viewModel.brightnessSliderViewModel,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .height(QuickSettingsShade.Dimensions.BrightnessSliderHeight),
+        )
+        TileGrid(
+            viewModel = viewModel.tileGridViewModel,
+            modifier =
+                Modifier.fillMaxWidth().heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
+            viewModel.editModeViewModel::startEditing,
+        )
+    }
+}
+
+object QuickSettingsShade {
+
+    object Dimensions {
+        val Padding = 16.dp
+        val BrightnessSliderHeight = 64.dp
+        val GridMaxHeight = 800.dp
     }
 }
