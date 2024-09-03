@@ -321,8 +321,10 @@ public class SplitscreenEventLogger {
                 0 /* enterReason */,
                 0 /* exitReason */,
                 mLastSplitRatio,
-                0 /* mainStagePosition */, 0 /* mainStageUid */,
-                0 /* sideStagePosition */, 0 /* sideStageUid */,
+                mLastMainStagePosition,
+                mLastMainStageUid,
+                mLastSideStagePosition,
+                mLastSideStageUid,
                 0 /* dragInstanceId */,
                 mLoggerSessionId.getId());
     }
