@@ -18760,7 +18760,7 @@ package android.webkit {
   public final class WebViewUpdateService {
     method public static android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
     method public static String getCurrentWebViewPackageName();
-    method public static android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+    method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
   }
 
 }
