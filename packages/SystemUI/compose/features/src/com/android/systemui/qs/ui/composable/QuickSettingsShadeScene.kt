@@ -19,7 +19,6 @@ package com.android.systemui.qs.ui.composable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
@@ -31,7 +30,7 @@ import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneContentViewModel
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
@@ -50,7 +49,7 @@ constructor(
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
 
     override val key = Scenes.QuickSettingsShade
 

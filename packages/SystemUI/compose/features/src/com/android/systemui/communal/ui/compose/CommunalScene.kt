@@ -29,7 +29,7 @@ import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
@@ -46,7 +46,7 @@ constructor(
     private val dialogFactory: SystemUIDialogFactory,
     private val interactionHandler: WidgetInteractionHandler,
     private val widgetSection: CommunalAppWidgetSection,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Communal
 
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =

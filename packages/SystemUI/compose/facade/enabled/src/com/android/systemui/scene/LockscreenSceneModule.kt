@@ -27,7 +27,7 @@ import com.android.systemui.keyguard.ui.composable.LockscreenScene
 import com.android.systemui.keyguard.ui.composable.LockscreenSceneBlueprintModule
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.ui.composable.Scene
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

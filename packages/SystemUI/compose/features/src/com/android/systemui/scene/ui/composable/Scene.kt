@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.model
+package com.android.systemui.scene.ui.composable
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.lifecycle.Activatable
@@ -56,4 +59,6 @@ interface Scene : Activatable {
      * current scene is this one.
      */
     val destinationScenes: Flow<Map<UserAction, UserActionResult>>
+
+    @Composable fun SceneScope.Content(modifier: Modifier)
 }

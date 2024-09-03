@@ -22,13 +22,13 @@ import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.animation.scene.animateContentFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneActionsViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -40,7 +40,7 @@ class LockscreenScene
 constructor(
     actionsViewModelFactory: LockscreenSceneActionsViewModel.Factory,
     private val lockscreenContent: Lazy<LockscreenContent>,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Lockscreen
 
     private val actionsViewModel: LockscreenSceneActionsViewModel by lazy {
@@ -70,7 +70,7 @@ private fun SceneScope.LockscreenScene(
     lockscreenContent: Lazy<LockscreenContent>,
     modifier: Modifier = Modifier,
 ) {
-    animateSceneFloatAsState(
+    animateContentFloatAsState(
         value = QuickSettings.SharedValues.SquishinessValues.LockscreenSceneStarting,
         key = QuickSettings.SharedValues.TilesSquishiness,
     )
