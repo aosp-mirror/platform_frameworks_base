@@ -138,3 +138,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+   name: "enable_bubble_to_fullscreen"
+   namespace: "multitasking"
+   description: "Enable an option to move bubbles to fullscreen"
+   bug: "363326492"
+}
