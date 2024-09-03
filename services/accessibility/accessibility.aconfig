@@ -117,7 +117,7 @@ flag {
     name: "enable_magnification_follows_mouse"
     namespace: "accessibility"
     description: "Whether to enable mouse following for fullscreen magnification"
-    bug: "335494097"
+    bug: "354696546"
 }
 
 flag {
