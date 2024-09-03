@@ -43,12 +43,11 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameters
-import platform.test.runner.parameterized.Parameter
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /**
  * Parameterized test for all of the common values of [FakeNetworkEventModel]. This test simply
@@ -69,8 +68,6 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             mock(),
             FakeSystemClock(),
             mock(),
-            testDispatcher,
-            testScope.backgroundScope,
         )
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)

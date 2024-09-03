@@ -58,8 +58,6 @@ class LogDiffsForTableTest : SysuiTestCase() {
                 BUFFER_NAME,
                 systemClock,
                 mock(),
-                testDispatcher,
-                testScope.backgroundScope,
             )
     }
 

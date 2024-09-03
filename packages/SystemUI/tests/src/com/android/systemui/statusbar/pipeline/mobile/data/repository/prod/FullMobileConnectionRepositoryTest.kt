@@ -87,8 +87,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             name = "TestName",
             systemClock,
             mock(),
-            testDispatcher,
-            testScope.backgroundScope,
         )
     private val mobileFactory = mock<MobileConnectionRepositoryImpl.Factory>()
     private val carrierMergedFactory = mock<CarrierMergedConnectionRepository.Factory>()
@@ -377,8 +375,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     mock(),
                     FakeSystemClock(),
                     mock(),
-                    testDispatcher,
-                    testScope.backgroundScope,
                 )
 
             val factory =
@@ -421,8 +417,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     mock(),
                     FakeSystemClock(),
                     mock(),
-                    testDispatcher,
-                    testScope.backgroundScope,
                 )
 
             val factory =

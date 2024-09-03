@@ -77,8 +77,6 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             "MobileIconsInteractorTest",
             FakeSystemClock(),
             mock(),
-            testDispatcher,
-            testScope.backgroundScope,
         )
 
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker

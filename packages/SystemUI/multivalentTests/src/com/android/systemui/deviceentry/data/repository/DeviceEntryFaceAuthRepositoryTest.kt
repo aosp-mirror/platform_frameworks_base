@@ -206,8 +206,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 "face auth",
                 systemClock,
                 mock(),
-                testDispatcher,
-                testScope.backgroundScope
             )
         val faceDetectBuffer =
             TableLogBuffer(
@@ -215,8 +213,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 "face detect",
                 systemClock,
                 mock(),
-                testDispatcher,
-                testScope.backgroundScope
             )
 
         return DeviceEntryFaceAuthRepositoryImpl(

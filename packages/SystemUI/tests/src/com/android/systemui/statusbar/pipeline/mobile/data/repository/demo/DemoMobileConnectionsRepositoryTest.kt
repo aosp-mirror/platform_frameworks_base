@@ -68,8 +68,6 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             dumpManager,
             FakeSystemClock(),
             mock(),
-            testDispatcher,
-            testScope.backgroundScope,
         )
 
     private lateinit var underTest: DemoMobileConnectionsRepository
