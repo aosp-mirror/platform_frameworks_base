@@ -78,8 +78,8 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
                     tag = TAG,
                     level = LogLevel.INFO,
                     messageInitializer = {
-                        str1 = transitionState.fromScene.toString()
-                        str2 = transitionState.toScene.toString()
+                        str1 = transitionState.fromContent.toString()
+                        str2 = transitionState.toContent.toString()
                     },
                     messagePrinter = { "Scene transition started: $str1 → $str2" },
                 )
