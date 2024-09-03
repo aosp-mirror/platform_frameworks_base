@@ -47,6 +47,7 @@ import android.util.SparseArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.WifiPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;

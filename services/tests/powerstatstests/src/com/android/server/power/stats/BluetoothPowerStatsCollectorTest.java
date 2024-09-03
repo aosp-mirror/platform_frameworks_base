@@ -37,6 +37,7 @@ import android.util.SparseLongArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.BluetoothPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
