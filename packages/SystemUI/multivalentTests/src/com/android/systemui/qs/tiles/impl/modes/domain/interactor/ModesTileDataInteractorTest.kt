@@ -206,6 +206,39 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
         }
 
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    @Test
+    fun getCurrentTileModel_returnsActiveModes() = runTest {
+        var tileData = underTest.getCurrentTileModel()
+        assertThat(tileData.isActivated).isFalse()
+        assertThat(tileData.activeModes).isEmpty()
+
+        // Add active mode
+        zenModeRepository.addMode(id = "One", active = true)
+        tileData = underTest.getCurrentTileModel()
+        assertThat(tileData.isActivated).isTrue()
+        assertThat(tileData.activeModes).containsExactly("Mode One")
+
+        // Add an inactive mode: state hasn't changed
+        zenModeRepository.addMode(id = "Two", active = false)
+        tileData = underTest.getCurrentTileModel()
+        assertThat(tileData.isActivated).isTrue()
+        assertThat(tileData.activeModes).containsExactly("Mode One")
+
+        // Add another active mode
+        zenModeRepository.addMode(id = "Three", active = true)
+        tileData = underTest.getCurrentTileModel()
+        assertThat(tileData.isActivated).isTrue()
+        assertThat(tileData.activeModes).containsExactly("Mode One", "Mode Three").inOrder()
+
+        // Remove a mode and deactivate the other
+        zenModeRepository.removeMode("One")
+        zenModeRepository.deactivateMode("Three")
+        tileData = underTest.getCurrentTileModel()
+        assertThat(tileData.isActivated).isFalse()
+        assertThat(tileData.activeModes).isEmpty()
+    }
+
     private companion object {
         val TEST_USER = UserHandle.of(1)!!
 
