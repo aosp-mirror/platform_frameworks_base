@@ -29,10 +29,10 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
-import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeUserActionsViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.Flow
 class NotificationsShadeScene
 @Inject
 constructor(
-    private val actionsViewModelFactory: NotificationsShadeSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: NotificationsShadeUserActionsViewModel.Factory,
     private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -57,16 +57,15 @@ constructor(
     private val statusBarIconController: StatusBarIconController,
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
 
     override val key = Scenes.NotificationsShade
 
-    private val actionsViewModel: NotificationsShadeSceneActionsViewModel by lazy {
+    private val actionsViewModel: NotificationsShadeUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        actionsViewModel.actions
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()

@@ -146,12 +146,8 @@ public class A11yMenuViewPager {
     /** The container layout for a11y menu. */
     private ViewGroup mA11yMenuLayout;
 
-    /** Display context for inflating views. */
-    private Context mDisplayContext;
-
-    public A11yMenuViewPager(AccessibilityMenuService service, Context displayContext) {
+    public A11yMenuViewPager(AccessibilityMenuService service) {
         this.mService = service;
-        this.mDisplayContext = displayContext;
     }
 
     /**
@@ -289,7 +285,8 @@ public class A11yMenuViewPager {
             footerLayout.getLayoutParams().height =
                     (int) (footerLayout.getLayoutParams().height / densityScale);
             // Adjust the view pager height for system bar and display cutout insets.
-            WindowManager windowManager = mService.getSystemService(WindowManager.class);
+            WindowManager windowManager = mA11yMenuLayout.getContext()
+                    .getSystemService(WindowManager.class);
             WindowMetrics windowMetric = windowManager.getCurrentWindowMetrics();
             Insets windowInsets = windowMetric.getWindowInsets().getInsetsIgnoringVisibility(
                     WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());

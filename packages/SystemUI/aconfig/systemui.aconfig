@@ -1356,13 +1356,6 @@ flag {
 }
 
 flag {
-    name: "new_picker_ui"
-    namespace: "systemui"
-    description: "Enables the BC25 design of the customization picker UI."
-    bug: "339081035"
-}
-
-flag {
   namespace: "systemui"
   name: "settings_ext_register_content_observer_on_bg_thread"
   description: "Register content observer in callback flow APIs on background thread in SettingsProxyExt."

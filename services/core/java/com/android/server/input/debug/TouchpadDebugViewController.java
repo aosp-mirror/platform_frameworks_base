@@ -18,14 +18,12 @@ package com.android.server.input.debug;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Slog;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.WindowManager;
 
@@ -36,12 +34,14 @@ import java.util.Objects;
 
 public class TouchpadDebugViewController {
 
-    private static final String TAG = "TouchpadDebugViewController";
+    private static final String TAG = "TouchpadDebugView";
 
     private final Context mContext;
     private final Handler mHandler;
+
     @Nullable
     private TouchpadDebugView mTouchpadDebugView;
+
     private final InputManagerService mInputManagerService;
 
     public TouchpadDebugViewController(Context context, Looper looper,
@@ -95,32 +95,15 @@ public class TouchpadDebugViewController {
                 mContext.getSystemService(WindowManager.class));
 
         mTouchpadDebugView = new TouchpadDebugView(mContext, touchpadId);
+        final WindowManager.LayoutParams mWindowLayoutParams =
+                mTouchpadDebugView.getWindowLayoutParams();
 
-        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-        lp.setFitInsetsTypes(0);
-        lp.layoutInDisplayCutoutMode =
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.setTitle("TouchpadDebugView - display " + mContext.getDisplayId());
-        lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-
-        lp.x = 40;
-        lp.y = 100;
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.gravity = Gravity.TOP | Gravity.LEFT;
-
-        wm.addView(mTouchpadDebugView, lp);
+        wm.addView(mTouchpadDebugView, mWindowLayoutParams);
         Slog.d(TAG, "Touchpad debug view created.");
 
         TouchpadHardwareProperties mTouchpadHardwareProperties =
                 mInputManagerService.getTouchpadHardwareProperties(
                         touchpadId);
-        // TODO(b/360137366): Use the hardware properties to initialise layout parameters.
         if (mTouchpadHardwareProperties != null) {
             Slog.d(TAG, mTouchpadHardwareProperties.toString());
         } else {

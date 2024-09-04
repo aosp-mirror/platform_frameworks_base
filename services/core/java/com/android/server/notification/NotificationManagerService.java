@@ -7600,16 +7600,14 @@ public class NotificationManagerService extends SystemService {
                     + " trying to post for invalid pkg " + pkg + " in user " + incomingUserId);
         }
 
-        if (android.app.Flags.secureAllowlistToken()) {
-            IBinder allowlistToken = notification.getAllowlistToken();
-            if (allowlistToken != null && allowlistToken != ALLOWLIST_TOKEN) {
-                throw new SecurityException(
-                        "Unexpected allowlist token received from " + callingUid);
-            }
-            // allowlistToken is populated by unparceling, so it can be null if the notification was
-            // posted from inside system_server. Ensure it's the expected value.
-            notification.overrideAllowlistToken(ALLOWLIST_TOKEN);
+        IBinder allowlistToken = notification.getAllowlistToken();
+        if (allowlistToken != null && allowlistToken != ALLOWLIST_TOKEN) {
+            throw new SecurityException(
+                    "Unexpected allowlist token received from " + callingUid);
         }
+        // allowlistToken is populated by unparceling, so it can be null if the notification was
+        // posted from inside system_server. Ensure it's the expected value.
+        notification.overrideAllowlistToken(ALLOWLIST_TOKEN);
 
         checkRestrictedCategories(notification);
 
@@ -8774,12 +8772,10 @@ public class NotificationManagerService extends SystemService {
          */
         private boolean enqueueNotification() {
             synchronized (mNotificationLock) {
-                if (android.app.Flags.secureAllowlistToken()) {
-                    // allowlistToken is populated by unparceling, so it will be absent if the
-                    // EnqueueNotificationRunnable is created directly by NMS (as we do for group
-                    // summaries) instead of via notify(). Fix that.
-                    r.getNotification().overrideAllowlistToken(ALLOWLIST_TOKEN);
-                }
+                // allowlistToken is populated by unparceling, so it will be absent if the
+                // EnqueueNotificationRunnable is created directly by NMS (as we do for group
+                // summaries) instead of via notify(). Fix that.
+                r.getNotification().overrideAllowlistToken(ALLOWLIST_TOKEN);
 
                 final long snoozeAt =
                         mSnoozeHelper.getSnoozeTimeForUnpostedNotification(

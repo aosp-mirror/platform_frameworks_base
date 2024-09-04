@@ -399,26 +399,53 @@ private class AnimatedStateImpl<T, Delta>(
 
         val fromValue = sharedValue[transition.fromContent]
         val toValue = sharedValue[transition.toContent]
-        return if (fromValue != null && toValue != null) {
-            if (fromValue == toValue) {
-                // Optimization: avoid reading progress if the values are the same, so we don't
-                // relayout/redraw for nothing.
-                fromValue
-            } else {
-                val overscrollSpec = transition.currentOverscrollSpec
-                val progress =
-                    when {
-                        overscrollSpec == null -> {
-                            if (canOverflow) transition.progress
-                            else transition.progress.fastCoerceIn(0f, 1f)
-                        }
-                        overscrollSpec.content == transition.toContent -> 1f
-                        else -> 0f
-                    }
+        if (fromValue == null && toValue == null) {
+            return null
+        }
 
-                sharedValue.type.lerp(fromValue, toValue, progress)
+        if (fromValue != null && toValue != null) {
+            return interpolateSharedValue(fromValue, toValue, transition, sharedValue)
+        }
+
+        if (transition is TransitionState.Transition.ReplaceOverlay) {
+            val currentSceneValue = sharedValue[transition.currentScene]
+            if (currentSceneValue != null) {
+                return interpolateSharedValue(
+                    fromValue = fromValue ?: currentSceneValue,
+                    toValue = toValue ?: currentSceneValue,
+                    transition,
+                    sharedValue,
+                )
             }
-        } else fromValue ?: toValue
+        }
+
+        return fromValue ?: toValue
+    }
+
+    private fun interpolateSharedValue(
+        fromValue: T,
+        toValue: T,
+        transition: TransitionState.Transition,
+        sharedValue: SharedValue<T, *>,
+    ): T? {
+        if (fromValue == toValue) {
+            // Optimization: avoid reading progress if the values are the same, so we don't
+            // relayout/redraw for nothing.
+            return fromValue
+        }
+
+        val overscrollSpec = transition.currentOverscrollSpec
+        val progress =
+            when {
+                overscrollSpec == null -> {
+                    if (canOverflow) transition.progress
+                    else transition.progress.fastCoerceIn(0f, 1f)
+                }
+                overscrollSpec.content == transition.toContent -> 1f
+                else -> 0f
+            }
+
+        return sharedValue.type.lerp(fromValue, toValue, progress)
     }
 
     private fun transition(sharedValue: SharedValue<T, Delta>): TransitionState.Transition? {

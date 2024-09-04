@@ -83,18 +83,20 @@ constructor(
     /** Flow returning the currently active mode(s), if any. */
     val activeModes: Flow<ActiveZenModes> =
         modes
-            .map { modes ->
-                val activeModesList =
-                    modes
-                        .filter { mode -> mode.isActive }
-                        .sortedWith(ZenMode.PRIORITIZING_COMPARATOR)
-                val mainActiveMode =
-                    activeModesList.firstOrNull()?.let { ZenModeInfo(it.name, getModeIcon(it)) }
-
-                ActiveZenModes(activeModesList.map { m -> m.name }, mainActiveMode)
-            }
+            .map { modes -> buildActiveZenModes(modes) }
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
+
+    suspend fun getActiveModes() = buildActiveZenModes(zenModeRepository.getModes())
+
+    private suspend fun buildActiveZenModes(modes: List<ZenMode>): ActiveZenModes {
+        val activeModesList =
+            modes.filter { mode -> mode.isActive }.sortedWith(ZenMode.PRIORITIZING_COMPARATOR)
+        val mainActiveMode =
+            activeModesList.firstOrNull()?.let { ZenModeInfo(it.name, getModeIcon(it)) }
+
+        return ActiveZenModes(activeModesList.map { m -> m.name }, mainActiveMode)
+    }
 
     val mainActiveMode: Flow<ZenModeInfo?> =
         activeModes.map { a -> a.mainMode }.distinctUntilChanged()

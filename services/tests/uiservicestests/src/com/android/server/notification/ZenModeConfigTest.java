@@ -788,6 +788,19 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testRuleXml_invalidInterruptionFilter_readsDefault() throws Exception {
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.zenMode = 1979;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeRuleXml(rule, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig.ZenRule fromXml = readRuleXml(bais);
+
+        assertThat(fromXml.zenMode).isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+    }
+
+    @Test
     public void testZenPolicyXml_allUnset() throws Exception {
         ZenPolicy policy = new ZenPolicy.Builder().build();
 

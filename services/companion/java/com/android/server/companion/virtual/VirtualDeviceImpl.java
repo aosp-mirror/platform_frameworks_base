@@ -40,6 +40,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.app.compat.CompatChanges;
 import android.companion.AssociationInfo;
 import android.companion.virtual.ActivityPolicyExemption;
 import android.companion.virtual.IVirtualDevice;
@@ -55,6 +56,8 @@ import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
@@ -87,6 +90,7 @@ import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
 import android.media.audiopolicy.AudioMix;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -130,6 +134,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         implements IBinder.DeathRecipient, RunningAppsChangedListener {
 
     private static final String TAG = "VirtualDeviceImpl";
+
+    /**
+     * Do not show a toast on the virtual display when a secure surface is shown after
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}. VDM clients should use
+     * {@link VirtualDeviceManager.ActivityListener#onSecureWindowShown} instead to provide
+     * a custom notification if desired.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long DO_NOT_SHOW_TOAST_WHEN_SECURE_SURFACE_SHOWN = 311101667L;
 
     private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
             DisplayManager.VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED
@@ -256,8 +270,18 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
         @Override
         public void onSecureWindowShown(int displayId, @NonNull ActivityInfo activityInfo) {
-            synchronized (mVirtualDeviceLock) {
-                if (!mVirtualDisplays.contains(displayId)) {
+            if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                try {
+                    mActivityListener.onSecureWindowShown(
+                            displayId,
+                            activityInfo.getComponentName(),
+                            UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid));
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
+                }
+
+                if (CompatChanges.isChangeEnabled(DO_NOT_SHOW_TOAST_WHEN_SECURE_SURFACE_SHOWN,
+                        mOwnerPackageName,  UserHandle.getUserHandleForUid(mOwnerUid))) {
                     return;
                 }
             }

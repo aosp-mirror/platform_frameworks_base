@@ -36,6 +36,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
@@ -62,6 +63,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
@@ -78,6 +80,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -107,6 +110,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val sceneInteractor: SceneInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val bouncerInteractor: BouncerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
@@ -134,6 +138,7 @@ constructor(
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val vibratorHelper: VibratorHelper,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -148,6 +153,7 @@ constructor(
             respondToFalsingDetections()
             hydrateInteractionState()
             handleBouncerOverscroll()
+            handleDeviceEntryHapticsWhileDeviceLocked()
             hydrateWindowController()
             hydrateBackStack()
             resetShadeSessions()
@@ -189,7 +195,7 @@ constructor(
                             // current scene
                             when (state) {
                                 is ObservableTransitionState.Idle -> state.currentScene
-                                is ObservableTransitionState.Transition -> state.fromScene
+                                is ObservableTransitionState.Transition -> state.fromContent
                             }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
                         }
                         .distinctUntilChanged()
@@ -220,7 +226,7 @@ constructor(
                                             }
                                         }
                                         is ObservableTransitionState.Transition -> {
-                                            if (state.fromScene == Scenes.Gone) {
+                                            if (state.fromContent == Scenes.Gone) {
                                                 true to "scene transitioning away from Gone"
                                             } else {
                                                 null
@@ -351,8 +357,8 @@ constructor(
                             is ObservableTransitionState.Idle -> setOf(transitionState.currentScene)
                             is ObservableTransitionState.Transition ->
                                 setOf(
-                                    transitionState.fromScene,
-                                    transitionState.toScene,
+                                    transitionState.fromContent,
+                                    transitionState.toContent,
                                 )
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
@@ -461,7 +467,8 @@ constructor(
                     sceneInteractor.transitionState.value as? ObservableTransitionState.Transition
                         ?: return@collect
                 if (
-                    transition.fromScene == Scenes.Gone && transition.toScene == Scenes.Lockscreen
+                    transition.fromContent == Scenes.Gone &&
+                        transition.toContent == Scenes.Lockscreen
                 ) {
                     switchToScene(
                         targetSceneKey = Scenes.Gone,
@@ -524,6 +531,37 @@ constructor(
         }
     }
 
+    private fun handleDeviceEntryHapticsWhileDeviceLocked() {
+        applicationScope.launch {
+            deviceEntryInteractor.isDeviceEntered.collectLatest { isDeviceEntered ->
+                // Only check for haptics signals before device is entered
+                if (!isDeviceEntered) {
+                    coroutineScope {
+                        launch {
+                            deviceEntryHapticsInteractor.playSuccessHaptic
+                                .sample(sceneInteractor.currentScene)
+                                .collect { currentScene ->
+                                    vibratorHelper.vibrateAuthSuccess(
+                                        "$TAG, $currentScene device-entry::success"
+                                    )
+                                }
+                        }
+
+                        launch {
+                            deviceEntryHapticsInteractor.playErrorHaptic
+                                .sample(sceneInteractor.currentScene)
+                                .collect { currentScene ->
+                                    vibratorHelper.vibrateAuthError(
+                                        "$TAG, $currentScene device-entry::error"
+                                    )
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /** Keeps [SysUiState] up-to-date */
     private fun hydrateSystemUiState() {
         applicationScope.launch {
@@ -567,15 +605,6 @@ constructor(
             deviceEntryInteractor.isDeviceEntered.collect { isDeviceEntered ->
                 windowController.setKeyguardShowing(!isDeviceEntered)
             }
-        }
-
-        applicationScope.launch {
-            sceneInteractor.currentScene
-                .map { it == Scenes.Bouncer }
-                .distinctUntilChanged()
-                .collect { isBouncerShowing ->
-                    windowController.setBouncerShowing(isBouncerShowing)
-                }
         }
 
         applicationScope.launch {
@@ -694,8 +723,8 @@ constructor(
                 .filterIsInstance<ObservableTransitionState.Transition>()
                 // Only consider user-initiated (e.g. drags) that go from bouncer to lockscreen.
                 .filter { transition ->
-                    transition.fromScene == Scenes.Bouncer &&
-                        transition.toScene == Scenes.Lockscreen &&
+                    transition.fromContent == Scenes.Bouncer &&
+                        transition.toContent == Scenes.Lockscreen &&
                         transition.isInitiatedByUserInput
                 }
                 .flatMapLatest { it.progress }
@@ -815,5 +844,9 @@ constructor(
                 .filter { it }
                 .collectLatest { deviceEntryInteractor.refreshLockscreenEnabled() }
         }
+    }
+
+    companion object {
+        private const val TAG = "SceneContainerStartable"
     }
 }

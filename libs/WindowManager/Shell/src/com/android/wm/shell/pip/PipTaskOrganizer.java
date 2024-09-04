@@ -99,6 +99,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -831,6 +832,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     mPictureInPictureParams.getTitle());
             mPipParamsChangedForwarder.notifySubtitleChanged(
                     mPictureInPictureParams.getSubtitle());
+            logRemoteActions(mPictureInPictureParams);
         }
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
@@ -1112,6 +1114,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         applyNewPictureInPictureParams(newParams);
         mPictureInPictureParams = newParams;
+        logRemoteActions(mPictureInPictureParams);
     }
 
     @Override
@@ -1418,6 +1421,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mPipParamsChangedForwarder.notifyActionsChanged(params.getActions(),
                     params.getCloseAction());
         }
+    }
+
+    private void logRemoteActions(@NonNull PictureInPictureParams params) {
+        StringJoiner sj = new StringJoiner("|", "[", "]");
+        if (params.hasSetActions()) {
+            params.getActions().forEach((action) -> sj.add(action.getTitle()));
+        }
+
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: PIP remote actions=%s", TAG, sj.toString());
     }
 
     /**

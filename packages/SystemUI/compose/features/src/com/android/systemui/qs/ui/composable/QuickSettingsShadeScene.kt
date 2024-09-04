@@ -19,7 +19,6 @@ package com.android.systemui.qs.ui.composable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
@@ -28,10 +27,10 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeSceneContentViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeUserActionsViewModel
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
@@ -44,22 +43,21 @@ import kotlinx.coroutines.flow.Flow
 class QuickSettingsShadeScene
 @Inject
 constructor(
-    private val actionsViewModelFactory: QuickSettingsShadeSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: QuickSettingsShadeUserActionsViewModel.Factory,
     private val contentViewModelFactory: QuickSettingsShadeSceneContentViewModel.Factory,
     private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
 
     override val key = Scenes.QuickSettingsShade
 
-    private val actionsViewModel: QuickSettingsShadeSceneActionsViewModel by lazy {
+    private val actionsViewModel: QuickSettingsShadeUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        actionsViewModel.actions
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     override suspend fun onActivated(): Nothing {
         actionsViewModel.activate()

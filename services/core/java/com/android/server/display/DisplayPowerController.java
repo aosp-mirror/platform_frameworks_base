@@ -126,7 +126,7 @@ import java.util.Objects;
  * slower by changing the "animator duration scale" option in Development Settings.
  */
 final class DisplayPowerController implements AutomaticBrightnessController.Callbacks,
-        DisplayWhiteBalanceController.Callbacks, DisplayPowerControllerInterface {
+        DisplayWhiteBalanceController.Callbacks{
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
     private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
 
@@ -481,7 +481,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // DPCs following the brightness of this DPC. This is used in concurrent displays mode - there
     // is one lead display, the additional displays follow the brightness value of the lead display.
     @GuardedBy("mLock")
-    private final SparseArray<DisplayPowerControllerInterface> mDisplayBrightnessFollowers =
+    private final SparseArray<DisplayPowerController> mDisplayBrightnessFollowers =
             new SparseArray();
 
     private boolean mBootCompleted;
@@ -679,7 +679,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     /**
      * Returns true if the proximity sensor screen-off function is available.
      */
-    @Override
     public boolean isProximitySensorAvailable() {
         return mDisplayPowerProximityStateController.isProximitySensorAvailable();
     }
@@ -691,7 +690,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * @param includePackage if false will null out the package name in events
      */
     @Nullable
-    @Override
     public ParceledListSlice<BrightnessChangeEvent> getBrightnessEvents(
             @UserIdInt int userId, boolean includePackage) {
         if (mBrightnessTracker == null) {
@@ -700,7 +698,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return mBrightnessTracker.getEvents(userId, includePackage);
     }
 
-    @Override
     public void onSwitchUser(@UserIdInt int newUserId, int userSerial, float newBrightness) {
         Message msg = mHandler.obtainMessage(MSG_SWITCH_USER, newUserId, userSerial, newBrightness);
         mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
@@ -737,7 +734,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Nullable
-    @Override
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
             @UserIdInt int userId) {
         if (mBrightnessTracker == null) {
@@ -749,7 +745,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     /**
      * Persist the brightness slider events and ambient brightness stats to disk.
      */
-    @Override
     public void persistBrightnessTrackerState() {
         if (mBrightnessTracker != null) {
             mBrightnessTracker.persistBrightnessTrackerState();
@@ -806,7 +801,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    @Override
     public void overrideDozeScreenState(int displayState, @Display.StateReason int reason) {
         Slog.i(TAG, "New offload doze override: " + Display.stateToString(displayState));
         if (mDisplayOffloadSession != null
@@ -833,7 +827,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    @Override
     public void setDisplayOffloadSession(DisplayOffloadSession session) {
         if (session == mDisplayOffloadSession) {
             return;
@@ -842,7 +835,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mDisplayOffloadSession = session;
     }
 
-    @Override
     public BrightnessConfiguration getDefaultBrightnessConfiguration() {
         if (mAutomaticBrightnessController == null) {
             return null;
@@ -857,7 +849,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      *
      * Make sure DisplayManagerService.mSyncRoot lock is held when this is called
      */
-    @Override
     public void onDisplayChanged(HighBrightnessModeMetadata hbmMetadata, int leadDisplayId) {
         mLeadDisplayId = leadDisplayId;
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
@@ -939,7 +930,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * This method should be called when the DisplayPowerController is no longer in use; i.e. when
      * the {@link #mDisplayId display} has been removed.
      */
-    @Override
     public void stop() {
         synchronized (mLock) {
             clearDisplayBrightnessFollowersLocked();
@@ -1216,7 +1206,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    @Override
     public void setAutomaticScreenBrightnessMode(
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
         Message msg = mHandler.obtainMessage();
@@ -1314,7 +1303,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         boolean mustInitialize = false;
         mBrightnessReasonTemp.set(null);
         mTempBrightnessEvent.reset();
-        SparseArray<DisplayPowerControllerInterface> displayBrightnessFollowers;
+        SparseArray<DisplayPowerController> displayBrightnessFollowers;
         synchronized (mLock) {
             if (mStopped) {
                 return;
@@ -1547,7 +1536,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         float ambientLux = mAutomaticBrightnessController == null ? 0
                 : mAutomaticBrightnessController.getAmbientLux();
         for (int i = 0; i < displayBrightnessFollowers.size(); i++) {
-            DisplayPowerControllerInterface follower = displayBrightnessFollowers.valueAt(i);
+            DisplayPowerController follower = displayBrightnessFollowers.valueAt(i);
             follower.setBrightnessToFollow(rawBrightnessState,
                     mDisplayBrightnessController.convertToNits(rawBrightnessState),
                     ambientLux, slowChange);
@@ -1904,7 +1893,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    @Override
     public void updateBrightness() {
         sendUpdatePowerState();
     }
@@ -1913,12 +1901,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * Ignores the proximity sensor until the sensor state changes, but only if the sensor is
      * currently enabled and forcing the screen to be dark.
      */
-    @Override
     public void ignoreProximitySensorUntilChanged() {
         mDisplayPowerProximityStateController.ignoreProximitySensorUntilChanged();
     }
 
-    @Override
     public void setBrightnessConfiguration(BrightnessConfiguration c,
             boolean shouldResetShortTermModel) {
         Message msg = mHandler.obtainMessage(MSG_CONFIGURE_BRIGHTNESS,
@@ -1926,28 +1912,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         msg.sendToTarget();
     }
 
-    @Override
     public void setTemporaryBrightness(float brightness) {
         Message msg = mHandler.obtainMessage(MSG_SET_TEMPORARY_BRIGHTNESS,
                 Float.floatToIntBits(brightness), 0 /*unused*/);
         msg.sendToTarget();
     }
 
-    @Override
     public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
         Message msg = mHandler.obtainMessage(MSG_SET_TEMPORARY_AUTO_BRIGHTNESS_ADJUSTMENT,
                 Float.floatToIntBits(adjustment), 0 /*unused*/);
         msg.sendToTarget();
     }
 
-    @Override
     public void setBrightnessFromOffload(float brightness) {
         Message msg = mHandler.obtainMessage(MSG_SET_BRIGHTNESS_FROM_OFFLOAD,
                 Float.floatToIntBits(brightness), 0 /*unused*/);
         mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
-    @Override
     public float[] getAutoBrightnessLevels(
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
         int preset = Settings.System.getIntForUser(mContext.getContentResolver(),
@@ -1956,7 +1938,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(mode, preset);
     }
 
-    @Override
     public float[] getAutoBrightnessLuxLevels(
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
         int preset = Settings.System.getIntForUser(mContext.getContentResolver(),
@@ -1965,7 +1946,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(mode, preset);
     }
 
-    @Override
     public BrightnessInfo getBrightnessInfo() {
         synchronized (mCachedBrightnessInfo) {
             return new BrightnessInfo(
@@ -1979,7 +1959,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    @Override
     public void onBootCompleted() {
         Message msg = mHandler.obtainMessage(MSG_BOOT_COMPLETED);
         mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
@@ -2495,18 +2474,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-
-    @Override
     public float getScreenBrightnessSetting() {
         return mDisplayBrightnessController.getScreenBrightnessSetting();
     }
 
-    @Override
     public float getDozeBrightnessForOffload() {
         return mDisplayBrightnessController.getCurrentBrightness() * mDozeScaleFactor;
     }
 
-    @Override
     public void setBrightness(float brightness) {
         // After HBMController and NBMController migration to Clampers framework
         // currentBrightnessMax should be taken from clampers controller
@@ -2515,7 +2490,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mBrightnessRangeController.getCurrentBrightnessMax());
     }
 
-    @Override
     public void setBrightness(float brightness, int userSerial) {
         // After HBMController and NBMController migration to Clampers framework
         // currentBrightnessMax should be taken from clampers controller
@@ -2524,17 +2498,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mBrightnessRangeController.getCurrentBrightnessMax());
     }
 
-    @Override
     public int getDisplayId() {
         return mDisplayId;
     }
 
-    @Override
     public int getLeadDisplayId() {
         return mLeadDisplayId;
     }
 
-    @Override
     public void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux,
             boolean slowChange) {
         mBrightnessRangeController.onAmbientLuxChange(ambientLux);
@@ -2595,16 +2566,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mAutomaticBrightnessController.getLastSensorTimestamps());
     }
 
-    @Override
-    public void addDisplayBrightnessFollower(DisplayPowerControllerInterface follower) {
+    public void addDisplayBrightnessFollower(DisplayPowerController follower) {
         synchronized (mLock) {
             mDisplayBrightnessFollowers.append(follower.getDisplayId(), follower);
             sendUpdatePowerStateLocked();
         }
     }
 
-    @Override
-    public void removeDisplayBrightnessFollower(DisplayPowerControllerInterface follower) {
+    public void removeDisplayBrightnessFollower(DisplayPowerController follower) {
         synchronized (mLock) {
             mDisplayBrightnessFollowers.remove(follower.getDisplayId());
             mHandler.postAtTime(() -> follower.setBrightnessToFollow(
@@ -2616,7 +2585,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @GuardedBy("mLock")
     private void clearDisplayBrightnessFollowersLocked() {
         for (int i = 0; i < mDisplayBrightnessFollowers.size(); i++) {
-            DisplayPowerControllerInterface follower = mDisplayBrightnessFollowers.valueAt(i);
+            DisplayPowerController follower = mDisplayBrightnessFollowers.valueAt(i);
             mHandler.postAtTime(() -> follower.setBrightnessToFollow(
                     PowerManager.BRIGHTNESS_INVALID_FLOAT, BrightnessMappingStrategy.INVALID_NITS,
                     /* ambientLux= */ 0, /* slowChange= */ false), mClock.uptimeMillis());
@@ -2624,7 +2593,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mDisplayBrightnessFollowers.clear();
     }
 
-    @Override
     public void dump(final PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
@@ -3161,19 +3129,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    @Override
     public void setAutoBrightnessLoggingEnabled(boolean enabled) {
         if (mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.setLoggingEnabled(enabled);
         }
     }
 
-    @Override // DisplayWhiteBalanceController.Callbacks
+    // DisplayWhiteBalanceController.Callbacks
     public void updateWhiteBalance() {
         sendUpdatePowerState();
     }
 
-    @Override
     public void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
         Message msg = mHandler.obtainMessage();
         msg.what = MSG_SET_DWBC_LOGGING_ENABLED;
@@ -3181,7 +3147,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         msg.sendToTarget();
     }
 
-    @Override
     public void setAmbientColorTemperatureOverride(float cct) {
         Message msg = mHandler.obtainMessage();
         msg.what = MSG_SET_DWBC_COLOR_OVERRIDE;

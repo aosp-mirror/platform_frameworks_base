@@ -19,8 +19,8 @@ package com.android.systemui.log.table
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.LogcatEchoTrackerAlways
 import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
@@ -57,9 +57,7 @@ class LogDiffsForTableTest : SysuiTestCase() {
                 MAX_SIZE,
                 BUFFER_NAME,
                 systemClock,
-                mock(),
-                testDispatcher,
-                testScope.backgroundScope,
+                LogcatEchoTrackerAlways(),
             )
     }
 

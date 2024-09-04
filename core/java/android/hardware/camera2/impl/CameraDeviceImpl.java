@@ -80,6 +80,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -89,6 +90,17 @@ public class CameraDeviceImpl extends CameraDevice
         implements IBinder.DeathRecipient {
     private final String TAG;
     private final boolean DEBUG = false;
+
+    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
+        private static final ThreadFactory mFactory = Executors.defaultThreadFactory();
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = mFactory.newThread(r);
+            thread.setName("CameraDeviceExecutor");
+            return thread;
+        }
+    };
 
     private static final int REQUEST_ID_NONE = -1;
 
@@ -354,7 +366,11 @@ public class CameraDeviceImpl extends CameraDevice
         mCameraId = cameraId;
         if (Flags.singleThreadExecutor()) {
             mDeviceCallback = new ClientStateCallback(executor, callback);
-            mDeviceExecutor = Executors.newSingleThreadExecutor();
+            if (Flags.singleThreadExecutorNaming()) {
+                mDeviceExecutor = Executors.newSingleThreadExecutor(sThreadFactory);
+            } else {
+                mDeviceExecutor = Executors.newSingleThreadExecutor();
+            }
         } else {
             mDeviceCallback = callback;
             mDeviceExecutor = executor;
