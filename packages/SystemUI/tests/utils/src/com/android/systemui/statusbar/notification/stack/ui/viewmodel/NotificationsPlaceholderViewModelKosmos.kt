@@ -35,3 +35,11 @@ val Kosmos.notificationsPlaceholderViewModel by Fixture {
         dumpManager = dumpManager,
     )
 }
+
+val Kosmos.notificationsPlaceholderViewModelFactory by Fixture {
+    object : NotificationsPlaceholderViewModel.Factory {
+        override fun create(): NotificationsPlaceholderViewModel {
+            return notificationsPlaceholderViewModel
+        }
+    }
+}

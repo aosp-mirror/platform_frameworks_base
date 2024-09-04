@@ -1974,7 +1974,7 @@ public final class Settings {
     /**
      * Activity Action: Show Notification Policy access settings.
      * <p>
-     * Users can grant and deny access to Notification Policy (DND / Priority Modes) configuration
+     * Users can grant and deny access to Notification Policy (DND / Modes) configuration
      * from here. Managed profiles cannot grant Notification Policy access.
      * See {@link android.app.NotificationManager#isNotificationPolicyAccessGranted()} for more
      * details.

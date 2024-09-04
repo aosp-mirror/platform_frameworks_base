@@ -28,7 +28,6 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -43,32 +42,18 @@ class QuickSettingsShadeOverlayActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val fakeShadeRepository by lazy { kosmos.fakeShadeRepository }
 
-    private val underTest by lazy { kosmos.quickSettingsShadeOverlayActionsViewModel }
+    private val underTest = kosmos.quickSettingsShadeOverlayActionsViewModel
 
     @Test
-    fun upTransitionSceneKey_topAligned_hidesShade() =
+    fun upTransitionSceneKey_hidesShade() =
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
-            fakeShadeRepository.setDualShadeAlignedToBottom(false)
             underTest.activateIn(this)
 
             assertThat((actions?.get(Swipe.Up) as? UserActionResult.HideOverlay)?.overlay)
                 .isEqualTo(Overlays.QuickSettingsShade)
             assertThat(actions?.get(Swipe.Down)).isNull()
-        }
-
-    @Test
-    fun upTransitionSceneKey_bottomAligned_doesNothing() =
-        testScope.runTest {
-            val actions by collectLastValue(underTest.actions)
-            fakeShadeRepository.setDualShadeAlignedToBottom(true)
-            underTest.activateIn(this)
-
-            assertThat(actions?.get(Swipe.Up)).isNull()
-            assertThat((actions?.get(Swipe.Down) as? UserActionResult.HideOverlay)?.overlay)
-                .isEqualTo(Overlays.QuickSettingsShade)
         }
 
     @Test

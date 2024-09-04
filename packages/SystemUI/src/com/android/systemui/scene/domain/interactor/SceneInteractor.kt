@@ -202,8 +202,8 @@ constructor(
                 }
                 is ObservableTransitionState.Transition -> {
                     when {
-                        transition.toScene == scene -> transition.progress
-                        transition.fromScene == scene -> transition.progress.map { 1f - it }
+                        transition.toContent == scene -> transition.progress
+                        transition.fromContent == scene -> transition.progress.map { 1f - it }
                         else -> flowOf(0f)
                     }
                 }
@@ -501,7 +501,7 @@ constructor(
         }
 
         val inMidTransitionFromGone =
-            (transitionState.value as? ObservableTransitionState.Transition)?.fromScene ==
+            (transitionState.value as? ObservableTransitionState.Transition)?.fromContent ==
                 Scenes.Gone
         val isChangeAllowed =
             to != Scenes.Gone ||

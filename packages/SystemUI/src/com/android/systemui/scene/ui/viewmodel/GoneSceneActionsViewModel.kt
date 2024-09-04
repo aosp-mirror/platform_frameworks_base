@@ -16,14 +16,12 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
-import androidx.compose.ui.Alignment
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.scene.shared.model.TransitionKeys.OpenBottomShade
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -47,38 +45,23 @@ constructor(
                             // zones.
                             shadeMode is ShadeMode.Dual
                     ) {
-                        if (shadeInteractor.shadeAlignment == Alignment.BottomEnd) {
-                            put(
-                                Swipe(
-                                    pointerCount = 2,
-                                    fromSource = Edge.Bottom,
-                                    direction = SwipeDirection.Up,
-                                ),
-                                UserActionResult(SceneFamilies.QuickSettings, OpenBottomShade)
-                            )
-                        } else {
-                            put(
-                                Swipe(
-                                    pointerCount = 2,
-                                    fromSource = Edge.Top,
-                                    direction = SwipeDirection.Down,
-                                ),
-                                UserActionResult(SceneFamilies.QuickSettings)
-                            )
-                        }
-                    }
-
-                    if (shadeInteractor.shadeAlignment == Alignment.BottomEnd) {
-                        put(Swipe.Up, UserActionResult(SceneFamilies.NotifShade, OpenBottomShade))
-                    } else {
                         put(
-                            Swipe.Down,
-                            UserActionResult(
-                                SceneFamilies.NotifShade,
-                                ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
-                            )
+                            Swipe(
+                                pointerCount = 2,
+                                fromSource = Edge.Top,
+                                direction = SwipeDirection.Down,
+                            ),
+                            UserActionResult(SceneFamilies.QuickSettings)
                         )
                     }
+
+                    put(
+                        Swipe.Down,
+                        UserActionResult(
+                            SceneFamilies.NotifShade,
+                            ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
+                        )
+                    )
                 }
             }
             .collect { setActions(it) }

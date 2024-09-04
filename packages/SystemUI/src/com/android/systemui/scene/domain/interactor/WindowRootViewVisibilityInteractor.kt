@@ -81,14 +81,14 @@ constructor(
                                 state.currentScene == Scenes.QuickSettingsShade ||
                                 state.currentScene == Scenes.Lockscreen
                         is ObservableTransitionState.Transition ->
-                            state.toScene == Scenes.Shade ||
-                                state.toScene == Scenes.NotificationsShade ||
-                                state.toScene == Scenes.QuickSettingsShade ||
-                                state.toScene == Scenes.Lockscreen ||
-                                state.fromScene == Scenes.Shade ||
-                                state.fromScene == Scenes.NotificationsShade ||
-                                state.fromScene == Scenes.QuickSettingsShade ||
-                                state.fromScene == Scenes.Lockscreen
+                            state.toContent == Scenes.Shade ||
+                                state.toContent == Scenes.NotificationsShade ||
+                                state.toContent == Scenes.QuickSettingsShade ||
+                                state.toContent == Scenes.Lockscreen ||
+                                state.fromContent == Scenes.Shade ||
+                                state.fromContent == Scenes.NotificationsShade ||
+                                state.fromContent == Scenes.QuickSettingsShade ||
+                                state.fromContent == Scenes.Lockscreen
                     }
                 }
                 .distinctUntilChanged()

@@ -345,10 +345,14 @@ package com.android.server.display.config {
   public class PowerThrottlingConfig {
     ctor public PowerThrottlingConfig();
     method @NonNull public final java.math.BigDecimal getBrightnessLowestCapAllowed();
-    method @NonNull public final java.math.BigInteger getPollingWindowMillis();
+    method @NonNull public final java.math.BigDecimal getCustomAnimationRateSec();
+    method @NonNull public final java.math.BigInteger getPollingWindowMaxMillis();
+    method @NonNull public final java.math.BigInteger getPollingWindowMinMillis();
     method public final java.util.List<com.android.server.display.config.PowerThrottlingMap> getPowerThrottlingMap();
     method public final void setBrightnessLowestCapAllowed(@NonNull java.math.BigDecimal);
-    method public final void setPollingWindowMillis(@NonNull java.math.BigInteger);
+    method public final void setCustomAnimationRateSec(@NonNull java.math.BigDecimal);
+    method public final void setPollingWindowMaxMillis(@NonNull java.math.BigInteger);
+    method public final void setPollingWindowMinMillis(@NonNull java.math.BigInteger);
   }
 
   public class PowerThrottlingMap {

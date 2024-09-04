@@ -92,6 +92,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     private FakeFeatureFlags mFeatureFlags;
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
+    private UserActivityNotifier mUserActivityNotifier;
     private KeyguardAbsKeyInputViewController mKeyguardAbsKeyInputViewController;
     private KosmosJavaAdapter mKosmosJavaAdapter = new KosmosJavaAdapter(this);
     private final FakeMSDLPlayer mMSDLPlayer = mKosmosJavaAdapter.getMsdlPlayer();
@@ -117,7 +119,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         return new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
-                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor, mMSDLPlayer) {
+                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor, mMSDLPlayer,
+                mUserActivityNotifier) {
             @Override
             void resetState() {
             }

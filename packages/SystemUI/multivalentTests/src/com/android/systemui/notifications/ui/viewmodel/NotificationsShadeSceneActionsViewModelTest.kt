@@ -37,7 +37,6 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.ui.viewmodel.notificationsShadeSceneActionsViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -104,36 +103,6 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun downTransitionSceneKey_deviceLocked_bottomAligned_lockscreen() =
-        testScope.runTest {
-            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
-            val actions by collectLastValue(underTest.actions)
-            lockDevice()
-            underTest.activateIn(this)
-
-            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
-                .isEqualTo(SceneFamilies.Home)
-            assertThat(actions?.get(Swipe.Up)).isNull()
-            assertThat(kosmos.homeSceneFamilyResolver.resolvedScene.value)
-                .isEqualTo(Scenes.Lockscreen)
-        }
-
-    @Test
-    fun downTransitionSceneKey_deviceUnlocked_bottomAligned_gone() =
-        testScope.runTest {
-            kosmos.fakeShadeRepository.setDualShadeAlignedToBottom(true)
-            val actions by collectLastValue(underTest.actions)
-            lockDevice()
-            unlockDevice()
-            underTest.activateIn(this)
-
-            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
-                .isEqualTo(SceneFamilies.Home)
-            assertThat(actions?.get(Swipe.Up)).isNull()
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
-        }
-
-    @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val actions by collectLastValue(underTest.actions)
@@ -153,11 +122,13 @@ class NotificationsShadeSceneActionsViewModelTest : SysuiTestCase() {
     @Test
     fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
+            val deviceUnlockStatus by collectLastValue(deviceUnlockedInteractor.deviceUnlockStatus)
             val actions by collectLastValue(underTest.actions)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
+            assertThat(deviceUnlockStatus?.isUnlocked).isTrue()
             sceneInteractor // force the lazy; this will kick off StateFlows
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")

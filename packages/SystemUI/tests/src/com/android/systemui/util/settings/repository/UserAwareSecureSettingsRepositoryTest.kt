@@ -23,12 +23,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,9 +41,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class UserAwareSecureSettingsRepositoryTest : SysuiTestCase() {
 
-    private val dispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(dispatcher)
-    private val secureSettings = FakeSettings()
+    private val kosmos = testKosmos()
+    private val dispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val secureSettings = kosmos.fakeSettings
     private val userRepository = Kosmos().fakeUserRepository
     private lateinit var repository: UserAwareSecureSettingsRepository
 

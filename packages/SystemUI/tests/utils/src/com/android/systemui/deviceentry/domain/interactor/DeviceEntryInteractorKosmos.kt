@@ -19,6 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
+import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -34,5 +35,6 @@ val Kosmos.deviceEntryInteractor by
             sceneInteractor = sceneInteractor,
             deviceUnlockedInteractor = deviceUnlockedInteractor,
             alternateBouncerInteractor = alternateBouncerInteractor,
+            dismissCallbackRegistry = dismissCallbackRegistry,
         )
     }

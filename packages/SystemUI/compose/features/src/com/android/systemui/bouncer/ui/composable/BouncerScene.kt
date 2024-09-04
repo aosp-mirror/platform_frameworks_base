@@ -34,7 +34,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -57,7 +57,7 @@ constructor(
     private val actionsViewModelFactory: BouncerSceneActionsViewModel.Factory,
     private val contentViewModelFactory: BouncerSceneContentViewModel.Factory,
     private val dialogFactory: BouncerDialogFactory,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Bouncer
 
     private val actionsViewModel: BouncerSceneActionsViewModel by lazy {

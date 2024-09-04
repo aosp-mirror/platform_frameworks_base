@@ -228,6 +228,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             public void onDismissBubble(Bubble bubble) {
                 mManager.dismissBubble(bubble, Bubbles.DISMISS_USER_GESTURE);
             }
+
+            @Override
+            public void onMoveToFullscreen(Bubble bubble) {
+                if (mTaskView != null) {
+                    mTaskView.moveToFullscreen();
+                }
+            }
         });
         mHandleView.setOnClickListener(view -> {
             mMenuViewController.showMenu(true /* animated */);
