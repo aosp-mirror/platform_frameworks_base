@@ -203,9 +203,6 @@ object Flags {
     @JvmField
     val INCOMPATIBLE_CHARGING_BATTERY_ICON = releasedFlag("incompatible_charging_battery_icon")
 
-    // TODO(b/293585143): Tracking Bug
-    val INSTANT_TETHER = releasedFlag("instant_tether")
-
     // TODO(b/290676905): Tracking Bug
     val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS = releasedFlag("new_shade_carrier_group_mobile_icons")
 
