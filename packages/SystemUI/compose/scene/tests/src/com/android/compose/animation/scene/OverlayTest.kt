@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -44,9 +45,12 @@ import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestOverlays.OverlayB
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.test.assertSizeIsEqualTo
+import com.android.compose.test.setContentAndCreateMainScope
 import com.android.compose.test.subjects.assertThat
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -647,5 +651,43 @@ class OverlayTest {
                 assertThat(sharedIntValueByContent).containsEntry(OverlayB, 2_000)
             }
         }
+    }
+
+    @Test
+    fun overscrollingOverlay_movableElementNotInOverlay() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        // Make OverlayA overscrollable.
+                        overscroll(OverlayA, orientation = Orientation.Horizontal) {
+                            translate(ElementKey("elementThatDoesNotExist"), x = 10.dp)
+                        }
+                    }
+                )
+            }
+
+        val key = MovableElementKey("Foo", contents = setOf(SceneA))
+        val movableElementChildTag = "movableElementChildTag"
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    scene(SceneA) {
+                        MovableElement(key, Modifier) {
+                            content { Box(Modifier.testTag(movableElementChildTag).size(100.dp)) }
+                        }
+                    }
+                    overlay(OverlayA) { /* Does not contain the element. */ }
+                }
+            }
+
+        // Overscroll on Overlay A.
+        scope.launch { state.startTransition(transition(SceneA, OverlayA, progress = { 1.5f })) }
+        rule
+            .onNode(hasTestTag(movableElementChildTag) and inContent(SceneA))
+            .assertPositionInRootIsEqualTo(0.dp, 0.dp)
+            .assertSizeIsEqualTo(100.dp)
+            .assertIsDisplayed()
     }
 }
