@@ -932,6 +932,9 @@
     <uses-permission
         android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
 
+    <!-- Permission required for CTS test - CtsNfcTestCases -->
+    <uses-permission android:name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
