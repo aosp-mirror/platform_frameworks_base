@@ -415,9 +415,9 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun ongoingActivityChip_matchesViewModel() =
+    fun primaryOngoingActivityChip_matchesViewModel() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.ongoingActivityChip)
+            val latest by collectLastValue(underTest.primaryOngoingActivityChip)
 
             kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
 

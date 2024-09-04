@@ -93,7 +93,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                 }
 
                 if (Flags.statusBarScreenSharingChips()) {
-                    val chipView: View = view.requireViewById(R.id.ongoing_activity_chip)
+                    val chipView: View = view.requireViewById(R.id.ongoing_activity_chip_primary)
                     val chipContext = chipView.context
                     val chipDefaultIconView: ImageView =
                         chipView.requireViewById(R.id.ongoing_activity_chip_icon)
@@ -106,7 +106,7 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                             R.id.ongoing_activity_chip_background
                         )
                     launch {
-                        viewModel.ongoingActivityChip.collect { chipModel ->
+                        viewModel.primaryOngoingActivityChip.collect { chipModel ->
                             when (chipModel) {
                                 is OngoingActivityChipModel.Shown -> {
                                     // Data
