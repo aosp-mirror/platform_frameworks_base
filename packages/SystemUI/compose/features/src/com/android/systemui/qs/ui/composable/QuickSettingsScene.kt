@@ -93,8 +93,8 @@ import com.android.systemui.notifications.ui.composable.NotificationStackCutoffG
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQS
-import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneContentViewModel
+import com.android.systemui.qs.ui.viewmodel.QuickSettingsUserActionsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
@@ -125,7 +125,7 @@ constructor(
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
-    private val actionsViewModelFactory: QuickSettingsSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: QuickSettingsUserActionsViewModel.Factory,
     private val contentViewModelFactory: QuickSettingsSceneContentViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
@@ -135,7 +135,7 @@ constructor(
 ) : ExclusiveActivatable(), Scene {
     override val key = Scenes.QuickSettings
 
-    private val actionsViewModel: QuickSettingsSceneActionsViewModel by lazy {
+    private val actionsViewModel: QuickSettingsUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 

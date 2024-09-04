@@ -108,8 +108,8 @@ import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
-import com.android.systemui.shade.ui.viewmodel.ShadeSceneActionsViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneContentViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeUserActionsViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.StatusBarLocation
@@ -154,7 +154,7 @@ class ShadeScene
 constructor(
     private val shadeSession: SaveableSession,
     private val notificationStackScrollView: Lazy<NotificationScrollView>,
-    private val actionsViewModelFactory: ShadeSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: ShadeUserActionsViewModel.Factory,
     private val contentViewModelFactory: ShadeSceneContentViewModel.Factory,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -167,7 +167,7 @@ constructor(
 
     override val key = Scenes.Shade
 
-    private val actionsViewModel: ShadeSceneActionsViewModel by lazy {
+    private val actionsViewModel: ShadeUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 

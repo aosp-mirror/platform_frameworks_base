@@ -49,7 +49,7 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneActionsViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenUserActionsViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
@@ -65,10 +65,10 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.shade.ui.viewmodel.ShadeSceneActionsViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneContentViewModel
-import com.android.systemui.shade.ui.viewmodel.shadeSceneActionsViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeUserActionsViewModel
 import com.android.systemui.shade.ui.viewmodel.shadeSceneContentViewModel
+import com.android.systemui.shade.ui.viewmodel.shadeUserActionsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
@@ -145,8 +145,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
     private lateinit var bouncerSceneContentViewModel: BouncerSceneContentViewModel
 
-    private val lockscreenSceneActionsViewModel by lazy {
-        LockscreenSceneActionsViewModel(
+    private val mLockscreenUserActionsViewModel by lazy {
+        LockscreenUserActionsViewModel(
             deviceEntryInteractor = deviceEntryInteractor,
             communalInteractor = communalInteractor,
             shadeInteractor = kosmos.shadeInteractor,
@@ -154,7 +154,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     private lateinit var shadeSceneContentViewModel: ShadeSceneContentViewModel
-    private lateinit var shadeSceneActionsViewModel: ShadeSceneActionsViewModel
+    private lateinit var mShadeUserActionsViewModel: ShadeUserActionsViewModel
 
     private val powerInteractor by lazy { kosmos.powerInteractor }
 
@@ -191,14 +191,14 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         bouncerSceneContentViewModel = kosmos.bouncerSceneContentViewModel
 
         shadeSceneContentViewModel = kosmos.shadeSceneContentViewModel
-        shadeSceneActionsViewModel = kosmos.shadeSceneActionsViewModel
+        mShadeUserActionsViewModel = kosmos.shadeUserActionsViewModel
 
         val startable = kosmos.sceneContainerStartable
         startable.start()
 
-        lockscreenSceneActionsViewModel.activateIn(testScope)
+        mLockscreenUserActionsViewModel.activateIn(testScope)
         shadeSceneContentViewModel.activateIn(testScope)
-        shadeSceneActionsViewModel.activateIn(testScope)
+        mShadeUserActionsViewModel.activateIn(testScope)
         bouncerSceneContentViewModel.activateIn(testScope)
         sceneContainerViewModel.activateIn(testScope)
 
@@ -229,7 +229,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnLockscreen_enterCorrectPin_unlocksDevice() =
         testScope.runTest {
-            val actions by collectLastValue(lockscreenSceneActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
@@ -250,7 +250,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
-            val actions by collectLastValue(lockscreenSceneActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
@@ -262,7 +262,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
-            val actions by collectLastValue(shadeSceneActionsViewModel.actions)
+            val actions by collectLastValue(mShadeUserActionsViewModel.actions)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             assertCurrentScene(Scenes.Lockscreen)
@@ -283,7 +283,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
-            val actions by collectLastValue(shadeSceneActionsViewModel.actions)
+            val actions by collectLastValue(mShadeUserActionsViewModel.actions)
             val canSwipeToEnter by collectLastValue(deviceEntryInteractor.canSwipeToEnter)
             val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
 
@@ -369,7 +369,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun swipeUpOnLockscreenWhileUnlocked_dismissesLockscreen() =
         testScope.runTest {
             unlockDevice()
-            val actions by collectLastValue(lockscreenSceneActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
@@ -392,7 +392,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun dismissingIme_whileOnPasswordBouncer_navigatesToLockscreen() =
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
-            val actions by collectLastValue(lockscreenSceneActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
@@ -411,7 +411,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun bouncerActionButtonClick_opensEmergencyServicesDialer() =
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
-            val actions by collectLastValue(lockscreenSceneActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
@@ -432,7 +432,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
             startPhoneCall()
-            val actions by collectLastValue(lockscreenSceneActionsViewModel.actions)
+            val actions by collectLastValue(mLockscreenUserActionsViewModel.actions)
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)

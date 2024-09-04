@@ -33,7 +33,7 @@ import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.Default
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.viewmodel.GoneSceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.GoneUserActionsViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import dagger.Lazy
@@ -50,11 +50,11 @@ class GoneScene
 constructor(
     private val notificationStackScrolLView: Lazy<NotificationScrollView>,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
-    private val viewModelFactory: GoneSceneActionsViewModel.Factory,
+    private val viewModelFactory: GoneUserActionsViewModel.Factory,
 ) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Gone
 
-    private val actionsViewModel: GoneSceneActionsViewModel by lazy { viewModelFactory.create() }
+    private val actionsViewModel: GoneUserActionsViewModel by lazy { viewModelFactory.create() }
 
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
         actionsViewModel.actions

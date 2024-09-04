@@ -25,15 +25,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Base class for view-models that need to keep a map of scene actions (also known as "destination
+ * Base class for view-models that need to keep a map of user actions (also known as "destination
  * scenes") up-to-date.
  *
  * Subclasses need only to override [hydrateActions], suspending forever if they need; they don't
  * need to worry about resetting the value of [actions] when the view-model is deactivated/canceled,
  * this base class takes care of it.
  */
-// TODO(b/363206563): Rename to UserActionsViewModel.
-abstract class SceneActionsViewModel : ExclusiveActivatable() {
+abstract class UserActionsViewModel : ExclusiveActivatable() {
 
     private val _actions = MutableStateFlow<Map<UserAction, UserActionResult>>(emptyMap())
     /**

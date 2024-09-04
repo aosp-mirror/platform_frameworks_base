@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 /**
  * Models UI state needed for rendering the content of the quick settings scene.
  *
- * Different from [QuickSettingsSceneActionsViewModel] that models the UI state needed to figure out
+ * Different from [QuickSettingsUserActionsViewModel] that models the UI state needed to figure out
  * which user actions can trigger navigation to other scenes.
  */
 class QuickSettingsSceneContentViewModel

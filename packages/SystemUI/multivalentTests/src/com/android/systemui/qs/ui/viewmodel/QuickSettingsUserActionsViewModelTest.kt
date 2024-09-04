@@ -57,7 +57,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @EnableSceneContainer
-class QuickSettingsSceneActionsViewModelTest : SysuiTestCase() {
+class QuickSettingsUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -67,7 +67,7 @@ class QuickSettingsSceneActionsViewModelTest : SysuiTestCase() {
     private val sceneBackInteractor = kosmos.sceneBackInteractor
     private val sceneContainerStartable = kosmos.sceneContainerStartable
 
-    private lateinit var underTest: QuickSettingsSceneActionsViewModel
+    private lateinit var underTest: QuickSettingsUserActionsViewModel
 
     @Before
     fun setUp() {
@@ -75,7 +75,7 @@ class QuickSettingsSceneActionsViewModelTest : SysuiTestCase() {
 
         sceneContainerStartable.start()
         underTest =
-            QuickSettingsSceneActionsViewModel(
+            QuickSettingsUserActionsViewModel(
                 qsSceneAdapter = qsFlexiglassAdapter,
                 sceneBackInteractor = sceneBackInteractor,
             )

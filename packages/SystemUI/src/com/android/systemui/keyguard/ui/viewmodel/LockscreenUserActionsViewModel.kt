@@ -28,7 +28,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
-import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.kotlin.filterValuesNotNull
@@ -40,13 +40,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 
 /** Models UI state and handles user input for the lockscreen scene. */
-class LockscreenSceneActionsViewModel
+class LockscreenUserActionsViewModel
 @AssistedInject
 constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val communalInteractor: CommunalInteractor,
     private val shadeInteractor: ShadeInteractor,
-) : SceneActionsViewModel() {
+) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         shadeInteractor.isShadeTouchable
@@ -119,6 +119,6 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(): LockscreenSceneActionsViewModel
+        fun create(): LockscreenUserActionsViewModel
     }
 }

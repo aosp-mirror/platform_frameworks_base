@@ -18,9 +18,9 @@ package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.quickSettingsShadeSceneActionsViewModel: QuickSettingsShadeSceneActionsViewModel by
+val Kosmos.quickSettingsShadeUserActionsViewModel: QuickSettingsShadeUserActionsViewModel by
     Kosmos.Fixture {
-        QuickSettingsShadeSceneActionsViewModel(
+        QuickSettingsShadeUserActionsViewModel(
             quickSettingsContainerViewModel = quickSettingsContainerViewModel,
         )
     }

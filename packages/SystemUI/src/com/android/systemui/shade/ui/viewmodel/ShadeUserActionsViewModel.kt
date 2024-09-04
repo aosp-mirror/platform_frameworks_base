@@ -24,7 +24,7 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
-import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import dagger.assisted.AssistedFactory
@@ -36,12 +36,12 @@ import kotlinx.coroutines.flow.combine
  *
  * Different from the [ShadeSceneContentViewModel] which models the _content_ of the scene.
  */
-class ShadeSceneActionsViewModel
+class ShadeUserActionsViewModel
 @AssistedInject
 constructor(
     private val qsSceneAdapter: QSSceneAdapter,
     private val shadeInteractor: ShadeInteractor,
-) : SceneActionsViewModel() {
+) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         combine(
@@ -71,6 +71,6 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(): ShadeSceneActionsViewModel
+        fun create(): ShadeUserActionsViewModel
     }
 }

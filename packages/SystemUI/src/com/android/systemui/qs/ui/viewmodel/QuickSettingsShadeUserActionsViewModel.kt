@@ -21,7 +21,7 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.map
@@ -32,11 +32,11 @@ import kotlinx.coroutines.flow.map
  * Different from the [QuickSettingsShadeSceneContentViewModel] which models the _content_ of the
  * scene.
  */
-class QuickSettingsShadeSceneActionsViewModel
+class QuickSettingsShadeUserActionsViewModel
 @AssistedInject
 constructor(
     val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
-) : SceneActionsViewModel() {
+) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         quickSettingsContainerViewModel.editModeViewModel.isEditing
@@ -53,6 +53,6 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(): QuickSettingsShadeSceneActionsViewModel
+        fun create(): QuickSettingsShadeUserActionsViewModel
     }
 }

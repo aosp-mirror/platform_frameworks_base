@@ -27,8 +27,8 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
-import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneActionsViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerUserActionsViewModel
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
@@ -54,13 +54,13 @@ object Bouncer {
 class BouncerScene
 @Inject
 constructor(
-    private val actionsViewModelFactory: BouncerSceneActionsViewModel.Factory,
+    private val actionsViewModelFactory: BouncerUserActionsViewModel.Factory,
     private val contentViewModelFactory: BouncerSceneContentViewModel.Factory,
     private val dialogFactory: BouncerDialogFactory,
 ) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Bouncer
 
-    private val actionsViewModel: BouncerSceneActionsViewModel by lazy {
+    private val actionsViewModel: BouncerUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 

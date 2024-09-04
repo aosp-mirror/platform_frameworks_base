@@ -29,11 +29,11 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.map
 
-class GoneSceneActionsViewModel
+class GoneUserActionsViewModel
 @AssistedInject
 constructor(
     private val shadeInteractor: ShadeInteractor,
-) : SceneActionsViewModel() {
+) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         shadeInteractor.shadeMode
@@ -69,6 +69,6 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(): GoneSceneActionsViewModel
+        fun create(): GoneUserActionsViewModel
     }
 }

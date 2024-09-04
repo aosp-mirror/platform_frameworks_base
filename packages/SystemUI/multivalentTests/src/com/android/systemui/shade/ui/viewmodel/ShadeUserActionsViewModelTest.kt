@@ -64,7 +64,7 @@ import org.junit.runner.RunWith
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
 @DisableFlags(DualShade.FLAG_NAME)
-class ShadeSceneActionsViewModelTest : SysuiTestCase() {
+class ShadeUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -72,7 +72,7 @@ class ShadeSceneActionsViewModelTest : SysuiTestCase() {
     private val shadeRepository by lazy { kosmos.shadeRepository }
     private val qsSceneAdapter by lazy { kosmos.fakeQSSceneAdapter }
 
-    private val underTest: ShadeSceneActionsViewModel by lazy { kosmos.shadeSceneActionsViewModel }
+    private val underTest: ShadeUserActionsViewModel by lazy { kosmos.shadeUserActionsViewModel }
 
     @Before
     fun setUp() {

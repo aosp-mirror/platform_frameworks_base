@@ -18,7 +18,7 @@ package com.android.systemui.shade.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeUserActionsViewModel
 
-val Kosmos.notificationsShadeSceneActionsViewModel:
-    NotificationsShadeSceneActionsViewModel by Fixture { NotificationsShadeSceneActionsViewModel() }
+val Kosmos.notificationsShadeUserActionsViewModel:
+    NotificationsShadeUserActionsViewModel by Fixture { NotificationsShadeUserActionsViewModel() }

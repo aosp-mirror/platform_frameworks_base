@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.bouncer.ui.viewmodel
+package com.android.systemui.scene.ui.viewmodel
 
+import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
-import com.android.systemui.scene.domain.startable.sceneContainerStartable
-import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.fakeSceneDataSource
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
-import com.android.systemui.truth.containsEntriesExactly
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -43,35 +41,42 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@TestableLooper.RunWithLooper
 @EnableSceneContainer
-class BouncerSceneActionsViewModelTest : SysuiTestCase() {
+class GoneUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-
-    private lateinit var underTest: BouncerSceneActionsViewModel
+    private val shadeRepository by lazy { kosmos.shadeRepository }
+    private lateinit var underTest: GoneUserActionsViewModel
 
     @Before
     fun setUp() {
-        kosmos.sceneContainerStartable.start()
-        underTest = kosmos.bouncerSceneActionsViewModel
+        underTest =
+            GoneUserActionsViewModel(
+                shadeInteractor = kosmos.shadeInteractor,
+            )
         underTest.activateIn(testScope)
     }
 
     @Test
-    fun actions() =
+    fun downTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
         testScope.runTest {
-            val actions by collectLastValue(underTest.actions)
-            kosmos.fakeSceneDataSource.changeScene(Scenes.QuickSettings)
+            val destinationScenes by collectLastValue(underTest.actions)
+            shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
-            kosmos.fakeSceneDataSource.changeScene(Scenes.Bouncer)
+            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.transitionKey)
+                .isEqualTo(ToSplitShade)
+        }
+
+    @Test
+    fun downTransitionKey_splitShadeDisabled_isNull() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.actions)
+            shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
-            assertThat(actions)
-                .containsEntriesExactly(
-                    Back to UserActionResult(Scenes.QuickSettings),
-                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.QuickSettings),
-                )
+            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()
         }
 }

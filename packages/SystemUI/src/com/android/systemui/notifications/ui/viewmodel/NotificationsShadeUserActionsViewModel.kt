@@ -21,15 +21,15 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /**
  * Models the UI state for the user actions that the user can perform to navigate to other scenes.
  */
-class NotificationsShadeSceneActionsViewModel @AssistedInject constructor() :
-    SceneActionsViewModel() {
+class NotificationsShadeUserActionsViewModel @AssistedInject constructor() :
+    UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         setActions(
@@ -42,6 +42,6 @@ class NotificationsShadeSceneActionsViewModel @AssistedInject constructor() :
 
     @AssistedFactory
     interface Factory {
-        fun create(): NotificationsShadeSceneActionsViewModel
+        fun create(): NotificationsShadeUserActionsViewModel
     }
 }

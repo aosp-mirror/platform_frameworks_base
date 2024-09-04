@@ -24,7 +24,7 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateContentFloatAsState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneActionsViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenUserActionsViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Scenes
@@ -38,12 +38,12 @@ import kotlinx.coroutines.flow.Flow
 class LockscreenScene
 @Inject
 constructor(
-    actionsViewModelFactory: LockscreenSceneActionsViewModel.Factory,
+    actionsViewModelFactory: LockscreenUserActionsViewModel.Factory,
     private val lockscreenContent: Lazy<LockscreenContent>,
 ) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Lockscreen
 
-    private val actionsViewModel: LockscreenSceneActionsViewModel by lazy {
+    private val actionsViewModel: LockscreenUserActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
 
