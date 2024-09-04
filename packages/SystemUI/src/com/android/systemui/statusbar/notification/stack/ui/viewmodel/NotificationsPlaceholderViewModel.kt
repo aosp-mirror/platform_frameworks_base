@@ -24,6 +24,7 @@ import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
@@ -49,6 +50,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
+    remoteInputInteractor: RemoteInputInteractor,
     featureFlags: FeatureFlagsClassic,
     dumpManager: DumpManager,
 ) :
@@ -131,6 +133,12 @@ constructor(
      */
     val isCurrentGestureOverscroll: Flow<Boolean> =
         interactor.isCurrentGestureOverscroll.dumpWhileCollecting("isCurrentGestureOverScroll")
+
+    /** Whether remote input is currently active for any notification. */
+    val isRemoteInputActive = remoteInputInteractor.isRemoteInputActive
+
+    /** The bottom bound of the currently focused remote input notification row. */
+    val remoteInputRowBottomBound = remoteInputInteractor.remoteInputRowBottomBound
 
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
