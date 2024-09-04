@@ -13,18 +13,12 @@ flag {
   bug: "289520697"
 }
 
+# Fully rolled out and must not be used.
 flag {
   name: "device_policy_size_tracking_enabled"
   is_exported: true
   namespace: "enterprise"
   description: "Add feature to track the total policy size and have a max threshold - public API changes"
-  bug: "281543351"
-}
-
-flag {
-  name: "device_policy_size_tracking_internal_enabled"
-  namespace: "enterprise"
-  description: "Add feature to track the total policy size and have a max threshold - internal changes"
   bug: "281543351"
 }
 
