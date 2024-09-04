@@ -70,6 +70,8 @@ import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeF
 import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
+import static com.android.server.stats.pull.netstats.NetworkStatsUtils.fromPublicNetworkStats;
+import static com.android.server.stats.pull.netstats.NetworkStatsUtils.isAddEntriesSupported;
 
 import static libcore.io.IoUtils.closeQuietly;
 
@@ -210,7 +212,6 @@ import com.android.internal.os.SelectedProcessCpuThreadReader;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.net.module.util.NetworkStatsUtils;
 import com.android.role.RoleManagerLocal;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalManagerRegistry;
@@ -1388,14 +1389,22 @@ public class StatsPullAtomService extends SystemService {
 
     @NonNull
     private static NetworkStats removeEmptyEntries(NetworkStats stats) {
-        NetworkStats ret = new NetworkStats(0, 1);
+        final ArrayList<NetworkStats.Entry> entries = new ArrayList<>();
         for (NetworkStats.Entry e : stats) {
             if (e.getRxBytes() != 0 || e.getRxPackets() != 0 || e.getTxBytes() != 0
                     || e.getTxPackets() != 0 || e.getOperations() != 0) {
-                ret = ret.addEntry(e);
+                entries.add(e);
             }
         }
-        return ret;
+        if (isAddEntriesSupported()) {
+            return new NetworkStats(0, entries.size()).addEntries(entries);
+        } else {
+            NetworkStats outputStats = new NetworkStats(0L, 1);
+            for (NetworkStats.Entry e : entries) {
+                outputStats = outputStats.addEntry(e);
+            }
+            return outputStats;
+        }
     }
 
     private void addNetworkStats(int atomTag, @NonNull List<StatsEvent> ret,
@@ -1587,14 +1596,14 @@ public class StatsPullAtomService extends SystemService {
                 getNetworkStatsManager().querySummary(template, startTime, endTime);
 
         final NetworkStats nonTaggedStats =
-                NetworkStatsUtils.fromPublicNetworkStats(queryNonTaggedStats);
+                fromPublicNetworkStats(queryNonTaggedStats);
         queryNonTaggedStats.close();
         if (!includeTags) return nonTaggedStats;
 
         final android.app.usage.NetworkStats queryTaggedStats =
                 getNetworkStatsManager().queryTaggedSummary(template, startTime, endTime);
         final NetworkStats taggedStats =
-                NetworkStatsUtils.fromPublicNetworkStats(queryTaggedStats);
+                fromPublicNetworkStats(queryTaggedStats);
         queryTaggedStats.close();
         return nonTaggedStats.add(taggedStats);
     }
@@ -1720,11 +1729,19 @@ public class StatsPullAtomService extends SystemService {
     @NonNull
     private NetworkStats sliceNetworkStats(@NonNull NetworkStats stats,
             @NonNull Function<NetworkStats.Entry, NetworkStats.Entry> slicer) {
-        NetworkStats ret = new NetworkStats(0, 1);
+        final ArrayList<NetworkStats.Entry> entries = new ArrayList();
         for (NetworkStats.Entry e : stats) {
-            ret = ret.addEntry(slicer.apply(e));
+            entries.add(slicer.apply(e));
         }
-        return ret;
+        if (isAddEntriesSupported()) {
+            return new NetworkStats(0, entries.size()).addEntries(entries);
+        } else {
+            NetworkStats outputStats = new NetworkStats(0L, 1);
+            for (NetworkStats.Entry e : entries) {
+                outputStats = outputStats.addEntry(e);
+            }
+            return outputStats;
+        }
     }
 
     private void registerWifiBytesTransferBackground() {

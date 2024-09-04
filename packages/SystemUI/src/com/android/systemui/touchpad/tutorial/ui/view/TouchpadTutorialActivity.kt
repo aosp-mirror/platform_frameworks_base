@@ -27,6 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
 import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
@@ -42,6 +44,7 @@ class TouchpadTutorialActivity
 @Inject
 constructor(
     private val viewModelFactory: TouchpadTutorialViewModel.Factory,
+    private val logger: InputDeviceTutorialLogger,
 ) : ComponentActivity() {
 
     private val vm by viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
@@ -49,9 +52,17 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { PlatformTheme { TouchpadTutorialScreen(vm) { finish() } } }
+        setContent {
+            PlatformTheme { TouchpadTutorialScreen(vm, closeTutorial = ::finishTutorial) }
+        }
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
+    }
+
+    private fun finishTutorial() {
+        logger.logCloseTutorial(TutorialContext.TOUCHPAD_TUTORIAL)
+        finish()
     }
 
     override fun onResume() {

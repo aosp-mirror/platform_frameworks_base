@@ -408,6 +408,10 @@ class TransitionController {
      */
     @Nullable
     Transition getCollectingTransition() {
+        if (mCollectingTransition != null && !mCollectingTransition.isCollecting()) {
+            Slog.wtfStack(TAG, "Collecting Transition (#" + mCollectingTransition.getSyncId()
+                    + ") is not collecting. state=" + mCollectingTransition.getState());
+        }
         return mCollectingTransition;
     }
 
@@ -876,10 +880,10 @@ class TransitionController {
     }
 
     /** @see Transition#setOverrideAnimation */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options, ActivityRecord r,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setOverrideAnimation(options, startCallback, finishCallback);
+        mCollectingTransition.setOverrideAnimation(options, r, startCallback, finishCallback);
     }
 
     void setNoAnimation(WindowContainer wc) {
@@ -917,7 +921,12 @@ class TransitionController {
     }
 
     /** @see Transition#finishTransition */
-    void finishTransition(Transition record) {
+    void finishTransition(@NonNull ActionChain chain) {
+        if (!chain.isFinishing()) {
+            throw new IllegalStateException("Can't finish on a non-finishing transition "
+                    + chain.mTransition);
+        }
+        final Transition record = chain.mTransition;
         // It is usually a no-op but make sure that the metric consumer is removed.
         mTransitionMetricsReporter.reportAnimationStart(record.getToken(), 0 /* startTime */);
         // It is a no-op if the transition did not change the display.
@@ -933,7 +942,7 @@ class TransitionController {
             mTrackCount = 0;
         }
         updateRunningRemoteAnimation(record, false /* isPlaying */);
-        record.finishTransition();
+        record.finishTransition(chain);
         for (int i = mAnimatingExitWindows.size() - 1; i >= 0; i--) {
             final WindowState w = mAnimatingExitWindows.get(i);
             if (w.mAnimatingExit && w.mHasSurface && !w.inTransition()) {

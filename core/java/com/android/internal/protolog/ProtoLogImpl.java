@@ -93,35 +93,30 @@ public class ProtoLogImpl {
     }
 
     /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
-     */
-    public static void registerGroups(IProtoLogGroup... protoLogGroups) {
-        getSingleInstance().registerGroups(protoLogGroups);
-    }
-
-    /**
      * Returns the single instance of the ProtoLogImpl singleton class.
      */
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
+            final var groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
+
             if (android.tracing.Flags.perfettoProtologTracing()) {
                 File f = new File(sViewerConfigPath);
                 if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
                     // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
-                    // In so tests the viewer config file might not exist in which we don't
+                    // In some tests the viewer config file might not exist in which we don't
                     // want to provide config path to the user
-                    sServiceInstance = new PerfettoProtoLogImpl(sCacheUpdater);
+                    sServiceInstance = new PerfettoProtoLogImpl(sCacheUpdater, groups);
                 } else {
-                    sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater);
+                    sServiceInstance =
+                            new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater, groups);
                 }
             } else {
-                sServiceInstance = new LegacyProtoLogImpl(
+                var protologImpl = new LegacyProtoLogImpl(
                         sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);
+                protologImpl.registerGroups(groups);
+                sServiceInstance = protologImpl;
             }
 
-            IProtoLogGroup[] groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
-            sServiceInstance.registerGroups(groups);
             sCacheUpdater.run();
         }
         return sServiceInstance;

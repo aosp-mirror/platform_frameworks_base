@@ -29,6 +29,7 @@ import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.transition.LegacyTransitions;
 
 import java.util.ArrayList;

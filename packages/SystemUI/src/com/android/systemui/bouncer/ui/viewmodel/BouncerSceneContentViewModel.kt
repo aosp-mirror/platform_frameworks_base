@@ -23,20 +23,21 @@ import android.graphics.Bitmap
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.core.graphics.drawable.toBitmap
+import com.android.app.tracing.coroutines.traceCoroutine
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,13 +56,12 @@ constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     private val devicePolicyManager: DevicePolicyManager,
     private val bouncerMessageViewModelFactory: BouncerMessageViewModel.Factory,
-    private val flags: ComposeBouncerFlags,
     private val userSwitcher: UserSwitcherViewModel,
     private val actionButtonInteractor: BouncerActionButtonInteractor,
     private val pinViewModelFactory: PinBouncerViewModel.Factory,
     private val patternViewModelFactory: PatternBouncerViewModel.Factory,
     private val passwordViewModelFactory: PasswordBouncerViewModel.Factory,
-) : SysUiViewModel() {
+) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
 
@@ -137,7 +137,7 @@ constructor(
         MutableStateFlow(authenticationInteractor.lockoutEndTimestamp == null)
     private val isInputEnabled: StateFlow<Boolean> = _isInputEnabled.asStateFlow()
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { message.activate() }
             launch {
@@ -145,7 +145,7 @@ constructor(
                     .map(::getChildViewModel)
                     .collectLatest { childViewModelOrNull ->
                         _authMethodViewModel.value = childViewModelOrNull
-                        childViewModelOrNull?.activate()
+                        childViewModelOrNull?.let { traceCoroutine(it.traceName) { it.activate() } }
                     }
             }
 
@@ -158,7 +158,7 @@ constructor(
             launch {
                 userSwitcher.selectedUser
                     .map { it.image.toBitmap() }
-                    .collectLatest { _selectedUserImage.value = it }
+                    .collect { _selectedUserImage.value = it }
             }
 
             launch {
@@ -185,35 +185,35 @@ constructor(
                                 )
                             }
                     }
-                    .collectLatest { _userSwitcherDropdown.value = it }
+                    .collect { _userSwitcherDropdown.value = it }
             }
 
             launch {
                 combine(wipeDialogMessage, lockoutDialogMessage) { _, _ -> createDialogViewModel() }
-                    .collectLatest { _dialogViewModel.value = it }
+                    .collect { _dialogViewModel.value = it }
             }
 
-            launch {
-                actionButtonInteractor.actionButton.collectLatest { _actionButton.value = it }
-            }
+            launch { actionButtonInteractor.actionButton.collect { _actionButton.value = it } }
 
             launch {
                 authMethodViewModel
                     .map { authMethod -> isSideBySideSupported(authMethod) }
-                    .collectLatest { _isSideBySideSupported.value = it }
+                    .collect { _isSideBySideSupported.value = it }
             }
 
             launch {
                 authMethodViewModel
                     .map { authMethod -> isFoldSplitRequired(authMethod) }
-                    .collectLatest { _isFoldSplitRequired.value = it }
+                    .collect { _isFoldSplitRequired.value = it }
             }
 
             launch {
                 message.isLockoutMessagePresent
                     .map { lockoutMessagePresent -> !lockoutMessagePresent }
-                    .collectLatest { _isInputEnabled.value = it }
+                    .collect { _isInputEnabled.value = it }
             }
+
+            awaitCancellation()
         }
     }
 

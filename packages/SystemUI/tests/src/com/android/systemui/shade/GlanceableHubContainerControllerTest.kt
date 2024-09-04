@@ -33,7 +33,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
-import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_BACK_GESTURE
 import com.android.systemui.Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
@@ -58,6 +57,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.controller.keyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
@@ -139,7 +139,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
-                    kosmos.lockscreenSmartspaceController
+                    kosmos.lockscreenSmartspaceController,
+                    logcatLogBuffer("GlanceableHubContainerControllerTest")
                 )
         }
         testableLooper = TestableLooper.get(this)
@@ -185,7 +186,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         kosmos.sceneDataSourceDelegator,
                         kosmos.notificationStackScrollLayoutController,
                         kosmos.keyguardMediaController,
-                        kosmos.lockscreenSmartspaceController
+                        kosmos.lockscreenSmartspaceController,
+                        logcatLogBuffer("GlanceableHubContainerControllerTest")
                     )
 
                 // First call succeeds.
@@ -213,7 +215,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
-                    kosmos.lockscreenSmartspaceController
+                    kosmos.lockscreenSmartspaceController,
+                    logcatLogBuffer("GlanceableHubContainerControllerTest")
                 )
 
             assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.INITIALIZED)
@@ -236,7 +239,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.sceneDataSourceDelegator,
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
-                    kosmos.lockscreenSmartspaceController
+                    kosmos.lockscreenSmartspaceController,
+                    logcatLogBuffer("GlanceableHubContainerControllerTest")
                 )
 
             // Only initView without attaching a view as we don't want the flows to start collecting
@@ -412,13 +416,17 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 // Communal is open.
                 goToScene(CommunalScenes.Communal)
 
-                // Shade shows up.
-                shadeTestUtil.setQsExpansion(0.5f)
-                testableLooper.processAllMessages()
+                // Touch starts and ends.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
                 assertThat(underTest.onTouchEvent(CANCEL_EVENT)).isTrue()
+
+                // Up event is no longer processed
                 assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+
+                // Move event can still be processed
                 assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isTrue()
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
             }
         }
 
@@ -436,7 +444,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit() =
         with(kosmos) {
             testScope.runTest {
@@ -462,7 +470,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
     @EnableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit_fullSwipe() =
         with(kosmos) {
@@ -483,7 +490,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
+    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit_rtl() =
         with(kosmos) {
             testScope.runTest {
@@ -508,7 +515,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
-    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
     @EnableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_setAfterInit_rtl_fullSwipe() =
         with(kosmos) {
@@ -523,102 +529,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                             /* top= */ 0,
                             /* right= */ CONTAINER_WIDTH,
                             /* bottom= */ CONTAINER_HEIGHT
-                        )
-                    )
-            }
-        }
-
-    @Test
-    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
-    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
-    fun gestureExclusionZone_setAfterInit_backGestureEnabled() =
-        with(kosmos) {
-            testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
-                goToScene(CommunalScenes.Communal)
-
-                assertThat(containerView.systemGestureExclusionRects)
-                    .containsExactly(
-                        Rect(
-                            /* left= */ FAKE_INSETS.left,
-                            /* top= */ TOP_SWIPE_REGION_WIDTH,
-                            /* right= */ CONTAINER_WIDTH - FAKE_INSETS.right,
-                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
-                        ),
-                        Rect(
-                            /* left= */ 0,
-                            /* top= */ 0,
-                            /* right= */ FAKE_INSETS.right,
-                            /* bottom= */ CONTAINER_HEIGHT
-                        )
-                    )
-            }
-        }
-
-    @Test
-    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
-    fun gestureExclusionZone_setAfterInit_backGestureEnabled_fullSwipe() =
-        with(kosmos) {
-            testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
-                goToScene(CommunalScenes.Communal)
-
-                assertThat(containerView.systemGestureExclusionRects)
-                    .containsExactly(
-                        Rect(
-                            /* left= */ 0,
-                            /* top= */ 0,
-                            /* right= */ FAKE_INSETS.right,
-                            /* bottom= */ CONTAINER_HEIGHT
-                        )
-                    )
-            }
-        }
-
-    @Test
-    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE)
-    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
-    fun gestureExclusionZone_setAfterInit_backGestureEnabled_rtl() =
-        with(kosmos) {
-            testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
-                goToScene(CommunalScenes.Communal)
-
-                assertThat(containerView.systemGestureExclusionRects)
-                    .containsExactly(
-                        Rect(
-                            /* left= */ FAKE_INSETS.left,
-                            /* top= */ TOP_SWIPE_REGION_WIDTH,
-                            /* right= */ CONTAINER_WIDTH - FAKE_INSETS.right,
-                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
-                        ),
-                        Rect(
-                            /* left= */ FAKE_INSETS.left,
-                            /* top= */ 0,
-                            /* right= */ CONTAINER_WIDTH,
-                            /* bottom= */ CONTAINER_HEIGHT
-                        )
-                    )
-            }
-        }
-
-    @Test
-    @EnableFlags(FLAG_GLANCEABLE_HUB_BACK_GESTURE, FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
-    fun gestureExclusionZone_setAfterInit_backGestureEnabled_rtl_fullSwipe() =
-        with(kosmos) {
-            testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
-                goToScene(CommunalScenes.Communal)
-
-                assertThat(containerView.systemGestureExclusionRects)
-                    .containsExactly(
-                        Rect(
-                            Rect(
-                                /* left= */ FAKE_INSETS.left,
-                                /* top= */ 0,
-                                /* right= */ CONTAINER_WIDTH,
-                                /* bottom= */ CONTAINER_HEIGHT
-                            )
                         )
                     )
             }
@@ -727,7 +637,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
                 // Touch event is sent to the container view.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
-                verify(containerView).onTouchEvent(any())
+                verify(containerView).onTouchEvent(DOWN_EVENT)
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isTrue()
+                verify(containerView).onTouchEvent(UP_EVENT)
             }
         }
 
@@ -774,13 +686,107 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun onTouchEvent_shadeInteracting_movesNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+                whenever(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            any(),
+                            any()
+                        )
+                    )
+                    .thenReturn(true)
+
+                // Touches not consumed by default but are received by containerView.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(DOWN_EVENT)
+
+                // User is interacting with shade on lockscreen.
+                shadeTestUtil.setLockscreenShadeTracking(true)
+                testableLooper.processAllMessages()
+
+                // A move event is ignored while the user is already interacting.
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(MOVE_EVENT)
+
+                // An up event is still delivered.
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(UP_EVENT)
+            }
+        }
+
+    @Test
+    fun onTouchEvent_shadeExpanding_touchesNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+                whenever(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            any(),
+                            any()
+                        )
+                    )
+                    .thenReturn(true)
+
+                // Shade is open slightly.
+                shadeTestUtil.setShadeExpansion(0.01f)
+                testableLooper.processAllMessages()
+
+                // Touches are not consumed.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(DOWN_EVENT)
+            }
+        }
+
+    @Test
+    fun onTouchEvent_bouncerInteracting_movesNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+                whenever(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            any(),
+                            any()
+                        )
+                    )
+                    .thenReturn(true)
+
+                // Touches not consumed by default but are received by containerView.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(DOWN_EVENT)
+
+                // User is interacting with bouncer on lockscreen.
+                fakeKeyguardBouncerRepository.setPrimaryShow(true)
+                testableLooper.processAllMessages()
+
+                // A move event is ignored while the user is already interacting.
+                assertThat(underTest.onTouchEvent(MOVE_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(MOVE_EVENT)
+
+                // An up event is still delivered.
+                assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
+                verify(containerView).onTouchEvent(UP_EVENT)
+            }
+        }
+
     private fun initAndAttachContainerView() {
         val mockInsets =
             mock<WindowInsets> {
                 on { getInsets(WindowInsets.Type.systemGestures()) } doReturn FAKE_INSETS
             }
 
-        containerView = spy(View(context)) { on { rootWindowInsets } doReturn mockInsets }
+        containerView =
+            spy(View(context)) {
+                on { rootWindowInsets } doReturn mockInsets
+                // Return true to handle touch events or else further events in the gesture will not
+                // be received as we are using real View objects.
+                onGeneric { onTouchEvent(any()) } doReturn true
+            }
 
         parentView = FrameLayout(context)
 

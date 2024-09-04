@@ -40,8 +40,8 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
                 public ExecuteAppFunctionRequest createFromParcel(Parcel parcel) {
                     String targetPackageName = parcel.readString8();
                     String functionIdentifier = parcel.readString8();
-                    GenericDocument parameters;
-                    parameters = GenericDocument.createFromParcel(parcel);
+                    GenericDocumentWrapper parameters = GenericDocumentWrapper
+                            .CREATOR.createFromParcel(parcel);
                     Bundle extras = parcel.readBundle(Bundle.class.getClassLoader());
                     return new ExecuteAppFunctionRequest(
                             targetPackageName, functionIdentifier, extras, parameters);
@@ -75,17 +75,17 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      *
      * <p>The document may have missing parameters. Developers are advised to implement defensive
      * handling measures.
-     *
+     * <p>
      * TODO(b/357551503): Document how function parameters can be obtained for function execution
      */
     @NonNull
-    private final GenericDocument mParameters;
+    private final GenericDocumentWrapper mParameters;
 
     private ExecuteAppFunctionRequest(
             @NonNull String targetPackageName,
             @NonNull String functionIdentifier,
             @NonNull Bundle extras,
-            @NonNull GenericDocument parameters) {
+            @NonNull GenericDocumentWrapper parameters) {
         mTargetPackageName = Objects.requireNonNull(targetPackageName);
         mFunctionIdentifier = Objects.requireNonNull(functionIdentifier);
         mExtras = Objects.requireNonNull(extras);
@@ -117,7 +117,7 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      */
     @NonNull
     public GenericDocument getParameters() {
-        return mParameters;
+        return mParameters.getValue();
     }
 
     /**
@@ -152,7 +152,8 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
         @NonNull
         private Bundle mExtras = Bundle.EMPTY;
         @NonNull
-        private GenericDocument mParameters = new GenericDocument.Builder<>("", "", "").build();
+        private GenericDocument mParameters =
+                new GenericDocument.Builder<>("", "", "").build();
 
         public Builder(@NonNull String targetPackageName, @NonNull String functionIdentifier) {
             mTargetPackageName = Objects.requireNonNull(targetPackageName);
@@ -173,7 +174,8 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
          */
         @NonNull
         public Builder setParameters(@NonNull GenericDocument parameters) {
-            mParameters = Objects.requireNonNull(parameters);
+            Objects.requireNonNull(parameters);
+            mParameters = parameters;
             return this;
         }
 
@@ -183,7 +185,8 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
         @NonNull
         public ExecuteAppFunctionRequest build() {
             return new ExecuteAppFunctionRequest(
-                    mTargetPackageName, mFunctionIdentifier, mExtras, mParameters);
+                    mTargetPackageName, mFunctionIdentifier, mExtras,
+                    new GenericDocumentWrapper(mParameters));
         }
     }
 }

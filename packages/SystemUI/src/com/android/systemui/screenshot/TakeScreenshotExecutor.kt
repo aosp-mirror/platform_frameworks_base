@@ -99,6 +99,9 @@ constructor(
     ) {
         val displays = getDisplaysToScreenshot(screenshotRequest.type)
         val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
+        if (displays.isEmpty()) {
+            Log.wtf(TAG, "No displays found for screenshot.")
+        }
         displays.forEach { display ->
             val displayId = display.displayId
             var screenshotHandler: ScreenshotHandler =
@@ -219,8 +222,7 @@ constructor(
     }
 
     private fun getScreenshotController(display: Display): InteractiveScreenshotHandler {
-        val controller =
-            screenshotController ?: interactiveScreenshotHandlerFactory.create(display)
+        val controller = screenshotController ?: interactiveScreenshotHandlerFactory.create(display)
         screenshotController = controller
         return controller
     }

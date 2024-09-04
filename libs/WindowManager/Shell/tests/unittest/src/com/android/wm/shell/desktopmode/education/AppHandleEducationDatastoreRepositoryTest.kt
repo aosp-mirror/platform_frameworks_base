@@ -26,13 +26,16 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
+import com.android.wm.shell.util.createWindowingEducationProto
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import java.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -88,35 +91,22 @@ class AppHandleEducationDatastoreRepositoryTest {
         assertThat(resultProto).isEqualTo(windowingEducationProto)
       }
 
-  private fun createWindowingEducationProto(
-      educationViewedTimestampMillis: Long? = null,
-      featureUsedTimestampMillis: Long? = null,
-      appUsageStats: Map<String, Int>? = null,
-      appUsageStatsLastUpdateTimestampMillis: Long? = null
-  ): WindowingEducationProto =
-      WindowingEducationProto.newBuilder()
-          .apply {
-            if (educationViewedTimestampMillis != null)
-                setEducationViewedTimestampMillis(educationViewedTimestampMillis)
-            if (featureUsedTimestampMillis != null)
-                setFeatureUsedTimestampMillis(featureUsedTimestampMillis)
-            setAppHandleEducation(
-                createAppHandleEducationProto(
-                    appUsageStats, appUsageStatsLastUpdateTimestampMillis))
-          }
-          .build()
+  @Test
+  fun updateAppUsageStats_updatesDatastoreProto() =
+      runTest(StandardTestDispatcher()) {
+        val appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 3)
+        val appUsageStatsLastUpdateTimestamp = Duration.ofMillis(123L)
+        val windowingEducationProto =
+            createWindowingEducationProto(
+                appUsageStats = appUsageStats,
+                appUsageStatsLastUpdateTimestampMillis =
+                    appUsageStatsLastUpdateTimestamp.toMillis())
 
-  private fun createAppHandleEducationProto(
-      appUsageStats: Map<String, Int>? = null,
-      appUsageStatsLastUpdateTimestampMillis: Long? = null
-  ): WindowingEducationProto.AppHandleEducation =
-      WindowingEducationProto.AppHandleEducation.newBuilder()
-          .apply {
-            if (appUsageStats != null) putAllAppUsageStats(appUsageStats)
-            if (appUsageStatsLastUpdateTimestampMillis != null)
-                setAppUsageStatsLastUpdateTimestampMillis(appUsageStatsLastUpdateTimestampMillis)
-          }
-          .build()
+        datastoreRepository.updateAppUsageStats(appUsageStats, appUsageStatsLastUpdateTimestamp)
+
+        val result = testDatastore.data.first()
+        assertThat(result).isEqualTo(windowingEducationProto)
+      }
 
   companion object {
     private const val GMAIL_PACKAGE_NAME = "com.google.android.gm"

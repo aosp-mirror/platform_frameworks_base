@@ -1,5 +1,6 @@
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.annotation.SuppressLint;
@@ -48,9 +49,12 @@ import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class BluetoothUtils {
     private static final String TAG = "BluetoothUtils";
@@ -561,6 +565,68 @@ public class BluetoothUtils {
         return isFilterMatched;
     }
 
+    /**
+     * Checks if a given `CachedBluetoothDevice` is available for audio sharing and being switch as
+     * active media device.
+     *
+     * <p>This method determines if the device meets the following criteria to be available:
+     *
+     * <ol>
+     *   <li>Audio sharing session is off.
+     *   <li>The device is one of the two connected devices on the LE Broadcast Assistant profile.
+     *   <li>The device is not currently active on the LE Audio profile.
+     *   <li>There is exactly one other device that is active on the LE Audio profile.
+     * </ol>
+     *
+     * @param cachedDevice The `CachedBluetoothDevice` to check.
+     * @param localBluetoothManager The `LocalBluetoothManager` instance, or null if unavailable.
+     * @return `true` if the device is available for audio sharing and settings as active, `false`
+     *     otherwise.
+     */
+    @WorkerThread
+    public static boolean isAvailableAudioSharingMediaBluetoothDevice(
+            CachedBluetoothDevice cachedDevice,
+            @Nullable LocalBluetoothManager localBluetoothManager) {
+        LocalBluetoothLeBroadcastAssistant assistantProfile =
+                Optional.ofNullable(localBluetoothManager)
+                        .map(LocalBluetoothManager::getProfileManager)
+                        .map(LocalBluetoothProfileManager::getLeAudioBroadcastAssistantProfile)
+                        .orElse(null);
+        LeAudioProfile leAudioProfile =
+                Optional.ofNullable(localBluetoothManager)
+                        .map(LocalBluetoothManager::getProfileManager)
+                        .map(LocalBluetoothProfileManager::getLeAudioProfile)
+                        .orElse(null);
+        CachedBluetoothDeviceManager deviceManager =
+                Optional.ofNullable(localBluetoothManager)
+                        .map(LocalBluetoothManager::getCachedDeviceManager)
+                        .orElse(null);
+        // If any of the profiles are null, or broadcast is already on, return false
+        if (assistantProfile == null
+                || leAudioProfile == null
+                || deviceManager == null
+                || isBroadcasting(localBluetoothManager)) {
+            return false;
+        }
+        Set<Integer> connectedGroupIds =
+                assistantProfile.getAllConnectedDevices().stream()
+                        .map(deviceManager::findDevice)
+                        .filter(Objects::nonNull)
+                        .map(CachedBluetoothDevice::getGroupId)
+                        .collect(Collectors.toSet());
+        Set<Integer> activeGroupIds =
+                leAudioProfile.getActiveDevices().stream()
+                        .map(deviceManager::findDevice)
+                        .filter(Objects::nonNull)
+                        .map(CachedBluetoothDevice::getGroupId)
+                        .collect(Collectors.toSet());
+        int groupId = cachedDevice.getGroupId();
+        return activeGroupIds.size() == 1
+                && !activeGroupIds.contains(groupId)
+                && connectedGroupIds.size() == 2
+                && connectedGroupIds.contains(groupId);
+    }
+
     /** Returns if the le audio sharing is enabled. */
     public static boolean isAudioSharingEnabled() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -639,10 +705,48 @@ public class BluetoothUtils {
         return !sourceList.isEmpty() && sourceList.stream().anyMatch(BluetoothUtils::isConnected);
     }
 
+    /**
+     * Check if {@link BluetoothDevice} has a active local broadcast source.
+     *
+     * @param device The bluetooth device to check.
+     * @param localBtManager The BT manager to provide BT functions.
+     * @return Whether the device has a active local broadcast source.
+     */
+    @WorkerThread
+    public static boolean hasActiveLocalBroadcastSourceForBtDevice(
+            @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                localBtManager == null
+                        ? null
+                        : localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        LocalBluetoothLeBroadcast broadcast =
+                localBtManager == null
+                        ? null
+                        : localBtManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (device == null || assistant == null || broadcast == null) {
+            Log.d(TAG, "Skip check hasActiveLocalBroadcastSourceForBtDevice due to arg is null");
+            return false;
+        }
+        List<BluetoothLeBroadcastReceiveState> sourceList = assistant.getAllSources(device);
+        int broadcastId = broadcast.getLatestBroadcastId();
+        return !sourceList.isEmpty()
+                && broadcastId != UNKNOWN_VALUE_PLACEHOLDER
+                && sourceList.stream()
+                        .anyMatch(
+                                source -> isSourceMatched(source, broadcastId));
+    }
+
     /** Checks the connectivity status based on the provided broadcast receive state. */
     @WorkerThread
     public static boolean isConnected(BluetoothLeBroadcastReceiveState state) {
         return state.getBisSyncState().stream().anyMatch(bitmap -> bitmap != 0);
+    }
+
+    /** Checks if the broadcast id is matched based on the provided broadcast receive state. */
+    @WorkerThread
+    public static boolean isSourceMatched(
+            @Nullable BluetoothLeBroadcastReceiveState state, int broadcastId) {
+        return state != null && state.getBroadcastId() == broadcastId;
     }
 
     /**

@@ -34,6 +34,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCE
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+import static com.android.server.pm.UserManagerService.enforceCurrentUserIfVisibleBackgroundEnabled;
 import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
@@ -1100,11 +1101,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("performGlobalAction", "action=" + action);
         }
+        int currentUserId;
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
+            currentUserId = mSystemSupport.getCurrentUserIdLocked();
         }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         final long identity = Binder.clearCallingIdentity();
         try {
             return mSystemActionPerformer.performSystemAction(action);
@@ -2750,6 +2754,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @RequiresNoPermission
     @Override
     public void setAnimationScale(float scale) {
+        int currentUserId;
+        synchronized (mLock) {
+            currentUserId = mSystemSupport.getCurrentUserIdLocked();
+        }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         final long identity = Binder.clearCallingIdentity();
         try {
             Settings.Global.putFloat(

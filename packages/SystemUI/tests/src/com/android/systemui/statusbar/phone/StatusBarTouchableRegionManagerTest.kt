@@ -56,11 +56,11 @@ class StatusBarTouchableRegionManagerTest : SysuiTestCase() {
             runCurrent()
             assertThat(underTest.shouldMakeEntireScreenTouchable()).isFalse()
 
-            sceneRepository.isRemoteUserInteractionOngoing.value = true
+            sceneRepository.isRemoteUserInputOngoing.value = true
             runCurrent()
             assertThat(underTest.shouldMakeEntireScreenTouchable()).isTrue()
 
-            sceneRepository.isRemoteUserInteractionOngoing.value = false
+            sceneRepository.isRemoteUserInputOngoing.value = false
             runCurrent()
             assertThat(underTest.shouldMakeEntireScreenTouchable()).isFalse()
         }
@@ -71,7 +71,7 @@ class StatusBarTouchableRegionManagerTest : SysuiTestCase() {
         testScope.runTest {
             assertThat(underTest.shouldMakeEntireScreenTouchable()).isFalse()
 
-            sceneRepository.isRemoteUserInteractionOngoing.value = true
+            sceneRepository.isRemoteUserInputOngoing.value = true
             runCurrent()
 
             assertThat(underTest.shouldMakeEntireScreenTouchable()).isFalse()

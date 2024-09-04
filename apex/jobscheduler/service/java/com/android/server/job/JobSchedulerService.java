@@ -1669,6 +1669,20 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     @Override
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        if (!Flags.removeUserDuringUserSwitch()
+                || from == null
+                || !mActivityManagerInternal.isEarlyPackageKillEnabledForUserSwitch(
+                                                                from.getUserIdentifier(),
+                                                                to.getUserIdentifier())) {
+            return;
+        }
+        synchronized (mLock) {
+            mStartedUsers = ArrayUtils.removeInt(mStartedUsers, from.getUserIdentifier());
+        }
+    }
+
+    @Override
     public void onUserStopping(@NonNull TargetUser user) {
         synchronized (mLock) {
             mStartedUsers = ArrayUtils.removeInt(mStartedUsers, user.getUserIdentifier());

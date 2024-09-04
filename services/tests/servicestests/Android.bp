@@ -36,8 +36,8 @@ android_test {
         "-Werror",
     ],
     static_libs: [
-        "a11ychecker-protos-java-proto-lite",
         "aatf",
+        "accessibility_protos_lite",
         "cts-input-lib",
         "frameworks-base-testutils",
         "services.accessibility",
@@ -85,6 +85,7 @@ android_test {
         "securebox",
         "flag-junit",
         "ravenwood-junit",
+        "net-tests-utils",
         "net_flags_lib",
         "CtsVirtualDeviceCommonLib",
         "com_android_server_accessibility_flags_lib",

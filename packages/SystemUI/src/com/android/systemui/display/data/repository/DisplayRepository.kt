@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
@@ -184,6 +185,9 @@ constructor(
         if (Flags.enableEfficientDisplayRepository()) {
             enabledDisplayIds
                 .mapElementsLazily { displayId -> getDisplay(displayId) }
+                .onEach {
+                    if (it.isEmpty()) Log.wtf(TAG, "No enabled displays. This should never happen.")
+                }
                 .flowOn(backgroundCoroutineDispatcher)
                 .debugLog("enabledDisplays")
                 .stateIn(
@@ -194,7 +198,8 @@ constructor(
                     // performance concerns.
                     // Ultimately, this is a trade-off between a one-time UI thread binder call and
                     // the constant overhead of sharedFlows.
-                    initialValue = getDisplays())
+                    initialValue = getDisplays()
+                )
         } else {
             oldEnabledDisplays
         }
@@ -380,9 +385,8 @@ constructor(
             val resultSet: Set<V>
         )
 
-        val initialState = State(emptySet<T>(), emptyMap(), emptySet<V>())
-
-        return this.scan(initialState) { state, currentSet ->
+        val emptyInitialState = State(emptySet<T>(), emptyMap(), emptySet<V>())
+        return this.scan(emptyInitialState) { state, currentSet ->
                 if (currentSet == state.previousSet) {
                     state
                 } else {
@@ -397,6 +401,7 @@ constructor(
                     State(currentSet, newMap, resultSet)
                 }
             }
+            .filter { it != emptyInitialState }
             .map { it.resultSet }
     }
 

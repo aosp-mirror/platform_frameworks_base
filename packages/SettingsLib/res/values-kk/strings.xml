@@ -112,11 +112,11 @@
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Істеп тұр (екі жағы да)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Істеп тұр (тек мультимедиа). Батарея зарядының деңгейі – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Істеп тұр (тек мультимедиа). Сол жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. Оң жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Қосылды (аудио бөлісуге мүмкіндік береді). Батарея зарядының деңгейі:<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Жалғанып тұр (аудио бөлісу мүмкіндігі бар). Батарея зарядының деңгейі – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Қосылды (аудио бөлісуге мүмкіндік береді). Сол жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. Оң жақ: батарея зарядының деңгейі — <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Қосылды (аудио бөлісуге мүмкіндік береді). Сол жақ: батарея зарядының деңгейі – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Қосылды (аудио бөлісуге мүмкіндік береді). Оң жақ: батарея зарядының деңгейі – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
-    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Қосылды (аудио бөлісуге мүмкіндік береді)."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Жалғанды (аудио бөлісу мүмкіндігі бар)."</string>
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Істеп тұр (тек мультимедиа)."</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Аудио бөлісуге мүмкіндік береді."</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Тек сол жақ істеп тұр (мультимедиа ғана)."</string>

@@ -16,11 +16,25 @@
 
 package com.android.systemui.education.domain.interactor
 
+import android.os.SystemProperties
+import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
+import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
+import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
+import java.time.Clock
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -39,17 +53,61 @@ class KeyboardTouchpadEduStatsInteractorImpl
 @Inject
 constructor(
     @Background private val backgroundScope: CoroutineScope,
-    private val contextualEducationInteractor: ContextualEducationInteractor
+    private val contextualEducationInteractor: ContextualEducationInteractor,
+    private val inputDeviceRepository: UserInputDeviceRepository,
+    private val tutorialRepository: TutorialSchedulerRepository,
+    @EduClock private val clock: Clock,
 ) : KeyboardTouchpadEduStatsInteractor {
 
+    companion object {
+        val initialDelayDuration: Duration
+            get() =
+                SystemProperties.getLong(
+                        "persist.contextual_edu.initial_delay_sec",
+                        /* defaultValue= */ 72.hours.inWholeSeconds
+                    )
+                    .toDuration(DurationUnit.SECONDS)
+    }
+
     override fun incrementSignalCount(gestureType: GestureType) {
-        // Todo: check if keyboard/touchpad is connected before update
-        backgroundScope.launch { contextualEducationInteractor.incrementSignalCount(gestureType) }
+        backgroundScope.launch {
+            val targetDevice = getTargetDevice(gestureType)
+            if (isTargetDeviceConnected(targetDevice) && hasInitialDelayElapsed(targetDevice)) {
+                contextualEducationInteractor.incrementSignalCount(gestureType)
+            }
+        }
     }
 
     override fun updateShortcutTriggerTime(gestureType: GestureType) {
         backgroundScope.launch {
             contextualEducationInteractor.updateShortcutTriggerTime(gestureType)
         }
+    }
+
+    private suspend fun isTargetDeviceConnected(deviceType: DeviceType): Boolean {
+        if (deviceType == KEYBOARD) {
+            return inputDeviceRepository.isAnyKeyboardConnectedForUser.first().isConnected
+        } else if (deviceType == TOUCHPAD) {
+            return inputDeviceRepository.isAnyTouchpadConnectedForUser.first().isConnected
+        }
+        return false
+    }
+
+    /**
+     * Keyboard shortcut education would be provided for All Apps. Touchpad gesture education would
+     * be provided for the rest of the gesture types (i.e. Home, Overview, Back). This method maps
+     * gesture to its target education device.
+     */
+    private fun getTargetDevice(gestureType: GestureType) =
+        when (gestureType) {
+            ALL_APPS -> KEYBOARD
+            else -> TOUCHPAD
+        }
+
+    private suspend fun hasInitialDelayElapsed(deviceType: DeviceType): Boolean {
+        val oobeLaunchTime = tutorialRepository.launchTime(deviceType) ?: return false
+        return clock
+            .instant()
+            .isAfter(oobeLaunchTime.plusSeconds(initialDelayDuration.inWholeSeconds))
     }
 }

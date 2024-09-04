@@ -26,7 +26,6 @@ import static android.app.AppOpsManager.ATTRIBUTION_FLAGS_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.app.AppOpsManager.OP_BLUETOOTH_CONNECT;
 import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISALLOWED;
 import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISCOURAGED;
 import static android.permission.flags.Flags.serverSideAttributionRegistration;
@@ -1640,22 +1639,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         throw new SecurityException(msg + ":" + e.getMessage());
                     }
                 }
-                int result = Math.max(checkedOpResult, notedOpResult);
-                // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                if (op == OP_BLUETOOTH_CONNECT && result == MODE_ERRORED) {
-                    if (result == checkedOpResult) {
-                        Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as"
-                                + " checkOp for resolvedAttributionSource "
-                                + resolvedAttributionSource + " and op " + op
-                                + " returned MODE_ERRORED");
-                    } else {
-                        Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as"
-                                + " noteOp for resolvedAttributionSource "
-                                + resolvedAttributionSource + " and op " + notedOp
-                                + " returned MODE_ERRORED");
-                    }
-                }
-                return result;
+                return Math.max(checkedOpResult, notedOpResult);
             }
         }
 

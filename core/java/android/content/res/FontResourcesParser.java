@@ -18,6 +18,7 @@ package android.content.res;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Typeface;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -36,6 +37,7 @@ import java.util.List;
  * Parser for xml type font resources.
  * @hide
  */
+@RavenwoodKeepWholeClass
 public class FontResourcesParser {
     private static final String TAG = "FontResourcesParser";
 

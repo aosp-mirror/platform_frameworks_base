@@ -76,6 +76,11 @@ constructor(
             viewModel
                 .areNotificationsVisible(contentKey)
                 .collectAsStateWithLifecycle(initialValue = false)
+        val isBypassEnabled by viewModel.isBypassEnabled.collectAsStateWithLifecycle()
+
+        if (isBypassEnabled) {
+            with(notificationSection) { HeadsUpNotifications() }
+        }
 
         LockscreenLongPress(
             viewModel = viewModel.touchHandling,
@@ -110,7 +115,7 @@ constructor(
                                             }
                                 )
                             }
-                            if (isShadeLayoutWide) {
+                            if (isShadeLayoutWide && !isBypassEnabled) {
                                 with(notificationSection) {
                                     Notifications(
                                         areNotificationsVisible = areNotificationsVisible,
@@ -124,7 +129,7 @@ constructor(
                                 }
                             }
                         }
-                        if (!isShadeLayoutWide) {
+                        if (!isShadeLayoutWide && !isBypassEnabled) {
                             with(notificationSection) {
                                 Notifications(
                                     areNotificationsVisible = areNotificationsVisible,
@@ -175,7 +180,7 @@ constructor(
                 },
                 modifier = Modifier.fillMaxSize(),
             ) { measurables, constraints ->
-                check(measurables.size == 6)
+                check(measurables.size == 6) { "Expected 6 measurables, got: ${measurables.size}" }
                 val aboveLockIconMeasurable = measurables[0]
                 val lockIconMeasurable = measurables[1]
                 val belowLockIconMeasurable = measurables[2]

@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene.transition.link
 
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutStateImpl
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutState
@@ -35,8 +36,8 @@ class StateLink(target: SceneTransitionLayoutState, val transitionLinks: List<Tr
      * target to `SceneA` from any current scene.
      */
     class TransitionLink(
-        val sourceFrom: SceneKey?,
-        val sourceTo: SceneKey?,
+        val sourceFrom: ContentKey?,
+        val sourceTo: ContentKey?,
         val targetFrom: SceneKey?,
         val targetTo: SceneKey,
         val targetTransitionKey: TransitionKey? = null,
@@ -49,14 +50,16 @@ class StateLink(target: SceneTransitionLayoutState, val transitionLinks: List<Tr
                 error("From and To can't be the same")
         }
 
-        internal fun isMatchingLink(transition: TransitionState.Transition): Boolean {
-            return (sourceFrom == null || sourceFrom == transition.fromScene) &&
-                (sourceTo == null || sourceTo == transition.toScene)
+        internal fun isMatchingLink(
+            transition: TransitionState.Transition,
+        ): Boolean {
+            return (sourceFrom == null || sourceFrom == transition.fromContent) &&
+                (sourceTo == null || sourceTo == transition.toContent)
         }
 
-        internal fun targetIsInValidState(targetCurrentScene: SceneKey): Boolean {
-            return (targetFrom == null || targetFrom == targetCurrentScene) &&
-                targetTo != targetCurrentScene
+        internal fun targetIsInValidState(targetCurrentContent: ContentKey): Boolean {
+            return (targetFrom == null || targetFrom == targetCurrentContent) &&
+                targetTo != targetCurrentContent
         }
     }
 }

@@ -22,10 +22,14 @@ import android.util.Log
 import com.android.window.flags.Flags
 
 /*
- * A shared class to check desktop mode flags state.
+ * An enum to check desktop mode flags state.
  *
- * The class computes whether a Desktop Windowing flag should be enabled by using the aconfig flag
- * value and the developer option override state (if applicable).
+ * This enum provides a centralized way to control the behavior of flags related to desktop
+ * windowing features which are aiming for developer preview before their release. It allows
+ * developer option to override the default behavior of these flags.
+ *
+ * NOTE: Flags should only be added to this enum when they have received Product and UX
+ * alignment that the feature is ready for developer preview, otherwise just do a flag check.
  */
 enum class DesktopModeFlags(
     // Function called to obtain aconfig flag value.
@@ -44,7 +48,7 @@ enum class DesktopModeFlags(
     TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
     SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
     DISABLE_SNAP_RESIZE(Flags::disableNonResizableAppSnapResizing, true),
-    DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
+    DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, false),
     ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
     BACK_NAVIGATION(Flags::enableDesktopWindowingBackNavigation, true),
     EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),

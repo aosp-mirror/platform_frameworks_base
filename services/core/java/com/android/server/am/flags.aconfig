@@ -184,3 +184,14 @@ flag {
     description: "Defer submitting binder calls to paused processes."
     bug: "327038797"
 }
+
+flag {
+    name: "log_broadcast_sent_event"
+    namespace: "backstage_power"
+    description: "Log the broadcast send event to Statsd"
+    bug: "355261986"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

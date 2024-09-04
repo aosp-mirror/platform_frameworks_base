@@ -16,23 +16,47 @@
 
 package com.android.systemui.education.domain.interactor
 
+import android.hardware.input.InputManager
 import com.android.systemui.education.data.repository.fakeEduClock
+import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
+import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
+import com.android.systemui.keyboard.data.repository.keyboardRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.touchpad.data.repository.touchpadRepository
+import com.android.systemui.user.data.repository.userRepository
+import org.mockito.kotlin.mock
 
 var Kosmos.keyboardTouchpadEduInteractor by
     Kosmos.Fixture {
         KeyboardTouchpadEduInteractor(
             backgroundScope = testScope.backgroundScope,
             contextualEducationInteractor = contextualEducationInteractor,
-            clock = fakeEduClock
+            userInputDeviceRepository =
+                UserInputDeviceRepository(
+                    testDispatcher,
+                    keyboardRepository,
+                    touchpadRepository,
+                    userRepository
+                ),
+            clock = fakeEduClock,
+            inputManager = mockEduInputManager
         )
     }
+
+var Kosmos.mockEduInputManager by Kosmos.Fixture { mock<InputManager>() }
 
 var Kosmos.keyboardTouchpadEduStatsInteractor by
     Kosmos.Fixture {
         KeyboardTouchpadEduStatsInteractorImpl(
             backgroundScope = testScope.backgroundScope,
-            contextualEducationInteractor = contextualEducationInteractor
+            contextualEducationInteractor = contextualEducationInteractor,
+            inputDeviceRepository = mockUserInputDeviceRepository,
+            tutorialRepository = mockTutorialSchedulerRepository,
+            clock = fakeEduClock
         )
     }
+
+var mockUserInputDeviceRepository = mock<UserInputDeviceRepository>()
+var mockTutorialSchedulerRepository = mock<TutorialSchedulerRepository>()

@@ -51,8 +51,8 @@ import com.android.internal.policy.SystemBarUtils
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
-import com.android.wm.shell.animation.Interpolators
 import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.shared.animation.Interpolators
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -189,10 +189,13 @@ abstract class CrossActivityBackAnimation(
         preparePreCommitEnteringRectMovement()
 
         background.ensureBackground(
-            closingTarget!!.windowConfiguration.bounds,
-            getBackgroundColor(),
-            transaction,
-            statusbarHeight
+                closingTarget!!.windowConfiguration.bounds,
+                getBackgroundColor(),
+                transaction,
+                statusbarHeight,
+                if (closingTarget!!.windowConfiguration.tasksAreFloating())
+                    closingTarget!!.localBounds else null,
+                cornerRadius
         )
         ensureScrimLayer()
         if (isLetterboxed && enteringHasSameLetterbox) {

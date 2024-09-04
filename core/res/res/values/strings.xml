@@ -3280,6 +3280,9 @@
     <!-- Accessibility text for the long click action on the switch input method button. This will
          be used following "Double-tap and hold to..." [CHAR LIMIT=NONE] -->
     <string name="input_method_ime_switch_long_click_action_desc">Open input method picker</string>
+    <!-- Button to access the language settings of the current input method
+         from the Input Method Switcher menu. [CHAR LIMIT=50]-->
+    <string name="input_method_switcher_settings_button">Settings</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>
@@ -3883,7 +3886,8 @@
 
     <!-- Title of the pop-up dialog in which the user switches keyboard, also known as input method. -->
     <string name="select_input_method">Choose input method</string>
-    <!-- Button to access the language settings of the current input method. [CHAR LIMIT=50]-->
+    <!-- Content description of the button to access the language settings of the current input method
+         from the Input Method Switcher menu, for accessibility (not shown on the screen). [CHAR LIMIT=NONE]-->
     <string name="input_method_language_settings">Language Settings</string>
     <!-- Summary text of a toggle switch to enable/disable use of the IME while a physical
          keyboard is connected -->
@@ -4800,9 +4804,9 @@
     </string>
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
-    from volume key shortcut. [CHAR LIMIT=100] -->
+    from volume keys shortcut. [CHAR LIMIT=100] -->
     <string name="accessibility_edit_shortcut_menu_volume_title">Choose features to use with the
-        volume key shortcut
+        volume keys shortcut
     </string>
 
     <!-- Text for showing the warning to user when uncheck the legacy app item in the accessibility

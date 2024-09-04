@@ -65,14 +65,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ఎగువ కుడివైపునకు జరుపు"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"దిగువ ఎడమవైపునకు తరలించు"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"దిగవు కుడివైపునకు జరుపు"</string>
-    <!-- no translation found for bubble_accessibility_action_expand_menu (8637233525952938845) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_collapse_menu (2975310870146231463) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_left (4803535120353716759) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_right (7686542531917510421) -->
-    <skip />
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"మెనూను విస్తరించండి"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"మెనూను కుదించండి"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"ఎడమ వైపుగా జరపండి"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"కుడి వైపుగా జరపండి"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> విస్తరించండి"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>‌ను కుదించండి"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> సెట్టింగ్‌లు"</string>
@@ -131,4 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"మెనూను తెరవండి"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"స్క్రీన్ సైజ్‌ను పెంచండి"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"స్క్రీన్‌ను స్నాప్ చేయండి"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ఈ యాప్ సైజ్‌ను మార్చడం సాధ్యపడదు"</string>
 </resources>

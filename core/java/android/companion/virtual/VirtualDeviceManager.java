@@ -67,6 +67,7 @@ import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.Display;
@@ -531,7 +532,6 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR)
     @TestApi
     public boolean isVirtualDeviceOwnedMirrorDisplay(int displayId) {
         if (mService == null) {
@@ -765,14 +765,15 @@ public final class VirtualDeviceManager {
          * <p>Note that changing the activity launch policy will clear current set of exempt
          * components.</p>
          *
-         * @see #removeActivityPolicyExemption
+         * @see #removeActivityPolicyExemption(ComponentName)
          * @see #setDevicePolicy
          */
         @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void addActivityPolicyExemption(@NonNull ComponentName componentName) {
-            mVirtualDeviceInternal.addActivityPolicyExemption(
-                    Objects.requireNonNull(componentName));
+            addActivityPolicyExemption(new ActivityPolicyExemption.Builder()
+                    .setComponentName(componentName)
+                    .build());
         }
 
         /**
@@ -788,14 +789,54 @@ public final class VirtualDeviceManager {
          * <p>Note that changing the activity launch policy will clear current set of exempt
          * components.</p>
          *
-         * @see #addActivityPolicyExemption
+         * @see #addActivityPolicyExemption(ComponentName)
          * @see #setDevicePolicy
          */
         @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
-            mVirtualDeviceInternal.removeActivityPolicyExemption(
-                    Objects.requireNonNull(componentName));
+            removeActivityPolicyExemption(new ActivityPolicyExemption.Builder()
+                    .setComponentName(componentName)
+                    .build());
+        }
+
+        /**
+         * Specifies an exemption from the current activity launch policy.
+         *
+         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
+         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
+         * then all exempt activities be blocked from launching.
+         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
+         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then all
+         * exempt activities will be allowed to launch.</p>
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * packages.</p>
+         * <p>Any change to the exemptions will only be applied for new activity launches.</p>
+         *
+         * @see #removeActivityPolicyExemption(ActivityPolicyExemption)
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void addActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
+            mVirtualDeviceInternal.addActivityPolicyExemption(Objects.requireNonNull(exemption));
+        }
+
+        /**
+         * Removes an exemption from the current activity launch policy.
+         *
+         * <p>Note that changing the activity launch policy will clear current set of exempt
+         * packages.</p>
+         * <p>Any change to the exemptions will only be applied for new activity launches.</p>
+         *
+         * @see #addActivityPolicyExemption(ActivityPolicyExemption)
+         * @see #setDevicePolicy
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        public void removeActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
+            mVirtualDeviceInternal.removeActivityPolicyExemption(Objects.requireNonNull(exemption));
         }
 
         /**
@@ -822,69 +863,6 @@ public final class VirtualDeviceManager {
                 @VirtualDeviceParams.DevicePolicy int devicePolicy,
                 int displayId) {
             mVirtualDeviceInternal.setDevicePolicyForDisplay(displayId, policyType, devicePolicy);
-        }
-
-        /**
-         * Specifies a component name to be exempt from the given display's activity launch policy.
-         *
-         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
-         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
-         * then the specified component will be blocked from launching.
-         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
-         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
-         * specified component will be allowed to launch.</p>
-         *
-         * <p>Note that changing the activity launch policy will clear current set of exempt
-         * components.</p>
-         * <p>Any change to the exemptions will only be applied for new activity launches.</p>
-         *
-         * @param componentName the component name to be exempt from the activity launch policy.
-         * @param displayId the ID of the display, for which to apply the exemption. The display
-         *   must belong to the virtual device.
-         * @throws IllegalArgumentException if the specified display does not belong to the virtual
-         *   device.
-         *
-         * @see #removeActivityPolicyExemption
-         * @see #setDevicePolicy
-         * @see Display#getDisplayId
-         */
-        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-        public void addActivityPolicyExemption(
-                @NonNull ComponentName componentName, int displayId) {
-            mVirtualDeviceInternal.addActivityPolicyExemptionForDisplay(
-                    displayId, Objects.requireNonNull(componentName));
-        }
-
-        /**
-         * Makes the specified component name adhere to the given display's activity launch policy.
-         *
-         * <p>If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} allows activity
-         * launches by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_DEFAULT}),
-         * then the specified component will be allowed to launch.
-         * If the current {@link VirtualDeviceParams#POLICY_TYPE_ACTIVITY} blocks activity launches
-         * by default, (i.e. it is {@link VirtualDeviceParams#DEVICE_POLICY_CUSTOM}), then the
-         * specified component will be blocked from launching.</p>
-         *
-         * <p>Note that changing the activity launch policy will clear current set of exempt
-         * components.</p>
-         *
-         * @param componentName the component name to be removed from the exemption list.
-         * @param displayId the ID of the display, for which to apply the exemption. The display
-         *   must belong to the virtual device.
-         * @throws IllegalArgumentException if the specified display does not belong to the virtual
-         *   device.
-         *
-         * @see #addActivityPolicyExemption
-         * @see #setDevicePolicy
-         * @see Display#getDisplayId
-         */
-        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-        public void removeActivityPolicyExemption(
-                @NonNull ComponentName componentName, int displayId) {
-            mVirtualDeviceInternal.removeActivityPolicyExemptionForDisplay(
-                    displayId, Objects.requireNonNull(componentName));
         }
 
         /**
@@ -1264,7 +1242,7 @@ public final class VirtualDeviceManager {
          *
          * @param displayId The display ID on which the activity tried to launch.
          * @param componentName The component name of the blocked activity.
-         * @param userId The user ID associated with the blocked activity.
+         * @param user The user associated with the blocked activity.
          * @param intentSender The original sender of the intent. May be {@code null} if the sender
          *   expects an activity result to be reported. In that case
          *   {@link android.app.Activity#RESULT_CANCELED} was already reported back because the
@@ -1272,11 +1250,25 @@ public final class VirtualDeviceManager {
          *   activity to a different display.
          *
          * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
-         * @see VirtualDevice#addActivityPolicyExemption(ComponentName)
+         * @see VirtualDevice#addActivityPolicyExemption(ActivityPolicyExemption)
          */
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         default void onActivityLaunchBlocked(int displayId, @NonNull ComponentName componentName,
-                @UserIdInt int userId, @Nullable IntentSender intentSender) {}
+                @NonNull UserHandle user, @Nullable IntentSender intentSender) {}
+
+        /**
+         * Called when a window with a secure surface is shown on the device.
+         *
+         * @param displayId The display ID on which the window was shown.
+         * @param componentName The component name of the activity that showed the window.
+         * @param user The user associated with the activity.
+         *
+         * @see Display#FLAG_SECURE
+         * @see WindowManager.LayoutParams#FLAG_SECURE
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        default void onSecureWindowShown(int displayId, @NonNull ComponentName componentName,
+                @NonNull UserHandle user) {}
     }
 
     /**

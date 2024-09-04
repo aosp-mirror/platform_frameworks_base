@@ -28,6 +28,7 @@ import android.util.Slog;
 import android.view.Gravity;
 import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
@@ -59,10 +60,11 @@ public class WirelessChargingAnimation {
      */
     private WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper,
             int transmittingBatteryLevel, int batteryLevel, Callback callback, boolean isDozing,
-            RippleShape rippleShape, UiEventLogger uiEventLogger) {
+            RippleShape rippleShape, UiEventLogger uiEventLogger,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mCurrentWirelessChargingView = new WirelessChargingView(context, looper,
                 transmittingBatteryLevel, batteryLevel, callback, isDozing,
-                rippleShape, uiEventLogger);
+                rippleShape, uiEventLogger, viewCaptureAwareWindowManager);
     }
 
     /**
@@ -73,9 +75,11 @@ public class WirelessChargingAnimation {
     public static WirelessChargingAnimation makeWirelessChargingAnimation(@NonNull Context context,
             @Nullable Looper looper, int transmittingBatteryLevel, int batteryLevel,
             Callback callback, boolean isDozing, RippleShape rippleShape,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         return new WirelessChargingAnimation(context, looper, transmittingBatteryLevel,
-                batteryLevel, callback, isDozing, rippleShape, uiEventLogger);
+                batteryLevel, callback, isDozing, rippleShape, uiEventLogger,
+                viewCaptureAwareWindowManager);
     }
 
     /**
@@ -83,10 +87,11 @@ public class WirelessChargingAnimation {
      * battery level without charging number shown.
      */
     public static WirelessChargingAnimation makeChargingAnimationWithNoBatteryLevel(
-            @NonNull Context context, RippleShape rippleShape, UiEventLogger uiEventLogger) {
+            @NonNull Context context, RippleShape rippleShape, UiEventLogger uiEventLogger,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         return makeWirelessChargingAnimation(context, null,
                 UNKNOWN_BATTERY_LEVEL, UNKNOWN_BATTERY_LEVEL, null, false,
-                rippleShape, uiEventLogger);
+                rippleShape, uiEventLogger, viewCaptureAwareWindowManager);
     }
 
     /**
@@ -118,17 +123,19 @@ public class WirelessChargingAnimation {
         private int mGravity;
         private WirelessChargingLayout mView;
         private WirelessChargingLayout mNextView;
-        private WindowManager mWM;
+        private ViewCaptureAwareWindowManager mWM;
         private Callback mCallback;
 
         public WirelessChargingView(Context context, @Nullable Looper looper,
                 int transmittingBatteryLevel, int batteryLevel, Callback callback,
-                boolean isDozing, RippleShape rippleShape, UiEventLogger uiEventLogger) {
+                boolean isDozing, RippleShape rippleShape, UiEventLogger uiEventLogger,
+                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
             mCallback = callback;
             mNextView = new WirelessChargingLayout(context, transmittingBatteryLevel, batteryLevel,
                     isDozing, rippleShape);
             mGravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER;
             mUiEventLogger = uiEventLogger;
+            mWM = viewCaptureAwareWindowManager;
 
             final WindowManager.LayoutParams params = mParams;
             params.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -200,7 +207,6 @@ public class WirelessChargingAnimation {
                 if (context == null) {
                     context = mView.getContext();
                 }
-                mWM = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
                 mParams.packageName = packageName;
                 mParams.hideTimeoutMilliseconds = DURATION;
 

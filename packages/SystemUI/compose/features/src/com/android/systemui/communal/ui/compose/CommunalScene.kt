@@ -27,10 +27,12 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSe
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,16 +46,20 @@ constructor(
     private val dialogFactory: SystemUIDialogFactory,
     private val interactionHandler: WidgetInteractionHandler,
     private val widgetSection: CommunalAppWidgetSection,
-) : ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Communal
 
-    override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow<Map<UserAction, UserActionResult>>(
+    override val userActions: Flow<Map<UserAction, UserActionResult>> =
+        MutableStateFlow(
                 mapOf(
-                    Swipe(SwipeDirection.End) to UserActionResult(Scenes.Lockscreen),
+                    Swipe(SwipeDirection.End) to Scenes.Lockscreen,
                 )
             )
             .asStateFlow()
+
+    override suspend fun onActivated(): Nothing {
+        awaitCancellation()
+    }
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {

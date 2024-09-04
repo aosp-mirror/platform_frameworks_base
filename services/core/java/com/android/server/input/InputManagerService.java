@@ -84,6 +84,7 @@ import android.os.VibrationEffect;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
@@ -466,7 +467,7 @@ public class InputManagerService extends IInputManager.Stub
                 injector.getLooper());
         mTouchpadDebugViewController =
                 touchpadVisualizer() ? new TouchpadDebugViewController(mContext,
-                        injector.getLooper()) : null;
+                        injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
         mKeyboardBacklightController = InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
@@ -596,9 +597,6 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
-        if (mTouchpadDebugViewController != null) {
-            mTouchpadDebugViewController.systemRunning();
-        }
     }
 
     private void reloadDeviceAliases() {
@@ -1798,6 +1796,16 @@ public class InputManagerService extends IInputManager.Stub
         return mNative.getSensorList(deviceId);
     }
 
+    /**
+     * Retrieves the hardware properties of the touchpad for the given device ID.
+     * Returns null if the device has no touchpad hardware properties
+     * or if the device ID is invalid.
+     */
+    @Nullable
+    public TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId) {
+        return mNative.getTouchpadHardwareProperties(deviceId);
+    }
+
     @Override // Binder call
     public boolean registerSensorListener(IInputSensorEventListener listener) {
         if (DEBUG) {
@@ -2256,6 +2264,18 @@ public class InputManagerService extends IInputManager.Stub
         // Input device change can possibly change configuration, so notify window manager to update
         // its configuration.
         mWindowManagerCallbacks.notifyConfigurationChanged();
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    private void notifyTouchpadHardwareState(TouchpadHardwareState hardwareStates, int deviceId) {
+        // TODO(b/286551975): sent the touchpad hardware state data here to TouchpadDebugActivity
+        Slog.d(TAG, "notifyTouchpadHardwareState: Time: "
+                + hardwareStates.getTimestamp() + ", No. Buttons: "
+                + hardwareStates.getButtonsDown() + ", No. Fingers: "
+                + hardwareStates.getFingerCount() + ", No. Touch: "
+                + hardwareStates.getTouchCount() + ", Id: "
+                + deviceId);
     }
 
     // Native callback.
@@ -3314,6 +3334,13 @@ public class InputManagerService extends IInputManager.Stub
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);
             }
+        }
+    }
+
+    void updateTouchpadVisualizerEnabled(boolean enabled) {
+        mNative.setShouldNotifyTouchpadHardwareState(enabled);
+        if (mTouchpadDebugViewController != null) {
+            mTouchpadDebugViewController.updateTouchpadVisualizerEnabled(enabled);
         }
     }
 

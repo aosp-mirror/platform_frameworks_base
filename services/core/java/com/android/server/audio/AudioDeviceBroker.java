@@ -1714,6 +1714,10 @@ public class AudioDeviceBroker {
         sendIILMsg(MSG_IIL_BTLEAUDIO_TIMEOUT, SENDMSG_QUEUE, device, codec, address, delayMs);
     }
 
+    /*package*/ void setHearingAidTimeout(String address, int delayMs) {
+        sendLMsg(MSG_IL_BT_HEARING_AID_TIMEOUT, SENDMSG_QUEUE, address, delayMs);
+    }
+
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean supported) {
         synchronized (mDeviceStateLock) {
             mBtHelper.setAvrcpAbsoluteVolumeSupported(supported);
@@ -1957,6 +1961,13 @@ public class AudioDeviceBroker {
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onMakeLeAudioDeviceUnavailableNow(
                                 (String) msg.obj, msg.arg1, msg.arg2);
+                    }
+                    break;
+                case MSG_IL_BT_HEARING_AID_TIMEOUT:
+                    // msg.obj  == address of Hearing Aid device
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onMakeHearingAidDeviceUnavailableNow(
+                                (String) msg.obj);
                     }
                     break;
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE: {
@@ -2234,6 +2245,7 @@ public class AudioDeviceBroker {
     private static final int MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY = 58;
     private static final int MSG_IL_UPDATED_ADI_DEVICE_STATE = 59;
     private static final int MSG_L_SET_FORCE_BT_A2DP_USE_NO_MUTE = 60;
+    private static final int MSG_IL_BT_HEARING_AID_TIMEOUT = 61;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
@@ -2246,6 +2258,7 @@ public class AudioDeviceBroker {
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT:
             case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT:
             case MSG_CHECK_MUTE_MUSIC:
+            case MSG_IL_BT_HEARING_AID_TIMEOUT:
                 return true;
             default:
                 return false;
@@ -2330,6 +2343,7 @@ public class AudioDeviceBroker {
                 case MSG_IL_BTA2DP_TIMEOUT:
                 case MSG_IIL_BTLEAUDIO_TIMEOUT:
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE:
+                case MSG_IL_BT_HEARING_AID_TIMEOUT:
                     if (sLastDeviceConnectMsgTime >= time) {
                         // add a little delay to make sure messages are ordered as expected
                         time = sLastDeviceConnectMsgTime + 30;

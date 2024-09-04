@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 
 import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.EDGE_DRAG_RESIZE;
@@ -166,7 +167,10 @@ final class DragResizeWindowGeometry {
     static boolean isEdgeResizePermitted(@NonNull Context context, @NonNull MotionEvent e) {
         if (EDGE_DRAG_RESIZE.isEnabled(context)) {
             return e.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
-                    || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
+                    || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE
+                    // Touchpad input
+                    || (e.isFromSource(SOURCE_MOUSE)
+                        && e.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER);
         } else {
             return e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE;
         }

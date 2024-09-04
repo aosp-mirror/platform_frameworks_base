@@ -63,6 +63,18 @@ class SceneKey(
     }
 }
 
+/** Key for an overlay. */
+class OverlayKey(
+    debugName: String,
+    identity: Any = Object(),
+) : ContentKey(debugName, identity) {
+    override val testTag: String = "overlay:$debugName"
+
+    override fun toString(): String {
+        return "OverlayKey(debugName=$debugName)"
+    }
+}
+
 /** Key for an element. */
 open class ElementKey(
     debugName: String,
@@ -140,5 +152,16 @@ class ValueKey(debugName: String, identity: Any = Object()) : Key(debugName, ide
 class TransitionKey(debugName: String, identity: Any = Object()) : Key(debugName, identity) {
     override fun toString(): String {
         return "TransitionKey(debugName=$debugName)"
+    }
+
+    companion object {
+        /**
+         * A special transition key indicating that the associated transition should be used for
+         * Predictive Back gestures.
+         *
+         * Use this key when defining a transition that you want to be specifically triggered when
+         * the user performs a Predictive Back gesture.
+         */
+        val PredictiveBack = TransitionKey("PredictiveBack")
     }
 }

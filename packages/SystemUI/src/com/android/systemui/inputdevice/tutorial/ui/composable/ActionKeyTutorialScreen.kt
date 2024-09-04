@@ -17,15 +17,18 @@
 package com.android.systemui.inputdevice.tutorial.ui.composable
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -46,17 +49,26 @@ fun ActionKeyTutorialScreen(
     BackHandler(onBack = onBack)
     val screenConfig = buildScreenConfig()
     var actionState by remember { mutableStateOf(NOT_STARTED) }
+    val focusRequester = remember { FocusRequester() }
     Box(
         modifier =
-            Modifier.fillMaxSize().onKeyEvent { keyEvent: KeyEvent ->
-                // temporary before we can access Action/Meta key
-                if (keyEvent.key == Key.AltLeft && keyEvent.type == KeyEventType.KeyUp) {
-                    actionState = FINISHED
+            Modifier.fillMaxSize()
+                .onKeyEvent { keyEvent: KeyEvent ->
+                    if (keyEvent.key == Key.MetaLeft && keyEvent.type == KeyEventType.KeyUp) {
+                        actionState = FINISHED
+                    }
+                    true
                 }
-                true
-            }
+                .focusRequester(focusRequester)
+                .focusable()
     ) {
         ActionTutorialContent(actionState, onDoneButtonClicked, screenConfig)
+    }
+    LaunchedEffect(Unit) {
+        // we need to request focus on main container so it can handle all key events immediately
+        // when it's open. Otherwise user needs to press non-modifier key before modifier key can
+        // be handled as nothing is focused
+        focusRequester.requestFocus()
     }
 }
 
@@ -84,7 +96,6 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
     val secondaryFixedDim = LocalAndroidColorScheme.current.secondaryFixedDim
     val onSecondaryFixed = LocalAndroidColorScheme.current.onSecondaryFixed
     val onSecondaryFixedVariant = LocalAndroidColorScheme.current.onSecondaryFixedVariant
-    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
     val dynamicProperties =
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".primaryFixedDim", primaryFixedDim),
@@ -93,11 +104,10 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
             rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant)
         )
     val screenColors =
-        remember(surfaceContainer, dynamicProperties) {
+        remember(dynamicProperties) {
             TutorialScreenConfig.Colors(
                 background = onSecondaryFixed,
-                successBackground = surfaceContainer,
-                title = primaryFixedDim,
+                title = secondaryFixedDim,
                 animationColors = dynamicProperties,
             )
         }

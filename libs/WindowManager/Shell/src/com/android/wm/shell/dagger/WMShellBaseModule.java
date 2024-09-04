@@ -62,7 +62,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.pip.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -77,10 +76,13 @@ import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
 import com.android.wm.shell.compatui.CompatUIStatusManager;
+import com.android.wm.shell.compatui.api.CompatUIComponentFactory;
 import com.android.wm.shell.compatui.api.CompatUIComponentIdGenerator;
 import com.android.wm.shell.compatui.api.CompatUIHandler;
 import com.android.wm.shell.compatui.api.CompatUIRepository;
 import com.android.wm.shell.compatui.api.CompatUIState;
+import com.android.wm.shell.compatui.components.RestartButtonSpecKt;
+import com.android.wm.shell.compatui.impl.DefaultCompatUIComponentFactory;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIHandler;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIRepository;
 import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
@@ -102,6 +104,7 @@ import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.recents.TaskStackTransitionObserver;
 import com.android.wm.shell.shared.ShellTransitions;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
@@ -134,6 +137,7 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.Optional;
+import java.util.function.IntPredicate;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -144,7 +148,11 @@ import java.util.Optional;
  * dependencies that are device/form factor SystemUI implementation specific should go into their
  * respective modules (ie. {@link WMShellModule} for handheld, {@link TvWMShellModule} for tv, etc.)
  */
-@Module(includes = WMShellConcurrencyModule.class)
+@Module(
+        includes = {
+                WMShellConcurrencyModule.class,
+                WMShellCoroutinesModule.class
+        })
 public abstract class WMShellBaseModule {
 
     //
@@ -258,16 +266,23 @@ public abstract class WMShellBaseModule {
             Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
             Lazy<AccessibilityManager> accessibilityManager,
             CompatUIRepository compatUIRepository,
+            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
             @NonNull CompatUIState compatUIState,
             @NonNull CompatUIComponentIdGenerator componentIdGenerator,
+            @NonNull CompatUIComponentFactory compatUIComponentFactory,
             CompatUIStatusManager compatUIStatusManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
         }
         if (Flags.appCompatUiFramework()) {
-            return Optional.of(new DefaultCompatUIHandler(compatUIRepository, compatUIState,
-                    componentIdGenerator));
+            return Optional.of(
+                    new DefaultCompatUIHandler(compatUIRepository, compatUIState,
+                            componentIdGenerator, compatUIComponentFactory, mainExecutor));
         }
+        final IntPredicate inDesktopModePredicate =
+                desktopModeTaskRepository.<IntPredicate>map(modeTaskRepository -> displayId ->
+                        modeTaskRepository.getVisibleTaskCount(displayId) > 0)
+                            .orElseGet(() -> displayId -> false);
         return Optional.of(
                 new CompatUIController(
                         context,
@@ -283,7 +298,8 @@ public abstract class WMShellBaseModule {
                         compatUIConfiguration.get(),
                         compatUIShellCommandHandler.get(),
                         accessibilityManager.get(),
-                        compatUIStatusManager));
+                        compatUIStatusManager,
+                        inDesktopModePredicate));
     }
 
     @WMSingleton
@@ -308,6 +324,15 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static CompatUIComponentFactory provideCompatUIComponentFactory(
+            @NonNull Context context,
+            @NonNull SyncTransactionQueue syncQueue,
+            @NonNull DisplayController displayController) {
+        return new DefaultCompatUIComponentFactory(context, syncQueue, displayController);
+    }
+
+    @WMSingleton
+    @Provides
     static CompatUIComponentIdGenerator provideCompatUIComponentIdGenerator() {
         return new DefaultComponentIdGenerator();
     }
@@ -315,7 +340,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static CompatUIRepository provideCompatUIRepository() {
-        return new DefaultCompatUIRepository();
+        // TODO(b/360288344) Integrate Dagger Multibinding
+        final CompatUIRepository repository = new DefaultCompatUIRepository();
+        repository.addSpec(RestartButtonSpecKt.getRestartButtonSpec());
+        return repository;
     }
 
     @WMSingleton

@@ -65,14 +65,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"移至右上方"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"移至左下方"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"移至右下方"</string>
-    <!-- no translation found for bubble_accessibility_action_expand_menu (8637233525952938845) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_collapse_menu (2975310870146231463) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_left (4803535120353716759) -->
-    <skip />
-    <!-- no translation found for bubble_accessibility_action_move_bar_right (7686542531917510421) -->
-    <skip />
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"展開選單"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"收合選單"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"向左移"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"向右移"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"展開「<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>」"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"收合「<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>」"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"「<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>」設定"</string>
@@ -131,4 +127,5 @@
     <string name="expand_menu_text" msgid="3847736164494181168">"開啟選單"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"畫面最大化"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"貼齊畫面"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"這個應用程式無法調整大小"</string>
 </resources>

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.policy.ScreenDecorationsUtils
@@ -39,13 +40,14 @@ import com.android.systemui.keyguard.ui.composable.AlternateBouncer
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Overlay
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -56,7 +58,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 object SceneWindowRootViewBinder {
@@ -70,6 +71,7 @@ object SceneWindowRootViewBinder {
         containerConfig: SceneContainerConfig,
         sharedNotificationContainer: SharedNotificationContainer,
         scenes: Set<Scene>,
+        overlays: Set<Overlay>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
         alternateBouncerDependencies: AlternateBouncerDependencies,
@@ -86,8 +88,22 @@ object SceneWindowRootViewBinder {
             }
         }
 
+        val unsortedOverlayByKey: Map<OverlayKey, Overlay> =
+            overlays.associateBy { overlay -> overlay.key }
+        val sortedOverlayByKey: Map<OverlayKey, Overlay> = buildMap {
+            containerConfig.overlayKeys.forEach { overlayKey ->
+                val overlay =
+                    checkNotNull(unsortedOverlayByKey[overlayKey]) {
+                        "Overlay not found for key \"$overlayKey\"!"
+                    }
+
+                put(overlayKey, overlay)
+            }
+        }
+
         view.repeatWhenAttached {
             view.viewModel(
+                traceName = "SceneWindowRootViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = { viewModelFactory.create(motionEventHandlerReceiver) },
             ) { viewModel ->
@@ -112,6 +128,7 @@ object SceneWindowRootViewBinder {
                                 viewModel = viewModel,
                                 windowInsets = windowInsets,
                                 sceneByKey = sortedSceneByKey,
+                                overlayByKey = sortedOverlayByKey,
                                 dataSourceDelegator = dataSourceDelegator,
                                 containerConfig = containerConfig,
                             )
@@ -140,11 +157,7 @@ object SceneWindowRootViewBinder {
                         )
                     }
 
-                    launch {
-                        viewModel.isVisible.collect { isVisible ->
-                            onVisibilityChangedInternal(isVisible)
-                        }
-                    }
+                    view.setSnapshotBinding { onVisibilityChangedInternal(viewModel.isVisible) }
                     awaitCancellation()
                 } finally {
                     // Here when destroyed.
@@ -160,6 +173,7 @@ object SceneWindowRootViewBinder {
         viewModel: SceneContainerViewModel,
         windowInsets: StateFlow<WindowInsets?>,
         sceneByKey: Map<SceneKey, Scene>,
+        overlayByKey: Map<OverlayKey, Overlay>,
         dataSourceDelegator: SceneDataSourceDelegator,
         containerConfig: SceneContainerConfig,
     ): View {
@@ -172,8 +186,8 @@ object SceneWindowRootViewBinder {
                     ) {
                         SceneContainer(
                             viewModel = viewModel,
-                            sceneByKey =
-                                sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
+                            sceneByKey = sceneByKey,
+                            overlayByKey = overlayByKey,
                             initialSceneKey = containerConfig.initialSceneKey,
                             dataSourceDelegator = dataSourceDelegator,
                         )

@@ -47,6 +47,19 @@ interface ITaskFragmentOrganizerController {
     void unregisterOrganizer(in ITaskFragmentOrganizer organizer);
 
     /**
+     * Registers remote animations per transition type for the organizer. It will override the
+     * animations if the transition only contains windows that belong to the organized
+     * TaskFragments in the given Task.
+     */
+    void registerRemoteAnimations(in ITaskFragmentOrganizer organizer,
+        in RemoteAnimationDefinition definition);
+
+    /**
+     * Unregisters remote animations per transition type for the organizer.
+     */
+    void unregisterRemoteAnimations(in ITaskFragmentOrganizer organizer);
+
+    /**
      * Saves the state in the system, where the state can be restored if the process of
      * the TaskFragmentOrganizer is restarted.
      */

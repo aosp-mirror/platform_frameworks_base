@@ -44,7 +44,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
@@ -194,21 +193,6 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         InOrder orderVerifier = Mockito.inOrder(mMockListener);
         orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(true));
         orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(false));
-    }
-
-    @Test
-    public void testSetRunningBothAnimations() {
-        mWpc.setRunningRemoteAnimation(true);
-        mWpc.setRunningRecentsAnimation(true);
-
-        mWpc.setRunningRecentsAnimation(false);
-        mWpc.setRunningRemoteAnimation(false);
-        waitHandlerIdle(mAtm.mH);
-
-        InOrder orderVerifier = Mockito.inOrder(mMockListener);
-        orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(true));
-        orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(false));
-        orderVerifier.verifyNoMoreInteractions();
     }
 
     @Test

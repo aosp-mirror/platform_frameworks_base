@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Gravadora da pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando gravación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación de actividade en curso sobre unha sesión de gravación de pantalla"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Queres gravar a túa pantalla?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Gravar unha aplicación"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Gravar pantalla completa"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Cando gravas a pantalla completa, recóllese todo o que se mostra nela. Recomendámosche que teñas coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como co contido de audio e de vídeo."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Cando gravas unha aplicación, recóllese todo o que se mostra ou reproduce nela. Recomendámosche que teñas coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como co contido de audio e de vídeo."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Gravar pantalla"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Escoller unha aplicación para gravar"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio do dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son do dispositivo (por exemplo, música, chamadas e tons de chamada)"</string>
@@ -307,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Usar Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Estableceuse a conexión"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audio compartido"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gardouse"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconectar"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activar"</string>
@@ -315,6 +310,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"O Bluetooth activarase mañá á mañá"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Compartir audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Compartindo audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"configurar o uso compartido de audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculares"</string>
@@ -386,7 +382,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravar pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Deter"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Rexistrar problema"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Gravar problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Deter"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Informe de erros"</string>
@@ -396,7 +392,7 @@
     <string name="performance" msgid="6552785217174378320">"Rendemento"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interface de usuario"</string>
     <string name="thermal" msgid="6758074791325414831">"Térmico"</string>
-    <string name="custom" msgid="3337456985275158299">"Personalizada"</string>
+    <string name="custom" msgid="3337456985275158299">"Personalizado"</string>
     <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Configuración de rastrexo personalizada"</string>
     <string name="restore_default" msgid="5259420807486239755">"Restaurar configuración predeterminada"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo dunha soa man"</string>
@@ -441,6 +437,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Feito"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Configuración"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Activado"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Activo • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivado"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurar"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Xestionar na configuración"</string>
@@ -489,7 +486,7 @@
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Pechar"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Engadir, quitar e reordenar widgets neste espazo"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Engadir máis widgets"</string>
-    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pulsación longa para personalizar os widgets"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantén premido para personalizar os widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizar widgets"</string>
     <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Desbloquea o dispositivo para personalizar os widgets"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Icona da aplicación de widget desactivado"</string>
@@ -535,8 +532,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acceso a toda a información visible na pantalla ou reproducida desde o teu dispositivo mentres graves ou emitas contido. Isto inclúe datos como contrasinais, detalles de pago, fotos, mensaxes e o audio que reproduzas."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Queres iniciar a gravación ou a emisión?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"O servizo que proporciona esta función terá acceso a toda a información visible na pantalla ou reproducida desde o teu dispositivo mentres graves ou emitas contido. Isto inclúe datos como contrasinais, detalles de pago, fotos, mensaxes e o audio que reproduzas."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Compartir ou gravar unha aplicación"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Queres compartir a pantalla con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Compartir unha aplicación"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Compartir toda a pantalla"</string>
@@ -544,16 +540,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Se compartes toda a pantalla, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> poderá ver todo o contido que apareza ou se reproduza nesa aplicación. Ten coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como co contido de audio e de vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Compartir pantalla"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> desactivou esta opción"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Escoller unha aplicación para compartir"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Queres emitir a túa pantalla?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Emitir unha aplicación"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Emitir pantalla completa"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Cando emites a pantalla enteira, pódese ver todo o que haxa nela. Xa que logo, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como co contido de audio e de vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Cando emites unha aplicación, pódese ver todo o que se mostre ou reproduza nela. Xa que logo, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como co contido de audio e de vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Emitir pantalla"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Escoller unha aplicación para emitir"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Queres comezar a compartir contido?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Cando compartes, gravas ou emites contido, Android ten acceso a todo o que se vexa na pantalla ou se reproduza no teu dispositivo. Polo tanto, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como o contido de audio e de vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Cando compartes, gravas ou emites unha aplicación, Android ten acceso a todo o que se vexa ou se reproduza nela. Polo tanto, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como o contido de audio e de vídeo."</string>
@@ -726,6 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satélite, boa conexión"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, conexión dispoñible"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS por satélite"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Chamadas de emerxencia ou SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de traballo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión só para algúns"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"O configurador da IU do sistema ofréceche formas adicionais de modificar e personalizar a interface de usuario de Android. Estas funcións experimentais poden cambiar, interromperse ou desaparecer en futuras versións. Continúa con precaución."</string>
@@ -1398,24 +1393,16 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Feito"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Volver"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Para retroceder, pasa tres dedos cara á esquerda ou cara á dereita en calquera parte do panel táctil.\n\nTamén podes usar o atallo de teclado Acción + Escape."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Moi ben!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Completaches o xesto de retroceso."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ir ao inicio"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Para ir á pantalla de inicio, pasa tres dedos cara arriba desde a parte inferior da pantalla."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Excelente!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Completaches o xesto de ir ao inicio."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tecla de acción"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Para acceder ás aplicacións, preme a tecla de acción do teclado."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Parabéns!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Completaches o xesto da tecla de acción.\n\nAcción + / mostra todos os atallos que tes á túa disposición."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación do teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controis domóticos"</string>

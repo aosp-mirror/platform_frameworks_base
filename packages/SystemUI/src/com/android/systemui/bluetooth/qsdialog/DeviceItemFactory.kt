@@ -38,7 +38,7 @@ private val actionAccessibilityLabelDisconnect =
     R.string.accessibility_quick_settings_bluetooth_device_tap_to_disconnect
 
 /** Factories to create different types of Bluetooth device items from CachedBluetoothDevice. */
-internal abstract class DeviceItemFactory {
+abstract class DeviceItemFactory {
     abstract fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,
@@ -125,6 +125,37 @@ internal class AudioSharingMediaDeviceItemFactory(
     }
 }
 
+internal class AvailableAudioSharingMediaDeviceItemFactory(
+    private val localBluetoothManager: LocalBluetoothManager?
+) : AvailableMediaDeviceItemFactory() {
+    override fun isFilterMatched(
+        context: Context,
+        cachedDevice: CachedBluetoothDevice,
+        audioManager: AudioManager
+    ): Boolean {
+        return BluetoothUtils.isAudioSharingEnabled() &&
+            super.isFilterMatched(context, cachedDevice, audioManager) &&
+            BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(
+                cachedDevice,
+                localBluetoothManager
+            )
+    }
+
+    override fun create(context: Context, cachedDevice: CachedBluetoothDevice): DeviceItem {
+        return createDeviceItem(
+            context,
+            cachedDevice,
+            DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
+            context.getString(
+                R.string.quick_settings_bluetooth_device_audio_sharing_or_switch_active
+            ),
+            if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
+            "",
+            isActive = false
+        )
+    }
+}
+
 internal class ActiveHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
@@ -136,7 +167,7 @@ internal class ActiveHearingDeviceItemFactory : ActiveMediaDeviceItemFactory() {
     }
 }
 
-internal open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
+open class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
     override fun isFilterMatched(
         context: Context,
         cachedDevice: CachedBluetoothDevice,

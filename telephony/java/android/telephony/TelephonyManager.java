@@ -132,6 +132,7 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.flags.Flags;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
 import java.io.IOException;
@@ -1777,8 +1778,8 @@ public class TelephonyManager {
 
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
-     * to indicate user to decide whether current SIM should be preferred for all
-     * data / voice / sms. {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
+     * to indicate the current SIM should be preferred for all data / voice / sms.
+     * {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
      * which subscription should be the default subscription.
      * @hide
      */
@@ -9975,6 +9976,7 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
             ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
+            ALLOWED_NETWORK_TYPES_REASON_TEST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -10011,6 +10013,14 @@ public class TelephonyManager {
      */
     @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
+     * To indicate allowed network type change is requested by Testing purpose, should be default to
+     * {@link #getAllNetworkTypesBitmask} when done testing.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_NETWORK_TYPES_REASON_TEST = 4;
 
     /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
@@ -10118,6 +10128,8 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
                 return true;
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST:
+                return TelephonyUtils.IS_DEBUGGABLE;
         }
         return false;
     }
@@ -13928,7 +13940,10 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public void getCarrierRestrictionStatus(@NonNull Executor executor,
             @NonNull @CarrierRestrictionStatus
                     Consumer<Integer> resultListener) {

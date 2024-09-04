@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Skærmoptagelse"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandler skærmoptagelse"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Konstant notifikation om skærmoptagelse"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Vil du optage din skærm?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Optag én app"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Optag hele skærmen"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Når du optager hele skærmen, bliver alt det, der vises på skærmen, optaget. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Når du optager en app, optages alt det, der vises eller afspilles i den pågældende app. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Optag skærm"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Vælg den app, der skal optages"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Optag lyd"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Enhedslyd"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Lyd fra din enhed såsom musik, opkald og ringetoner"</string>
@@ -307,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Brug Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Der er oprettet forbindelse"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Lyddeling"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gemt"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"afbryd forbindelse"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivér"</string>
@@ -315,6 +310,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth aktiveres i morgen tidlig"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Del lyd"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Deler lyd"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"angive indstillinger for lyddeling"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batteri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Lyd"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -441,6 +437,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Udfør"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Indstillinger"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Til"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Til • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Fra"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Konfigurer"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Administrer i indstillingerne"</string>
@@ -535,8 +532,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> får adgang til alle de oplysninger, der er synlige på din skærm, eller som afspilles på din enhed, når du optager eller caster. Dette omfatter oplysninger som f.eks. adgangskoder, betalingsoplysninger, billeder, beskeder og afspillet lyd."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Vil du begynde at optage eller caste?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Tjenesten, der tilbyder denne funktion, får adgang til alle de oplysninger, der er synlige på din skærm, eller som afspilles på din enhed, når du optager eller caster. Dette omfatter oplysninger som f.eks. adgangskoder, betalingsoplysninger, billeder, beskeder og afspillet lyd."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Del eller optag en app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Vil du dele din skærm med <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Del én app"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Del hele skærmen"</string>
@@ -544,16 +540,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Når du deler en app, er alt, der vises eller afspilles i den pågældende app, synligt for <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Vær derfor forsigtig med f.eks. adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Del skærm"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> har deaktiveret denne valgmulighed"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Vælg den app, du vil dele fra"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Vil du caste din skærm?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Cast én app"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Cast hele skærmen"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Når du caster hele din skærm, er alt på skærmen synligt. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Når du caster en app, er alt, der vises eller afspilles i appen, synligt. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Cast skærm"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Vælg den app, du vil caste fra"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Vil du begynde at dele?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Når du deler, optager eller caster, har Android adgang til alt, der er synligt på din skærm eller afspilles på din enhed. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Når du deler, optager eller caster en app, har Android adgang til alt, der vises eller afspilles i den pågældende app. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
@@ -726,6 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellit – god forbindelse"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellit – forbindelsen er tilgængelig"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS-meldinger via satellit"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Nødopkald eller SOS-meldinger via satellit"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Arbejdsprofil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Sjovt for nogle, men ikke for alle"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner giver dig flere muligheder for at justere og tilpasse Android-brugerfladen. Disse eksperimentelle funktioner kan ændres, gå i stykker eller forsvinde i fremtidige udgivelser. Vær forsigtig, hvis du fortsætter."</string>
@@ -1398,24 +1393,16 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Udfør"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gå tilbage"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Du kan gå tilbage ved at stryge mod venstre eller højre med tre fingre et vilkårligt sted på touchpladen.\n\nDu kan også bruge tastaturgenvejen Alt + Esc."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Flot!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Du har fuldført bevægelsen for Gå tilbage."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Gå til startskærmen"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Du kan til enhver tid stryge opad med tre fingre fra bunden af skærmen, hvis du vil gå til startskærmen."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Sådan!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Du har fuldført bevægelsen for Gå til startskærmen."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Handlingstast"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Du kan tilgå alle dine apps ved at trykke på handlingstasten på dit tastatur."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Tillykke!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Du har fuldført bevægelsen for handlingstasten.\n\nHandling + / viser alle de tilgængelige genveje."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Tastaturets baggrundslys"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d af %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Hjemmestyring"</string>

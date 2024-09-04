@@ -53,9 +53,9 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
-import com.android.wm.shell.common.bubbles.BubbleInfo;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.bubbles.BubbleInfo;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -349,7 +349,8 @@ public class Bubble implements BubbleViewProvider {
                 getPackageName(),
                 getTitle(),
                 getAppName(),
-                isImportantConversation());
+                isImportantConversation(),
+                !isAppLaunchIntent());
     }
 
     @Override
@@ -568,11 +569,11 @@ public class Bubble implements BubbleViewProvider {
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
             boolean skipInflation) {
+        ProtoLog.v(WM_SHELL_BUBBLES, "Inflate bubble key=%s", getKey());
         if (Flags.bubbleViewInfoExecutors()) {
-            if (mInflationTask != null && mInflationTask.getStatus() != FINISHED) {
-                mInflationTask.cancel(true /* mayInterruptIfRunning */);
+            if (mInflationTask != null && !mInflationTask.isFinished()) {
+                mInflationTask.cancel();
             }
-            // TODO(b/353894869): switch to executors
             mInflationTask = new BubbleViewInfoTask(this,
                     context,
                     expandedViewManager,
@@ -583,11 +584,12 @@ public class Bubble implements BubbleViewProvider {
                     iconFactory,
                     skipInflation,
                     callback,
-                    mMainExecutor);
+                    mMainExecutor,
+                    mBgExecutor);
             if (mInflateSynchronously) {
-                mInflationTask.onPostExecute(mInflationTask.doInBackground());
+                mInflationTask.startSync();
             } else {
-                mInflationTask.execute();
+                mInflationTask.start();
             }
         } else {
             if (mInflationTaskLegacy != null && mInflationTaskLegacy.getStatus() != FINISHED) {
@@ -625,7 +627,7 @@ public class Bubble implements BubbleViewProvider {
             if (mInflationTask == null) {
                 return;
             }
-            mInflationTask.cancel(true /* mayInterruptIfRunning */);
+            mInflationTask.cancel();
         } else {
             if (mInflationTaskLegacy == null) {
                 return;

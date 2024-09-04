@@ -29,11 +29,11 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -50,6 +50,7 @@ constructor(
     AuthMethodBouncerViewModel(
         interactor = interactor,
         isInputEnabled = isInputEnabled,
+        traceName = "PatternBouncerViewModel",
     ) {
 
     /** The number of columns in the dot grid. */
@@ -80,14 +81,13 @@ constructor(
 
     override val lockoutMessageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { super.onActivated() }
             launch {
-                selectedDotSet
-                    .map { it.toList() }
-                    .collectLatest { selectedDotList.value = it.toList() }
+                selectedDotSet.map { it.toList() }.collect { selectedDotList.value = it.toList() }
             }
+            awaitCancellation()
         }
     }
 

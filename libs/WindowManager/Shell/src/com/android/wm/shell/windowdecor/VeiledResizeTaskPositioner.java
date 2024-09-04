@@ -104,9 +104,6 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true);
                 mTaskOrganizer.applyTransaction(wct);
             }
-        } else {
-            mInteractionJankMonitor.begin(mDesktopWindowDecoration.mTaskSurface,
-                    mDesktopWindowDecoration.mContext, CUJ_DESKTOP_MODE_DRAG_WINDOW);
         }
         mDragStartListener.onDragStart(mDesktopWindowDecoration.mTaskInfo.taskId);
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
@@ -133,6 +130,9 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 mDesktopWindowDecoration.updateResizeVeil(mRepositionTaskBounds);
             }
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
+            // Begin window drag CUJ instrumentation only when drag position moves.
+            mInteractionJankMonitor.begin(mDesktopWindowDecoration.mTaskSurface,
+                    mDesktopWindowDecoration.mContext, CUJ_DESKTOP_MODE_DRAG_WINDOW);
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             DragPositioningCallbackUtility.setPositionOnDrag(mDesktopWindowDecoration,
                     mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t, x, y);

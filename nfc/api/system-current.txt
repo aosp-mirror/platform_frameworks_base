@@ -62,10 +62,32 @@ package android.nfc {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcOemExtension.Callback);
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void synchronizeScreenState();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterCallback(@NonNull android.nfc.NfcOemExtension.Callback);
+    field public static final int HCE_ACTIVATE = 1; // 0x1
+    field public static final int HCE_DATA_TRANSFERRED = 2; // 0x2
+    field public static final int HCE_DEACTIVATE = 3; // 0x3
+    field public static final int STATUS_OK = 0; // 0x0
+    field public static final int STATUS_UNKNOWN_ERROR = 1; // 0x1
   }
 
   public static interface NfcOemExtension.Callback {
+    method public void onApplyRouting(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onBootFinished(int);
+    method public void onBootStarted();
+    method public void onCardEmulationActivated(boolean);
+    method public void onDisable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onDisableFinished(int);
+    method public void onDisableStarted();
+    method public void onEnable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onEnableFinished(int);
+    method public void onEnableStarted();
+    method public void onHceEventReceived(int);
+    method public void onNdefRead(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onRfDiscoveryStarted(boolean);
+    method public void onRfFieldActivated(boolean);
+    method public void onRoutingChanged();
+    method public void onStateUpdated(int);
     method public void onTagConnected(boolean, @NonNull android.nfc.Tag);
+    method public void onTagDispatch(@NonNull java.util.function.Consumer<java.lang.Boolean>);
   }
 
 }
@@ -75,7 +97,7 @@ package android.nfc.cardemulation {
   public final class CardEmulation {
     method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static android.content.ComponentName getPreferredPaymentService(@NonNull android.content.Context);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
-    method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void overrideRoutingTable(@NonNull android.app.Activity, @Nullable String, @Nullable String);
+    method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void overrideRoutingTable(@NonNull android.app.Activity, int, int);
     method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void recoverRoutingTable(@NonNull android.app.Activity);
   }
 

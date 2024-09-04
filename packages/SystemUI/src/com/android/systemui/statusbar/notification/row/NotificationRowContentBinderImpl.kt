@@ -46,6 +46,9 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.row.ContentViewInflationResult.InflatedContentViewHolder
+import com.android.systemui.statusbar.notification.row.ContentViewInflationResult.KeepExistingView
+import com.android.systemui.statusbar.notification.row.ContentViewInflationResult.NullContentView
 import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED
 import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_EXPANDED
 import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP
@@ -286,11 +289,15 @@ constructor(
                 }
             FLAG_CONTENT_VIEW_EXPANDED ->
                 row.privateLayout.performWhenContentInactive(VISIBLE_TYPE_EXPANDED) {
+                    row.privateLayout.mExpandedBinderHandle?.dispose()
+                    row.privateLayout.mExpandedBinderHandle = null
                     row.privateLayout.setExpandedChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)
                 }
             FLAG_CONTENT_VIEW_HEADS_UP ->
                 row.privateLayout.performWhenContentInactive(VISIBLE_TYPE_HEADSUP) {
+                    row.privateLayout.mHeadsUpBinderHandle?.dispose()
+                    row.privateLayout.mHeadsUpBinderHandle = null
                     row.privateLayout.setHeadsUpChild(null)
                     remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)
                     row.privateLayout.setHeadsUpInflatedSmartReplies(null)
@@ -499,17 +506,87 @@ constructor(
                     }
             }
 
-            if (reInflateFlags and CONTENT_VIEWS_TO_CREATE_RICH_ONGOING != 0) {
+            val richOngoingContentModel = inflationProgress.contentModel.richOngoingContentModel
+
+            if (
+                richOngoingContentModel != null &&
+                    reInflateFlags and CONTENT_VIEWS_TO_CREATE_RICH_ONGOING != 0
+            ) {
                 logger.logAsyncTaskProgress(entry, "inflating RON view")
-                inflationProgress.richOngoingNotificationViewHolder =
-                    inflationProgress.contentModel.richOngoingContentModel?.let {
+                val inflateContractedView = reInflateFlags and FLAG_CONTENT_VIEW_CONTRACTED != 0
+                val inflateExpandedView = reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0
+                val inflateHeadsUpView = reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0
+
+                inflationProgress.contractedRichOngoingNotificationViewHolder =
+                    if (inflateContractedView) {
                         ronInflater.inflateView(
-                            contentModel = it,
+                            contentModel = richOngoingContentModel,
                             existingView = row.privateLayout.contractedChild,
                             entry = entry,
                             systemUiContext = context,
-                            parentView = row.privateLayout
+                            parentView = row.privateLayout,
+                            viewType = RichOngoingNotificationViewType.Contracted
                         )
+                    } else {
+                        if (
+                            ronInflater.canKeepView(
+                                contentModel = richOngoingContentModel,
+                                existingView = row.privateLayout.contractedChild,
+                                viewType = RichOngoingNotificationViewType.Contracted
+                            )
+                        ) {
+                            KeepExistingView
+                        } else {
+                            NullContentView
+                        }
+                    }
+
+                inflationProgress.expandedRichOngoingNotificationViewHolder =
+                    if (inflateExpandedView) {
+                        ronInflater.inflateView(
+                            contentModel = richOngoingContentModel,
+                            existingView = row.privateLayout.expandedChild,
+                            entry = entry,
+                            systemUiContext = context,
+                            parentView = row.privateLayout,
+                            viewType = RichOngoingNotificationViewType.Expanded
+                        )
+                    } else {
+                        if (
+                            ronInflater.canKeepView(
+                                contentModel = richOngoingContentModel,
+                                existingView = row.privateLayout.expandedChild,
+                                viewType = RichOngoingNotificationViewType.Expanded
+                            )
+                        ) {
+                            KeepExistingView
+                        } else {
+                            NullContentView
+                        }
+                    }
+
+                inflationProgress.headsUpRichOngoingNotificationViewHolder =
+                    if (inflateHeadsUpView) {
+                        ronInflater.inflateView(
+                            contentModel = richOngoingContentModel,
+                            existingView = row.privateLayout.headsUpChild,
+                            entry = entry,
+                            systemUiContext = context,
+                            parentView = row.privateLayout,
+                            viewType = RichOngoingNotificationViewType.HeadsUp
+                        )
+                    } else {
+                        if (
+                            ronInflater.canKeepView(
+                                contentModel = richOngoingContentModel,
+                                existingView = row.privateLayout.headsUpChild,
+                                viewType = RichOngoingNotificationViewType.HeadsUp
+                            )
+                        ) {
+                            KeepExistingView
+                        } else {
+                            NullContentView
+                        }
                     }
             }
 
@@ -618,7 +695,9 @@ constructor(
         var inflatedSmartReplyState: InflatedSmartReplyState? = null
         var expandedInflatedSmartReplies: InflatedSmartReplyViewHolder? = null
         var headsUpInflatedSmartReplies: InflatedSmartReplyViewHolder? = null
-        var richOngoingNotificationViewHolder: InflatedContentViewHolder? = null
+        var contractedRichOngoingNotificationViewHolder: ContentViewInflationResult? = null
+        var expandedRichOngoingNotificationViewHolder: ContentViewInflationResult? = null
+        var headsUpRichOngoingNotificationViewHolder: ContentViewInflationResult? = null
 
         // Inflated SingleLineView that lacks the UI State
         var inflatedSingleLineView: HybridNotificationView? = null
@@ -1428,12 +1507,19 @@ constructor(
             logger.logAsyncTaskProgress(entry, "finishing")
 
             // before updating the content model, stop existing binding if necessary
-            val hasRichOngoingContentModel = result.contentModel.richOngoingContentModel != null
-            val requestedRichOngoing = reInflateFlags and CONTENT_VIEWS_TO_CREATE_RICH_ONGOING != 0
-            val rejectedRichOngoing = requestedRichOngoing && !hasRichOngoingContentModel
-            if (result.richOngoingNotificationViewHolder != null || rejectedRichOngoing) {
+            if (result.contractedRichOngoingNotificationViewHolder.shouldDisposeViewBinder()) {
                 row.privateLayout.mContractedBinderHandle?.dispose()
                 row.privateLayout.mContractedBinderHandle = null
+            }
+
+            if (result.expandedRichOngoingNotificationViewHolder.shouldDisposeViewBinder()) {
+                row.privateLayout.mExpandedBinderHandle?.dispose()
+                row.privateLayout.mExpandedBinderHandle = null
+            }
+
+            if (result.headsUpRichOngoingNotificationViewHolder.shouldDisposeViewBinder()) {
+                row.privateLayout.mHeadsUpBinderHandle?.dispose()
+                row.privateLayout.mHeadsUpBinderHandle = null
             }
 
             // set the content model after disposal and before setting new rich ongoing view
@@ -1477,19 +1563,53 @@ constructor(
                 }
             }
 
-            // after updating the content model, set the view, then start the new binder
-            result.richOngoingNotificationViewHolder?.let { viewHolder ->
-                row.privateLayout.contractedChild = viewHolder.view
-                row.privateLayout.expandedChild = null
-                row.privateLayout.headsUpChild = null
-                row.privateLayout.setExpandedInflatedSmartReplies(null)
-                row.privateLayout.setHeadsUpInflatedSmartReplies(null)
-                row.privateLayout.mContractedBinderHandle =
-                    viewHolder.binder.setupContentViewBinder()
-                row.setExpandable(false)
+            val hasRichOngoingViewHolder =
+                result.contractedRichOngoingNotificationViewHolder != null ||
+                    result.expandedRichOngoingNotificationViewHolder != null ||
+                    result.headsUpRichOngoingNotificationViewHolder != null
+
+            if (hasRichOngoingViewHolder) {
+                // after updating the content model, set the view, then start the new binder
+                result.contractedRichOngoingNotificationViewHolder?.let { contractedViewHolder ->
+                    if (contractedViewHolder is InflatedContentViewHolder) {
+                        row.privateLayout.contractedChild = contractedViewHolder.view
+                        row.privateLayout.mContractedBinderHandle =
+                            contractedViewHolder.binder.setupContentViewBinder()
+                    } else if (contractedViewHolder == NullContentView) {
+                        row.privateLayout.contractedChild = null
+                    }
+                }
+
+                result.expandedRichOngoingNotificationViewHolder?.let { expandedViewHolder ->
+                    if (expandedViewHolder is InflatedContentViewHolder) {
+                        row.privateLayout.expandedChild = expandedViewHolder.view
+                        row.privateLayout.mExpandedBinderHandle =
+                            expandedViewHolder.binder.setupContentViewBinder()
+                    } else if (expandedViewHolder == NullContentView) {
+                        row.privateLayout.expandedChild = null
+                    }
+                }
+
+                result.headsUpRichOngoingNotificationViewHolder?.let { headsUpViewHolder ->
+                    if (headsUpViewHolder is InflatedContentViewHolder) {
+                        row.privateLayout.headsUpChild = headsUpViewHolder.view
+                        row.privateLayout.mHeadsUpBinderHandle =
+                            headsUpViewHolder.binder.setupContentViewBinder()
+                    } else if (headsUpViewHolder == NullContentView) {
+                        row.privateLayout.headsUpChild = null
+                    }
+                }
+
+                // clean remoteViewCache when we don't keep existing views.
                 remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)
                 remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)
                 remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)
+
+                // Since RONs don't support smart reply, remove them from HUNs and Expanded.
+                row.privateLayout.setExpandedInflatedSmartReplies(null)
+                row.privateLayout.setHeadsUpInflatedSmartReplies(null)
+
+                row.setExpandable(row.privateLayout.expandedChild != null)
             }
 
             Trace.endAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row))

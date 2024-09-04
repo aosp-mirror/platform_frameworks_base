@@ -132,7 +132,8 @@ class DesktopModeEventLogger {
             sessionId,
             taskUpdate.minimizeReason?.reason ?: UNSET_MINIMIZE_REASON,
             taskUpdate.unminimizeReason?.reason ?: UNSET_UNMINIMIZE_REASON,
-
+            /* visible_task_count */
+            taskUpdate.visibleTaskCount
         )
     }
 
@@ -159,6 +160,7 @@ class DesktopModeEventLogger {
             val taskY: Int,
             val minimizeReason: MinimizeReason? = null,
             val unminimizeReason: UnminimizeReason? = null,
+            val visibleTaskCount: Int,
         )
 
         // Default value used when the task was not minimized.

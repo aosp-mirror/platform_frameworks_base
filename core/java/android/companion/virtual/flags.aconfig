@@ -35,13 +35,6 @@ flag {
 }
 
 flag {
-  name: "consistent_display_flags"
-  namespace: "virtual_devices"
-  description: "Make virtual display flags consistent with display manager"
-  bug: "300905478"
-}
-
-flag {
   name: "vdm_custom_ime"
   is_exported: true
   namespace: "virtual_devices"
@@ -86,14 +79,6 @@ flag {
   namespace: "virtual_devices"
   description: "Enable persistent device ID notification API"
   bug: "295258915"
-}
-
-flag {
-  name: "interactive_screen_mirror"
-  is_exported: true
-  namespace: "virtual_devices"
-  description: "Enable interactive screen mirroring using Virtual Devices"
-  bug: "292212199"
 }
 
 flag {

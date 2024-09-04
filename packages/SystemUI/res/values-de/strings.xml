@@ -107,20 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Bildschirmaufzeichnung"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Bildschirmaufzeichnung…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Bildschirm aufnehmen?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Einzelne App aufnehmen"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Gesamten Bildschirm aufnehmen"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Wenn du den gesamten Bildschirm aufnimmst, ist in der Aufnahme alles zu sehen, was auf dem Bildschirm angezeigt wird. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Wenn du eine App aufnimmst, ist in der Aufnahme alles zu sehen, was in dieser App angezeigt oder abgespielt wird. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Bildschirm aufnehmen"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"App zum Aufnehmen auswählen"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio aufnehmen"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio des Geräts"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Audioinhalte auf deinem Gerät, wie Musik, Anrufe und Klingeltöne"</string>
@@ -307,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth verwenden"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Verbunden"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audiofreigabe"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gespeichert"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"Verknüpfung aufheben"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivieren"</string>
@@ -315,6 +310,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth wird morgen früh aktiviert"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Audioinhalte freigeben"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Audioinhalte werden freigegeben"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"Einstellungen für die Audiofreigabe eingeben"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Akkustand: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -386,7 +382,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Bildschirmaufzeichnung"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starten"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Beenden"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Problem aufnehmen"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Problem aufzeichnen"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Starten"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Aufnahme beenden"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Fehlerbericht"</string>
@@ -441,6 +437,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Fertig"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Einstellungen"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"An"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"An • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Aus"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Einrichten"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"In den Einstellungen verwalten"</string>
@@ -535,8 +532,7 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Die <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Aufnahme oder Stream starten?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Der Anbieter dieser App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"App teilen oder aufnehmen"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Bildschirm mit <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> teilen?"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Eine App streamen"</string>
     <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Gesamten Bildschirm teilen"</string>
@@ -544,16 +540,14 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Wenn du eine App streamst, ist für <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> alles sichtbar, was in dieser App angezeigt oder abgespielt wird. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Bildschirm teilen"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> hat diese Option deaktiviert"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"App zum Teilen auswählen"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Bildschirm streamen?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Eine App streamen"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Gesamten Bildschirm streamen"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Wenn du den gesamten Bildschirm streamst, ist alles auf dem Bildschirm sichtbar. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Wenn du eine App streamst, ist alles sichtbar, was in dieser App angezeigt oder abgespielt wird. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Bildschirm streamen"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"App zum Streamen auswählen"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Teilen starten?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Beim Teilen, Aufnehmen oder Streamen hat Android Zugriff auf alle Inhalte, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Beim Teilen, Aufnehmen oder Streamen einer App hat Android Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder von ihr wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
@@ -637,7 +631,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Einstellungen"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Automatische Untertitel"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Auf verträglichere Lautstärke eingestellt"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Die Kopfhörerlautstärke war länger als empfohlen hoch eingestellt"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Die Kopfhörer sind schon länger als empfohlen auf hohe Lautstärke eingestellt"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Die Kopfhörerlautstärke hat für diese Woche das Sicherheitslimit überschritten"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Weiterhören"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Leiser stellen"</string>
@@ -726,6 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellit, Verbindung gut"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellit, Verbindung verfügbar"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Notruf über Satellit"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Notrufe oder SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Arbeitsprofil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Für einige ein Vergnügen, aber nicht für alle"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Mit System UI Tuner erhältst du zusätzliche Möglichkeiten, die Android-Benutzeroberfläche anzupassen. Achtung: Diese Testfunktionen können sich ändern, abstürzen oder in zukünftigen Versionen verschwinden."</string>
@@ -1398,24 +1393,16 @@
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fertig"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Zurück"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Wenn du zurückgehen möchtest, wische an einer beliebigen Stelle des Touchpads mit drei Fingern nach links oder rechts.\n\nDu kannst stattdessen auch die Tastenkombination „Aktion“ + „ESC“ verwenden."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Gut gemacht!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Du hast den Schritt für die „Zurück“-Geste abgeschlossen."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Startbildschirm"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Du kannst jederzeit zum Startbildschirm gehen, indem du mit drei Fingern vom unteren Displayrand nach oben wischst."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Sehr gut!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Du hast den Schritt für die „Startbildschirm“-Geste abgeschlossen."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Aktionstaste"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Wenn du auf deine Apps zugreifen möchtest, drücke auf der Tastatur die Aktionstaste."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Glückwunsch!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Du hast den Schritt für die „Aktionstaste“-Geste abgeschlossen.\n\nAktion + / zeigt alle verfügbaren Tastenkombinationen."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Tastaturbeleuchtung"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d von %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Smart-Home-Steuerung"</string>

@@ -45,7 +45,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
-import com.android.wm.shell.common.split.SplitScreenConstants
+import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
@@ -64,6 +64,7 @@ import com.android.wm.shell.windowdecor.extension.isPinned
  */
 class HandleMenu(
     private val parentDecor: DesktopModeWindowDecoration,
+    private val windowManagerWrapper: WindowManagerWrapper,
     private val layoutResId: Int,
     private val appIconBitmap: Bitmap?,
     private val appName: CharSequence?,
@@ -178,7 +179,7 @@ class HandleMenu(
         handleMenuViewContainer =
             if (!taskInfo.isFreeform && Flags.enableAdditionalWindowsAboveStatusBar()) {
                 AdditionalSystemViewContainer(
-                    context = context,
+                    windowManagerWrapper = windowManagerWrapper,
                     taskId = taskInfo.taskId,
                     x = x,
                     y = y,
@@ -635,6 +636,7 @@ class HandleMenu(
 interface HandleMenuFactory {
     fun create(
         parentDecor: DesktopModeWindowDecoration,
+        windowManagerWrapper: WindowManagerWrapper,
         layoutResId: Int,
         appIconBitmap: Bitmap?,
         appName: CharSequence?,
@@ -652,6 +654,7 @@ interface HandleMenuFactory {
 object DefaultHandleMenuFactory : HandleMenuFactory {
     override fun create(
         parentDecor: DesktopModeWindowDecoration,
+        windowManagerWrapper: WindowManagerWrapper,
         layoutResId: Int,
         appIconBitmap: Bitmap?,
         appName: CharSequence?,
@@ -665,6 +668,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
     ): HandleMenu {
         return HandleMenu(
             parentDecor,
+            windowManagerWrapper,
             layoutResId,
             appIconBitmap,
             appName,

@@ -43,7 +43,6 @@ import android.tools.traces.protolog.ProtoLogTrace;
 import android.tracing.perfetto.DataSource;
 import android.util.proto.ProtoInputStream;
 
-import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
@@ -73,7 +72,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test class for {@link ProtoLogImpl}.
  */
 @SuppressWarnings("ConstantConditions")
-@SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
 public class PerfettoProtoLogImplTest {
@@ -166,8 +164,7 @@ public class PerfettoProtoLogImplTest {
         mReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
         mProtoLog = new PerfettoProtoLogImpl(
                 viewerConfigInputStreamProvider, mReader,
-                () -> mCacheUpdater.run());
-        mProtoLog.registerGroups(TestProtoLogGroup.values());
+                () -> mCacheUpdater.run(), TestProtoLogGroup.values());
     }
 
     @After
@@ -757,6 +754,80 @@ public class PerfettoProtoLogImplTest {
         Truth.assertThat(protolog.messages).hasSize(1);
         Truth.assertThat(protolog.messages.get(0).getMessage())
                 .isEqualTo("My null args: 0, 0, false");
+    }
+
+    @Test
+    public void handlesConcurrentTracingSessions() throws IOException {
+        PerfettoTraceMonitor traceMonitor1 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true)
+                        .build();
+
+        PerfettoTraceMonitor traceMonitor2 =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(true)
+                        .build();
+
+        final ResultWriter writer2 = new ResultWriter()
+                .forScenario(new ScenarioBuilder()
+                        .forClass(createTempFile("temp", "").getName()).build())
+                .withOutputDir(mTracingDirectory)
+                .setRunComplete();
+
+        try {
+            traceMonitor1.start();
+            traceMonitor2.start();
+
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP, 1,
+                    LogDataType.BOOLEAN, new Object[]{true});
+        } finally {
+            traceMonitor1.stop(mWriter);
+            traceMonitor2.stop(writer2);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protologFromMonitor1 = reader.readProtoLogTrace();
+
+        final ResultReader reader2 = new ResultReader(writer2.write(), mTraceConfig);
+        final ProtoLogTrace protologFromMonitor2 = reader2.readProtoLogTrace();
+
+        Truth.assertThat(protologFromMonitor1.messages).hasSize(1);
+        Truth.assertThat(protologFromMonitor1.messages.get(0).getMessage())
+                .isEqualTo("My Test Debug Log Message true");
+
+        Truth.assertThat(protologFromMonitor2.messages).hasSize(1);
+        Truth.assertThat(protologFromMonitor2.messages.get(0).getMessage())
+                .isEqualTo("My Test Debug Log Message true");
+    }
+
+    @Test
+    public void usesDefaultLogFromLevel() throws IOException {
+        PerfettoTraceMonitor traceMonitor =
+                PerfettoTraceMonitor.newBuilder().enableProtoLog(LogLevel.WARN).build();
+        try {
+            traceMonitor.start();
+            mProtoLog.log(LogLevel.DEBUG, TestProtoLogGroup.TEST_GROUP,
+                "This message should not be logged");
+            mProtoLog.log(LogLevel.WARN, TestProtoLogGroup.TEST_GROUP,
+                "This message should logged %d", 123);
+            mProtoLog.log(LogLevel.ERROR, TestProtoLogGroup.TEST_GROUP,
+                "This message should also be logged %d", 567);
+        } finally {
+            traceMonitor.stop(mWriter);
+        }
+
+        final ResultReader reader = new ResultReader(mWriter.write(), mTraceConfig);
+        final ProtoLogTrace protolog = reader.readProtoLogTrace();
+
+        Truth.assertThat(protolog.messages).hasSize(2);
+
+        Truth.assertThat(protolog.messages.get(0).getLevel())
+                .isEqualTo(LogLevel.WARN);
+        Truth.assertThat(protolog.messages.get(0).getMessage())
+                .isEqualTo("This message should logged 123");
+
+        Truth.assertThat(protolog.messages.get(1).getLevel())
+                .isEqualTo(LogLevel.ERROR);
+        Truth.assertThat(protolog.messages.get(1).getMessage())
+                .isEqualTo("This message should also be logged 567");
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {

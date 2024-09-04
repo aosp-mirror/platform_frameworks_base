@@ -89,6 +89,7 @@ import android.view.WindowMetrics;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
@@ -344,6 +345,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
     @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
+    @Mock private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -603,7 +605,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mActivityStarter,
                 mBrightnessMirrorShowingInteractor,
                 mGlanceableHubContainerController,
-                mEmergencyGestureIntentFactory
+                mEmergencyGestureIntentFactory,
+                mViewCaptureAwareWindowManager
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();

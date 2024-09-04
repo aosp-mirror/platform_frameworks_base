@@ -134,11 +134,6 @@ class AppCompatActivityRobot {
                 isUnresizable);
     }
 
-    void configureTopActivityIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        mActivityStack.top().mDisplayContent
-                .setIgnoreOrientationRequest(ignoreOrientationRequest);
-    }
-
     void configureUnresizableTopActivity(@ActivityInfo.ScreenOrientation int screenOrientation) {
         configureTopActivity(/* minAspect */ -1, /* maxAspect */ -1, screenOrientation,
                 /* isUnresizable */ true);
@@ -214,7 +209,7 @@ class AppCompatActivityRobot {
     }
 
     void setShouldCreateCompatDisplayInsets(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()).shouldCreateCompatDisplayInsets();
+        doReturn(enabled).when(mActivityStack.top()).shouldCreateAppCompatDisplayInsets();
     }
 
     void setTopActivityInSizeCompatMode(boolean inScm) {
@@ -246,6 +241,18 @@ class AppCompatActivityRobot {
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityVisible(boolean isVisible) {
+        doReturn(isVisible).when(mActivityStack.top()).isVisible();
+    }
+
+    void setTopActivityVisibleRequested(boolean isVisibleRequested) {
+        doReturn(isVisibleRequested).when(mActivityStack.top()).isVisibleRequested();
+    }
+
+    void setTopActivityFillsParent(boolean fillsParent) {
+        doReturn(fillsParent).when(mActivityStack.top()).fillsParent();
     }
 
     void setTopActivityInMultiWindowMode(boolean multiWindowMode) {
@@ -492,7 +499,7 @@ class AppCompatActivityRobot {
             activity.setRequestedOrientation(screenOrientation);
         }
         // Make sure to use the provided configuration to construct the size compat fields.
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         // Make sure the display configuration reflects the change of activity.
         if (activity.mDisplayContent.updateOrientation()) {

@@ -33,8 +33,8 @@ import android.util.Log;
 import android.util.proto.ProtoInputStream;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 public final class WindowTracingDataSource extends DataSource<WindowTracingDataSource.Instance,
         WindowTracingDataSource.TlsState, Void> {
@@ -76,15 +76,11 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
     private static final String TAG = "WindowTracingDataSource";
 
     @NonNull
-    private final Consumer<Config> mOnStartCallback;
-    @NonNull
-    private final Consumer<Config> mOnStopCallback;
+    private final WeakReference<WindowTracingPerfetto> mWindowTracing;
 
-    public WindowTracingDataSource(@NonNull Consumer<Config> onStart,
-            @NonNull Consumer<Config> onStop) {
+    public WindowTracingDataSource(WindowTracingPerfetto windowTracing) {
         super(DATA_SOURCE_NAME);
-        mOnStartCallback = onStart;
-        mOnStopCallback = onStop;
+        mWindowTracing = new WeakReference<>(windowTracing);
 
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
@@ -93,6 +89,7 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
                                 PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT)
                         .build();
         register(params);
+        Log.i(TAG, "Registered with perfetto service");
     }
 
     @Override
@@ -102,12 +99,18 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
         return new Instance(this, instanceIndex, config != null ? config : CONFIG_DEFAULT) {
             @Override
             protected void onStart(StartCallbackArguments args) {
-                mOnStartCallback.accept(mConfig);
+                WindowTracingPerfetto windowTracing = mWindowTracing.get();
+                if (windowTracing != null) {
+                    windowTracing.onStart(mConfig);
+                }
             }
 
             @Override
             protected void onStop(StopCallbackArguments args) {
-                mOnStopCallback.accept(mConfig);
+                WindowTracingPerfetto windowTracing = mWindowTracing.get();
+                if (windowTracing != null) {
+                    windowTracing.onStop(mConfig);
+                }
             }
         };
     }

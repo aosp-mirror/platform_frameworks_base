@@ -80,6 +80,7 @@ import android.widget.ImageView;
 import androidx.annotation.UiThread;
 import androidx.core.math.MathUtils;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -126,6 +127,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final SurfaceControl.Transaction mTransaction;
 
     private final WindowManager mWm;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
     private float mScale;
     private int mSettingsButtonIndex = MagnificationSize.DEFAULT;
@@ -258,7 +260,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             SecureSettings secureSettings,
             Supplier<SurfaceControlViewHost> scvhSupplier,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
-            Supplier<IWindowSession> globalWindowSessionSupplier) {
+            Supplier<IWindowSession> globalWindowSessionSupplier,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context;
         mHandler = handler;
         mAnimationController = animationController;
@@ -280,6 +283,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         mWm = context.getSystemService(WindowManager.class);
         mWindowBounds = new Rect(mWm.getCurrentWindowMetrics().getBounds());
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
 
         mResources = mContext.getResources();
         mScale = secureSettings.getFloatForUser(
@@ -510,7 +514,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mHandler.removeCallbacks(mMirrorViewRunnable);
             mMirrorView.removeOnLayoutChangeListener(mMirrorViewLayoutChangeListener);
             if (!Flags.createWindowlessWindowMagnifier()) {
-                mWm.removeView(mMirrorView);
+                mViewCaptureAwareWindowManager.removeView(mMirrorView);
             }
             mMirrorView = null;
         }
@@ -722,7 +726,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return v.onApplyWindowInsets(insets);
         });
 
-        mWm.addView(mMirrorView, params);
+        mViewCaptureAwareWindowManager.addView(mMirrorView, params);
 
         SurfaceHolder holder = mMirrorSurfaceView.getHolder();
         holder.addCallback(this);

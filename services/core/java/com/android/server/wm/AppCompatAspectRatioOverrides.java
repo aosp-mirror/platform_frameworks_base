@@ -220,7 +220,7 @@ class AppCompatAspectRatioOverrides {
     float getFixedOrientationLetterboxAspectRatio(@NonNull Configuration parentConfiguration) {
         return shouldUseSplitScreenAspectRatio(parentConfiguration)
                 ? getSplitScreenAspectRatio()
-                : mActivityRecord.shouldCreateCompatDisplayInsets()
+                : mActivityRecord.shouldCreateAppCompatDisplayInsets()
                         ? getDefaultMinAspectRatioForUnresizableApps()
                         : getDefaultMinAspectRatio();
     }

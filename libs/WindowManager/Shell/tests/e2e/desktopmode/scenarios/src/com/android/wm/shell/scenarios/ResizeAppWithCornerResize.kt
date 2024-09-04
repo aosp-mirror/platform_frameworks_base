@@ -25,6 +25,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
+import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
 import com.android.wm.shell.Utils
@@ -40,15 +41,24 @@ import org.junit.runners.BlockJUnit4ClassRunner
 @Postsubmit
 open class ResizeAppWithCornerResize
 @JvmOverloads
-constructor(val rotation: Rotation = Rotation.ROTATION_0,
-    val horizontalChange: Int = 50,
-    val verticalChange: Int = -50) {
+constructor(
+    val rotation: Rotation = Rotation.ROTATION_0,
+    val horizontalChange: Int = 200,
+    val verticalChange: Int = -200,
+    val appProperty: AppProperty = AppProperty.STANDARD
+) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
     private val wmHelper = WindowManagerStateHelper(instrumentation)
     private val device = UiDevice.getInstance(instrumentation)
-    private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
+    private val testApp =
+        DesktopModeAppHelper(
+            when (appProperty) {
+                AppProperty.STANDARD -> SimpleAppHelper(instrumentation)
+                AppProperty.NON_RESIZABLE -> NonResizeableAppHelper(instrumentation)
+            }
+        )
 
     @Rule
     @JvmField
@@ -64,15 +74,24 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0,
 
     @Test
     open fun resizeAppWithCornerResize() {
-        testApp.cornerResize(wmHelper,
+        testApp.cornerResize(
+            wmHelper,
             device,
             DesktopModeAppHelper.Corners.RIGHT_TOP,
             horizontalChange,
-            verticalChange)
+            verticalChange
+        )
     }
 
     @After
     fun teardown() {
         testApp.exit(wmHelper)
+    }
+
+    companion object {
+        enum class AppProperty {
+            STANDARD,
+            NON_RESIZABLE
+        }
     }
 }

@@ -20,7 +20,7 @@ package com.android.systemui.shade.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -39,12 +39,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Models UI state used to render the content of the shade scene.
  *
- * Different from [ShadeSceneActionsViewModel], which only models user actions that can be performed
+ * Different from [ShadeUserActionsViewModel], which only models user actions that can be performed
  * to navigate to other scenes.
  */
 class ShadeSceneContentViewModel
@@ -60,7 +59,7 @@ constructor(
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val sceneInteractor: SceneInteractor,
-) : SysUiViewModel() {
+) : ExclusiveActivatable() {
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
@@ -73,8 +72,8 @@ constructor(
 
     private val footerActionsControllerInitialized = AtomicBoolean(false)
 
-    override suspend fun onActivated() {
-        deviceEntryInteractor.isDeviceEntered.collectLatest { isDeviceEntered ->
+    override suspend fun onActivated(): Nothing {
+        deviceEntryInteractor.isDeviceEntered.collect { isDeviceEntered ->
             _isEmptySpaceClickable.value = !isDeviceEntered
         }
     }

@@ -122,8 +122,10 @@ interface MediaProjectionAppSelectorModule {
         @Provides
         @MediaProjectionAppSelector
         @MediaProjectionAppSelectorScope
-        fun bindConfigurationController(context: Context): ConfigurationController =
-            ConfigurationControllerImpl(context)
+        fun bindConfigurationController(
+            context: Context,
+            configurationControlleFactory: ConfigurationControllerImpl.Factory
+        ): ConfigurationController = configurationControlleFactory.create(context)
 
         @Provides fun bindIconFactory(context: Context): IconFactory = IconFactory.obtain(context)
 
