@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
@@ -64,7 +65,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -140,11 +140,6 @@ public class MobileRadioPowerStatsCollectorTest {
         }
 
         @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> 3500;
-        }
-
-        @Override
         public Supplier<NetworkStats> getMobileNetworkStatsSupplier() {
             return mNetworkStatsSupplier;
         }
@@ -179,6 +174,7 @@ public class MobileRadioPowerStatsCollectorTest {
                 return uid;
             }
         });
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
         mBatteryStats = mStatsRule.getBatteryStats();
     }
 
@@ -415,8 +411,8 @@ public class MobileRadioPowerStatsCollectorTest {
                 4321, 321, 1234, 23,
                 4000, 40, 2000, 20);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{10000});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(10000)});
 
         when(mCallDurationSupplier.getAsLong()).thenReturn(10000L);
         when(mScanDurationSupplier.getAsLong()).thenReturn(20000L);
@@ -438,13 +434,19 @@ public class MobileRadioPowerStatsCollectorTest {
                 5321, 421, 3234, 223,
                 8000, 80, 4000, 40);
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{777})))
-                .thenReturn(new long[]{64321});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{777})))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(64321)});
         when(mCallDurationSupplier.getAsLong()).thenReturn(50000L);
         when(mScanDurationSupplier.getAsLong()).thenReturn(80000L);
 
         mStatsRule.setTime(20000, 20000);
         return collector.collectStats();
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private void mockModemActivityInfo(long timestamp, int sleepTimeMs, int idleTimeMs,

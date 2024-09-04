@@ -48,8 +48,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.function.IntSupplier;
-
 public class AmbientDisplayPowerStatsProcessorTest {
 
     @Rule(order = 0)
@@ -96,11 +94,6 @@ public class AmbientDisplayPowerStatsProcessorTest {
                 @Override
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
-                }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> VOLTAGE_MV;
                 }
 
                 @Override
