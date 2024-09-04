@@ -5029,6 +5029,18 @@ public class CarrierConfigManager {
         public static final String KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY =
                 KEY_PREFIX + "es_supl_data_plane_only_roaming_plmn_string_array";
 
+        /**
+         * Determine whether to enable Net Initiated SUPL (NI SUPL) message injection.
+         * If enabled, the GnssLocationProvider will monitor for WAP PUSH or MT SMS NI SUPL intents
+         * and subsequently inject the NI SUPL packet into the GNSS HAL.
+         * {@code false} - Disable NI SUPL message injection. This is default.
+         * {@code true} - Enable NI SUPL message injection.
+         */
+        @FlaggedApi(android.location.flags.Flags
+                .FLAG_ENABLE_NI_SUPL_MESSAGE_INJECTION_BY_CARRIER_CONFIG)
+        public static final String KEY_ENABLE_NI_SUPL_MESSAGE_INJECTION_BOOL =
+                KEY_PREFIX + "enable_ni_supl_message_injection_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
@@ -5046,6 +5058,9 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT,
                     SUPL_EMERGENCY_MODE_TYPE_CP_ONLY);
             defaults.putStringArray(KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY, null);
+            if (android.location.flags.Flags.enableNiSuplMessageInjectionByCarrierConfig()) {
+                defaults.putBoolean(KEY_ENABLE_NI_SUPL_MESSAGE_INJECTION_BOOL, false);
+            }
             return defaults;
         }
     }
