@@ -83,7 +83,6 @@ constructor(
     }
 
     override fun start() {
-        // Listen to back gesture model changes and trigger education if needed
         backgroundScope.launch {
             contextualEducationInteractor.backGestureModelFlow.collect {
                 if (isUsageSessionExpired(it)) {
@@ -95,7 +94,6 @@ constructor(
             }
         }
 
-        // Listen to touchpad connection changes and update the first connection time
         backgroundScope.launch {
             userInputDeviceRepository.isAnyTouchpadConnectedForUser.collect {
                 if (
@@ -109,7 +107,6 @@ constructor(
             }
         }
 
-        // Listen to keyboard connection changes and update the first connection time
         backgroundScope.launch {
             userInputDeviceRepository.isAnyKeyboardConnectedForUser.collect {
                 if (
@@ -123,7 +120,6 @@ constructor(
             }
         }
 
-        // Listen to keyboard shortcut triggered and update the last trigger time
         backgroundScope.launch {
             keyboardShortcutTriggered.collect {
                 contextualEducationInteractor.updateShortcutTriggerTime(it)
