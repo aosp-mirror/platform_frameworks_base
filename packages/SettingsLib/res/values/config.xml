@@ -31,4 +31,14 @@
     <!-- Control whether status bar should distinguish HSPA data icon form UMTS
     data icon on devices -->
     <bool name="config_hspa_data_distinguishable">false</bool>
+
+    <!-- Edit User avatar explicit package name -->
+    <string name="config_avatar_picker_package" translatable="false">
+        com.android.avatarpicker
+    </string>
+
+    <!-- Edit User avatar explicit activity class -->
+    <string name="config_avatar_picker_class" translatable="false">
+        com.android.avatarpicker.ui.AvatarPickerActivity
+    </string>
 </resources>
