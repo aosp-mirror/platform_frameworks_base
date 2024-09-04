@@ -1925,7 +1925,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 11, attributes: 2
+  interfaces: 0, fields: 1, methods: 12, attributes: 2
   int value;
     descriptor: I
     flags: (0x0000)
@@ -2019,6 +2019,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestThrow
+
+  public static native void nativeStillKeep();
+    descriptor: ()V
+    flags: (0x0109) ACC_PUBLIC, ACC_STATIC, ACC_NATIVE
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestKeep
 
   public static void nativeStillNotSupported_should_be_like_this();
     descriptor: ()V

@@ -26,67 +26,47 @@ import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterPolicyWithReason
 import com.android.hoststubgen.filters.OutputFilter
-import com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
-import com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+import com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
 import com.android.hoststubgen.log
+import java.io.PrintWriter
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.ClassRemapper
-import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.util.TraceClassVisitor
-import java.io.PrintWriter
 
-val OPCODE_VERSION = Opcodes.ASM9
+const val OPCODE_VERSION = Opcodes.ASM9
 
-abstract class BaseAdapter (
-        protected val classes: ClassNodes,
-        nextVisitor: ClassVisitor,
-        protected val filter: OutputFilter,
-        protected val options: Options,
+abstract class BaseAdapter(
+    protected val classes: ClassNodes,
+    nextVisitor: ClassVisitor,
+    protected val filter: OutputFilter,
+    protected val options: Options,
 ) : ClassVisitor(OPCODE_VERSION, nextVisitor) {
 
     /**
      * Options to control the behavior.
      */
-    data class Options (
-            val errors: HostStubGenErrors,
-            val stats: HostStubGenStats?,
-            val enablePreTrace: Boolean,
-            val enablePostTrace: Boolean,
-            val enableNonStubMethodCallDetection: Boolean,
-            )
+    data class Options(
+        val errors: HostStubGenErrors,
+        val stats: HostStubGenStats?,
+        val enablePreTrace: Boolean,
+        val enablePostTrace: Boolean
+    )
 
     protected lateinit var currentPackageName: String
     protected lateinit var currentClassName: String
     protected var nativeSubstitutionClass: String? = null
     protected lateinit var classPolicy: FilterPolicyWithReason
 
-    /**
-     * Return whether an item with a given policy should be included in the output.
-     */
-    protected abstract fun shouldEmit(policy: FilterPolicy): Boolean
-
-    /**
-     * Inject [HostStubGenKeptInStub] and [HostStubGenKeptInImpl] as needed to an item.
-     */
-    protected fun injectInStubAndKeepAnnotations(policy: FilterPolicy, v: UnifiedVisitor) {
-        if (policy.needsInStub) {
-            v.visitAnnotation(HostStubGenKeptInStub.CLASS_DESCRIPTOR, true)
-        }
-        if (policy.needsInImpl) {
-            v.visitAnnotation(HostStubGenKeptInImpl.CLASS_DESCRIPTOR, true)
-        }
-    }
-
     override fun visit(
-            version: Int,
-            access: Int,
-            name: String,
-            signature: String?,
-            superName: String?,
-            interfaces: Array<String>,
+        version: Int,
+        access: Int,
+        name: String,
+        signature: String?,
+        superName: String?,
+        interfaces: Array<String>,
     ) {
         super.visit(version, access, name, signature, superName, interfaces)
         currentClassName = name
@@ -103,21 +83,25 @@ abstract class BaseAdapter (
                 .toJvmClassName()
             log.d("  NativeSubstitutionClass: $fullClassName")
             if (classes.findClass(fullClassName) == null) {
-                log.w("Native substitution class $fullClassName not found. Class must be " +
-                        "available at runtime.")
+                log.w(
+                    "Native substitution class $fullClassName not found. Class must be " +
+                            "available at runtime."
+                )
             } else {
                 // If the class exists, it must have a KeepClass policy.
                 if (filter.getPolicyForClass(fullClassName).policy != FilterPolicy.KeepClass) {
                     // TODO: Use real annotation name.
                     options.errors.onErrorFound(
-                            "Native substitution class $fullClassName should have @Keep.")
+                        "Native substitution class $fullClassName should have @Keep."
+                    )
                 }
             }
 
             nativeSubstitutionClass = fullClassName
         }
+
         // Inject annotations to generated classes.
-        injectInStubAndKeepAnnotations(classPolicy.policy, UnifiedVisitor.on(this))
+        UnifiedVisitor.on(this).visitAnnotation(HostStubGenProcessedAsKeep.CLASS_DESCRIPTOR, true)
     }
 
     override fun visitEnd() {
@@ -141,11 +125,11 @@ abstract class BaseAdapter (
     }
 
     override fun visitField(
-            access: Int,
-            name: String,
-            descriptor: String,
-            signature: String?,
-            value: Any?,
+        access: Int,
+        name: String,
+        descriptor: String,
+        signature: String?,
+        value: Any?,
     ): FieldVisitor? {
         if (skipMemberModificationNestCount > 0) {
             return super.visitField(access, name, descriptor, signature, value)
@@ -154,7 +138,7 @@ abstract class BaseAdapter (
         log.d("visitField: %s %s [%x] Policy: %s", name, descriptor, access, policy)
 
         log.withIndent {
-            if (!shouldEmit(policy.policy)) {
+            if (policy.policy == FilterPolicy.Remove) {
                 log.d("Removing %s %s", name, policy)
                 return null
             }
@@ -162,18 +146,19 @@ abstract class BaseAdapter (
             log.v("Emitting field: %s %s %s", name, descriptor, policy)
             val ret = super.visitField(access, name, descriptor, signature, value)
 
-            injectInStubAndKeepAnnotations(policy.policy, UnifiedVisitor.on(ret))
+            UnifiedVisitor.on(ret)
+                .visitAnnotation(HostStubGenProcessedAsKeep.CLASS_DESCRIPTOR, true)
 
             return ret
         }
     }
 
     override fun visitMethod(
-            access: Int,
-            name: String,
-            descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
+        access: Int,
+        name: String,
+        descriptor: String,
+        signature: String?,
+        exceptions: Array<String>?,
     ): MethodVisitor? {
         if (skipMemberModificationNestCount > 0) {
             return super.visitMethod(access, name, descriptor, signature, exceptions)
@@ -191,7 +176,7 @@ abstract class BaseAdapter (
                 log.d("Skipping %s%s %s", name, descriptor, policy)
                 return null
             }
-            if (!shouldEmit(p.policy)) {
+            if (p.policy == FilterPolicy.Remove) {
                 log.d("Removing %s%s %s", name, descriptor, policy)
                 return null
             }
@@ -209,13 +194,16 @@ abstract class BaseAdapter (
                 // `name` is the name of the method we're currently visiting, so it's usually a
                 // "...$ravewnwood" name.
                 newAccess = checkSubstitutionMethodCompatibility(
-                        classes, currentClassName, newName, name, descriptor, options.errors)
+                    classes, currentClassName, newName, name, descriptor, options.errors
+                )
                 if (newAccess == NOT_COMPATIBLE) {
                     return null
                 }
 
-                log.v("Emitting %s.%s%s as %s %s", currentClassName, name, descriptor,
-                        newName, policy)
+                log.v(
+                    "Emitting %s.%s%s as %s %s", currentClassName, name, descriptor,
+                    newName, policy
+                )
             } else {
                 log.v("Emitting method: %s%s %s", name, descriptor, policy)
                 newName = name
@@ -225,14 +213,17 @@ abstract class BaseAdapter (
             // But note, we only use it when calling the super's method,
             // but not for visitMethodInner(), because when subclass wants to change access,
             // it can do so inside visitMethodInner().
-            newAccess = updateAccessFlags(newAccess, name, descriptor)
+            newAccess = updateAccessFlags(newAccess, name, descriptor, policy.policy)
 
-            val ret = visitMethodInner(access, newName, descriptor, signature, exceptions, policy,
+            val ret = visitMethodInner(
+                access, newName, descriptor, signature, exceptions, policy,
                 renameTo != null,
-                super.visitMethod(newAccess, newName, descriptor, signature, exceptions))
+                super.visitMethod(newAccess, newName, descriptor, signature, exceptions)
+            )
 
             ret?.let {
-                injectInStubAndKeepAnnotations(policy.policy, UnifiedVisitor.on(ret))
+                UnifiedVisitor.on(ret)
+                    .visitAnnotation(HostStubGenProcessedAsKeep.CLASS_DESCRIPTOR, true)
             }
 
             return ret
@@ -240,9 +231,10 @@ abstract class BaseAdapter (
     }
 
     open fun updateAccessFlags(
-            access: Int,
-            name: String,
-            descriptor: String,
+        access: Int,
+        name: String,
+        descriptor: String,
+        policy: FilterPolicy,
     ): Int {
         return access
     }
@@ -256,7 +248,7 @@ abstract class BaseAdapter (
         policy: FilterPolicyWithReason,
         substituted: Boolean,
         superVisitor: MethodVisitor?,
-        ): MethodVisitor?
+    ): MethodVisitor?
 
     companion object {
         fun getVisitor(
@@ -265,8 +257,6 @@ abstract class BaseAdapter (
             nextVisitor: ClassVisitor,
             filter: OutputFilter,
             packageRedirector: PackageRedirectRemapper,
-            remapper: Remapper?,
-            forImpl: Boolean,
             options: Options,
         ): ClassVisitor {
             var next = nextVisitor
@@ -289,23 +279,20 @@ abstract class BaseAdapter (
                 if (!packageRedirector.isTarget(classInternalName)) {
                     next = ClassRemapper(next, packageRedirector)
                 } else {
-                    log.v("Class $classInternalName is a redirect-from class, not applying" +
-                            " --package-redirect")
+                    log.v(
+                        "Class $classInternalName is a redirect-from class, not applying" +
+                                " --package-redirect"
+                    )
                 }
             }
 
-            var ret: ClassVisitor
-            if (forImpl) {
-                ret = ImplGeneratingAdapter(classes, next, filter, options)
-            } else {
-                ret = StubGeneratingAdapter(classes, next, filter, options)
-            }
+            next = ImplGeneratingAdapter(classes, next, filter, options)
 
             // Inject TraceClassVisitor for debugging.
             if (options.enablePreTrace) {
-                ret = TraceClassVisitor(ret, verbosePrinter)
+                next = TraceClassVisitor(next, verbosePrinter)
             }
-            return ret
+            return next
         }
     }
 }

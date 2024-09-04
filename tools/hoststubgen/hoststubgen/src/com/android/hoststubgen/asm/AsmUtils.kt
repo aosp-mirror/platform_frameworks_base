@@ -327,6 +327,10 @@ fun MethodNode.isPublic(): Boolean {
     return (this.access and Opcodes.ACC_PUBLIC) != 0
 }
 
+fun MethodNode.isNative(): Boolean {
+    return (this.access and Opcodes.ACC_NATIVE) != 0
+}
+
 fun MethodNode.isSpecial(): Boolean {
     return CTOR_NAME == this.name || CLASS_INITIALIZER_NAME == this.name
 }
