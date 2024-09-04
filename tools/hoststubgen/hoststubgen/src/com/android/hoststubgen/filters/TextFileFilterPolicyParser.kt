@@ -240,7 +240,7 @@ fun createFilterFromTextPolicyFile(
 
                             imf.setPolicyForMethod(className, name, signature,
                                     policy.withReason(FILTER_REASON))
-                            if (policy.isSubstitute) {
+                            if (policy == FilterPolicy.Substitute) {
                                 val fromName = fields[3].substring(1)
 
                                 if (fromName == name) {
@@ -248,10 +248,9 @@ fun createFilterFromTextPolicyFile(
                                             "Substitution must have a different name")
                                 }
 
-                                // Set the policy  for the "from" method.
+                                // Set the policy for the "from" method.
                                 imf.setPolicyForMethod(className, fromName, signature,
-                                        policy.getSubstitutionBasePolicy()
-                                                .withReason(FILTER_REASON))
+                                    FilterPolicy.Stub.withReason(FILTER_REASON))
 
                                 val classAndMethod = splitWithLastPeriod(fromName)
                                 if (classAndMethod != null) {
@@ -355,9 +354,7 @@ private fun parsePolicy(s: String): FilterPolicy {
         "i", "ignore" -> FilterPolicy.Ignore
         else -> {
             if (s.startsWith("@")) {
-                FilterPolicy.SubstituteAndStub
-            } else if (s.startsWith("%")) {
-                FilterPolicy.SubstituteAndKeep
+                FilterPolicy.Substitute
             } else {
                 throw ParseException("Invalid policy \"$s\"")
             }

@@ -187,7 +187,7 @@ abstract class BaseAdapter (
             // Instead of this method, we rename the substitute-to method with the original
             // name, in the "Maybe rename the method" part below.
             val policy = filter.getPolicyForMethod(currentClassName, name, descriptor)
-            if (policy.policy.isSubstitute) {
+            if (policy.policy == FilterPolicy.Substitute) {
                 log.d("Skipping %s%s %s", name, descriptor, policy)
                 return null
             }

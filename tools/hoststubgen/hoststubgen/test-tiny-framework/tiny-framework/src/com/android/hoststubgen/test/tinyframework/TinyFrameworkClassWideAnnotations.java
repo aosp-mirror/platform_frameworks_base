@@ -15,16 +15,20 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
+import android.hosttest.annotation.HostSideTestRemove;
 import android.hosttest.annotation.HostSideTestSubstitute;
 import android.hosttest.annotation.HostSideTestThrow;
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class TinyFrameworkClassWideAnnotations {
     public TinyFrameworkClassWideAnnotations() {
     }
 
-    public int stub = 1;
+    public int keep = 1;
+
+    @HostSideTestRemove
+    public int remove;
 
     public int addOne(int value) {
         return value + 1;
@@ -39,12 +43,13 @@ public class TinyFrameworkClassWideAnnotations {
         return value + 2;
     }
 
+    @HostSideTestRemove
+    public void toBeRemoved(String foo) {
+        throw new RuntimeException();
+    }
+
     @HostSideTestThrow
     public String unsupportedMethod() {
         return "This value shouldn't be seen on the host side.";
-    }
-
-    public String visibleButUsesUnsupportedMethod() {
-        return unsupportedMethod();
     }
 }
