@@ -26,6 +26,7 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -86,6 +87,7 @@ public class PowerUtilTest {
         assertThat(PowerUtil.roundTimeToNearestThreshold(-200, -75)).isEqualTo(225);
     }
 
+    @Ignore("b/359066481")
     @Test
     public void getTargetTimeShortString_lessThan15Minutes_returnsTimeShortStringWithoutRounded() {
         mContext.getSystemService(AlarmManager.class).setTimeZone("UTC");
@@ -100,6 +102,7 @@ public class PowerUtilTest {
         assertThat(actualTimeString).endsWith("14 PM");
     }
 
+    @Ignore("b/359066481")
     @Test
     public void getTargetTimeShortString_moreThan15Minutes_returnsTimeShortStringWithRounded() {
         mContext.getSystemService(AlarmManager.class).setTimeZone("UTC");

@@ -88,21 +88,14 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testWakeUpSetsExitAnimationsRunning() {
-        controller.wakeUp()
-
-        verify(stateController).setExitAnimationsRunning(true)
-    }
-
-    @Test
-    fun testWakeUpAfterStartWillCancel() {
+    fun testOnWakeUpAfterStartWillCancel() {
         val mockStartAnimator: AnimatorSet = mock()
 
         controller.startEntryAnimations(false, animatorBuilder = { mockStartAnimator })
 
         verify(mockStartAnimator, never()).cancel()
 
-        controller.wakeUp()
+        controller.onWakeUp()
 
         // Verify that we cancelled the start animator in favor of the exit
         // animator.

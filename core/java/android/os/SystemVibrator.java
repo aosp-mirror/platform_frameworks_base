@@ -215,6 +215,17 @@ public class SystemVibrator extends Vibrator {
     }
 
     @Override
+    public void performHapticFeedbackForInputDevice(int constant, int inputDeviceId,
+            int inputSource, String reason, int flags, int privFlags) {
+        if (mVibratorManager == null) {
+            Log.w(TAG, "Failed to perform haptic feedback for input device; no vibrator manager.");
+            return;
+        }
+        mVibratorManager.performHapticFeedbackForInputDevice(constant, inputDeviceId, inputSource,
+                reason, flags, privFlags);
+    }
+
+    @Override
     public void cancel() {
         if (mVibratorManager == null) {
             Log.w(TAG, "Failed to cancel vibrate; no vibrator manager.");

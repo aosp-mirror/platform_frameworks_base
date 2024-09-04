@@ -111,7 +111,6 @@ import com.android.systemui.media.controls.ui.view.MediaViewHolder;
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder;
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel;
 import com.android.systemui.media.controls.util.MediaDataUtils;
-import com.android.systemui.media.controls.util.MediaFlags;
 import com.android.systemui.media.controls.util.MediaUiEventLogger;
 import com.android.systemui.media.controls.util.SmallHash;
 import com.android.systemui.media.dialog.MediaOutputDialogManager;
@@ -120,6 +119,7 @@ import com.android.systemui.monet.Style;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -209,7 +209,6 @@ public class MediaControlPanel {
     static final long TURBULENCE_NOISE_PLAY_DURATION = 7500L;
 
     private final SeekBarViewModel mSeekBarViewModel;
-    private final MediaFlags mMediaFlags;
     private final CommunalSceneInteractor mCommunalSceneInteractor;
     private SeekBarObserver mSeekBarObserver;
     protected final Executor mBackgroundExecutor;
@@ -323,8 +322,7 @@ public class MediaControlPanel {
             CommunalSceneInteractor communalSceneInteractor,
             NotificationLockscreenUserManager lockscreenUserManager,
             BroadcastDialogController broadcastDialogController,
-            GlobalSettings globalSettings,
-            MediaFlags mediaFlags
+            GlobalSettings globalSettings
     ) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
@@ -343,7 +341,6 @@ public class MediaControlPanel {
         mActivityIntentHelper = activityIntentHelper;
         mLockscreenUserManager = lockscreenUserManager;
         mBroadcastDialogController = broadcastDialogController;
-        mMediaFlags = mediaFlags;
         mCommunalSceneInteractor = communalSceneInteractor;
 
         mSeekBarViewModel.setLogSeek(() -> {
@@ -641,7 +638,7 @@ public class MediaControlPanel {
         // State refresh interferes with the translation animation, only run it if it's not running.
         if (!mMetadataAnimationHandler.isRunning()) {
             // Don't refresh in scene framework, because it will calculate with invalid layout sizes
-            if (!mMediaFlags.isSceneContainerEnabled()) {
+            if (!SceneContainerFlag.isEnabled()) {
                 mMediaViewController.refreshState();
             }
         }
@@ -909,7 +906,7 @@ public class MediaControlPanel {
         // Capture width & height from views in foreground for artwork scaling in background
         int width = mMediaViewHolder.getAlbumView().getMeasuredWidth();
         int height = mMediaViewHolder.getAlbumView().getMeasuredHeight();
-        if (mMediaFlags.isSceneContainerEnabled() && (width <= 0 || height <= 0)) {
+        if (SceneContainerFlag.isEnabled() && (width <= 0 || height <= 0)) {
             // TODO(b/312714128): ensure we have a valid size before setting background
             width = mMediaViewController.getWidthInSceneContainerPx();
             height = mMediaViewController.getHeightInSceneContainerPx();

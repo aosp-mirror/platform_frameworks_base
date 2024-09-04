@@ -20,7 +20,6 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.inputmethodservice.InputMethodService.IME_VISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
@@ -79,12 +78,14 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.accessibility.AccessibilityGestureTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
@@ -215,6 +216,8 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private WindowManager mWindowManager;
     @Mock
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
+    @Mock
     private TelecomManager mTelecomManager;
     @Mock
     private InputMethodManager mInputMethodManager;
@@ -285,6 +288,7 @@ public class NavigationBarTest extends SysuiTestCase {
             mNavBarHelper = spy(new NavBarHelper(mContext, mock(AccessibilityManager.class),
                     mock(AccessibilityButtonModeObserver.class),
                     mock(AccessibilityButtonTargetsObserver.class),
+                    mock(AccessibilityGestureTargetsObserver.class),
                     mSystemActions, mOverviewProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mCentralSurfaces),
                     mKeyguardStateController, mock(NavigationModeController.class),
@@ -512,7 +516,7 @@ public class NavigationBarTest extends SysuiTestCase {
 
         externalNavBar.setImeWindowStatus(EXTERNAL_DISPLAY_ID, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
-        defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, IME_INVISIBLE,
+        defaultNavBar.setImeWindowStatus(DEFAULT_DISPLAY, 0 /* vis */,
                 BACK_DISPOSITION_DEFAULT, false);
         // Verify IME window state will be updated in external NavBar & default NavBar state reset.
         assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN
@@ -620,6 +624,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 null,
                 context,
                 mWindowManager,
+                mViewCaptureAwareWindowManager,
                 () -> mAssistManager,
                 mock(AccessibilityManager.class),
                 deviceProvisionedController,

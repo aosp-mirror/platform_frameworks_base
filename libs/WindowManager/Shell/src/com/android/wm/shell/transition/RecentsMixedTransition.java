@@ -18,7 +18,7 @@ package com.android.wm.shell.transition;
 
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.transition.DefaultMixedHandler.handoverTransitionLeashes;
 import static com.android.wm.shell.transition.MixedTransitionHelper.animateEnterPipFromSplit;
 import static com.android.wm.shell.transition.MixedTransitionHelper.animateKeyguard;

@@ -276,7 +276,6 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 .setTask(mTask)
                 .build();
 
-        spyOn(mActivity.mLetterboxUiController);
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
         spyOn(mActivity.info);
 

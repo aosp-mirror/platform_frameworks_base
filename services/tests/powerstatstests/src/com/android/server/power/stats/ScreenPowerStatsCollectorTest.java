@@ -32,6 +32,7 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.ScreenPowerStatsCollector.Injector;
+import com.android.server.power.stats.format.ScreenPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -171,8 +172,7 @@ public class ScreenPowerStatsCollectorTest {
 
         PowerStats powerStats = collector.collectStats();
 
-        ScreenPowerStatsLayout layout = new ScreenPowerStatsLayout();
-        layout.fromExtras(powerStats.descriptor.extras);
+        ScreenPowerStatsLayout layout = new ScreenPowerStatsLayout(powerStats.descriptor);
 
         // (45000 - 10000) / 3500
         assertThat(layout.getConsumedEnergy(powerStats.stats, 0))

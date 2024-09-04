@@ -4985,6 +4985,16 @@ public final class Telephony {
          */
         public static final String COLUMN_SATELLITE_ESOS_SUPPORTED = "satellite_esos_supported";
 
+        /**
+         * TelephonyProvider column name for satellite provisioned status. The value of this
+         * column is set based on whether carrier roaming or OEM-enabled NB-IOT satellite service is
+         * provisioned or not. By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM =
+                "is_satellite_provisioned_for_non_ip_datagram";
+
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
                 COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID,
@@ -5061,7 +5071,8 @@ public final class Telephony {
                 COLUMN_TRANSFER_STATUS,
                 COLUMN_SATELLITE_ENTITLEMENT_STATUS,
                 COLUMN_SATELLITE_ENTITLEMENT_PLMNS,
-                COLUMN_SATELLITE_ESOS_SUPPORTED
+                COLUMN_SATELLITE_ESOS_SUPPORTED,
+                COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM
         );
 
         /**

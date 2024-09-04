@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor
@@ -46,6 +47,15 @@ constructor(
             duration = FromAlternateBouncerTransitionInteractor.TO_AOD_DURATION,
             edge = Edge.create(from = ALTERNATE_BOUNCER, to = AOD),
         )
+
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
+            duration = FromAlternateBouncerTransitionInteractor.TO_AOD_DURATION,
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(startAlpha, 1f, it) },
+        )
+    }
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

@@ -19,7 +19,6 @@ package com.android.systemui.shade;
 
 import static android.view.WindowInsets.Type.ime;
 
-import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
 import static com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE;
@@ -444,10 +443,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mUseLargeScreenShadeHeader =
                 LargeScreenUtils.shouldUseLargeScreenShadeHeader(mPanelView.getResources());
         mLargeScreenShadeHeaderHeight =
-                centralizedStatusBarHeightFix()
-                        ? mLargeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
-                        : mResources.getDimensionPixelSize(
-                                R.dimen.large_screen_shade_header_height);
+                mLargeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight();
         int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
         mShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);
@@ -1009,7 +1005,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
         if (height == 0 && !mKeyguardStateController.canDismissLockScreen()) {
-            mDeviceEntryFaceAuthInteractor.onQsExpansionStared();
+            mDeviceEntryFaceAuthInteractor.onShadeExpansionStarted();
         }
     }
 
@@ -1067,13 +1063,17 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
         setClippingBounds();
 
-        if (mSplitShadeEnabled) {
-            // In split shade we want to pretend that QS are always collapsed so their behaviour and
-            // interactions don't influence notifications as they do in portrait. But we want to set
-            // 0 explicitly in case we're rotating from non-split shade with QS expansion of 1.
-            mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
-        } else {
-            mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
+        if (!SceneContainerFlag.isEnabled()) {
+            if (mSplitShadeEnabled) {
+                // In split shade we want to pretend that QS are always collapsed so their
+                // behaviour and interactions don't influence notifications as they do in portrait.
+                // But we want to set 0 explicitly in case we're rotating from non-split shade with
+                // QS expansion of 1.
+                mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
+            } else {
+                mNotificationStackScrollLayoutController.setQsExpansionFraction(
+                        qsExpansionFraction);
+            }
         }
 
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
@@ -2256,8 +2256,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             // panel, mQs will not need to be null cause it will be tied to the same lifecycle.
             if (fragment == mQs) {
                 // Clear it to remove bindings to mQs from the provider.
-                mNotificationStackScrollLayoutController.setQsHeaderBoundsProvider(null);
-                mNotificationStackScrollLayoutController.setQsHeader(null);
+                if (QSComposeFragment.isEnabled()) {
+                    mNotificationStackScrollLayoutController.setQsHeaderBoundsProvider(null);
+                } else {
+                    mNotificationStackScrollLayoutController.setQsHeader(null);
+                }
                 mQs = null;
             }
         }

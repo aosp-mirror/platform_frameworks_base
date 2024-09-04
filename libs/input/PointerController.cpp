@@ -25,6 +25,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
 #include <ftl/enum.h>
+#include <input/PrintTools.h>
 
 #include <mutex>
 
@@ -353,6 +354,8 @@ std::string PointerController::dump() {
     for (const auto& [_, spotController] : mLocked.spotControllers) {
         spotController.dump(dump, INDENT3);
     }
+    dump += INDENT2 "Cursor Controller:\n";
+    dump += addLinePrefix(mCursorController.dump(), INDENT3);
     return dump;
 }
 

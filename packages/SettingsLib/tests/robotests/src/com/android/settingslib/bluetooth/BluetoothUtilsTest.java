@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.bluetooth.BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice;
+import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
 import static com.android.settingslib.flags.Flags.FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -31,10 +33,13 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastReceiveState;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -70,10 +75,14 @@ public class BluetoothUtilsTest {
     @Mock private BluetoothDevice mBluetoothDevice;
     @Mock private AudioManager mAudioManager;
     @Mock private PackageManager mPackageManager;
+    @Mock private LeAudioProfile mA2dpProfile;
+    @Mock private LeAudioProfile mLeAudioProfile;
+    @Mock private LeAudioProfile mHearingAid;
     @Mock private LocalBluetoothLeBroadcast mBroadcast;
     @Mock private LocalBluetoothProfileManager mProfileManager;
     @Mock private LocalBluetoothManager mLocalBluetoothManager;
     @Mock private LocalBluetoothLeBroadcastAssistant mAssistant;
+    @Mock private CachedBluetoothDeviceManager mDeviceManager;
     @Mock private BluetoothLeBroadcastReceiveState mLeBroadcastReceiveState;
 
     private Context mContext;
@@ -88,6 +97,7 @@ public class BluetoothUtilsTest {
                     + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
     private static final String TEST_EXCLUSIVE_MANAGER_PACKAGE = "com.test.manager";
     private static final String TEST_EXCLUSIVE_MANAGER_COMPONENT = "com.test.manager/.component";
+    private static final int TEST_BROADCAST_ID = 25;
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -98,8 +108,13 @@ public class BluetoothUtilsTest {
         mContext = spy(RuntimeEnvironment.application);
         mSetFlagsRule.disableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
+        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(mDeviceManager);
         when(mProfileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
         when(mProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(mAssistant);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
+        when(mA2dpProfile.getProfileId()).thenReturn(BluetoothProfile.A2DP);
+        when(mLeAudioProfile.getProfileId()).thenReturn(BluetoothProfile.LE_AUDIO);
+        when(mHearingAid.getProfileId()).thenReturn(BluetoothProfile.HEARING_AID);
     }
 
     @Test
@@ -658,6 +673,34 @@ public class BluetoothUtilsTest {
     }
 
     @Test
+    public void testHasActiveLocalBroadcastSourceForBtDevice_hasActiveLocalSource() {
+        when(mBroadcast.getLatestBroadcastId()).thenReturn(TEST_BROADCAST_ID);
+        when(mLeBroadcastReceiveState.getBroadcastId()).thenReturn(TEST_BROADCAST_ID);
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        sourceList.add(mLeBroadcastReceiveState);
+        when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(sourceList);
+
+        assertThat(
+                BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
+                        mBluetoothDevice, mLocalBluetoothManager))
+                .isTrue();
+    }
+
+    @Test
+    public void testHasActiveLocalBroadcastSourceForBtDevice_noActiveLocalSource() {
+        when(mLeBroadcastReceiveState.getBroadcastId()).thenReturn(UNKNOWN_VALUE_PLACEHOLDER);
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        sourceList.add(mLeBroadcastReceiveState);
+        when(mAssistant.getAllSources(mBluetoothDevice)).thenReturn(sourceList);
+
+        assertThat(
+                BluetoothUtils.hasActiveLocalBroadcastSourceForBtDevice(
+                        mBluetoothDevice, mLocalBluetoothManager))
+                .isFalse();
+    }
+
+
+    @Test
     public void isAvailableHearingDevice_isConnectedHearingAid_returnTure() {
         when(mCachedBluetoothDevice.isConnectedHearingAidDevice()).thenReturn(true);
         when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
@@ -755,5 +798,195 @@ public class BluetoothUtilsTest {
                         BluetoothUtils.getSecondaryDeviceForBroadcast(
                                 mContext.getContentResolver(), mLocalBluetoothManager))
                 .isEqualTo(mCachedBluetoothDevice);
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_nullProfiles() {
+        when(mProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(null);
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_alreadyBroadcasting() {
+        when(mBroadcast.isEnabled(any())).thenReturn(true);
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_availableDevice() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+
+        when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        cachedBluetoothDevice2, mLocalBluetoothManager);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_alreadyActive() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+
+        when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_notConnected() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+
+        when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device2));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        mCachedBluetoothDevice, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsAvailableAudioSharingMediaBluetoothDevice_moreThanTwoConnected() {
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(1);
+        CachedBluetoothDevice cachedBluetoothDevice2 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
+        CachedBluetoothDevice cachedBluetoothDevice3 = mock(CachedBluetoothDevice.class);
+        when(cachedBluetoothDevice3.getGroupId()).thenReturn(3);
+
+        BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
+        BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
+        BluetoothDevice device3 = mock(BluetoothDevice.class);
+        when(mDeviceManager.findDevice(device3)).thenReturn(cachedBluetoothDevice3);
+
+        when(mAssistant.getAllConnectedDevices())
+                .thenReturn(ImmutableList.of(device1, device2, device3));
+        when(mLeAudioProfile.getActiveDevices()).thenReturn(ImmutableList.of(device1));
+
+        boolean result =
+                isAvailableAudioSharingMediaBluetoothDevice(
+                        cachedBluetoothDevice2, mLocalBluetoothManager);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void getAudioDeviceAttributesForSpatialAudio_bleHeadset() {
+        String address = "11:22:33:44:55:66";
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getAddress()).thenReturn(address);
+        when(mCachedBluetoothDevice.getProfiles()).thenReturn(List.of(mLeAudioProfile));
+        when(mLeAudioProfile.isEnabled(mBluetoothDevice)).thenReturn(true);
+
+        AudioDeviceAttributes attr =
+                BluetoothUtils.getAudioDeviceAttributesForSpatialAudio(
+                        mCachedBluetoothDevice, AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES);
+
+        assertThat(attr)
+                .isEqualTo(
+                        new AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_BLE_HEADSET,
+                                address));
+    }
+
+    @Test
+    public void getAudioDeviceAttributesForSpatialAudio_bleSpeaker() {
+        String address = "11:22:33:44:55:66";
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getAddress()).thenReturn(address);
+        when(mCachedBluetoothDevice.getProfiles()).thenReturn(List.of(mLeAudioProfile));
+        when(mLeAudioProfile.isEnabled(mBluetoothDevice)).thenReturn(true);
+
+        AudioDeviceAttributes attr =
+                BluetoothUtils.getAudioDeviceAttributesForSpatialAudio(
+                        mCachedBluetoothDevice, AudioManager.AUDIO_DEVICE_CATEGORY_SPEAKER);
+
+        assertThat(attr)
+                .isEqualTo(
+                        new AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_BLE_SPEAKER,
+                                address));
+    }
+
+    @Test
+    public void getAudioDeviceAttributesForSpatialAudio_a2dp() {
+        String address = "11:22:33:44:55:66";
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getAddress()).thenReturn(address);
+        when(mCachedBluetoothDevice.getProfiles()).thenReturn(List.of(mA2dpProfile));
+        when(mA2dpProfile.isEnabled(mBluetoothDevice)).thenReturn(true);
+
+        AudioDeviceAttributes attr =
+                BluetoothUtils.getAudioDeviceAttributesForSpatialAudio(
+                        mCachedBluetoothDevice, AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES);
+
+        assertThat(attr)
+                .isEqualTo(
+                        new AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                                address));
+    }
+
+    @Test
+    public void getAudioDeviceAttributesForSpatialAudio_hearingAid() {
+        String address = "11:22:33:44:55:66";
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getAddress()).thenReturn(address);
+        when(mCachedBluetoothDevice.getProfiles()).thenReturn(List.of(mHearingAid));
+        when(mHearingAid.isEnabled(mBluetoothDevice)).thenReturn(true);
+
+        AudioDeviceAttributes attr =
+                BluetoothUtils.getAudioDeviceAttributesForSpatialAudio(
+                        mCachedBluetoothDevice, AudioManager.AUDIO_DEVICE_CATEGORY_HEARING_AID);
+
+        assertThat(attr)
+                .isEqualTo(
+                        new AudioDeviceAttributes(
+                                AudioDeviceAttributes.ROLE_OUTPUT,
+                                AudioDeviceInfo.TYPE_HEARING_AID,
+                                address));
     }
 }

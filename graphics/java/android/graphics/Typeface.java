@@ -56,6 +56,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.text.flags.Flags;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -74,6 +75,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -143,6 +145,23 @@ public class Typeface {
     private static final LruCache<String, Typeface> sDynamicTypefaceCache = new LruCache<>(16);
     private static final Object sDynamicCacheLock = new Object();
 
+    private static final LruCache<Long, LruCache<String, Typeface>> sVariableCache =
+            new LruCache<>(16);
+    private static final Object sVariableCacheLock = new Object();
+
+    /** @hide */
+    @VisibleForTesting
+    public static void clearTypefaceCachesForTestingPurpose() {
+        synchronized (sWeightCacheLock) {
+            sWeightTypefaceCache.clear();
+        }
+        synchronized (sDynamicCacheLock) {
+            sDynamicTypefaceCache.evictAll();
+        }
+        synchronized (sVariableCacheLock) {
+            sVariableCache.evictAll();
+        }
+    }
 
     @GuardedBy("SYSTEM_FONT_MAP_LOCK")
     static Typeface sDefaultTypeface;
@@ -194,6 +213,8 @@ public class Typeface {
      */
     @UnsupportedAppUsage
     public final long native_instance;
+
+    private final Typeface mDerivedFrom;
 
     private final String mSystemFontFamilyName;
 
@@ -271,6 +292,18 @@ public class Typeface {
     /** Returns true if getStyle() has the ITALIC bit set. */
     public final boolean isItalic() {
         return (mStyle & ITALIC) != 0;
+    }
+
+    /**
+     * Returns the Typeface used for creating this Typeface.
+     *
+     * Maybe null if this is not derived from other Typeface.
+     * TODO(b/357707916): Make this public API.
+     * @hide
+     */
+    @VisibleForTesting
+    public final @Nullable Typeface getDerivedFrom() {
+        return mDerivedFrom;
     }
 
     /**
@@ -1021,9 +1054,51 @@ public class Typeface {
         return typeface;
     }
 
-    /** @hide */
+    private static String axesToVarKey(@NonNull List<FontVariationAxis> axes) {
+        // The given list can be mutated because it is allocated in Paint#setFontVariationSettings.
+        // Currently, Paint#setFontVariationSettings is the only code path reaches this method.
+        axes.sort(Comparator.comparingInt(FontVariationAxis::getOpenTypeTagValue));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < axes.size(); ++i) {
+            final FontVariationAxis fva = axes.get(i);
+            sb.append(fva.getTag());
+            sb.append(fva.getStyleValue());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * TODO(b/357707916): Make this public API.
+     * @hide
+     */
     public static Typeface createFromTypefaceWithVariation(@Nullable Typeface family,
             @NonNull List<FontVariationAxis> axes) {
+        if (Flags.typefaceCacheForVarSettings()) {
+            final Typeface target = (family == null) ? Typeface.DEFAULT : family;
+            final Typeface base = (target.mDerivedFrom == null) ? target : target.mDerivedFrom;
+
+            final String key = axesToVarKey(axes);
+
+            synchronized (sVariableCacheLock) {
+                LruCache<String, Typeface> innerCache = sVariableCache.get(base.native_instance);
+                if (innerCache == null) {
+                    // Cache up to 16 var instance per root Typeface
+                    innerCache = new LruCache<>(16);
+                    sVariableCache.put(base.native_instance, innerCache);
+                } else {
+                    Typeface cached = innerCache.get(key);
+                    if (cached != null) {
+                        return cached;
+                    }
+                }
+                Typeface typeface = new Typeface(
+                        nativeCreateFromTypefaceWithVariation(base.native_instance, axes),
+                        base.getSystemFontFamilyName(), base);
+                innerCache.put(key, typeface);
+                return typeface;
+            }
+        }
+
         final Typeface base = family == null ? Typeface.DEFAULT : family;
         Typeface typeface = new Typeface(
                 nativeCreateFromTypefaceWithVariation(base.native_instance, axes),
@@ -1184,11 +1259,19 @@ public class Typeface {
     // don't allow clients to call this directly
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Typeface(long ni) {
-        this(ni, null);
+        this(ni, null, null);
+    }
+
+
+    // don't allow clients to call this directly
+    // This is kept for robolectric.
+    private Typeface(long ni, @Nullable String systemFontFamilyName) {
+        this(ni, systemFontFamilyName, null);
     }
 
     // don't allow clients to call this directly
-    private Typeface(long ni, @Nullable String systemFontFamilyName) {
+    private Typeface(long ni, @Nullable String systemFontFamilyName,
+            @Nullable Typeface derivedFrom) {
         if (ni == 0) {
             throw new RuntimeException("native typeface cannot be made");
         }
@@ -1198,6 +1281,7 @@ public class Typeface {
         mStyle = nativeGetStyle(ni);
         mWeight = nativeGetWeight(ni);
         mSystemFontFamilyName = systemFontFamilyName;
+        mDerivedFrom = derivedFrom;
     }
 
     /**

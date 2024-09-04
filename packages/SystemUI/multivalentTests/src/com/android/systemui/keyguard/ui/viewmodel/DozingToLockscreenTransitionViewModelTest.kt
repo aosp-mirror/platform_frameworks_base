@@ -42,6 +42,28 @@ class DozingToLockscreenTransitionViewModelTest : SysuiTestCase() {
     val underTest = kosmos.dozingToLockscreenTransitionViewModel
 
     @Test
+    fun lockscreenAlpha() =
+        testScope.runTest {
+            val lockscreenAlpha by collectValues(underTest.lockscreenAlpha)
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(1f))
+            lockscreenAlpha.forEach { assertThat(it).isEqualTo(1f) }
+        }
+
+    @Test
+    fun shortcutsAlpha() =
+        testScope.runTest {
+            val shortcutsAlpha by collectValues(underTest.shortcutsAlpha)
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(1f))
+            assertThat(shortcutsAlpha[0]).isEqualTo(0f)
+            assertThat(shortcutsAlpha[1]).isEqualTo(1f)
+        }
+
+    @Test
     fun deviceEntryParentViewShows() =
         testScope.runTest {
             val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)

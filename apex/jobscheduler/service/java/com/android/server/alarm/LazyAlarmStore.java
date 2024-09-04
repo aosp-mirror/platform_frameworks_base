@@ -17,11 +17,9 @@
 package com.android.server.alarm;
 
 import static com.android.server.alarm.AlarmManagerService.dumpAlarmList;
-import static com.android.server.alarm.AlarmManagerService.isTimeTickAlarm;
 
 import android.app.AlarmManager;
 import android.util.IndentingPrintWriter;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,11 +85,6 @@ public class LazyAlarmStore implements AlarmStore {
                 final Alarm removed = mAlarms.remove(i);
                 if (removed.alarmClock != null && mOnAlarmClockRemoved != null) {
                     mOnAlarmClockRemoved.run();
-                }
-                if (isTimeTickAlarm(removed)) {
-                    // This code path is not invoked when delivering alarms, only when removing
-                    // alarms due to the caller cancelling it or getting uninstalled, etc.
-                    Slog.wtf(TAG, "Removed TIME_TICK alarm");
                 }
                 removedAlarms.add(removed);
             }

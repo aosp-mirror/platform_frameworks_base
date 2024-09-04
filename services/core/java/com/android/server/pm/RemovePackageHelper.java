@@ -435,7 +435,7 @@ final class RemovePackageHelper {
 
             // Preserve split apk information for downgrade check with DELETE_KEEP_DATA and archived
             // app cases
-            if (deletedPkg.getSplitNames() != null) {
+            if (deletedPkg != null && deletedPkg.getSplitNames() != null) {
                 deletedPs.setSplitNames(deletedPkg.getSplitNames());
                 deletedPs.setSplitRevisionCodes(deletedPkg.getSplitRevisionCodes());
             }

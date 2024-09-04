@@ -4,6 +4,7 @@
 package: "android.app.admin.flags"
 container: "system"
 
+# Fully rolled out and must not be used.
 flag {
   name: "policy_engine_migration_v2_enabled"
   is_exported: true
@@ -26,17 +27,6 @@ flag {
   description: "Add feature to track the total policy size and have a max threshold - internal changes"
   bug: "281543351"
 }
-
-flag {
-  name: "device_policy_size_tracking_internal_bug_fix_enabled"
-  namespace: "enterprise"
-  description: "Bug fix for tracking the total policy size and have a max threshold"
-  bug: "281543351"
-  metadata {
-      purpose: PURPOSE_BUGFIX
-  }
-}
-
 
 flag {
   name: "onboarding_bugreport_v2_enabled"
@@ -78,13 +68,6 @@ flag {
 }
 
 flag {
-  name: "permission_migration_for_zero_trust_impl_enabled"
-  namespace: "enterprise"
-  description: "(Implementation) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
-  bug: "289520697"
-}
-
-flag {
   name: "device_theft_api_enabled"
   is_exported: true
   namespace: "enterprise"
@@ -107,6 +90,15 @@ flag {
 }
 
 flag {
+  name: "coexistence_migration_for_supervision_enabled"
+  is_exported: true
+  namespace: "enterprise"
+  description: "Migrate existing APIs that are used by supervision (Kids Module) to be coexistable."
+  bug: "356894721"
+}
+
+# Fully rolled out and must not be used.
+flag {
   name: "security_log_v2_enabled"
   is_exported: true
   namespace: "enterprise"
@@ -122,13 +114,6 @@ flag {
   metadata {
       purpose: PURPOSE_BUGFIX
   }
-}
-
-flag {
-  name: "dumpsys_policy_engine_migration_enabled"
-  namespace: "enterprise"
-  description: "Update DumpSys to include information about migrated APIs in DPE"
-  bug: "304999634"
 }
 
 flag {
@@ -180,6 +165,7 @@ flag {
   bug: "295301164"
 }
 
+# Fully rolled out and must not be used.
 flag {
   name: "headless_device_owner_single_user_enabled"
   is_exported: true
@@ -207,26 +193,6 @@ flag {
 }
 
 flag {
-  name: "power_exemption_bg_usage_fix"
-  namespace: "enterprise"
-  description: "Ensure aps with EXEMPT_FROM_POWER_RESTRICTIONS can execute in the background"
-  bug: "333379020"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "disallow_user_control_bg_usage_fix"
-  namespace: "enterprise"
-  description: "Make DPM.setUserControlDisabledPackages() ensure background usage is allowed"
-  bug: "326031059"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "disallow_user_control_stopped_state_fix"
   namespace: "enterprise"
   description: "Ensure DPM.setUserControlDisabledPackages() clears FLAG_STOPPED for the app"
@@ -244,16 +210,6 @@ flag {
 }
 
 flag {
-  name: "headless_device_owner_provisioning_fix_enabled"
-  namespace: "enterprise"
-  description: "Fix provisioning for single-user headless DO"
-  bug: "289515470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "dmrh_set_app_restrictions"
   namespace: "enterprise"
   description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
@@ -261,13 +217,6 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
-}
-
-flag {
-  name: "allow_screen_brightness_control_on_cope"
-  namespace: "enterprise"
-  description: "Allow COPE admin to control screen brightness and timeout."
-  bug: "323894620"
 }
 
 flag {
@@ -288,16 +237,6 @@ flag {
 }
 
 flag {
-  name: "headless_device_owner_delegate_security_logging_bug_fix"
-  namespace: "enterprise"
-  description: "Fix delegate security logging for single user headless DO."
-  bug: "289515470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "headless_single_user_bad_device_admin_state_fix"
   namespace: "enterprise"
   description: "Fix the bad state in DPMS caused by an earlier bug related to the headless single user change"
@@ -312,16 +251,6 @@ flag {
   namespace: "enterprise"
   description: "Add a separate storage limit for deferred bugreports"
   bug: "330177040"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "delete_private_space_under_restriction"
-  namespace: "enterprise"
-  description: "Delete private space if user restriction is set"
-  bug: "328758346"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -399,6 +328,16 @@ flag {
     namespace: "enterprise"
     description: "Add provisioningContext to store metadata about when the admin was set"
     bug: "326525847"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "dont_read_policy_definition"
+    namespace: "enterprise"
+    description: "Rely on <policy-key-entry> to determine policy definition and ignore <policy-definition-entry>"
+    bug: "335663055"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

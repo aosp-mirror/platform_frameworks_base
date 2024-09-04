@@ -18,17 +18,14 @@ package com.android.systemui.qs.dagger
 
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QSHostAdapter
-import com.android.systemui.qs.QSTileHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.QsEventLoggerImpl
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedSharedPrefsRepository
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractorImpl
-import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 
 @Module
 interface QSHostModule {
@@ -37,36 +34,10 @@ interface QSHostModule {
 
     @Binds fun provideEventLogger(impl: QsEventLoggerImpl): QsEventLogger
 
-    @Module
-    companion object {
-        private const val MAX_QS_INSTANCE_ID = 1 shl 20
+    @Binds fun providePanelInteractor(impl: PanelInteractorImpl): PanelInteractor
 
-        @Provides
-        @JvmStatic
-        fun providePanelInteractor(
-            featureFlags: QSPipelineFlagsRepository,
-            qsHost: QSTileHost,
-            panelInteractorImpl: PanelInteractorImpl
-        ): PanelInteractor {
-            return if (featureFlags.pipelineEnabled) {
-                panelInteractorImpl
-            } else {
-                qsHost
-            }
-        }
-
-        @Provides
-        @JvmStatic
-        fun provideCustomTileAddedRepository(
-            featureFlags: QSPipelineFlagsRepository,
-            qsHost: QSTileHost,
-            customTileAddedRepository: CustomTileAddedSharedPrefsRepository
-        ): CustomTileAddedRepository {
-            return if (featureFlags.pipelineEnabled) {
-                customTileAddedRepository
-            } else {
-                qsHost
-            }
-        }
-    }
+    @Binds
+    fun provideCustomTileAddedRepository(
+        impl: CustomTileAddedSharedPrefsRepository
+    ): CustomTileAddedRepository
 }

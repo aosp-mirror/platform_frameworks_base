@@ -1326,6 +1326,7 @@ public class StatusBarManager {
         private boolean mClock;
         private boolean mNotificationIcons;
         private boolean mRotationSuggestion;
+        private boolean mQuickSettings;
 
         /** @hide */
         public DisableInfo(int flags1, int flags2) {
@@ -1338,6 +1339,7 @@ public class StatusBarManager {
             mClock = (flags1 & DISABLE_CLOCK) != 0;
             mNotificationIcons = (flags1 & DISABLE_NOTIFICATION_ICONS) != 0;
             mRotationSuggestion = (flags2 & DISABLE2_ROTATE_SUGGESTIONS) != 0;
+            mQuickSettings = (flags2 & DISABLE2_QUICK_SETTINGS) != 0;
         }
 
         /** @hide */
@@ -1471,6 +1473,20 @@ public class StatusBarManager {
         }
 
         /**
+         * @hide
+         */
+        public void setQuickSettingsDisabled(boolean disabled) {
+            mQuickSettings = disabled;
+        }
+
+        /**
+         * @hide
+         */
+        public boolean isQuickSettingsDisabled() {
+            return mQuickSettings;
+        }
+
+        /**
          * @return {@code true} if no components are disabled (default state)
          * @hide
          */
@@ -1478,7 +1494,7 @@ public class StatusBarManager {
         public boolean areAllComponentsEnabled() {
             return !mStatusBarExpansion && !mNavigateHome && !mNotificationPeeking && !mRecents
                     && !mSearch && !mSystemIcons && !mClock && !mNotificationIcons
-                    && !mRotationSuggestion;
+                    && !mRotationSuggestion && !mQuickSettings;
         }
 
         /** @hide */
@@ -1492,6 +1508,7 @@ public class StatusBarManager {
             mClock = false;
             mNotificationIcons = false;
             mRotationSuggestion = false;
+            mQuickSettings = false;
         }
 
         /**
@@ -1502,7 +1519,7 @@ public class StatusBarManager {
         public boolean areAllComponentsDisabled() {
             return mStatusBarExpansion && mNavigateHome && mNotificationPeeking
                     && mRecents && mSearch && mSystemIcons && mClock && mNotificationIcons
-                    && mRotationSuggestion;
+                    && mRotationSuggestion && mQuickSettings;
         }
 
         /** @hide */
@@ -1516,6 +1533,7 @@ public class StatusBarManager {
             mClock = true;
             mNotificationIcons = true;
             mRotationSuggestion = true;
+            mQuickSettings = true;
         }
 
         @NonNull
@@ -1533,6 +1551,7 @@ public class StatusBarManager {
             sb.append(" mClock=").append(mClock ? "disabled" : "enabled");
             sb.append(" mNotificationIcons=").append(mNotificationIcons ? "disabled" : "enabled");
             sb.append(" mRotationSuggestion=").append(mRotationSuggestion ? "disabled" : "enabled");
+            sb.append(" mQuickSettings=").append(mQuickSettings ? "disabled" : "enabled");
 
             return sb.toString();
 
@@ -1557,6 +1576,7 @@ public class StatusBarManager {
             if (mClock) disable1 |= DISABLE_CLOCK;
             if (mNotificationIcons) disable1 |= DISABLE_NOTIFICATION_ICONS;
             if (mRotationSuggestion) disable2 |= DISABLE2_ROTATE_SUGGESTIONS;
+            if (mQuickSettings) disable2 |= DISABLE2_QUICK_SETTINGS;
 
             return new Pair<Integer, Integer>(disable1, disable2);
         }

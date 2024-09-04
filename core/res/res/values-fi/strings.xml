@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Käsinkirjoitusta ei tueta salasanakentissä"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Takaisin"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Vaihda syöttötapaa"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Avaa syöttötavan valinta"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Asetukset"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Tallennustila loppumassa"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Kaikki järjestelmätoiminnot eivät välttämättä toimi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tallennustila ei riitä. Varmista, että vapaata tilaa on 250 Mt, ja käynnistä uudelleen."</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sovelluksen sisältö piilotettu näytön jakamiselta turvallisuussyistä"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Yhdistetty automaattisesti satelliittiin"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Voit lähettää ja vastaanottaa viestejä ilman mobiili‑ tai Wi-Fi-verkkoa"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Käytetäänkö satelliittiviestintää?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Lähetä ja vastaanota viestejä ilman mobiili- tai Wi-Fi-verkkoa"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Avaa Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Näin se toimii"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Odottaa…"</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Laskin"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Sovellukset"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Sormenjälkiäsi ei voi enää tunnistaa. Ota sormenjälkiavaus uudelleen käyttöön."</string>
 </resources>

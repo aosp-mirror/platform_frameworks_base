@@ -1,5 +1,5 @@
 package: "com.android.server.policy.feature.flags"
-container: "system"
+container: "system_ext"
 
 flag {
     name: "enable_dual_display_blocking"

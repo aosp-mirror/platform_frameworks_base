@@ -17,20 +17,17 @@ package com.android.hoststubgen
 
 import com.android.hoststubgen.filters.FilterPolicy
 import java.io.BufferedReader
-import java.io.File
 import java.io.FileReader
 
 /**
  * A single value that can only set once.
  */
-class SetOnce<T>(
-        private var value: T,
-) {
+open class SetOnce<T>(private var value: T) {
     class SetMoreThanOnceException : Exception()
 
     private var set = false
 
-    fun set(v: T) {
+    fun set(v: T): T {
         if (set) {
             throw SetMoreThanOnceException()
         }
@@ -39,6 +36,7 @@ class SetOnce<T>(
         }
         set = true
         value = v
+        return v
     }
 
     val get: T
@@ -56,6 +54,16 @@ class SetOnce<T>(
 
     override fun toString(): String {
         return "$value"
+    }
+}
+
+class IntSetOnce(value: Int) : SetOnce<Int>(value) {
+    fun set(v: String): Int {
+        try {
+            return this.set(v.toInt())
+        } catch (e: NumberFormatException) {
+            throw ArgumentsException("Invalid integer $v")
+        }
     }
 }
 
@@ -112,15 +120,11 @@ class HostStubGenOptions(
         var statsFile: SetOnce<String?> = SetOnce(null),
 
         var apiListFile: SetOnce<String?> = SetOnce(null),
+
+        var numShards: IntSetOnce = IntSetOnce(1),
+        var shard: IntSetOnce = IntSetOnce(0),
 ) {
     companion object {
-
-        private fun String.ensureFileExists(): String {
-            if (!File(this).exists()) {
-                throw InputFileNotFoundException(this)
-            }
-            return this
-        }
 
         private fun parsePackageRedirect(fromColonTo: String): Pair<String, String> {
             val colon = fromColonTo.indexOf(':')
@@ -134,7 +138,7 @@ class HostStubGenOptions(
         fun parseArgs(args: Array<String>): HostStubGenOptions {
             val ret = HostStubGenOptions()
 
-            val ai = ArgIterator(expandAtFiles(args))
+            val ai = ArgIterator.withAtFiles(args)
 
             var allAnnotations = mutableSetOf<String>()
 
@@ -145,11 +149,6 @@ class HostStubGenOptions(
                 return name
             }
 
-            fun setLogFile(level: LogLevel, filename: String) {
-                log.addFilePrinter(level, filename)
-                log.i("$level log file: $filename")
-            }
-
             while (true) {
                 val arg = ai.nextArgOptional()
                 if (arg == null) {
@@ -158,26 +157,23 @@ class HostStubGenOptions(
 
                 // Define some shorthands...
                 fun nextArg(): String = ai.nextArgRequired(arg)
-                fun SetOnce<String>.setNextStringArg(): String = nextArg().also { this.set(it) }
-                fun SetOnce<String?>.setNextStringArg(): String = nextArg().also { this.set(it) }
                 fun MutableSet<String>.addUniqueAnnotationArg(): String =
                         nextArg().also { this += ensureUniqueAnnotation(it) }
 
+                if (log.maybeHandleCommandLineArg(arg) { nextArg() }) {
+                    continue
+                }
                 try {
                     when (arg) {
                         // TODO: Write help
                         "-h", "--help" -> TODO("Help is not implemented yet")
 
-                        "-v", "--verbose" -> log.setConsoleLogLevel(LogLevel.Verbose)
-                        "-d", "--debug" -> log.setConsoleLogLevel(LogLevel.Debug)
-                        "-q", "--quiet" -> log.setConsoleLogLevel(LogLevel.None)
-
-                        "--in-jar" -> ret.inJar.setNextStringArg().ensureFileExists()
-                        "--out-stub-jar" -> ret.outStubJar.setNextStringArg()
-                        "--out-impl-jar" -> ret.outImplJar.setNextStringArg()
+                        "--in-jar" -> ret.inJar.set(nextArg()).ensureFileExists()
+                        "--out-stub-jar" -> ret.outStubJar.set(nextArg())
+                        "--out-impl-jar" -> ret.outImplJar.set(nextArg())
 
                         "--policy-override-file" ->
-                            ret.policyOverrideFile.setNextStringArg().ensureFileExists()
+                            ret.policyOverrideFile.set(nextArg())!!.ensureFileExists()
 
                         "--clean-up-on-error" -> ret.cleanUpOnError.set(true)
                         "--no-clean-up-on-error" -> ret.cleanUpOnError.set(false)
@@ -221,19 +217,19 @@ class HostStubGenOptions(
                             ret.packageRedirects += parsePackageRedirect(nextArg())
 
                         "--annotation-allowed-classes-file" ->
-                            ret.annotationAllowedClassesFile.setNextStringArg()
+                            ret.annotationAllowedClassesFile.set(nextArg())
 
                         "--default-class-load-hook" ->
-                            ret.defaultClassLoadHook.setNextStringArg()
+                            ret.defaultClassLoadHook.set(nextArg())
 
                         "--default-method-call-hook" ->
-                            ret.defaultMethodCallHook.setNextStringArg()
+                            ret.defaultMethodCallHook.set(nextArg())
 
                         "--intersect-stub-jar" ->
                             ret.intersectStubJars += nextArg().ensureFileExists()
 
                         "--gen-keep-all-file" ->
-                            ret.inputJarAsKeepAllFile.setNextStringArg()
+                            ret.inputJarAsKeepAllFile.set(nextArg())
 
                         // Following options are for debugging.
                         "--enable-class-checker" -> ret.enableClassChecker.set(true)
@@ -251,13 +247,21 @@ class HostStubGenOptions(
                         "--no-non-stub-method-check" ->
                             ret.enableNonStubMethodCallDetection.set(false)
 
-                        "--gen-input-dump-file" -> ret.inputJarDumpFile.setNextStringArg()
+                        "--gen-input-dump-file" -> ret.inputJarDumpFile.set(nextArg())
 
-                        "--verbose-log" -> setLogFile(LogLevel.Verbose, nextArg())
-                        "--debug-log" -> setLogFile(LogLevel.Debug, nextArg())
+                        "--stats-file" -> ret.statsFile.set(nextArg())
+                        "--supported-api-list-file" -> ret.apiListFile.set(nextArg())
 
-                        "--stats-file" -> ret.statsFile.setNextStringArg()
-                        "--supported-api-list-file" -> ret.apiListFile.setNextStringArg()
+                        "--num-shards" -> ret.numShards.set(nextArg()).also {
+                            if (it < 1) {
+                                throw ArgumentsException("$arg must be positive integer")
+                            }
+                        }
+                        "--shard-index" -> ret.shard.set(nextArg()).also {
+                            if (it < 0) {
+                                throw ArgumentsException("$arg must be positive integer or zero")
+                            }
+                        }
 
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }
@@ -273,6 +277,15 @@ class HostStubGenOptions(
                 log.w("Neither --out-stub-jar nor --out-impl-jar is set." +
                         " $executableName will not generate jar files.")
             }
+            if (ret.numShards.isSet != ret.shard.isSet) {
+                throw ArgumentsException("--num-shards and --shard-index must be used together")
+            }
+
+            if (ret.numShards.isSet) {
+                if (ret.shard.get >= ret.numShards.get) {
+                    throw ArgumentsException("--shard-index must be smaller than --num-shards")
+                }
+            }
 
             if (ret.enableNonStubMethodCallDetection.get) {
                 log.w("--enable-non-stub-method-check is not fully implemented yet." +
@@ -280,87 +293,6 @@ class HostStubGenOptions(
             }
 
             return ret
-        }
-
-        /**
-         * Scan the arguments, and if any of them starts with an `@`, then load from the file
-         * and use its content as arguments.
-         *
-         * In this file, each line is treated as a single argument.
-         *
-         * The file can contain '#' as comments.
-         */
-        private fun expandAtFiles(args: Array<String>): List<String> {
-            val ret = mutableListOf<String>()
-
-            args.forEach { arg ->
-                if (!arg.startsWith('@')) {
-                    ret += arg
-                    return@forEach
-                }
-                // Read from the file, and add each line to the result.
-                val filename = arg.substring(1).ensureFileExists()
-
-                log.v("Expanding options file $filename")
-
-                BufferedReader(FileReader(filename)).use { reader ->
-                    while (true) {
-                        var line = reader.readLine()
-                        if (line == null) {
-                            break // EOF
-                        }
-
-                        line = normalizeTextLine(line)
-                        if (line.isNotEmpty()) {
-                            ret += line
-                        }
-                    }
-                }
-            }
-            return ret
-        }
-    }
-
-    open class ArgumentsException(message: String?) : Exception(message), UserErrorException
-
-    /** Thrown when the same annotation is used with different annotation arguments. */
-    class DuplicateAnnotationException(annotationName: String?) :
-            ArgumentsException("Duplicate annotation specified: '$annotationName'")
-
-    /** Thrown when an input file does not exist. */
-    class InputFileNotFoundException(filename: String) :
-            ArgumentsException("File '$filename' not found")
-
-    private class ArgIterator(
-            private val args: List<String>,
-            private var currentIndex: Int = -1
-    ) {
-        val current: String
-            get() = args.get(currentIndex)
-
-        /**
-         * Get the next argument, or [null] if there's no more arguments.
-         */
-        fun nextArgOptional(): String? {
-            if ((currentIndex + 1) >= args.size) {
-                return null
-            }
-            return args.get(++currentIndex)
-        }
-
-        /**
-         * Get the next argument, or throw if
-         */
-        fun nextArgRequired(argName: String): String {
-            nextArgOptional().let {
-                if (it == null) {
-                    throw ArgumentsException("Missing parameter for option $argName")
-                }
-                if (it.isEmpty()) {
-                    throw ArgumentsException("Parameter can't be empty for option $argName")
-                }
-                return it
-            }
         }
     }
 
@@ -396,7 +328,86 @@ class HostStubGenOptions(
               enableNonStubMethodCallDetection=$enableNonStubMethodCallDetection,
               statsFile=$statsFile,
               apiListFile=$apiListFile,
+              numShards=$numShards,
+              shard=$shard,
             }
             """.trimIndent()
     }
+}
+
+class ArgIterator(
+    private val args: List<String>,
+    private var currentIndex: Int = -1
+) {
+    val current: String
+        get() = args.get(currentIndex)
+
+    /**
+     * Get the next argument, or [null] if there's no more arguments.
+     */
+    fun nextArgOptional(): String? {
+        if ((currentIndex + 1) >= args.size) {
+            return null
+        }
+        return args.get(++currentIndex)
+    }
+
+    /**
+     * Get the next argument, or throw if
+     */
+    fun nextArgRequired(argName: String): String {
+        nextArgOptional().let {
+            if (it == null) {
+                throw ArgumentsException("Missing parameter for option $argName")
+            }
+            if (it.isEmpty()) {
+                throw ArgumentsException("Parameter can't be empty for option $argName")
+            }
+            return it
+        }
+    }
+
+    companion object {
+        fun withAtFiles(args: Array<String>): ArgIterator {
+            return ArgIterator(expandAtFiles(args))
+        }
+    }
+}
+
+/**
+ * Scan the arguments, and if any of them starts with an `@`, then load from the file
+ * and use its content as arguments.
+ *
+ * In this file, each line is treated as a single argument.
+ *
+ * The file can contain '#' as comments.
+ */
+private fun expandAtFiles(args: Array<String>): List<String> {
+    val ret = mutableListOf<String>()
+
+    args.forEach { arg ->
+        if (!arg.startsWith('@')) {
+            ret += arg
+            return@forEach
+        }
+        // Read from the file, and add each line to the result.
+        val filename = arg.substring(1).ensureFileExists()
+
+        log.v("Expanding options file $filename")
+
+        BufferedReader(FileReader(filename)).use { reader ->
+            while (true) {
+                var line = reader.readLine()
+                if (line == null) {
+                    break // EOF
+                }
+
+                line = normalizeTextLine(line)
+                if (line.isNotEmpty()) {
+                    ret += line
+                }
+            }
+        }
+    }
+    return ret
 }

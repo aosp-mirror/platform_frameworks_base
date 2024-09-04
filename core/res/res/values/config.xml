@@ -3031,9 +3031,8 @@
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
     <!-- Whether the device allows full users to start in background visible on displays.
-         Note: this flag does NOT control the Communal Profile, which is not a full user.
-         Should be false for all devices in production. Can be enabled only for development use
-         in automotive vehicles with passenger displays. -->
+         Should be false for most devices, except automotive vehicle with passenger displays.
+         Note: this flag does NOT control the Communal Profile, which is not a full user. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
     <!-- Whether the device allows full users to start in background visible on the default display.
@@ -3065,10 +3064,13 @@
         frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller.java -->
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
 
-    <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
-     it can't be deleted or downgraded to non-admin status.
-     This is generally only relevant on headless system user mode devices; on other devices, the
-     main user is the system user which is always a permanent admin anyway. -->
+    <!-- Whether the device will automatically (at first boot) have a designated main user and treat
+         it as a permanent admin.
+         Since the main user is a permanent admin user it can't be deleted or downgraded to
+         non-admin status.
+         This is generally only relevant on headless system user mode (HSUM) devices; on other
+         devices, the main user is the system user which is always a permanent admin anyway.
+         Note that HSUM devices without this enabled will not automatically have a main user. -->
     <bool name="config_isMainUserPermanentAdmin">true</bool>
 
     <!-- Whether switch to headless system user is allowed. If allowed,
@@ -3078,8 +3080,13 @@
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
+    <!-- Whether to boot system with the headless system user, i.e. user 0. If set to true,
+         system will be booted with the headless system user, or user 0. It has no effect if device
+         is not in Headless System User Mode (HSUM). -->
+    <bool name="config_bootToHeadlessSystemUser">false</bool>
+
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
-     with admin privileges and admin privileges can be granted/revoked from existing users. -->
+         with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
 
     <!-- Whether there is a communal profile which should always be running.
@@ -3960,6 +3967,9 @@
     <!-- The default value for always on magnification feature flag if the remote feature
          flag does not exist -->
     <bool name="config_magnification_always_on_enabled">true</bool>
+
+    <!-- Whether to keep fullscreen magnification zoom level when context changes. -->
+    <bool name="config_magnification_keep_zoom_level_when_context_changed">false</bool>
 
     <!-- If true, the display will be shifted around in ambient mode. -->
     <bool name="config_enableBurnInProtection">false</bool>
@@ -4976,7 +4986,7 @@
     <!-- URI for camera shutter sound -->
     <string translatable="false" name="config_cameraShutterSound">/product/media/audio/ui/camera_click.ogg</string>
 
-    <!-- URI for default ringtone sound file to be used for silent ringer vibration -->
+    <!-- @deprecated This configuration is no longer used. -->
     <string translatable="false" name="config_defaultRingtoneVibrationSound"></string>
 
     <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->

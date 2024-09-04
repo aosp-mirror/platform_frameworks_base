@@ -107,10 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"ସ୍କ୍ରିନ ରେକର୍ଡର"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ସ୍କ୍ରିନ ରେକର୍ଡିଂର ପ୍ରକ୍ରିୟାକରଣ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବେ?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ଆପଣ ରେକର୍ଡ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"ଆପଣ ଏକ ଆପ ରେକର୍ଡ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ରେକର୍ଡ କରିବେ?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ଗୋଟିଏ ଆପ ରେକର୍ଡ କରନ୍ତୁ"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ରେକର୍ଡ କରନ୍ତୁ"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ଆପଣ ଆପଣଙ୍କର ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ରେକର୍ଡ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା ସବୁକିଛି ରେକର୍ଡ ହୋଇଥାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ଆପଣ ଏକ ଆପ ରେକର୍ଡ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛି ରେକର୍ଡ ହୋଇଥାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ସ୍କ୍ରିନ ରେକର୍ଡ କରନ୍ତୁ"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ରେକର୍ଡ କରିବାକୁ ଆପ ବାଛନ୍ତୁ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ଡିଭାଇସ ଅଡିଓ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ମ୍ୟୁଜିକ, କଲ ଏବଂ ରିଂଟୋନଗୁଡ଼ିକ ପରି ଆପଣଙ୍କ ଡିଭାଇସରୁ ସାଉଣ୍ଡ"</string>
@@ -153,7 +156,7 @@
     <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"ରେକର୍ଡିଂରେ ସମସ୍ୟା"</string>
     <string name="issuerecord_share_label" msgid="3992657993619876199">"ସେୟାର କରନ୍ତୁ"</string>
     <string name="issuerecord_save_title" msgid="4161043023696751591">"ସମସ୍ୟାର ରେକର୍ଡିଂକୁ ସେଭ କରାଯାଇଛି"</string>
-    <string name="issuerecord_save_text" msgid="1205985304551521495">"ଦେଖିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"ଭ୍ୟୁ କରିବାକୁ ଟାପ କରନ୍ତୁ"</string>
     <string name="issuerecord_save_error" msgid="6913040083446722726">"ସମସ୍ୟାର ରେକର୍ଡିଂ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="issuerecord_start_error" msgid="3402782952722871190">"ସମସ୍ୟାର ରେକର୍ଡିଂ ଆରମ୍ଭ କରିବାରେ ତ୍ରୁଟି"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନରେ ଦେଖିବା"</string>
@@ -176,8 +179,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ପଠାନ୍ତୁ"</string>
     <string name="cancel" msgid="1089011503403416730">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"ଆପ ଲୋଗୋ"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ପ୍ରାମାଣିକତା ବାତିଲ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
@@ -307,6 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ବ୍ଲୁଟୁଥ ଆସନ୍ତା କାଲି ସକାଳେ ଚାଲୁ ହେବ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ଅଡିଓ ସେୟାର କରନ୍ତୁ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"ଅଡିଓ ସେୟାର କରାଯାଉଛି"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"ଅଡିଓ ସେୟାରିଂ ସେଟିଂସରେ ପ୍ରବେଶ କରନ୍ତୁ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ବ୍ୟାଟେରୀ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ଅଡିଓ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ହେଡସେଟ୍‍"</string>
@@ -381,7 +383,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ସମସ୍ୟାର ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ବଗ୍‌ ରିପୋର୍ଟ୍‌"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ବଗ ରିପୋର୍ଟ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ଆପଣଙ୍କ ଡିଭାଇସ ଅନୁଭୂତିର କେଉଁ ଅଂଶ ପ୍ରଭାବିତ ହୋଇଛି?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ସମସ୍ୟାର ପ୍ରକାର ଚୟନ କରନ୍ତୁ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ସ୍କ୍ରିନ ରେକର୍ଡ"</string>
@@ -400,7 +402,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ନୂଆ ଡିଭାଇସ ପେୟାର କରିବାକୁ କ୍ଲିକ କରନ୍ତୁ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ପ୍ରିସେଟକୁ ଅପଡେଟ କରାଯାଇପାରିଲା ନାହିଁ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ପ୍ରିସେଟ"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"ଲାଇଭ କେପ୍ସନ"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"ଲାଇଭ କେପ୍ସନ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ଡିଭାଇସର କେମେରାକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ଡିଭାଇସର କ୍ୟାମେରା ଏବଂ ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରିବେ?"</string>
@@ -433,13 +435,11 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ହୋଇଗଲା"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ସେଟିଂସ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ଚାଲୁ ଅଛି"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ଚାଲୁ ଅଛି • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ବନ୍ଦ ଅଛି"</string>
-    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
-    <skip />
-    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
-    <skip />
-    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"ସେଟ ଅପ କରନ୍ତୁ"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ସେଟିଂସରେ ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{କୌଣସି ସକ୍ରିୟ ମୋଡ ନାହିଁ}=1{{mode} ସକ୍ରିୟ ଅଛି}other{# ମୋଡ ସକ୍ରିୟ ଅଛି}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ଆଲାର୍ମ, ରିମାଇଣ୍ଡର୍‌, ଇଭେଣ୍ଟ ଏବଂ ଆପଣ ନିର୍ଦ୍ଦିଷ୍ଟ କରିଥିବା କଲର୍‌ଙ୍କ ବ୍ୟତୀତ ଆପଣଙ୍କ ଧ୍ୟାନ ଅନ୍ୟ କୌଣସି ଧ୍ୱନୀ ଏବଂ ଭାଇବ୍ରେଶନ୍‌ରେ ଆକର୍ଷଣ କରାଯିବନାହିଁ। ମ୍ୟୁଜିକ୍‍, ଭିଡିଓ ଏବଂ ଗେମ୍‌ ସମେତ ନିଜେ ଚଲାଇବାକୁ ବାଛିଥିବା ଅନ୍ୟ ସବୁକିଛି ଆପଣ ଶୁଣିପାରିବେ।"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"ଆଲାର୍ମ ବ୍ୟତୀତ ଆପଣଙ୍କ ଧ୍ୟାନ ଅନ୍ୟ କୌଣସି ଧ୍ୱନୀ ଏବଂ ଭାଇବ୍ରେଶନ୍‌ରେ ଆକର୍ଷଣ କରାଯିବନାହିଁ। ମ୍ୟୁଜିକ୍‍, ଭିଡିଓ ଏବଂ ଗେମ୍‌ ସମେତ ନିଜେ ଚଲାଇବାକୁ ବାଛିଥିବା ଅନ୍ୟ ସବୁକିଛି ଆପଣ ଶୁଣିପାରିବେ।"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"କଷ୍ଟମାଇଜ୍‌ କରନ୍ତୁ"</string>
@@ -478,8 +478,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ଚାର୍ଜ ହେଉଛି • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ରେ ସମ୍ପୂର୍ଣ୍ଣ ହେବ"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ଲକ ସ୍କ୍ରିନରେ ଥିବା ୱିଜେଟଗୁଡ଼ିକ"</string>
-    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
-    <skip />
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"ଲକ ସ୍କ୍ରିନରେ <xliff:g id="WIDGET_NAME">%1$s</xliff:g> ୱିଜେଟ ଯୋଗ କରାଯାଇଛି"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"କମ୍ୟୁନାଲ ଟ୍ୟୁଟୋରିଆଲ ଆରମ୍ଭ କରିବା ପାଇଁ ବାମକୁ ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ଖାରଜ କରନ୍ତୁ"</string>
@@ -531,22 +530,27 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"ରେକର୍ଡ ବା କାଷ୍ଟ କରିବା ସମୟରେ ଆପଣଙ୍କ ଡିଭାଇସରୁ ପ୍ଲେ ହେଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା ସମସ୍ତ ସୂଚନାକୁ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ର ଆକ୍ସେସ ରହିବ। ଏଥିରେ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ ଏବଂ ଆପଣ ପ୍ଲେ କରୁଥିବା ଅଡିଓ ପରି ସୂଚନା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ରେକର୍ଡ ବା କାଷ୍ଟ କରିବା ସମୟରେ ଆପଣଙ୍କ ଡିଭାଇସରୁ ପ୍ଲେ ହେଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା ସମସ୍ତ ସୂଚନାକୁ ଏହି ଫଙ୍କସନ ପ୍ରଦାନ କରୁଥିବା ସେବାର ଆକ୍ସେସ ରହିବ। ଏଥିରେ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ଫଟୋ, ମେସେଜ ଏବଂ ଆପଣ ପ୍ଲେ କରୁଥିବା ଅଡିଓ ପରି ସୂଚନା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"ଏକ ସିଙ୍ଗଲ ଆପ"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"ଏକ ଆପକୁ ସେୟାର କିମ୍ବା ରେକର୍ଡ କରନ୍ତୁ"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ସହ ରେକର୍ଡିଂ ବା କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"ଆପଣ ସେୟାର, ରେକର୍ଡ କିମ୍ବା କାଷ୍ଟ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"ଆପଣ ଏକ ଆପ ସେୟାର, ରେକର୍ଡ କିମ୍ବା କାଷ୍ଟ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"ଏକ ଆପକୁ ସେୟାର କିମ୍ବା ରେକର୍ଡ କରନ୍ତୁ"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ସହ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ସେୟାର କରନ୍ତୁ?"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"ଗୋଟିଏ ଆପ ସେୟାର କରନ୍ତୁ"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ସେୟାର କରନ୍ତୁ"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"ଆପଣ ଆପଣଙ୍କ ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ ସେୟାର କରିବା ସମୟରେ ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ସବୁକିଛି <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>କୁ ଦେଖାଯାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"ଆପଣ ଏକ ଆପ ସେୟାର କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛି <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>କୁ ଦେଖାଯାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"ସ୍କ୍ରିନ ସେୟାର କରନ୍ତୁ"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଏହି ବିକଳ୍ପକୁ ଅକ୍ଷମ କରିଛି"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"କାଷ୍ଟିଂ ଆରମ୍ଭ କରିବେ?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"ଆପଣ କାଷ୍ଟ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ଆପଣ ଏକ ଆପ କାଷ୍ଟ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପାଇଁ ସତର୍କ ରୁହନ୍ତୁ।"</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"କାଷ୍ଟିଂ ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"ସେୟାର କରିବାକୁ ଆପ ବାଛନ୍ତୁ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ କାଷ୍ଟ କରିବେ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"ଗୋଟିଏ ଆପକୁ କାଷ୍ଟ କରନ୍ତୁ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ କାଷ୍ଟ କରନ୍ତୁ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"ଆପଣ ଆପଣଙ୍କ ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ କାଷ୍ଟ କରିବା ସମୟରେ ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ସବୁକିଛି ଦେଖାଯାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"ଆପଣ ଏକ ଆପ କାଷ୍ଟ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛି ଦେଖାଯାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"କାଷ୍ଟ ସ୍କ୍ରିନ"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"କାଷ୍ଟ କରିବାକୁ ଆପ ବାଛନ୍ତୁ"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ସେୟାରିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ଆପଣ ସେୟାର, ରେକର୍ଡ କିମ୍ବା କାଷ୍ଟ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ଆପଣ ଏକ ଆପ ସେୟାର, ରେକର୍ଡ କିମ୍ବା କାଷ୍ଟ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"ପରବର୍ତ୍ତୀ"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"ଆପଣ ଆପ୍ସ ସୁଇଚ କଲେ ସେୟାରିଂ ବିରତ ହୁଏ"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"ଏହା ପରିବର୍ତ୍ତେ ଏହି ଆପ ସେୟାର କରନ୍ତୁ"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"ପୁଣି ସୁଇଚ କରନ୍ତୁ"</string>
@@ -592,7 +596,7 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"ନେଟୱାର୍କ ଲଗିଂ"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA ସର୍ଟିଫିକେଟ୍‌"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ପଲିସୀ ଦେଖନ୍ତୁ"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ନୀତିଗୁଡ଼ିକୁ ଭ୍ୟୁ କରନ୍ତୁ"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ।\n\nଆପଣଙ୍କ IT ଆଡମିନ ସେଟିଂସ, କର୍ପୋରେଟ ଆକ୍ସେସ, ଆପ୍ସ, ଆପଣଙ୍କ ଡିଭାଇସ ସହ ସମ୍ବନ୍ଧିତ ଡାଟା ଏବଂ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ ସୂଚନାକୁ ନିରୀକ୍ଷଣ ଏବଂ ପରିଚାଳନା କରିପାରିବେ।\n\nଅଧିକ ସୂଚନା ପାଇଁ, ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> ଏହି ଡିଭାଇସ ସହ ସମ୍ବନ୍ଧିତ ଡାଟା ଆକ୍ସେସ କରିବା, ଆପଗୁଡ଼ିକୁ ପରିଚାଳନା କରିବା ଏବଂ ଏହି ଡିଭାଇସର ସେଟିଂସ ବଦଳାଇବାକୁ ସକ୍ଷମ ହୋଇପାରେ।\n\nଯଦି ଆପଣଙ୍କର କିଛି ପ୍ରଶ୍ନ ଅଛି, ତେବେ <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
@@ -600,7 +604,7 @@
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ଏହି ଡିଭାଇସରେ ଆପଣଙ୍କ ସଂସ୍ଥା ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲରେ ଆପଣଙ୍କ ସଂସ୍ଥା ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ଏହି ଡିଭାଇସରେ ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରାଯାଇଛି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
-    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ଆପଣଙ୍କ ଆଡମିନ୍‍ ନେଟୱର୍କ ଲଗଇନ୍‍ କରିବା ଅନ୍‍ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ଡିଭାଇସରେ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରେ।"</string>
+    <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ଆପଣଙ୍କ ଆଡମିନ ନେଟୱାର୍କ ଲଗିଂ ଚାଲୁ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ଡିଭାଇସରେ ଟ୍ରାଫିକ ନୀରିକ୍ଷଣ କରେ।"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ଆପଣଙ୍କ ଆଡମିନ୍ ନେଟୱାର୍କ ଲଗିଂ ଚାଲୁ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଟ୍ରାଫିକ୍ ନିରୀକ୍ଷଣ କରେ କିନ୍ତୁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ ନୁହେଁ।"</string>
     <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"ଏହି ଡିଭାଇସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ହୋଇଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ VPN ପ୍ରଦାନକାରୀଙ୍କୁ ଦେଖାଯାଉଛି।"</string>
     <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"ଏହି ଡିଭାଇସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ ଆପଣଙ୍କର IT ଆଡମିନଙ୍କୁ ଦୃଶ୍ୟମାନ ହୋଇଥାଏ।"</string>
@@ -714,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ସାଟେଲାଇଟ, ଭଲ କନେକ୍ସନ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ସାଟେଲାଇଟ, କନେକ୍ସନ ଉପଲବ୍ଧ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ସେଟେଲାଇଟ SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"କେତେକଙ୍କ ପାଇଁ ମଜାଦାର, କିନ୍ତୁ ସମସ୍ତଙ୍କ ପାଇଁ ନୁହେଁ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Android ୟୁଜର୍‍ ଇଣ୍ଟରଫେସ୍‍ ବଦଳାଇବାକୁ ତଥା ନିଜ ପସନ୍ଦ ଅନୁଯାୟୀ କରିବାକୁ ସିଷ୍ଟମ୍‍ UI ଟ୍ୟୁନର୍‍ ଆପଣଙ୍କୁ ଅତିରିକ୍ତ ଉପାୟ ପ୍ରଦାନ କରେ। ଏହି ପରୀକ୍ଷାମୂଳକ ସୁବିଧାମାନ ବଦଳିପାରେ, ଭାଙ୍ଗିପାରେ କିମ୍ବା ଭବିଷ୍ୟତର ରିଲିଜ୍‌ଗୁଡ଼ିକରେ ନଦେଖାଯାଇପାରେ। ସତର୍କତାର ସହ ଆଗକୁ ବଢ଼ନ୍ତୁ।"</string>
@@ -1376,6 +1382,7 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"କୀବୋର୍ଡ ସର୍ଟକଟ"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ସର୍ଚ୍ଚ ସର୍ଟକଟ"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"କୌଣସି ସର୍ଚ୍ଚ ଫଳାଫଳ ନାହିଁ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ଆଇକନକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ଆଇକନକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"କିମ୍ବା"</string>
@@ -1383,14 +1390,18 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ହୋମ ଜେଶ୍ଚର"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"ଆକ୍ସନ କୀ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ହୋଇଗଲା"</string>
-    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"ବଢ଼ିଆ କାମ!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ପଛକୁ ଫେରନ୍ତୁ"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
-    <skip />
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"ଡାହାଣ ଏବଂ ବାମକୁ ତିନି ଆଙ୍ଗୁଠି ମୁଭ କରୁଥିବା ଟଚପେଡ ଦେଖାଉଛି"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"ଡିଭାଇସ ସ୍କ୍ରିନ ବେକ ଜେଶ୍ଚର ପାଇଁ ଆନିମେସନ ଦେଖାଉଛି"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ପଛକୁ ଫେରିବା ପାଇଁ ଯେ କୌଣସି ସ୍ଥାନରେ ତିନି ଆଙ୍ଗୁଠି ବ୍ୟବହାର କରି ବାମ କିମ୍ବା ଡାହାଣକୁ ସ୍ୱାଇପ କରନ୍ତୁ।\n\nଏଥିପାଇଁ ଆପଣ କୀବୋର୍ଡ ସର୍ଟକଟ ଆକ୍ସନ + ESC ମଧ୍ୟ ବ୍ୟବହାର କରିପାରିବେ।"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ବଢ଼ିଆ କାମ!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ଆପଣ \'ପଛକୁ ଫେରନ୍ତୁ\' ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ହୋମକୁ ଯାଆନ୍ତୁ"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ଯେ କୌଣସି ସମୟରେ ଆପଣଙ୍କ ହୋମ ସ୍କ୍ରିନକୁ ଯିବା ପାଇଁ ଆପଣଙ୍କ ସ୍କିନର ତଳୁ ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ କରନ୍ତୁ।"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ବଢ଼ିଆ!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ଆପଣ \'ହୋମକୁ ଯାଆନ୍ତୁ\' ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ଆକ୍ସନ କୀ"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ଆପଣଙ୍କ ଆପ୍ସ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣଙ୍କର କୀବୋର୍ଡରେ ଆକ୍ସନ କୀ\'କୁ ଦବାନ୍ତୁ।"</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ଅଭିନନ୍ଦନ!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ଆପଣ ଆକ୍ସନ କୀ ଜେଶ୍ଚରକୁ ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।\n\nଆକ୍ସନ + / ଆପଣଙ୍କ ପାଖରେ ଉପଲବ୍ଧ ଥିବା ସମସ୍ତ ସଟକର୍ଟକୁ ଦେଖାଇଥାଏ।"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"କୀବୋର୍ଡ ବେକଲାଇଟ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dରୁ %1$d ନମ୍ବର ଲେଭେଲ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ହୋମ କଣ୍ଟ୍ରୋଲ୍ସ"</string>
@@ -1400,6 +1411,8 @@
     <string name="home_edu_toast_content" msgid="3381071147871955415">"ହୋମକୁ ଯିବା ପାଇଁ ଟଚପେଡରେ ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ କରନ୍ତୁ"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"ବର୍ତ୍ତମାନର ଆପ୍ସ ଭ୍ୟୁ କରିବାକୁ, ଟଚପେଡରେ ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ଆପଣଙ୍କ ସମସ୍ତ ଆପ୍ସ ଭ୍ୟୁ କରିବା ପାଇଁ ଆପଣଙ୍କ କୀବୋର୍ଡରେ ଆକ୍ସନ କୀ\'କୁ ଦବାନ୍ତୁ"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"ଲୁଚା ଯାଇଥିବା"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ଭ୍ୟୁ କରିବାକୁ ଅନଲକ କରନ୍ତୁ"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ପଛକୁ ଫେରିବା ପାଇଁ ଆପଣଙ୍କ ଟଚପେଡକୁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"ତିନୋଟି ଆଙ୍ଗୁଠିରେ ବାମ ବା ଡାହାଣକୁ ସ୍ୱାଇପ କରନ୍ତୁ। ଜେଶ୍ଚରଗୁଡ଼ିକ ବିଷୟରେ ଅଧିକ ଜାଣିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ହୋମକୁ ଯିବା ପାଇଁ ଆପଣଙ୍କ ଟଚପେଡ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -1408,4 +1421,8 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ କରି ଧରି ରଖନ୍ତୁ। ଜେଶ୍ଚରଗୁଡ଼ିକ ବିଷୟରେ ଅଧିକ ଜାଣିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ସମସ୍ତ ଆପ୍ସ ଭ୍ୟୁ କରିବା ପାଇଁ ଆପଣଙ୍କ କୀବୋର୍ଡକୁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ଯେ କୌଣସି ସମୟରେ ଆକ୍ସନ କୀ\'କୁ ଦବାନ୍ତୁ। ଜେଶ୍ଚରଗୁଡ଼ିକ ବିଷୟରେ ଅଧିକ ଜାଣିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"ଅତିରିକ୍ତ ଡିମ ବର୍ତ୍ତମାନ ଉଜ୍ଜ୍ୱଳତା ବାରର ଅଂଶ ଅଟେ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"ବର୍ତ୍ତମାନ ଆପଣ ଆପଣଙ୍କ ସ୍କ୍ରିନର ଶୀର୍ଷରୁ ଉଜ୍ଜ୍ୱଳତାର ଲେଭେଲ ହ୍ରାସ କରି ସ୍କ୍ରିନକୁ ଅତିରିକ୍ତ ଡିମ କରିପାରିବେ।\n\nଆପଣ ଏକ ଡାର୍କ ପରିବେଶରେ ଥିଲେ ଏହା ସବୁଠାରୁ ଭଲ କାମ କରେ।"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"ଅତିରିକ୍ତ ଡିମ ସର୍ଟକଟକୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"ଅତିରିକ୍ତ ଡିମର ସର୍ଟକଟ କାଢ଼ି ଦିଆଯାଇଛି। ଆପଣଙ୍କ ଉଜ୍ଜ୍ୱଳତା ହ୍ରାସ କରିବା ପାଇଁ ନିୟମିତ ଉଜ୍ଜ୍ୱଳତା ବାର ବ୍ୟବହାର କରନ୍ତୁ।"</string>
 </resources>

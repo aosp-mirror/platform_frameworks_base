@@ -19,20 +19,19 @@ package com.android.systemui.settings.brightness.ui.viewModel
 import android.content.res.Resources
 import android.util.Log
 import android.view.View
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.settings.brightness.ToggleSlider
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
-import javax.inject.Inject
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-@SysUISingleton
 class BrightnessMirrorViewModel
-@Inject
+@AssistedInject
 constructor(
     private val brightnessMirrorShowingInteractor: BrightnessMirrorShowingInteractor,
     @Main private val resources: Resources,
@@ -98,6 +97,11 @@ constructor(
     override fun addCallback(listener: MirrorController.BrightnessMirrorListener) {}
 
     override fun removeCallback(listener: MirrorController.BrightnessMirrorListener) {}
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): BrightnessMirrorViewModel
+    }
 
     companion object {
         private const val TAG = "BrightnessMirrorViewModel"

@@ -15,8 +15,9 @@
 package com.android.systemui.statusbar;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
+import static android.inputmethodservice.InputMethodService.IME_ACTIVE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
@@ -195,9 +196,11 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, IME_ACTIVE,
+                BACK_DISPOSITION_ADJUST_NOTHING, true);
         waitForIdleSync();
-        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(1), eq(2), eq(true));
+        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(IME_ACTIVE),
+                eq(BACK_DISPOSITION_ADJUST_NOTHING), eq(true));
     }
 
     @Test
@@ -205,11 +208,13 @@ public class CommandQueueTest extends SysuiTestCase {
         // First show in default display to update the "last updated ime display"
         testShowImeButton();
 
-        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, IME_ACTIVE,
+                BACK_DISPOSITION_ADJUST_NOTHING, true);
         waitForIdleSync();
-        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(IME_INVISIBLE),
+        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(0) /* vis */,
                 eq(BACK_DISPOSITION_DEFAULT), eq(false));
-        verify(mCallbacks).setImeWindowStatus(eq(SECONDARY_DISPLAY), eq(1), eq(2), eq(true));
+        verify(mCallbacks).setImeWindowStatus(eq(SECONDARY_DISPLAY), eq(IME_ACTIVE),
+                eq(BACK_DISPOSITION_ADJUST_NOTHING), eq(true));
     }
 
     @Test

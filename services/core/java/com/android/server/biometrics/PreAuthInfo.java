@@ -77,13 +77,15 @@ class PreAuthInfo {
     private final int mBiometricStrengthRequested;
     private final BiometricCameraManager mBiometricCameraManager;
     private final boolean mOnlyMandatoryBiometricsRequested;
+    private final boolean mIsMandatoryBiometricsAuthentication;
 
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
             List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
             PromptInfo promptInfo, int userId, Context context,
             BiometricCameraManager biometricCameraManager,
-            boolean isOnlyMandatoryBiometricsRequested) {
+            boolean isOnlyMandatoryBiometricsRequested,
+            boolean isMandatoryBiometricsAuthentication) {
         mBiometricRequested = biometricRequested;
         mBiometricStrengthRequested = biometricStrengthRequested;
         mBiometricCameraManager = biometricCameraManager;
@@ -97,6 +99,7 @@ class PreAuthInfo {
         this.userId = userId;
         this.context = context;
         this.mOnlyMandatoryBiometricsRequested = isOnlyMandatoryBiometricsRequested;
+        this.mIsMandatoryBiometricsAuthentication = isMandatoryBiometricsAuthentication;
     }
 
     static PreAuthInfo create(ITrustManager trustManager,
@@ -110,10 +113,12 @@ class PreAuthInfo {
 
         final boolean isOnlyMandatoryBiometricsRequested = promptInfo.getAuthenticators()
                 == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
+        boolean isMandatoryBiometricsAuthentication = false;
 
         if (dropCredentialFallback(promptInfo.getAuthenticators(),
                 settingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
                         userId), trustManager)) {
+            isMandatoryBiometricsAuthentication = true;
             promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
             promptInfo.setNegativeButtonText(context.getString(R.string.cancel));
         }
@@ -166,7 +171,8 @@ class PreAuthInfo {
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
                 eligibleSensors, ineligibleSensors, credentialAvailable, promptInfo, userId,
-                context, biometricCameraManager, isOnlyMandatoryBiometricsRequested);
+                context, biometricCameraManager, isOnlyMandatoryBiometricsRequested,
+                isMandatoryBiometricsAuthentication);
     }
 
     private static boolean dropCredentialFallback(int authenticators,
@@ -387,25 +393,6 @@ class PreAuthInfo {
                     status = CREDENTIAL_NOT_ENROLLED;
                 }
             }
-        } else if (Flags.mandatoryBiometrics() && mOnlyMandatoryBiometricsRequested) {
-            if (!eligibleSensors.isEmpty()) {
-                for (BiometricSensor sensor : eligibleSensors) {
-                    modality |= sensor.modality;
-                }
-
-                if (modality == TYPE_FACE && cameraPrivacyEnabled) {
-                    // If the only modality requested is face, credential is unavailable,
-                    // and the face sensor privacy is enabled then return
-                    // BIOMETRIC_SENSOR_PRIVACY_ENABLED.
-                    //
-                    // Note: This sensor will not be eligible for calls to authenticate.
-                    status = BIOMETRIC_SENSOR_PRIVACY_ENABLED;
-                } else {
-                    status = AUTHENTICATOR_OK;
-                }
-            } else {
-                status = MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR;
-            }
         } else if (mBiometricRequested) {
             if (!eligibleSensors.isEmpty()) {
                 for (BiometricSensor sensor : eligibleSensors) {
@@ -434,6 +421,9 @@ class PreAuthInfo {
         } else if (credentialRequested) {
             modality |= TYPE_CREDENTIAL;
             status = credentialAvailable ? AUTHENTICATOR_OK : CREDENTIAL_NOT_ENROLLED;
+        } else if (Flags.mandatoryBiometrics() && mOnlyMandatoryBiometricsRequested
+                && !mIsMandatoryBiometricsAuthentication) {
+            status = MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR;
         } else {
             // This should not be possible via the public API surface and is here mainly for
             // "correctness". An exception should have been thrown before getting here.
@@ -456,6 +446,12 @@ class PreAuthInfo {
                 Utils.authenticatorStatusToBiometricConstant(
                         getInternalStatus().second));
     }
+
+    /** Returns if mandatory biometrics authentication is in effect */
+    boolean getIsMandatoryBiometricsAuthentication() {
+        return mIsMandatoryBiometricsAuthentication;
+    }
+
 
     /**
      * For the given request, generate the appropriate reason why authentication cannot be started.

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
@@ -25,11 +27,12 @@ import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
-import com.android.systemui.scene.sceneKeys
+import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -37,12 +40,15 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer
@@ -57,6 +63,9 @@ class SceneContainerViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: SceneContainerViewModel
 
+    private lateinit var activationJob: Job
+    private var motionEventHandler: SceneContainerViewModel.MotionEventHandler? = null
+
     @Before
     fun setUp() {
         underTest =
@@ -64,26 +73,44 @@ class SceneContainerViewModelTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
+                logger = kosmos.sceneLogger,
+                motionEventHandlerReceiver = { motionEventHandler ->
+                    this@SceneContainerViewModelTest.motionEventHandler = motionEventHandler
+                },
             )
+        activationJob = Job()
+        underTest.activateIn(testScope, activationJob)
     }
+
+    @Test
+    fun activate_setsMotionEventHandler() =
+        testScope.runTest {
+            runCurrent()
+            assertThat(motionEventHandler).isNotNull()
+        }
+
+    @Test
+    fun deactivate_clearsMotionEventHandler() =
+        testScope.runTest {
+            activationJob.cancel()
+            runCurrent()
+
+            assertThat(motionEventHandler).isNull()
+        }
 
     @Test
     fun isVisible() =
         testScope.runTest {
-            val isVisible by collectLastValue(underTest.isVisible)
-            assertThat(isVisible).isTrue()
+            assertThat(underTest.isVisible).isTrue()
 
             sceneInteractor.setVisible(false, "reason")
-            assertThat(isVisible).isFalse()
+            runCurrent()
+            assertThat(underTest.isVisible).isFalse()
 
             sceneInteractor.setVisible(true, "reason")
-            assertThat(isVisible).isTrue()
+            runCurrent()
+            assertThat(underTest.isVisible).isTrue()
         }
-
-    @Test
-    fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys).isEqualTo(kosmos.sceneKeys)
-    }
 
     @Test
     fun sceneTransition() =
@@ -203,15 +230,17 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     fun remoteUserInteraction_keepsContainerVisible() =
         testScope.runTest {
             sceneInteractor.setVisible(false, "reason")
-            val isVisible by collectLastValue(underTest.isVisible)
-            assertThat(isVisible).isFalse()
-            sceneInteractor.onRemoteUserInteractionStarted("reason")
-            assertThat(isVisible).isTrue()
+            runCurrent()
+            assertThat(underTest.isVisible).isFalse()
+            sceneInteractor.onRemoteUserInputStarted("reason")
+            runCurrent()
+            assertThat(underTest.isVisible).isTrue()
 
             underTest.onMotionEvent(
                 mock { whenever(actionMasked).thenReturn(MotionEvent.ACTION_UP) }
             )
+            runCurrent()
 
-            assertThat(isVisible).isFalse()
+            assertThat(underTest.isVisible).isFalse()
         }
 }

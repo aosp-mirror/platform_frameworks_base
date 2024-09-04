@@ -62,7 +62,8 @@ public class BiometricSchedulerOperationTest {
             extends HalClientMonitor<T> {
         public InterruptableMonitor() {
             super(null, null, null, null, 0, null, 0, 0,
-                    mock(BiometricLogger.class), mock(BiometricContext.class));
+                    mock(BiometricLogger.class), mock(BiometricContext.class),
+                    false /* isMandatoryBiometrics */);
         }
     }
 

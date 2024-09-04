@@ -17,9 +17,9 @@ package com.android.hoststubgen.test.tinyframework;
 
 import android.hosttest.annotation.HostSideTestNativeSubstitutionClass;
 import android.hosttest.annotation.HostSideTestThrow;
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 @HostSideTestNativeSubstitutionClass("TinyFrameworkNative_host")
 public class TinyFrameworkNative {
     public static native int nativeAddTwo(int arg);

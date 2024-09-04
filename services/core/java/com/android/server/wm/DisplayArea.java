@@ -356,7 +356,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 

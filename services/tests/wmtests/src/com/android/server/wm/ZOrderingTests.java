@@ -40,23 +40,16 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
-import android.util.SparseBooleanArray;
-import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.ScreenCapture;
@@ -410,30 +403,6 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForImeOnAppWithRecentsAnimating() {
-        final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
-                mAppWindow.mActivityRecord, "imeAppTarget");
-        mDisplayContent.setImeInputTarget(imeAppTarget);
-        mDisplayContent.setImeLayeringTarget(imeAppTarget);
-        mDisplayContent.setImeControlTarget(imeAppTarget);
-        mDisplayContent.updateImeParent();
-
-        // Simulate the ime layering target task is animating with recents animation.
-        final Task imeAppTargetTask = imeAppTarget.getTask();
-        final SurfaceAnimator imeTargetTaskAnimator = imeAppTargetTask.mSurfaceAnimator;
-        spyOn(imeTargetTaskAnimator);
-        doReturn(ANIMATION_TYPE_RECENTS).when(imeTargetTaskAnimator).getAnimationType();
-        doReturn(true).when(imeTargetTaskAnimator).isAnimating();
-
-        mDisplayContent.assignChildLayers(mTransaction);
-
-        // Ime should on top of the application window when in recents animation and keep
-        // attached on app.
-        assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        assertWindowHigher(mImeWindow, imeAppTarget);
-    }
-
-    @Test
     public void testAssignWindowLayers_ForImeOnPopupImeLayeringTarget() {
         final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
                 mAppWindow.mActivityRecord, "imeAppTarget");
@@ -490,43 +459,6 @@ public class ZOrderingTests extends WindowTestsBase {
             assertThat(t.getLayer(childList.get(i).getSurfaceControl()))
                     .isGreaterThan(PRESERVED_SURFACE_LAYER);
         }
-    }
-
-    @Test
-    public void testAttachNavBarWhenEnteringRecents_expectNavBarHigherThanIme() {
-        // create RecentsAnimationController
-        IRecentsAnimationRunner mockRunner = mock(IRecentsAnimationRunner.class);
-        when(mockRunner.asBinder()).thenReturn(new Binder());
-        final int displayId = mDisplayContent.getDisplayId();
-        RecentsAnimationController controller = new RecentsAnimationController(
-                mWm, mockRunner, null, displayId);
-        spyOn(controller);
-        doReturn(mNavBarWindow).when(controller).getNavigationBarWindow();
-        mWm.setRecentsAnimationController(controller);
-
-        // set ime visible
-        spyOn(mDisplayContent.mInputMethodWindow);
-        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
-
-        DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
-        spyOn(policy);
-        doReturn(true).when(policy).shouldAttachNavBarToAppDuringTransition();
-
-        // create home activity
-        Task rootHomeTask = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
-        final ActivityRecord homeActivity = new ActivityBuilder(mWm.mAtmService)
-                .setParentTask(rootHomeTask)
-                .setCreateTask(true)
-                .build();
-        homeActivity.setVisibility(true);
-
-        // start recent animation
-        controller.initialize(homeActivity.getActivityType(), new SparseBooleanArray(),
-                homeActivity);
-
-        mDisplayContent.assignChildLayers(mTransaction);
-        assertZOrderGreaterThan(mTransaction, mNavBarWindow.mToken.getSurfaceControl(),
-                mDisplayContent.getImeContainer().getSurfaceControl());
     }
 
     @Test

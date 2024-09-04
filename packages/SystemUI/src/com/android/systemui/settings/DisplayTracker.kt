@@ -17,6 +17,7 @@
 package com.android.systemui.settings
 
 import android.view.Display
+import com.android.systemui.util.annotations.WeaklyReferencedCallback
 import java.util.concurrent.Executor
 
 /**
@@ -52,6 +53,7 @@ interface DisplayTracker {
     fun getDisplay(displayId: Int): Display
 
     /** Ćallback for notifying of changes. */
+    @WeaklyReferencedCallback
     interface Callback {
 
         /** Notifies that a display has been added. */

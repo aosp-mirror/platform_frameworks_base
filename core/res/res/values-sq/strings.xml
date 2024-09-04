@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Shkrimi i dorës nuk mbështetet në fushat e fjalëkalimeve"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Pas"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Ndërro metodën e hyrjes"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Hap zgjedhësin e metodës së hyrjes"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Cilësimet"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Hapësira ruajtëse po mbaron"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Disa funksione të sistemit mund të mos punojnë"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Nuk ka hapësirë të mjaftueshme ruajtjeje për sistemin. Sigurohu që të kesh 250 MB hapësirë të lirë dhe pastaj të rifillosh."</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Përmbajtja e aplikacionit është fshehur nga ndarja e ekranit për arsye sigurie"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"U lidh automatikisht me satelitin"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Mund të dërgosh dhe të marrësh mesazhe pa një rrjet celular apo rrjet Wi-Fi"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Të përdoret shkëmbimi i mesazheve nëpërmjet satelitit?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Dërgo dhe merr mesazhe pa një rrjet celular ose Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Hap \"Mesazhet\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Si funksionon"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Në pritje..."</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Makina llogaritëse"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Aplikacionet"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Gjurmët e tua të gishtave nuk mund të njihen më. Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\"."</string>
 </resources>

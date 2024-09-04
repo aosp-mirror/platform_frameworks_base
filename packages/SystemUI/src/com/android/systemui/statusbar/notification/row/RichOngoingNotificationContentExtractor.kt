@@ -17,12 +17,12 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.app.Notification
-import android.app.Notification.RichOngoingStyle
 import android.app.PendingIntent
 import android.content.Context
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.row.shared.EnRouteContentModel
 import com.android.systemui.statusbar.notification.row.shared.IconModel
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel
 import com.android.systemui.statusbar.notification.row.shared.RichOngoingNotificationFlag
@@ -70,12 +70,11 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         systemUIContext: Context,
         packageContext: Context
     ): RichOngoingContentModel? {
-        if (builder.style !is RichOngoingStyle) return null
+        val sbn = entry.sbn
+        val notification = sbn.notification
+        val icon = IconModel(notification.smallIcon)
 
         try {
-            val sbn = entry.sbn
-            val notification = sbn.notification
-            val icon = IconModel(notification.smallIcon)
             return if (sbn.packageName == "com.google.android.deskclock") {
                 when (notification.channelId) {
                     "Timers v2" -> {
@@ -90,6 +89,8 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
                         null
                     }
                 }
+            } else if (builder.style is Notification.EnRouteStyle) {
+                parseEnRouteNotification(notification, icon)
             } else null
         } catch (e: Exception) {
             Log.e("RONs", "Error parsing RON", e)
@@ -202,5 +203,16 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         return Duration.ofHours(hour.toLong())
             .plusMinutes(minute.toLong())
             .plusSeconds(second.toLong())
+    }
+
+    private fun parseEnRouteNotification(
+        notification: Notification,
+        icon: IconModel,
+    ): EnRouteContentModel {
+        return EnRouteContentModel(
+            smallIcon = icon,
+            title = notification.extras.getCharSequence(Notification.EXTRA_TITLE),
+            text = notification.extras.getCharSequence(Notification.EXTRA_TEXT),
+        )
     }
 }

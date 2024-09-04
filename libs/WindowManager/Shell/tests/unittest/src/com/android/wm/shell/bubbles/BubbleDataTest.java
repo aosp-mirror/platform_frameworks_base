@@ -50,8 +50,8 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.bubbles.BubbleData.TimeSource;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
-import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleBarUpdate;
 
 import com.google.common.collect.ImmutableList;
 
@@ -117,6 +117,8 @@ public class BubbleDataTest extends ShellTestCase {
     private BubbleEducationController mEducationController;
     @Mock
     private ShellExecutor mMainExecutor;
+    @Mock
+    private ShellExecutor mBgExecutor;
 
     @Captor
     private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
@@ -144,47 +146,47 @@ public class BubbleDataTest extends ShellTestCase {
         when(ranking.isTextChanged()).thenReturn(true);
         mEntryInterruptive = createBubbleEntry(1, "interruptive", "package.d", ranking);
         mBubbleInterruptive = new Bubble(mEntryInterruptive, mBubbleMetadataFlagListener, null,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
 
         mEntryDismissed = createBubbleEntry(1, "dismissed", "package.d", null);
         mBubbleDismissed = new Bubble(mEntryDismissed, mBubbleMetadataFlagListener, null,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
 
         mEntryLocusId = createBubbleEntry(1, "keyLocus", "package.e", null,
                 new LocusId("locusId1"));
         mBubbleLocusId = new Bubble(mEntryLocusId,
                 mBubbleMetadataFlagListener,
                 null /* pendingIntentCanceledListener */,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
 
         mBubbleA1 = new Bubble(mEntryA1,
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
         mBubbleA2 = new Bubble(mEntryA2,
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
         mBubbleA3 = new Bubble(mEntryA3,
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
         mBubbleB1 = new Bubble(mEntryB1,
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
         mBubbleB2 = new Bubble(mEntryB2,
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
         mBubbleB3 = new Bubble(mEntryB3,
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
         mBubbleC1 = new Bubble(mEntryC1,
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
 
         Intent appBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
         appBubbleIntent.setPackage(mContext.getPackageName());
@@ -192,12 +194,12 @@ public class BubbleDataTest extends ShellTestCase {
                 appBubbleIntent,
                 new UserHandle(1),
                 mock(Icon.class),
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
 
         mPositioner = new TestableBubblePositioner(mContext,
                 mContext.getSystemService(WindowManager.class));
         mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner, mEducationController,
-                mMainExecutor);
+                mMainExecutor, mBgExecutor);
 
         // Used by BubbleData to set lastAccessedTime
         when(mTimeSource.currentTimeMillis()).thenReturn(1000L);

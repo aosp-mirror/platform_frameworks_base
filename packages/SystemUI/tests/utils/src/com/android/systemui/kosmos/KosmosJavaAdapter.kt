@@ -36,12 +36,14 @@ import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.globalactions.domain.interactor.globalActionsInteractor
+import com.android.systemui.haptics.msdl.msdlPlayer
 import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.fromOccludedTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -50,6 +52,7 @@ import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.scrimStartable
@@ -115,6 +118,7 @@ class KosmosJavaAdapter() {
     val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
     val fakeSceneContainerConfig by lazy { kosmos.sceneContainerConfig }
     val sceneInteractor by lazy { kosmos.sceneInteractor }
+    val sceneBackInteractor by lazy { kosmos.sceneBackInteractor }
     val falsingCollector by lazy { kosmos.falsingCollector }
     val powerInteractor by lazy { kosmos.powerInteractor }
     val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
@@ -126,6 +130,7 @@ class KosmosJavaAdapter() {
     val deviceProvisioningInteractor by lazy { kosmos.deviceProvisioningInteractor }
     val fakeDeviceProvisioningRepository by lazy { kosmos.fakeDeviceProvisioningRepository }
     val fromLockscreenTransitionInteractor by lazy { kosmos.fromLockscreenTransitionInteractor }
+    val fromOccludedTransitionInteractor by lazy { kosmos.fromOccludedTransitionInteractor }
     val fromPrimaryBouncerTransitionInteractor by lazy {
         kosmos.fromPrimaryBouncerTransitionInteractor
     }
@@ -150,4 +155,5 @@ class KosmosJavaAdapter() {
     val scrimController by lazy { kosmos.scrimController }
     val scrimStartable by lazy { kosmos.scrimStartable }
     val sceneContainerOcclusionInteractor by lazy { kosmos.sceneContainerOcclusionInteractor }
+    val msdlPlayer by lazy { kosmos.msdlPlayer }
 }

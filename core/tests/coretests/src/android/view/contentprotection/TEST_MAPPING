@@ -1,18 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.view.contentprotection"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksCoreTests_android_view_contentprotection"
     }
   ]
 }

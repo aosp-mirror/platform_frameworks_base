@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +58,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.Spy
@@ -100,7 +102,7 @@ class AudioSharingRepositoryTest {
 
     @Captor
     private lateinit var assistantCallbackCaptor:
-        ArgumentCaptor<BluetoothLeBroadcastAssistant.Callback>
+            ArgumentCaptor<BluetoothLeBroadcastAssistant.Callback>
 
     @Captor private lateinit var btCallbackCaptor: ArgumentCaptor<BluetoothCallback>
 
@@ -109,6 +111,7 @@ class AudioSharingRepositoryTest {
     @Captor
     private lateinit var volumeCallbackCaptor: ArgumentCaptor<BluetoothVolumeControl.Callback>
 
+    private val logger = FakeAudioSharingRepositoryLogger()
     private val testScope = TestScope()
     private val context: Context = ApplicationProvider.getApplicationContext()
     @Spy private val contentResolver: ContentResolver = context.contentResolver
@@ -134,19 +137,29 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID_INVALID)
+            TEST_GROUP_ID_INVALID
+        )
         underTest =
             AudioSharingRepositoryImpl(
                 contentResolver,
                 btManager,
                 testScope.backgroundScope,
                 testScope.testScheduler,
+                logger
             )
     }
 
+    @After
+    fun tearDown() {
+        logger.reset()
+    }
+
     @Test
-    fun audioSharingStateChange_emitValues() {
+    fun audioSharingStateChange_profileReady_emitValues() {
         testScope.runTest {
+            `when`(broadcast.isProfileReady).thenReturn(true)
+            `when`(assistant.isProfileReady).thenReturn(true)
+            `when`(volumeControl.isProfileReady).thenReturn(true)
             val states = mutableListOf<Boolean?>()
             underTest.inAudioSharing.onEach { states.add(it) }.launchIn(backgroundScope)
             runCurrent()
@@ -155,7 +168,26 @@ class AudioSharingRepositoryTest {
             triggerAudioSharingStateChange(TriggerType.BROADCAST_START, broadcastStarted)
             runCurrent()
 
-            Truth.assertThat(states).containsExactly(true, false, true)
+            Truth.assertThat(states).containsExactly(false, true, false, true)
+            Truth.assertThat(logger.logs)
+                .containsAtLeastElementsIn(
+                    listOf(
+                        "onAudioSharingStateChanged state=true",
+                        "onAudioSharingStateChanged state=false",
+                    )
+                ).inOrder()
+        }
+    }
+
+    @Test
+    fun audioSharingStateChange_profileNotReady_broadcastCallbackNotRegistered() {
+        testScope.runTest {
+            val states = mutableListOf<Boolean?>()
+            underTest.inAudioSharing.onEach { states.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            verify(broadcast, never()).registerServiceCallBack(any(), any())
+
+            Truth.assertThat(states).containsExactly(false)
         }
     }
 
@@ -171,13 +203,27 @@ class AudioSharingRepositoryTest {
             Truth.assertThat(groupIds)
                 .containsExactly(
                     TEST_GROUP_ID_INVALID,
-                    TEST_GROUP_ID2)
+                    TEST_GROUP_ID2
+                )
         }
     }
 
     @Test
-    fun secondaryGroupIdChange_emitValues() {
+    fun secondaryGroupIdChange_profileNotReady_assistantCallbackNotRegistered() {
         testScope.runTest {
+            val groupIds = mutableListOf<Int?>()
+            underTest.secondaryGroupId.onEach { groupIds.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            verify(assistant, never()).registerServiceCallBack(any(), any())
+        }
+    }
+
+    @Test
+    fun secondaryGroupIdChange_profileReady_emitValues() {
+        testScope.runTest {
+            `when`(broadcast.isProfileReady).thenReturn(true)
+            `when`(assistant.isProfileReady).thenReturn(true)
+            `when`(volumeControl.isProfileReady).thenReturn(true)
             val groupIds = mutableListOf<Int?>()
             underTest.secondaryGroupId.onEach { groupIds.add(it) }.launchIn(backgroundScope)
             runCurrent()
@@ -190,13 +236,16 @@ class AudioSharingRepositoryTest {
             triggerSourceAdded()
             runCurrent()
             triggerProfileConnectionChange(
-                BluetoothAdapter.STATE_CONNECTING, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
+                BluetoothAdapter.STATE_CONNECTING, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
+            )
             runCurrent()
             triggerProfileConnectionChange(
-                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO)
+                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO
+            )
             runCurrent()
             triggerProfileConnectionChange(
-                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
+                BluetoothAdapter.STATE_DISCONNECTED, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
+            )
             runCurrent()
 
             Truth.assertThat(groupIds)
@@ -206,13 +255,25 @@ class AudioSharingRepositoryTest {
                     TEST_GROUP_ID1,
                     TEST_GROUP_ID_INVALID,
                     TEST_GROUP_ID2,
-                    TEST_GROUP_ID_INVALID)
+                    TEST_GROUP_ID_INVALID
+                )
+            Truth.assertThat(logger.logs)
+                .containsAtLeastElementsIn(
+                    listOf(
+                        "onSecondaryGroupIdChanged groupId=$TEST_GROUP_ID_INVALID",
+                        "onSecondaryGroupIdChanged groupId=$TEST_GROUP_ID2",
+                        "onSecondaryGroupIdChanged groupId=$TEST_GROUP_ID1",
+                    )
+                ).inOrder()
         }
     }
 
     @Test
-    fun volumeMapChange_emitValues() {
+    fun volumeMapChange_profileReady_emitValues() {
         testScope.runTest {
+            `when`(broadcast.isProfileReady).thenReturn(true)
+            `when`(assistant.isProfileReady).thenReturn(true)
+            `when`(volumeControl.isProfileReady).thenReturn(true)
             val volumeMaps = mutableListOf<GroupIdToVolumes?>()
             underTest.volumeMap.onEach { volumeMaps.add(it) }.launchIn(backgroundScope)
             runCurrent()
@@ -225,11 +286,32 @@ class AudioSharingRepositoryTest {
             verify(volumeControl).unregisterCallback(any())
             runCurrent()
 
+            val expectedMap1 = mapOf(TEST_GROUP_ID1 to TEST_VOLUME1)
+            val expectedMap2 = mapOf(TEST_GROUP_ID1 to TEST_VOLUME2)
             Truth.assertThat(volumeMaps)
                 .containsExactly(
                     emptyMap<Int, Int>(),
-                    mapOf(TEST_GROUP_ID1 to TEST_VOLUME1),
-                    mapOf(TEST_GROUP_ID1 to TEST_VOLUME2))
+                    expectedMap1,
+                    expectedMap2
+                )
+            Truth.assertThat(logger.logs)
+                .containsAtLeastElementsIn(
+                    listOf(
+                        "onVolumeMapChanged map={}",
+                        "onVolumeMapChanged map=$expectedMap1",
+                        "onVolumeMapChanged map=$expectedMap2",
+                    )
+                ).inOrder()
+        }
+    }
+
+    @Test
+    fun volumeMapChange_profileNotReady_volumeControlCallbackNotRegistered() {
+        testScope.runTest {
+            val volumeMaps = mutableListOf<GroupIdToVolumes?>()
+            underTest.volumeMap.onEach { volumeMaps.add(it) }.launchIn(backgroundScope)
+            runCurrent()
+            verify(volumeControl, never()).registerCallback(any(), any())
         }
     }
 
@@ -239,12 +321,19 @@ class AudioSharingRepositoryTest {
             Settings.Secure.putInt(
                 contentResolver,
                 BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-                TEST_GROUP_ID2)
+                TEST_GROUP_ID2
+            )
             `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
             underTest.setSecondaryVolume(TEST_VOLUME1)
 
             runCurrent()
             verify(volumeControl).setDeviceVolume(device1, TEST_VOLUME1, true)
+            Truth.assertThat(logger.logs)
+                .isEqualTo(
+                    listOf(
+                        "onSetVolumeRequested volume=$TEST_VOLUME1",
+                    )
+                )
         }
     }
 
@@ -258,6 +347,7 @@ class AudioSharingRepositoryTest {
                 `when`(broadcast.isEnabled(null)).thenReturn(true)
                 broadcastCallbackCaptor.value.broadcastAction()
             }
+
             TriggerType.BROADCAST_STOP -> {
                 `when`(broadcast.isEnabled(null)).thenReturn(false)
                 broadcastCallbackCaptor.value.broadcastAction()
@@ -270,7 +360,8 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID1)
+            TEST_GROUP_ID1
+        )
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
         assistantCallbackCaptor.value.sourceAdded(device1, receiveState)
     }
@@ -281,7 +372,8 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID1)
+            TEST_GROUP_ID1
+        )
         assistantCallbackCaptor.value.sourceRemoved(device2)
     }
 
@@ -291,7 +383,8 @@ class AudioSharingRepositoryTest {
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID1)
+            TEST_GROUP_ID1
+        )
         btCallbackCaptor.value.onProfileConnectionStateChanged(cachedDevice2, state, profile)
     }
 
@@ -300,12 +393,14 @@ class AudioSharingRepositoryTest {
             .registerContentObserver(
                 eq(Settings.Secure.getUriFor(BluetoothUtils.getPrimaryGroupIdUriForBroadcast())),
                 eq(false),
-                contentObserverCaptor.capture())
+                contentObserverCaptor.capture()
+            )
         `when`(assistant.allConnectedDevices).thenReturn(listOf(device1, device2))
         Settings.Secure.putInt(
             contentResolver,
             BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
-            TEST_GROUP_ID2)
+            TEST_GROUP_ID2
+        )
         contentObserverCaptor.value.primaryChanged()
     }
 
@@ -337,8 +432,9 @@ class AudioSharingRepositoryTest {
             onBroadcastStopped(TEST_REASON, TEST_BROADCAST_ID)
         }
         val sourceAdded:
-            BluetoothLeBroadcastAssistant.Callback.(
-                sink: BluetoothDevice, state: BluetoothLeBroadcastReceiveState) -> Unit =
+                BluetoothLeBroadcastAssistant.Callback.(
+                    sink: BluetoothDevice, state: BluetoothLeBroadcastReceiveState
+                ) -> Unit =
             { sink, state ->
                 onReceiveStateChanged(sink, TEST_SOURCE_ID, state)
             }

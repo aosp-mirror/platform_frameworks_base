@@ -19,8 +19,6 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
 import android.compat.testing.PlatformCompatChangeRule;
 import android.platform.test.annotations.Presubmit;
 
@@ -177,7 +175,6 @@ public class AppCompatFocusOverridesTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<FocusOverridesRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
         final FocusOverridesRobotTest robot = new FocusOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
     }

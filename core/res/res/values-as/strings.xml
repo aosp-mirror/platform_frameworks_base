@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"পাছৱৰ্ড ক্ষেত্ৰসমূহত হস্তলিপি সমৰ্থিত নহয়"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"উভতি যাওক"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ইনপুটৰ পদ্ধতি সলনি কৰক"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ইনপুট পদ্ধতি বাছনিকর্তা খোলক"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ছেটিং"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ষ্ট’ৰেজৰ খালী ঠাই শেষ হৈ আছে"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ছিষ্টেমৰ কিছুমান কাৰ্যকলাপে কাম নকৰিবও পাৰে"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ছিষ্টেমৰ বাবে পৰ্যাপ্ত খালী ঠাই নাই। আপোনাৰ ২৫০এমবি খালী ঠাই থকাটো নিশ্চিত কৰক আৰু ৰিষ্টাৰ্ট কৰক।"</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"সুৰক্ষাৰ বাবে এপৰ সমল স্ক্ৰীণ শ্বেয়াৰ কৰাৰ পৰা লুকুৱাই ৰখা হৈছে"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"উপগ্ৰহৰ সৈতে স্বয়ংক্ৰিয়ভাৱে সংযুক্ত হৈছে"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"আপুনি ম’বাইল বা ৱাই-ফাই নেটৱৰ্কৰ জৰিয়তে পাঠ বাৰ্তা পঠিয়াব বা লাভ কৰিব পাৰে"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"উপগ্ৰহৰ জৰিয়তে বাৰ্তা বিনিময়ৰ সুবিধাটো ব্যৱহাৰ কৰিবনে?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"আপুনি কোনো ম’বাইল বা ৱাই-ফাই নেটৱৰ্ক নোহোৱাকৈ বাৰ্তা পঠিয়াওক আৰু লাভ কৰক"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খোলক"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ই কেনেকৈ কাম কৰে"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বিবেচনাধীন হৈ আছে..."</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"কেলকুলেটৰ"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"মেপ"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"এপ্লিকেশ্বন"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"আপোনাৰ ফিংগাৰপ্ৰিণ্ট আৰু চিনাক্ত কৰিব নোৱাৰি। ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক।"</string>
 </resources>

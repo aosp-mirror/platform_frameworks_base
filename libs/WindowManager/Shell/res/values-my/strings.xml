@@ -65,6 +65,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ညာဘက်ထိပ်သို့ ရွှေ့ပါ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ဘယ်အောက်ခြေသို့ ရွှေ့ရန်"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ညာအောက်ခြေသို့ ရွှေ့ပါ"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"မီနူးကို ပိုပြပါ"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"မီနူးကို လျှော့ပြပါ"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"ဘယ်သို့ရွှေ့ရန်"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"ညာသို့ရွှေ့ရန်"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ကို ချဲ့ရန်"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ကို ချုံ့ရန်"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ဆက်တင်များ"</string>
@@ -117,9 +121,11 @@
     <string name="select_text" msgid="5139083974039906583">"ရွေးရန်"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ဘရောင်ဇာတွင် ဖွင့်ရန်"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"ဝင်းဒိုးအသစ်"</string>
     <string name="close_text" msgid="4986518933445178928">"ပိတ်ရန်"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"မီနူး ပိတ်ရန်"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"မီနူး ဖွင့်ရန်"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"စခရင်ကို ချဲ့မည်"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"စခရင်ကို ချုံ့မည်"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ဤအက်ပ်ကို အရွယ်ပြင်၍ မရပါ"</string>
 </resources>

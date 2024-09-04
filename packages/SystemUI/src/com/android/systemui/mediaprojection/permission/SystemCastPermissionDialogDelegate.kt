@@ -46,12 +46,12 @@ class SystemCastPermissionDialogDelegate(
         appName,
         hostUid,
         mediaProjectionMetricsLogger,
+        dialogIconDrawable = R.drawable.ic_cast_connected,
     ) {
     override fun onCreate(dialog: AlertDialog, savedInstanceState: Bundle?) {
         super.onCreate(dialog, savedInstanceState)
         // TODO(b/270018943): Handle the case of System sharing (not recording nor casting)
         setDialogTitle(R.string.media_projection_entry_cast_permission_dialog_title)
-        setStartButtonText(R.string.media_projection_entry_cast_permission_dialog_continue)
         setStartButtonOnClickListener {
             // Note that it is important to run this callback before dismissing, so that the
             // callback can disable the dialog exit animation if it wants to.
@@ -82,18 +82,28 @@ class SystemCastPermissionDialogDelegate(
                 listOf(
                     ScreenShareOption(
                         mode = SINGLE_APP,
-                        spinnerText = R.string.screen_share_permission_dialog_option_single_app,
+                        spinnerText =
+                            R.string
+                                .media_projection_entry_cast_permission_dialog_option_text_single_app,
                         warningText =
                             R.string
                                 .media_projection_entry_cast_permission_dialog_warning_single_app,
+                        startButtonText =
+                            R.string
+                                .media_projection_entry_generic_permission_dialog_continue_single_app,
                         spinnerDisabledText = singleAppDisabledText,
                     ),
                     ScreenShareOption(
                         mode = ENTIRE_SCREEN,
-                        spinnerText = R.string.screen_share_permission_dialog_option_entire_screen,
+                        spinnerText =
+                            R.string
+                                .media_projection_entry_cast_permission_dialog_option_text_entire_screen,
                         warningText =
                             R.string
                                 .media_projection_entry_cast_permission_dialog_warning_entire_screen,
+                        startButtonText =
+                            R.string
+                                .media_projection_entry_cast_permission_dialog_continue_entire_screen,
                     )
                 )
             return if (singleAppDisabledText != null) {

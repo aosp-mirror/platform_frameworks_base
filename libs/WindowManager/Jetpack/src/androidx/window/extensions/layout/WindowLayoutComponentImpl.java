@@ -19,11 +19,11 @@ package androidx.window.extensions.layout;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
-import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
 import static androidx.window.common.ExtensionHelper.isZero;
 import static androidx.window.common.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.common.ExtensionHelper.transformToWindowSpaceRect;
+import static androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_FLAT;
+import static androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
 
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -45,9 +45,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiContext;
 import androidx.annotation.VisibleForTesting;
-import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
+import androidx.window.common.collections.ListUtil;
+import androidx.window.common.layout.CommonFoldingFeature;
 import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.extensions.util.DeduplicateConsumer;
 
@@ -95,8 +96,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mFoldingFeatureProducer = foldingFeatureProducer;
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-        final List<DisplayFoldFeature> displayFoldFeatures =
-                DisplayFoldFeatureUtil.extractDisplayFoldFeatures(mFoldingFeatureProducer);
+        final List<DisplayFoldFeature> displayFoldFeatures = ListUtil.map(
+                mFoldingFeatureProducer.getDisplayFeatures(), DisplayFoldFeatureUtil::translate);
         mSupportedWindowFeatures = new SupportedWindowFeatures.Builder(displayFoldFeatures).build();
     }
 

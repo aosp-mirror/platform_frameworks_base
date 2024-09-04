@@ -86,7 +86,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     private final long mFromTimestamp;
     private final long mToTimestamp;
     private final double mMinConsumedPowerThreshold;
-    private final @BatteryConsumer.PowerComponent int[] mPowerComponents;
+    private final @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
         mFlags = builder.mFlags;
@@ -139,6 +139,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      * Returns the power components that should be estimated or null if all power components
      * are being requested.
      */
+    @BatteryConsumer.PowerComponentId
     public int[] getPowerComponents() {
         return mPowerComponents;
     }
@@ -228,7 +229,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private long mFromTimestamp;
         private long mToTimestamp;
         private double mMinConsumedPowerThreshold = 0;
-        private @BatteryConsumer.PowerComponent int[] mPowerComponents;
+        private @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
         /**
          * Builds a read-only BatteryUsageStatsQuery object.
@@ -294,7 +295,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * is all power components.
          */
         public Builder includePowerComponents(
-                @BatteryConsumer.PowerComponent int[] powerComponents) {
+                @BatteryConsumer.PowerComponentId int[] powerComponents) {
             mPowerComponents = powerComponents;
             return this;
         }

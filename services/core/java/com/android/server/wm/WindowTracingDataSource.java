@@ -33,8 +33,8 @@ import android.util.Log;
 import android.util.proto.ProtoInputStream;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 public final class WindowTracingDataSource extends DataSource<WindowTracingDataSource.Instance,
         WindowTracingDataSource.TlsState, Void> {
@@ -50,12 +50,14 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
     }
 
     public static class Config {
-        public final @WindowTraceLogLevel int mLogLevel;
-        public final boolean mLogOnFrame;
+        public final @WindowTracingLogLevel int mLogLevel;
+        public final @WindowTracingLogFrequency int mLogFrequency;
 
-        private Config(@WindowTraceLogLevel int logLevel, boolean logOnFrame) {
+        private Config(
+                @WindowTracingLogLevel int logLevel,
+                @WindowTracingLogFrequency int logFrequency) {
             mLogLevel = logLevel;
-            mLogOnFrame = logOnFrame;
+            mLogFrequency = logFrequency;
         }
     }
 
@@ -68,20 +70,17 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
         }
     }
 
-    private static final Config CONFIG_DEFAULT = new Config(WindowTraceLogLevel.TRIM, true);
+    private static final Config CONFIG_DEFAULT =
+            new Config(WindowTracingLogLevel.TRIM, WindowTracingLogFrequency.FRAME);
     private static final int CONFIG_VALUE_UNSPECIFIED = 0;
     private static final String TAG = "WindowTracingDataSource";
 
     @NonNull
-    private final Consumer<Config> mOnStartCallback;
-    @NonNull
-    private final Consumer<Config> mOnStopCallback;
+    private final WeakReference<WindowTracingPerfetto> mWindowTracing;
 
-    public WindowTracingDataSource(@NonNull Consumer<Config> onStart,
-            @NonNull Consumer<Config> onStop) {
+    public WindowTracingDataSource(WindowTracingPerfetto windowTracing) {
         super(DATA_SOURCE_NAME);
-        mOnStartCallback = onStart;
-        mOnStopCallback = onStop;
+        mWindowTracing = new WeakReference<>(windowTracing);
 
         Producer.init(InitArguments.DEFAULTS);
         DataSourceParams params =
@@ -90,6 +89,7 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
                                 PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT)
                         .build();
         register(params);
+        Log.i(TAG, "Registered with perfetto service");
     }
 
     @Override
@@ -99,12 +99,18 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
         return new Instance(this, instanceIndex, config != null ? config : CONFIG_DEFAULT) {
             @Override
             protected void onStart(StartCallbackArguments args) {
-                mOnStartCallback.accept(mConfig);
+                WindowTracingPerfetto windowTracing = mWindowTracing.get();
+                if (windowTracing != null) {
+                    windowTracing.onStart(mConfig);
+                }
             }
 
             @Override
             protected void onStop(StopCallbackArguments args) {
-                mOnStopCallback.accept(mConfig);
+                WindowTracingPerfetto windowTracing = mWindowTracing.get();
+                if (windowTracing != null) {
+                    windowTracing.onStop(mConfig);
+                }
             }
         };
     }
@@ -160,45 +166,48 @@ public final class WindowTracingDataSource extends DataSource<WindowTracingDataS
             throw new RuntimeException("Failed to parse WindowManagerConfig", e);
         }
 
-        @WindowTraceLogLevel int logLevel;
+        @WindowTracingLogLevel int logLevel;
         switch(parsedLogLevel) {
             case CONFIG_VALUE_UNSPECIFIED:
                 Log.w(TAG, "Unspecified log level. Defaulting to TRIM");
-                logLevel = WindowTraceLogLevel.TRIM;
+                logLevel = WindowTracingLogLevel.TRIM;
                 break;
             case WindowManagerConfig.LOG_LEVEL_VERBOSE:
-                logLevel = WindowTraceLogLevel.ALL;
+                logLevel = WindowTracingLogLevel.ALL;
                 break;
             case WindowManagerConfig.LOG_LEVEL_DEBUG:
-                logLevel = WindowTraceLogLevel.TRIM;
+                logLevel = WindowTracingLogLevel.TRIM;
                 break;
             case WindowManagerConfig.LOG_LEVEL_CRITICAL:
-                logLevel = WindowTraceLogLevel.CRITICAL;
+                logLevel = WindowTracingLogLevel.CRITICAL;
                 break;
             default:
                 Log.w(TAG, "Unrecognized log level. Defaulting to TRIM");
-                logLevel = WindowTraceLogLevel.TRIM;
+                logLevel = WindowTracingLogLevel.TRIM;
                 break;
         }
 
-        boolean logOnFrame;
+        @WindowTracingLogFrequency int logFrequency;
         switch(parsedLogFrequency) {
             case CONFIG_VALUE_UNSPECIFIED:
-                Log.w(TAG, "Unspecified log frequency. Defaulting to 'log on frame'");
-                logOnFrame = true;
+                Log.w(TAG, "Unspecified log frequency. Defaulting to 'frame'");
+                logFrequency = WindowTracingLogFrequency.FRAME;
                 break;
             case WindowManagerConfig.LOG_FREQUENCY_FRAME:
-                logOnFrame = true;
+                logFrequency = WindowTracingLogFrequency.FRAME;
                 break;
             case WindowManagerConfig.LOG_FREQUENCY_TRANSACTION:
-                logOnFrame = false;
+                logFrequency = WindowTracingLogFrequency.TRANSACTION;
+                break;
+            case WindowManagerConfig.LOG_FREQUENCY_SINGLE_DUMP:
+                logFrequency = WindowTracingLogFrequency.SINGLE_DUMP;
                 break;
             default:
-                Log.w(TAG, "Unrecognized log frequency. Defaulting to 'log on frame'");
-                logOnFrame = true;
+                Log.w(TAG, "Unrecognized log frequency. Defaulting to 'frame'");
+                logFrequency = WindowTracingLogFrequency.FRAME;
                 break;
         }
 
-        return new Config(logLevel, logOnFrame);
+        return new Config(logLevel, logFrequency);
     }
 }

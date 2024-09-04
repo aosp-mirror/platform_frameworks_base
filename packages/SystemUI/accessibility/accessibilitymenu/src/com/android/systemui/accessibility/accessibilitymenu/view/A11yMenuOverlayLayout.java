@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import static android.os.UserManager.DISALLOW_ADJUST_VOLUME;
+import static android.os.UserManager.DISALLOW_CONFIG_BRIGHTNESS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -24,6 +26,7 @@ import static java.lang.Math.max;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
@@ -32,6 +35,8 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -46,8 +51,10 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiContext;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
+import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
@@ -94,10 +101,7 @@ public class A11yMenuOverlayLayout {
             A11yMenuShortcut.ShortcutId.ID_SCREENSHOT_VALUE.ordinal()
     };
 
-
-
     private final AccessibilityMenuService mService;
-    private final WindowManager mWindowManager;
     private final DisplayManager mDisplayManager;
     private ViewGroup mLayout;
     private WindowManager.LayoutParams mLayoutParameter;
@@ -107,7 +111,6 @@ public class A11yMenuOverlayLayout {
 
     public A11yMenuOverlayLayout(AccessibilityMenuService service) {
         mService = service;
-        mWindowManager = mService.getSystemService(WindowManager.class);
         mDisplayManager = mService.getSystemService(DisplayManager.class);
         configureLayout();
         mHandler = new Handler(Looper.getMainLooper());
@@ -130,8 +133,7 @@ public class A11yMenuOverlayLayout {
         int lastVisibilityState = View.GONE;
         if (mLayout != null) {
             lastVisibilityState = mLayout.getVisibility();
-            mWindowManager.removeView(mLayout);
-            mLayout = null;
+            clearLayout();
         }
 
         if (mLayoutParameter == null) {
@@ -139,22 +141,28 @@ public class A11yMenuOverlayLayout {
         }
 
         final Display display = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
-        final Context context = mService.createDisplayContext(display).createWindowContext(
-                TYPE_ACCESSIBILITY_OVERLAY, null);
-        mLayout = new FrameLayout(context);
-        updateLayoutPosition();
-        inflateLayoutAndSetOnTouchListener(mLayout, context);
-        mA11yMenuViewPager = new A11yMenuViewPager(mService, context);
+        final Context uiContext = mService.createWindowContext(
+                display, TYPE_ACCESSIBILITY_OVERLAY, /* options= */null);
+        final WindowManager windowManager = uiContext.getSystemService(WindowManager.class);
+        mLayout = new A11yMenuFrameLayout(uiContext);
+        updateLayoutPosition(uiContext);
+        inflateLayoutAndSetOnTouchListener(mLayout, uiContext);
+        mA11yMenuViewPager = new A11yMenuViewPager(mService);
         mA11yMenuViewPager.configureViewPagerAndFooter(mLayout, createShortcutList(), pageIndex);
-        mWindowManager.addView(mLayout, mLayoutParameter);
+        windowManager.addView(mLayout, mLayoutParameter);
         mLayout.setVisibility(lastVisibilityState);
+        mA11yMenuViewPager.updateFooterState();
 
         return mLayout;
     }
 
     public void clearLayout() {
         if (mLayout != null) {
-            mWindowManager.removeView(mLayout);
+            WindowManager windowManager =
+                    mLayout.getContext().getSystemService(WindowManager.class);
+            if (windowManager != null) {
+                windowManager.removeView(mLayout);
+            }
             mLayout.setOnTouchListener(null);
             mLayout = null;
         }
@@ -165,8 +173,11 @@ public class A11yMenuOverlayLayout {
         if (mLayout == null || mLayoutParameter == null) {
             return;
         }
-        updateLayoutPosition();
-        mWindowManager.updateViewLayout(mLayout, mLayoutParameter);
+        updateLayoutPosition(mLayout.getContext());
+        WindowManager windowManager = mLayout.getContext().getSystemService(WindowManager.class);
+        if (windowManager != null) {
+            windowManager.updateViewLayout(mLayout, mLayoutParameter);
+        }
     }
 
     private void initLayoutParams() {
@@ -178,8 +189,8 @@ public class A11yMenuOverlayLayout {
         mLayoutParameter.setTitle(mService.getString(R.string.accessibility_menu_service_name));
     }
 
-    private void inflateLayoutAndSetOnTouchListener(ViewGroup view, Context displayContext) {
-        LayoutInflater inflater = LayoutInflater.from(displayContext);
+    private void inflateLayoutAndSetOnTouchListener(ViewGroup view, @UiContext Context uiContext) {
+        LayoutInflater inflater = LayoutInflater.from(uiContext);
         inflater.inflate(R.layout.paged_menu, view);
         view.setOnTouchListener(mService);
     }
@@ -195,13 +206,49 @@ public class A11yMenuOverlayLayout {
         for (int shortcutId :
                 (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)
                         ? LARGE_SHORTCUT_LIST_DEFAULT : SHORTCUT_LIST_DEFAULT)) {
-            shortcutList.add(new A11yMenuShortcut(shortcutId));
+            if (!isShortcutRestricted(shortcutId)) {
+                shortcutList.add(new A11yMenuShortcut(shortcutId));
+            }
         }
         return shortcutList;
     }
 
+    @SuppressLint("MissingPermission")
+    private boolean isShortcutRestricted(int shortcutId) {
+        if (!Flags.hideRestrictedActions()) {
+            return false;
+        }
+        final UserManager userManager = mService.getSystemService(UserManager.class);
+        if (userManager == null) {
+            return false;
+        }
+        final int userId = mService.getUserId();
+        final UserHandle userHandle = UserHandle.of(userId);
+        if (shortcutId == A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()
+                || shortcutId == A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
+            if (userManager.hasUserRestriction(DISALLOW_CONFIG_BRIGHTNESS)
+                    || (com.android.systemui.Flags.enforceBrightnessBaseUserRestriction()
+                    && userManager.hasBaseUserRestriction(
+                            DISALLOW_CONFIG_BRIGHTNESS, userHandle))) {
+                return true;
+            }
+        }
+        if (shortcutId == A11yMenuShortcut.ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()
+                || shortcutId == A11yMenuShortcut.ShortcutId.ID_VOLUME_UP_VALUE.ordinal()) {
+            if (userManager.hasUserRestriction(DISALLOW_ADJUST_VOLUME)
+                    || userManager.hasBaseUserRestriction(DISALLOW_ADJUST_VOLUME, userHandle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Updates a11y menu layout position by configuring layout params. */
-    private void updateLayoutPosition() {
+    private void updateLayoutPosition(@UiContext @NonNull Context uiContext) {
+        WindowManager windowManager = uiContext.getSystemService(WindowManager.class);
+        if (windowManager == null) {
+            return;
+        }
         final Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         final Configuration configuration = mService.getResources().getConfiguration();
         final int orientation = configuration.orientation;
@@ -239,14 +286,13 @@ public class A11yMenuOverlayLayout {
             mLayoutParameter.height = WindowManager.LayoutParams.WRAP_CONTENT;
             mLayout.setBackgroundResource(R.drawable.shadow_0deg);
         }
-
         // Adjusts the y position of a11y menu layout to make the layout not to overlap bottom
         // navigation bar window.
-        updateLayoutByWindowInsetsIfNeeded();
+        updateLayoutByWindowInsetsIfNeeded(windowManager);
         mLayout.setOnApplyWindowInsetsListener(
                 (view, insets) -> {
-                    if (updateLayoutByWindowInsetsIfNeeded()) {
-                        mWindowManager.updateViewLayout(mLayout, mLayoutParameter);
+                    if (updateLayoutByWindowInsetsIfNeeded(windowManager)) {
+                        windowManager.updateViewLayout(mLayout, mLayoutParameter);
                     }
                     return view.onApplyWindowInsets(insets);
                 });
@@ -258,9 +304,9 @@ public class A11yMenuOverlayLayout {
      * This method adjusts the layout position and size to
      * make a11y menu not to overlap navigation bar window.
      */
-    private boolean updateLayoutByWindowInsetsIfNeeded() {
+    private boolean updateLayoutByWindowInsetsIfNeeded(@NonNull WindowManager windowManager) {
         boolean shouldUpdateLayout = false;
-        WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
+        WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
         Insets windowInsets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(
                 WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
         int xOffset = max(windowInsets.left, windowInsets.right);
@@ -312,7 +358,17 @@ public class A11yMenuOverlayLayout {
 
     /** Toggles a11y menu layout visibility. */
     public void toggleVisibility() {
-        mLayout.setVisibility((mLayout.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE);
+        if (mLayout.getVisibility() == View.VISIBLE) {
+            mLayout.setVisibility(View.GONE);
+        } else {
+            if (Flags.hideRestrictedActions()) {
+                // Reconfigure the shortcut list in case the set of restricted actions has changed.
+                mA11yMenuViewPager.configureViewPagerAndFooter(
+                        mLayout, createShortcutList(), getPageIndex());
+                updateViewLayout();
+            }
+            mLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     /** Shows hint text on a minimal Snackbar-like text view. */
@@ -326,8 +382,7 @@ public class A11yMenuOverlayLayout {
             return;
         }
         snackbar.setText(text);
-        if (com.android.systemui.accessibility.accessibilitymenu
-                .Flags.a11yMenuSnackbarLiveRegion()) {
+        if (Flags.a11yMenuSnackbarLiveRegion()) {
             snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
         }
 
@@ -347,5 +402,17 @@ public class A11yMenuOverlayLayout {
                             snackbar.setVisibility(View.GONE);
                         }
                     }), timeoutDurationMs);
+    }
+
+    private class A11yMenuFrameLayout extends FrameLayout {
+        A11yMenuFrameLayout(@UiContext @NonNull Context context) {
+            super(context);
+        }
+
+        @Override
+        public void dispatchConfigurationChanged(Configuration newConfig) {
+            super.dispatchConfigurationChanged(newConfig);
+            mA11yMenuViewPager.mA11yMenuFooter.updateRightToLeftDirection(newConfig);
+        }
     }
 }

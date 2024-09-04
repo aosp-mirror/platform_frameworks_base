@@ -44,6 +44,9 @@
             <!-- Predefined vibration effect -->
             <xs:element name="predefined-effect" type="PredefinedEffect"/>
 
+            <!-- Vendor vibration effect -->
+            <xs:element name="vendor-effect" type="VendorEffect"/>
+
             <!-- Primitive composition effect -->
             <xs:sequence>
                 <xs:element name="primitive-effect" type="PrimitiveEffect"/>
@@ -111,6 +114,10 @@
             <xs:enumeration value="heavy_click"/>
             <xs:enumeration value="double_click"/>
         </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="VendorEffect">
+        <xs:restriction base="xs:base64Binary"/>
     </xs:simpleType>
 
     <xs:complexType name="PrimitiveEffect">

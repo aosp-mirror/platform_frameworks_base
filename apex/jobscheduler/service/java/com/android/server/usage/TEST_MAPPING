@@ -17,11 +17,7 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.usage"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-      ]
+      "name": "FrameworksServicesTests_com_android_server_usage_Presubmit"
     }
   ],
   "postsubmit": [

@@ -37,9 +37,9 @@ class DeviceSettingsConfigTest {
                             "package_name_1",
                             "class_name_1",
                             "intent_action_1",
-                            Bundle()
-                        )
-                    ),
+                            null,
+                            Bundle(),
+                        )),
                 moreSettingsItems =
                     listOf(
                         DeviceSettingItem(
@@ -47,10 +47,17 @@ class DeviceSettingsConfigTest {
                             "package_name_2",
                             "class_name_2",
                             "intent_action_2",
-                            Bundle()
-                        )
-                    ),
-                moreSettingsFooter = "footer",
+                            null,
+                            Bundle(),
+                        )),
+                moreSettingsHelpItem = DeviceSettingItem(
+                    3,
+                    "package_name_2",
+                    "class_name_2",
+                    "intent_action_2",
+                    null,
+                    Bundle(),
+                ),
                 extras = Bundle().apply { putString("key1", "value1") },
             )
 
@@ -72,7 +79,10 @@ class DeviceSettingsConfigTest {
             .containsExactly("class_name_2")
         assertThat(fromParcel.moreSettingsItems.stream().map { it.intentAction }.toList())
             .containsExactly("intent_action_2")
-        assertThat(fromParcel.moreSettingsFooter).isEqualTo(config.moreSettingsFooter)
+        assertThat(fromParcel.moreSettingsHelpItem?.settingId).isEqualTo(3)
+        assertThat(fromParcel.moreSettingsHelpItem?.packageName).isEqualTo("package_name_2")
+        assertThat(fromParcel.moreSettingsHelpItem?.className).isEqualTo("class_name_2")
+        assertThat(fromParcel.moreSettingsHelpItem?.intentAction).isEqualTo("intent_action_2")
     }
 
     private fun writeAndRead(item: DeviceSettingsConfig): DeviceSettingsConfig {

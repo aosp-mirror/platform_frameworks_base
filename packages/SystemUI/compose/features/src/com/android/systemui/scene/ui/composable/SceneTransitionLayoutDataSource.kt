@@ -18,7 +18,9 @@
 
 package com.android.systemui.scene.ui.composable
 
+import androidx.compose.runtime.snapshotFlow
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.observableTransitionState
@@ -52,6 +54,14 @@ class SceneTransitionLayoutDataSource(
                 initialValue = state.transitionState.currentScene,
             )
 
+    override val currentOverlays: StateFlow<Set<OverlayKey>> =
+        snapshotFlow { state.currentOverlays }
+            .stateIn(
+                scope = coroutineScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = emptySet(),
+            )
+
     override fun changeScene(
         toScene: SceneKey,
         transitionKey: TransitionKey?,
@@ -59,13 +69,38 @@ class SceneTransitionLayoutDataSource(
         state.setTargetScene(
             targetScene = toScene,
             transitionKey = transitionKey,
-            coroutineScope = coroutineScope,
+            animationScope = coroutineScope,
         )
     }
 
     override fun snapToScene(toScene: SceneKey) {
         state.snapToScene(
             scene = toScene,
+        )
+    }
+
+    override fun showOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) {
+        state.showOverlay(
+            overlay = overlay,
+            animationScope = coroutineScope,
+            transitionKey = transitionKey,
+        )
+    }
+
+    override fun hideOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) {
+        state.hideOverlay(
+            overlay = overlay,
+            animationScope = coroutineScope,
+            transitionKey = transitionKey,
+        )
+    }
+
+    override fun replaceOverlay(from: OverlayKey, to: OverlayKey, transitionKey: TransitionKey?) {
+        state.replaceOverlay(
+            from = from,
+            to = to,
+            animationScope = coroutineScope,
+            transitionKey = transitionKey,
         )
     }
 }

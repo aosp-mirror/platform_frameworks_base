@@ -139,6 +139,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val settingsInteractor: NotificationSettingsInteractor = mock()
     protected val packageManager: PackageManager = mock()
     protected val notificationManager: NotificationManager = mock()
+    protected val logger: VisualInterruptionDecisionLogger = mock()
     protected abstract val provider: VisualInterruptionDecisionProvider
 
     private val neverSuppresses = object : NotificationInterruptSuppressor {}

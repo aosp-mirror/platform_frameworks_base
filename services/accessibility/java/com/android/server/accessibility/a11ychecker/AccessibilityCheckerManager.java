@@ -30,7 +30,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.Flags;
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckResultReported;
 
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityCheckPreset;
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityHierarchyCheck;
@@ -58,7 +57,7 @@ public final class AccessibilityCheckerManager {
     private final PackageManager mPackageManager;
     private final Set<AccessibilityHierarchyCheck> mHierarchyChecks;
     private final ATFHierarchyBuilder mATFHierarchyBuilder;
-    private final Set<AccessibilityCheckResultReported> mCachedResults = new HashSet<>();
+    private final Set<AndroidAccessibilityCheckerResult> mCachedResults = new HashSet<>();
 
     @VisibleForTesting
     final A11yCheckerTimer mTimer = new A11yCheckerTimer();
@@ -85,35 +84,44 @@ public final class AccessibilityCheckerManager {
      * logging. Returns the check results for the given nodes.
      */
     @RequiresPermission(allOf = {android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    public Set<AccessibilityCheckResultReported> maybeRunA11yChecker(
+    public Set<AndroidAccessibilityCheckerResult> maybeRunA11yChecker(
             List<AccessibilityNodeInfo> nodes, @Nullable String sourceEventClassName,
             ComponentName a11yServiceComponentName, @UserIdInt int userId) {
-        if (!shouldRunA11yChecker()) {
+        if (!shouldRunA11yChecker() || nodes.isEmpty()) {
             return Set.of();
         }
 
-        Set<AccessibilityCheckResultReported> allResults = new HashSet<>();
+        Set<AndroidAccessibilityCheckerResult> allResults = new HashSet<>();
         String defaultBrowserName = mPackageManager.getDefaultBrowserPackageNameAsUser(userId);
 
         try {
+            AndroidAccessibilityCheckerResult.Builder commonResultBuilder =
+                    AccessibilityCheckerUtils.getCommonResultBuilder(nodes.getFirst(),
+                            sourceEventClassName, mPackageManager, a11yServiceComponentName);
+            if (commonResultBuilder == null) {
+                return Set.of();
+            }
             for (AccessibilityNodeInfo nodeInfo : nodes) {
-                // Skip browser results because they are mostly related to web content and not the
-                // browser app itself.
+                // Skip browser results because they are mostly related to web content and
+                // not the browser app itself.
                 if (nodeInfo.getPackageName() == null
                         || nodeInfo.getPackageName().toString().equals(defaultBrowserName)) {
                     continue;
                 }
-                List<AccessibilityHierarchyCheckResult> checkResults = runChecksOnNode(nodeInfo);
-                Set<AccessibilityCheckResultReported> filteredResults =
+                List<AccessibilityHierarchyCheckResult> checkResults = runChecksOnNode(
+                        nodeInfo);
+                Set<AndroidAccessibilityCheckerResult> filteredResults =
                         AccessibilityCheckerUtils.processResults(nodeInfo, checkResults,
-                                sourceEventClassName, mPackageManager, a11yServiceComponentName);
+                                commonResultBuilder);
                 allResults.addAll(filteredResults);
             }
             mCachedResults.addAll(allResults);
+            return allResults;
+
         } catch (RuntimeException e) {
             Slog.e(LOG_TAG, "An unknown error occurred while running a11y checker.", e);
+            return Set.of();
         }
-        return allResults;
     }
 
     private List<AccessibilityHierarchyCheckResult> runChecksOnNode(
@@ -127,7 +135,7 @@ public final class AccessibilityCheckerManager {
         return checkResults;
     }
 
-    public Set<AccessibilityCheckResultReported> getCachedResults() {
+    public Set<AndroidAccessibilityCheckerResult> getCachedResults() {
         return Collections.unmodifiableSet(mCachedResults);
     }
 

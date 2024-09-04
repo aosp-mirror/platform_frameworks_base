@@ -22,7 +22,7 @@ import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the size of an element to the size of another element. */
 internal class AnchoredSize(
@@ -36,7 +36,7 @@ internal class AnchoredSize(
         content: ContentKey,
         element: Element,
         stateInContent: Element.State,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         value: IntSize,
     ): IntSize {
         fun anchorSizeIn(content: ContentKey): IntSize {

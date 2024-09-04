@@ -42,6 +42,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.CpuPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -228,9 +229,7 @@ public class CpuPowerStatsCollectorTest {
         assertThat(descriptor.name).isEqualTo("cpu");
         assertThat(descriptor.statsArrayLength).isEqualTo(13);
         assertThat(descriptor.uidStatsArrayLength).isEqualTo(5);
-        CpuPowerStatsLayout layout =
-                new CpuPowerStatsLayout();
-        layout.fromExtras(descriptor.extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(descriptor);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
         layout.setTimeByScalingStep(deviceStats, 2, 42);
@@ -267,8 +266,7 @@ public class CpuPowerStatsCollectorTest {
         mockEnergyConsumers();
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
-        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
-        layout.fromExtras(collector.getPowerStatsDescriptor().extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(collector.getPowerStatsDescriptor());
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
                 new SparseArray<>() {{
@@ -338,8 +336,7 @@ public class CpuPowerStatsCollectorTest {
         mockEnergyConsumers();
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
-        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
-        layout.fromExtras(collector.getPowerStatsDescriptor().extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(collector.getPowerStatsDescriptor());
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
                 new SparseArray<>() {{
@@ -470,9 +467,7 @@ public class CpuPowerStatsCollectorTest {
     }
 
     private static int[] getScalingStepToPowerBracketMap(CpuPowerStatsCollector collector) {
-        CpuPowerStatsLayout layout =
-                new CpuPowerStatsLayout();
-        layout.fromExtras(collector.getPowerStatsDescriptor().extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(collector.getPowerStatsDescriptor());
         return layout.getScalingStepToPowerBracketMap();
     }
 

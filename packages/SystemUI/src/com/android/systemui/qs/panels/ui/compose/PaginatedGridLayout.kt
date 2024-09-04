@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.panels.dagger.PaginatedBaseLayoutType
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.FooterHeight
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.InterPageSpacing
@@ -77,7 +78,7 @@ constructor(
         Column {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier,
+                modifier = Modifier.sysuiResTag("qs_pager"),
                 pageSpacing = if (pages.size > 1) InterPageSpacing else 0.dp,
                 beyondViewportPageCount = 1,
                 verticalAlignment = Alignment.Top,

@@ -45,7 +45,6 @@ import android.provider.Settings.Global.HEADS_UP_OFF
 import android.service.notification.Flags
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.UiEventLogger.UiEventEnum.RESERVE_NEW_UI_EVENT_ID
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -279,7 +278,8 @@ class AvalancheSuppressor(
     private val packageManager: PackageManager,
     private val uiEventLogger: UiEventLogger,
     private val context: Context,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val logger: VisualInterruptionDecisionLogger
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
@@ -354,15 +354,18 @@ class AvalancheSuppressor(
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
         if (!isCooldownEnabled()) {
+            logger.logAvalancheAllow("cooldown OFF")
             return false
         }
         val timeSinceAvalancheMs = systemClock.currentTimeMillis() - avalancheProvider.startTime
         val timedOut = timeSinceAvalancheMs >= avalancheProvider.timeoutMs
         if (timedOut) {
+            logger.logAvalancheAllow("timedOut! timeSinceAvalancheMs=$timeSinceAvalancheMs")
             return false
         }
         val state = calculateState(entry)
         if (state != State.SUPPRESS) {
+            logger.logAvalancheAllow("state=$state")
             return false
         }
         if (shouldShowEdu()) {

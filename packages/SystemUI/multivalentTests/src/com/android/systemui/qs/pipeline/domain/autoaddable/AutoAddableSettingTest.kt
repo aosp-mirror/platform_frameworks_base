@@ -16,34 +16,34 @@
 
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
-import android.platform.test.annotations.EnabledOnRavenwood
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.pipeline.domain.model.AutoAddSignal
 import com.android.systemui.qs.pipeline.domain.model.AutoAddTracking
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class AutoAddableSettingTest : SysuiTestCase() {
 
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val secureSettings = kosmos.fakeSettings
 
-    private val secureSettings = FakeSettings()
     private val underTest =
         AutoAddableSetting(
             secureSettings,

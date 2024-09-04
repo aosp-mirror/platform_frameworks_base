@@ -18,6 +18,9 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
+import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -28,5 +31,8 @@ val Kosmos.alternateBouncerViewModel by Fixture {
     AlternateBouncerViewModel(
         statusBarKeyguardViewManager = statusBarKeyguardViewManager,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
+        dismissCallbackRegistry = dismissCallbackRegistry,
+        alternateBouncerInteractor = { alternateBouncerInteractor },
+        primaryBouncerInteractor = primaryBouncerInteractor,
     )
 }
