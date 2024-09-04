@@ -114,3 +114,14 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_memory_info"
+     description: "Rate limit calls to getMemoryInfo using a cache"
+     is_fixed_read_only: true
+     bug: "364312431"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
