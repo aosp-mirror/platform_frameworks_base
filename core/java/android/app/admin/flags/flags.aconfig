@@ -83,13 +83,6 @@ flag {
 }
 
 flag {
-  name: "coexistence_migration_for_non_emm_management_enabled"
-  namespace: "enterprise"
-  description: "Migrate existing APIs to be coexistable, and enable DMRH to call them to support non-EMM device management."
-  bug: "289520697"
-}
-
-flag {
   name: "coexistence_migration_for_supervision_enabled"
   is_exported: true
   namespace: "enterprise"
