@@ -27,7 +27,9 @@ var Kosmos.overlayKeys by Fixture {
     )
 }
 
-val Kosmos.fakeOverlays by Fixture { overlayKeys.map { key -> FakeOverlay(key) }.toSet() }
+val Kosmos.fakeOverlaysByKeys by Fixture { overlayKeys.associateWith { FakeOverlay(it) } }
+
+val Kosmos.fakeOverlays by Fixture { fakeOverlaysByKeys.values.toSet() }
 
 val Kosmos.overlays by Fixture { fakeOverlays }
 
