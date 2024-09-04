@@ -45,7 +45,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.TimeUnit
 import java.util.LinkedList
 import java.util.Queue
 import android.util.ArraySet
@@ -117,9 +116,6 @@ class MouseKeysInterceptorTest {
         Mockito.`when`(mockAms.traceManager).thenReturn(mockTraceManager)
 
         mouseKeysInterceptor = MouseKeysInterceptor(mockAms, testLooper.looper, DISPLAY_ID)
-        // VirtualMouse is created on a separate thread.
-        // Wait for VirtualMouse to be created before running tests
-        TimeUnit.MILLISECONDS.sleep(20L)
         mouseKeysInterceptor.next = nextInterceptor
     }
 

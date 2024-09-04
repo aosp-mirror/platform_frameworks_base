@@ -22,7 +22,7 @@ import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Translate an element from an edge of the layout. */
 internal class EdgeTranslate(
@@ -34,12 +34,12 @@ internal class EdgeTranslate(
         layoutImpl: SceneTransitionLayoutImpl,
         content: ContentKey,
         element: Element,
-        sceneState: Element.State,
+        stateInContent: Element.State,
         transition: TransitionState.Transition,
         value: Offset
     ): Offset {
         val sceneSize = layoutImpl.content(content).targetSize
-        val elementSize = sceneState.targetSize
+        val elementSize = stateInContent.targetSize
         if (elementSize == Element.SizeUnspecified) {
             return value
         }

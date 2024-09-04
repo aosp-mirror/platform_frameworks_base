@@ -81,7 +81,7 @@
     <string name="speed_label_fast" msgid="2677719134596044051">"Cepat"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Sangat Cepat"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Sudah tidak berlaku"</string>
-    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Sambungan terputus"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Memutus sambungan..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Menghubungkan…"</string>
@@ -112,7 +112,7 @@
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktif (kiri dan kanan)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktif (hanya media). Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktif (hanya media). Baterai L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Terhubung (mendukung berbagi audio). Baterai<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Terhubung (mendukung berbagi audio). Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Terhubung (mendukung berbagi audio). Baterai L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Terhubung (mendukung berbagi audio). Kiri: Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Terhubung (mendukung berbagi audio). Kanan: Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Tampilkan efek visual untuk ketukan"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Tampilkan penekanan tombol"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Tampilkan respons visual untuk penekanan tombol fisik"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Tampilkan input touchpad"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Overlay layar menampilkan data input touchpad dan mengenali gestur"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Tampilkan pembaruan permukaan"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Buat seluruh permukaan jendela berkedip saat diperbarui"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Tampilkan pembaruan tampilan"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi sampai penuh"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sampai penuh"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengisian daya dihentikan sementara untuk melindungi baterai"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Mengisi daya"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - Penuh pukul <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - Baterai terisi penuh dalam <xliff:g id="TIME">%2$s</xliff:g>"</string>

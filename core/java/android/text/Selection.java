@@ -350,7 +350,7 @@ public class Selection {
     private static final char PARAGRAPH_SEPARATOR = '\n';
 
     /**
-     * Move the cusrot to the closest paragraph start offset.
+     * Move the cursor to the closest paragraph start offset.
      *
      * @param text the spannable text
      * @param layout layout to be used for drawing.

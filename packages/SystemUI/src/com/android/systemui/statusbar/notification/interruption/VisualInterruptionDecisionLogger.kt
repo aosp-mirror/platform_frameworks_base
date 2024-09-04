@@ -93,6 +93,15 @@ constructor(@NotificationInterruptLog val buffer: LogBuffer) {
             }
         )
     }
+
+    fun logAvalancheAllow(info: String) {
+        buffer.log(
+            TAG,
+            INFO,
+            { str1 = info },
+            { "AvalancheSuppressor: $str1" }
+        )
+    }
 }
 
 private const val TAG = "VisualInterruptionDecisionProvider"

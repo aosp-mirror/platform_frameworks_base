@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.util.Range;
 import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -60,8 +61,10 @@ public class MagnificationSettingsController implements ComponentCallbacks {
             @UiContext Context context,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
             @NonNull Callback settingsControllerCallback,
-            SecureSettings secureSettings) {
-        this(context, sfVsyncFrameProvider, settingsControllerCallback,  secureSettings, null);
+            SecureSettings secureSettings,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
+        this(context, sfVsyncFrameProvider, settingsControllerCallback,  secureSettings, null,
+                viewCaptureAwareWindowManager);
     }
 
     @VisibleForTesting
@@ -70,7 +73,8 @@ public class MagnificationSettingsController implements ComponentCallbacks {
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
             @NonNull Callback settingsControllerCallback,
             SecureSettings secureSettings,
-            WindowMagnificationSettings windowMagnificationSettings) {
+            WindowMagnificationSettings windowMagnificationSettings,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context.createWindowContext(
                 context.getDisplay(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
@@ -84,7 +88,7 @@ public class MagnificationSettingsController implements ComponentCallbacks {
         } else {
             mWindowMagnificationSettings = new WindowMagnificationSettings(mContext,
                     mWindowMagnificationSettingsCallback,
-                    sfVsyncFrameProvider, secureSettings);
+                    sfVsyncFrameProvider, secureSettings, viewCaptureAwareWindowManager);
         }
     }
 

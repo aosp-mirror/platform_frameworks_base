@@ -38,7 +38,11 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAG
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.accessibility.AccessibilityManager.FlashNotificationReason;
 
 import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
@@ -55,9 +59,11 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TWOFINGER_DOUBLETAP;
 import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logAccessibilityShortcutActivated;
+import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
+import static com.android.server.pm.UserManagerService.enforceCurrentUserIfVisibleBackgroundEnabled;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
@@ -157,6 +163,7 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IUserInitializationCompleteCallback;
 import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.R;
@@ -304,6 +311,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final PowerManager mPowerManager;
 
+    private final UserManager mUserManager;
+
     private final WindowManagerInternal mWindowManagerService;
 
     private final AccessibilitySecurityPolicy mSecurityPolicy;
@@ -357,6 +366,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final List<SendWindowStateChangedEventRunnable> mSendWindowStateChangedEventRunnables =
             new ArrayList<>();
+
+    @VisibleForTesting
+    final HashSet<IUserInitializationCompleteCallback>
+            mUserInitializationCompleteCallbacks =
+            new HashSet<IUserInitializationCompleteCallback>();
 
     @GuardedBy("mLock")
     private @UserIdInt int mCurrentUserId = UserHandle.USER_SYSTEM;
@@ -502,6 +516,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         super(permissionEnforcer);
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mUserManager = mContext.getSystemService(UserManager.class);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
         mTraceManager = AccessibilityTraceManager.getInstance(
                 mWindowManagerService.getAccessibilityController(), this, mLock);
@@ -537,6 +552,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
+        mUserManager = context.getSystemService(UserManager.class);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
         mTraceManager = AccessibilityTraceManager.getInstance(
                 mWindowManagerService.getAccessibilityController(), this, mLock);
@@ -937,8 +953,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             }
                         }
                         case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                                Settings.Secure.ACCESSIBILITY_QS_TARGETS,
-                                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
+                             Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
+                             Settings.Secure.ACCESSIBILITY_QS_TARGETS,
+                             Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
                                 restoreShortcutTargets(newValue,
                                         ShortcutUtils.convertToType(which));
                     }
@@ -1257,6 +1274,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void registerSystemAction(RemoteAction action, int actionId) {
         registerSystemAction_enforcePermission();
+        int currentUserId;
+        synchronized (mLock) {
+            currentUserId = mCurrentUserId;
+        }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".registerSystemAction",
                     FLAGS_ACCESSIBILITY_MANAGER, "action=" + action + ";actionId=" + actionId);
@@ -1273,6 +1295,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @EnforcePermission(MANAGE_ACCESSIBILITY)
     public void unregisterSystemAction(int actionId) {
         unregisterSystemAction_enforcePermission();
+        int currentUserId;
+        synchronized (mLock) {
+            currentUserId = mCurrentUserId;
+        }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".unregisterSystemAction",
                     FLAGS_ACCESSIBILITY_MANAGER, "actionId=" + actionId);
@@ -1600,6 +1627,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @EnforcePermission(STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonClicked(int displayId, String targetName) {
         notifyAccessibilityButtonClicked_enforcePermission();
+        int currentUserId;
+        synchronized (mLock) {
+            currentUserId = mCurrentUserId;
+        }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".notifyAccessibilityButtonClicked",
                     FLAGS_ACCESSIBILITY_MANAGER,
@@ -1628,6 +1660,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @EnforcePermission(STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonVisibilityChanged(boolean shown) {
         notifyAccessibilityButtonVisibilityChanged_enforcePermission();
+        int currentUserId;
+        synchronized (mLock) {
+            currentUserId = mCurrentUserId;
+        }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".notifyAccessibilityButtonVisibilityChanged",
                     FLAGS_ACCESSIBILITY_MANAGER, "shown=" + shown);
@@ -1968,9 +2005,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         this, 0, oldUserState.mUserId));
             }
 
-            // Announce user changes only if more that one exist.
-            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            final boolean announceNewUser = userManager.getUsers().size() > 1;
+            // Announce user changes only if more than one exist.
+            final boolean announceNewUser = mUserManager.getUsers().size() > 1;
 
             // The user changed.
             mCurrentUserId = userId;
@@ -1995,11 +2031,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // Accessibility Menu component disabled.
             disableAccessibilityMenuToMigrateIfNeeded();
 
+            // As an initialization step, update the shortcuts for the current user.
+            updateShortcutsForCurrentNavigationMode();
+
             if (announceNewUser) {
                 // Schedule announcement of the current user if needed.
                 mMainHandler.sendMessageDelayed(
                         obtainMessage(AccessibilityManagerService::announceNewUserIfNeeded, this),
                         WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS);
+            }
+
+            for (IUserInitializationCompleteCallback callback
+                    : mUserInitializationCompleteCallbacks) {
+                try {
+                    callback.onUserInitializationComplete(mCurrentUserId);
+                } catch (RemoteException re) {
+                    Log.e("AccessibilityManagerService",
+                            "Error while dispatching userInitializationComplete callback: ",
+                            re);
+                }
             }
         }
     }
@@ -2008,10 +2058,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             AccessibilityUserState userState = getCurrentUserStateLocked();
             if (userState.isHandlingAccessibilityEventsLocked()) {
-                UserManager userManager = (UserManager) mContext.getSystemService(
-                        Context.USER_SERVICE);
                 String message = mContext.getString(R.string.user_switched,
-                        userManager.getUserInfo(mCurrentUserId).name);
+                        mUserManager.getUserInfo(mCurrentUserId).name);
                 AccessibilityEvent event = AccessibilityEvent.obtain(
                         AccessibilityEvent.TYPE_ANNOUNCEMENT);
                 event.getText().add(message);
@@ -2214,6 +2262,69 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         mProxyManager.clearCacheLocked();
+    }
+
+    @VisibleForTesting
+    void updateShortcutsForCurrentNavigationMode() {
+        synchronized (mLock) {
+            AccessibilityUserState userState = getCurrentUserStateLocked();
+            if (!isUserSetupCompleted(mContext)) {
+                return;
+            }
+            final boolean isInGesturalNavigation = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(), Settings.Secure.NAVIGATION_MODE,
+                    -1, userState.mUserId) == NAV_BAR_MODE_GESTURAL;
+
+            Set<String> gestureTargets = userState.getShortcutTargetsLocked(GESTURE);
+            Set<String> softwareTargets = userState.getShortcutTargetsLocked(SOFTWARE);
+            int buttonMode = ShortcutUtils.getButtonMode(mContext, userState.mUserId);
+
+            if (android.provider.Flags.a11yStandaloneGestureEnabled()) {
+                if (isInGesturalNavigation) {
+                    if (buttonMode == ACCESSIBILITY_BUTTON_MODE_GESTURE) {
+                        // GESTURE button mode indicates migrating from old version
+                        // User was using gesture, so move all targets into gesture
+                        gestureTargets.addAll(softwareTargets);
+                        softwareTargets.clear();
+                    }
+                    buttonMode = ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+                } else {
+                    // Only change the current button mode if there are gesture targets
+                    // (indicating the user came from gesture mode or is migrating)
+                    if (!gestureTargets.isEmpty()) {
+                        buttonMode = softwareTargets.isEmpty()
+                                ? ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR
+                                : ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+
+                        softwareTargets.addAll(gestureTargets);
+                        gestureTargets.clear();
+                    }
+                }
+            } else {
+                if (!gestureTargets.isEmpty()) {
+                    // Adjust button mode before clearing out gesture targets
+                    if (!softwareTargets.isEmpty()) {
+                        buttonMode = ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+                    } else if (isInGesturalNavigation) {
+                        buttonMode = ACCESSIBILITY_BUTTON_MODE_GESTURE;
+                    } else {
+                        buttonMode = ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
+                    }
+                    softwareTargets.addAll(gestureTargets);
+                    gestureTargets.clear();
+                } else if (buttonMode != ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+                    buttonMode = isInGesturalNavigation
+                            ? ACCESSIBILITY_BUTTON_MODE_GESTURE
+                            : ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
+                }
+            }
+
+            updateShortcutTargetSets(userState, Set.of(
+                    Pair.create(gestureTargets, GESTURE),
+                    Pair.create(softwareTargets, SOFTWARE)
+            ));
+            ShortcutUtils.setButtonMode(mContext, buttonMode, userState.mUserId);
+        }
     }
 
     private void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
@@ -3113,6 +3224,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void updateWindowsForAccessibilityCallbackLocked(AccessibilityUserState userState) {
         // We observe windows for accessibility only if there is at least
         // one bound service that can retrieve window content that specified
@@ -3139,6 +3251,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = 0; i < displays.size(); i++) {
             final Display display = displays.get(i);
             if (display != null) {
+                // When supporting visible background users, only track windows on the display
+                // assigned to the current user. The proxy displays are registered only to the
+                // current user.
+                if (UserManager.isVisibleBackgroundUsersEnabled()
+                        && !mProxyManager.isProxyedDisplay(display.getDisplayId())
+                        && !mUmi.isUserVisible(mCurrentUserId, display.getDisplayId())) {
+                    continue;
+                }
                 if (observingWindows) {
                     mA11yWindowManager.startTrackingWindows(display.getDisplayId(),
                             mProxyManager.isProxyedDisplay(display.getDisplayId()));
@@ -3644,6 +3764,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         persistColonDelimitedSetToSettingLocked(ShortcutUtils.convertToKey(shortcutType),
                 userState.mUserId, currentTargets, str -> str);
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+    }
+
+    private void updateShortcutTargetSets(AccessibilityUserState userState,
+            Set<Pair<Set<String>, Integer>> targetSets) {
+        boolean somethingChanged = false;
+        for (Pair<Set<String>, Integer> pair : targetSets) {
+            Set<String> targets = pair.first;
+            int type = pair.second;
+            if (userState.updateShortcutTargetsLocked(targets, type)) {
+                somethingChanged = true;
+                persistColonDelimitedSetToSettingLocked(ShortcutUtils.convertToKey(type),
+                        userState.mUserId, targets, str -> str);
+            }
+        }
+        if (somethingChanged) {
+            scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+        }
     }
 
     /**
@@ -4710,6 +4847,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             throws RemoteException {
         registerProxyForDisplay_enforcePermission();
         mSecurityPolicy.checkForAccessibilityPermissionOrRole();
+        int currentUserId;
+        synchronized (mLock) {
+            currentUserId = mCurrentUserId;
+        }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         if (client == null) {
             return false;
         }
@@ -4761,40 +4903,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    @RequiresNoPermission
-    public boolean startFlashNotificationSequence(String opPkg,
-            @FlashNotificationReason int reason, IBinder token) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mFlashNotificationsController.startFlashNotificationSequence(opPkg,
-                    reason, token);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
+    public boolean startFlashNotificationSequence(String opPkg, @FlashNotificationReason int reason,
+            IBinder token) {
+        startFlashNotificationSequence_enforcePermission();
+        return mFlashNotificationsController.startFlashNotificationSequence(opPkg, reason, token);
     }
 
     @Override
-    @RequiresNoPermission
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
     public boolean stopFlashNotificationSequence(String opPkg) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mFlashNotificationsController.stopFlashNotificationSequence(opPkg);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+        stopFlashNotificationSequence_enforcePermission();
+        return mFlashNotificationsController.stopFlashNotificationSequence(opPkg);
     }
 
     @Override
-    @RequiresNoPermission
-    public boolean startFlashNotificationEvent(String opPkg,
-            @FlashNotificationReason int reason, String reasonPkg) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return mFlashNotificationsController.startFlashNotificationEvent(opPkg,
-                    reason, reasonPkg);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+    @EnforcePermission(MANAGE_ACCESSIBILITY)
+    public boolean startFlashNotificationEvent(String opPkg, @FlashNotificationReason int reason,
+            String reasonPkg) {
+        startFlashNotificationEvent_enforcePermission();
+        return mFlashNotificationsController.startFlashNotificationEvent(opPkg, reason, reasonPkg);
     }
 
     @Override
@@ -5505,6 +5633,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMouseKeysUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED);
 
+        private final Uri mNavigationModeUri = Settings.Secure.getUriFor(
+                Settings.Secure.NAVIGATION_MODE);
+
+        private final Uri mUserSetupCompleteUri = Settings.Secure.getUriFor(
+                Settings.Secure.USER_SETUP_COMPLETE);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -5555,6 +5689,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mAlwaysOnMagnificationUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mMouseKeysUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mNavigationModeUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mUserSetupCompleteUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -5639,6 +5777,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (readMouseKeysEnabledLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
+                } else if (mNavigationModeUri.equals(uri) || mUserSetupCompleteUri.equals(uri)) {
+                    updateShortcutsForCurrentNavigationMode();
                 }
             }
         }
@@ -6110,6 +6250,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     service.setImeSessionEnabledLocked(sessions.get(service.mId), enabled);
                 }
             }
+        }
+    }
+
+    @Override
+    @RequiresNoPermission
+    public void registerUserInitializationCompleteCallback(
+            IUserInitializationCompleteCallback callback) {
+        synchronized (mLock) {
+            mUserInitializationCompleteCallbacks.add(callback);
+        }
+    }
+
+    @Override
+    @RequiresNoPermission
+    public void unregisterUserInitializationCompleteCallback(
+            IUserInitializationCompleteCallback callback) {
+        synchronized (mLock) {
+            mUserInitializationCompleteCallbacks.remove(callback);
         }
     }
 

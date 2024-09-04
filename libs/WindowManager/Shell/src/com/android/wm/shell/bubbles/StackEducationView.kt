@@ -26,7 +26,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.internal.util.ContrastColorUtil
 import com.android.wm.shell.R
-import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.animation.Interpolators
 
 /**
  * User education view to highlight the collapsed stack of bubbles. Shown only the first time a user

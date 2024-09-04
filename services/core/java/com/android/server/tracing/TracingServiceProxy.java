@@ -38,6 +38,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.tracing.TraceReportService;
 import android.tracing.ITracingServiceProxy;
 import android.tracing.TraceReportParams;
@@ -76,8 +77,6 @@ public class TracingServiceProxy extends SystemService {
     // Keep this in sync with the definitions in TraceService
     private static final String INTENT_ACTION_NOTIFY_SESSION_STOPPED =
             "com.android.traceur.NOTIFY_SESSION_STOPPED";
-    private static final String INTENT_ACTION_NOTIFY_SESSION_STOLEN =
-            "com.android.traceur.NOTIFY_SESSION_STOLEN";
 
     private static final int REPORT_BEGIN =
             TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_BEGIN;
@@ -89,6 +88,8 @@ public class TracingServiceProxy extends SystemService {
             TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_PERM_MISSING;
     private static final int REPORT_SVC_COMM_ERROR =
             TRACING_SERVICE_REPORT_EVENT__EVENT__TRACING_SERVICE_REPORT_SVC_COMM_ERROR;
+    private static final String NOTIFY_SESSION_ENDED_SETTING = "should_notify_trace_session_ended";
+    private static final int ENABLED = 1;
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -97,13 +98,24 @@ public class TracingServiceProxy extends SystemService {
 
     private final ITracingServiceProxy.Stub mTracingServiceProxy = new ITracingServiceProxy.Stub() {
         /**
-         * Notifies system tracing app that a tracing session has ended. If a session is repurposed
-         * for use in a bugreport, sessionStolen can be set to indicate that tracing has ended but
-         * there is no buffer available to dump.
+         * Notifies system tracing app that a tracing session has ended. sessionStolen is ignored,
+         * as trace sessions are no longer stolen and are always cloned instead.
+         * <p>
+         * Cases exist where user-flows besides Traceur's QS Tile may end long-trace sessions. In
+         * these cases, a Global int will be set to flag the upcoming notifyTraceSessionEnded call
+         * as purposely muted once.
          */
         @Override
-        public void notifyTraceSessionEnded(boolean sessionStolen) {
-            TracingServiceProxy.this.notifyTraceur(sessionStolen);
+        public void notifyTraceSessionEnded(boolean sessionStolen /* unused */) {
+            long identity = Binder.clearCallingIdentity();
+            if (Settings.Global.getInt(mContext.getContentResolver(),
+                    NOTIFY_SESSION_ENDED_SETTING, ENABLED) == ENABLED) {
+                TracingServiceProxy.this.notifyTraceur();
+            } else {
+                Settings.Global.putInt(mContext.getContentResolver(), NOTIFY_SESSION_ENDED_SETTING,
+                        ENABLED);
+            }
+            Binder.restoreCallingIdentity(identity);
         }
 
         @Override
@@ -132,7 +144,7 @@ public class TracingServiceProxy extends SystemService {
         }
     }
 
-    private void notifyTraceur(boolean sessionStolen) {
+    private void notifyTraceur() {
         final Intent intent = new Intent();
 
         try {
@@ -141,11 +153,7 @@ public class TracingServiceProxy extends SystemService {
                     PackageManager.MATCH_SYSTEM_ONLY);
 
             intent.setClassName(info.packageName, TRACING_APP_ACTIVITY);
-            if (sessionStolen) {
-                intent.setAction(INTENT_ACTION_NOTIFY_SESSION_STOLEN);
-            } else {
-                intent.setAction(INTENT_ACTION_NOTIFY_SESSION_STOPPED);
-            }
+            intent.setAction(INTENT_ACTION_NOTIFY_SESSION_STOPPED);
 
             final long identity = Binder.clearCallingIdentity();
             try {

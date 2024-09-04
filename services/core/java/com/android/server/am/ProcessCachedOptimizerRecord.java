@@ -19,6 +19,8 @@ package com.android.server.am;
 import android.annotation.IntDef;
 import android.annotation.UptimeMillisLong;
 import android.app.ActivityManagerInternal.OomAdjReason;
+import android.app.ActivityManagerInternal.FrozenProcessListener;
+import android.util.Pair;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -29,6 +31,8 @@ import dalvik.annotation.optimization.NeverCompile;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * The state info of app when it's cached, used by the optimizer.
@@ -164,6 +168,12 @@ final class ProcessCachedOptimizerRecord {
      */
     @GuardedBy("mProcLock")
     private long mLastUsedTimeout;
+
+    /**
+     * The list of callbacks for this process whenever it is frozen or unfrozen.
+     */
+    final CopyOnWriteArrayList<Pair<Executor, FrozenProcessListener>> mFrozenProcessListeners =
+            new CopyOnWriteArrayList<>();
 
     @GuardedBy("mProcLock")
     long getLastCompactTime() {
@@ -386,6 +396,22 @@ final class ProcessCachedOptimizerRecord {
         mFreezeExempt = exempt;
     }
 
+    void addFrozenProcessListener(Executor executor, FrozenProcessListener listener) {
+        mFrozenProcessListeners.add(new Pair<Executor, FrozenProcessListener>(executor, listener));
+    }
+
+    void dispatchFrozenEvent() {
+        mFrozenProcessListeners.forEach((pair) -> {
+            pair.first.execute(() -> pair.second.onProcessFrozen(mApp.mPid));
+        });
+    }
+
+    void dispatchUnfrozenEvent() {
+        mFrozenProcessListeners.forEach((pair) -> {
+            pair.first.execute(() -> pair.second.onProcessUnfrozen(mApp.mPid));
+        });
+    }
+
     ProcessCachedOptimizerRecord(ProcessRecord app) {
         mApp = app;
         mProcLock = app.mService.mProcLock;
@@ -409,6 +435,10 @@ final class ProcessCachedOptimizerRecord {
         pw.print(" " + IS_FROZEN + "="); pw.println(mFrozen);
         pw.print(prefix); pw.print("earliestFreezableTimeMs=");
         TimeUtils.formatDuration(mEarliestFreezableTimeMillis, nowUptime, pw);
+        if (!mFrozenProcessListeners.isEmpty()) {
+            pw.print(" mFrozenProcessListeners=");
+            mFrozenProcessListeners.forEach((pair) -> pw.print(pair.second + ", "));
+        }
         pw.println();
     }
 }

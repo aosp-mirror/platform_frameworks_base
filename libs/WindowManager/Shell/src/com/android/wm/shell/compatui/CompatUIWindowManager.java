@@ -19,8 +19,6 @@ package com.android.wm.shell.compatui;
 import static android.view.WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
-import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
@@ -40,6 +38,7 @@ import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 import com.android.wm.shell.compatui.api.CompatUIEvent;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import java.util.function.Consumer;
 
@@ -82,8 +81,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
                                   onRestartButtonClicked) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
-        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
-        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
+        if (DesktopModeStatus.canEnterDesktopMode(context)
                 && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
@@ -138,8 +137,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
         final boolean prevHasSizeCompat = mHasSizeCompat;
-        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
-        if (DESKTOP_WINDOWING_MODE.isEnabled(mContext)
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
+        if (DesktopModeStatus.canEnterDesktopMode(mContext)
                 && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();

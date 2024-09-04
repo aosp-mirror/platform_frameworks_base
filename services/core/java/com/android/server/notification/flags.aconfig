@@ -149,3 +149,10 @@ flag {
   description: "This flag enables forced auto-grouping singleton groups"
   bug: "336488844"
 }
+
+flag {
+  name: "notification_force_group_conversations"
+  namespace: "systemui"
+  description: "This flag enables forced auto-grouping conversations"
+  bug: "336488844"
+}

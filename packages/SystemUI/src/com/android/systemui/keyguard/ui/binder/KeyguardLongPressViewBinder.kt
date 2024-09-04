@@ -26,8 +26,8 @@ import com.android.app.tracing.coroutines.launch
 import com.android.systemui.common.ui.view.LongPressHandlingView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.res.R
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 
 object KeyguardLongPressViewBinder {
     /**
@@ -46,7 +46,6 @@ object KeyguardLongPressViewBinder {
         onSingleTap: () -> Unit,
         falsingManager: FalsingManager,
     ) {
-        view.contentDescription = view.resources.getString(R.string.accessibility_desc_lock_screen)
         view.accessibilityHintLongPressAction =
             AccessibilityNodeInfo.AccessibilityAction(
                 AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
@@ -54,8 +53,15 @@ object KeyguardLongPressViewBinder {
             )
         view.listener =
             object : LongPressHandlingView.Listener {
-                override fun onLongPressDetected(view: View, x: Int, y: Int, isA11yAction: Boolean) {
-                    if (!isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
+                override fun onLongPressDetected(
+                    view: View,
+                    x: Int,
+                    y: Int,
+                    isA11yAction: Boolean
+                ) {
+                    if (
+                        !isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
+                    ) {
                         return
                     }
 
@@ -76,6 +82,12 @@ object KeyguardLongPressViewBinder {
                 launch("$TAG#viewModel.isLongPressHandlingEnabled") {
                     viewModel.isLongPressHandlingEnabled.collect { isEnabled ->
                         view.setLongPressHandlingEnabled(isEnabled)
+                        view.contentDescription =
+                            if (isEnabled) {
+                                view.resources.getString(R.string.accessibility_desc_lock_screen)
+                            } else {
+                                null
+                            }
                     }
                 }
             }

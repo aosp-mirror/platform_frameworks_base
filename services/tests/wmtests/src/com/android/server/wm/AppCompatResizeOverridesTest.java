@@ -20,8 +20,6 @@ import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
 import android.compat.testing.PlatformCompatChangeRule;
 import android.platform.test.annotations.Presubmit;
 
@@ -39,7 +37,7 @@ import java.util.function.Consumer;
 
 /**
  * Test class for {@link AppCompatResizeOverrides}.
- * <p>
+ * <p/>
  * Build/Install/Run:
  * atest WmTests:AppCompatResizeOverridesTest
  */
@@ -171,7 +169,6 @@ public class AppCompatResizeOverridesTest extends WindowTestsBase {
      * Runs a test scenario providing a Robot.
      */
     void runTestScenario(@NonNull Consumer<ResizeOverridesRobotTest> consumer) {
-        spyOn(mWm.mAppCompatConfiguration);
         final ResizeOverridesRobotTest robot = new ResizeOverridesRobotTest(mWm, mAtm, mSupervisor);
         consumer.accept(robot);
     }

@@ -143,6 +143,7 @@ cc_defaults {
                 "aconfig_text_flags_c_lib",
                 "server_configurable_flags",
                 "libaconfig_storage_read_api_cc",
+                "libgraphicsenv",
             ],
             static_libs: [
                 "libEGL_blobCache",

@@ -44,7 +44,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider;
-import com.android.window.flags.Flags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -145,9 +144,6 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
      * @see #DATA_DISPLAY_SETTINGS_FILE_PATH
      */
     void setOverrideSettingsForUser(@UserIdInt int userId) {
-        if (!Flags.perUserDisplayWindowSettings()) {
-            return;
-        }
         final AtomicFile settingsFile = getOverrideSettingsFileForUser(userId);
         setOverrideSettingsStorage(new AtomicFileStorage(settingsFile));
     }
@@ -165,9 +161,6 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
      */
     void removeStaleDisplaySettingsLocked(@NonNull WindowManagerService wms,
             @NonNull RootWindowContainer root) {
-        if (!Flags.perUserDisplayWindowSettings()) {
-            return;
-        }
         final Set<String> displayIdentifiers = new ArraySet<>();
         final Consumer<DisplayInfo> addDisplayIdentifier =
                 displayInfo -> displayIdentifiers.add(mOverrideSettings.getIdentifier(displayInfo));
@@ -403,12 +396,9 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
 
     @NonNull
     private static AtomicFile getOverrideSettingsFileForUser(@UserIdInt int userId) {
-        final File directory;
-        if (userId == USER_SYSTEM || !Flags.perUserDisplayWindowSettings()) {
-            directory = Environment.getDataDirectory();
-        } else {
-            directory = Environment.getDataSystemCeDirectory(userId);
-        }
+        final File directory = (userId == USER_SYSTEM)
+                ? Environment.getDataDirectory()
+                : Environment.getDataSystemCeDirectory(userId);
         final File overrideSettingsFile = new File(directory, DATA_DISPLAY_SETTINGS_FILE_PATH);
         return new AtomicFile(overrideSettingsFile, WM_DISPLAY_COMMIT_TAG);
     }

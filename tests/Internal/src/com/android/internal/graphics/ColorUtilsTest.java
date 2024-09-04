@@ -19,13 +19,18 @@ package com.android.internal.graphics;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Color;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 @SmallTest
 public class ColorUtilsTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void calculateMinimumBackgroundAlpha_satisfiestContrast() {

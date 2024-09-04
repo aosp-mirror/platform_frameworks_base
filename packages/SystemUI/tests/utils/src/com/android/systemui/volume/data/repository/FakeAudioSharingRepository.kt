@@ -18,7 +18,6 @@ package com.android.systemui.volume.data.repository
 
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.data.repository.GroupIdToVolumes
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,7 +29,7 @@ class FakeAudioSharingRepository : AudioSharingRepository {
         MutableStateFlow(TEST_GROUP_ID_INVALID)
     private val mutableVolumeMap: MutableStateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())
 
-    override val inAudioSharing: Flow<Boolean> = mutableInAudioSharing
+    override val inAudioSharing: StateFlow<Boolean> = mutableInAudioSharing
     override val primaryGroupId: StateFlow<Int> = mutablePrimaryGroupId
     override val secondaryGroupId: StateFlow<Int> = mutableSecondaryGroupId
     override val volumeMap: StateFlow<GroupIdToVolumes> = mutableVolumeMap

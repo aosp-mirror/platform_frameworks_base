@@ -35,6 +35,7 @@ import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -240,6 +241,16 @@ public class DisplayLayout {
         if (mCutout != null) {
             mCutout = mCutout.getRotated(origWidth, origHeight, fromRotation, toRotation);
         }
+
+        recalcInsets(res);
+    }
+
+    /**
+     * Update the dimensions of this layout.
+     */
+    public void resizeTo(Resources res, Size displaySize) {
+        mWidth = displaySize.getWidth();
+        mHeight = displaySize.getHeight();
 
         recalcInsets(res);
     }

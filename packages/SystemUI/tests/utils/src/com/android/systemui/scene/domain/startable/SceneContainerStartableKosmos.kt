@@ -18,13 +18,16 @@ package com.android.systemui.scene.domain.startable
 
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.classifier.falsingManager
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.keyguard.dismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -54,6 +57,7 @@ val Kosmos.sceneContainerStartable by Fixture {
         applicationScope = testScope.backgroundScope,
         sceneInteractor = sceneInteractor,
         deviceEntryInteractor = deviceEntryInteractor,
+        deviceEntryHapticsInteractor = deviceEntryHapticsInteractor,
         deviceUnlockedInteractor = deviceUnlockedInteractor,
         bouncerInteractor = bouncerInteractor,
         keyguardInteractor = keyguardInteractor,
@@ -80,5 +84,7 @@ val Kosmos.sceneContainerStartable by Fixture {
         keyguardEnabledInteractor = keyguardEnabledInteractor,
         dismissCallbackRegistry = dismissCallbackRegistry,
         statusBarStateController = sysuiStatusBarStateController,
+        alternateBouncerInteractor = alternateBouncerInteractor,
+        vibratorHelper = vibratorHelper,
     )
 }

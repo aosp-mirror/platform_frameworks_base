@@ -19,17 +19,21 @@ package com.android.server.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ImeTracker;
+import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
+import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Placeholder for all IMMS user specific fields */
 final class UserData {
@@ -43,6 +47,17 @@ final class UserData {
     @NonNull
     final CountDownLatch mBackgroundLoadLatch = new CountDownLatch(1);
 
+    /**
+     * Contains non-null {@link RawInputMethodMap}, which represents the latest collections of
+     * {@link android.view.inputmethod.InputMethodInfo} for both direct-boot aware and unaware IMEs
+     * before taking {@link AdditionalSubtypeMap} into account.
+     *
+     * <p>See {@link RawInputMethodMap} for details on when to use this.</p>
+     */
+    @NonNull
+    final AtomicReference<RawInputMethodMap> mRawInputMethodMap =
+            new AtomicReference<>(RawInputMethodMap.emptyMap());
+
     @NonNull
     final InputMethodBindingController mBindingController;
 
@@ -53,6 +68,9 @@ final class UserData {
     @NonNull
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
+
+    @NonNull
+    final ImeVisibilityStateComputer mVisibilityStateComputer;
 
     /**
      * Have we called mCurMethod.bindInput()?
@@ -134,18 +152,39 @@ final class UserData {
     String mLastEnabledInputMethodsStr = "";
 
     /**
+     * A temporary solution to Bug 356879517, where we need to emulate the previous single-user mode
+     * behavior for KeyboardLayoutManager.
+     *
+     * <p>TODO(b/357663774): Remove this workaround</p>
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    Pair<InputMethodSubtypeHandle, InputMethodSubtype> mSubtypeForKeyboardLayoutMapping;
+
+    /**
      * {@code true} when the IME is responsible for drawing the navigation bar and its buttons.
      */
     @NonNull
     final AtomicBoolean mImeDrawsNavBar = new AtomicBoolean();
 
+
+    /**
+     * {@code true} if the user storage is considered to be unlocked.
+     *
+     * @see com.android.server.pm.UserManagerInternal#isUserUnlockingOrUnlocked(int)
+     */
+    @NonNull
+    final AtomicBoolean mIsUnlockingOrUnlocked = new AtomicBoolean(false);
+
     /**
      * Intended to be instantiated only from this file.
      */
     UserData(@UserIdInt int userId,
-            @NonNull InputMethodBindingController bindingController) {
+            @NonNull InputMethodBindingController bindingController,
+            @NonNull ImeVisibilityStateComputer stateComputer) {
         mUserId = userId;
         mBindingController = bindingController;
+        mVisibilityStateComputer = stateComputer;
     }
 
     @Override

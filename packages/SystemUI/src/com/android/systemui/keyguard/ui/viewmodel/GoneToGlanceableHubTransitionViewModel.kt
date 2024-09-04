@@ -43,7 +43,7 @@ constructor(
         transitionAnimation.sharedFlow(
             duration = 167.milliseconds,
             onStep = { it },
-            onCancel = { 0f },
+            onCancel = { 1f },
             onFinish = { 1f },
         )
 }

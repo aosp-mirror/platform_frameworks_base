@@ -193,7 +193,7 @@ internal class DragAndDropTargetState(
             val widgetExtra = event.maybeWidgetExtra() ?: return false
             val (componentName, user) = widgetExtra
             if (componentName != null && user != null) {
-                // Placeholder isn't removed yet to allow the setting the right priority for items
+                // Placeholder isn't removed yet to allow the setting the right rank for items
                 // before adding in the new item.
                 contentListState.onSaveList(
                     newItemComponentName = componentName,

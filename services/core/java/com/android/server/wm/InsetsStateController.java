@@ -462,7 +462,7 @@ class InsetsStateController {
         }
     }
 
-    void dumpDebug(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
+    void dumpDebug(ProtoOutputStream proto, @WindowTracingLogLevel int logLevel) {
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
             provider.dumpDebug(proto,

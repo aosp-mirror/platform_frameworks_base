@@ -23,6 +23,7 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
@@ -30,6 +31,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,6 +42,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
 @SmallTest
@@ -50,9 +53,16 @@ class ModesDialogViewModelTest : SysuiTestCase() {
     private val repository = kosmos.fakeZenModeRepository
     private val interactor = kosmos.zenModeInteractor
     private val mockDialogDelegate = kosmos.mockModesDialogDelegate
+    private val mockDialogEventLogger = kosmos.mockModesDialogEventLogger
 
     private val underTest =
-        ModesDialogViewModel(context, interactor, kosmos.testDispatcher, mockDialogDelegate)
+        ModesDialogViewModel(
+            context,
+            interactor,
+            kosmos.testDispatcher,
+            mockDialogDelegate,
+            mockDialogEventLogger
+        )
 
     @Test
     fun tiles_filtersOutUserDisabledModes() =
@@ -69,7 +79,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setName("Disabled by other")
                         .setEnabled(false, /* byUser= */ false)
                         .build(),
-                    TestModeBuilder.MANUAL_DND,
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
                     TestModeBuilder()
                         .setName("Enabled")
                         .setEnabled(true)
@@ -91,7 +101,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 assertThat(this.enabled).isEqualTo(false)
             }
             with(tiles?.elementAt(1)!!) {
-                assertThat(this.text).isEqualTo("Manual DND")
+                assertThat(this.text).isEqualTo("Do Not Disturb")
                 assertThat(this.subtext).isEqualTo("On")
                 assertThat(this.enabled).isEqualTo(true)
             }
@@ -142,7 +152,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             }
             with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Active with manual")
-                assertThat(this.subtext).isEqualTo("trigger description")
+                assertThat(this.subtext).isEqualTo("On • trigger description")
                 assertThat(this.enabled).isEqualTo(true)
             }
             with(tiles?.elementAt(2)!!) {
@@ -261,6 +271,139 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(tiles?.size).isEqualTo(0)
+        }
+
+    @Test
+    fun tiles_calculatesSubtext() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("With description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When the going gets tough")
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When in Rome")
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When you find yourself in a hole")
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles!!).hasSize(6)
+            assertThat(tiles!![0].subtext).isEqualTo("When the going gets tough")
+            assertThat(tiles!![1].subtext).isEqualTo("On • When in Rome")
+            assertThat(tiles!![2].subtext).isEqualTo("Set up")
+            assertThat(tiles!![3].subtext).isEqualTo("Off")
+            assertThat(tiles!![4].subtext).isEqualTo("On")
+            assertThat(tiles!![5].subtext).isEqualTo("Set up")
+        }
+
+    @Test
+    fun tiles_populatesFieldsForAccessibility() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("With description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When the going gets tough")
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When in Rome")
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("With description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription("When you find yourself in a hole")
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, inactive")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, active")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setActive(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Without description, needs setup")
+                        .setManualInvocationAllowed(true)
+                        .setTriggerDescription(null)
+                        .setEnabled(false, /* byUser= */ false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles!!).hasSize(6)
+            with(tiles?.elementAt(0)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("When the going gets tough")
+            }
+            with(tiles?.elementAt(1)!!) {
+                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.subtextDescription).isEqualTo("When in Rome")
+            }
+            with(tiles?.elementAt(2)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("Set up")
+            }
+            with(tiles?.elementAt(3)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEmpty()
+            }
+            with(tiles?.elementAt(4)!!) {
+                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.subtextDescription).isEmpty()
+            }
+            with(tiles?.elementAt(5)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription).isEqualTo("Set up")
+            }
+
+            // All tiles have the same long click info
+            tiles!!.forEach { assertThat(it.onLongClickLabel).isEqualTo("Open settings") }
         }
 
     @Test
@@ -431,5 +574,85 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             assertThat(intent.action).isEqualTo(Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
             assertThat(intent.extras?.getString(Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID))
                 .isEqualTo("B")
+        }
+
+    @Test
+    fun onClick_logsOnOffEvents() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
+                    TestModeBuilder()
+                        .setId("id1")
+                        .setName("Inactive Mode One")
+                        .setActive(false)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                    TestModeBuilder()
+                        .setId("id2")
+                        .setName("Active Non-Invokable Mode Two") // but can be turned off by tile
+                        .setActive(true)
+                        .setManualInvocationAllowed(false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(3)
+
+            // Trigger onClick for each tile in sequence
+            tiles?.forEach { it.onClick.invoke() }
+            runCurrent()
+
+            val onModeCaptor = argumentCaptor<ZenMode>()
+            val offModeCaptor = argumentCaptor<ZenMode>()
+
+            // manual mode and mode 2 should have turned off
+            verify(mockDialogEventLogger, times(2)).logModeOff(offModeCaptor.capture())
+            val off0 = offModeCaptor.firstValue
+            assertThat(off0.isManualDnd).isTrue()
+
+            val off1 = offModeCaptor.secondValue
+            assertThat(off1.id).isEqualTo("id2")
+
+            // should also have logged turning mode 1 on
+            verify(mockDialogEventLogger).logModeOn(onModeCaptor.capture())
+            val on = onModeCaptor.lastValue
+            assertThat(on.id).isEqualTo("id1")
+        }
+
+    @Test
+    fun onLongClick_logsSettingsEvents() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tiles)
+
+            repository.addModes(
+                listOf(
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
+                    TestModeBuilder()
+                        .setId("id1")
+                        .setName("Inactive Mode One")
+                        .setActive(false)
+                        .setManualInvocationAllowed(true)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(tiles?.size).isEqualTo(2)
+            val modeCaptor = argumentCaptor<ZenMode>()
+
+            // long click manual DND and then automatic mode
+            tiles?.forEach { it.onLongClick.invoke() }
+            runCurrent()
+
+            verify(mockDialogEventLogger, times(2)).logModeSettings(modeCaptor.capture())
+            val manualMode = modeCaptor.firstValue
+            assertThat(manualMode.isManualDnd).isTrue()
+
+            val automaticMode = modeCaptor.lastValue
+            assertThat(automaticMode.id).isEqualTo("id1")
         }
 }

@@ -29,6 +29,7 @@ import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 
 /**
  * Renders the content of the lockscreen.
@@ -37,7 +38,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
  * outside the scene container framework.
  */
 class LockscreenContent(
-    private val viewModel: LockscreenContentViewModel,
+    private val viewModelFactory: LockscreenContentViewModel.Factory,
     private val blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
     private val clockInteractor: KeyguardClockInteractor,
 ) {
@@ -49,6 +50,7 @@ class LockscreenContent(
     fun SceneScope.Content(
         modifier: Modifier = Modifier,
     ) {
+        val viewModel = rememberViewModel("LockscreenContent") { viewModelFactory.create() }
         val isContentVisible: Boolean by viewModel.isContentVisible.collectAsStateWithLifecycle()
         if (!isContentVisible) {
             // If the content isn't supposed to be visible, show a large empty box as it's needed
@@ -69,6 +71,6 @@ class LockscreenContent(
         }
 
         val blueprint = blueprintByBlueprintId[blueprintId] ?: return
-        with(blueprint) { Content(modifier.sysuiResTag("keyguard_root_view")) }
+        with(blueprint) { Content(viewModel, modifier.sysuiResTag("keyguard_root_view")) }
     }
 }

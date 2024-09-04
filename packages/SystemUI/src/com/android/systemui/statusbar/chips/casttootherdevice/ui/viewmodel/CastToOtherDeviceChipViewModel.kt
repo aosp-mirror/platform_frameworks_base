@@ -190,12 +190,14 @@ constructor(
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
             icon =
-                Icon.Resource(
-                    CAST_TO_OTHER_DEVICE_ICON,
-                    // This string is "Casting screen"
-                    ContentDescription.Resource(
-                        R.string.cast_screen_to_other_device_chip_accessibility_label,
-                    ),
+                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+                    Icon.Resource(
+                        CAST_TO_OTHER_DEVICE_ICON,
+                        // This string is "Casting screen"
+                        ContentDescription.Resource(
+                            R.string.cast_screen_to_other_device_chip_accessibility_label,
+                        ),
+                    )
                 ),
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
@@ -213,10 +215,12 @@ constructor(
     private fun createIconOnlyCastChip(deviceName: String?): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.IconOnly(
             icon =
-                Icon.Resource(
-                    CAST_TO_OTHER_DEVICE_ICON,
-                    // This string is just "Casting"
-                    ContentDescription.Resource(R.string.accessibility_casting),
+                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+                    Icon.Resource(
+                        CAST_TO_OTHER_DEVICE_ICON,
+                        // This string is just "Casting"
+                        ContentDescription.Resource(R.string.accessibility_casting),
+                    )
                 ),
             colors = ColorsModel.Red,
             createDialogLaunchOnClickListener(

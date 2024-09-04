@@ -81,7 +81,7 @@
     <string name="speed_label_fast" msgid="2677719134596044051">"快"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"很快"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"已失效"</string>
-    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"已断开连接"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"正在断开连接..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"正在连接..."</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"显示点按操作的视觉反馈"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"显示按键操作"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"显示实体按键操作的视觉反馈"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"显示触控板输入"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"一个屏幕叠加层，显示了触控板输入数据和已识别的手势"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"显示面 (surface) 更新"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"窗口中的面 (surface) 更新时全部闪烁"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"显示视图更新"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"还需<xliff:g id="TIME">%1$s</xliff:g>充满"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - 为保护电池，已暂停充电"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - 正在充电"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> 前充满"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> 前充满"</string>

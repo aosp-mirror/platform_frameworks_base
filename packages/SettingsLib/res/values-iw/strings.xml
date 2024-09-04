@@ -196,7 +196,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"הוגדרו כמה ברירות מחדל"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"לא הוגדרו ברירות מחדל"</string>
     <string name="tts_settings" msgid="8130616705989351312">"הגדרות טקסט לדיבור"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"המרת טקסט לדיבור"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"פלט של המרת טקסט לדיבור"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"קצב דיבור"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"המהירות שבה הטקסט נאמר"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"גובה צליל"</string>
@@ -207,7 +207,7 @@
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"הגדרת קול ספציפי לשפה עבור הטקסט הנאמר"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"האזנה לדוגמה"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"הפעלת הדגמה קצרה של סינתזת דיבור"</string>
-    <string name="tts_install_data_title" msgid="1829942496472751703">"התקנת נתוני קול"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"התקנת נתונים שנאספים בזיהוי קולי"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"התקנת הנתונים הקוליים הדרושים לסינתזת דיבור"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ייתכן שמנוע סינתזת דיבור זה יכול לאסוף את כל הטקסט המדובר, כולל נתונים אישיים כגון סיסמאות ומספרי כרטיסי אשראי. הוא מגיע מהמנוע <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. להפוך את השימוש במנוע סינתזת דיבור זה לפעיל?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"שפה זו דורשת חיבור רשת פעיל עבור פלט טקסט לדיבור."</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"הצגת משוב ויזואלי להקשות"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"הצגת לחיצות המקשים"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"הצגת משוב חזותי עבור לחיצות פיזיות על מקשים"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"הצגת הקלט של לוח המגע"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"שכבת-על במסך מציגה את נתוני הקלט של לוח המגע ואת התנועות המזוהות"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"הצגת עדכונים על פני השטח"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"הבהוב של כל שטחי החלון כשהם מתעדכנים"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"הצגת עדכונים של התצוגה"</string>
@@ -430,7 +432,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"אילוץ יכולת קביעת גודל של הפעילויות"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"מאפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא התחשבות בערכי המניפסט."</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת האפשרות לשנות את הגודל והמיקום של החלונות"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת מצב חופשי (חלונות צפים)"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"סיסמת גיבוי שולחן העבודה"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"גיבויים מלאים בשולחן העבודה אינם מוגנים כעת"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"יש להקיש כדי לשנות או להסיר את הסיסמה לגיבויים מלאים בשולחן העבודה"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"‫<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה הושהתה כדי להגן על הסוללה"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"‫<xliff:g id="LEVEL">%1$s</xliff:g> – בטעינה"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"‫<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – טעינה מלאה עד <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"‫<xliff:g id="LEVEL">%1$s</xliff:g> – טעינה מלאה עד <xliff:g id="TIME">%2$s</xliff:g>"</string>

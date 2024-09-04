@@ -41,9 +41,9 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
@@ -57,6 +57,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 /**
@@ -108,6 +109,9 @@ class HandleMenuTest : ShellTestCase() {
             R.layout.desktop_mode_window_decor_handle_menu, null)
         whenever(mockDesktopWindowDecoration.addWindow(
             anyInt(), any(), any(), any(), anyInt(), anyInt(), anyInt(), anyInt())
+        ).thenReturn(mockAdditionalViewHostViewContainer)
+        whenever(mockDesktopWindowDecoration.addWindow(
+            any<View>(), any(), any(), any(), anyInt(), anyInt(), anyInt(), anyInt())
         ).thenReturn(mockAdditionalViewHostViewContainer)
         whenever(mockAdditionalViewHostViewContainer.view).thenReturn(menuView)
         whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
@@ -226,13 +230,13 @@ class HandleMenuTest : ShellTestCase() {
             }
             else -> error("Invalid windowing mode")
         }
-        val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId,
-                onClickListener, onTouchListener, appIcon, appName, displayController,
-                splitScreenController, shouldShowWindowingPill = true,
-                null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
-                captionX = captionX
+        val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId, appIcon, appName,
+            splitScreenController, shouldShowWindowingPill = true,
+            shouldShowNewWindowButton = true,
+            null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
+            captionX = captionX
         )
-        handleMenu.show()
+        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock())
         return handleMenu
     }
 

@@ -29,7 +29,7 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,14 +40,12 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class CommunalTutorialRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-
-    private lateinit var secureSettings: FakeSettings
+    private val secureSettings = kosmos.fakeSettings
     private lateinit var userRepository: FakeUserRepository
 
     private lateinit var underTest: CommunalTutorialRepositoryImpl
@@ -56,7 +54,6 @@ class CommunalTutorialRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        secureSettings = FakeSettings()
         userRepository = FakeUserRepository()
         val listOfUserInfo = listOf(MAIN_USER_INFO)
         userRepository.setUserInfos(listOfUserInfo)

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 
 import java.util.function.Consumer;
@@ -36,16 +37,20 @@ abstract class AppCompatRobotBase {
     private final AppCompatConfigurationRobot mConfigurationRobot;
     @NonNull
     private final AppCompatComponentPropRobot mOptPropRobot;
+    @NonNull
+    private final AppCompatResourcesRobot mResourcesRobot;
 
     AppCompatRobotBase(@NonNull WindowManagerService wm,
             @NonNull ActivityTaskManagerService atm,
             @NonNull ActivityTaskSupervisor supervisor,
             int displayWidth, int displayHeight) {
         mActivityRobot = new AppCompatActivityRobot(wm, atm, supervisor,
-                displayWidth, displayHeight);
+                displayWidth, displayHeight, this::onPostActivityCreation,
+                this::onPostDisplayContentCreation);
         mConfigurationRobot =
                 new AppCompatConfigurationRobot(wm.mAppCompatConfiguration);
         mOptPropRobot = new AppCompatComponentPropRobot(wm);
+        mResourcesRobot = new AppCompatResourcesRobot(wm.mContext.getResources());
     }
 
     AppCompatRobotBase(@NonNull WindowManagerService wm,
@@ -54,12 +59,31 @@ abstract class AppCompatRobotBase {
         this(wm, atm, supervisor, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
     }
 
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link ActivityRecord}. Common case is to invoke spyOn().
+     *
+     * @param activity The newly created {@link ActivityRecord}.
+     */
+    @CallSuper
+    void onPostActivityCreation(@NonNull ActivityRecord activity) {
+    }
+
+    /**
+     * Specific Robots can override this method to add operation to run on a newly created
+     * {@link DisplayContent}. Common case is to invoke spyOn().
+     *
+     * @param displayContent THe newly created {@link DisplayContent}.
+     */
+    @CallSuper
+    void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+    }
+
     @NonNull
     AppCompatConfigurationRobot conf() {
         return mConfigurationRobot;
     }
 
-    @NonNull
     void applyOnConf(@NonNull Consumer<AppCompatConfigurationRobot> consumer) {
         consumer.accept(mConfigurationRobot);
     }
@@ -69,7 +93,6 @@ abstract class AppCompatRobotBase {
         return mActivityRobot;
     }
 
-    @NonNull
     void applyOnActivity(@NonNull Consumer<AppCompatActivityRobot> consumer) {
         consumer.accept(mActivityRobot);
     }
@@ -79,8 +102,16 @@ abstract class AppCompatRobotBase {
         return mOptPropRobot;
     }
 
-    @NonNull
     void applyOnProp(@NonNull Consumer<AppCompatComponentPropRobot> consumer) {
         consumer.accept(mOptPropRobot);
+    }
+
+    @NonNull
+    AppCompatResourcesRobot resources() {
+        return mResourcesRobot;
+    }
+
+    void applyOnResources(@NonNull Consumer<AppCompatResourcesRobot> consumer) {
+        consumer.accept(mResourcesRobot);
     }
 }

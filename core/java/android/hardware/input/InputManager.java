@@ -1378,6 +1378,34 @@ public final class InputManager {
     }
 
     /**
+     * Registers a key gesture event listener for {@link KeyGestureEvent} being triggered.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link KeyGestureEventListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventListener(@NonNull Executor executor,
+            @NonNull KeyGestureEventListener listener) throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event listener.
+     *
+     * @param listener the {@link KeyGestureEventListener}
+     * @hide
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventListener(@NonNull KeyGestureEventListener listener) {
+        mGlobal.unregisterKeyGestureEventListener(listener);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1477,5 +1505,21 @@ public final class InputManager {
          * @param state the new sticky modifier state, never null.
          */
         void onStickyModifierStateChanged(@NonNull StickyModifierState state);
+    }
+
+    /**
+     * A callback used to notify about key gesture event on completion.
+     *
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     * @hide
+     */
+    public interface KeyGestureEventListener {
+        /**
+         * Called when a key gesture event occurs.
+         *
+         * @param event the gesture event that occurred.
+         */
+        void onKeyGestureEvent(@NonNull KeyGestureEvent event);
     }
 }

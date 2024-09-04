@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import javax.inject.Inject
@@ -52,13 +53,15 @@ constructor(
     val dismissFling =
         shadeRepository.currentFling
             .sample(
-                transitionInteractor.startedKeyguardState,
-                keyguardInteractor.isKeyguardDismissible
+                transitionInteractor.startedKeyguardTransitionStep,
+                keyguardInteractor.isKeyguardDismissible,
+                keyguardInteractor.statusBarState,
             )
-            .filter { (flingInfo, startedState, keyguardDismissable) ->
+            .filter { (flingInfo, startedStep, keyguardDismissable, statusBarState) ->
                 flingInfo != null &&
                     !flingInfo.expand &&
-                    startedState == KeyguardState.LOCKSCREEN &&
+                    statusBarState != StatusBarState.SHADE_LOCKED &&
+                    startedStep.to == KeyguardState.LOCKSCREEN &&
                     keyguardDismissable
             }
             .map { (flingInfo, _) -> flingInfo }

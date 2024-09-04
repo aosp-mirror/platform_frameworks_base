@@ -1196,6 +1196,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Рукописне введення не підтримується в полях паролів"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Змінити метод введення"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Відкрити засіб вибору методу введення"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Налаштування"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Деякі системні функції можуть не працювати"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
@@ -2424,6 +2426,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"З міркувань безпеки вміст додатка приховано під час показу екрана"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматично підключено до супутника"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Ви можете надсилати й отримувати повідомлення, не використовуючи Wi-Fi або мобільну мережу"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Скористатися супутниковим обміном повідомленнями?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Надсилайте й отримуйте текстові повідомлення без мобільної мережі або Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Відкрийте Повідомлення"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Як це працює"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обробка…"</string>
@@ -2449,4 +2453,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Калькулятор"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Карти"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Додатки"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Ваші відбитки пальців більше не розпізнаються. Налаштуйте розблокування відбитком пальця повторно."</string>
 </resources>

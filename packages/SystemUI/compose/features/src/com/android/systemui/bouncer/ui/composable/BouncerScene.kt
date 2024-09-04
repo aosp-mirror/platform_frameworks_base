@@ -27,11 +27,14 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
-import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneActionsViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -51,23 +54,37 @@ object Bouncer {
 class BouncerScene
 @Inject
 constructor(
-    private val viewModel: BouncerViewModel,
+    private val actionsViewModelFactory: BouncerSceneActionsViewModel.Factory,
+    private val contentViewModelFactory: BouncerSceneContentViewModel.Factory,
     private val dialogFactory: BouncerDialogFactory,
-) : ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Bouncer
 
+    private val actionsViewModel: BouncerSceneActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
     override val destinationScenes: Flow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+        actionsViewModel.actions
+
+    override suspend fun onActivated(): Nothing {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
-    ) = BouncerScene(viewModel, dialogFactory, modifier)
+    ) =
+        BouncerScene(
+            viewModel = rememberViewModel("BouncerScene") { contentViewModelFactory.create() },
+            dialogFactory = dialogFactory,
+            modifier = modifier,
+        )
 }
 
 @Composable
 private fun SceneScope.BouncerScene(
-    viewModel: BouncerViewModel,
+    viewModel: BouncerSceneContentViewModel,
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier = Modifier,
 ) {

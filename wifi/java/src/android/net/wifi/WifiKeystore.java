@@ -36,6 +36,8 @@ import java.util.Set;
 @SuppressLint("UnflaggedApi") // Promoting from @SystemApi(MODULE_LIBRARIES)
 public final class WifiKeystore {
     private static final String TAG = "WifiKeystore";
+    private static final String sPrimaryDbName =
+            WifiBlobStore.supplicantCanAccessBlobstore() ? "WifiBlobstore" : "LegacyKeystore";
 
     /** @hide */
     WifiKeystore() {
@@ -57,8 +59,13 @@ public final class WifiKeystore {
         // are able to access the same values.
         final long identity = Binder.clearCallingIdentity();
         try {
-            Log.i(TAG, "put blob. alias " + alias);
-            return WifiBlobStore.getInstance().put(alias, blob);
+            Log.i(TAG, "put blob. alias=" + alias + ", primaryDb=" + sPrimaryDbName);
+            if (WifiBlobStore.supplicantCanAccessBlobstore()) {
+                return WifiBlobStore.getInstance().put(alias, blob);
+            } else {
+                WifiBlobStore.getLegacyKeystore().put(alias, Process.WIFI_UID, blob);
+                return true;
+            }
         } catch (Exception e) {
             Log.e(TAG, "Failed to put blob.", e);
             return false;
@@ -80,7 +87,7 @@ public final class WifiKeystore {
     public static @NonNull byte[] get(@NonNull String alias) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            Log.i(TAG, "get blob. alias " + alias);
+            Log.i(TAG, "get blob. alias=" + alias + ", primaryDb=" + sPrimaryDbName);
             byte[] blob = WifiBlobStore.getInstance().get(alias);
             if (blob != null) {
                 return blob;
@@ -112,7 +119,7 @@ public final class WifiKeystore {
         boolean legacyKsSuccess = false;
         final long identity = Binder.clearCallingIdentity();
         try {
-            Log.i(TAG, "remove blob. alias " + alias);
+            Log.i(TAG, "remove blob. alias=" + alias + ", primaryDb=" + sPrimaryDbName);
             blobStoreSuccess = WifiBlobStore.getInstance().remove(alias);
             // Legacy Keystore will throw an exception if the alias is not found.
             WifiBlobStore.getLegacyKeystore().remove(alias, Process.WIFI_UID);

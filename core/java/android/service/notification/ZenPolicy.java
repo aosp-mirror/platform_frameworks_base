@@ -393,6 +393,46 @@ public final class ZenPolicy implements Parcelable {
     }
 
     /**
+     * Base Zen Policy used when {@link android.app.NotificationManager#setInterruptionFilter} is
+     * called with {@link android.app.NotificationManager#INTERRUPTION_FILTER_ALARMS} or an
+     * {@link android.app.AutomaticZenRule} specifies said filter.
+     *
+     * <p>Note that <em>visual effects</em> for filtered notifications are unset in this base
+     * policy, so should be merged on top of the default policy's visual effects (see
+     * {@link #overwrittenWith(ZenPolicy)}).
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static ZenPolicy getBasePolicyInterruptionFilterAlarms() {
+        return new ZenPolicy.Builder()
+                .disallowAllSounds()
+                .allowAlarms(true)
+                .allowMedia(true)
+                .allowPriorityChannels(false)
+                .build();
+    }
+
+    /**
+     * Base Zen Policy used when {@link android.app.NotificationManager#setInterruptionFilter} is
+     * called with {@link android.app.NotificationManager#INTERRUPTION_FILTER_NONE} or an
+     * {@link android.app.AutomaticZenRule} specifies said filter.
+     *
+     * <p>Note that <em>visual effects</em> for filtered notifications are unset in this base
+     * policy, so it should be merged on top of the device default policy's visual effects (see
+     * {@link #overwrittenWith(ZenPolicy)}).
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static ZenPolicy getBasePolicyInterruptionFilterNone() {
+        return new ZenPolicy.Builder()
+                .disallowAllSounds()
+                .allowPriorityChannels(false)
+                .build();
+    }
+
+    /**
      * Conversation type that can bypass DND.
      * @return {@link #CONVERSATION_SENDERS_UNSET}, {@link #CONVERSATION_SENDERS_ANYONE},
      * {@link #CONVERSATION_SENDERS_IMPORTANT}, {@link #CONVERSATION_SENDERS_NONE}.
@@ -1240,7 +1280,10 @@ public final class ZenPolicy implements Parcelable {
         return "invalidState{" + state + "}";
     }
 
-    private String peopleTypeToString(@PeopleType int peopleType) {
+    /**
+     * @hide
+     */
+    public static String peopleTypeToString(@PeopleType int peopleType) {
         switch (peopleType) {
             case PEOPLE_TYPE_ANYONE:
                 return "anyone";

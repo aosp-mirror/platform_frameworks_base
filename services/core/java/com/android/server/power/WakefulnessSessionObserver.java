@@ -31,6 +31,7 @@ import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASO
 import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_USER_ACTIVITY_BUTTON;
 import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_USER_ACTIVITY_OTHER;
 import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_USER_ACTIVITY_TOUCH;
+import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_WAKE_LOCK_DEATH;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager;
@@ -574,9 +575,12 @@ public class WakefulnessSessionObserver {
                         case RELEASE_REASON_USER_ACTIVITY_ACCESSIBILITY:
                             outcome = OVERRIDE_OUTCOME_CANCEL_USER_INTERACTION;
                             break;
-                        case RELEASE_REASON_SCREEN_LOCK:
-                        case RELEASE_REASON_NON_INTERACTIVE:
+                        case RELEASE_REASON_WAKE_LOCK_DEATH:
                             outcome = OVERRIDE_OUTCOME_CANCEL_CLIENT_DISCONNECT;
+                            break;
+                        case RELEASE_REASON_NON_INTERACTIVE:
+                        case RELEASE_REASON_SCREEN_LOCK:
+                            outcome = OVERRIDE_OUTCOME_CANCEL_OTHER;
                             break;
                         default:
                             outcome = OVERRIDE_OUTCOME_UNKNOWN;

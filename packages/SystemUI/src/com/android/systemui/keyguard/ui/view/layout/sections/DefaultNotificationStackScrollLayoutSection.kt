@@ -24,7 +24,6 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
@@ -64,13 +63,7 @@ constructor(
                 val useLargeScreenHeader =
                     context.resources.getBoolean(R.bool.config_use_large_screen_shade_header)
                 val marginTopLargeScreen =
-                    if (centralizedStatusBarHeightFix()) {
-                        largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
-                    } else {
-                        context.resources.getDimensionPixelSize(
-                            R.dimen.large_screen_shade_header_height
-                        )
-                    }
+                    largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
                 connect(
                     R.id.nssl_placeholder,
                     TOP,

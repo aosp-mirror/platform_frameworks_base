@@ -36,7 +36,7 @@ public class EdgeToEdgeUtils {
      * Enable Edge to Edge and handle overlaps using insets. It should be called before
      * setContentView.
      */
-    static void enable(@NonNull ComponentActivity activity) {
+    public static void enable(@NonNull ComponentActivity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             return;
         }

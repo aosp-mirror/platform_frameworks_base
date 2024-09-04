@@ -47,12 +47,12 @@ sealed interface CommunalContentModel {
 
     sealed interface WidgetContent : CommunalContentModel {
         val appWidgetId: Int
-        val priority: Int
+        val rank: Int
         val componentName: ComponentName
 
         data class Widget(
             override val appWidgetId: Int,
-            override val priority: Int,
+            override val rank: Int,
             val providerInfo: AppWidgetProviderInfo,
             val appWidgetHost: CommunalAppWidgetHost,
             val inQuietMode: Boolean,
@@ -71,7 +71,7 @@ sealed interface CommunalContentModel {
 
         data class DisabledWidget(
             override val appWidgetId: Int,
-            override val priority: Int,
+            override val rank: Int,
             val providerInfo: AppWidgetProviderInfo
         ) : WidgetContent {
             override val key = KEY.disabledWidget(appWidgetId)
@@ -85,7 +85,7 @@ sealed interface CommunalContentModel {
 
         data class PendingWidget(
             override val appWidgetId: Int,
-            override val priority: Int,
+            override val rank: Int,
             override val componentName: ComponentName,
             val icon: Bitmap? = null,
         ) : WidgetContent {

@@ -17,6 +17,7 @@
 package com.android.systemui.education.domain.interactor
 
 import com.android.systemui.education.data.repository.contextualEducationRepository
+import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -28,6 +29,7 @@ val Kosmos.contextualEducationInteractor by
             backgroundScope = testScope.backgroundScope,
             backgroundDispatcher = testDispatcher,
             repository = contextualEducationRepository,
-            selectedUserInteractor = selectedUserInteractor
+            selectedUserInteractor = selectedUserInteractor,
+            clock = fakeEduClock
         )
     }

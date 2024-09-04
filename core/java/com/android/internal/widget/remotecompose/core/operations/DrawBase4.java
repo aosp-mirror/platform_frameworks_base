@@ -41,10 +41,10 @@ public abstract class DrawBase4 extends PaintOperation
                 }
             };
     protected String mName = "DrawRectBase";
-    float mX1;
-    float mY1;
-    float mX2;
-    float mY2;
+    protected float mX1;
+    protected float mY1;
+    protected float mX2;
+    protected float mY2;
     float mX1Value;
     float mY1Value;
     float mX2Value;

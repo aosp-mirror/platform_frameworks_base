@@ -54,13 +54,8 @@ import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
@@ -2989,7 +2984,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17;
 
     /**
@@ -4334,11 +4328,13 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, conditional = true)
     @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    @UserHandleAware
     public @ContentProtectionPolicy int getContentProtectionPolicy(@Nullable ComponentName admin) {
         throwIfParentInstance("getContentProtectionPolicy");
         if (mService != null) {
             try {
-                return mService.getContentProtectionPolicy(admin, mContext.getPackageName());
+                return mService.getContentProtectionPolicy(admin, mContext.getPackageName(),
+                        myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11964,6 +11960,34 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Adds a user restriction on {@code targetUser}, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity  The service entity that adds the restriction. A user restriction set by
+     *                       a service entity can only be cleared by the same entity. This can be
+     *                       just the calling package name, or any string of the caller's choice
+     *                       can be used.
+     * @param key  The key of the restriction.
+     * @param targetUser  The user to add the restriction on.
+     * @throws SecurityException if the caller is not a system service
+     *
+     * @hide
+     */
+    public void addUserRestriction(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key, @UserIdInt int targetUser) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionForUser(
+                        systemEntity, key, /* enable= */ true, targetUser);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by a profile owner, device owner or a holder of any permission that is associated with
      *  a user restriction to set a user restriction specified by the provided {@code key} globally
      *  on all users. To clear the restriction use {@link #clearUserRestriction}.
@@ -11971,7 +11995,7 @@ public class DevicePolicyManager {
      * <p>For a given user, a restriction will be set if it was applied globally or locally by any
      * admin.
      *
-     * <p> The calling device admin must be a profile owner, device owner or or a holder of any
+     * <p> The calling device admin must be a profile owner, device owner or a holder of any
      * permission that is associated with a user restriction; if it is not, a security
      * exception will be thrown.
      *
@@ -12065,6 +12089,34 @@ public class DevicePolicyManager {
             try {
                 mService.setUserRestriction(
                         admin, mContext.getPackageName(), key, false, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clears a user restriction from {@code targetUser}, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity  The system entity that clears the restriction. A user restriction
+     *                         set by a system entity can only be cleared by the same entity. This
+     *                         can be just the calling package name, or any string of the caller's
+     *                         choice can be used.
+     * @param key  The key of the restriction.
+     * @param targetUser  The user to clear the restriction from.
+     * @throws SecurityException if the caller is not a system service
+     *
+     * @hide
+     */
+    public void clearUserRestriction(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key, @UserIdInt int targetUser) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionForUser(
+                        systemEntity, key, /* enable= */ false, targetUser);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -14277,7 +14329,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void setAuditLogEnabled(boolean enabled) {
         throwIfParentInstance("setAuditLogEnabled");
@@ -14294,7 +14345,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public boolean isAuditLogEnabled() {
         throwIfParentInstance("isAuditLogEnabled");
@@ -14316,7 +14366,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void setAuditLogEventCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -14343,7 +14392,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void clearAuditLogEventCallback() {
         throwIfParentInstance("clearAuditLogEventCallback");
@@ -17691,7 +17739,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller is not authorized to call this method.
      * @return ids of all managed subscriptions currently downloaded by an admin on the device.
      */
-    @FlaggedApi(FLAG_ESIM_MANAGEMENT_ENABLED)
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS)
     @NonNull
     public Set<Integer> getSubscriptionIds() {
@@ -17760,7 +17807,6 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
     public void forceSetMaxPolicyStorageLimit(int storageLimit) {
         if (mService != null) {
             try {
@@ -17778,7 +17824,6 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
     public int getPolicySizeForAdmin(@NonNull EnforcingAdmin admin) {
         if (mService != null) {
             try {
@@ -17797,13 +17842,9 @@ public class DevicePolicyManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED)
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     @DeviceAdminInfo.HeadlessDeviceOwnerMode
     public int getHeadlessDeviceOwnerMode() {
-        if (!Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
-            return HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
-        }
         if (mService != null) {
             try {
                 return mService.getHeadlessDeviceOwnerMode(mContext.getPackageName());

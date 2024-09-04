@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth.devicesettings.shared.model
 
 import android.content.Intent
 import android.graphics.Bitmap
+import androidx.annotation.DrawableRes
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
 
@@ -32,7 +33,7 @@ sealed interface DeviceSettingModel {
         @DeviceSettingId override val id: Int,
         val title: String,
         val summary: String? = null,
-        val icon: Bitmap? = null,
+        val icon: DeviceSettingIcon? = null,
         val intent: Intent? = null,
         val switchState: DeviceSettingStateModel.ActionSwitchPreferenceState? = null,
         val isAllowedChangingState: Boolean = true,
@@ -51,6 +52,20 @@ sealed interface DeviceSettingModel {
         val updateState: (DeviceSettingStateModel.MultiTogglePreferenceState) -> Unit
     ) : DeviceSettingModel
 
+    /** Models a footer preference. */
+    data class FooterPreference(
+        override val cachedDevice: CachedBluetoothDevice,
+        @DeviceSettingId override val id: Int,
+        val footerText: String,
+    ) : DeviceSettingModel
+
+    /** Models a help preference displayed on the top right corner of the fragment. */
+    data class HelpPreference(
+        override val cachedDevice: CachedBluetoothDevice,
+        @DeviceSettingId override val id: Int,
+        val intent: Intent,
+    ) : DeviceSettingModel
+
     /** Models an unknown preference. */
     data class Unknown(
         override val cachedDevice: CachedBluetoothDevice,
@@ -59,4 +74,12 @@ sealed interface DeviceSettingModel {
 }
 
 /** Models a toggle in [DeviceSettingModel.MultiTogglePreference]. */
-data class ToggleModel(val label: String, val icon: Bitmap)
+data class ToggleModel(val label: String, val icon: DeviceSettingIcon)
+
+/** Models an icon in device settings. */
+sealed interface DeviceSettingIcon {
+
+    data class BitmapIcon(val bitmap: Bitmap) : DeviceSettingIcon
+
+    data class ResourceIcon(@DrawableRes val resId: Int) : DeviceSettingIcon
+}

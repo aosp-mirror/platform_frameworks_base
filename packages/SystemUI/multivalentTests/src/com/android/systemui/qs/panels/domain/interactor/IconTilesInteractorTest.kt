@@ -24,6 +24,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.qsPreferencesRepository
+import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -40,15 +41,16 @@ class IconTilesInteractorTest : SysuiTestCase() {
         testKosmos().apply {
             defaultLargeTilesRepository =
                 object : DefaultLargeTilesRepository {
-                    override val defaultLargeTiles: Set<TileSpec> = setOf(TileSpec.create("large"))
+                    override val defaultLargeTiles: Set<TileSpec> = setOf(largeTile)
                 }
+            currentTilesInteractor.setTiles(listOf(largeTile, smallTile))
         }
     private val underTest = with(kosmos) { iconTilesInteractor }
 
     @Test
     fun isIconTile_returnsCorrectValue() {
-        assertThat(underTest.isIconTile(TileSpec.create("large"))).isFalse()
-        assertThat(underTest.isIconTile(TileSpec.create("small"))).isTrue()
+        assertThat(underTest.isIconTile(largeTile)).isFalse()
+        assertThat(underTest.isIconTile(smallTile)).isTrue()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -56,31 +58,80 @@ class IconTilesInteractorTest : SysuiTestCase() {
     fun isIconTile_updatesFromSharedPreferences() =
         with(kosmos) {
             testScope.runTest {
-                // Assert that new tile defaults to icon
-                assertThat(underTest.isIconTile(TileSpec.create("newTile"))).isTrue()
+                val spec = TileSpec.create("newTile")
 
-                qsPreferencesRepository.setLargeTilesSpecs(setOf(TileSpec.create("newTile")))
+                // Assert that new tile defaults to icon
+                assertThat(underTest.isIconTile(spec)).isTrue()
+
+                // Add the tile
+                currentTilesInteractor.addTile(spec)
+                runCurrent()
+
+                // Resize it to large
+                qsPreferencesRepository.setLargeTilesSpecs(setOf(spec))
                 runCurrent()
 
                 // Assert that the new tile was added to the large tiles set
-                assertThat(underTest.isIconTile(TileSpec.create("newTile"))).isFalse()
+                assertThat(underTest.isIconTile(spec)).isFalse()
             }
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun resize_updatesSharedPreferences() =
         with(kosmos) {
             testScope.runTest {
                 val latest by collectLastValue(qsPreferencesRepository.largeTilesSpecs)
-                val spec = TileSpec.create("large")
-
-                // Assert that the tile is added to the large tiles after resizing
-                underTest.resize(spec, toIcon = false)
-                assertThat(latest).contains(spec)
+                runCurrent()
 
                 // Assert that the tile is removed from the large tiles after resizing
-                underTest.resize(spec, toIcon = true)
-                assertThat(latest).doesNotContain(spec)
+                underTest.resize(largeTile)
+                runCurrent()
+                assertThat(latest).doesNotContain(largeTile)
+
+                // Assert that the tile is added to the large tiles after resizing
+                underTest.resize(largeTile)
+                runCurrent()
+                assertThat(latest).contains(largeTile)
             }
         }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun removingTile_updatesSharedPreferences() =
+        with(kosmos) {
+            testScope.runTest {
+                val latest by collectLastValue(qsPreferencesRepository.largeTilesSpecs)
+                runCurrent()
+
+                // Remove the large tile from the current tiles
+                currentTilesInteractor.removeTiles(listOf(largeTile))
+                runCurrent()
+
+                // Assert that it resized to small
+                assertThat(latest).doesNotContain(largeTile)
+            }
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun resizingNonCurrentTile_doesNothing() =
+        with(kosmos) {
+            testScope.runTest {
+                val latest by collectLastValue(qsPreferencesRepository.largeTilesSpecs)
+                val newTile = TileSpec.create("newTile")
+
+                // Remove the large tile from the current tiles
+                underTest.resize(newTile)
+                runCurrent()
+
+                // Assert that it's still small
+                assertThat(latest).doesNotContain(newTile)
+            }
+        }
+
+    private companion object {
+        private val largeTile = TileSpec.create("large")
+        private val smallTile = TileSpec.create("small")
+    }
 }

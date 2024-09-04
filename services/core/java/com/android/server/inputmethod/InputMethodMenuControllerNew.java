@@ -21,7 +21,7 @@ import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
-import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.util.Slog;
@@ -107,7 +108,7 @@ final class InputMethodMenuControllerNew {
             if (which != selectedIndex) {
                 final var item = items.get(which);
                 InputMethodManagerInternal.get()
-                        .switchToInputMethod(item.mImi.getId(), item.mSubtypeId, userId);
+                        .switchToInputMethod(item.mImi.getId(), item.mSubtypeIndex, userId);
             }
             hide(displayId, userId);
         };
@@ -115,7 +116,11 @@ final class InputMethodMenuControllerNew {
         final var selectedImi = selectedIndex >= 0 ? items.get(selectedIndex).mImi : null;
         final var languageSettingsIntent = selectedImi != null
                 ? selectedImi.createImeLanguageSettingsActivityIntent() : null;
-        final boolean hasLanguageSettingsButton = languageSettingsIntent != null;
+        final boolean isDeviceProvisioned = Settings.Global.getInt(
+                dialogWindowContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                0) != 0;
+        final boolean hasLanguageSettingsButton = languageSettingsIntent != null
+                && isDeviceProvisioned;
         if (hasLanguageSettingsButton) {
             final View buttonBar = contentView
                     .requireViewById(com.android.internal.R.id.button_bar);
@@ -135,11 +140,13 @@ final class InputMethodMenuControllerNew {
         final RecyclerView recyclerView = contentView
                 .requireViewById(com.android.internal.R.id.list);
         recyclerView.setAdapter(new Adapter(items, selectedIndex, inflater, onClickListener));
-        // Scroll to the currently selected IME.
-        recyclerView.scrollToPosition(selectedIndex);
+        // Scroll to the currently selected IME. This must run after the recycler view is laid out.
+        recyclerView.post(() -> recyclerView.scrollToPosition(selectedIndex));
         // Indicate that the list can be scrolled.
         recyclerView.setScrollIndicators(
                 hasLanguageSettingsButton ? View.SCROLL_INDICATOR_BOTTOM : 0);
+        // Request focus to enable rotary scrolling on watches.
+        recyclerView.requestFocus();
 
         builder.setOnCancelListener(dialog -> hide(displayId, userId));
         mMenuItems = items;
@@ -223,10 +230,10 @@ final class InputMethodMenuControllerNew {
 
         /**
          * The index of the subtype in the input method's array of subtypes,
-         * or {@link InputMethodUtils#NOT_A_SUBTYPE_ID} if this item doesn't have a subtype.
+         * or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if this item doesn't have a subtype.
          */
-        @IntRange(from = NOT_A_SUBTYPE_ID)
-        private final int mSubtypeId;
+        @IntRange(from = NOT_A_SUBTYPE_INDEX)
+        private final int mSubtypeIndex;
 
         /** Whether this item has a group header (only the first item of each input method). */
         private final boolean mHasHeader;
@@ -238,12 +245,13 @@ final class InputMethodMenuControllerNew {
         private final boolean mHasDivider;
 
         MenuItem(@NonNull CharSequence imeName, @Nullable CharSequence subtypeName,
-                @NonNull InputMethodInfo imi, @IntRange(from = NOT_A_SUBTYPE_ID) int subtypeId,
-                boolean hasHeader, boolean hasDivider) {
+                @NonNull InputMethodInfo imi,
+                @IntRange(from = NOT_A_SUBTYPE_INDEX) int subtypeIndex, boolean hasHeader,
+                boolean hasDivider) {
             mImeName = imeName;
             mSubtypeName = subtypeName;
             mImi = imi;
-            mSubtypeId = subtypeId;
+            mSubtypeIndex = subtypeIndex;
             mHasHeader = hasHeader;
             mHasDivider = hasDivider;
         }
@@ -253,7 +261,7 @@ final class InputMethodMenuControllerNew {
             return "MenuItem{"
                     + "mImeName=" + mImeName
                     + " mSubtypeName=" + mSubtypeName
-                    + " mSubtypeId=" + mSubtypeId
+                    + " mSubtypeIndex=" + mSubtypeIndex
                     + " mHasHeader=" + mHasHeader
                     + " mHasDivider=" + mHasDivider
                     + "}";

@@ -16,12 +16,14 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
+import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.utils.coroutines.flow.mapLatestConflated
@@ -56,6 +58,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
 ) {
     /**
      * Whether the device is unlocked.
@@ -119,7 +122,7 @@ constructor(
      * Note: `true` doesn't mean the lockscreen is visible. It may be occluded or covered by other
      * UI.
      */
-    val canSwipeToEnter: StateFlow<Boolean?> =
+    val canSwipeToEnter: StateFlow<Boolean?> by lazy {
         combine(
                 authenticationInteractor.authenticationMethod.map {
                     it == AuthenticationMethodModel.None
@@ -142,12 +145,21 @@ constructor(
                 // from upstream data sources.
                 initialValue = null,
             )
+    }
 
     /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
      * unlock the device it will transition to bouncer.
+     *
+     * @param callback An optional callback to invoke when the attempt succeeds, fails, or is
+     *   canceled
      */
-    fun attemptDeviceEntry() {
+    @JvmOverloads
+    fun attemptDeviceEntry(
+        callback: IKeyguardDismissCallback? = null,
+    ) {
+        callback?.let { dismissCallbackRegistry.addCallback(it) }
+
         // TODO (b/307768356),
         //       1. Check if the device is already authenticated by trust agent/passive biometrics
         //       2. Show SPFS/UDFPS bouncer if it is available AlternateBouncerInteractor.show

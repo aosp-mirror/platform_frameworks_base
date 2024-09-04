@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastLastOrNull
+import com.android.compose.animation.scene.content.state.TransitionState
 import kotlin.math.roundToInt
 
 /**
@@ -119,7 +120,7 @@ fun ContentScope.animateContentFloatAsState(
 }
 
 @Deprecated(
-    "Use animateSceneFloatAsState() instead",
+    "Use animateContentFloatAsState() instead",
     replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)")
 )
 @Composable
@@ -170,7 +171,7 @@ fun ContentScope.animateContentDpAsState(
 }
 
 @Deprecated(
-    "Use animateSceneDpAsState() instead",
+    "Use animateContentDpAsState() instead",
     replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)")
 )
 @Composable
@@ -392,11 +393,12 @@ private class AnimatedStateImpl<T, Delta>(
         transition: TransitionState.Transition?,
     ): T? {
         if (transition == null) {
-            return sharedValue[layoutImpl.state.transitionState.currentScene]
+            return sharedValue[content]
+                ?: sharedValue[layoutImpl.state.transitionState.currentScene]
         }
 
-        val fromValue = sharedValue[transition.fromScene]
-        val toValue = sharedValue[transition.toScene]
+        val fromValue = sharedValue[transition.fromContent]
+        val toValue = sharedValue[transition.toContent]
         return if (fromValue != null && toValue != null) {
             if (fromValue == toValue) {
                 // Optimization: avoid reading progress if the values are the same, so we don't
@@ -410,7 +412,7 @@ private class AnimatedStateImpl<T, Delta>(
                             if (canOverflow) transition.progress
                             else transition.progress.fastCoerceIn(0f, 1f)
                         }
-                        overscrollSpec.scene == transition.toScene -> 1f
+                        overscrollSpec.content == transition.toContent -> 1f
                         else -> 0f
                     }
 
@@ -423,14 +425,16 @@ private class AnimatedStateImpl<T, Delta>(
         val targetValues = sharedValue.targetValues
         val transition =
             if (element != null) {
-                layoutImpl.elements[element]?.stateByContent?.let { sceneStates ->
-                    layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                        transition.fromScene in sceneStates || transition.toScene in sceneStates
-                    }
+                layoutImpl.elements[element]?.let { element ->
+                    elementState(
+                        layoutImpl.state.transitionStates,
+                        isInContent = { it in element.stateByContent },
+                    )
+                        as? TransitionState.Transition
                 }
             } else {
                 layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                    transition.fromScene in targetValues || transition.toScene in targetValues
+                    transition.fromContent in targetValues || transition.toContent in targetValues
                 }
             }
 

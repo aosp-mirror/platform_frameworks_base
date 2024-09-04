@@ -19,6 +19,7 @@ package com.android.systemui.qs.panels.domain.interactor
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.shared.model.SizedTile
+import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.shared.model.TileRow
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
@@ -38,17 +39,12 @@ constructor(
     override fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec> {
         val newTiles: MutableList<TileSpec> = mutableListOf()
         val row = TileRow<TileSpec>(columns = gridSizeInteractor.columns.value)
-        val tilesQueue =
+        val tilesQueue: ArrayDeque<SizedTile<TileSpec>> =
             ArrayDeque(
                 tiles.map {
-                    SizedTile(
+                    SizedTileImpl(
                         it,
-                        width =
-                            if (iconTilesInteractor.isIconTile(it)) {
-                                1
-                            } else {
-                                2
-                            }
+                        if (iconTilesInteractor.isIconTile(it)) 1 else 2,
                     )
                 }
             )

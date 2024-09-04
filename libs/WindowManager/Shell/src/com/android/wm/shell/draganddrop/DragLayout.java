@@ -21,15 +21,14 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -61,9 +60,9 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;

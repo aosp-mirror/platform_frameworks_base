@@ -17,6 +17,8 @@
 package com.android.systemui.bouncer.domain.interactor
 
 import android.content.pm.UserInfo
+import android.hardware.biometrics.BiometricFaceConstants
+import android.hardware.biometrics.BiometricSourceType
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -25,6 +27,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.Pattern
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FaceSensorInfo
@@ -35,7 +38,7 @@ import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryBiometricsAllowedInteractor
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
@@ -57,7 +60,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -76,6 +81,8 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
     @Mock private lateinit var securityModel: KeyguardSecurityModel
     @Mock private lateinit var countDownTimerUtil: CountDownTimerUtil
     @Mock private lateinit var systemPropertiesHelper: SystemPropertiesHelper
+    @Captor
+    private lateinit var keyguardUpdateMonitorCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
 
     private lateinit var underTest: BouncerMessageInteractor
 
@@ -106,9 +113,9 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 systemPropertiesHelper = systemPropertiesHelper,
                 primaryBouncerInteractor = kosmos.primaryBouncerInteractor,
                 facePropertyRepository = kosmos.fakeFacePropertyRepository,
-                deviceEntryFingerprintAuthInteractor = kosmos.deviceEntryFingerprintAuthInteractor,
-                faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository,
-                securityModel = securityModel
+                securityModel = securityModel,
+                deviceEntryBiometricsAllowedInteractor =
+                    kosmos.deviceEntryBiometricsAllowedInteractor,
             )
         biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(
             fingerprintAuthCurrentlyAllowed
@@ -204,6 +211,52 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun resetMessageBackToDefault_faceAuthRestarts() =
+        testScope.runTest {
+            init()
+            captureKeyguardUpdateMonitorCallback()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
+
+            underTest.setFaceAcquisitionMessage("not empty")
+
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isEqualTo("not empty")
+
+            keyguardUpdateMonitorCaptor.value.onBiometricAcquired(
+                BiometricSourceType.FACE,
+                BiometricFaceConstants.FACE_ACQUIRED_START
+            )
+
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isNull()
+        }
+
+    @Test
+    fun faceRestartDoesNotResetFingerprintMessage() =
+        testScope.runTest {
+            init()
+            captureKeyguardUpdateMonitorCallback()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
+
+            underTest.setFingerprintAcquisitionMessage("not empty")
+
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isEqualTo("not empty")
+
+            keyguardUpdateMonitorCaptor.value.onBiometricAcquired(
+                BiometricSourceType.FACE,
+                BiometricFaceConstants.FACE_ACQUIRED_START
+            )
+
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isEqualTo("not empty")
+        }
+
+    @Test
     fun setFingerprintMessage_propagateValue() =
         testScope.runTest {
             init()
@@ -278,6 +331,32 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
             assertThat(primaryResMessage(lockoutMessage))
                 .isEqualTo("Unlock with PIN or fingerprint")
             assertThat(lockoutMessage?.secondaryMessage?.message).isNull()
+        }
+
+    @Test
+    fun faceLockoutThenFaceFailure_doesNotUpdateMessage() =
+        testScope.runTest {
+            init()
+            captureKeyguardUpdateMonitorCallback()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
+
+            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+            kosmos.fakeDeviceEntryFaceAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(secondaryResMessage(bouncerMessage))
+                .isEqualTo("Can’t unlock with face. Too many attempts.")
+
+            // WHEN face failure comes in during lockout
+            keyguardUpdateMonitorCaptor.value.onBiometricAuthFailed(BiometricSourceType.FACE)
+
+            // THEN lockout message does NOT update to face failure message
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(secondaryResMessage(bouncerMessage))
+                .isEqualTo("Can’t unlock with face. Too many attempts.")
         }
 
     @Test
@@ -571,6 +650,10 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 assertThat(secondaryResMessage(authFlagsMessage)).isEqualTo(messagePair.second)
             }
         }
+    }
+
+    private fun captureKeyguardUpdateMonitorCallback() {
+        verify(updateMonitor).registerCallback(keyguardUpdateMonitorCaptor.capture())
     }
 
     companion object {

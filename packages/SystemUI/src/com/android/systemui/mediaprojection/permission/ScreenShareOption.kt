@@ -26,9 +26,10 @@ annotation class ScreenShareMode
 const val SINGLE_APP = 0
 const val ENTIRE_SCREEN = 1
 
-class ScreenShareOption(
+data class ScreenShareOption(
     @ScreenShareMode val mode: Int,
     @StringRes val spinnerText: Int,
     @StringRes val warningText: Int,
+    @StringRes val startButtonText: Int,
     val spinnerDisabledText: String? = null,
 )

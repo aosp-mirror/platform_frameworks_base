@@ -141,8 +141,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.Vibrator;
-import android.os.vibrator.Flags;
 import android.service.credentials.CredentialProviderService;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
@@ -5711,9 +5709,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The pointer icon when the mouse hovers on this view. The default is null.
      */
     private PointerIcon mMousePointerIcon;
-
-    /** Vibrator for haptic feedback. */
-    private Vibrator mVibrator;
 
     /**
      * @hide
@@ -16448,7 +16443,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED) {
             try {
-                Trace.traceBegin(TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
+                if (Trace.isTagEnabled(TRACE_TAG_VIEW)) {
+                    Trace.traceBegin(TRACE_TAG_VIEW,
+                            "View.onTouchListener#onTouch - " + getClass().getSimpleName()
+                                    + ", eventId - " + event.getId());
+                }
                 handled = li.mOnTouchListener.onTouch(this, event);
             } finally {
                 Trace.traceEnd(TRACE_TAG_VIEW);
@@ -27378,6 +27377,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Modifiers the input matrix such that it maps root view's coordinates to view-local
+     * coordinates.
+     *
+     * @param matrix input matrix to modify
+     * @hide
+     */
+    public void transformMatrixRootToLocal(@NonNull Matrix matrix) {
+        final ViewParent parent = mParent;
+        if (parent instanceof final View vp) {
+            vp.transformMatrixRootToLocal(matrix);
+            matrix.postTranslate(vp.mScrollX, vp.mScrollY);
+        }
+        // This method is different from transformMatrixToLocal that it doesn't perform any
+        // transformation for ViewRootImpl
+
+        matrix.postTranslate(-mLeft, -mTop);
+
+        if (!hasIdentityMatrix()) {
+            matrix.postConcat(getInverseMatrix());
+        }
+    }
+
+    /**
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", indexMapping = {
@@ -28667,37 +28689,63 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param flags Additional flags as per {@link HapticFeedbackConstants}.
      */
     public boolean performHapticFeedback(int feedbackConstant, int flags) {
-        if (feedbackConstant == HapticFeedbackConstants.NO_HAPTICS
-                || mAttachInfo == null) {
+        if (isPerformHapticFeedbackSuppressed(feedbackConstant, flags)) {
             return false;
+        }
+
+        int privFlags = computeHapticFeedbackPrivateFlags();
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, flags, privFlags);
+    }
+
+    /**
+     * <p>Provide haptic feedback to the user for this view.
+     *
+     * <p>Call this method (vs {@link #performHapticFeedback(int)}) to specify more details about
+     * the {@link InputDevice} that caused this haptic feedback. The framework will choose and
+     * provide a haptic feedback based on these details.
+     *
+     * <p>The feedback will only be performed if {@link #isHapticFeedbackEnabled()} is {@code true}.
+     *
+     * @param feedbackConstant One of the constants defined in {@link HapticFeedbackConstants}.
+     * @param inputDeviceId The ID of the {@link InputDevice} that generated the event which
+     *          triggered this haptic feedback request.
+     * @param inputSource The input source of the event which triggered this haptic feedback
+     *          request, defined as {@code InputDevice#SOURCE_*}.
+     *
+     * @hide
+     */
+    public void performHapticFeedbackForInputDevice(int feedbackConstant, int inputDeviceId,
+            int inputSource, int flags) {
+        if (isPerformHapticFeedbackSuppressed(feedbackConstant, flags)) {
+            return;
+        }
+
+        int privFlags = computeHapticFeedbackPrivateFlags();
+        mAttachInfo.mRootCallbacks.performHapticFeedbackForInputDevice(
+                feedbackConstant, inputDeviceId, inputSource, flags, privFlags);
+    }
+
+    private boolean isPerformHapticFeedbackSuppressed(int feedbackConstant, int flags) {
+        if (feedbackConstant == HapticFeedbackConstants.NO_HAPTICS
+                || mAttachInfo == null
+                || mAttachInfo.mSession == null) {
+            return true;
         }
         //noinspection SimplifiableIfStatement
         if ((flags & HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
                 && !isHapticFeedbackEnabled()) {
-            return false;
+            return true;
         }
+        return false;
+    }
 
+    private int computeHapticFeedbackPrivateFlags() {
         int privFlags = 0;
         if (mAttachInfo.mViewRootImpl != null
                 && mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD) {
             privFlags = HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS;
         }
-        if (Flags.useVibratorHapticFeedback()) {
-            if (!mAttachInfo.canPerformHapticFeedback()) {
-                return false;
-            }
-            getSystemVibrator().performHapticFeedback(feedbackConstant,
-                    "View#performHapticFeedback", flags, privFlags);
-            return true;
-        }
-        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, flags, privFlags);
-    }
-
-    private Vibrator getSystemVibrator() {
-        if (mVibrator != null) {
-            return mVibrator;
-        }
-        return mVibrator = mContext.getSystemService(Vibrator.class);
+        return privFlags;
     }
 
     /**
@@ -31731,6 +31779,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             boolean performHapticFeedback(int effectId,
                     @HapticFeedbackConstants.Flags int flags,
                     @HapticFeedbackConstants.PrivateFlags int privFlags);
+
+            void performHapticFeedbackForInputDevice(int effectId,
+                    int inputDeviceId, int inputSource,
+                    @HapticFeedbackConstants.Flags int flags,
+                    @HapticFeedbackConstants.PrivateFlags int privFlags);
         }
 
         /**
@@ -32295,11 +32348,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             return events;
-        }
-
-        private boolean canPerformHapticFeedback() {
-            return mSession != null
-                    && (mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) == 0;
         }
 
         @Nullable
@@ -33963,7 +34011,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 || mLastFrameTop != mTop)
                 && viewRootImpl.shouldCheckFrameRateCategory()
                 && parent instanceof View
-                && ((View) parent).mFrameContentVelocity <= 0
+                && ((View) parent).getFrameContentVelocity() <= 0
                 && !isInputMethodWindowType) {
 
             return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;
@@ -34130,7 +34178,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Keep in mind that the preferred frame rate affects the frame rate for the next frame,
      * so use this method carefully. It's important to note that the preference is valid as
-     * long as the View is invalidated.
+     * long as the View is invalidated. Please also be aware that the requested frame rate
+     * will not propagate to child views when this API is used on a ViewGroup.
      *
      * @param frameRate the preferred frame rate of the view.
      */
@@ -34149,6 +34198,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, and REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Note that the frame rate value is valid as long as the View is invalidated.
+     * Please also be aware that the requested frame rate will not propagate to
+     * child views when this API is used on a ViewGroup.
      *
      * @return REQUESTED_FRAME_RATE_CATEGORY_DEFAULT by default,
      * or value passed to {@link #setRequestedFrameRate(float)}.

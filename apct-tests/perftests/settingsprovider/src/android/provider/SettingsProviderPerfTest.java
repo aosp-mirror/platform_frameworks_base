@@ -36,7 +36,7 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public final class SettingsProviderPerfTest {
-    private static final String NAMESPACE = "test@namespace";
+    private static final String NAMESPACE = "testing";
     private static final String SETTING_NAME1 = "test:setting1";
     private static final String SETTING_NAME2 = "test-setting2";
     private static final String UNSET_SETTING = "test_unset_setting";

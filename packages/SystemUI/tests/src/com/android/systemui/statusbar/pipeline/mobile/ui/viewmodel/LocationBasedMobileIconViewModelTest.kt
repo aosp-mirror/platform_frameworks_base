@@ -21,24 +21,23 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.connectivity.MobileIconCarrierIdOverridesFake
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
-import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -59,13 +58,15 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var commonImpl: MobileIconViewModelCommon
     private lateinit var homeIcon: HomeMobileIconViewModel
     private lateinit var qsIcon: QsMobileIconViewModel
     private lateinit var keyguardIcon: KeyguardMobileIconViewModel
     private lateinit var iconsInteractor: MobileIconsInteractor
     private lateinit var interactor: MobileIconInteractor
-    private lateinit var connectionsRepository: FakeMobileConnectionsRepository
+    private val connectionsRepository = kosmos.fakeMobileConnectionsRepository
     private lateinit var repository: FakeMobileConnectionRepository
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
 
@@ -76,9 +77,9 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             it.set(Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS, true)
         }
 
-    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var constants: ConnectivityConstants
-    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    private val tableLogBuffer =
+        logcatTableLogBuffer(kosmos, "LocationBasedMobileIconViewModelTest")
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -91,10 +92,8 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 FakeAirplaneModeRepository(),
                 FakeConnectivityRepository(),
-                FakeMobileConnectionsRepository(),
+                connectionsRepository,
             )
-        connectionsRepository =
-            FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogBuffer)
         repository =
             FakeMobileConnectionRepository(SUB_1_ID, tableLogBuffer).apply {
                 isInService.value = true

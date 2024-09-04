@@ -838,12 +838,13 @@ class ActivityMetricsLogger {
         }
 
         if (android.app.Flags.appStartInfoTimestamps()) {
+            final int pid = r.getPid();
             // Log here to match StatsD for time to first frame.
             mLoggerHandler.post(
                     () -> mSupervisor.mService.mWindowManager.mAmInternal.addStartInfoTimestamp(
                             ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME,
-                            timestampNs, r.getUid(), r.getPid(),
-                            info.mLastLaunchedActivity.mUserId));
+                            timestampNs, infoSnapshot.applicationInfo.uid, pid,
+                            infoSnapshot.userId));
         }
 
         return infoSnapshot;
@@ -1275,10 +1276,8 @@ class ActivityMetricsLogger {
         final ActivityRecord r = info.mLastLaunchedActivity;
         final long lastTopLossTime = r.topResumedStateLossTime;
         final WindowManagerService wm = mSupervisor.mService.mWindowManager;
-        final Object controller = wm.getRecentsAnimationController();
         mLoggerHandler.postDelayed(() -> {
-            if (lastTopLossTime != r.topResumedStateLossTime
-                    || controller != wm.getRecentsAnimationController()) {
+            if (lastTopLossTime != r.topResumedStateLossTime) {
                 // Skip if the animation was finished in a short time.
                 return;
             }
@@ -1612,7 +1611,8 @@ class ActivityMetricsLogger {
 
         int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__NOT_LETTERBOXED_POSITION;
         if (isAppCompateStateChangedToLetterboxed(state)) {
-            positionToLog = activity.mLetterboxUiController.getLetterboxPositionForLogging();
+            positionToLog = activity.mAppCompatController.getAppCompatReachabilityOverrides()
+                    .getLetterboxPositionForLogging();
         }
         FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED,
                 packageUid, state, positionToLog);

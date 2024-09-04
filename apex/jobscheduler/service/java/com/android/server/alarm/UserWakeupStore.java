@@ -20,7 +20,6 @@ package com.android.server.alarm;
 import android.annotation.Nullable;
 import android.os.Environment;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
@@ -119,13 +118,10 @@ public class UserWakeupStore {
      * @param alarmTime time when alarm is expected to trigger.
      */
     public void addUserWakeup(int userId, long alarmTime) {
-        // SYSTEM user is always running, so no need to schedule wakeup for it.
-        if (userId != UserHandle.USER_SYSTEM) {
-            synchronized (mUserWakeupLock) {
-                mUserStarts.put(userId, alarmTime - BUFFER_TIME_MS + getUserWakeupOffset());
-            }
-            updateUserListFile();
+        synchronized (mUserWakeupLock) {
+            mUserStarts.put(userId, alarmTime - BUFFER_TIME_MS + getUserWakeupOffset());
         }
+        updateUserListFile();
     }
 
     /**

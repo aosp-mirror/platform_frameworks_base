@@ -58,13 +58,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.DejankUtils;
+import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
@@ -1375,7 +1375,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    @DisableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    @DisableSceneContainer
     public void shadeExpanded_whenHunIsPresent() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();

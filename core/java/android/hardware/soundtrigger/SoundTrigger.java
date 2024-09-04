@@ -876,7 +876,7 @@ public class SoundTrigger {
      * A GenericSoundModel is a specialized {@link SoundModel} for non-voice sound
      * patterns.
      ****************************************************************************/
-    @FlaggedApi(android.media.soundtrigger.Flags.FLAG_SOUND_TRIGGER_GENERIC_MODEL_API)
+    @FlaggedApi(android.media.soundtrigger.Flags.FLAG_GENERIC_MODEL_API)
     public static final class GenericSoundModel extends SoundModel implements Parcelable {
 
         public static final @android.annotation.NonNull Parcelable.Creator<GenericSoundModel> CREATOR
@@ -900,8 +900,7 @@ public class SoundTrigger {
          */
         public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data, int version) {
-            super(uuid, Objects.requireNonNull(vendorUuid, "vendorUuid cannot be null"),
-                    TYPE_GENERIC_SOUND, data, version);
+            super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data, version);
         }
 
         /**
@@ -911,6 +910,7 @@ public class SoundTrigger {
          * @param vendorUuid Unique vendor identifier for this sound model.
          * @param data Opaque data for this sound model.
          */
+        @UnsupportedAppUsage
         public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data) {
             this(uuid, vendorUuid, data, -1);

@@ -293,11 +293,11 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         if (shouldUseFloatBrightness()) {
             mDozeService.setDozeScreenBrightnessFloat(
                     clampToDimBrightnessForScreenOffFloat(
-                            clampToUserSettingFloat(mDefaultDozeBrightnessFloat)));
+                            clampToUserSettingOrAutoBrightnessFloat(mDefaultDozeBrightnessFloat)));
         } else {
             mDozeService.setDozeScreenBrightness(
                     clampToDimBrightnessForScreenOff(
-                            clampToUserSetting(mDefaultDozeBrightness)));
+                            clampToUserSettingOrAutoBrightness(mDefaultDozeBrightness)));
         }
         mDozeHost.setAodDimmingScrim(0f);
     }
@@ -310,10 +310,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             return brightness;
         }
 
-        int userSetting = mSystemSettings.getIntForUser(
-                Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,
-                UserHandle.USER_CURRENT);
-        return Math.min(brightness, userSetting);
+        return Math.min(brightness, getScreenBrightness());
     }
 
     @SuppressLint("AndroidFrameworkRequiresPermission")
@@ -325,8 +322,33 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             return brightness;
         }
 
-        float userSetting = mDisplayManager.getBrightness(Display.DEFAULT_DISPLAY);
-        return Math.min(brightness, userSetting);
+        return Math.min(brightness, getScreenBrightnessFloat());
+    }
+
+    private int clampToUserSettingOrAutoBrightness(int brightness) {
+        return Math.min(brightness, getScreenBrightness());
+    }
+
+    private float clampToUserSettingOrAutoBrightnessFloat(float brightness) {
+        return Math.min(brightness, getScreenBrightnessFloat());
+    }
+
+    /**
+     * Gets the current screen brightness that may have been set by manually by the user
+     * or by autobrightness.
+     */
+    private int getScreenBrightness() {
+        return mSystemSettings.getIntForUser(
+                Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Gets the current screen brightness that may have been set by manually by the user
+     * or by autobrightness.
+     */
+    private float getScreenBrightnessFloat() {
+        return mDisplayManager.getBrightness(Display.DEFAULT_DISPLAY);
     }
 
     /**

@@ -98,7 +98,7 @@ public class Instrumentation {
      */
     public static final String REPORT_KEY_STREAMRESULT = "stream";
 
-    private static final String TAG = "Instrumentation";
+    static final String TAG = "Instrumentation";
 
     private static final long CONNECT_TIMEOUT_MILLIS = 60_000;
 

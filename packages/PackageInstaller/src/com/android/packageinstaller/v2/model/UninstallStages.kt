@@ -38,7 +38,8 @@ class UninstallReady : UninstallStage(STAGE_READY)
 data class UninstallUserActionRequired(
     val title: String? = null,
     val message: String? = null,
-    val appDataSize: Long = 0
+    val appDataSize: Long = 0,
+    val isArchive: Boolean = false
 ) : UninstallStage(STAGE_USER_ACTION_REQUIRED)
 
 data class UninstallUninstalling(val appLabel: CharSequence, val isCloneUser: Boolean) :
@@ -96,6 +97,11 @@ data class UninstallAborted(val abortReason: Int) : UninstallStage(STAGE_ABORTED
                 dialogTextResource = R.string.user_is_not_allowed_dlg_text
             }
 
+            ABORT_REASON_UNINSTALL_DONE -> {
+                dialogTitleResource = 0
+                dialogTextResource = 0
+            }
+
             else -> {
                 dialogTitleResource = 0
                 dialogTextResource = R.string.generic_error_dlg_text
@@ -107,6 +113,7 @@ data class UninstallAborted(val abortReason: Int) : UninstallStage(STAGE_ABORTED
         const val ABORT_REASON_GENERIC_ERROR = 0
         const val ABORT_REASON_APP_UNAVAILABLE = 1
         const val ABORT_REASON_USER_NOT_ALLOWED = 2
+        const val ABORT_REASON_UNINSTALL_DONE = 3
     }
 }
 

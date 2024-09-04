@@ -59,7 +59,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -173,12 +172,12 @@ class WallpaperController {
                 && animatingContainer.getAnimation() != null
                 && animatingContainer.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = w.hasWallpaper() || animationWallpaper;
-        if (isRecentsTransitionTarget(w) || isBackNavigationTarget(w)) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
+        if (isBackNavigationTarget(w)) {
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found back animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             return true;
-        } else if (hasWallpaper && w.isOnScreen()
-                && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
+        } else if (hasWallpaper
+                && (w.mActivityRecord != null ? w.isOnScreen() : w.isReadyForDisplay())) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             mFindResults.setIsWallpaperTargetForLetterbox(w.hasWallpaperForLetterboxBackground());
@@ -199,15 +198,6 @@ class WallpaperController {
         }
         return false;
     };
-
-    private boolean isRecentsTransitionTarget(WindowState w) {
-        if (w.mTransitionController.isShellTransitionsEnabled()) {
-            return false;
-        }
-        // The window is either the recents activity or is in the task animating by the recents.
-        final RecentsAnimationController controller = mService.getRecentsAnimationController();
-        return controller != null && controller.isWallpaperVisible(w);
-    }
 
     private boolean isBackNavigationTarget(WindowState w) {
         // The window is in animating by back navigation and set to show wallpaper.
@@ -759,7 +749,7 @@ class WallpaperController {
 
     void collectTopWallpapers(Transition transition) {
         if (mFindResults.hasTopShowWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
@@ -767,7 +757,7 @@ class WallpaperController {
 
         }
         if (mFindResults.hasTopHideWhenLockedWallpaper()) {
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper.mToken);
             } else {
                 transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
@@ -929,12 +919,6 @@ class WallpaperController {
                 Slog.v(TAG, "*** WALLPAPER DRAW TIMEOUT");
             }
 
-            // If there was a pending recents animation, start the animation anyways (it's better
-            // to not see the wallpaper than for the animation to not start)
-            if (mService.getRecentsAnimationController() != null) {
-                mService.getRecentsAnimationController().startAnimation();
-            }
-
             // If there was a pending back navigation animation that would show wallpaper, start
             // the animation due to it was skipped in previous surface placement.
             mService.mAtmService.mBackNavigationController.startAnimation();
@@ -1064,13 +1048,17 @@ class WallpaperController {
 
     /**
      * Mirrors the visible wallpaper if it's available.
+     * <p>
+     * We mirror at the WallpaperWindowToken level because scale and translation is applied at
+     * the WindowState level and mirroring the WindowState's SurfaceControl will remove any local
+     * scale and translation.
      *
      * @return A SurfaceControl for the parent of the mirrored wallpaper.
      */
     SurfaceControl mirrorWallpaperSurface() {
         final WindowState wallpaperWindowState = getTopVisibleWallpaper();
         return wallpaperWindowState != null
-                ? SurfaceControl.mirrorSurface(wallpaperWindowState.getSurfaceControl())
+                ? SurfaceControl.mirrorSurface(wallpaperWindowState.mToken.getSurfaceControl())
                 : null;
     }
 

@@ -19,8 +19,7 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.pm.PackageManager.FEATURE_PC;
 
-import static com.android.window.flags.Flags.enableDesktopWindowingTaskbarRunningApps;
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -52,16 +51,16 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
-import com.android.wm.shell.util.SplitBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -365,7 +364,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private boolean shouldEnableRunningTasksForDesktopMode() {
         return mPcFeatureEnabled
                 || (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && enableDesktopWindowingTaskbarRunningApps());
+                && DesktopModeFlags.TASKBAR_RUNNING_APPS.isEnabled(mContext));
     }
 
     @VisibleForTesting

@@ -148,6 +148,11 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     @Override
+    public FingerprintUtils getFingerprintUtilsInstance() {
+        return FingerprintUtils.getLegacyInstance(getSensorProperties().sensorId);
+    }
+
+    @Override
     @Nullable
     @VisibleForTesting
     protected AidlSession getSessionForUser(int userId) {
@@ -186,7 +191,8 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
                 mLockoutTracker,
                 mLockoutResetDispatcher,
                 mAuthSessionCoordinator,
-                mAidlResponseHandlerCallback);
+                mAidlResponseHandlerCallback,
+                getFingerprintUtilsInstance());
     }
 
     @VisibleForTesting IBiometricsFingerprint getIBiometricsFingerprint() {
@@ -266,8 +272,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
                 () -> getSession().getSession(), newUserId, TAG,
                 getSensorProperties().sensorId, BiometricLogger.ofUnknown(getContext()),
                 getBiometricContext(), () -> mCurrentUserId,
-                !FingerprintUtils.getInstance(getSensorProperties().sensorId)
-                        .getBiometricsForUser(getContext(),
+                !getFingerprintUtilsInstance().getBiometricsForUser(getContext(),
                 newUserId).isEmpty(), getAuthenticatorIds(), forceUpdateAuthenticatorIds,
                 mUserStartedCallback);
     }

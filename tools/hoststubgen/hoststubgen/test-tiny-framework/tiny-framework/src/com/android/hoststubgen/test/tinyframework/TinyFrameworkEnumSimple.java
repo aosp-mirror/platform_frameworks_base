@@ -15,12 +15,12 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestStub;
+import android.hosttest.annotation.HostSideTestKeep;
 
-@HostSideTestStub
+@HostSideTestKeep
 public enum TinyFrameworkEnumSimple {
-    @HostSideTestStub
+    @HostSideTestKeep
     CAT,
-    @HostSideTestStub
+    @HostSideTestKeep
     DOG,
 }

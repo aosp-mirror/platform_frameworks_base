@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
@@ -160,7 +161,10 @@ constructor(
                     .stateIn(
                         bgApplicationScope,
                         SharingStarted.WhileSubscribed(),
-                        emptySet(),
+                        // This is necessary because there might be multiple displays, and we could
+                        // have missed events for those added before this process or flow started.
+                        // Note it causes a binder call from the main thread (it's traced).
+                        getDisplays().map { display -> display.displayId }.toSet(),
                     )
             } else {
                 oldEnabledDisplays.map { enabledDisplaysSet ->
@@ -181,12 +185,20 @@ constructor(
         if (Flags.enableEfficientDisplayRepository()) {
             enabledDisplayIds
                 .mapElementsLazily { displayId -> getDisplay(displayId) }
+                .onEach {
+                    if (it.isEmpty()) Log.wtf(TAG, "No enabled displays. This should never happen.")
+                }
                 .flowOn(backgroundCoroutineDispatcher)
                 .debugLog("enabledDisplays")
                 .stateIn(
                     bgApplicationScope,
                     started = SharingStarted.WhileSubscribed(),
-                    initialValue = setOf(defaultDisplay)
+                    // This triggers a single binder call on the UI thread per process. The
+                    // alternative would be to use sharedFlows, but they are prohibited due to
+                    // performance concerns.
+                    // Ultimately, this is a trade-off between a one-time UI thread binder call and
+                    // the constant overhead of sharedFlows.
+                    initialValue = getDisplays()
                 )
         } else {
             oldEnabledDisplays
@@ -373,9 +385,8 @@ constructor(
             val resultSet: Set<V>
         )
 
-        val initialState = State(emptySet<T>(), emptyMap(), emptySet<V>())
-
-        return this.scan(initialState) { state, currentSet ->
+        val emptyInitialState = State(emptySet<T>(), emptyMap(), emptySet<V>())
+        return this.scan(emptyInitialState) { state, currentSet ->
                 if (currentSet == state.previousSet) {
                     state
                 } else {
@@ -390,6 +401,7 @@ constructor(
                     State(currentSet, newMap, resultSet)
                 }
             }
+            .filter { it != emptyInitialState }
             .map { it.resultSet }
     }
 

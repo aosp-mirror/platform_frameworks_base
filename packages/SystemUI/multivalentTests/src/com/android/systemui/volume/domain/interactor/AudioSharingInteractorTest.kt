@@ -49,6 +49,24 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun handleInAudioSharingChange() {
+        with(kosmos) {
+            testScope.runTest {
+                with(audioSharingRepository) { setInAudioSharing(true) }
+                val inAudioSharing by collectLastValue(underTest.isInAudioSharing)
+                runCurrent()
+
+                Truth.assertThat(inAudioSharing).isEqualTo(true)
+
+                with(audioSharingRepository) { setInAudioSharing(false) }
+                runCurrent()
+
+                Truth.assertThat(inAudioSharing).isEqualTo(false)
+            }
+        }
+    }
+
+    @Test
     fun handlePrimaryGroupChange_nullVolume() {
         with(kosmos) {
             testScope.runTest {

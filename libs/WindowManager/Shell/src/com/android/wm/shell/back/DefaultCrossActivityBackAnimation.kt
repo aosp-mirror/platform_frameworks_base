@@ -20,7 +20,7 @@ import android.view.SurfaceControl
 import android.window.BackEvent
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
-import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.animation.Interpolators
 import javax.inject.Inject
 import kotlin.math.max
 

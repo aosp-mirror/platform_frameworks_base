@@ -18,119 +18,71 @@ package com.android.compose.animation.scene
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.snap
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
+import com.android.compose.animation.scene.UserActionResult.ChangeScene
+import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
+import com.android.compose.animation.scene.transition.animateProgress
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun PredictiveBackHandler(
-    state: MutableSceneTransitionLayoutStateImpl,
-    coroutineScope: CoroutineScope,
-    targetSceneForBack: SceneKey? = null,
+    layoutImpl: SceneTransitionLayoutImpl,
+    result: UserActionResult?,
 ) {
     PredictiveBackHandler(
-        enabled = targetSceneForBack != null,
-    ) { progress: Flow<BackEventCompat> ->
-        val fromScene = state.transitionState.currentScene
-        if (targetSceneForBack == null || targetSceneForBack == fromScene) {
+        enabled = result != null,
+    ) { events: Flow<BackEventCompat> ->
+        if (result == null) {
             // Note: We have to collect progress otherwise PredictiveBackHandler will throw.
-            progress.first()
+            events.first()
             return@PredictiveBackHandler
         }
 
-        val transition =
-            PredictiveBackTransition(state, coroutineScope, fromScene, toScene = targetSceneForBack)
-        state.startTransition(transition)
-        try {
-            progress.collect { backEvent -> transition.dragProgress = backEvent.progress }
+        val animation =
+            createSwipeAnimation(
+                layoutImpl,
+                if (result.transitionKey != null) {
+                    result
+                } else {
+                    result.copy(transitionKey = TransitionKey.PredictiveBack)
+                },
+                isUpOrLeft = false,
+                // Note that the orientation does not matter here given that it's only used to
+                // compute the distance. In our case the distance is always 1f.
+                orientation = Orientation.Horizontal,
+                distance = 1f,
+            )
 
-            // Back gesture successful.
-            transition.animateTo(targetSceneForBack)
-        } catch (e: CancellationException) {
-            // Back gesture cancelled.
-            transition.animateTo(fromScene)
-        }
+        animateProgress(
+            state = layoutImpl.state,
+            animation = animation,
+            progress = events.map { it.progress },
+
+            // Use the transformationSpec.progressSpec. We will lazily access it later once the
+            // transition has been started, because at this point the transformation spec of the
+            // transition is not computed yet.
+            commitSpec = null,
+
+            // The predictive back APIs will automatically animate the progress for us in this case
+            // so there is no need to animate it.
+            cancelSpec = snap(),
+        )
     }
 }
 
-private class PredictiveBackTransition(
-    val state: MutableSceneTransitionLayoutStateImpl,
-    val coroutineScope: CoroutineScope,
-    fromScene: SceneKey,
-    toScene: SceneKey,
-) : TransitionState.Transition(fromScene, toScene) {
-    override var currentScene by mutableStateOf(fromScene)
-        private set
-
-    /** The animated progress once the gesture was committed or cancelled. */
-    private var progressAnimatable by mutableStateOf<Animatable<Float, AnimationVector1D>?>(null)
-    var dragProgress: Float by mutableFloatStateOf(0f)
-
-    override val previewProgress: Float
-        get() = dragProgress
-
-    override val previewProgressVelocity: Float
-        get() = 0f // Currently, velocity is not exposed by predictive back API
-
-    override val isInPreviewStage: Boolean
-        get() = progressAnimatable == null && previewTransformationSpec != null
-
-    override val progress: Float
-        get() = progressAnimatable?.value ?: previewTransformationSpec?.let { 0f } ?: dragProgress
-
-    override val progressVelocity: Float
-        get() = progressAnimatable?.velocity ?: 0f
-
-    override val isInitiatedByUserInput: Boolean
-        get() = true
-
-    override val isUserInputOngoing: Boolean
-        get() = progressAnimatable == null
-
-    private var animationJob: Job? = null
-
-    override fun finish(): Job = animateTo(currentScene)
-
-    fun animateTo(scene: SceneKey): Job {
-        check(scene == fromScene || scene == toScene)
-        animationJob?.let {
-            return it
-        }
-
-        if (scene != currentScene && state.transitionState == this && state.canChangeScene(scene)) {
-            currentScene = scene
-        }
-
-        val targetProgress =
-            when (currentScene) {
-                fromScene -> 0f
-                toScene -> 1f
-                else -> error("scene $currentScene should be either $fromScene or $toScene")
-            }
-        val startProgress = if (previewTransformationSpec != null) 0f else dragProgress
-        val animatable = Animatable(startProgress).also { progressAnimatable = it }
-
-        // Important: We start atomically to make sure that we start the coroutine even if it is
-        // cancelled right after it is launched, so that finishTransition() is correctly called.
-        return coroutineScope
-            .launch(start = CoroutineStart.ATOMIC) {
-                try {
-                    animatable.animateTo(targetProgress)
-                } finally {
-                    state.finishTransition(this@PredictiveBackTransition, scene)
-                }
-            }
-            .also { animationJob = it }
+private fun UserActionResult.copy(
+    transitionKey: TransitionKey? = this.transitionKey
+): UserActionResult {
+    return when (this) {
+        is ChangeScene -> copy(transitionKey = transitionKey)
+        is ShowOverlay -> copy(transitionKey = transitionKey)
+        is HideOverlay -> copy(transitionKey = transitionKey)
+        is ReplaceByOverlay -> copy(transitionKey = transitionKey)
     }
 }

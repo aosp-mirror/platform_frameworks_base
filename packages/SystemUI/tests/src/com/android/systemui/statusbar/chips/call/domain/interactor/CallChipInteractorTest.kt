@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
@@ -39,7 +40,7 @@ class CallChipInteractorTest : SysuiTestCase() {
         kosmos.testScope.runTest {
             val latest by collectLastValue(underTest.ongoingCallState)
 
-            val inCall = OngoingCallModel.InCall(startTimeMs = 1000, intent = null)
+            val inCall = inCallModel(startTimeMs = 1000)
             repo.setOngoingCallState(inCall)
             assertThat(latest).isEqualTo(inCall)
 

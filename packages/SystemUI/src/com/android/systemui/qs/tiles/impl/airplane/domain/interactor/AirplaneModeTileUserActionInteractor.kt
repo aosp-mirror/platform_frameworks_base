@@ -57,6 +57,7 @@ constructor(
                         Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

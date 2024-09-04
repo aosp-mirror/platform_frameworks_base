@@ -18,10 +18,13 @@ package com.android.systemui.shade
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.SysuiTestableContext
+import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.data.repository.ShadeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -86,6 +89,11 @@ class ShadeTestUtil constructor(val delegate: ShadeTestUtilDelegate) {
         delegate.assertFlagValid()
         delegate.setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer)
     }
+
+    fun setSplitShade(splitShade: Boolean) {
+        delegate.assertFlagValid()
+        delegate.setSplitShade(splitShade)
+    }
 }
 
 /** Sets up shade state for tests for a specific value of the scene container flag. */
@@ -117,11 +125,16 @@ interface ShadeTestUtilDelegate {
     fun setQsFullscreen(qsFullscreen: Boolean)
 
     fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean)
+
+    fun setSplitShade(splitShade: Boolean)
 }
 
 /** Sets up shade state for tests when the scene container flag is disabled. */
-class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: FakeShadeRepository) :
-    ShadeTestUtilDelegate {
+class ShadeTestUtilLegacyImpl(
+    val testScope: TestScope,
+    val shadeRepository: FakeShadeRepository,
+    val context: SysuiTestableContext
+) : ShadeTestUtilDelegate {
     override fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float) {
         shadeRepository.setLegacyShadeExpansion(shadeExpansion)
         shadeRepository.setQsExpansion(qsExpansion)
@@ -168,11 +181,22 @@ class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: Fak
     override fun setLegacyExpandedOrAwaitingInputTransfer(expanded: Boolean) {
         shadeRepository.setLegacyExpandedOrAwaitingInputTransfer(expanded)
     }
+
+    override fun setSplitShade(splitShade: Boolean) {
+        context
+            .getOrCreateTestableResources()
+            .addOverride(R.bool.config_use_split_notification_shade, splitShade)
+        testScope.runCurrent()
+    }
 }
 
 /** Sets up shade state for tests when the scene container flag is enabled. */
-class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: SceneInteractor) :
-    ShadeTestUtilDelegate {
+class ShadeTestUtilSceneImpl(
+    val testScope: TestScope,
+    val sceneInteractor: SceneInteractor,
+    val shadeRepository: ShadeRepository,
+    val context: SysuiTestableContext,
+) : ShadeTestUtilDelegate {
     val isUserInputOngoing = MutableStateFlow(true)
 
     override fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float) {
@@ -260,6 +284,14 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
                 )
             )
         sceneInteractor.setTransitionState(transitionState)
+        testScope.runCurrent()
+    }
+
+    override fun setSplitShade(splitShade: Boolean) {
+        context
+            .getOrCreateTestableResources()
+            .addOverride(R.bool.config_use_split_notification_shade, splitShade)
+        shadeRepository.setShadeLayoutWide(splitShade)
         testScope.runCurrent()
     }
 

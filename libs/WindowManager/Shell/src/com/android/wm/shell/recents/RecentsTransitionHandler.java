@@ -19,16 +19,18 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
-import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
-import static com.android.wm.shell.util.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
+import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
+import static com.android.wm.shell.shared.split.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -775,6 +777,20 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     // Don't consider order-only & non-leaf changes as changing apps.
                     if (!TransitionUtil.isOrderOnly(change) && isLeafTask) {
                         hasChangingApp = true;
+                        // Check if the changing app is moving to top and fullscreen. This handles
+                        // the case where we moved from desktop to recents and launching a desktop
+                        // task in fullscreen.
+                        if ((change.getFlags() & FLAG_MOVED_TO_TOP) != 0
+                                && taskInfo != null
+                                && taskInfo.getWindowingMode()
+                                == WINDOWING_MODE_FULLSCREEN) {
+                            if (openingTasks == null) {
+                                openingTasks = new ArrayList<>();
+                                openingTaskIsLeafs = new IntArray();
+                            }
+                            openingTasks.add(change);
+                            openingTaskIsLeafs.add(1);
+                        }
                     } else if (isLeafTask && taskInfo.topActivityType == ACTIVITY_TYPE_HOME
                             && !isRecentsTask ) {
                         // Unless it is a 3p launcher. This means that the 3p launcher was already

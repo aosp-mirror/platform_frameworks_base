@@ -23,7 +23,7 @@ import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_S
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_ACTIVITY_NAME;
 import static com.android.server.accessibility.a11ychecker.TestUtils.TEST_DEFAULT_BROWSER;
-import static com.android.server.accessibility.a11ychecker.TestUtils.createAtom;
+import static com.android.server.accessibility.a11ychecker.TestUtils.createResult;
 import static com.android.server.accessibility.a11ychecker.TestUtils.getMockPackageManagerWithInstalledApps;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -32,6 +32,8 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.accessibility.AccessibilityCheckClass;
+import android.accessibility.AccessibilityCheckResultType;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.platform.test.annotations.DisableFlags;
@@ -112,19 +114,19 @@ public class AccessibilityCheckerManagerTest {
                         .setViewIdResourceName("node2")
                         .build();
 
-        Set<A11yCheckerProto.AccessibilityCheckResultReported> results =
+        Set<AndroidAccessibilityCheckerResult> results =
                 mAccessibilityCheckerManager.maybeRunA11yChecker(
                         List.of(mockNodeInfo1, mockNodeInfo2), QUALIFIED_TEST_ACTIVITY_NAME,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME), /*userId=*/ 0);
 
         assertThat(results).containsExactly(
-                createAtom(/*viewIdResourceName=*/ "node1", TEST_ACTIVITY_NAME,
-                        A11yCheckerProto.AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
-                        A11yCheckerProto.AccessibilityCheckResultType.ERROR, /*resultId=*/ 2),
-                createAtom(/*viewIdResourceName=*/ "node2", TEST_ACTIVITY_NAME,
-                        A11yCheckerProto.AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
-                        A11yCheckerProto.AccessibilityCheckResultType.ERROR, /*resultId=*/ 2)
+                createResult(/*viewIdResourceName=*/ "node1", TEST_ACTIVITY_NAME,
+                        AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
+                        AccessibilityCheckResultType.ERROR_CHECK_RESULT_TYPE, /*resultId=*/ 2),
+                createResult(/*viewIdResourceName=*/ "node2", TEST_ACTIVITY_NAME,
+                        AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
+                        AccessibilityCheckResultType.ERROR_CHECK_RESULT_TYPE, /*resultId=*/ 2)
         );
     }
 
@@ -137,7 +139,7 @@ public class AccessibilityCheckerManagerTest {
                         .setViewIdResourceName("node1")
                         .build();
 
-        Set<A11yCheckerProto.AccessibilityCheckResultReported> results =
+        Set<AndroidAccessibilityCheckerResult> results =
                 mAccessibilityCheckerManager.maybeRunA11yChecker(
                         List.of(mockNodeInfo), QUALIFIED_TEST_ACTIVITY_NAME,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
@@ -158,16 +160,17 @@ public class AccessibilityCheckerManagerTest {
                         .setViewIdResourceName("node1")
                         .build();
 
-        Set<A11yCheckerProto.AccessibilityCheckResultReported> results =
+        Set<AndroidAccessibilityCheckerResult> results =
                 mAccessibilityCheckerManager.maybeRunA11yChecker(
                         List.of(mockNodeInfo, mockNodeInfoDuplicate), QUALIFIED_TEST_ACTIVITY_NAME,
                         new ComponentName(TEST_A11Y_SERVICE_SOURCE_PACKAGE_NAME,
                                 TEST_A11Y_SERVICE_CLASS_NAME), /*userId=*/ 0);
 
         assertThat(results).containsExactly(
-                createAtom(/*viewIdResourceName=*/ "node1", TEST_ACTIVITY_NAME,
-                        A11yCheckerProto.AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
-                        A11yCheckerProto.AccessibilityCheckResultType.ERROR, /*resultId=*/ 2)
+                createResult(/*viewIdResourceName=*/ "node1", TEST_ACTIVITY_NAME,
+                        AccessibilityCheckClass.TOUCH_TARGET_SIZE_CHECK,
+                        AccessibilityCheckResultType.ERROR_CHECK_RESULT_TYPE, /*resultId=*/
+                        2)
         );
     }
 

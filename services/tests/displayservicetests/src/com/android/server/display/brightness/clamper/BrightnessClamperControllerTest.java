@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.SensorManager;
-import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -158,12 +157,6 @@ public class BrightnessClamperControllerTest {
         captor.getValue().onPropertiesChanged(mMockProperties);
 
         verify(mMockClamper).onDeviceConfigChanged();
-    }
-
-    @Test
-    public void testMaxReasonIsNoneOnInit() {
-        assertEquals(BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE,
-                mClamperController.getBrightnessMaxReason());
     }
 
     @Test
@@ -365,7 +358,7 @@ public class BrightnessClamperControllerTest {
 
     private BrightnessClamperController createBrightnessClamperController() {
         return new BrightnessClamperController(mTestInjector, mTestHandler, mMockExternalListener,
-                mMockDisplayDeviceData, mMockContext, mFlags, mSensorManager);
+                mMockDisplayDeviceData, mMockContext, mFlags, mSensorManager, 0);
     }
 
     interface TestDisplayListenerModifier extends BrightnessStateModifier,
@@ -403,7 +396,7 @@ public class BrightnessClamperControllerTest {
                 Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data,
-                DisplayManagerFlags flags, Context context) {
+                DisplayManagerFlags flags, Context context, float currentBrightness) {
             mCapturedChangeListener = clamperChangeListener;
             return mClampers;
         }

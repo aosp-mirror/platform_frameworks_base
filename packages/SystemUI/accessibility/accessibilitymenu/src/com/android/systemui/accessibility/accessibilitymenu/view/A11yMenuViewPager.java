@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -29,7 +28,7 @@ import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.widget.GridView;
 
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.R;
@@ -133,9 +132,9 @@ public class A11yMenuViewPager {
      * The pager widget, which handles animation and allows swiping horizontally to access previous
      * and next gridView pages.
      */
-    protected ViewPager mViewPager;
+    protected ViewPager2 mViewPager;
 
-    private ViewPagerAdapter<GridView> mViewPagerAdapter;
+    private ViewPagerAdapter mViewPagerAdapter;
     private final List<GridView> mGridPageList = new ArrayList<>();
 
     /** The footer, which provides buttons to switch between pages */
@@ -147,12 +146,8 @@ public class A11yMenuViewPager {
     /** The container layout for a11y menu. */
     private ViewGroup mA11yMenuLayout;
 
-    /** Display context for inflating views. */
-    private Context mDisplayContext;
-
-    public A11yMenuViewPager(AccessibilityMenuService service, Context displayContext) {
+    public A11yMenuViewPager(AccessibilityMenuService service) {
         this.mService = service;
-        this.mDisplayContext = displayContext;
     }
 
     /**
@@ -169,6 +164,8 @@ public class A11yMenuViewPager {
         initViewPager();
         initChildPage();
         mA11yMenuFooter = new A11yMenuFooter(a11yMenuLayout, mFooterCallbacks);
+        mA11yMenuFooter.updateRightToLeftDirection(
+                a11yMenuLayout.getResources().getConfiguration());
         updateFooterState();
         registerOnGlobalLayoutListener();
         goToPage(pageIndex);
@@ -177,18 +174,12 @@ public class A11yMenuViewPager {
     /** Initializes viewPager and its adapter. */
     private void initViewPager() {
         mViewPager = mA11yMenuLayout.findViewById(R.id.view_pager);
-        mViewPagerAdapter = new ViewPagerAdapter<>();
+        mViewPagerAdapter = new ViewPagerAdapter(mService);
+        mViewPager.setOffscreenPageLimit(2);
         mViewPager.setAdapter(mViewPagerAdapter);
         mViewPager.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        mViewPager.addOnPageChangeListener(
-                new ViewPager.OnPageChangeListener() {
-                    @Override
-                    public void onPageScrollStateChanged(int state) {}
-
-                    @Override
-                    public void onPageScrolled(
-                            int position, float positionOffset, int positionOffsetPixels) {}
-
+        mViewPager.registerOnPageChangeCallback(
+                new ViewPager2.OnPageChangeCallback() {
                     @Override
                     public void onPageSelected(int position) {
                         updateFooterState();
@@ -206,31 +197,14 @@ public class A11yMenuViewPager {
             mGridPageList.clear();
         }
 
-        // Generate pages by calculating # of items per grid.
-        for (List<A11yMenuShortcut> page : GridViewParams.generateShortcutSubLists(
-                GridViewParams.getGridItemCount(mService), mA11yMenuShortcutList)
-        ) {
-            addGridPage(page);
-        }
-
-        mViewPagerAdapter.set(mGridPageList);
-    }
-
-    private void addGridPage(List<A11yMenuShortcut> shortcutDataListInPage) {
-        LayoutInflater inflater = LayoutInflater.from(mDisplayContext);
-        View view = inflater.inflate(R.layout.grid_view, null);
-        GridView gridView = view.findViewById(R.id.gridview);
-        A11yMenuAdapter adapter = new A11yMenuAdapter(
-                mService, mDisplayContext, shortcutDataListInPage);
-        gridView.setNumColumns(GridViewParams.getGridColumnCount(mService));
-        gridView.setAdapter(adapter);
-        mGridPageList.add(gridView);
+        mViewPagerAdapter.set(GridViewParams.generateShortcutSubLists(
+                GridViewParams.getGridItemCount(mService), mA11yMenuShortcutList));
     }
 
     /** Updates footer's state by index of current page in view pager. */
-    private void updateFooterState() {
+    public void updateFooterState() {
         int currentPage = mViewPager.getCurrentItem();
-        int lastPage = mViewPager.getAdapter().getCount() - 1;
+        int lastPage = mViewPager.getAdapter().getItemCount() - 1;
         mA11yMenuFooter.getPreviousPageBtn().setEnabled(currentPage > 0);
         mA11yMenuFooter.getNextPageBtn().setEnabled(currentPage < lastPage);
     }
@@ -239,7 +213,7 @@ public class A11yMenuViewPager {
         if (mViewPager == null) {
             return;
         }
-        if ((pageIndex >= 0) && (pageIndex < mViewPager.getAdapter().getCount())) {
+        if ((pageIndex >= 0) && (pageIndex < mViewPager.getAdapter().getItemCount())) {
             mViewPager.setCurrentItem(pageIndex);
         }
     }
@@ -311,7 +285,8 @@ public class A11yMenuViewPager {
             footerLayout.getLayoutParams().height =
                     (int) (footerLayout.getLayoutParams().height / densityScale);
             // Adjust the view pager height for system bar and display cutout insets.
-            WindowManager windowManager = mService.getSystemService(WindowManager.class);
+            WindowManager windowManager = mA11yMenuLayout.getContext()
+                    .getSystemService(WindowManager.class);
             WindowMetrics windowMetric = windowManager.getCurrentWindowMetrics();
             Insets windowInsets = windowMetric.getWindowInsets().getInsetsIgnoringVisibility(
                     WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
@@ -341,7 +316,7 @@ public class A11yMenuViewPager {
     protected A11yMenuFooterCallBack mFooterCallbacks =
             new A11yMenuFooterCallBack() {
                 @Override
-                public void onLeftButtonClicked() {
+                public void onPreviousButtonClicked() {
                     // Moves to previous page.
                     int targetPage = mViewPager.getCurrentItem() - 1;
                     goToPage(targetPage);
@@ -349,7 +324,7 @@ public class A11yMenuViewPager {
                 }
 
                 @Override
-                public void onRightButtonClicked() {
+                public void onNextButtonClicked() {
                     // Moves to next page.
                     int targetPage = mViewPager.getCurrentItem() + 1;
                     goToPage(targetPage);

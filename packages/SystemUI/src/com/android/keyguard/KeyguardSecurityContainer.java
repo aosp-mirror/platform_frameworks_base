@@ -344,7 +344,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                         R.dimen.keyguard_security_container_padding_top), getPaddingRight(),
                 getPaddingBottom());
         setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
-                com.android.internal.R.attr.materialColorSurface));
+                com.android.internal.R.attr.materialColorSurfaceDim));
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -647,7 +647,12 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
+        updateSecurityViewFlipper();
+    }
+
+    protected void updateSecurityViewFlipper() {
         mSecurityViewFlipper = findViewById(R.id.view_flipper);
+        setupViewMode();
     }
 
     @Override
@@ -803,7 +808,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     void reloadColors() {
         mViewMode.reloadColors();
         setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
-                com.android.internal.R.attr.materialColorSurface));
+                com.android.internal.R.attr.materialColorSurfaceDim));
     }
 
     /** Handles density or font scale changes. */
@@ -1004,10 +1009,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
             if (mUserSwitcherViewGroup == null) {
                 inflateUserSwitcher();
+                setupUserSwitcher();
+                mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
             }
             updateSecurityViewLocation();
-            setupUserSwitcher();
-            mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
         }
 
         @Override

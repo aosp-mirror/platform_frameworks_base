@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.notification.interruption
 import android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST
 import android.app.Notification
 import android.app.Notification.BubbleMetadata
+import android.app.Notification.CATEGORY_ALARM
+import android.app.Notification.CATEGORY_CAR_EMERGENCY
+import android.app.Notification.CATEGORY_CAR_WARNING
 import android.app.Notification.CATEGORY_EVENT
 import android.app.Notification.CATEGORY_REMINDER
 import android.app.Notification.VISIBILITY_PRIVATE
@@ -275,7 +278,8 @@ class AvalancheSuppressor(
     private val packageManager: PackageManager,
     private val uiEventLogger: UiEventLogger,
     private val context: Context,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val logger: VisualInterruptionDecisionLogger
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
@@ -307,6 +311,9 @@ class AvalancheSuppressor(
         ALLOW_CALLSTYLE,
         ALLOW_CATEGORY_REMINDER,
         ALLOW_CATEGORY_EVENT,
+        ALLOW_CATEGORY_ALARM,
+        ALLOW_CATEGORY_CAR_EMERGENCY,
+        ALLOW_CATEGORY_CAR_WARNING,
         ALLOW_FSI_WITH_PERMISSION_ON,
         ALLOW_COLORIZED,
         ALLOW_EMERGENCY,
@@ -333,8 +340,13 @@ class AvalancheSuppressor(
         @UiEvent(doc = "HUN allowed during avalanche because it is colorized.")
         AVALANCHE_SUPPRESSOR_HUN_ALLOWED_COLORIZED(1832),
         @UiEvent(doc = "HUN allowed during avalanche because it is an emergency notification.")
-        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY(1833);
-
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_EMERGENCY(1833),
+        @UiEvent(doc = "HUN allowed during avalanche because it is an alarm.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_ALARM(1867),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a car emergency.")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_EMERGENCY(1868),
+        @UiEvent(doc = "HUN allowed during avalanche because it is a car warning")
+        AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_WARNING(1869);
         override fun getId(): Int {
             return id
         }
@@ -342,15 +354,18 @@ class AvalancheSuppressor(
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
         if (!isCooldownEnabled()) {
+            logger.logAvalancheAllow("cooldown OFF")
             return false
         }
         val timeSinceAvalancheMs = systemClock.currentTimeMillis() - avalancheProvider.startTime
         val timedOut = timeSinceAvalancheMs >= avalancheProvider.timeoutMs
         if (timedOut) {
+            logger.logAvalancheAllow("timedOut! timeSinceAvalancheMs=$timeSinceAvalancheMs")
             return false
         }
         val state = calculateState(entry)
         if (state != State.SUPPRESS) {
+            logger.logAvalancheAllow("state=$state")
             return false
         }
         if (shouldShowEdu()) {
@@ -421,6 +436,22 @@ class AvalancheSuppressor(
         if (entry.sbn.notification.category == CATEGORY_REMINDER) {
             uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_REMINDER)
             return State.ALLOW_CATEGORY_REMINDER
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_ALARM) {
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_ALARM)
+            return State.ALLOW_CATEGORY_ALARM
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_CAR_EMERGENCY) {
+            uiEventLogger.log(
+                    AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_EMERGENCY)
+            return State.ALLOW_CATEGORY_CAR_EMERGENCY
+        }
+
+        if (entry.sbn.notification.category == CATEGORY_CAR_WARNING) {
+            uiEventLogger.log(AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_WARNING)
+            return State.ALLOW_CATEGORY_CAR_WARNING
         }
 
         if (entry.sbn.notification.category == CATEGORY_EVENT) {

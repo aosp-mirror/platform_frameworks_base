@@ -16,27 +16,34 @@
 
 package android.content.res;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import android.annotation.NonNull;
 import android.app.ResourcesManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.LocaleList;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.Postsubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-
-import junit.framework.TestCase;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,7 +56,7 @@ import java.util.Map;
 
 @Postsubmit
 @RunWith(AndroidJUnit4.class)
-public class ResourcesManagerTest extends TestCase {
+public class ResourcesManagerTest {
     private static final int SECONDARY_DISPLAY_ID = 1;
     private static final String APP_ONE_RES_DIR = "app_one.apk";
     private static final String APP_ONE_RES_SPLIT_DIR = "app_one_split.apk";
@@ -57,14 +64,20 @@ public class ResourcesManagerTest extends TestCase {
     private static final String LIB_RES_DIR = "lib.apk";
     private static final String TEST_LIB = "com.android.frameworks.coretests.bdr_helper_app1";
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            RavenwoodRule.isOnRavenwood()
+                    ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
+                    : DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private ResourcesManager mResourcesManager;
     private Map<Integer, DisplayMetrics> mDisplayMetricsMap;
-    private PackageManager mPackageManager;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         mDisplayMetricsMap = new HashMap<>();
 
         DisplayMetrics defaultDisplayMetrics = new DisplayMetrics();
@@ -110,12 +123,11 @@ public class ResourcesManagerTest extends TestCase {
                 return mDisplayMetricsMap.get(displayId);
             }
         };
-
-        mPackageManager = InstrumentationRegistry.getContext().getPackageManager();
     }
 
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    private PackageManager getPackageManager() {
+        return InstrumentationRegistry.getInstrumentation().getContext().getPackageManager();
+    }
 
     @Test
     @SmallTest
@@ -356,6 +368,7 @@ public class ResourcesManagerTest extends TestCase {
     @Test
     @SmallTest
     @RequiresFlagsEnabled(Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    @DisabledOnRavenwood(blockedBy = PackageManager.class)
     public void testExistingResourcesAfterResourcePathsRegistration()
              throws PackageManager.NameNotFoundException {
         // Inject ResourcesManager instance from this test to the ResourcesManager class so that all
@@ -370,7 +383,7 @@ public class ResourcesManagerTest extends TestCase {
         assertNotNull(resources);
         ResourcesImpl oriResImpl = resources.getImpl();
 
-        ApplicationInfo appInfo = mPackageManager.getApplicationInfo(TEST_LIB, 0);
+        ApplicationInfo appInfo = getPackageManager().getApplicationInfo(TEST_LIB, 0);
         Resources.registerResourcePaths(TEST_LIB, appInfo);
 
         assertNotSame(oriResImpl, resources.getImpl());
@@ -390,6 +403,7 @@ public class ResourcesManagerTest extends TestCase {
     @Test
     @SmallTest
     @RequiresFlagsEnabled(Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    @DisabledOnRavenwood(blockedBy = PackageManager.class)
     public void testNewResourcesAfterResourcePathsRegistration()
             throws PackageManager.NameNotFoundException {
         // Inject ResourcesManager instance from this test to the ResourcesManager class so that all
@@ -397,7 +411,7 @@ public class ResourcesManagerTest extends TestCase {
         ResourcesManager oriResourcesManager = ResourcesManager.getInstance();
         ResourcesManager.setInstance(mResourcesManager);
 
-        ApplicationInfo appInfo = mPackageManager.getApplicationInfo(TEST_LIB, 0);
+        ApplicationInfo appInfo = getPackageManager().getApplicationInfo(TEST_LIB, 0);
         Resources.registerResourcePaths(TEST_LIB, appInfo);
 
         // Create a Resources after register resources' paths for a package.
@@ -420,6 +434,7 @@ public class ResourcesManagerTest extends TestCase {
     @Test
     @SmallTest
     @RequiresFlagsEnabled(Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    @DisabledOnRavenwood(blockedBy = PackageManager.class)
     public void testExistingResourcesCreatedByConstructorAfterResourcePathsRegistration()
             throws PackageManager.NameNotFoundException {
         // Inject ResourcesManager instance from this test to the ResourcesManager class so that all
@@ -437,7 +452,7 @@ public class ResourcesManagerTest extends TestCase {
 
         ResourcesImpl oriResImpl = resources.getImpl();
 
-        ApplicationInfo appInfo = mPackageManager.getApplicationInfo(TEST_LIB, 0);
+        ApplicationInfo appInfo = getPackageManager().getApplicationInfo(TEST_LIB, 0);
         Resources.registerResourcePaths(TEST_LIB, appInfo);
 
         assertNotSame(oriResImpl, resources.getImpl());
@@ -456,6 +471,7 @@ public class ResourcesManagerTest extends TestCase {
     @Test
     @SmallTest
     @RequiresFlagsEnabled(Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    @DisabledOnRavenwood(blockedBy = PackageManager.class)
     public void testNewResourcesWithOutdatedImplAfterResourcePathsRegistration()
             throws PackageManager.NameNotFoundException {
         ResourcesManager oriResourcesManager = ResourcesManager.getInstance();
@@ -467,7 +483,7 @@ public class ResourcesManagerTest extends TestCase {
         assertNotNull(old_resources);
         ResourcesImpl oldImpl = old_resources.getImpl();
 
-        ApplicationInfo appInfo = mPackageManager.getApplicationInfo(TEST_LIB, 0);
+        ApplicationInfo appInfo = getPackageManager().getApplicationInfo(TEST_LIB, 0);
         Resources.registerResourcePaths(TEST_LIB, appInfo);
 
         // Create another resources with identical parameters.

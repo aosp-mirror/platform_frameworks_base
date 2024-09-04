@@ -16,9 +16,6 @@
 
 package android.app.admin;
 
-import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
-
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.admin.flags.Flags;
@@ -195,7 +192,6 @@ public final class DeviceAdminInfo implements Parcelable {
      * DPCs should set the value of attribute "headless-device-owner-mode" inside the
      * "headless-system-user" tag as "single_user".
      */
-    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER = 2;
 
     /**

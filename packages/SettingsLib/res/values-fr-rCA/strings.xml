@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Afficher repère visuel pour éléments sélectionnés"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Afficher press. de touches"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Afficher retour visuel pour press. de touches phys."</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"Afficher l\'entrée du pavé tactile"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"Superposition de l\'écran affichant les données d\'entrée du pavé tactile et les gestes reconnus"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Afficher mises à jour surface"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Faire clignoter les surfaces à chaque mise à jour"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Afficher m. à j. affichage"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> jusqu\'à la recharge complète"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> (<xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la recharge complète)"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – La recharge a été mise en pause pour protéger la pile"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Recharge en cours…"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Recharge complète d\'ici <xliff:g id="TIME">%3$s</xliff:g>"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Recharge complète d\'ici <xliff:g id="TIME">%2$s</xliff:g>"</string>

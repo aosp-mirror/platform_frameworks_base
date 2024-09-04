@@ -42,28 +42,31 @@ class GlobalSettingsImpl implements GlobalSettings {
         mBgDispatcher = bgDispatcher;
     }
 
+    @NonNull
     @Override
     public ContentResolver getContentResolver() {
         return mContentResolver;
     }
 
+    @NonNull
     @Override
-    public Uri getUriFor(String name) {
+    public Uri getUriFor(@NonNull String name) {
         return Settings.Global.getUriFor(name);
     }
 
+    @NonNull
     @Override
     public CoroutineDispatcher getBackgroundDispatcher() {
         return mBgDispatcher;
     }
 
     @Override
-    public String getString(String name) {
+    public String getString(@NonNull String name) {
         return Settings.Global.getString(mContentResolver, name);
     }
 
     @Override
-    public boolean putString(String name, String value) {
+    public boolean putString(@NonNull String name, String value) {
         return Settings.Global.putString(mContentResolver, name, value);
     }
 

@@ -385,7 +385,7 @@ class SettingsProxyTest : SysuiTestCase() {
     private class FakeSettingsProxy(val testDispatcher: CoroutineDispatcher) : SettingsProxy {
 
         private val mContentResolver = mock(ContentResolver::class.java)
-        private val settingToValueMap: MutableMap<String, String> = mutableMapOf()
+        private val settingToValueMap: MutableMap<String, String?> = mutableMapOf()
 
         override fun getContentResolver() = mContentResolver
 
@@ -399,15 +399,15 @@ class SettingsProxyTest : SysuiTestCase() {
             return settingToValueMap[name] ?: ""
         }
 
-        override fun putString(name: String, value: String): Boolean {
+        override fun putString(name: String, value: String?): Boolean {
             settingToValueMap[name] = value
             return true
         }
 
         override fun putString(
             name: String,
-            value: String,
-            tag: String,
+            value: String?,
+            tag: String?,
             makeDefault: Boolean
         ): Boolean {
             settingToValueMap[name] = value
