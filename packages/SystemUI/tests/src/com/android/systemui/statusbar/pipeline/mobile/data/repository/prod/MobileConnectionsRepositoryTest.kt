@@ -109,7 +109,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         FakeFeatureFlagsClassic().also {
             it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true)
             it.set(Flags.INSTANT_TETHER, true)
-            it.set(Flags.WIFI_SECONDARY_NETWORKS, true)
         }
 
     private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
