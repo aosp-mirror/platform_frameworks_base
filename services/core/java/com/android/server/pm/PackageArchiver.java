@@ -283,10 +283,7 @@ public class PackageArchiver {
             return START_CLASS_NOT_FOUND;
         }
 
-        String currentLauncherPackageName = getCurrentLauncherPackageName(getParentUserId(userId));
-        if ((currentLauncherPackageName == null || !TextUtils.equals(callerPackageName,
-                currentLauncherPackageName)) && callingUid != Process.SHELL_UID) {
-            // TODO(b/311619990): Remove dependency on SHELL_UID for testing
+        if (!isCallerQualifiedForUnarchival(callerPackageName, callingUid, userId)) {
             Slog.e(TAG, TextUtils.formatSimple(
                     "callerPackageName: %s does not qualify for unarchival of package: " + "%s!",
                     callerPackageName, packageName));
@@ -333,6 +330,37 @@ public class PackageArchiver {
         // 3. Returning STATUS_ABORTED helps us avoid manually handling of different cases like
         // aborting activity options, animations etc in the Windows Manager.
         return START_ABORTED;
+    }
+
+    private boolean isCallerQualifiedForUnarchival(String callerPackageName, int callingUid,
+            int userId) {
+        // TODO(b/311619990): Remove dependency on SHELL_UID for testing
+        if (callingUid == Process.SHELL_UID) {
+            return true;
+        }
+        String currentLauncherPackageName = getCurrentLauncherPackageName(getParentUserId(userId));
+        if (currentLauncherPackageName != null && TextUtils.equals(
+                callerPackageName, currentLauncherPackageName)) {
+            return true;
+        }
+        Slog.w(TAG, TextUtils.formatSimple(
+                "Requester of unarchival: %s is not the default launcher package: %s.",
+                callerPackageName, currentLauncherPackageName));
+        // When the default launcher is not set, or when the current caller is not the default
+        // launcher, allow the caller to directly request unarchive if it is a launcher app
+        // that is a pre-installed system app.
+        final Computer snapshot = mPm.snapshotComputer();
+        final PackageStateInternal ps = snapshot.getPackageStateInternal(callerPackageName);
+        final boolean isSystem = ps != null && ps.isSystem();
+        return isSystem && isLauncherApp(snapshot, callerPackageName, userId);
+    }
+
+    private boolean isLauncherApp(Computer snapshot, String packageName, int userId) {
+        final Intent intent = snapshot.getHomeIntent();
+        intent.setPackage(packageName);
+        List<ResolveInfo> launcherActivities = snapshot.queryIntentActivitiesInternal(
+                intent, null /* resolvedType */, 0 /* flags */, userId);
+        return !launcherActivities.isEmpty();
     }
 
     // Profiles share their UI and default apps, so we have to get the profile parent before
