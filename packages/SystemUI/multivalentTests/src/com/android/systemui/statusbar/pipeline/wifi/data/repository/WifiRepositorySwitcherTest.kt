@@ -73,11 +73,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
     private val demoModelFlow = MutableStateFlow<FakeWifiEventModel?>(null)
 
     private val mainExecutor = FakeExecutor(FakeSystemClock())
-    private val featureFlags =
-        FakeFeatureFlagsClassic().also {
-            it.set(Flags.INSTANT_TETHER, true)
-            it.set(Flags.WIFI_SECONDARY_NETWORKS, true)
-        }
+    private val featureFlags = FakeFeatureFlagsClassic().also { it.set(Flags.INSTANT_TETHER, true) }
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)

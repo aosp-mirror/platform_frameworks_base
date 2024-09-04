@@ -104,7 +104,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         featureFlags.set(Flags.INSTANT_TETHER, false)
-        featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, false)
         whenever(wifiPickerTrackerFactory.create(any(), capture(callbackCaptor), any()))
             .thenReturn(wifiPickerTracker)
     }
@@ -826,7 +825,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_activeEntriesEmpty_isEmpty() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf())
@@ -839,7 +837,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_oneActiveEntry_hasOne() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val wifiEntry = mock<WifiEntry>()
@@ -853,7 +850,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_multipleActiveEntries_hasMultiple() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val wifiEntry1 = mock<WifiEntry>()
@@ -868,7 +864,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_mapsToInactive() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val inactiveEntry =
@@ -884,7 +879,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_mapsToActive() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val activeEntry = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
@@ -900,7 +894,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_mapsToCarrierMerged() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val carrierMergedEntry =
@@ -917,7 +910,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_mapsMultipleInOrder() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val activeEntry = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
@@ -937,7 +929,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_filtersOutConnectedEntry() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val connectedEntry = mock<WifiEntry>().apply { whenever(this.level).thenReturn(1) }
@@ -959,7 +950,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_noConnectedEntry_hasAllActiveEntries() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val secondaryEntry1 = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
@@ -978,7 +968,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Test
     fun secondaryNetworks_filtersOutPrimaryNetwork() =
         testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
             val latest by collectLastValue(underTest.secondaryNetworks)
 
             val primaryEntry =
@@ -998,20 +987,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).hasSize(2)
             assertThat((latest!![0] as WifiNetworkModel.Active).level).isEqualTo(2)
             assertThat((latest!![1] as WifiNetworkModel.Active).level).isEqualTo(3)
-        }
-
-    @Test
-    fun secondaryNetworks_flagOff_noNetworks() =
-        testScope.runTest {
-            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, false)
-            val latest by collectLastValue(underTest.secondaryNetworks)
-
-            val wifiEntry = mock<WifiEntry>()
-            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf(wifiEntry))
-
-            getCallback().onWifiEntriesChanged()
-
-            assertThat(latest).isEmpty()
         }
 
     @Test

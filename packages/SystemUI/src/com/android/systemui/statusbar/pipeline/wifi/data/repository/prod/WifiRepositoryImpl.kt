@@ -109,16 +109,11 @@ constructor(
                             val connectedEntry = wifiPickerTracker.mergedOrPrimaryConnection
                             logOnWifiEntriesChanged(connectedEntry)
 
+                            val activeNetworks = wifiPickerTracker?.activeWifiEntries ?: emptyList()
                             val secondaryNetworks =
-                                if (featureFlags.isEnabled(Flags.WIFI_SECONDARY_NETWORKS)) {
-                                    val activeNetworks =
-                                        wifiPickerTracker?.activeWifiEntries ?: emptyList()
-                                    activeNetworks
-                                        .filter { it != connectedEntry && !it.isPrimaryNetwork }
-                                        .map { it.toWifiNetworkModel() }
-                                } else {
-                                    emptyList()
-                                }
+                                activeNetworks
+                                    .filter { it != connectedEntry && !it.isPrimaryNetwork }
+                                    .map { it.toWifiNetworkModel() }
 
                             // [WifiPickerTracker.connectedWifiEntry] will return the same instance
                             // but with updated internals. For example, when its validation status
@@ -130,7 +125,8 @@ constructor(
                             // into our internal model immediately. [toWifiNetworkModel] always
                             // returns a new instance, so the flow is guaranteed to emit.
                             send(
-                                newPrimaryNetwork = connectedEntry?.toPrimaryWifiNetworkModel()
+                                newPrimaryNetwork =
+                                    connectedEntry?.toPrimaryWifiNetworkModel()
                                         ?: WIFI_NETWORK_DEFAULT,
                                 newSecondaryNetworks = secondaryNetworks,
                                 newIsDefault = connectedEntry?.isDefaultNetwork ?: false,
