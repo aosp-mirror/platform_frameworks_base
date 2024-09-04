@@ -161,6 +161,16 @@ flag {
 }
 
 flag {
+    name: "fix_avatar_content_provider_null_authority"
+    namespace: "multiuser"
+    description: "Fix crash when content provider authority is null."
+    bug: "362880068"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "fix_avatar_picker_not_responding_for_new_user"
     namespace: "multiuser"
     description: "Avatar picker is not responding after selecting photo for new user."
