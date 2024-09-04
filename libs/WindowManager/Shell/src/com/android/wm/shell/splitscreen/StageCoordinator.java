@@ -1449,12 +1449,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSkipEvictingMainStageChildren = false;
         mSplitRequest = null;
         updateRecentTasksSplitPair();
-        if (!mLogger.hasStartedSession()) {
-            mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
-                    getMainStagePosition(), mMainStage.getTopChildTaskUid(),
-                    getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                    mSplitLayout.isLeftRightSplit());
-        }
+
+        mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
+                getMainStagePosition(), mMainStage.getTopChildTaskUid(),
+                getSideStagePosition(), mSideStage.getTopChildTaskUid(),
+                mSplitLayout.isLeftRightSplit());
     }
 
     void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
@@ -1930,15 +1929,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             clearRequestIfPresented();
             updateRecentTasksSplitPair();
 
-            if (!mLogger.hasStartedSession()) {
-                if (!mLogger.hasValidEnterSessionId()) {
-                    mLogger.enterRequested(null /*enterSessionId*/, ENTER_REASON_MULTI_INSTANCE);
-                }
-                mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
-                        getMainStagePosition(), mMainStage.getTopChildTaskUid(),
-                        getSideStagePosition(), mSideStage.getTopChildTaskUid(),
-                        mSplitLayout.isLeftRightSplit());
+            if (!mLogger.hasStartedSession() && !mLogger.hasValidEnterSessionId()) {
+                mLogger.enterRequested(null /*enterSessionId*/, ENTER_REASON_MULTI_INSTANCE);
             }
+            mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
+                    getMainStagePosition(), mMainStage.getTopChildTaskUid(),
+                    getSideStagePosition(), mSideStage.getTopChildTaskUid(),
+                    mSplitLayout.isLeftRightSplit());
         }
     }
 
