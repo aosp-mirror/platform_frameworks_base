@@ -58,7 +58,7 @@ class BackupHelper {
     void scheduleBackup() {
         if (!mBackupIdlerScheduled) {
             mBackupIdlerScheduled = true;
-            Looper.myQueue().addIdleHandler(mBackupIdler);
+            Looper.getMainLooper().getQueue().addIdleHandler(mBackupIdler);
         }
     }
 

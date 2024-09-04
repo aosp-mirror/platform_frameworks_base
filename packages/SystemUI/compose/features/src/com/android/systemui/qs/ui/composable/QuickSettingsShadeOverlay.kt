@@ -34,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
@@ -51,6 +53,7 @@ import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class QuickSettingsShadeOverlay
@@ -68,6 +71,8 @@ constructor(
     private val actionsViewModel: QuickSettingsShadeOverlayActionsViewModel by lazy {
         actionsViewModelFactory.create()
     }
+
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     override suspend fun activate(): Nothing {
         actionsViewModel.activate()

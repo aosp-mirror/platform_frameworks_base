@@ -24,17 +24,11 @@ public class TinyFrameworkForTextPolicy {
 
     public int stub = 1;
 
-    public int keep = 2;
-
     // Removed fields cannot have an initial value, because otherwise .ctor will fail to set it at
     // runtime.
     public int remove;
 
     public int addOne(int value) {
-        return addOneInner(value);
-    }
-
-    public int addOneInner(int value) {
         return value + 1;
     }
 
@@ -94,9 +88,5 @@ public class TinyFrameworkForTextPolicy {
 
     public String unsupportedMethod() {
         return "This value shouldn't be seen on the host side.";
-    }
-
-    public String visibleButUsesUnsupportedMethod() {
-        return unsupportedMethod();
     }
 }

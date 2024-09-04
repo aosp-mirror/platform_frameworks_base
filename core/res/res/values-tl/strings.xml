@@ -1721,7 +1721,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Alisin"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Magpatuloy sa pakikinig nang may malakas na volume?\n\nNaging malakas ang volume nang mas matagal na sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Magpatuloy sa pakikinig nang may malakas na volume?\n\nMalakas ang volume nang mas matagal na sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Naka-detect ng malakas na tunog\n\nMas malakas ang volume kaysa sa inirerekomenda, at posible nitong mapinsala ang pandinig mo"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Accessibility?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>

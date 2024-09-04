@@ -21,13 +21,13 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
+import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /** Models the UI state for the user actions for navigating to other scenes or overlays. */
 class QuickSettingsShadeOverlayActionsViewModel @AssistedInject constructor() :
-    SceneActionsViewModel() {
+    UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         setActions(

@@ -49,6 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Flags;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dagger.SysUISingleton;
@@ -341,6 +342,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                     mNotificationShadeWindowModel.isKeyguardOccluded(),
                     this::setKeyguardOccluded
             );
+        }
+        if (ComposeBouncerFlags.INSTANCE.isComposeBouncerOrSceneContainerEnabled()) {
+            collectFlow(mWindowRootView, mNotificationShadeWindowModel.isBouncerShowing(),
+                    this::setBouncerShowing);
+            collectFlow(mWindowRootView, mNotificationShadeWindowModel.getDoesBouncerRequireIme(),
+                    this::setKeyguardNeedsInput);
         }
     }
 

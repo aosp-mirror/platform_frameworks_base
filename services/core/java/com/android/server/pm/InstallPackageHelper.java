@@ -209,6 +209,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+
 final class InstallPackageHelper {
     private final PackageManagerService mPm;
     private final AppDataHelper mAppDataHelper;
@@ -989,15 +990,6 @@ final class InstallPackageHelper {
         return false;
     }
 
-    void installPackagesTraced(List<InstallRequest> requests) {
-        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
-            installPackagesLI(requests);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-    }
-
     /**
      * Installs one or more packages atomically. This operation is broken up into four phases:
      * <ul>
@@ -1017,15 +1009,31 @@ final class InstallPackageHelper {
      *
      * Failure at any phase will result in a full failure to install all packages.
      */
-    @GuardedBy("mPm.mInstallLock")
-    private void installPackagesLI(List<InstallRequest> requests) {
-        final Set<String> scannedPackages = new ArraySet<>(requests.size());
-        final Map<String, Settings.VersionInfo> versionInfos = new ArrayMap<>(requests.size());
-        final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
-        CriticalEventLog.getInstance().logInstallPackagesStarted();
+    void installPackagesTraced(List<InstallRequest> requests) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackages");
         boolean success = false;
+        final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
+        final Map<String, Settings.VersionInfo> versionInfos = new ArrayMap<>(requests.size());
         try {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackagesLI");
+            CriticalEventLog.getInstance().logInstallPackagesStarted();
+
+            if (prepareInstallPackages(requests)
+                    && scanInstallPackages(requests, createdAppId, versionInfos)) {
+                List<ReconciledPackage> reconciledPackages =
+                        reconcileInstallPackages(requests, versionInfos);
+                if (reconciledPackages != null && commitInstallPackages(reconciledPackages)) {
+                    success = true;
+                }
+            }
+        } finally {
+            completeInstallProcess(requests, createdAppId, success);
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    private boolean prepareInstallPackages(List<InstallRequest> requests) {
+        // TODO: will remove the locking after doRename is moved out of prepare
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             for (InstallRequest request : requests) {
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "preparePackage");
@@ -1036,17 +1044,27 @@ final class InstallPackageHelper {
                             prepareFailure.getMessage());
                     request.setOriginPackage(prepareFailure.mConflictingPackage);
                     request.setOriginPermission(prepareFailure.mConflictingPermission);
-                    return;
+                    return false;
                 } finally {
                     request.onPrepareFinished();
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
+            }
+        }
+        return true;
+    }
 
+    private boolean scanInstallPackages(List<InstallRequest> requests,
+            Map<String, Boolean> createdAppId, Map<String, Settings.VersionInfo> versionInfos) {
+        // TODO(b/362840929): remove locker
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+            final Set<String> scannedPackages = new ArraySet<>(requests.size());
+            for (InstallRequest request : requests) {
                 final ParsedPackage packageToScan = request.getParsedPackage();
                 if (packageToScan == null) {
                     request.setError(INSTALL_FAILED_SESSION_INVALID,
                             "Failed to obtain package to scan");
-                    return;
+                    return false;
                 }
                 request.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
                 final String packageName = packageToScan.getPackageName();
@@ -1064,7 +1082,7 @@ final class InstallPackageHelper {
                                 "Duplicate package "
                                         + packageName
                                         + " in multi-package install request.");
-                        return;
+                        return false;
                     }
                     if (!checkNoAppStorageIsConsistent(
                             request.getScanRequestOldPackage(), packageToScan)) {
@@ -1074,7 +1092,7 @@ final class InstallPackageHelper {
                                 INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                                 "Update attempted to change value of "
                                         + PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
-                        return;
+                        return false;
                     }
                     final boolean isApex = (request.getScanFlags() & SCAN_AS_APEX) != 0;
                     final boolean isSdkLibrary = packageToScan.isSdkLibrary();
@@ -1087,7 +1105,7 @@ final class InstallPackageHelper {
                             mPm.getSettingsVersionForPackage(packageToScan));
                 } catch (PackageManagerException e) {
                     request.setError("Scanning Failed.", e);
-                    return;
+                    return false;
                 }
                 if (request.isArchived()) {
                     final SparseArray<String> responsibleInstallerTitles =
@@ -1099,17 +1117,22 @@ final class InstallPackageHelper {
                         request.setError(PackageManagerException.ofInternalError(
                                 "Failed to obtain the responsible installer info",
                                 INTERNAL_ERROR_ARCHIVE_NO_INSTALLER_TITLE));
-                        return;
+                        return false;
                     }
                     request.setResponsibleInstallerTitles(responsibleInstallerTitles);
                 }
             }
+        }
+        return true;
+    }
 
-            List<ReconciledPackage> reconciledPackages;
+    private List<ReconciledPackage> reconcileInstallPackages(List<InstallRequest> requests,
+            Map<String, Settings.VersionInfo> versionInfos) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             synchronized (mPm.mLock) {
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "reconcilePackages");
-                    reconciledPackages = ReconcilePackageUtils.reconcilePackages(
+                    return ReconcilePackageUtils.reconcilePackages(
                             requests, Collections.unmodifiableMap(mPm.mPackages),
                             versionInfos, mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
                             mPm.mSettings, mPm.mInjector.getSystemConfig());
@@ -1117,70 +1140,80 @@ final class InstallPackageHelper {
                     for (InstallRequest request : requests) {
                         request.setError("Reconciliation failed...", e);
                     }
-                    return;
+                    return null;
                 } finally {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
-                if (Flags.improveInstallFreeze()) {
-                    // Postpone freezer until after reconcile
-                    for (ReconciledPackage reconciledPkg : reconciledPackages) {
-                        InstallRequest installRequest = reconciledPkg.mInstallRequest;
-                        String packageName = installRequest.getParsedPackage().getPackageName();
-                        PackageFreezer freezer = freezePackageForInstall(packageName,
-                                UserHandle.USER_ALL, installRequest.getInstallFlags(),
-                                "installPackageLI", ApplicationExitInfo.REASON_PACKAGE_UPDATED,
-                                installRequest);
-                        installRequest.setFreezer(freezer);
-                    }
+            }
+        }
+    }
+
+
+    private boolean commitInstallPackages(List<ReconciledPackage> reconciledPackages) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+            if (Flags.improveInstallFreeze()) {
+                // Postpone freezer until after reconcile
+                for (ReconciledPackage reconciledPkg : reconciledPackages) {
+                    InstallRequest installRequest = reconciledPkg.mInstallRequest;
+                    String packageName = installRequest.getParsedPackage().getPackageName();
+                    PackageFreezer freezer = freezePackageForInstall(packageName,
+                            UserHandle.USER_ALL, installRequest.getInstallFlags(),
+                            "installPackageLI", ApplicationExitInfo.REASON_PACKAGE_UPDATED,
+                            installRequest);
+                    installRequest.setFreezer(freezer);
                 }
+            }
+            synchronized (mPm.mLock) {
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "commitPackages");
                     commitPackagesLocked(reconciledPackages, mPm.mUserManager.getUserIds());
-                    success = true;
                 } finally {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             }
             executePostCommitStepsLIF(reconciledPackages);
-        } finally {
-            if (success) {
-                for (InstallRequest request : requests) {
-                    if (request.getDataLoaderType() != DataLoaderType.INCREMENTAL) {
-                        continue;
-                    }
-                    if (request.getSignatureSchemeVersion() != SIGNING_BLOCK_V4) {
-                        continue;
-                    }
-                    // For incremental installs, we bypass the verifier prior to install. Now
-                    // that we know the package is valid, send a notice to the verifier with
-                    // the root hash of the base.apk.
-                    final String baseCodePath = request.getPkg().getBaseApkPath();
-                    final String[] splitCodePaths = request.getPkg().getSplitCodePaths();
-                    final Uri originUri = request.getOriginUri();
-                    final int verificationId = mPm.mPendingVerificationToken++;
-                    final String rootHashString = PackageManagerServiceUtils
-                            .buildVerificationRootHashString(baseCodePath, splitCodePaths);
-                    VerificationUtils.broadcastPackageVerified(verificationId, originUri,
-                            PackageManager.VERIFICATION_ALLOW, rootHashString,
-                            request.getDataLoaderType(), request.getUser(), mContext);
+        }
+        return true;
+    }
+
+    private void completeInstallProcess(List<InstallRequest> requests,
+            Map<String, Boolean> createdAppId, boolean success) {
+        if (success) {
+            for (InstallRequest request : requests) {
+                if (request.getDataLoaderType() != DataLoaderType.INCREMENTAL) {
+                    continue;
                 }
-            } else {
-                for (InstallRequest installRequest : requests) {
-                    if (installRequest.getParsedPackage() != null && createdAppId.getOrDefault(
-                            installRequest.getParsedPackage().getPackageName(), false)) {
-                        cleanUpAppIdCreation(installRequest);
-                    }
+                if (request.getSignatureSchemeVersion() != SIGNING_BLOCK_V4) {
+                    continue;
                 }
-                // TODO(b/194319951): create a more descriptive reason than unknown
-                // mark all non-failure installs as UNKNOWN so we do not treat them as success
-                for (InstallRequest request : requests) {
-                    request.closeFreezer();
-                    if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
-                        request.setReturnCode(PackageManager.INSTALL_UNKNOWN);
-                    }
+                // For incremental installs, we bypass the verifier prior to install. Now
+                // that we know the package is valid, send a notice to the verifier with
+                // the root hash of the base.apk.
+                final String baseCodePath = request.getPkg().getBaseApkPath();
+                final String[] splitCodePaths = request.getPkg().getSplitCodePaths();
+                final Uri originUri = request.getOriginUri();
+                final int verificationId = mPm.mPendingVerificationToken++;
+                final String rootHashString = PackageManagerServiceUtils
+                        .buildVerificationRootHashString(baseCodePath, splitCodePaths);
+                VerificationUtils.broadcastPackageVerified(verificationId, originUri,
+                        PackageManager.VERIFICATION_ALLOW, rootHashString,
+                        request.getDataLoaderType(), request.getUser(), mContext);
+            }
+        } else {
+            for (InstallRequest installRequest : requests) {
+                if (installRequest.getParsedPackage() != null && createdAppId.getOrDefault(
+                        installRequest.getParsedPackage().getPackageName(), false)) {
+                    cleanUpAppIdCreation(installRequest);
                 }
             }
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            // TODO(b/194319951): create a more descriptive reason than unknown
+            // mark all non-failure installs as UNKNOWN so we do not treat them as success
+            for (InstallRequest request : requests) {
+                request.closeFreezer();
+                if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
+                    request.setReturnCode(PackageManager.INSTALL_UNKNOWN);
+                }
+            }
         }
     }
 

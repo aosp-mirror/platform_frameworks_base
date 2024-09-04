@@ -14375,7 +14375,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Matrix matrix = mTempMatrix;
         matrix.reset();
-        transformMatrixToLocal(matrix);
+        transformMatrixRootToLocal(matrix);
         editorBounds.set(rect);
         // When the view has transformations like scaleX/scaleY computing the global visible
         // rectangle will already apply the transformations. The getLocalVisibleRect only offsets

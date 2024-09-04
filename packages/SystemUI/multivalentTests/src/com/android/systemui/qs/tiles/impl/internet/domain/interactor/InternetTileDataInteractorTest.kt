@@ -33,7 +33,7 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.res.R
@@ -86,7 +86,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
     private val wifiInteractor =
         WifiInteractorImpl(connectivityRepository, wifiRepository, testScope.backgroundScope)
 
-    private val tableLogBuffer: TableLogBuffer = mock()
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "InternetTileDataInteractorTest")
     private val carrierConfigTracker: CarrierConfigTracker = mock()
 
     private val mobileConnectionsRepository =

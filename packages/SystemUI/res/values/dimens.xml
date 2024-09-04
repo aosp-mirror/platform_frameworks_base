@@ -1751,6 +1751,7 @@
 
     <!-- System UI Dialog -->
     <dimen name="dialog_title_text_size">24sp</dimen>
+    <dimen name="dialog_button_side_margin">8dp</dimen>
 
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_max_height">662dp</dimen>

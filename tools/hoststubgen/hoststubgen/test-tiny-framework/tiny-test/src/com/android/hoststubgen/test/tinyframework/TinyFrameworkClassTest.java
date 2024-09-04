@@ -17,7 +17,7 @@ package com.android.hoststubgen.test.tinyframework;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 import com.android.hoststubgen.test.tinyframework.R.Nested;
 
@@ -40,16 +40,12 @@ public class TinyFrameworkClassTest {
         assertThat(tfc.stub).isEqualTo(1);
     }
 
-//    @Test
-//    public void testDoesntCompile() {
-//        TinyFrameworkClass tfc = new TinyFrameworkClass();
-//
-//        tfc.addOneInner(1); // Shouldn't compile.
-//        tfc.toBeRemoved("abc"); // Shouldn't compile.
-//        tfc.unsupportedMethod(); // Shouldn't compile.
-//        int a = tfc.keep; // Shouldn't compile
-//        int b = tfc.remove; // Shouldn't compile
-//    }
+    @Test
+    public void testRemove() {
+        TinyFrameworkForTextPolicy tfc = new TinyFrameworkForTextPolicy();
+        assertThrows(NoSuchMethodError.class, () -> tfc.toBeRemoved("abc"));
+        assertThrows(NoSuchFieldError.class, () -> tfc.remove = 1);
+    }
 
     @Test
     public void testIgnore() {
@@ -78,12 +74,12 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
-    public void testVisibleButUsesUnsupportedMethod() {
+    public void testUnsupportedMethod() {
         TinyFrameworkForTextPolicy tfc = new TinyFrameworkForTextPolicy();
 
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("not yet supported");
-        tfc.visibleButUsesUnsupportedMethod();
+        tfc.unsupportedMethod();
     }
 
     @Test
@@ -149,28 +145,22 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
-    public void testSubstituteNativeWithThrow() throws Exception {
-        // We can't use TinyFrameworkNative.nativeStillNotSupported() directly in this class,
-        // because @Throw implies @Keep (not @Stub), and we currently compile this test
-        // against the stub jar (so it won't contain @Throw methods).
-        //
-        // But the method exists at runtime, so we can use reflections to call it.
-        //
-        // In the real Ravenwood environment, we don't use HostStubGen's stub jar at all,
-        // so it's not a problem.
+    public void testSubstituteNativeWithThrow() {
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("not yet supported");
 
-        final var clazz = TinyFrameworkNative.class;
-        final var method = clazz.getMethod("nativeStillNotSupported");
+        TinyFrameworkNative.nativeStillNotSupported();
+    }
 
-        try {
-            method.invoke(null);
+    @Test
+    public void testSubstituteNativeWithKeep() {
+        // We don't want to complicate the test by setting up JNI,
+        // so to test out whether the native method is preserved, we
+        // check whether calling it will throw UnsatisfiedLinkError,
+        // which would only happen on native methods.
+        thrown.expect(UnsatisfiedLinkError.class);
 
-            fail("java.lang.reflect.InvocationTargetException expected");
-
-        } catch (java.lang.reflect.InvocationTargetException e) {
-            var inner = e.getCause();
-            assertThat(inner.getMessage()).contains("not yet supported");
-        }
+        TinyFrameworkNative.nativeStillKeep();
     }
 
     @Test
@@ -179,7 +169,6 @@ public class TinyFrameworkClassTest {
         thrown.expectMessage("Outer exception");
 
         TinyFrameworkExceptionTester.testException();
-
     }
 
     @Test

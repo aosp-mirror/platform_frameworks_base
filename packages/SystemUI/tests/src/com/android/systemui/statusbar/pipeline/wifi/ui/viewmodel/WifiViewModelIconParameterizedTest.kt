@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirp
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon.Companion.NO_INTERNET
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +65,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(Parameterized::class)
 internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase) :
     SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     private lateinit var underTest: WifiViewModel
 
@@ -91,7 +93,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 AirplaneModeInteractor(
                     airplaneModeRepository,
                     connectivityRepository,
-                    FakeMobileConnectionsRepository(),
+                    kosmos.fakeMobileConnectionsRepository,
                 ),
                 tableLogBuffer,
                 scope,

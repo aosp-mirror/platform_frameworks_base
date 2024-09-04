@@ -180,7 +180,7 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateTouchpadHardwareStateNotificationsEnabled() {
-        mNative.setShouldNotifyTouchpadHardwareState(InputSettings.useTouchpadVisualizer(mContext));
+        mService.updateTouchpadVisualizerEnabled(InputSettings.useTouchpadVisualizer(mContext));
     }
 
     private void updateTouchpadRightClickZoneEnabled() {

@@ -7151,9 +7151,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // If there is a profile owner, redirect to that; otherwise query the device owner.
         ComponentName aliasChooser = getProfileOwnerAsUser(caller.getUserId());
-        boolean isDoUser = Flags.headlessSingleUserFixes()
-                ? caller.getUserId() == getDeviceOwnerUserId()
-                : caller.getUserHandle().isSystem();
+        boolean isDoUser = caller.getUserId() == getDeviceOwnerUserId();
         if (aliasChooser == null && isDoUser) {
             synchronized (getLockObject()) {
                 final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
@@ -8163,7 +8161,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // First check whether the admin is allowed to wipe the device/user/profile.
             final String restriction;
             boolean shouldFactoryReset = userId == UserHandle.USER_SYSTEM;
-            if (Flags.headlessSingleUserFixes() && getHeadlessDeviceOwnerModeForDeviceOwner()
+            if (getHeadlessDeviceOwnerModeForDeviceOwner()
                     == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
                 shouldFactoryReset = userId == getMainUserId();
             }
@@ -8187,8 +8185,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 adminPackage,
                 userId)) {
             // Legacy mode
-            wipeDevice = Flags.headlessSingleUserFixes()
-                    && getHeadlessDeviceOwnerModeForDeviceOwner()
+            wipeDevice = getHeadlessDeviceOwnerModeForDeviceOwner()
                     == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER ? isMainUser : isSystemUser;
         } else {
             // Explicit behaviour
@@ -11858,7 +11855,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             setBackwardsCompatibleAppRestrictions(
                     caller, packageName, restrictions, caller.getUserHandle());
-        } else if (Flags.dmrhSetAppRestrictions()) {
+        } else {
             final boolean isRoleHolder;
             if (who != null) {
                 // DO or PO
@@ -11905,15 +11902,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             caller.getUserHandle());
                 });
             }
-        } else {
-            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                    || (caller.hasPackage() && isCallerDelegate(caller,
-                    DELEGATION_APP_RESTRICTIONS)));
-            mInjector.binderWithCleanCallingIdentity(() -> {
-                mUserManager.setApplicationRestrictions(packageName, restrictions,
-                        caller.getUserHandle());
-            });
         }
 
         DevicePolicyEventLogger
@@ -13244,7 +13232,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return Bundle.EMPTY;
             }
             return policies.get(enforcingAdmin).getValue();
-        } else if (Flags.dmrhSetAppRestrictions()) {
+        } else {
             final boolean isRoleHolder;
             if (who != null) {
                 // Caller is DO or PO. They cannot call this on parent
@@ -13287,19 +13275,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     return bundle != null ? bundle : Bundle.EMPTY;
                 });
             }
-
-        } else {
-            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                    || (caller.hasPackage() && isCallerDelegate(caller,
-                    DELEGATION_APP_RESTRICTIONS)));
-            return mInjector.binderWithCleanCallingIdentity(() -> {
-                Bundle bundle = mUserManager.getApplicationRestrictions(packageName,
-                        caller.getUserHandle());
-                // if no restrictions were saved, mUserManager.getApplicationRestrictions
-                // returns null, but DPM method should return an empty Bundle as per JavaDoc
-                return bundle != null ? bundle : Bundle.EMPTY;
-            });
         }
     }
 
@@ -18662,8 +18637,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         // Backup service has to be enabled on the main user in order for it to be enabled on
         // secondary users.
-        if (Flags.headlessSingleUserFixes() && isDeviceOwner(caller)
-                && getHeadlessDeviceOwnerModeForDeviceOwner()
+        if (isDeviceOwner(caller) && getHeadlessDeviceOwnerModeForDeviceOwner()
                 == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER) {
             toggleBackupServiceActive(UserHandle.USER_SYSTEM, enabled);
         }
