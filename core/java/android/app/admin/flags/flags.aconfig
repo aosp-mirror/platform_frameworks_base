@@ -157,6 +157,7 @@ flag {
   bug: "304999634"
 }
 
+# Fully rolled out and must not be used.
 flag {
   name: "esim_management_enabled"
   is_exported: true
@@ -174,6 +175,7 @@ flag {
   bug: "289515470"
 }
 
+# Fully rolled out and must not be used.
 flag {
   name: "is_mte_policy_enforced"
   is_exported: true
