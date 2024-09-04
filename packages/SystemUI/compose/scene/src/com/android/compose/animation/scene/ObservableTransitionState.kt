@@ -31,9 +31,6 @@ import kotlinx.coroutines.flow.flowOf
  *    layout or Compose drawing phases.
  * 2. [ObservableTransitionState] values are backed by Kotlin [Flow]s and can be collected by
  *    non-Compose code to observe value changes.
- * 3. [ObservableTransitionState.Transition.fromScene] and
- *    [ObservableTransitionState.Transition.toScene] will never be equal, while
- *    [TransitionState.Transition.fromScene] and [TransitionState.Transition.toScene] can be equal.
  */
 sealed interface ObservableTransitionState {
     /**
@@ -54,9 +51,8 @@ sealed interface ObservableTransitionState {
 
     /** There is a transition animating between two scenes. */
     sealed class Transition(
-        // TODO(b/353679003): Rename these to fromContent and toContent.
-        open val fromScene: ContentKey,
-        open val toScene: ContentKey,
+        val fromContent: ContentKey,
+        val toContent: ContentKey,
         val currentOverlays: Flow<Set<OverlayKey>>,
         val progress: Flow<Float>,
 
@@ -86,8 +82,8 @@ sealed interface ObservableTransitionState {
     ) : ObservableTransitionState {
         override fun toString(): String =
             """Transition
-                |(from=$fromScene,
-                | to=$toScene,
+                |(from=$fromContent,
+                | to=$toContent,
                 | isInitiatedByUserInput=$isInitiatedByUserInput,
                 | isUserInputOngoing=$isUserInputOngoing
                 |)"""
@@ -95,8 +91,8 @@ sealed interface ObservableTransitionState {
 
         /** A transition animating between [fromScene] and [toScene]. */
         class ChangeScene(
-            override val fromScene: SceneKey,
-            override val toScene: SceneKey,
+            val fromScene: SceneKey,
+            val toScene: SceneKey,
             val currentScene: Flow<SceneKey>,
             currentOverlays: Flow<Set<OverlayKey>>,
             progress: Flow<Float>,
@@ -196,8 +192,8 @@ sealed interface ObservableTransitionState {
 
     fun isTransitioning(from: ContentKey? = null, to: ContentKey? = null): Boolean {
         return this is Transition &&
-            (from == null || this.fromScene == from) &&
-            (to == null || this.toScene == to)
+            (from == null || this.fromContent == from) &&
+            (to == null || this.toContent == to)
     }
 }
 

@@ -195,7 +195,7 @@ constructor(
                     is ObservableTransitionState.Idle ->
                         flowOf(CommunalTransitionProgressModel.Idle(state.currentScene))
                     is ObservableTransitionState.Transition ->
-                        if (state.toScene == targetScene) {
+                        if (state.toContent == targetScene) {
                             state.progress.map {
                                 CommunalTransitionProgressModel.Transition(
                                     // Clamp the progress values between 0 and 1 as actual progress

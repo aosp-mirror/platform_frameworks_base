@@ -713,4 +713,16 @@ public class TaskViewTest extends ShellTestCase {
         verify(mViewHandler).post(any());
         verify(mTaskView).setResizeBackgroundColor(eq(Color.BLUE));
     }
+
+    @Test
+    public void testMoveToFullscreen_callsTaskRemovalStarted() {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        mTaskViewTaskController.moveToFullscreen();
+
+        verify(mViewListener).onTaskRemovalStarted(eq(mTaskInfo.taskId));
+    }
 }

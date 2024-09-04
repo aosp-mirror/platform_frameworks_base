@@ -23,7 +23,9 @@ import android.os.UserManager;
 import com.android.internal.R;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.settingslib.notification.modes.ZenIconLoader;
+import com.android.systemui.common.ui.GlobalConfig;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.log.LogBuffer;
@@ -103,9 +105,12 @@ public interface StatusBarPolicyModule {
     @Binds
     CastController provideCastController(CastControllerImpl controllerImpl);
 
-    /** */
+    /**
+     * @deprecated: unscoped configuration controller shouldn't be injected as it might lead to
+     * wrong updates in case of secondary displays.
+     */
     @Binds
-    ConfigurationController bindConfigurationController(ConfigurationControllerImpl impl);
+    ConfigurationController bindConfigurationController(@GlobalConfig ConfigurationController impl);
 
     /** */
     @Binds
@@ -179,6 +184,15 @@ public interface StatusBarPolicyModule {
     @Binds
     DevicePostureController provideDevicePostureController(
             DevicePostureControllerImpl devicePostureControllerImpl);
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @GlobalConfig
+    static ConfigurationController provideGlobalConfigurationController(
+            @Application Context context, ConfigurationControllerImpl.Factory factory) {
+        return factory.create(context);
+    }
 
     /** */
     @SysUISingleton

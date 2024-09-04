@@ -27,24 +27,21 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.ui.composable.LockscreenContent
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneActionsViewModel
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
-import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import dagger.Lazy
-import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -53,7 +50,6 @@ class NotificationsShadeScene
 @Inject
 constructor(
     private val actionsViewModelFactory: NotificationsShadeSceneActionsViewModel.Factory,
-    private val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
     private val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     private val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -61,8 +57,7 @@ constructor(
     private val statusBarIconController: StatusBarIconController,
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
-    private val lockscreenContent: Lazy<Optional<LockscreenContent>>,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
 
     override val key = Scenes.NotificationsShade
 
@@ -88,8 +83,7 @@ constructor(
 
         OverlayShade(
             modifier = modifier,
-            viewModelFactory = overlayShadeViewModelFactory,
-            lockscreenContent = lockscreenContent,
+            onScrimClicked = {},
         ) {
             Column {
                 ExpandedShadeHeader(

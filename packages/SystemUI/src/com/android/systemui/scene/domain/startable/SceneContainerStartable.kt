@@ -189,7 +189,7 @@ constructor(
                             // current scene
                             when (state) {
                                 is ObservableTransitionState.Idle -> state.currentScene
-                                is ObservableTransitionState.Transition -> state.fromScene
+                                is ObservableTransitionState.Transition -> state.fromContent
                             }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
                         }
                         .distinctUntilChanged()
@@ -220,7 +220,7 @@ constructor(
                                             }
                                         }
                                         is ObservableTransitionState.Transition -> {
-                                            if (state.fromScene == Scenes.Gone) {
+                                            if (state.fromContent == Scenes.Gone) {
                                                 true to "scene transitioning away from Gone"
                                             } else {
                                                 null
@@ -351,8 +351,8 @@ constructor(
                             is ObservableTransitionState.Idle -> setOf(transitionState.currentScene)
                             is ObservableTransitionState.Transition ->
                                 setOf(
-                                    transitionState.fromScene,
-                                    transitionState.toScene,
+                                    transitionState.fromContent,
+                                    transitionState.toContent,
                                 )
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
@@ -461,7 +461,8 @@ constructor(
                     sceneInteractor.transitionState.value as? ObservableTransitionState.Transition
                         ?: return@collect
                 if (
-                    transition.fromScene == Scenes.Gone && transition.toScene == Scenes.Lockscreen
+                    transition.fromContent == Scenes.Gone &&
+                        transition.toContent == Scenes.Lockscreen
                 ) {
                     switchToScene(
                         targetSceneKey = Scenes.Gone,
@@ -694,8 +695,8 @@ constructor(
                 .filterIsInstance<ObservableTransitionState.Transition>()
                 // Only consider user-initiated (e.g. drags) that go from bouncer to lockscreen.
                 .filter { transition ->
-                    transition.fromScene == Scenes.Bouncer &&
-                        transition.toScene == Scenes.Lockscreen &&
+                    transition.fromContent == Scenes.Bouncer &&
+                        transition.toContent == Scenes.Lockscreen &&
                         transition.isInitiatedByUserInput
                 }
                 .flatMapLatest { it.progress }

@@ -98,7 +98,7 @@ import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneContentViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
@@ -113,9 +113,11 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class QuickSettingsScene
 @Inject
@@ -130,7 +132,7 @@ constructor(
     private val statusBarIconController: StatusBarIconController,
     private val mediaCarouselController: MediaCarouselController,
     @Named(MediaModule.QS_PANEL) private val mediaHost: MediaHost,
-) : ExclusiveActivatable(), ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.QuickSettings
 
     private val actionsViewModel: QuickSettingsSceneActionsViewModel by lazy {

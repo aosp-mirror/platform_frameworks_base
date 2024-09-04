@@ -1356,13 +1356,6 @@ flag {
 }
 
 flag {
-    name: "new_picker_ui"
-    namespace: "systemui"
-    description: "Enables the BC25 design of the customization picker UI."
-    bug: "339081035"
-}
-
-flag {
   namespace: "systemui"
   name: "settings_ext_register_content_observer_on_bg_thread"
   description: "Register content observer in callback flow APIs on background thread in SettingsProxyExt."
@@ -1370,6 +1363,16 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "notify_password_text_view_user_activity_in_background"
+    namespace: "systemui"
+    description: "Decide whether to notify the user activity in password text view, to power manager in the background thread."
+    bug: "346882515"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

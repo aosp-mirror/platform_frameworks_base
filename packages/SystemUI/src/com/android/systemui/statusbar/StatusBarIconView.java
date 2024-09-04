@@ -415,8 +415,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);
         }
-        if (usesModeIcons()) {
-            setScaleType(icon.shape == Shape.FIXED_SPACE ? ScaleType.FIT_CENTER : ScaleType.CENTER);
+        if (usesModeIcons() && icon.shape == Shape.FIXED_SPACE) {
+            setScaleType(ScaleType.FIT_CENTER);
         }
         if (!visibilityEquals) {
             setVisibility(icon.visible && !mBlocked ? VISIBLE : GONE);

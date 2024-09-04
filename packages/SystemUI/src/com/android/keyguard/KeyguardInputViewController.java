@@ -220,6 +220,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final UiEventLogger mUiEventLogger;
         private final KeyguardKeyboardInteractor mKeyguardKeyboardInteractor;
         private final MSDLPlayer mMSDLPlayer;
+        private final UserActivityNotifier mUserActivityNotifier;
 
         @Inject
         public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -235,7 +236,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
                 UiEventLogger uiEventLogger,
                 KeyguardKeyboardInteractor keyguardKeyboardInteractor,
-                MSDLPlayer msdlPlayer) {
+                MSDLPlayer msdlPlayer,
+                UserActivityNotifier userActivityNotifier) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mLatencyTracker = latencyTracker;
@@ -254,6 +256,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mUiEventLogger = uiEventLogger;
             mKeyguardKeyboardInteractor = keyguardKeyboardInteractor;
             mMSDLPlayer = msdlPlayer;
+            mUserActivityNotifier = userActivityNotifier;
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
@@ -276,29 +279,29 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                         mInputMethodManager, emergencyButtonController, mMainExecutor, mResources,
                         mFalsingCollector, mKeyguardViewController,
                         mDevicePostureController, mFeatureFlags, mSelectedUserInteractor,
-                        mKeyguardKeyboardInteractor, mMSDLPlayer);
+                        mKeyguardKeyboardInteractor, mMSDLPlayer, mUserActivityNotifier);
             } else if (keyguardInputView instanceof KeyguardPINView) {
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, emergencyButtonController, mFalsingCollector,
                         mDevicePostureController, mFeatureFlags, mSelectedUserInteractor,
-                        mUiEventLogger, mKeyguardKeyboardInteractor, mMSDLPlayer
-                );
+                        mUiEventLogger, mKeyguardKeyboardInteractor, mMSDLPlayer,
+                        mUserActivityNotifier);
             } else if (keyguardInputView instanceof KeyguardSimPinView) {
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
                         emergencyButtonController, mFeatureFlags, mSelectedUserInteractor,
-                        mKeyguardKeyboardInteractor, mMSDLPlayer);
+                        mKeyguardKeyboardInteractor, mMSDLPlayer, mUserActivityNotifier);
             } else if (keyguardInputView instanceof KeyguardSimPukView) {
                 return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
                         emergencyButtonController, mFeatureFlags, mSelectedUserInteractor,
-                        mKeyguardKeyboardInteractor, mMSDLPlayer
+                        mKeyguardKeyboardInteractor, mMSDLPlayer, mUserActivityNotifier
                 );
             }
 

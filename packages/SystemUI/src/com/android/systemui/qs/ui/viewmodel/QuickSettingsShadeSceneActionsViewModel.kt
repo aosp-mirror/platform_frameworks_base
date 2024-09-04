@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.qs.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
@@ -24,11 +22,8 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.ui.viewmodel.SceneActionsViewModel
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeAlignment
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 
 /**
@@ -40,7 +35,6 @@ import kotlinx.coroutines.flow.map
 class QuickSettingsShadeSceneActionsViewModel
 @AssistedInject
 constructor(
-    private val shadeInteractor: ShadeInteractor,
     val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
 ) : SceneActionsViewModel() {
 
@@ -48,14 +42,7 @@ constructor(
         quickSettingsContainerViewModel.editModeViewModel.isEditing
             .map { editing ->
                 buildMap {
-                    put(
-                        if (shadeInteractor.shadeAlignment == ShadeAlignment.Top) {
-                            Swipe.Up
-                        } else {
-                            Swipe.Down
-                        },
-                        UserActionResult(SceneFamilies.Home)
-                    )
+                    put(Swipe.Up, UserActionResult(SceneFamilies.Home))
                     if (!editing) {
                         put(Back, UserActionResult(SceneFamilies.Home))
                     }
