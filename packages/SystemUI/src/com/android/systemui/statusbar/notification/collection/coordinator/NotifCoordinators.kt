@@ -90,9 +90,8 @@ constructor(
         mCoordinators.add(keyguardCoordinator)
         if (NotificationMinimalism.isEnabled) {
             mCoordinators.add(lockScreenMinimalismCoordinator)
-        } else {
-            mCoordinators.add(unseenKeyguardCoordinator)
         }
+        mCoordinators.add(unseenKeyguardCoordinator)
         mCoordinators.add(rankingCoordinator)
         mCoordinators.add(colorizedFgsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
