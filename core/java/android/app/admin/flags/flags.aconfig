@@ -44,13 +44,7 @@ flag {
   is_fixed_read_only: true
 }
 
-flag {
-  name: "dedicated_device_control_enabled"
-  namespace: "enterprise"
-  description: "Allow the device management role holder to control which platform features are available on dedicated devices."
-  bug: "281964214"
-}
-
+# Fully rolled out and must not be used.
 flag {
   name: "dedicated_device_control_api_enabled"
   is_exported: true

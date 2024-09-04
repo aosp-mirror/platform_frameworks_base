@@ -4033,7 +4033,6 @@
     <!-- Allows an application to manage policy related to block package uninstallation.
         <p>Protection level: internal|role
         <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
-        @FlaggedApi("android.app.admin.flags.dedicated_device_control_api_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL"
         android:protectionLevel="internal|role" />
@@ -4041,7 +4040,6 @@
     <!-- Allows an application to manage policy related to camera toggle.
         <p>Protection level: internal|role
         <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
-        @FlaggedApi("android.app.admin.flags.dedicated_device_control_api_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CAMERA_TOGGLE"
         android:protectionLevel="internal|role" />
@@ -4049,7 +4047,6 @@
     <!-- Allows an application to manage policy related to microphone toggle.
         <p>Protection level: internal|role
         <p>Intended for use by the DEVICE_POLICY_MANAGEMENT role only.
-        @FlaggedApi("android.app.admin.flags.dedicated_device_control_api_enabled")
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE"
         android:protectionLevel="internal|role" />
