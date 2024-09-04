@@ -107,7 +107,7 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"屏幕录制器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在处理屏幕录制视频"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"要录制屏幕？"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"要录制屏幕吗？"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"录制单个应用"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"录制整个屏幕"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"录制整个屏幕时，屏幕上显示的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"启用蓝牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已连接"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"音频分享"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已保存"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"断开连接"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"启用"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"卫星，连接质量良好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"卫星，可连接"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"卫星紧急呼救"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"紧急呼叫或紧急求救"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"工作资料"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"并不适合所有用户"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"系统界面调节工具可让您以更多方式调整及定制 Android 界面。在日后推出的版本中，这些实验性功能可能会变更、失效或消失。操作时请务必谨慎。"</string>
