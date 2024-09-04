@@ -18,18 +18,26 @@ package com.android.compose.test
 
 import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.Transition
 import kotlinx.coroutines.CompletableDeferred
 
-/** A transition for tests that will be finished once [finish] is called. */
-abstract class TestTransition(
+/** A [Transition.ShowOrHideOverlay] for tests that will be finished once [finish] is called. */
+abstract class TestOverlayTransition(
     fromScene: SceneKey,
-    toScene: SceneKey,
+    overlay: OverlayKey,
     replacedTransition: Transition?,
-) : Transition.ChangeScene(fromScene, toScene, replacedTransition) {
+) :
+    Transition.ShowOrHideOverlay(
+        overlay = overlay,
+        fromOrToScene = fromScene,
+        fromContent = fromScene,
+        toContent = overlay,
+        replacedTransition = replacedTransition,
+    ) {
     private val finishCompletable = CompletableDeferred<Unit>()
 
     override suspend fun run() {
@@ -42,11 +50,11 @@ abstract class TestTransition(
     }
 }
 
-/** A utility to easily create a [TestTransition] in tests. */
+/** A utility to easily create a [TestOverlayTransition] in tests. */
 fun transition(
-    from: SceneKey,
-    to: SceneKey,
-    current: () -> SceneKey = { to },
+    fromScene: SceneKey,
+    overlay: OverlayKey,
+    isEffectivelyShown: () -> Boolean = { true },
     progress: () -> Float = { 0f },
     progressVelocity: () -> Float = { 0f },
     previewProgress: () -> Float = { 0f },
@@ -58,13 +66,14 @@ fun transition(
     isUpOrLeft: Boolean = false,
     bouncingContent: ContentKey? = null,
     orientation: Orientation = Orientation.Horizontal,
-    onFreezeAndAnimate: ((TestTransition) -> Unit)? = null,
+    onFreezeAndAnimate: ((TestOverlayTransition) -> Unit)? = null,
     replacedTransition: Transition? = null,
-): TestTransition {
+): TestOverlayTransition {
     return object :
-        TestTransition(from, to, replacedTransition), TransitionState.HasOverscrollProperties {
-        override val currentScene: SceneKey
-            get() = current()
+        TestOverlayTransition(fromScene, overlay, replacedTransition),
+        TransitionState.HasOverscrollProperties {
+        override val isEffectivelyShown: Boolean
+            get() = isEffectivelyShown()
 
         override val progress: Float
             get() = progress()
