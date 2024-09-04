@@ -237,16 +237,6 @@ flag {
 }
 
 flag {
-  name: "headless_single_user_bad_device_admin_state_fix"
-  namespace: "enterprise"
-  description: "Fix the bad state in DPMS caused by an earlier bug related to the headless single user change"
-  bug: "332477138"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "onboarding_bugreport_storage_bug_fix"
   namespace: "enterprise"
   description: "Add a separate storage limit for deferred bugreports"
@@ -281,16 +271,6 @@ flag {
     namespace: "enterprise"
     description: "backup and restore connected work and personal apps user settings across devices"
     bug: "175067666"
-}
-
-flag {
-    name: "headless_single_user_compatibility_fix"
-    namespace: "enterprise"
-    description: "Fix for compatibility issue introduced from using single_user mode on pre-Android V builds"
-    bug: "338050276"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
 }
 
 flag {
