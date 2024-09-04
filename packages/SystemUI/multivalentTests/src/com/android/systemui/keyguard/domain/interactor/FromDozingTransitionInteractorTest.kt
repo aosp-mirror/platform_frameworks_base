@@ -48,12 +48,15 @@ import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -62,6 +65,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -150,13 +154,13 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     @Test
     @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     @DisableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
-    fun testTransitionToLockscreen_onPowerButtonPress_canDream_glanceableHubAvailable() =
+    fun testTransitionToLockscreen_onWake_canDream_glanceableHubAvailable() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
             kosmos.setCommunalAvailable(true)
             runCurrent()
 
-            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
+            powerInteractor.setAwakeForTest()
             runCurrent()
 
             // If dreaming is possible and communal is available, then we should transition to
@@ -170,14 +174,14 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
     @Test
     @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR, FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
-    fun testTransitionToLockscreen_onPowerButtonPress_canDream_ktfRefactor() =
+    fun testTransitionToLockscreen_onWake_canDream_ktfRefactor() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
             kosmos.setCommunalAvailable(true)
             runCurrent()
             clearInvocations(kosmos.fakeCommunalSceneRepository)
 
-            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
+            powerInteractor.setAwakeForTest()
             runCurrent()
 
             // If dreaming is possible and communal is available, then we should transition to
@@ -188,13 +192,13 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
     @Test
     @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
-    fun testTransitionToLockscreen_onPowerButtonPress_canNotDream_glanceableHubAvailable() =
+    fun testTransitionToLockscreen_onWake_canNotDream_glanceableHubAvailable() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(false)
             kosmos.setCommunalAvailable(true)
             runCurrent()
 
-            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
+            powerInteractor.setAwakeForTest()
             runCurrent()
 
             // If dreaming is NOT possible but communal is available, then we should transition to
@@ -208,13 +212,13 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
     @Test
     @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
-    fun testTransitionToLockscreen_onPowerButtonPress_canNDream_glanceableHubNotAvailable() =
+    fun testTransitionToLockscreen_onWake_canNDream_glanceableHubNotAvailable() =
         testScope.runTest {
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
             kosmos.setCommunalAvailable(false)
             runCurrent()
 
-            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
+            powerInteractor.setAwakeForTest()
             runCurrent()
 
             // If dreaming is possible but communal is NOT available, then we should transition to
@@ -316,6 +320,10 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetected_fromGone() =
         testScope.runTest {
+            val isGone by
+                collectLastValue(
+                    kosmos.keyguardTransitionInteractor.isFinishedIn(Scenes.Gone, GONE)
+                )
             powerInteractor.setAwakeForTest()
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.DOZING,
@@ -325,7 +333,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             runCurrent()
 
             // Make sure we're GONE.
-            assertEquals(KeyguardState.GONE, kosmos.keyguardTransitionInteractor.getFinishedState())
+            assertEquals(true, isGone)
 
             // Get part way to AOD.
             powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)
@@ -355,6 +363,10 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     @Suppress("ktlint:standard:max-line-length")
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetectedAfterFinishedInAod_fromGone() =
         testScope.runTest {
+            val isGone by
+                collectLastValue(
+                    kosmos.keyguardTransitionInteractor.isFinishedIn(Scenes.Gone, GONE)
+                )
             powerInteractor.setAwakeForTest()
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.DOZING,
@@ -364,7 +376,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             runCurrent()
 
             // Make sure we're GONE.
-            assertEquals(KeyguardState.GONE, kosmos.keyguardTransitionInteractor.getFinishedState())
+            assertEquals(true, isGone)
 
             // Get all the way to AOD
             powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)
@@ -390,6 +402,10 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
     @EnableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionToOccluded_onWakeUp_ifPowerButtonGestureDetected_fromLockscreen() =
         testScope.runTest {
+            val isLockscreen by
+                collectLastValue(
+                    kosmos.keyguardTransitionInteractor.isFinishedIn(Scenes.Lockscreen, LOCKSCREEN)
+                )
             powerInteractor.setAwakeForTest()
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.DOZING,
@@ -399,10 +415,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             runCurrent()
 
             // Make sure we're in LOCKSCREEN.
-            assertEquals(
-                KeyguardState.LOCKSCREEN,
-                kosmos.keyguardTransitionInteractor.getFinishedState()
-            )
+            assertEquals(true, isLockscreen)
 
             // Get part way to AOD.
             powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)

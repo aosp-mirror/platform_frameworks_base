@@ -127,6 +127,7 @@ constructor(
 
             // migrate addSmartspaceView from KeyguardClockSwitchController
             constrainHeight(sharedR.id.bc_smartspace_view, ConstraintSet.WRAP_CONTENT)
+            constrainWidth(sharedR.id.bc_smartspace_view, ConstraintSet.MATCH_CONSTRAINT)
             connect(
                 sharedR.id.bc_smartspace_view,
                 ConstraintSet.START,

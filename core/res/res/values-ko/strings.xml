@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"비밀번호 입력란은 필기 입력을 지원하지 않습니다."</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"뒤로"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"입력 방법 전환"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"입력 방법 선택 도구 열기"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"설정"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"보안을 위해 화면 공유에서 앱 콘텐츠가 숨겨집니다."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"위성에 자동 연결됨"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"모바일 또는 Wi-Fi 네트워크 없이 메시지를 주고 받을 수 있습니다"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"위성 메시지를 사용하시겠습니까?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"모바일 또는 Wi-Fi 네트워크 없이 메시지 주고받기"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"작동 방식"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"대기 중…"</string>
@@ -2443,8 +2447,9 @@
     <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"이메일"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"음악"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"캘린더"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"계산기"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"지도"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"애플리케이션"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"지문을 더 이상 인식할 수 없습니다. 지문 잠금 해제를 다시 설정하세요."</string>
 </resources>

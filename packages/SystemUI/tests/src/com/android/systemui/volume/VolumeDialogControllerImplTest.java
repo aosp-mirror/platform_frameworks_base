@@ -48,9 +48,11 @@ import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.flags.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.kosmos.Kosmos;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -77,6 +79,8 @@ import java.util.concurrent.Executor;
 @SmallTest
 @TestableLooper.RunWithLooper
 public class VolumeDialogControllerImplTest extends SysuiTestCase {
+
+    private final Kosmos mKosmos = SysuiTestCaseExtKt.testKosmos(this);
 
     TestableVolumeDialogControllerImpl mVolumeController;
     VolumeDialogControllerImpl.C mCallback;
@@ -146,6 +150,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                         mNotificationManager,
                         mVibrator,
                         mIAudioService,
+                        VolumeControllerAdapterKosmosKt.getVolumeControllerAdapter(mKosmos),
                         mAccessibilityManager,
                         mPackageManager,
                         mWakefullnessLifcycle,
@@ -229,6 +234,32 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testVolumeChangeW_inAudioSharing_doStateChanged() {
+        ArgumentCaptor<VolumeDialogController.State> stateCaptor =
+                ArgumentCaptor.forClass(VolumeDialogController.State.class);
+        mVolumeController.setDeviceInteractive(false);
+        when(mWakefullnessLifcycle.getWakefulness())
+                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
+        // For now, mAudioManager.getDevicesForStream returns DEVICE_NONE during audio sharing
+        when(mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC))
+                .thenReturn(AudioManager.DEVICE_NONE);
+
+        mVolumeController.mInAudioSharing = true;
+        mVolumeController.onVolumeChangedW(AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI);
+        verify(mCallback).onStateChanged(stateCaptor.capture());
+        assertThat(stateCaptor.getValue().states.contains(AudioManager.STREAM_MUSIC)).isTrue();
+        assertThat(stateCaptor.getValue().states.get(AudioManager.STREAM_MUSIC).routedToBluetooth)
+                .isTrue();
+
+        mVolumeController.mInAudioSharing = false;
+        mVolumeController.onVolumeChangedW(AudioManager.STREAM_MUSIC, AudioManager.FLAG_SHOW_UI);
+        verify(mCallback, times(2)).onStateChanged(stateCaptor.capture());
+        assertThat(stateCaptor.getValue().states.contains(AudioManager.STREAM_MUSIC)).isTrue();
+        assertThat(stateCaptor.getValue().states.get(AudioManager.STREAM_MUSIC).routedToBluetooth)
+                .isFalse();
+    }
+
+    @Test
     public void testOnRemoteVolumeChanged_newStream_noNullPointer() {
         MediaSession.Token token = new MediaSession.Token(Process.myUid(), null);
         mVolumeController.mMediaSessionsCallbacksW.onRemoteVolumeChanged(token, 0);
@@ -297,6 +328,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 NotificationManager notificationManager,
                 VibratorHelper optionalVibrator,
                 IAudioService iAudioService,
+                VolumeControllerAdapter volumeControllerAdapter,
                 AccessibilityManager accessibilityManager,
                 PackageManager packageManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
@@ -316,6 +348,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                     notificationManager,
                     optionalVibrator,
                     iAudioService,
+                    volumeControllerAdapter,
                     accessibilityManager,
                     packageManager,
                     wakefulnessLifecycle,

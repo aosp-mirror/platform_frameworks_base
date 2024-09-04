@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.impl.custom.domain.interactor
 
 import android.app.IUriGrantsManager
 import android.content.ComponentName
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.TestStubDrawable
@@ -51,11 +52,13 @@ import org.junit.runner.RunWith
 class CustomTileMapperTest : SysuiTestCase() {
 
     private val uriGrantsManager: IUriGrantsManager = mock {}
+    private val mockContext =
+        mock<Context> { whenever(createContextAsUser(any(), any())).thenReturn(context) }
     private val kosmos =
         testKosmos().apply { customTileSpec = TileSpec.Companion.create(TEST_COMPONENT) }
     private val underTest by lazy {
         CustomTileMapper(
-            context = mock { whenever(createContextAsUser(any(), any())).thenReturn(context) },
+            context = mockContext,
             uriGrantsManager = uriGrantsManager,
         )
     }
@@ -164,7 +167,7 @@ class CustomTileMapperTest : SysuiTestCase() {
                     )
                 val expected =
                     createTileState(
-                        activationState = QSTileState.ActivationState.INACTIVE,
+                        activationState = QSTileState.ActivationState.UNAVAILABLE,
                         icon = DEFAULT_DRAWABLE,
                     )
 
@@ -173,7 +176,7 @@ class CustomTileMapperTest : SysuiTestCase() {
         }
 
     @Test
-    fun failedToLoadIconTileIsInactive() =
+    fun failedToLoadIconTileIsUnavailable() =
         with(kosmos) {
             testScope.runTest {
                 val actual =
@@ -187,9 +190,28 @@ class CustomTileMapperTest : SysuiTestCase() {
                 val expected =
                     createTileState(
                         icon = null,
-                        activationState = QSTileState.ActivationState.INACTIVE,
+                        activationState = QSTileState.ActivationState.UNAVAILABLE,
                     )
 
+                assertThat(actual).isEqualTo(expected)
+            }
+        }
+
+    @Test
+    fun nullUserContextDoesNotCauseExceptionReturnsNullIconAndUnavailableState() =
+        with(kosmos) {
+            testScope.runTest {
+                // map() will catch this exception
+                whenever(mockContext.createContextAsUser(any(), any()))
+                    .thenThrow(IllegalStateException("Unable to create userContext"))
+
+                val actual = underTest.map(customTileQsTileConfig, createModel())
+
+                val expected =
+                    createTileState(
+                        icon = null,
+                        activationState = QSTileState.ActivationState.UNAVAILABLE,
+                    )
                 assertThat(actual).isEqualTo(expected)
             }
         }

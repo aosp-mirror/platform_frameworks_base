@@ -16,11 +16,10 @@
 
 package com.android.systemui.util.settings;
 
+import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
-
-import androidx.annotation.NonNull;
 
 import com.android.systemui.util.kotlin.SettingsSingleThreadBackground;
 
@@ -42,46 +41,50 @@ class SystemSettingsImpl implements SystemSettings {
         mBgCoroutineDispatcher = bgDispatcher;
     }
 
+    @NonNull
     @Override
     public ContentResolver getContentResolver() {
         return mContentResolver;
     }
 
+    @NonNull
     @Override
     public CurrentUserIdProvider getCurrentUserProvider() {
         return mCurrentUserProvider;
     }
 
+    @NonNull
     @Override
-    public Uri getUriFor(String name) {
+    public Uri getUriFor(@NonNull String name) {
         return Settings.System.getUriFor(name);
     }
 
+    @NonNull
     @Override
     public CoroutineDispatcher getBackgroundDispatcher() {
         return mBgCoroutineDispatcher;
     }
 
     @Override
-    public String getStringForUser(String name, int userHandle) {
+    public String getStringForUser(@NonNull String name, int userHandle) {
         return Settings.System.getStringForUser(mContentResolver, name,
                 getRealUserHandle(userHandle));
     }
 
     @Override
-    public boolean putString(String name, String value, boolean overrideableByRestore) {
+    public boolean putString(@NonNull String name, String value, boolean overrideableByRestore) {
         return Settings.System.putString(mContentResolver, name, value, overrideableByRestore);
     }
 
     @Override
-    public boolean putStringForUser(String name, String value, int userHandle) {
+    public boolean putStringForUser(@NonNull String name, String value, int userHandle) {
         return Settings.System.putStringForUser(mContentResolver, name, value,
                 getRealUserHandle(userHandle));
     }
 
     @Override
-    public boolean putStringForUser(String name, String value, String tag, boolean makeDefault,
-            int userHandle, boolean overrideableByRestore) {
+    public boolean putStringForUser(@NonNull String name, String value, String tag,
+            boolean makeDefault, int userHandle, boolean overrideableByRestore) {
         throw new UnsupportedOperationException(
                 "This method only exists publicly for Settings.Secure and Settings.Global");
     }

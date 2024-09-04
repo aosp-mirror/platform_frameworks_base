@@ -25,7 +25,8 @@ data class TileUiState(
     val label: String,
     val secondaryLabel: String,
     val state: Int,
-    val icon: Supplier<QSTile.Icon>,
+    val handlesSecondaryClick: Boolean,
+    val icon: Supplier<QSTile.Icon?>,
 )
 
 fun QSTile.State.toUiState(): TileUiState {
@@ -33,6 +34,7 @@ fun QSTile.State.toUiState(): TileUiState {
         label?.toString() ?: "",
         secondaryLabel?.toString() ?: "",
         state,
-        icon?.let { Supplier { icon } } ?: iconSupplier,
+        handlesSecondaryClick,
+        icon?.let { Supplier { icon } } ?: iconSupplier ?: Supplier { null },
     )
 }

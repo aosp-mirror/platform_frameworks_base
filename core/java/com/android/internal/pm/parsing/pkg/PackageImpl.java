@@ -727,11 +727,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.usesSdkLibraries = CollectionUtils.add(this.usesSdkLibraries,
                 TextUtils.safeIntern(libraryName));
         this.usesSdkLibrariesVersionsMajor = ArrayUtils.appendLong(
-                this.usesSdkLibrariesVersionsMajor, versionMajor, true);
+                this.usesSdkLibrariesVersionsMajor, versionMajor, /* allowDuplicates= */ true);
         this.usesSdkLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
-                this.usesSdkLibrariesCertDigests, certSha256Digests, true);
-        this.usesSdkLibrariesOptional = ArrayUtils.appendBoolean(this.usesSdkLibrariesOptional,
-                usesSdkLibrariesOptional);
+                this.usesSdkLibrariesCertDigests, certSha256Digests, /* allowDuplicates= */ true);
+        this.usesSdkLibrariesOptional = ArrayUtils.appendBooleanDuplicatesAllowed(
+                this.usesSdkLibrariesOptional, usesSdkLibrariesOptional);
         return this;
     }
 

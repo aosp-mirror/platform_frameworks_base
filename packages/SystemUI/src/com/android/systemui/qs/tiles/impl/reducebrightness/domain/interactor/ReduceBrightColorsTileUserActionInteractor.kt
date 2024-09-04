@@ -71,6 +71,7 @@ constructor(
                         Intent(Settings.ACTION_REDUCE_BRIGHT_COLORS_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

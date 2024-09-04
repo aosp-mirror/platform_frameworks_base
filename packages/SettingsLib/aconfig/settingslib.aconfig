@@ -109,3 +109,23 @@ flag {
     description: "Settings catalyst project migration"
     bug: "323791114"
 }
+
+flag {
+  name: "asha_profile_access_profile_enabled_true"
+  namespace: "accessibility"
+  description: "Changes the return value of HearingAidProfile.accessProfileEnabled() to true"
+  bug: "356530795"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "audio_sharing_hysteresis_mode_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable fix for hysteresis mode"
+    bug: "355222285"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

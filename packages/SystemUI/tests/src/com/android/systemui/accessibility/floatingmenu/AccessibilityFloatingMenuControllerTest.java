@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.display.DisplayManager;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.TestableLooper;
@@ -37,14 +38,19 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
+
+import kotlin.Lazy;
 
 import org.junit.After;
 import org.junit.Before;
@@ -71,9 +77,11 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
 
     private Context mContextWrapper;
     private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private AccessibilityManager mAccessibilityManager;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private AccessibilityFloatingMenuController mController;
+    private TestableLooper mTestableLooper;
     @Mock
     private AccessibilityButtonTargetsObserver mTargetsObserver;
     @Mock
@@ -83,6 +91,10 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     private KeyguardUpdateMonitorCallback mKeyguardCallback;
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
+    @Mock
+    private NavigationModeController mNavigationModeController;
 
     @Before
     public void setUp() throws Exception {
@@ -95,7 +107,10 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         };
 
         mWindowManager = mContext.getSystemService(WindowManager.class);
+        mViewCaptureAwareWindowManager = new ViewCaptureAwareWindowManager(mWindowManager,
+                mLazyViewCapture, /* isViewCaptureEnabled= */ false);
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
+        mTestableLooper = TestableLooper.get(this);
 
         when(mTargetsObserver.getCurrentAccessibilityButtonTargets())
                 .thenReturn(Settings.Secure.getStringForUser(mContextWrapper.getContentResolver(),
@@ -154,7 +169,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
         mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
-                mAccessibilityManager, mSecureSettings);
+                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                mNavigationModeController);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
 
@@ -181,7 +197,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
         mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
-                mAccessibilityManager, mSecureSettings);
+                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                mNavigationModeController);
         captureKeyguardUpdateMonitorCallback();
 
         mKeyguardCallback.onUserSwitching(fakeUserId);
@@ -195,7 +212,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
         mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
-                mAccessibilityManager, mSecureSettings);
+                mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
+                mNavigationModeController);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
         mKeyguardCallback.onKeyguardVisibilityChanged(true);
@@ -216,7 +234,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         mKeyguardCallback.onKeyguardVisibilityChanged(false);
 
         mKeyguardCallback.onUserSwitching(fakeUserId);
-        mKeyguardCallback.onUserSwitchComplete(fakeUserId);
+        mController.mUserInitializationCompleteCallback.onUserInitializationComplete(1);
+        mTestableLooper.processAllMessages();
 
         assertThat(mController.mFloatingMenu).isNotNull();
     }
@@ -321,13 +340,18 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
 
     private AccessibilityFloatingMenuController setUpController() {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        final ViewCaptureAwareWindowManager viewCaptureAwareWindowManager =
+                new ViewCaptureAwareWindowManager(windowManager, mLazyViewCapture,
+                        /* isViewCaptureEnabled= */ false);
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         final FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         final AccessibilityFloatingMenuController controller =
                 new AccessibilityFloatingMenuController(mContextWrapper, windowManager,
-                        displayManager, mAccessibilityManager, mTargetsObserver, mModeObserver,
-                        mKeyguardUpdateMonitor, mSecureSettings, displayTracker);
+                        viewCaptureAwareWindowManager, displayManager, mAccessibilityManager,
+                        mTargetsObserver, mModeObserver, mKeyguardUpdateMonitor, mSecureSettings,
+                        displayTracker, mNavigationModeController, new Handler(
+                                mTestableLooper.getLooper()));
         controller.init();
 
         return controller;

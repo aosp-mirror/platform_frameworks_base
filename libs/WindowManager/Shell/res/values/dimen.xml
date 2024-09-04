@@ -91,12 +91,16 @@
     <!-- Divider handle size for legacy split screen -->
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
-    <!-- Divider handle size for split screen -->
-    <dimen name="split_divider_handle_region_width">96dp</dimen>
-    <dimen name="split_divider_handle_region_height">48dp</dimen>
 
-    <dimen name="split_divider_handle_width">72dp</dimen>
-    <dimen name="split_divider_handle_height">3dp</dimen>
+    <dimen name="split_divider_handle_region_width">80dp</dimen>
+    <dimen name="split_divider_handle_region_height">48dp</dimen>
+    <!-- The divider touch zone height is intentionally halved in portrait to avoid colliding
+         with the app handle.-->
+    <dimen name="desktop_mode_portrait_split_divider_handle_region_height">24dp</dimen>
+
+    <!-- Divider handle size for split screen -->
+    <dimen name="split_divider_handle_width">40dp</dimen>
+    <dimen name="split_divider_handle_height">4dp</dimen>
 
     <dimen name="split_divider_bar_width">10dp</dimen>
     <dimen name="split_divider_corner_size">42dp</dimen>
@@ -456,6 +460,11 @@
          start of this area. -->
     <dimen name="desktop_mode_customizable_caption_margin_end">152dp</dimen>
 
+    <!-- The width of the right-aligned region that is taken up by caption elements and extra
+         margins when the caption has the minimize button. This will be merged with the above value
+         once the minimize button becomes default. -->
+    <dimen name="desktop_mode_customizable_caption_with_minimize_button_margin_end">204dp</dimen>
+
     <!-- The default minimum allowed window width when resizing a window in desktop mode. -->
     <dimen name="desktop_mode_minimum_window_width">386dp</dimen>
 
@@ -538,20 +547,23 @@
     <!-- The size of the icon shown in the resize veil. -->
     <dimen name="desktop_mode_resize_veil_icon_size">96dp</dimen>
 
-    <!-- The with of the border around the app task for edge resizing, when
+    <!-- The width of the border outside the app task eligible for edge resizing, when
          enable_windowing_edge_drag_resize is enabled. -->
-    <dimen name="desktop_mode_edge_handle">12dp</dimen>
+    <dimen name="freeform_edge_handle_outset">10dp</dimen>
+
+    <!-- The size of the border inside the app task eligible for edge resizing, when
+         enable_windowing_edge_drag_resize is enabled. -->
+    <dimen name="freeform_edge_handle_inset">2dp</dimen>
 
     <!-- The original width of the border around the app task for edge resizing, when
          enable_windowing_edge_drag_resize is disabled. -->
     <dimen name="freeform_resize_handle">15dp</dimen>
 
     <!-- The size of the corner region for drag resizing with touch, when a larger touch region is
-         appropriate. Applied when enable_windowing_edge_drag_resize is enabled. -->
+         appropriate. -->
     <dimen name="desktop_mode_corner_resize_large">48dp</dimen>
 
-    <!-- The original size of the corner region for darg resizing, when
-         enable_windowing_edge_drag_resize is disabled. -->
+    <!-- The size of the corner region for drag resizing with a cursor or a stylus. -->
     <dimen name="freeform_resize_corner">44dp</dimen>
 
     <!-- The thickness in dp for all desktop drag transition regions. -->
@@ -571,6 +583,13 @@
     <dimen name="desktop_mode_header_buttons_ripple_radius">16dp</dimen>
     <!-- The vertical inset to apply to the app chip's ripple drawable -->
     <dimen name="desktop_mode_header_app_chip_ripple_inset_vertical">4dp</dimen>
+
+    <!-- The corner radius of the minimize button's ripple drawable -->
+    <dimen name="desktop_mode_header_minimize_ripple_radius">18dp</dimen>
+    <!-- The vertical inset to apply to the minimize button's ripple drawable -->
+    <dimen name="desktop_mode_header_minimize_ripple_inset_vertical">4dp</dimen>
+    <!-- The horizontal inset to apply to the minimize button's ripple drawable -->
+    <dimen name="desktop_mode_header_minimize_ripple_inset_horizontal">6dp</dimen>
 
     <!-- The corner radius of the maximize button's ripple drawable -->
     <dimen name="desktop_mode_header_maximize_ripple_radius">18dp</dimen>

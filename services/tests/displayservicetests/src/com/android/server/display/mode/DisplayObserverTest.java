@@ -23,6 +23,7 @@ import static android.view.Display.Mode.INVALID_MODE_ID;
 import static com.android.server.display.mode.DisplayModeDirector.SYNCHRONIZED_REFRESH_RATE_TOLERANCE;
 import static com.android.server.display.mode.Vote.PRIORITY_LIMIT_MODE;
 import static com.android.server.display.mode.Vote.PRIORITY_SYNCHRONIZED_REFRESH_RATE;
+import static com.android.server.display.mode.Vote.PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE;
 import static com.android.server.display.mode.Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE;
 import static com.android.server.display.mode.VotesStorage.GLOBAL_ID;
 
@@ -360,9 +361,14 @@ public class DisplayObserverTest {
                 .thenReturn(true);
         init();
         assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE)).isEqualTo(null);
         mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
         assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(
                 Vote.forPhysicalRefreshRates(
+                        MAX_REFRESH_RATE - SYNCHRONIZED_REFRESH_RATE_TOLERANCE,
+                        MAX_REFRESH_RATE + SYNCHRONIZED_REFRESH_RATE_TOLERANCE));
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE)).isEqualTo(
+                Vote.forRenderFrameRates(
                         MAX_REFRESH_RATE - SYNCHRONIZED_REFRESH_RATE_TOLERANCE,
                         MAX_REFRESH_RATE + SYNCHRONIZED_REFRESH_RATE_TOLERANCE));
 
@@ -370,6 +376,7 @@ public class DisplayObserverTest {
         mObserver.onDisplayRemoved(EXTERNAL_DISPLAY);
 
         assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE)).isEqualTo(null);
     }
 
     /** External display added, disabled feature refresh rates synchronization */
@@ -383,8 +390,10 @@ public class DisplayObserverTest {
                 .thenReturn(true);
         init();
         assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE)).isEqualTo(null);
         mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
         assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE)).isEqualTo(null);
     }
 
     /** External display not applied refresh rates synchronization, because
@@ -397,8 +406,10 @@ public class DisplayObserverTest {
         when(mDisplayManagerFlags.isDisplaysRefreshRatesSynchronizationEnabled()).thenReturn(true);
         init();
         assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE)).isEqualTo(null);
         mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
         assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_REFRESH_RATE)).isEqualTo(null);
+        assertThat(getVote(GLOBAL_ID, PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE)).isEqualTo(null);
     }
 
     private void init() {

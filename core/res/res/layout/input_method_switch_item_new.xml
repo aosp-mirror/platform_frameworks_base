@@ -31,7 +31,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:importantForAccessibility="no"/>
 
     <TextView
         android:id="@+id/header_text"
@@ -69,6 +70,7 @@
                 android:ellipsize="marquee"
                 android:singleLine="true"
                 android:fontFamily="google-sans-text"
+                android:textColor="@color/input_method_switch_on_item"
                 android:textAppearance="?attr/textAppearanceListItem"/>
 
         </LinearLayout>
@@ -80,8 +82,9 @@
             android:gravity="center_vertical"
             android:layout_marginStart="12dp"
             android:src="@drawable/ic_check_24dp"
-            android:tint="?attr/materialColorOnSurface"
-            android:visibility="gone"/>
+            android:tint="@color/input_method_switch_on_item"
+            android:visibility="gone"
+            android:importantForAccessibility="no"/>
 
     </LinearLayout>
 

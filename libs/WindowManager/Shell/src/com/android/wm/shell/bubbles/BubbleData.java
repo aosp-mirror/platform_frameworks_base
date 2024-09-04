@@ -23,8 +23,10 @@ import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -39,8 +41,10 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubbles.DismissReason;
-import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
-import com.android.wm.shell.common.bubbles.RemovedBubble;
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.bubbles.BubbleBarUpdate;
+import com.android.wm.shell.shared.bubbles.RemovedBubble;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -174,6 +178,7 @@ public class BubbleData {
         BubbleBarUpdate getInitialState() {
             BubbleBarUpdate bubbleBarUpdate = BubbleBarUpdate.createInitialState();
             bubbleBarUpdate.shouldShowEducation = shouldShowEducation;
+            bubbleBarUpdate.showOverflow = !overflowBubbles.isEmpty();
             for (int i = 0; i < bubbles.size(); i++) {
                 bubbleBarUpdate.currentBubbleList.add(bubbles.get(i).asBubbleBarBubble());
             }
@@ -198,6 +203,7 @@ public class BubbleData {
     private final BubblePositioner mPositioner;
     private final BubbleEducationController mEducationController;
     private final Executor mMainExecutor;
+    private final Executor mBgExecutor;
     /** Bubbles that are actively in the stack. */
     private final List<Bubble> mBubbles;
     /** Bubbles that aged out to overflow. */
@@ -243,12 +249,14 @@ public class BubbleData {
     private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
 
     public BubbleData(Context context, BubbleLogger bubbleLogger, BubblePositioner positioner,
-            BubbleEducationController educationController, Executor mainExecutor) {
+            BubbleEducationController educationController, @ShellMainThread Executor mainExecutor,
+            @ShellBackgroundThread Executor bgExecutor) {
         mContext = context;
         mLogger = bubbleLogger;
         mPositioner = positioner;
         mEducationController = educationController;
         mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mOverflow = new BubbleOverflow(context, positioner);
         mBubbles = new ArrayList<>();
         mOverflowBubbles = new ArrayList<>();
@@ -420,23 +428,20 @@ public class BubbleData {
         Bubble bubbleToReturn = getBubbleInStackWithKey(key);
 
         if (bubbleToReturn == null) {
-            bubbleToReturn = getOverflowBubbleWithKey(key);
-            if (bubbleToReturn != null) {
-                // Promoting from overflow
-                mOverflowBubbles.remove(bubbleToReturn);
-                if (mOverflowBubbles.isEmpty()) {
-                    mStateChange.showOverflowChanged = true;
+            // Check if it's in the overflow
+            bubbleToReturn = findAndRemoveBubbleFromOverflow(key);
+            if (bubbleToReturn == null) {
+                if (entry != null) {
+                    // Not in the overflow, have an entry, so it's a new bubble
+                    bubbleToReturn = new Bubble(entry,
+                            mBubbleMetadataFlagListener,
+                            mCancelledListener,
+                            mMainExecutor,
+                            mBgExecutor);
+                } else {
+                    // If there's no entry it must be a persisted bubble
+                    bubbleToReturn = persistedBubble;
                 }
-            } else if (mPendingBubbles.containsKey(key)) {
-                // Update while it was pending
-                bubbleToReturn = mPendingBubbles.get(key);
-            } else if (entry != null) {
-                // New bubble
-                bubbleToReturn = new Bubble(entry, mBubbleMetadataFlagListener, mCancelledListener,
-                        mMainExecutor);
-            } else {
-                // Persisted bubble being promoted
-                bubbleToReturn = persistedBubble;
             }
         }
 
@@ -444,6 +449,46 @@ public class BubbleData {
             bubbleToReturn.setEntry(entry);
         }
         mPendingBubbles.put(key, bubbleToReturn);
+        return bubbleToReturn;
+    }
+
+    Bubble getOrCreateBubble(ShortcutInfo info) {
+        String bubbleKey = Bubble.getBubbleKeyForShortcut(info);
+        Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
+        if (bubbleToReturn == null) {
+            bubbleToReturn = Bubble.createShortcutBubble(info, mMainExecutor, mBgExecutor);
+        }
+        return bubbleToReturn;
+    }
+
+    Bubble getOrCreateBubble(Intent intent) {
+        UserHandle user = UserHandle.of(mCurrentUserId);
+        String bubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(),
+                user);
+        Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
+        if (bubbleToReturn == null) {
+            bubbleToReturn = Bubble.createAppBubble(intent, user, null, mMainExecutor, mBgExecutor);
+        }
+        return bubbleToReturn;
+    }
+
+    @Nullable
+    private Bubble findAndRemoveBubbleFromOverflow(String key) {
+        Bubble bubbleToReturn = getBubbleInStackWithKey(key);
+        if (bubbleToReturn != null) {
+            return bubbleToReturn;
+        }
+        bubbleToReturn = getOverflowBubbleWithKey(key);
+        if (bubbleToReturn != null) {
+            mOverflowBubbles.remove(bubbleToReturn);
+            // Promoting from overflow
+            mOverflowBubbles.remove(bubbleToReturn);
+            if (mOverflowBubbles.isEmpty()) {
+                mStateChange.showOverflowChanged = true;
+            }
+        } else if (mPendingBubbles.containsKey(key)) {
+            bubbleToReturn = mPendingBubbles.get(key);
+        }
         return bubbleToReturn;
     }
 

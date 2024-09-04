@@ -28,10 +28,12 @@ import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_HORIZONTAL_
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.function.Supplier;
 
 /**
@@ -43,6 +45,9 @@ class AppCompatReachabilityPolicy {
     private final ActivityRecord mActivityRecord;
     @NonNull
     private final AppCompatConfiguration mAppCompatConfiguration;
+    @Nullable
+    @VisibleForTesting
+    Supplier<Rect> mLetterboxInnerBoundsSupplier;
 
     AppCompatReachabilityPolicy(@NonNull ActivityRecord activityRecord,
             @NonNull AppCompatConfiguration appCompatConfiguration) {
@@ -50,15 +55,53 @@ class AppCompatReachabilityPolicy {
         mAppCompatConfiguration = appCompatConfiguration;
     }
 
-    @VisibleForTesting
-    void handleHorizontalDoubleTap(int x, @NonNull Supplier<Rect> innerFrameSupplier) {
+    /**
+     * To handle reachability a supplier for the current letterox inner bounds is required.
+     * <p/>
+     * @param letterboxInnerBoundsSupplier The supplier for the letterbox inner bounds.
+     */
+    void setLetterboxInnerBoundsSupplier(@Nullable Supplier<Rect> letterboxInnerBoundsSupplier) {
+        mLetterboxInnerBoundsSupplier = letterboxInnerBoundsSupplier;
+    }
+
+    /**
+     * Handles double tap events for reachability.
+     * <p/>
+     * @param x Double tap x coordinate.
+     * @param y Double tap y coordinate.
+     */
+    void handleDoubleTap(int x, int y) {
+        handleHorizontalDoubleTap(x);
+        handleVerticalDoubleTap(y);
+    }
+
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        final AppCompatReachabilityOverrides reachabilityOverrides =
+                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
+        pw.println(prefix + "  isVerticalThinLetterboxed=" + reachabilityOverrides
+                .isVerticalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalThinLetterboxed=" + reachabilityOverrides
+                .isHorizontalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalReachabilityEnabled="
+                + reachabilityOverrides.isHorizontalReachabilityEnabled());
+        pw.println(prefix + "  isVerticalReachabilityEnabled="
+                + reachabilityOverrides.isVerticalReachabilityEnabled());
+        pw.println(prefix + "  letterboxHorizontalPositionMultiplier="
+                + reachabilityOverrides.getHorizontalPositionMultiplier(
+                mActivityRecord.getParent().getConfiguration()));
+        pw.println(prefix + "  letterboxVerticalPositionMultiplier="
+                + reachabilityOverrides.getVerticalPositionMultiplier(
+                mActivityRecord.getParent().getConfiguration()));
+    }
+
+    private void handleHorizontalDoubleTap(int x) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
                 mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
         if (!reachabilityOverrides.isHorizontalReachabilityEnabled()
                 || mActivityRecord.isInTransition()) {
             return;
         }
-        final Rect letterboxInnerFrame = innerFrameSupplier.get();
+        final Rect letterboxInnerFrame = getLetterboxInnerFrame();
         if (letterboxInnerFrame.left <= x && letterboxInnerFrame.right >= x) {
             // Only react to clicks at the sides of the letterboxed app window.
             return;
@@ -97,15 +140,14 @@ class AppCompatReachabilityPolicy {
         mActivityRecord.recomputeConfiguration();
     }
 
-    @VisibleForTesting
-    void handleVerticalDoubleTap(int y, @NonNull Supplier<Rect> innerFrameSupplier) {
+    private void handleVerticalDoubleTap(int y) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
                 mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
         if (!reachabilityOverrides.isVerticalReachabilityEnabled()
                 || mActivityRecord.isInTransition()) {
             return;
         }
-        final Rect letterboxInnerFrame = innerFrameSupplier.get();
+        final Rect letterboxInnerFrame = getLetterboxInnerFrame();
         if (letterboxInnerFrame.top <= y && letterboxInnerFrame.bottom >= y) {
             // Only react to clicks at the top and bottom of the letterboxed app window.
             return;
@@ -149,5 +191,11 @@ class AppCompatReachabilityPolicy {
     private void logLetterboxPositionChange(int letterboxPositionChangeForLog) {
         mActivityRecord.mTaskSupervisor.getActivityMetricsLogger()
                 .logLetterboxPositionChange(mActivityRecord, letterboxPositionChangeForLog);
+    }
+
+    @NonNull
+    private Rect getLetterboxInnerFrame() {
+        return mLetterboxInnerBoundsSupplier != null ? mLetterboxInnerBoundsSupplier.get()
+                : new Rect();
     }
 }

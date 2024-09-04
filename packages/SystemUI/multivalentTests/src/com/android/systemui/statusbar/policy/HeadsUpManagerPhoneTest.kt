@@ -23,6 +23,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -36,7 +37,6 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -179,8 +179,8 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         mContext
             .getOrCreateTestableResources()
             .addOverride(R.integer.ambient_notification_extension_time, 500)
-        mAvalancheController = AvalancheController(dumpManager, mUiEventLogger,
-                mHeadsUpManagerLogger, mBgHandler)
+        mAvalancheController =
+            AvalancheController(dumpManager, mUiEventLogger, mHeadsUpManagerLogger, mBgHandler)
     }
 
     @Test
@@ -200,7 +200,12 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         hmp.addSwipedOutNotification(entry.key)
 
         // Remove should succeed because the notification is swiped out
-        val removedImmediately = hmp.removeNotification(entry.key, /* releaseImmediately= */ false)
+        val removedImmediately =
+            hmp.removeNotification(
+                entry.key,
+                /* releaseImmediately= */ false,
+                /* reason= */ "swipe out"
+            )
         Assert.assertTrue(removedImmediately)
         Assert.assertFalse(hmp.isHeadsUpEntry(entry.key))
     }
@@ -464,9 +469,9 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         @get:Parameters(name = "{0}")
         val flags: List<FlagsParameterization>
             get() = buildList {
-                addAll(FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME))
                 addAll(
-                    FlagsParameterization.allCombinationsOf(NotificationsHeadsUpRefactor.FLAG_NAME)
+                    FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME)
+                        .andSceneContainer()
                 )
             }
     }

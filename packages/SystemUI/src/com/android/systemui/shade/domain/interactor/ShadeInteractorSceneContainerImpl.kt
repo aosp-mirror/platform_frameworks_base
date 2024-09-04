@@ -22,8 +22,9 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -43,8 +44,12 @@ class ShadeInteractorSceneContainerImpl
 constructor(
     @Application scope: CoroutineScope,
     sceneInteractor: SceneInteractor,
-    sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
+    shadeRepository: ShadeRepository,
 ) : BaseShadeInteractor {
+    init {
+        SceneContainerFlag.assertInNewMode()
+    }
+
     override val shadeExpansion: StateFlow<Float> =
         sceneBasedExpansion(sceneInteractor, SceneFamilies.NotifShade)
             .traceAsCounter("panel_expansion") { (it * 100f).toInt() }
@@ -55,7 +60,7 @@ constructor(
 
     override val qsExpansion: StateFlow<Float> =
         combine(
-                sharedNotificationContainerInteractor.isSplitShadeEnabled,
+                shadeRepository.isShadeLayoutWide,
                 shadeExpansion,
                 sceneBasedQsExpansion,
             ) { isSplitShadeEnabled, shadeExpansion, qsExpansion ->
@@ -85,8 +90,8 @@ constructor(
                         when (state) {
                             is ObservableTransitionState.Idle -> false
                             is ObservableTransitionState.Transition ->
-                                state.toScene == quickSettingsScene &&
-                                    state.fromScene != notificationsScene
+                                state.toContent == quickSettingsScene &&
+                                    state.fromContent != notificationsScene
                         }
                     }
                     .distinctUntilChanged()
@@ -94,14 +99,17 @@ constructor(
             .distinctUntilChanged()
 
     override val isQsFullscreen: Flow<Boolean> =
-        sceneInteractor
-            .resolveSceneFamily(SceneFamilies.QuickSettings)
-            .flatMapLatestConflated { quickSettingsScene ->
+        combine(
+                shadeRepository.isShadeLayoutWide,
+                sceneInteractor.resolveSceneFamily(SceneFamilies.QuickSettings),
+                ::Pair
+            )
+            .flatMapLatestConflated { (isShadeLayoutWide, quickSettingsScene) ->
                 sceneInteractor.transitionState
                     .map { state ->
                         when (state) {
                             is ObservableTransitionState.Idle ->
-                                state.currentScene == quickSettingsScene
+                                !isShadeLayoutWide && state.currentScene == quickSettingsScene
                             is ObservableTransitionState.Transition -> false
                         }
                     }
@@ -142,9 +150,9 @@ constructor(
                                     flowOf(0f)
                                 }
                             is ObservableTransitionState.Transition ->
-                                if (state.toScene == resolvedSceneKey) {
+                                if (state.toContent == resolvedSceneKey) {
                                     state.progress
-                                } else if (state.fromScene == resolvedSceneKey) {
+                                } else if (state.fromContent == resolvedSceneKey) {
                                     state.progress.map { progress -> 1 - progress }
                                 } else {
                                     flowOf(0f)
@@ -167,8 +175,8 @@ constructor(
                     is ObservableTransitionState.Transition ->
                         sceneInteractor.resolveSceneFamily(sceneKey).map { resolvedSceneKey ->
                             state.isInitiatedByUserInput &&
-                                (state.toScene == resolvedSceneKey ||
-                                    state.fromScene == resolvedSceneKey)
+                                (state.toContent == resolvedSceneKey ||
+                                    state.fromContent == resolvedSceneKey)
                         }
                 }
             }

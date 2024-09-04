@@ -41,7 +41,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener;
 

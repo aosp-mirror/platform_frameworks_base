@@ -49,6 +49,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import android.annotation.IntDef;
 import android.annotation.UptimeMillisLong;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal.FrozenProcessListener;
 import android.app.ActivityManagerInternal.OomAdjReason;
 import android.app.ActivityThread;
 import android.app.ApplicationExitInfo;
@@ -99,6 +100,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 public final class CachedAppOptimizer {
 
@@ -1406,8 +1408,15 @@ public final class CachedAppOptimizer {
         }
     }
 
+    /**
+     * Returns true if the app was frozen and became unfrozen, otherwise false.
+     *
+     * Do not call this directly.  It will unfreeze a process but it will not send out any
+     * notifications.  Instead call unfreezeAppLSP().
+     */
     @GuardedBy({"mAm", "mProcLock", "mFreezerLock"})
-    void unfreezeAppInternalLSP(ProcessRecord app, @UnfreezeReason int reason, boolean force) {
+    private boolean unfreezeAppInternalLSP(ProcessRecord app, @UnfreezeReason int reason,
+            boolean force) {
         final int pid = app.getPid();
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         boolean sticky = opt.isFreezeSticky();
@@ -1418,7 +1427,7 @@ public final class CachedAppOptimizer {
                         "Skip unfreezing because frozen state is sticky pid=" + pid + " "
                                 + app.processName);
             }
-            return;
+            return false;
         }
         boolean processFreezableChangeReported = false;
         if (opt.isPendingFreeze()) {
@@ -1440,7 +1449,7 @@ public final class CachedAppOptimizer {
 
         opt.setFreezerOverride(false);
         if (pid == 0 || !opt.isFrozen()) {
-            return;
+            return false;
         }
 
         // Unfreeze the binder interface first, to avoid transactions triggered by timers fired
@@ -1473,7 +1482,7 @@ public final class CachedAppOptimizer {
         }
 
         if (processKilled) {
-            return;
+            return false;
         }
         if (!processFreezableChangeReported) {
             reportProcessFreezableChangedLocked(app);
@@ -1489,7 +1498,7 @@ public final class CachedAppOptimizer {
             app.killLocked("Unable to unfreeze",
                     ApplicationExitInfo.REASON_FREEZER,
                     ApplicationExitInfo.SUBREASON_FREEZER_BINDER_IOCTL, true);
-            return;
+            return false;
         }
 
         try {
@@ -1512,14 +1521,25 @@ public final class CachedAppOptimizer {
                         pid,
                         (int) Math.min(opt.getFreezeUnfreezeTime() - freezeTime, Integer.MAX_VALUE),
                         new Pair<ProcessRecord, Integer>(app, reason)));
+            return true;
+        }
+        return false;
+    }
+
+    @GuardedBy({"mAm", "mProcLock"})
+    void unfreezeAppLSP(ProcessRecord app, @UnfreezeReason int reason, boolean force) {
+        final boolean shouldDispatch;
+        synchronized (mFreezerLock) {
+            shouldDispatch = unfreezeAppInternalLSP(app, reason, force);
+        }
+        if (shouldDispatch) {
+            app.mOptRecord.dispatchUnfrozenEvent();
         }
     }
 
     @GuardedBy({"mAm", "mProcLock"})
     void unfreezeAppLSP(ProcessRecord app, @UnfreezeReason int reason) {
-        synchronized (mFreezerLock) {
-            unfreezeAppInternalLSP(app, reason, false);
-        }
+        unfreezeAppLSP(app, reason, false);
     }
 
     /**
@@ -1530,8 +1550,9 @@ public final class CachedAppOptimizer {
      * @param pid pid of the process to be unfrozen
      */
     void unfreezeProcess(int pid, @OomAdjReason int reason) {
+        final ProcessRecord app;
         synchronized (mFreezerLock) {
-            ProcessRecord app = mFrozenProcesses.get(pid);
+            app = mFrozenProcesses.get(pid);
             if (app == null) {
                 return;
             }
@@ -1550,6 +1571,7 @@ public final class CachedAppOptimizer {
                 Slog.e(TAG_AM, "Unable to quick unfreeze " + pid);
             }
         }
+        app.mOptRecord.dispatchUnfrozenEvent();
     }
 
     /**
@@ -2390,6 +2412,7 @@ public final class CachedAppOptimizer {
                     }
                 });
             }
+            opt.dispatchFrozenEvent();
         }
 
         private void reportUnfreeze(ProcessRecord app, int pid, int frozenDuration,
@@ -2549,7 +2572,7 @@ public final class CachedAppOptimizer {
                 if (freeze) {
                     forceFreezeAppAsyncLSP(proc);
                 } else {
-                    unfreezeAppInternalLSP(proc, UNFREEZE_REASON_NONE, true);
+                    unfreezeAppLSP(proc, UNFREEZE_REASON_NONE, true);
                 }
             }
         }
@@ -2651,5 +2674,13 @@ public final class CachedAppOptimizer {
                 // Log the error if binderfs stats can't be accesses or correctly parsed
                 exception -> Slog.e(TAG_AM, "Unable to parse binderfs stats"));
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /**
+     * Register a callback to notify when a process's frozen state changes.
+     */
+    public void addFrozenProcessListener(ProcessRecord app, Executor executor,
+            FrozenProcessListener listener) {
+        app.mOptRecord.addFrozenProcessListener(executor, listener);
     }
 }

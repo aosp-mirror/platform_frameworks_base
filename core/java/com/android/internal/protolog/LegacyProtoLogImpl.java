@@ -29,6 +29,7 @@ import static com.android.internal.protolog.ProtoLogMessage.MESSAGE_HASH;
 import static com.android.internal.protolog.ProtoLogMessage.SINT64_PARAMS;
 import static com.android.internal.protolog.ProtoLogMessage.STR_PARAMS;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ShellCommand;
 import android.os.SystemClock;
@@ -48,6 +49,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -419,9 +422,22 @@ public class LegacyProtoLogImpl implements IProtoLog {
     }
 
     @Override
+    @NonNull
+    public List<IProtoLogGroup> getRegisteredGroups() {
+        return mLogGroups.values().stream().toList();
+    }
+
     public void registerGroups(IProtoLogGroup... protoLogGroups) {
         for (IProtoLogGroup group : protoLogGroups) {
             mLogGroups.put(group.name(), group);
+        }
+
+        final var hasGroupsLoggingToLogcat = Arrays.stream(protoLogGroups)
+                .anyMatch(IProtoLogGroup::isLogToLogcat);
+
+        final ILogger logger = (msg) -> Slog.i(TAG, msg);
+        if (hasGroupsLoggingToLogcat) {
+            mViewerConfig.loadViewerConfig(logger, mLegacyViewerConfigFilename);
         }
     }
 }

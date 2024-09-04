@@ -117,7 +117,11 @@ class InternetTileMapperTest : SysuiTestCase() {
             label,
             activationState,
             secondaryLabel,
-            setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK),
+            setOf(
+                QSTileState.UserAction.CLICK,
+                QSTileState.UserAction.TOGGLE_CLICK,
+                QSTileState.UserAction.LONG_CLICK
+            ),
             contentDescription,
             null,
             QSTileState.SideViewIcon.Chevron,

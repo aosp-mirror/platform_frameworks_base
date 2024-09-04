@@ -26,7 +26,6 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.VISIBILITY_MODE_IGNORE
-import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
@@ -35,10 +34,8 @@ import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
-import com.android.systemui.statusbar.VibratorHelper
 import dagger.Lazy
 import javax.inject.Inject
 
@@ -49,11 +46,9 @@ constructor(
     private val keyguardQuickAffordancesCombinedViewModel:
         KeyguardQuickAffordancesCombinedViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
-    private val falsingManager: FalsingManager,
     private val indicationController: KeyguardIndicationController,
-    private val vibratorHelper: VibratorHelper,
     private val keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
-    private val shortcutsLogger: KeyguardQuickAffordancesLogger,
+    private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
 ) : BaseShortcutSection() {
 
     // Amount to increase the bottom margin by to avoid colliding with inset
@@ -82,24 +77,18 @@ constructor(
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             leftShortcutHandle =
-                KeyguardQuickAffordanceViewBinder.bind(
+                keyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.start_button),
                     keyguardQuickAffordancesCombinedViewModel.startButton,
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
-                    falsingManager,
-                    vibratorHelper,
-                    shortcutsLogger,
                 ) {
                     indicationController.showTransientIndication(it)
                 }
             rightShortcutHandle =
-                KeyguardQuickAffordanceViewBinder.bind(
+                keyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.end_button),
                     keyguardQuickAffordancesCombinedViewModel.endButton,
                     keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
-                    falsingManager,
-                    vibratorHelper,
-                    shortcutsLogger,
                 ) {
                     indicationController.showTransientIndication(it)
                 }

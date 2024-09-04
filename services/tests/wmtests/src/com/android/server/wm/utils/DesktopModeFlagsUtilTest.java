@@ -234,11 +234,11 @@ public class DesktopModeFlagsUtilTest extends WindowTestsBase {
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
             FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
-    public void isEnabled_dwFlagOn_overrideOff_featureFlagOn_returnsFalse() {
+    public void isEnabled_dwFlagOn_overrideOff_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_OFF.getSetting());
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
     }
 
     @Test
@@ -296,11 +296,11 @@ public class DesktopModeFlagsUtilTest extends WindowTestsBase {
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
             FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
     })
-    public void isEnabled_dwFlagOff_overrideOn_featureFlagOff_returnTrue() {
+    public void isEnabled_dwFlagOff_overrideOn_featureFlagOff_returnFalse() {
         setOverride(OVERRIDE_ON.getSetting());
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlagsUtil.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
     }
 
     @Test

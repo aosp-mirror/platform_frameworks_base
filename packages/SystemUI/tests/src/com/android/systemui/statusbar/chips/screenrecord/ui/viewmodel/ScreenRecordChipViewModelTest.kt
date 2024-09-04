@@ -150,7 +150,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(R.drawable.ic_screenrecord)
             assertThat(icon.contentDescription).isNotNull()
@@ -229,6 +229,34 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(5678)
+        }
+
+    /** Regression test for b/349620526. */
+    @Test
+    fun chip_recordingState_thenGetsTaskInfo_startTimeDoesNotChange() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            // Start recording, but without any task info
+            systemClock.setElapsedRealtime(1234)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
+
+            // WHEN we receive the recording task info a few milliseconds later
+            systemClock.setElapsedRealtime(1240)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask(
+                    "host.package",
+                    hostDeviceName = null,
+                    FakeActivityTaskManager.createTask(taskId = 1)
+                )
+
+            // THEN the start time is still the old start time
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown.Timer).startTimeMs).isEqualTo(1234)
         }
 
     @Test

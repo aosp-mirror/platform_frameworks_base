@@ -620,7 +620,11 @@ public class NotificationTestHelper {
                 .setUser(userHandle)
                 .setPostTime(System.currentTimeMillis())
                 .setChannel(channel)
+                .updateRanking(rankingBuilder -> rankingBuilder.setIsConversation(
+                        notification.isStyle(Notification.MessagingStyle.class)
+                ))
                 .build();
+
 
         return generateRow(entry, extraInflationFlags);
     }

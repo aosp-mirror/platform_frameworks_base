@@ -22,7 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -68,13 +68,13 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
+import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
-import com.android.wm.shell.util.SplitBounds;
 
 import org.junit.After;
 import org.junit.Before;

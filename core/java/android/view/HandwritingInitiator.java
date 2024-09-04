@@ -350,12 +350,13 @@ public class HandwritingInitiator {
             return;
         }
 
+        final View focusedView = getFocusedView();
+
         if (!view.isAutoHandwritingEnabled()) {
-            clearFocusedView(view);
+            clearFocusedView(focusedView);
             return;
         }
 
-        final View focusedView = getFocusedView();
         if (focusedView == view) {
             return;
         }
@@ -729,13 +730,13 @@ public class HandwritingInitiator {
 
         /* The distance between point (x, y) and rect, there are 2 basic cases:
          * a) The distance is the distance from (x, y) to the closest corner on rect.
-         *                    o |     |
+         *          o |     |
          *         ---+-----+---
          *            |     |
          *         ---+-----+---
          *            |     |
          * b) The distance is the distance from (x, y) to the closest edge on rect.
-         *                      |  o  |
+         *            |  o  |
          *         ---+-----+---
          *            |     |
          *         ---+-----+---

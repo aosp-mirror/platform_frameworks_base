@@ -21,6 +21,7 @@ import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.traces.component.ComponentNameMatcher
+import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.ClosePipTransition
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -60,7 +61,7 @@ class ClosePipBySwipingDownTest(flicker: LegacyFlickerTest) : ClosePipTransition
             val pipCenterY = pipRegion.centerY()
             val displayCenterX = device.displayWidth / 2
             val barComponent =
-                if (flicker.scenario.isTablet) {
+                if (flicker.scenario.isTablet || Flags.enableTaskbarOnPhones()) {
                     ComponentNameMatcher.TASK_BAR
                 } else {
                     ComponentNameMatcher.NAV_BAR

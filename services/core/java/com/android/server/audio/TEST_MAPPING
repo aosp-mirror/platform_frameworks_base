@@ -10,6 +10,9 @@
                     "include-filter": "android.media.audio.cts.AudioFocusTest"
                 },
                 {
+                    "include-filter": "android.media.audio.cts.AudioPlaybackCaptureTest"
+                },
+                {
                     "include-filter": "android.media.audio.cts.SpatializerTest"
                 }
             ]
@@ -26,21 +29,7 @@
             ]
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                  "include-filter": "com.android.server.audio"
-                },
-                {
-                  "include-annotation": "android.platform.test.annotations.Presubmit"
-                },
-                {
-                  "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                  "exclude-annotation": "org.junit.Ignore"
-                }
-            ]
+            "name": "FrameworksServicesTests_android_server_audio"
         }
     ]
 }

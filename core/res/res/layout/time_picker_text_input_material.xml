@@ -34,19 +34,29 @@
         android:layoutDirection="ltr">
         <EditText
             android:id="@+id/input_hour"
-            android:layout_width="50dp"
+            android:layout_width="50sp"
             android:layout_height="wrap_content"
+            android:layout_alignEnd="@id/hour_label_holder"
             android:inputType="number"
             android:textAppearance="@style/TextAppearance.Material.TimePicker.InputField"
             android:imeOptions="actionNext"/>
-        <TextView
-            android:id="@+id/label_hour"
+        <!-- Ensure the label_hour takes up at least 50sp of space -->
+        <FrameLayout
+            android:id="@+id/hour_label_holder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/input_hour"
-            android:layout_alignStart="@id/input_hour"
-            android:labelFor="@+id/input_hour"
-            android:text="@string/time_picker_hour_label"/>
+            android:layout_below="@id/input_hour">
+            <TextView
+                android:id="@+id/label_hour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:labelFor="@+id/input_hour"
+                android:text="@string/time_picker_hour_label"/>
+            <Space
+                android:layout_width="50sp"
+                android:layout_height="0dp"/>
+        </FrameLayout>
 
         <TextView
             android:id="@+id/input_separator"
@@ -58,21 +68,30 @@
 
         <EditText
             android:id="@+id/input_minute"
-            android:layout_width="50dp"
+            android:layout_width="50sp"
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@id/input_hour"
             android:layout_toEndOf="@id/input_separator"
             android:inputType="number"
             android:textAppearance="@style/TextAppearance.Material.TimePicker.InputField" />
-        <TextView
-            android:id="@+id/label_minute"
+        <!-- Ensure the label_minute takes up at least 50sp of space -->
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/input_minute"
             android:layout_alignStart="@id/input_minute"
-            android:labelFor="@+id/input_minute"
-            android:text="@string/time_picker_minute_label"/>
-
+            >
+            <TextView
+                android:id="@+id/label_minute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:labelFor="@+id/input_minute"
+                android:text="@string/time_picker_minute_label"/>
+            <Space
+                android:layout_width="50sp"
+                android:layout_height="0dp"/>
+        </FrameLayout>
         <TextView
             android:visibility="invisible"
             android:id="@+id/label_error"

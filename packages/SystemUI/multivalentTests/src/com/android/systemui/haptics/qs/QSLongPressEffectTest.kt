@@ -23,7 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
-import com.android.systemui.haptics.vibratorHelper
+import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.qs.qsTileFactory
@@ -50,7 +50,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
     @Rule @JvmField val mMockitoRule: MockitoRule = MockitoJUnit.rule()
     private val kosmos = testKosmos()
-    private val vibratorHelper = kosmos.vibratorHelper
+    private val vibratorHelper = kosmos.fakeVibratorHelper
     private val qsTile = kosmos.qsTileFactory.createTile("Test Tile")
     @Mock private lateinit var callback: QSLongPressEffect.Callback
     @Mock private lateinit var controller: ActivityTransitionAnimator.Controller
@@ -110,6 +110,26 @@ class QSLongPressEffectTest : SysuiTestCase() {
         // THEN the effect moves to the TIMEOUT_WAIT state
         assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
     }
+
+    @Test
+    fun onActionDown_whileClicked_startsWait() =
+        testWhileInState(QSLongPressEffect.State.CLICKED) {
+            // GIVEN an action down event occurs
+            longPressEffect.handleActionDown()
+
+            // THEN the effect moves to the TIMEOUT_WAIT state
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
+        }
+
+    @Test
+    fun onActionDown_whileLongClicked_startsWait() =
+        testWhileInState(QSLongPressEffect.State.LONG_CLICKED) {
+            // GIVEN an action down event occurs
+            longPressEffect.handleActionDown()
+
+            // THEN the effect moves to the TIMEOUT_WAIT state
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.TIMEOUT_WAIT)
+        }
 
     @Test
     fun onActionCancel_whileWaiting_goesIdle() =

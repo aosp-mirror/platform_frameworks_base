@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -36,7 +36,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class KeyPairGeneratorPerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -78,7 +78,7 @@ public class KeyPairGeneratorPerfTest {
     @Parameters(method = "getData")
     public void time(Algorithm algorithm, Implementation implementation) throws Exception {
         setUp(algorithm, implementation);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             KeyPair keyPair = mGenerator.generateKeyPair();
         }

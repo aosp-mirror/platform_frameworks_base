@@ -42,6 +42,8 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
@@ -424,8 +426,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void setImeWindowStatus(int displayId, int vis, int backDisposition,
-            boolean showImeSwitcher) {
+    public void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
         boolean imeShown = mNavBarHelper.isImeShown(vis);
         if (!imeShown) {
             // Count imperceptible changes as visible so we transition taskbar out quickly.
@@ -558,10 +560,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void onRecentsAnimationStateChanged(boolean running) {
     }
 
     @Override

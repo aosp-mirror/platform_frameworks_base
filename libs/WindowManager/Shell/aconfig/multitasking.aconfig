@@ -128,3 +128,27 @@ flag {
     description: "Enable bubble bar to be shown in the persistent task bar"
     bug: "346391377"
 }
+
+flag {
+    name: "bubble_view_info_executors"
+    namespace: "multitasking"
+    description: "Use executors to inflate bubble views"
+    bug: "353894869"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "enable_bubble_to_fullscreen"
+   namespace: "multitasking"
+   description: "Enable an option to move bubbles to fullscreen"
+   bug: "363326492"
+}
+
+flag {
+    name: "enable_flexible_split"
+    namespace: "multitasking"
+    description: "Enables flexibile split feature for split screen"
+    bug: "349828130"
+}

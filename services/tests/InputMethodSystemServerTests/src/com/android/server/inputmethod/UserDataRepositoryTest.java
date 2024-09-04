@@ -19,6 +19,11 @@ package com.android.server.inputmethod;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+
+import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,20 +48,43 @@ public final class UserDataRepositoryTest {
     @Mock
     private InputMethodManagerService mMockInputMethodManagerService;
 
+    @Mock
+    private WindowManagerInternal mMockWindowManagerInternal;
+
+    @NonNull
     private IntFunction<InputMethodBindingController> mBindingControllerFactory;
+
+    @NonNull
+    private IntFunction<ImeVisibilityStateComputer> mVisibilityStateComputerFactory;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         SecureSettingsWrapper.startTestMode();
 
-        mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
+        mBindingControllerFactory = userId ->
+                new InputMethodBindingController(userId, mMockInputMethodManagerService);
 
-            @Override
-            public InputMethodBindingController apply(int userId) {
-                return new InputMethodBindingController(userId, mMockInputMethodManagerService);
-            }
-        };
+        mVisibilityStateComputerFactory = userId -> new ImeVisibilityStateComputer(
+                mMockInputMethodManagerService,
+                new ImeVisibilityStateComputer.Injector() {
+                    @NonNull
+                    @Override
+                    public WindowManagerInternal getWmService() {
+                        return mMockWindowManagerInternal;
+                    }
+
+                    @NonNull
+                    @Override
+                    public InputMethodManagerService.ImeDisplayValidator getImeValidator() {
+                        return displayId -> WindowManager.DISPLAY_IME_POLICY_LOCAL;
+                    }
+
+                    @Override
+                    public int getUserId() {
+                        return userId;
+                    }
+                });
     }
 
     @After
@@ -69,7 +97,8 @@ public final class UserDataRepositoryTest {
     public void testUserDataRepository_removesUserInfoOnUserRemovedEvent() {
         // Create UserDataRepository
         final var repository = new UserDataRepository(
-                userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService));
+                userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService),
+                mVisibilityStateComputerFactory);
 
         // Add one UserData ...
         final var userData = repository.getOrCreate(ANY_USER_ID);
@@ -85,7 +114,8 @@ public final class UserDataRepositoryTest {
 
     @Test
     public void testGetOrCreate() {
-        final var repository = new UserDataRepository(mBindingControllerFactory);
+        final var repository = new UserDataRepository(mBindingControllerFactory,
+                mVisibilityStateComputerFactory);
 
         final var userData = repository.getOrCreate(ANY_USER_ID);
         assertThat(userData.mUserId).isEqualTo(ANY_USER_ID);
@@ -96,6 +126,7 @@ public final class UserDataRepositoryTest {
 
         // Assert UserDataRepository called the InputMethodBindingController creator function.
         assertThat(allUserData.get(0).mBindingController.getUserId()).isEqualTo(ANY_USER_ID);
+        assertThat(allUserData.get(0).mVisibilityStateComputer.getUserId()).isEqualTo(ANY_USER_ID);
     }
 
     private List<UserData> collectUserData(UserDataRepository repository) {

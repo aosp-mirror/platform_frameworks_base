@@ -67,7 +67,7 @@ constructor(
                     backgroundDispatcher,
                     logger
                 ),
-                NotSharingClickedConnected(
+                NotSharingClickedActive(
                     leAudioProfile,
                     assistantProfile,
                     backgroundDispatcher,
@@ -105,6 +105,12 @@ constructor(
                     }
                     DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
                         uiEventLogger.log(BluetoothTileDialogUiEvent.AUDIO_SHARING_DEVICE_CLICKED)
+                    }
+                    DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
+                        // TODO(b/360759048): pop up dialog
+                        uiEventLogger.log(
+                            BluetoothTileDialogUiEvent.AVAILABLE_AUDIO_SHARING_DEVICE_CLICKED
+                        )
                     }
                     DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
                         setActive()
@@ -238,14 +244,14 @@ constructor(
             BluetoothTileDialogUiEvent.LAUNCH_SETTINGS_NOT_SHARING_SAVED_LE_DEVICE_CLICKED
     }
 
-    private class NotSharingClickedConnected(
+    private class NotSharingClickedActive(
         private val leAudioProfile: LeAudioProfile?,
         private val assistantProfile: LocalBluetoothLeBroadcastAssistant?,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
         private val logger: BluetoothTileDialogLogger,
     ) : LaunchSettingsCriteria {
-        // If not broadcasting, having two device connected, clicked on any connected LE audio
-        // devices
+        // If not broadcasting, having two device connected, clicked on the active LE audio
+        // device
         override suspend fun matched(inAudioSharing: Boolean, deviceItem: DeviceItem): Boolean {
             return withContext(backgroundDispatcher) {
                 val matched =
@@ -259,7 +265,7 @@ constructor(
                                         logger
                                     )
                                     .size == 2 &&
-                                deviceItem.isActiveOrConnectedLeAudioSupported
+                                deviceItem.isActiveLeAudioSupported
                         }
                     } ?: false
 
@@ -275,7 +281,7 @@ constructor(
         }
 
         override suspend fun getClickUiEvent(deviceItem: DeviceItem) =
-            BluetoothTileDialogUiEvent.LAUNCH_SETTINGS_NOT_SHARING_CONNECTED_LE_DEVICE_CLICKED
+            BluetoothTileDialogUiEvent.LAUNCH_SETTINGS_NOT_SHARING_ACTIVE_LE_DEVICE_CLICKED
     }
 
     private companion object {
@@ -290,14 +296,12 @@ constructor(
         val DeviceItem.isNotConnectedLeAudioSupported: Boolean
             get() = type == DeviceItemType.SAVED_BLUETOOTH_DEVICE && isLeAudioSupported
 
-        val DeviceItem.isActiveOrConnectedLeAudioSupported: Boolean
-            get() =
-                (type == DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE ||
-                    type == DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE) && isLeAudioSupported
+        val DeviceItem.isActiveLeAudioSupported: Boolean
+            get() = type == DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE && isLeAudioSupported
 
         val DeviceItem.isMediaDevice: Boolean
             get() =
-                cachedBluetoothDevice.connectableProfiles.any {
+                cachedBluetoothDevice.uiAccessibleProfiles.any {
                     it is A2dpProfile ||
                         it is HearingAidProfile ||
                         it is LeAudioProfile ||

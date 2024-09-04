@@ -211,7 +211,6 @@ cc_defaults {
         "android.system.suspend-V1-ndk",
         "server_configurable_flags",
         "service.incremental",
-        "android.companion.virtualdevice.flags-aconfig-cc",
     ],
 
     static_libs: [

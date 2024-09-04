@@ -59,7 +59,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -152,9 +151,11 @@ public class SnapshotDrawerUtils {
         @VisibleForTesting
         public void setFrames(Rect frame, Rect systemBarInsets) {
             mFrame.set(frame);
-            mSystemBarInsets.set(systemBarInsets);
             mSizeMismatch = (mFrame.width() != mSnapshotW || mFrame.height() != mSnapshotH);
-            mSystemBarBackgroundPainter.setInsets(systemBarInsets);
+            if (!Flags.drawSnapshotAspectRatioMatch() && systemBarInsets != null) {
+                mSystemBarInsets.set(systemBarInsets);
+                mSystemBarBackgroundPainter.setInsets(systemBarInsets);
+            }
         }
 
         private void drawSnapshot(boolean releaseAfterDraw) {
@@ -185,7 +186,6 @@ public class SnapshotDrawerUtils {
 
         private void drawSizeMismatchSnapshot() {
             final HardwareBuffer buffer = mSnapshot.getHardwareBuffer();
-            final SurfaceSession session = new SurfaceSession();
 
             // We consider nearly matched dimensions as there can be rounding errors and the user
             // won't notice very minute differences from scaling one dimension more than the other
@@ -193,7 +193,7 @@ public class SnapshotDrawerUtils {
                     && !Flags.drawSnapshotAspectRatioMatch();
 
             // Keep a reference to it such that it doesn't get destroyed when finalized.
-            SurfaceControl childSurfaceControl = new SurfaceControl.Builder(session)
+            SurfaceControl childSurfaceControl = new SurfaceControl.Builder()
                     .setName(mTitle + " - task-snapshot-surface")
                     .setBLASTLayer()
                     .setFormat(buffer.getFormat())
@@ -396,9 +396,12 @@ public class SnapshotDrawerUtils {
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
         final ActivityManager.TaskDescription taskDescription =
                 getOrCreateTaskDescription(runningTaskInfo);
-        drawSurface.initiateSystemBarPainter(lp.flags, lp.privateFlags,
-                attrs.insetsFlags.appearance, taskDescription, info.requestedVisibleTypes);
-        final Rect systemBarInsets = getSystemBarInsets(windowBounds, topWindowInsetsState);
+        Rect systemBarInsets = null;
+        if (!Flags.drawSnapshotAspectRatioMatch()) {
+            drawSurface.initiateSystemBarPainter(lp.flags, lp.privateFlags,
+                    attrs.insetsFlags.appearance, taskDescription, info.requestedVisibleTypes);
+            systemBarInsets = getSystemBarInsets(windowBounds, topWindowInsetsState);
+        }
         drawSurface.setFrames(windowBounds, systemBarInsets);
         drawSurface.drawSnapshot(releaseAfterDraw);
     }

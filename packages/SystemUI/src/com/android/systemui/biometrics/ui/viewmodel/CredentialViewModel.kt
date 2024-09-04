@@ -6,7 +6,6 @@ import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptContentView
 import android.text.InputType
 import com.android.internal.widget.LockPatternView
-import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.CredentialStatus
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
@@ -39,7 +38,7 @@ constructor(
             credentialInteractor.prompt.filterIsInstance<BiometricPromptRequest.Credential>(),
             credentialInteractor.showTitleOnly
         ) { request, showTitleOnly ->
-            val flagEnabled = customBiometricPrompt() && constraintBp()
+            val flagEnabled = customBiometricPrompt()
             val showTitleOnlyForCredential = showTitleOnly && flagEnabled
             BiometricPromptHeaderViewModelImpl(
                 request,
@@ -82,8 +81,8 @@ constructor(
     val errorMessage: Flow<String> =
         combine(credentialInteractor.verificationError, credentialInteractor.prompt) { error, p ->
             when (error) {
-                is CredentialStatus.Fail.Error -> error.error
-                        ?: applicationContext.asBadCredentialErrorMessage(p)
+                is CredentialStatus.Fail.Error ->
+                    error.error ?: applicationContext.asBadCredentialErrorMessage(p)
                 is CredentialStatus.Fail.Throttled -> error.error
                 null -> ""
             }

@@ -232,6 +232,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
+import com.android.internal.os.DebugStore;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
@@ -357,6 +358,15 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private static final long BINDER_CALLBACK_THROTTLE = 10_100L;
     private long mBinderCallbackLast = -1;
+
+    private static final boolean DEBUG_STORE_ENABLED =
+            com.android.internal.os.Flags.debugStoreEnabled();
+
+    /**
+    * Threshold for identifying long-running looper messages (in milliseconds).
+    * Calculated as 2 seconds multiplied by the hardware timeout multiplier.
+    */
+    private static final long LONG_MESSAGE_THRESHOLD_MS = 2000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     /**
      * Denotes the sequence number of the process state change for which the main thread needs
@@ -2395,6 +2405,12 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         public void handleMessage(Message msg) {
             if (DEBUG_MESSAGES) Slog.v(TAG, ">>> handling: " + codeToString(msg.what));
+            long debugStoreId = -1;
+            // By default, log all long messages when the debug store is enabled,
+            // unless this is overridden for certain message types, for which we have
+            // more granular debug store logging.
+            boolean shouldLogLongMessage = DEBUG_STORE_ENABLED;
+            final long messageStartUptimeMs = SystemClock.uptimeMillis();
             switch (msg.what) {
                 case BIND_APPLICATION:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "bindApplication");
@@ -2419,24 +2435,61 @@ public final class ActivityThread extends ClientTransactionHandler
                                     "broadcastReceiveComp");
                         }
                     }
-                    handleReceiver((ReceiverData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    ReceiverData receiverData = (ReceiverData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId =
+                                DebugStore.recordBroadcastHandleReceiver(receiverData.intent);
+                    }
+
+                    try {
+                        handleReceiver(receiverData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case CREATE_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 ("serviceCreate: " + String.valueOf(msg.obj)));
                     }
-                    handleCreateService((CreateServiceData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    CreateServiceData createServiceData = (CreateServiceData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId = DebugStore.recordServiceCreate(createServiceData.info);
+                    }
+
+                    try {
+                        handleCreateService(createServiceData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case BIND_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceBind: "
                                 + String.valueOf(msg.obj));
                     }
-                    handleBindService((BindServiceData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    BindServiceData bindData = (BindServiceData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId =
+                                DebugStore.recordServiceBind(bindData.rebind, bindData.intent);
+                    }
+                    try {
+                        handleBindService(bindData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case UNBIND_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
@@ -2452,8 +2505,21 @@ public final class ActivityThread extends ClientTransactionHandler
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 ("serviceStart: " + String.valueOf(msg.obj)));
                     }
-                    handleServiceArgs((ServiceArgsData)msg.obj);
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    ServiceArgsData serviceData = (ServiceArgsData) msg.obj;
+                    if (DEBUG_STORE_ENABLED) {
+                        debugStoreId = DebugStore.recordServiceOnStart(serviceData.startId,
+                                serviceData.flags, serviceData.args);
+                    }
+
+                    try {
+                        handleServiceArgs(serviceData);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                        if (DEBUG_STORE_ENABLED) {
+                            DebugStore.recordEventEnd(debugStoreId);
+                            shouldLogLongMessage = false;
+                        }
+                    }
                     break;
                 case STOP_SERVICE:
                     if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
@@ -2649,11 +2715,17 @@ public final class ActivityThread extends ClientTransactionHandler
                     handleFinishInstrumentationWithoutRestart();
                     break;
             }
+            long messageElapsedTimeMs = SystemClock.uptimeMillis() - messageStartUptimeMs;
             Object obj = msg.obj;
             if (obj instanceof SomeArgs) {
                 ((SomeArgs) obj).recycle();
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
+            if (shouldLogLongMessage
+                    && messageElapsedTimeMs > LONG_MESSAGE_THRESHOLD_MS) {
+                DebugStore.recordLongLooperMessage(msg.what, msg.getTarget().getClass().getName(),
+                        messageElapsedTimeMs);
+            }
         }
     }
 
@@ -4511,7 +4583,7 @@ public final class ActivityThread extends ClientTransactionHandler
     public void handleAttachSplashScreenView(@NonNull ActivityClientRecord r,
             @Nullable SplashScreenView.SplashScreenViewParcelable parcelable,
             @NonNull SurfaceControl startingWindowLeash) {
-        final DecorView decorView = (DecorView) r.window.peekDecorView();
+        final DecorView decorView = r.window != null ? (DecorView) r.window.peekDecorView() : null;
         if (parcelable != null && decorView != null) {
             createSplashScreen(r, decorView, parcelable, startingWindowLeash);
         } else {

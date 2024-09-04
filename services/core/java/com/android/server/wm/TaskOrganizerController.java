@@ -390,7 +390,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 t.mTaskAppearedSent = false;
             }
             if (removeFromSystem) {
-                mService.removeTask(t.mTaskId);
+                mService.removeTask(t);
             }
             return taskAppearedSent;
         }
@@ -684,7 +684,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 removalInfo.playRevealAnimation = false;
             } else if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
                 removalInfo.roundedCornerRadius =
-                        topActivity.mLetterboxUiController.getRoundedCornersRadius(mainWindow);
+                        topActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                                .getRoundedCornersRadius(mainWindow);
                 removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                 removalInfo.mainFrame = new Rect(mainWindow.getFrame());
                 removalInfo.mainFrame.offsetTo(mainWindow.mSurfacePosition.x,

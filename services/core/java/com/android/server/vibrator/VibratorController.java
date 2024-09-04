@@ -279,8 +279,8 @@ final class VibratorController {
                 vendorEffect.getVendorData().writeToParcel(vendorData, /* flags= */ 0);
                 vendorData.setDataPosition(0);
                 long duration = mNativeWrapper.performVendorEffect(vendorData,
-                        vendorEffect.getEffectStrength(), vendorEffect.getLinearScale(),
-                        vibrationId);
+                        vendorEffect.getEffectStrength(), vendorEffect.getScale(),
+                        vendorEffect.getAdaptiveScale(), vibrationId);
                 if (duration > 0) {
                     mCurrentAmplitude = -1;
                     notifyListenerOnVibrating(true);
@@ -459,7 +459,7 @@ final class VibratorController {
                 long vibrationId);
 
         private static native long performVendorEffect(long nativePtr, Parcel vendorData,
-                long strength, float scale, long vibrationId);
+                long strength, float scale, float adaptiveScale, long vibrationId);
 
         private static native long performComposedEffect(long nativePtr, PrimitiveSegment[] effect,
                 long vibrationId);
@@ -518,8 +518,9 @@ final class VibratorController {
 
         /** Turns vibrator on to perform a vendor-specific effect. */
         public long performVendorEffect(Parcel vendorData, long strength, float scale,
-                long vibrationId) {
-            return performVendorEffect(mNativePtr, vendorData, strength, scale, vibrationId);
+                float adaptiveScale, long vibrationId) {
+            return performVendorEffect(mNativePtr, vendorData, strength, scale, adaptiveScale,
+                    vibrationId);
         }
 
         /** Turns vibrator on to perform effect composed of give primitives effect. */

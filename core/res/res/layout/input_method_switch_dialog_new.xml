@@ -17,25 +17,35 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.android.internal.widget.MaxHeightFrameLayout
-        android:layout_width="320dp"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:maxHeight="373dp">
+        android:orientation="horizontal">
 
-        <com.android.internal.widget.RecyclerView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
-            android:clipToPadding="false"
-            android:layoutManager="com.android.internal.widget.LinearLayoutManager"/>
+        <!-- TODO(b/357644229): Enable shrinking width without three levels of nesting. -->
+        <com.android.internal.widget.MaxHeightFrameLayout
+            android:layout_width="320dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:maxHeight="373dp">
 
-    </com.android.internal.widget.MaxHeightFrameLayout>
+            <com.android.internal.widget.RecyclerView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingVertical="8dp"
+                android:clipToPadding="false"
+                android:layoutManager="com.android.internal.widget.LinearLayoutManager"/>
+
+        </com.android.internal.widget.MaxHeightFrameLayout>
+
+    </LinearLayout>
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
@@ -51,7 +61,8 @@
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:importantForAccessibility="no"/>
 
         <Button
             style="?attr/buttonBarButtonStyle"
@@ -60,9 +71,10 @@
             android:layout_height="wrap_content"
             android:background="@drawable/input_method_switch_button"
             android:layout_gravity="end"
-            android:text="@string/input_method_language_settings"
+            android:text="@string/input_method_switcher_settings_button"
             android:fontFamily="google-sans-text"
             android:textAppearance="?attr/textAppearance"
+            android:contentDescription="@string/input_method_language_settings"
             android:visibility="gone"/>
 
     </LinearLayout>

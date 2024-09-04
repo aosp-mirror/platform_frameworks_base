@@ -17,8 +17,8 @@
 package android.service.dreams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.service.dreams.Flags.dreamHandlesBeingObscured;
+import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.service.dreams.Flags.startAndStopDozingInBackground;
 
 import android.annotation.FlaggedApi;
@@ -81,6 +81,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 /**
@@ -267,10 +268,13 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private boolean mPreviewMode;
-    private volatile int mDozeScreenState = Display.STATE_UNKNOWN;
-    private volatile @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
-    private volatile int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
-    private volatile float mDozeScreenBrightnessFloat = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+    private int mDozeScreenState = Display.STATE_UNKNOWN;
+    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
+    private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private float mDozeScreenBrightnessFloat = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+
+    // This variable being true means dozing device expecting normal(non-doze) brightness.
+    private boolean mUseNormalBrightnessForDoze;
 
     private boolean mDebug = false;
 
@@ -913,13 +917,15 @@ public class DreamService extends Service implements Window.Callback {
      */
     @UnsupportedAppUsage
     public void startDozing() {
-        if (mCanDoze && !mDozing) {
-            mDozing = true;
-            updateDoze();
+        synchronized (this) {
+            if (mCanDoze && !mDozing) {
+                mDozing = true;
+                updateDoze();
+            }
         }
     }
 
-    private void updateDoze() {
+    private synchronized void updateDoze() {
         if (mDreamToken == null) {
             Slog.w(mTag, "Updating doze without a dream token.");
             return;
@@ -927,16 +933,20 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
+                Slog.v(mTag, "UpdateDoze mDozeScreenState=" + mDozeScreenState
+                        + " mDozeScreenBrightness=" + mDozeScreenBrightness
+                        + " mDozeScreenBrightnessFloat=" + mDozeScreenBrightnessFloat);
                 if (startAndStopDozingInBackground()) {
                     mDreamManager.startDozingOneway(
                             mDreamToken, mDozeScreenState, mDozeScreenStateReason,
-                            mDozeScreenBrightnessFloat, mDozeScreenBrightness);
+                            mDozeScreenBrightnessFloat, mDozeScreenBrightness,
+                            mUseNormalBrightnessForDoze);
                 } else {
                     mDreamManager.startDozing(
                             mDreamToken, mDozeScreenState, mDozeScreenStateReason,
-                            mDozeScreenBrightnessFloat, mDozeScreenBrightness);
+                            mDozeScreenBrightnessFloat, mDozeScreenBrightness,
+                            mUseNormalBrightnessForDoze);
                 }
-
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -1005,7 +1015,8 @@ public class DreamService extends Service implements Window.Callback {
      */
     @UnsupportedAppUsage
     public void setDozeScreenState(int state) {
-        setDozeScreenState(state, Display.STATE_REASON_UNKNOWN);
+        setDozeScreenState(state, Display.STATE_REASON_UNKNOWN,
+                /* useNormalBrightnessForDoze= */ false);
     }
 
     /**
@@ -1043,16 +1054,40 @@ public class DreamService extends Service implements Window.Callback {
      * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
      * for the default behavior.
      * @param reason the reason for setting the specified screen state.
-     *
-     * @hide For use by system UI components only.
+     * @param useNormalBrightnessForDoze False means the default case where doze brightness is
+     * expected when device is dozing. True means display expects normal brightness for next doze
+     * request. Noted: unlike {@link #setDozeScreenBrightness} that sets a real brightness value for
+     * doze screen, this parameter only indicates whether the doze brightness is intended on next
+     * doze screen. The actual brightness value will be computed by {@link DisplayManager}
+     * internally.
+     * @hide For use by System UI components only.
      */
     @UnsupportedAppUsage
-    public void setDozeScreenState(int state, @Display.StateReason int reason) {
-        if (mDozeScreenState != state) {
-            mDozeScreenState = state;
-            mDozeScreenStateReason = reason;
-            updateDoze();
+    public void setDozeScreenState(int state, @Display.StateReason int reason,
+            boolean useNormalBrightnessForDoze) {
+        synchronized (this) {
+            if (mDozeScreenState != state
+                    || mUseNormalBrightnessForDoze != useNormalBrightnessForDoze) {
+                mDozeScreenState = state;
+                mDozeScreenStateReason = reason;
+                mUseNormalBrightnessForDoze = useNormalBrightnessForDoze;
+                updateDoze();
+            }
         }
+    }
+
+    /**
+     * Returns whether we want to use the normal brightness setting while in doze. This is useful
+     * on devices like Wear; when we allow the user to interact with a device that remains in
+     * doze (looking at time).
+     *
+     * @return a boolean that informs {@link DisplayManager} whether to adjust the display for the
+     * interacting user e.g. brightening the display.
+     * @hide For use by System UI components only.
+     */
+    @UnsupportedAppUsage
+    public boolean getUseNormalBrightnessForDoze() {
+        return mUseNormalBrightnessForDoze;
     }
 
     /**
@@ -1103,9 +1138,11 @@ public class DreamService extends Service implements Window.Callback {
         if (brightness != PowerManager.BRIGHTNESS_DEFAULT) {
             brightness = clampAbsoluteBrightness(brightness);
         }
-        if (mDozeScreenBrightness != brightness) {
-            mDozeScreenBrightness = brightness;
-            updateDoze();
+        synchronized (this) {
+            if (mDozeScreenBrightness != brightness) {
+                mDozeScreenBrightness = brightness;
+                updateDoze();
+            }
         }
     }
 
@@ -1141,9 +1178,12 @@ public class DreamService extends Service implements Window.Callback {
         if (!Float.isNaN(brightness)) {
             brightness = clampAbsoluteBrightnessFloat(brightness);
         }
-        if (!BrightnessSynchronizer.floatEquals(mDozeScreenBrightnessFloat, brightness)) {
-            mDozeScreenBrightnessFloat = brightness;
-            updateDoze();
+
+        synchronized (this) {
+            if (!BrightnessSynchronizer.floatEquals(mDozeScreenBrightnessFloat, brightness)) {
+                mDozeScreenBrightnessFloat = brightness;
+                updateDoze();
+            }
         }
     }
 
@@ -1222,7 +1262,7 @@ public class DreamService extends Service implements Window.Callback {
     @Override
     public final IBinder onBind(Intent intent) {
         if (mDebug) Slog.v(mTag, "onBind() intent = " + intent);
-        mDreamServiceWrapper = new DreamServiceWrapper();
+        mDreamServiceWrapper = new DreamServiceWrapper(new WeakReference<>(this));
         final ComponentName overlayComponent = intent.getParcelableExtra(
                 EXTRA_DREAM_OVERLAY_COMPONENT, ComponentName.class);
 
@@ -1324,6 +1364,9 @@ public class DreamService extends Service implements Window.Callback {
      * Tells the dream to come to the front (which in turn tells the overlay to come to the front).
      */
     private void comeToFront() {
+        if (mOverlayConnection == null) {
+            return;
+        }
         mOverlayConnection.addConsumer(overlay -> {
             try {
                 overlay.comeToFront();
@@ -1589,7 +1632,8 @@ public class DreamService extends Service implements Window.Callback {
             i.setComponent(mInjector.getDreamActivityComponent());
             i.setPackage(mInjector.getDreamPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-            DreamActivity.setCallback(i, new DreamActivityCallbacks(mDreamToken));
+            DreamActivity.setCallback(i,
+                    new DreamActivityCallbacks(mDreamToken, new WeakReference<>(this)));
             final ServiceInfo serviceInfo = mInjector.getServiceInfo();
             final CharSequence title = fetchDreamLabel(mInjector.getPackageManager(),
                     mInjector.getResources(), serviceInfo, isPreviewMode);
@@ -1657,6 +1701,7 @@ public class DreamService extends Service implements Window.Callback {
                                 try {
                                     overlay.startDream(mWindow.getAttributes(), mOverlayCallback,
                                             mDreamComponent.flattenToString(),
+                                            mPreviewMode,
                                             mShouldShowComplications);
                                 } catch (RemoteException e) {
                                     Log.e(mTag, "could not send window attributes:" + e);
@@ -1803,22 +1848,37 @@ public class DreamService extends Service implements Window.Callback {
      * uses it to control the DreamService. It is also used to receive callbacks from the
      * DreamActivity.
      */
-    final class DreamServiceWrapper extends IDreamService.Stub {
+    static final class DreamServiceWrapper extends IDreamService.Stub {
+        final WeakReference<DreamService> mService;
+
+        DreamServiceWrapper(WeakReference<DreamService> service) {
+            mService = service;
+        }
+
+        private void post(Consumer<DreamService> consumer) {
+            final DreamService service = mService.get();
+
+            if (service == null) {
+                return;
+            }
+
+            service.mHandler.post(() -> consumer.accept(service));
+        }
+
         @Override
         public void attach(final IBinder dreamToken, final boolean canDoze,
                 final boolean isPreviewMode, IRemoteCallback started) {
-            mHandler.post(
-                    () -> DreamService.this.attach(dreamToken, canDoze, isPreviewMode, started));
+            post(dreamService -> dreamService.attach(dreamToken, canDoze, isPreviewMode, started));
         }
 
         @Override
         public void detach() {
-            mHandler.post(DreamService.this::detach);
+            post(DreamService::detach);
         }
 
         @Override
         public void wakeUp() {
-            mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
+            post(dreamService -> dreamService.wakeUp(true /*fromSystem*/));
         }
 
         @Override
@@ -1826,48 +1886,70 @@ public class DreamService extends Service implements Window.Callback {
             if (!dreamHandlesBeingObscured()) {
                 return;
             }
-
-            mHandler.post(DreamService.this::comeToFront);
+            post(DreamService::comeToFront);
         }
+    }
+
+    private void onActivityCreated(DreamActivity activity, IBinder dreamToken) {
+        if (dreamToken != mDreamToken || mFinished) {
+            Slog.d(TAG, "DreamActivity was created after the dream was finished or "
+                    + "a new dream started, finishing DreamActivity");
+            if (!activity.isFinishing()) {
+                activity.finishAndRemoveTask();
+            }
+            return;
+        }
+        if (mActivity != null) {
+            Slog.w(TAG, "A DreamActivity has already been started, "
+                    + "finishing latest DreamActivity");
+            if (!activity.isFinishing()) {
+                activity.finishAndRemoveTask();
+            }
+            return;
+        }
+
+        mActivity = activity;
+        onWindowCreated(activity.getWindow());
+    }
+
+    private void onActivityDestroyed() {
+        mActivity = null;
+        mWindow = null;
+        detach();
     }
 
     /** @hide */
     @VisibleForTesting
-    public final class DreamActivityCallbacks extends Binder {
+    public static final class DreamActivityCallbacks extends Binder {
         private final IBinder mActivityDreamToken;
+        private WeakReference<DreamService> mService;
 
-        DreamActivityCallbacks(IBinder token) {
+        DreamActivityCallbacks(IBinder token, WeakReference<DreamService> service)  {
             mActivityDreamToken = token;
+            mService = service;
         }
 
         /** Callback when the {@link DreamActivity} has been created */
         public void onActivityCreated(DreamActivity activity) {
-            if (mActivityDreamToken != mDreamToken || mFinished) {
-                Slog.d(TAG, "DreamActivity was created after the dream was finished or "
-                        + "a new dream started, finishing DreamActivity");
-                if (!activity.isFinishing()) {
-                    activity.finishAndRemoveTask();
-                }
-                return;
-            }
-            if (mActivity != null) {
-                Slog.w(TAG, "A DreamActivity has already been started, "
-                        + "finishing latest DreamActivity");
-                if (!activity.isFinishing()) {
-                    activity.finishAndRemoveTask();
-                }
+            final DreamService service = mService.get();
+
+            if (service == null) {
                 return;
             }
 
-            mActivity = activity;
-            onWindowCreated(activity.getWindow());
+            service.onActivityCreated(activity, mActivityDreamToken);
         }
 
         /** Callback when the {@link DreamActivity} has been destroyed */
         public void onActivityDestroyed() {
-            mActivity = null;
-            mWindow = null;
-            detach();
+            final DreamService service = mService.get();
+
+            if (service == null) {
+                return;
+            }
+
+            service.onActivityDestroyed();
+            mService = null;
         }
     }
 

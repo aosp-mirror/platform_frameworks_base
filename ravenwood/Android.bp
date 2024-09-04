@@ -160,10 +160,19 @@ java_library {
         "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
+        "framework-annotations-lib",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
+}
+
+java_device_for_host {
+    name: "ravenwood-junit-impl-for-ravenizer",
+    libs: [
+        "ravenwood-junit-impl",
+    ],
+    visibility: [":__subpackages__"],
 }
 
 // Separated out from ravenwood-junit-impl since it needs to compile
@@ -181,13 +190,13 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
-// Carefully compiles against only test_current to support tests that
+// Carefully compiles against only module_current to support tests that
 // want to verify they're unbundled.  The "impl" library above is what
 // ships inside the Ravenwood environment to actually drive any API
 // access to implementation details.
-// This library needs to be statically linked to mainline tests as well,
-// which need to be able to run on multiple API levels, so we can't use
-// test APIs in this module.
+// We can't use test_current here because this library needs to be statically
+// linked to mainline tests as well, which can't use test APIs because they
+// need to be able to run on multiple API levels.
 java_library {
     name: "ravenwood-junit",
     srcs: [
@@ -203,6 +212,7 @@ java_library {
     libs: [
         "junit",
         "flag-junit",
+        "framework-annotations-lib",
     ],
     visibility: ["//visibility:public"],
 }
@@ -280,10 +290,10 @@ sh_test_host {
     src: "scripts/ravenwood-stats-checker.sh",
     test_suites: ["general-tests"],
     data: [
-        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_stats.csv}",
-        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_apis.csv}",
-        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_keep_all.txt}",
-        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_dump.txt}",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_stats.csv}",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_apis.csv}",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_keep_all.txt}",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_dump.txt}",
         ":services.core.ravenwood-base{hoststubgen_services.core_stats.csv}",
         ":services.core.ravenwood-base{hoststubgen_services.core_apis.csv}",
         ":services.core.ravenwood-base{hoststubgen_services.core_keep_all.txt}",
@@ -323,6 +333,7 @@ android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     data: [
         "framework-res",
+        "ravenwood-empty-res",
     ],
     libs: [
         "100-framework-minus-apex.ravenwood",

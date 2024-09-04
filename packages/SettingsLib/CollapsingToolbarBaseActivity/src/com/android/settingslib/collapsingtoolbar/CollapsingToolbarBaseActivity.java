@@ -169,7 +169,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
 
     private CollapsingToolbarDelegate getToolbarDelegate() {
         if (mToolbardelegate == null) {
-            mToolbardelegate = new CollapsingToolbarDelegate(new DelegateCallback());
+            mToolbardelegate = new CollapsingToolbarDelegate(new DelegateCallback(), true);
         }
         return mToolbardelegate;
     }

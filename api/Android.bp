@@ -87,6 +87,7 @@ combined_apis {
         "framework-permission",
         "framework-permission-s",
         "framework-profiling",
+        "framework-photopicker",
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
@@ -284,7 +285,7 @@ packages_to_document = [
 // These are libs from framework-internal-utils that are required (i.e. being referenced)
 // from framework-non-updatable-sources. Add more here when there's a need.
 // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
-// dependencies gets bigger.
+// dependencies when the list gets bigger.
 android_non_updatable_stubs_libs = [
     "android.hardware.cas-V1.2-java",
     "android.hardware.health-V1.0-java-constants",
@@ -383,6 +384,11 @@ non_updatable_api_deps_on_modules = [
     "sdk_module-lib_current_framework-connectivity-t",
     "sdk_system_current_android",
 ]
+
+java_defaults {
+    name: "module-classpath-java-defaults",
+    libs: non_updatable_api_deps_on_modules,
+}
 
 // Defaults with module APIs in the classpath (mostly from prebuilts).
 // Suitable for compiling android-non-updatable.

@@ -597,7 +597,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 .build();
 
         spyOn(mActivity.mAtmService.getLifecycleManager());
-        spyOn(mActivity.mLetterboxUiController);
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
 
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());

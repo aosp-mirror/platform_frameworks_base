@@ -17,44 +17,68 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
-import javax.inject.Inject
+import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 /** Models UI state for the scene container. */
-@SysUISingleton
 class SceneContainerViewModel
-@Inject
+@AssistedInject
 constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-) {
-    /**
-     * Keys of all scenes in the container.
-     *
-     * The scenes will be sorted in z-order such that the last one is the one that should be
-     * rendered on top of all previous ones.
-     */
-    val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
+    private val logger: SceneLogger,
+    @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
+) : ExclusiveActivatable() {
 
     /** The scene that should be rendered. */
     val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
+    private val hydrator = Hydrator("SceneContainerViewModel.hydrator")
+
     /** Whether the container is visible. */
-    val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
+    val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
+
+    override suspend fun onActivated(): Nothing {
+        try {
+            // Sends a MotionEventHandler to the owner of the view-model so they can report
+            // MotionEvents into the view-model.
+            motionEventHandlerReceiver(
+                object : MotionEventHandler {
+                    override fun onMotionEvent(motionEvent: MotionEvent) {
+                        this@SceneContainerViewModel.onMotionEvent(motionEvent)
+                    }
+
+                    override fun onMotionEventComplete() {
+                        this@SceneContainerViewModel.onMotionEventComplete()
+                    }
+                }
+            )
+
+            hydrator.activate()
+        } finally {
+            // Clears the previously-sent MotionEventHandler so the owner of the view-model releases
+            // their reference to it.
+            motionEventHandlerReceiver(null)
+        }
+    }
 
     /**
      * Binds the given flow so the system remembers it.
@@ -66,7 +90,9 @@ constructor(
     }
 
     /**
-     * Notifies that a [MotionEvent] is first seen at the top of the scene container UI.
+     * Notifies that a [MotionEvent] is first seen at the top of the scene container UI. This
+     * includes gestures on [SharedNotificationContainer] as well as the Composable scene container
+     * hierarchy.
      *
      * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
      */
@@ -77,8 +103,18 @@ constructor(
             event.actionMasked == MotionEvent.ACTION_UP ||
                 event.actionMasked == MotionEvent.ACTION_CANCEL
         ) {
-            sceneInteractor.onUserInteractionFinished()
+            sceneInteractor.onUserInputFinished()
         }
+    }
+
+    /**
+     * Notifies that a scene container user interaction has begun.
+     *
+     * This is a user interaction that has reached the Composable hierarchy of the scene container,
+     * rather than being handled by [SharedNotificationContainer].
+     */
+    fun onSceneContainerUserInputStarted() {
+        sceneInteractor.onSceneContainerUserInputStarted()
     }
 
     /**
@@ -110,16 +146,29 @@ constructor(
                 else -> null
             }
 
-        return interactionTypeOrNull?.let { interactionType ->
-            // It's important that the falsing system is always queried, even if no enforcement will
-            // occur. This helps build up the right signal in the system.
-            val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
+        val fromScene = currentScene.value
+        val isAllowed =
+            interactionTypeOrNull?.let { interactionType ->
+                // It's important that the falsing system is always queried, even if no enforcement
+                // will occur. This helps build up the right signal in the system.
+                val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
 
-            // Only enforce falsing if moving from the lockscreen scene to a new scene.
-            val fromLockscreenScene = currentScene.value == Scenes.Lockscreen
+                // Only enforce falsing if moving from the lockscreen scene to a new scene.
+                val fromLockscreenScene = fromScene == Scenes.Lockscreen
 
-            !fromLockscreenScene || !isFalseTouch
-        } ?: true
+                !fromLockscreenScene || !isFalseTouch
+            } ?: true
+
+        if (isAllowed) {
+            // A scene change is guaranteed; log it.
+            logger.logSceneChanged(
+                from = fromScene,
+                to = toScene,
+                reason = "user interaction",
+                isInstant = false,
+            )
+        }
+        return isAllowed
     }
 
     /**
@@ -130,27 +179,40 @@ constructor(
         actionResultMap: Map<UserAction, UserActionResult>,
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
-            sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
-                actionResult.copy(toScene = it)
+            when (actionResult) {
+                is UserActionResult.ChangeScene -> {
+                    sceneInteractor.resolveSceneFamilyOrNull(actionResult.toScene)?.value?.let {
+                        toScene ->
+                        UserActionResult(
+                            toScene = toScene,
+                            transitionKey = actionResult.transitionKey,
+                            requiresFullDistanceSwipe = actionResult.requiresFullDistanceSwipe,
+                        )
+                    }
+                }
+                is UserActionResult.ShowOverlay,
+                is UserActionResult.HideOverlay,
+                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
             } ?: actionResult
         }
     }
 
-    private fun replaceSceneFamilies(
-        destinationScenes: Map<UserAction, UserActionResult>,
-    ): Flow<Map<UserAction, UserActionResult>> {
-        return destinationScenes
-            .mapValues { (_, actionResult) ->
-                sceneInteractor.resolveSceneFamily(actionResult.toScene).map { scene ->
-                    actionResult.copy(toScene = scene)
-                }
-            }
-            .combineValueFlows()
+    /** Defines interface for classes that can handle externally-reported [MotionEvent]s. */
+    interface MotionEventHandler {
+        /** Notifies that a [MotionEvent] has occurred. */
+        fun onMotionEvent(motionEvent: MotionEvent)
+
+        /**
+         * Notifies that the previous [MotionEvent] reported by [onMotionEvent] has finished
+         * processing.
+         */
+        fun onMotionEventComplete()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
+        ): SceneContainerViewModel
     }
 }
-
-private fun <K, V> Map<K, Flow<V>>.combineValueFlows(): Flow<Map<K, V>> =
-    combine(
-        asIterable().map { (k, fv) -> fv.map { k to it } },
-        transform = Array<Pair<K, V>>::toMap,
-    )

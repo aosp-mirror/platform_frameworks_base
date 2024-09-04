@@ -2120,6 +2120,68 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(giveOsdName);
     }
 
+    @Test
+    public void onOneTouchPlay_wakeUp_addCecDevice() {
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .isEmpty();
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED);
+        mPowerManager.setInteractive(false);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(ADDR_PLAYBACK_1,
+                mTvLogicalAddress);
+        HdmiCecMessage activeSource = HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                0x1000);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(textViewOn)).isEqualTo(Constants.HANDLED);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(activeSource)).isEqualTo(
+                Constants.HANDLED);
+        mTestLooper.dispatchAll();
+        assertThat(mPowerManager.isInteractive()).isTrue();
+
+        // FakePowerManagerWrapper#wakeUp() doesn't broadcast Intent.ACTION_SCREEN_ON so we have to
+        // manually call this method.
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
+                .hasSize(1);
+    }
+
+
+    @Test
+    public void handleReportAudioStatus_SamOnAvrStandby_startSystemAudioActionFromTv() {
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
+                HdmiControlManager.SYSTEM_AUDIO_CONTROL_ENABLED);
+        // Emulate Audio device on port 0x1000 (does not support ARC)
+        mNativeWrapper.setPortConnectionStatus(1, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x1000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_AUDIO_SYSTEM, ADDR_TV,
+                        HdmiControlManager.POWER_STATUS_STANDBY);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceTv.getActions(SystemAudioActionFromTv.class)).hasSize(0);
+
+        HdmiCecFeatureAction systemAudioAutoInitiationAction =
+                new SystemAudioAutoInitiationAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM);
+        mHdmiCecLocalDeviceTv.addAndStartAction(systemAudioAutoInitiationAction);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        true);
+        mHdmiControlService.handleCecCommand(reportSystemAudioMode);
+        mTestLooper.dispatchAll();
+
+        // SAM must be on; ARC must be off
+        assertThat(mHdmiCecLocalDeviceTv.getActions(SystemAudioActionFromTv.class)).hasSize(1);
+    }
+
     protected static class MockTvDevice extends HdmiCecLocalDeviceTv {
         MockTvDevice(HdmiControlService service) {
             super(service);

@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.util.apk.SourceStampVerifierTest"
-        }
-      ]
+      "name": "FrameworksCoreTests_util_apk"
     }
   ],
   "presubmit-large": [

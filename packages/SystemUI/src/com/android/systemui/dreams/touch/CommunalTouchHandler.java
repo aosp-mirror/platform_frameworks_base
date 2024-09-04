@@ -33,7 +33,11 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dreams.touch.dagger.CommunalTouchModule;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
+import kotlinx.coroutines.Job;
+
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -48,6 +52,8 @@ public class CommunalTouchHandler implements TouchHandler {
 
     private final ConfigurationInteractor mConfigurationInteractor;
     private Boolean mIsEnabled = false;
+
+    private ArrayList<Job> mFlows = new ArrayList<>();
 
     private int mLayoutDirection = LayoutDirection.LTR;
 
@@ -70,17 +76,17 @@ public class CommunalTouchHandler implements TouchHandler {
         mCommunalInteractor = communalInteractor;
         mConfigurationInteractor = configurationInteractor;
 
-        collectFlow(
+        mFlows.add(collectFlow(
                 mLifecycle,
                 mCommunalInteractor.isCommunalAvailable(),
                 mIsCommunalAvailableCallback
-        );
+        ));
 
-        collectFlow(
+        mFlows.add(collectFlow(
                 mLifecycle,
                 mConfigurationInteractor.getLayoutDirection(),
                 mLayoutDirectionCallback
-        );
+        ));
     }
 
     @Override
@@ -139,5 +145,14 @@ public class CommunalTouchHandler implements TouchHandler {
                 return true;
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        for (Job job : mFlows) {
+            job.cancel(new CancellationException());
+        }
+        mFlows.clear();
+        TouchHandler.super.onDestroy();
     }
 }

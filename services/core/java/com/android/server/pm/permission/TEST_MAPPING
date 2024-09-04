@@ -1,24 +1,7 @@
 {
     "presubmit": [
         {
-            "name": "CtsPermissionTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.BackgroundPermissionsTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.SplitPermissionTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.PermissionFlagsTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.SharedUidPermissionsTest"
-                }
-            ]
+            "name": "CtsPermissionTestCases_Platform"
         },
         {
             "name": "CtsAppSecurityHostTestCases",

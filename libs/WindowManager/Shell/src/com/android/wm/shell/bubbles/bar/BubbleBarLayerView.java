@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.bubbles.bar;
 
-import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
-import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_GESTURE;
 
 import android.annotation.Nullable;
@@ -44,9 +44,9 @@ import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
-import com.android.wm.shell.common.bubbles.BaseBubblePinController;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
-import com.android.wm.shell.common.bubbles.DismissView;
+import com.android.wm.shell.shared.bubbles.BaseBubblePinController;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.DismissView;
 
 import kotlin.Unit;
 

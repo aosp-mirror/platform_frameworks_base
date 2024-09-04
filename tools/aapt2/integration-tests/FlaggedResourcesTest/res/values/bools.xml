@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <bool name="bool1">true</bool>
+    <bool name="bool1" android:featureFlag="test.package.falseFlag">false</bool>
+
+    <bool name="bool2">false</bool>
+    <bool name="bool2" android:featureFlag="test.package.trueFlag">true</bool>
+
+    <bool name="bool3">false</bool>
+
+    <bool name="bool4" android:featureFlag="test.package.falseFlag">true</bool>
+</resources>

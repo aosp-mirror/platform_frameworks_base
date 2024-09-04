@@ -183,15 +183,22 @@ public class DisplayManagerFlags {
             Flags::offloadDozeOverrideHoldsWakelock
     );
 
-    private final FlagState mOffloadSessionCancelBlockScreenOn =
-            new FlagState(
-                    Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
-                    Flags::offloadSessionCancelBlockScreenOn);
+    private final FlagState mOffloadSessionCancelBlockScreenOn = new FlagState(
+            Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
+            Flags::offloadSessionCancelBlockScreenOn);
 
-    private final FlagState mNewHdrBrightnessModifier =
-            new FlagState(
-                    Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
-                    Flags::newHdrBrightnessModifier);
+    private final FlagState mNewHdrBrightnessModifier = new FlagState(
+            Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
+            Flags::newHdrBrightnessModifier);
+
+    private final FlagState mIdleScreenConfigInSubscribingLightSensor = new FlagState(
+            Flags.FLAG_IDLE_SCREEN_CONFIG_IN_SUBSCRIBING_LIGHT_SENSOR,
+            Flags::idleScreenConfigInSubscribingLightSensor);
+
+    private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
+            Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
+            Flags::normalBrightnessForDozeParameter
+    );
 
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
@@ -393,11 +400,27 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return Whether the useDozeBrightness parameter should be used
+     */
+    public boolean isNormalBrightnessForDozeParameterEnabled() {
+        return mNormalBrightnessForDozeParameter.isEnabled();
+    }
+
+     /**
+      * @return {@code true} if idle timer refresh rate config is accounted for while subscribing to
+      * the light sensor
+      */
+    public boolean isIdleScreenConfigInSubscribingLightSensorEnabled() {
+        return mIdleScreenConfigInSubscribingLightSensor.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
     public void dump(PrintWriter pw) {
         pw.println("DisplayManagerFlags:");
+        pw.println("--------------------");
         pw.println(" " + mAdaptiveToneImprovements1);
         pw.println(" " + mAdaptiveToneImprovements2);
         pw.println(" " + mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState);
@@ -431,6 +454,8 @@ public class DisplayManagerFlags {
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
         pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mNormalBrightnessForDozeParameter);
+        pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
     }
 
     private static class FlagState {

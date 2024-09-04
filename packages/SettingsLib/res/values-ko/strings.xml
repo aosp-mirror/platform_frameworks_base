@@ -116,7 +116,7 @@
     <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"연결되었습니다(오디오 공유 지원). 배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"연결되었습니다(오디오 공유 지원). 왼쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"연결되었습니다(오디오 공유 지원). 오른쪽 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
-    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"연결되었습니다(오디오 공유 지원)."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"연결됨(오디오 공유 지원)"</string>
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"사용 중(미디어 전용)"</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"오디오 공유 지원"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"사용 중(미디어 전용), 왼쪽만"</string>
@@ -127,7 +127,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"파일 전송"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"입력 장치"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"인터넷 액세스"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"연락처 및 통화 기록에 대한 액세스를 허용합니다."</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"연락처 및 통화 기록에 대한 액세스 허용"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"정보는 전화 알림 등에 사용됩니다."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"인터넷 연결 공유"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"문자 메시지"</string>
@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"탭한 항목에 대해 시각적인 피드백 표시"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"키 누름 표시"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"물리적 키 누름에 관한 시각적 피드백을 표시합니다."</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"터치패드 입력 표시"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"터치패드 입력 데이터와 인식된 동작을 표시하는 화면 오버레이"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"표면 업데이트 표시"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"전체 창 화면이 업데이트되었을 때 플래시 처리"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"보기 업데이트 표시"</string>
@@ -495,8 +497,7 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> 후 충전 완료"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - 배터리 보호를 위해 충전 일시중지"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ 충전 중"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>에 완전히 충전됨"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>에 완전히 충전됨"</string>

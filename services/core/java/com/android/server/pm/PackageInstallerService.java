@@ -693,13 +693,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         params.appLabel = TextUtils.trimToSize(params.appLabel,
                 PackageItemInfo.MAX_SAFE_LABEL_LENGTH);
 
-        // Validate installer package name.
+        // Validate requested installer package name.
         if (params.installerPackageName != null && !isValidPackageName(
                 params.installerPackageName)) {
             params.installerPackageName = null;
         }
 
-        var requestedInstallerPackageName =
+        // Validate installer package name.
+        if (installerPackageName != null && !isValidPackageName(installerPackageName)) {
+            installerPackageName = null;
+        }
+
+        String requestedInstallerPackageName =
                 params.installerPackageName != null ? params.installerPackageName
                         : installerPackageName;
 
@@ -1433,7 +1438,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         if (mContext.checkPermission(Manifest.permission.DELETE_PACKAGES, callingPid, callingUid)
                 == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
-            mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
+            mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags,
+                    callingUid);
         } else if (canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
