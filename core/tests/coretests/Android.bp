@@ -21,6 +21,7 @@ filegroup {
     srcs: [
         "DisabledTestApp/src/**/*.java",
         "EnabledTestApp/src/**/*.java",
+        "BinderFrozenStateChangeCallbackTestApp/src/**/*.java",
         "BinderProxyCountingTestApp/src/**/*.java",
         "BinderProxyCountingTestService/src/**/*.java",
         "BinderDeathRecipientHelperApp/src/**/*.java",
@@ -137,6 +138,7 @@ android_test {
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
         ":com.android.cts.helpers.aosp",
+        ":BinderFrozenStateChangeCallbackTestApp",
         ":BinderProxyCountingTestApp",
         ":BinderProxyCountingTestService",
     ],
