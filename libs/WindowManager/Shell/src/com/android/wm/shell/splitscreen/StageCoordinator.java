@@ -155,13 +155,13 @@ import java.util.concurrent.Executor;
 
 /**
  * Coordinates the staging (visibility, sizing, ...) of the split-screen {@link MainStage} and
- * {@link SideStage} stages.
+ * other stages.
  * Some high-level rules:
- * - The {@link StageCoordinator} is only considered active if the {@link SideStage} contains at
+ * - The {@link StageCoordinator} is only considered active if the other stages contain at
  * least one child task.
  * - The {@link MainStage} should only have children if the coordinator is active.
  * - The {@link SplitLayout} divider is only visible if both the {@link MainStage}
- * and {@link SideStage} are visible.
+ * and other stages are visible.
  * - Both stages are put under a single-top root task.
  * This rules are mostly implemented in {@link #onStageVisibilityChanged(StageListenerImpl)} and
  * {@link #onStageHasChildrenChanged(StageListenerImpl).}
@@ -176,7 +176,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private final MainStage mMainStage;
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
-    private final SideStage mSideStage;
+    private final StageTaskListener mSideStage;
     private final StageListenerImpl mSideStageListener = new StageListenerImpl();
     @SplitPosition
     private int mSideStagePosition = SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -338,7 +338,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSurfaceSession,
                 iconProvider,
                 mWindowDecorViewModel);
-        mSideStage = new SideStage(
+        mSideStage = new StageTaskListener(
                 mContext,
                 mTaskOrganizer,
                 mDisplayId,
@@ -367,7 +367,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @VisibleForTesting
     StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-            ShellTaskOrganizer taskOrganizer, MainStage mainStage, SideStage sideStage,
+            ShellTaskOrganizer taskOrganizer, MainStage mainStage, StageTaskListener sideStage,
             DisplayController displayController, DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
             Transitions transitions, TransactionPool transactionPool, ShellExecutor mainExecutor,
@@ -507,7 +507,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         /**
          * {@link MainStage} will be deactivated in {@link #onStageHasChildrenChanged} if the
-         * {@link SideStage} no longer has children.
+         * other stages no longer have children.
          */
         final boolean result = mSideStage.removeTask(taskId,
                 isSplitActive() ? mMainStage.mRootTaskInfo.token : null,
