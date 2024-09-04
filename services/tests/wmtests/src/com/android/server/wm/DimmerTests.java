@@ -113,7 +113,7 @@ public class DimmerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         MockSurfaceBuildingContainer host = new MockSurfaceBuildingContainer(mWm);
-        mTransaction = spy(StubTransaction.class);
+        mTransaction = host.getSyncTransaction();
 
         final SurfaceControl mControl1 = mock(SurfaceControl.class);
         final SurfaceControl mControl2 = mock(SurfaceControl.class);

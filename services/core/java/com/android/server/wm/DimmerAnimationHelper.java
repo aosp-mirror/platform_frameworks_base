@@ -184,9 +184,11 @@ public class DimmerAnimationHelper {
         mLocalAnimationAdapter.startAnimation(dim.mDimSurface, t,
                 ANIMATION_TYPE_DIMMER, /* finishCallback */ (type, animator) -> {
                     synchronized (dim.mHostContainer.mWmService.mGlobalLock) {
-                        setCurrentAlphaBlur(dim.mDimSurface, t);
+                        SurfaceControl.Transaction finishTransaction =
+                                dim.mHostContainer.getSyncTransaction();
+                        setCurrentAlphaBlur(dim.mDimSurface, finishTransaction);
                         if (targetAlpha == 0f && !dim.isDimming()) {
-                            dim.remove(t);
+                            dim.remove(finishTransaction);
                         }
                         mLocalAnimationAdapter = null;
                         mAlphaAnimationSpec = null;
