@@ -434,7 +434,11 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubblesManager).onUserChangedBubble(entry, false);
 
-        verify(mHeadsUpManager).removeNotification(entry.getKey(), true);
+        verify(mHeadsUpManager).removeNotification(
+                entry.getKey(),
+                /* releaseImmediately= */ true,
+                /* reason= */ "onNotificationBubbleIconClicked"
+        );
 
         verifyNoMoreInteractions(mContentIntent);
         verifyNoMoreInteractions(mShadeController);
@@ -456,7 +460,11 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubblesManager).onUserChangedBubble(entry, true);
 
-        verify(mHeadsUpManager).removeNotification(entry.getKey(), true);
+        verify(mHeadsUpManager).removeNotification(
+                entry.getKey(),
+                /* releaseImmediately= */ true,
+                /* reason= */ "onNotificationBubbleIconClicked"
+        );
 
         verify(mContentIntent, atLeastOnce()).isActivity();
         verifyNoMoreInteractions(mContentIntent);

@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.ui.composable
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -28,7 +30,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.UserAction
@@ -49,17 +54,23 @@ import kotlinx.coroutines.flow.collectLatest
  * containers.
  *
  * @param viewModel The UI state holder for this container.
- * @param sceneByKey Mapping of [ComposableScene] by [SceneKey], ordered by z-order such that the
- *   last scene is rendered on top of all other scenes. It's critical that this map contains exactly
- *   and only the scenes on this container. In other words: (a) there should be no scene in this map
- *   that is not in the configuration for this container and (b) all scenes in the configuration
- *   must have entries in this map.
+ * @param sceneByKey Mapping of [Scene] by [SceneKey], ordered by z-order such that the last scene
+ *   is rendered on top of all other scenes. It's critical that this map contains exactly and only
+ *   the scenes on this container. In other words: (a) there should be no scene in this map that is
+ *   not in the configuration for this container and (b) all scenes in the configuration must have
+ *   entries in this map.
+ * @param overlayByKey Mapping of [Overlay] by [OverlayKey], ordered by z-order such that the last
+ *   overlay is rendered on top of all other overlays. It's critical that this map contains exactly
+ *   and only the overlays on this container. In other words: (a) there should be no overlay in this
+ *   map that is not in the configuration for this container and (b) all overlays in the
+ *   configuration must have entries in this map.
  * @param modifier A modifier.
  */
 @Composable
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
-    sceneByKey: Map<SceneKey, ComposableScene>,
+    sceneByKey: Map<SceneKey, Scene>,
+    overlayByKey: Map<OverlayKey, Overlay>,
     initialSceneKey: SceneKey,
     dataSourceDelegator: SceneDataSourceDelegator,
     modifier: Modifier = Modifier,
@@ -86,37 +97,55 @@ fun SceneContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
-    val userActionsBySceneKey: MutableMap<SceneKey, Map<UserAction, UserActionResult>> = remember {
-        mutableStateMapOf()
-    }
+    val userActionsByContentKey: MutableMap<ContentKey, Map<UserAction, UserActionResult>> =
+        remember {
+            mutableStateMapOf()
+        }
+    // TODO(b/359173565): Add overlay user actions when the API is final.
     LaunchedEffect(currentSceneKey) {
         try {
             sceneByKey[currentSceneKey]?.destinationScenes?.collectLatest { userActions ->
-                userActionsBySceneKey[currentSceneKey] = viewModel.resolveSceneFamilies(userActions)
+                userActionsByContentKey[currentSceneKey] =
+                    viewModel.resolveSceneFamilies(userActions)
             }
         } finally {
-            userActionsBySceneKey[currentSceneKey] = emptyMap()
+            userActionsByContentKey[currentSceneKey] = emptyMap()
         }
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier.fillMaxSize().pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown(false)
+                    viewModel.onSceneContainerUserInputStarted()
+                }
+            },
     ) {
         SceneTransitionLayout(state = state, modifier = modifier.fillMaxSize()) {
-            sceneByKey.forEach { (sceneKey, composableScene) ->
+            sceneByKey.forEach { (sceneKey, scene) ->
                 scene(
                     key = sceneKey,
-                    userActions = userActionsBySceneKey.getOrDefault(sceneKey, emptyMap())
+                    userActions = userActionsByContentKey.getOrDefault(sceneKey, emptyMap())
                 ) {
                     // Activate the scene.
-                    LaunchedEffect(composableScene) { composableScene.activate() }
+                    LaunchedEffect(scene) { scene.activate() }
 
                     // Render the scene.
-                    with(composableScene) {
+                    with(scene) {
                         this@scene.Content(
                             modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),
                         )
                     }
+                }
+            }
+            overlayByKey.forEach { (overlayKey, composableOverlay) ->
+                overlay(
+                    key = overlayKey,
+                    userActions = userActionsByContentKey.getOrDefault(overlayKey, emptyMap())
+                ) {
+                    // Render the overlay.
+                    with(composableOverlay) { this@overlay.Content(Modifier) }
                 }
             }
         }

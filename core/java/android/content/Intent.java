@@ -3767,7 +3767,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>The Intent will have the following extra value:</p>
      * <ul>
      *   <li><em>{@link android.content.Intent#EXTRA_PHONE_NUMBER}</em> -
-     *       the phone number originally intended to be dialed.</li>
+     *       the phone number dialed.</li>
      * </ul>
      * <p class="note">Starting in Android 15, this broadcast is no longer sent as an ordered
      * broadcast.  The <code>resultData</code> no longer has any effect and will not determine the
@@ -3799,6 +3799,14 @@ public class Intent implements Parcelable, Cloneable {
      * <p>You must hold the
      * {@link android.Manifest.permission#PROCESS_OUTGOING_CALLS}
      * permission to receive this Intent.</p>
+     *
+     * <p class="note">Starting in {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, this broadcast is
+     * no longer sent as an ordered broadcast, and does not allow activity launches.  This means
+     * that receivers may no longer change the phone number for the outgoing call, or cancel the
+     * outgoing call.  This functionality is only possible using the
+     * {@link android.telecom.CallRedirectionService} API.  Although background receivers are
+     * woken up to handle this intent, no guarantee is made as to the timeliness of the broadcast.
+     * </p>
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -7485,7 +7493,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This flag is only used for split-screen multi-window mode. The new activity will be displayed
-     * adjacent to the one launching it. This can only be used in conjunction with
+     * adjacent to the one launching it if possible. This can only be used in conjunction with
      * {@link #FLAG_ACTIVITY_NEW_TASK}. Also, setting {@link #FLAG_ACTIVITY_MULTIPLE_TASK} is
      * required if you want a new instance of an existing activity to be created.
      */

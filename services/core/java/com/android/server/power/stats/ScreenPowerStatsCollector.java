@@ -26,6 +26,7 @@ import android.util.SparseLongArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.ScreenPowerStatsLayout;
 
 import java.util.Arrays;
 import java.util.function.IntSupplier;
@@ -33,7 +34,7 @@ import java.util.function.IntSupplier;
 public class ScreenPowerStatsCollector extends PowerStatsCollector {
     private static final String TAG = "ScreenPowerStatsCollector";
 
-    interface ScreenUsageTimeRetriever {
+    public interface ScreenUsageTimeRetriever {
         interface Callback {
             void onUidTopActivityTime(int uid, long topActivityTimeMs);
         }
@@ -45,7 +46,7 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
         long getScreenDozeTimeMs(int display);
     }
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
@@ -76,7 +77,7 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
     private final SparseLongArray mLastTopActivityTime = new SparseLongArray();
     private long mLastCollectionTime;
 
-    ScreenPowerStatsCollector(Injector injector) {
+    public ScreenPowerStatsCollector(Injector injector) {
         super(injector.getHandler(),
                 injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
@@ -103,13 +104,8 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
         mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
         Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new ScreenPowerStatsLayout();
-        mLayout.addDeviceScreenUsageDurationSection(mInjector.getDisplayCount());
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidTopActivitiyDuration();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new ScreenPowerStatsLayout(mEnergyConsumerIds.length,
+                mInjector.getDisplayCount());
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);
@@ -129,7 +125,7 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
     }
 
     @Override
-    protected PowerStats collectStats() {
+    public PowerStats collectStats() {
         if (!ensureInitialized()) {
             return null;
         }

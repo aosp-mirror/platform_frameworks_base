@@ -44,6 +44,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.utils.TestUtils;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -94,7 +95,8 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         mMenuViewLayer = spy(new MenuViewLayer(
                 mContext, stubWindowManager, mAccessibilityManager,
                 stubMenuViewModel, stubMenuViewAppearance, mMenuView,
-                mock(IAccessibilityFloatingMenu.class), mSecureSettings));
+                mock(IAccessibilityFloatingMenu.class), mSecureSettings,
+                mock(NavigationModeController.class)));
         doNothing().when(mMenuViewLayer).gotoEditScreen();
 
         doReturn(mDraggableBounds).when(mMenuView).getMenuDraggableBounds();

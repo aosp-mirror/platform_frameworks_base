@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone.ui;
 
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -64,9 +63,8 @@ public class DarkIconManager extends IconManager {
     }
 
     @Override
-    protected LinearLayout.LayoutParams onCreateLayoutParams() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+    protected LinearLayout.LayoutParams onCreateLayoutParams(StatusBarIcon.Shape shape) {
+        LinearLayout.LayoutParams lp = super.onCreateLayoutParams(shape);
         lp.setMargins(mIconHorizontalMargin, 0, mIconHorizontalMargin, 0);
         return lp;
     }

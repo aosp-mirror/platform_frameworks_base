@@ -22,8 +22,8 @@ import android.os.fakeExecutorHandler
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.localMediaManagerFactory
-import com.android.systemui.media.controls.util.mediaControllerFactory
 import com.android.systemui.media.muteawait.mediaMuteAwaitConnectionManagerFactory
 import com.android.systemui.statusbar.policy.configurationController
 
@@ -31,7 +31,7 @@ val Kosmos.mediaDeviceManager by
     Kosmos.Fixture {
         MediaDeviceManager(
             context = applicationContext,
-            controllerFactory = mediaControllerFactory,
+            controllerFactory = fakeMediaControllerFactory,
             localMediaManagerFactory = localMediaManagerFactory,
             mr2manager = { MediaRouter2Manager.getInstance(applicationContext) },
             muteAwaitConnectionManagerFactory = mediaMuteAwaitConnectionManagerFactory,
@@ -41,5 +41,6 @@ val Kosmos.mediaDeviceManager by
             },
             fgExecutor = fakeExecutor,
             bgExecutor = fakeExecutor,
+            logger = mediaDeviceLogger,
         )
     }

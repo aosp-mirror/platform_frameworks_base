@@ -7459,15 +7459,15 @@ public class AppOpsManager {
         }
 
         /**
-         * Similar to {@link #onOpChanged(String, String, int)} but includes the device for which
-         * the op mode has changed.
+         * Similar to {@link #onOpChanged(String, String)} but includes user and the device for
+         * which the op mode has changed.
          *
          * <p> Implement this method if callbacks are required on all devices.
          * If not implemented explicitly, the default implementation will notify for op changes
-         * on the default device {@link VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT} only.
+         * on the default device only.
          *
-         * <p> If implemented, {@link #onOpChanged(String, String, int)}
-         * will not be called automatically.
+         * <p> If implemented, {@link #onOpChanged(String, String)} will not be called
+         * automatically.
          *
          * @param op The Op that changed.
          * @param packageName Package of the app whose Op changed.
@@ -10768,8 +10768,13 @@ public class AppOpsManager {
                 final long key = makeKey(uidState, flag);
 
                 NoteOpEvent event = events.get(key);
-                if (lastEvent == null
-                        || event != null && event.getNoteTime() > lastEvent.getNoteTime()) {
+                if (event == null) {
+                    continue;
+                }
+
+                if (lastEvent == null || event.getNoteTime() > lastEvent.getNoteTime()
+                        || (event.getNoteTime() == lastEvent.getNoteTime()
+                                && event.getDuration() > lastEvent.getDuration())) {
                     lastEvent = event;
                 }
             }
@@ -11013,7 +11018,8 @@ public class AppOpsManager {
 
                 if (access != null) {
                     NoteOpEvent existingAccess = accessEvents.get(key);
-                    if (existingAccess == null || existingAccess.getDuration() == -1) {
+                    if (existingAccess == null || existingAccess.getDuration() == -1
+                            || existingAccess.getDuration() < access.getDuration()) {
                         accessEvents.append(key, access);
                     } else if (existingAccess.mProxy == null && access.mProxy != null ) {
                         existingAccess.mProxy = access.mProxy;

@@ -34,6 +34,7 @@ import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.util.TraceClassVisitor
 import java.io.PrintWriter
 
@@ -186,7 +187,7 @@ abstract class BaseAdapter (
             // Instead of this method, we rename the substitute-to method with the original
             // name, in the "Maybe rename the method" part below.
             val policy = filter.getPolicyForMethod(currentClassName, name, descriptor)
-            if (policy.policy.isSubstitute) {
+            if (policy.policy == FilterPolicy.Substitute) {
                 log.d("Skipping %s%s %s", name, descriptor, policy)
                 return null
             }
@@ -259,13 +260,14 @@ abstract class BaseAdapter (
 
     companion object {
         fun getVisitor(
-                classInternalName: String,
-                classes: ClassNodes,
-                nextVisitor: ClassVisitor,
-                filter: OutputFilter,
-                packageRedirector: PackageRedirectRemapper,
-                forImpl: Boolean,
-                options: Options,
+            classInternalName: String,
+            classes: ClassNodes,
+            nextVisitor: ClassVisitor,
+            filter: OutputFilter,
+            packageRedirector: PackageRedirectRemapper,
+            remapper: Remapper?,
+            forImpl: Boolean,
+            options: Options,
         ): ClassVisitor {
             var next = nextVisitor
 

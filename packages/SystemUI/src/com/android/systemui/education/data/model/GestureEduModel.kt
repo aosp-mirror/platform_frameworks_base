@@ -26,4 +26,7 @@ data class GestureEduModel(
     val signalCount: Int = 0,
     val educationShownCount: Int = 0,
     val lastShortcutTriggeredTime: Instant? = null,
+    val usageSessionStartTime: Instant? = null,
+    val lastEducationTime: Instant? = null,
+    val userId: Int
 )

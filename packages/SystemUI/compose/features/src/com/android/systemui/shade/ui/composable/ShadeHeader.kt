@@ -73,6 +73,7 @@ import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -122,12 +123,13 @@ object ShadeHeader {
 
 @Composable
 fun SceneScope.CollapsedShadeHeader(
-    viewModel: ShadeHeaderViewModel,
+    viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = rememberViewModel("CollapsedShadeHeader") { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return
@@ -279,12 +281,13 @@ fun SceneScope.CollapsedShadeHeader(
 
 @Composable
 fun SceneScope.ExpandedShadeHeader(
-    viewModel: ShadeHeaderViewModel,
+    viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = rememberViewModel("ExpandedShadeHeader") { viewModelFactory.create() }
     val isDisabled by viewModel.isDisabled.collectAsStateWithLifecycle()
     if (isDisabled) {
         return

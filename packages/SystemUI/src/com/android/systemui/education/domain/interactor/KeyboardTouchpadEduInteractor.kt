@@ -16,18 +16,33 @@
 
 package com.android.systemui.education.domain.interactor
 
+import android.hardware.input.InputManager
+import android.hardware.input.InputManager.KeyGestureEventListener
+import android.hardware.input.KeyGestureEvent
 import com.android.systemui.CoreStartable
+import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
+import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.contextualeducation.GestureType.HOME
+import com.android.systemui.contextualeducation.GestureType.OVERVIEW
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
 import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.shared.model.EducationInfo
 import com.android.systemui.education.shared.model.EducationUiType
+import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import java.time.Clock
+import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
 /** Allow listening to new contextual education triggered */
@@ -36,37 +51,99 @@ class KeyboardTouchpadEduInteractor
 @Inject
 constructor(
     @Background private val backgroundScope: CoroutineScope,
-    private val contextualEducationInteractor: ContextualEducationInteractor
+    private val contextualEducationInteractor: ContextualEducationInteractor,
+    private val userInputDeviceRepository: UserInputDeviceRepository,
+    private val inputManager: InputManager,
+    @EduClock private val clock: Clock,
 ) : CoreStartable {
 
     companion object {
+        const val TAG = "KeyboardTouchpadEduInteractor"
         const val MAX_SIGNAL_COUNT: Int = 2
+        val usageSessionDuration = 72.hours
     }
 
     private val _educationTriggered = MutableStateFlow<EducationInfo?>(null)
     val educationTriggered = _educationTriggered.asStateFlow()
 
-    override fun start() {
-        backgroundScope.launch {
-            contextualEducationInteractor.backGestureModelFlow
-                .mapNotNull { getEduType(it) }
-                .collect { _educationTriggered.value = EducationInfo(BACK, it) }
+    private val keyboardShortcutTriggered: Flow<GestureType> = conflatedCallbackFlow {
+        val listener = KeyGestureEventListener { event ->
+            val shortcutType =
+                when (event.keyGestureType) {
+                    KeyGestureEvent.KEY_GESTURE_TYPE_BACK -> BACK
+                    KeyGestureEvent.KEY_GESTURE_TYPE_HOME -> HOME
+                    KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS -> OVERVIEW
+                    KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS -> ALL_APPS
+                    else -> null
+                }
+
+            if (shortcutType != null) {
+                trySendWithFailureLogging(shortcutType, TAG)
+            }
         }
+
+        inputManager.registerKeyGestureEventListener(Executor(Runnable::run), listener)
+        awaitClose { inputManager.unregisterKeyGestureEventListener(listener) }
     }
 
-    private fun getEduType(model: GestureEduModel): EducationUiType? {
-        if (isEducationNeeded(model)) {
-            return EducationUiType.Toast
-        } else {
-            return null
+    override fun start() {
+        backgroundScope.launch {
+            contextualEducationInteractor.backGestureModelFlow.collect {
+                if (isUsageSessionExpired(it)) {
+                    contextualEducationInteractor.startNewUsageSession(BACK)
+                } else if (isEducationNeeded(it)) {
+                    _educationTriggered.value = EducationInfo(BACK, getEduType(it), it.userId)
+                    contextualEducationInteractor.updateOnEduTriggered(BACK)
+                }
+            }
+        }
+
+        backgroundScope.launch {
+            userInputDeviceRepository.isAnyTouchpadConnectedForUser.collect {
+                if (
+                    it.isConnected &&
+                        contextualEducationInteractor
+                            .getEduDeviceConnectionTime()
+                            .touchpadFirstConnectionTime == null
+                ) {
+                    contextualEducationInteractor.updateTouchpadFirstConnectionTime()
+                }
+            }
+        }
+
+        backgroundScope.launch {
+            userInputDeviceRepository.isAnyKeyboardConnectedForUser.collect {
+                if (
+                    it.isConnected &&
+                        contextualEducationInteractor
+                            .getEduDeviceConnectionTime()
+                            .keyboardFirstConnectionTime == null
+                ) {
+                    contextualEducationInteractor.updateKeyboardFirstConnectionTime()
+                }
+            }
+        }
+
+        backgroundScope.launch {
+            keyboardShortcutTriggered.collect {
+                contextualEducationInteractor.updateShortcutTriggerTime(it)
+            }
         }
     }
 
     private fun isEducationNeeded(model: GestureEduModel): Boolean {
         // Todo: b/354884305 - add complete education logic to show education in correct scenarios
-        val shortcutWasTriggered = model.lastShortcutTriggeredTime == null
+        val noShortcutTriggered = model.lastShortcutTriggeredTime == null
         val signalCountReached = model.signalCount >= MAX_SIGNAL_COUNT
-
-        return shortcutWasTriggered && signalCountReached
+        return noShortcutTriggered && signalCountReached
     }
+
+    private fun isUsageSessionExpired(model: GestureEduModel): Boolean {
+        return model.usageSessionStartTime
+            ?.plusSeconds(usageSessionDuration.inWholeSeconds)
+            ?.isBefore(clock.instant()) ?: false
+    }
+
+    private fun getEduType(model: GestureEduModel) =
+        if (model.educationShownCount > 0) EducationUiType.Notification else EducationUiType.Toast
 }

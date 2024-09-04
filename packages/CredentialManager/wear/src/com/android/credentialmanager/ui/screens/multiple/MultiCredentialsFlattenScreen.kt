@@ -24,13 +24,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.ui.components.WearButtonText
+import com.android.credentialmanager.ui.components.LockedProviderChip
 import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
@@ -38,6 +38,8 @@ import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberColumnState
 import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
+import androidx.compose.ui.text.style.TextAlign
+import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 
 /**
  * Screen that shows multiple credentials to select from, grouped by accounts
@@ -69,6 +71,7 @@ fun MultiCredentialsFlattenScreen(
                     text = stringResource(R.string.sign_in_options_title),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.854f).fillMaxSize(),
+                    maxLines = 2,
                 )
                 Spacer(Modifier.weight(0.073f)) // 7.3% side margin
             }
@@ -79,7 +82,7 @@ fun MultiCredentialsFlattenScreen(
                 Row {
                     Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
                     WearSecondaryLabel(
-                        text = userNameEntries.userName,
+                        text = userNameEntries.name,
                         modifier = Modifier.padding(
                             top = 12.dp,
                             bottom = 4.dp,
@@ -94,16 +97,36 @@ fun MultiCredentialsFlattenScreen(
             userNameEntries.sortedCredentialEntryList.forEach { credential: CredentialEntryInfo ->
                 item {
                     CredentialsScreenChip(
-                        label = credential.userName,
+                        primaryText = {
+                            WearButtonText(
+                                text = credential.userName,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2,
+                            )
+                        },
                         onClick = { selectEntry(credential, false) },
-                        secondaryLabel =
-                        credential.credentialTypeDisplayName.ifEmpty {
-                            credential.providerDisplayName
+                        secondaryText =
+                        {
+                            WearSecondaryLabel(
+                                text = credential.credentialTypeDisplayName.ifEmpty {
+                                    credential.providerDisplayName
+                                },
+                                color = WearMaterialTheme.colors.onSurfaceVariant,
+                                maxLines = 2
+                            )
                         },
                         icon = credential.icon,
-                        textAlign = TextAlign.Start
                     )
 
+                    CredentialsScreenChipSpacer()
+                }
+            }
+
+            credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
+                item {
+                    LockedProviderChip(authenticationEntryInfo, secondaryMaxLines = 2) {
+                        selectEntry(authenticationEntryInfo, false)
+                    }
                     CredentialsScreenChipSpacer()
                 }
             }
@@ -120,7 +143,8 @@ fun MultiCredentialsFlattenScreen(
                             bottom = 4.dp,
                             start = 0.dp,
                             end = 0.dp
-                        ).fillMaxWidth(0.87f)
+                        ).fillMaxWidth(0.87f),
+                        maxLines = 2
                 )
                     Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
                 }
@@ -128,9 +152,15 @@ fun MultiCredentialsFlattenScreen(
             credentialSelectorUiState.actionEntryList.forEach { actionEntry ->
                 item {
                     CredentialsScreenChip(
-                        label = actionEntry.title,
+                        primaryText = {
+                            WearButtonText(
+                                text = actionEntry.title,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2
+                            )
+                        },
                         onClick = { selectEntry(actionEntry, false) },
-                        secondaryLabel = null,
+                        secondaryText = null,
                         icon = actionEntry.icon,
                     )
                     CredentialsScreenChipSpacer()

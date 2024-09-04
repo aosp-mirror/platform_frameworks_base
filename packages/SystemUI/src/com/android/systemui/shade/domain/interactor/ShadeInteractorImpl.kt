@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.shared.flag.DualShade
-import com.android.systemui.shade.shared.model.ShadeAlignment
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -55,7 +54,7 @@ constructor(
     keyguardRepository: KeyguardRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
-    shadeRepository: ShadeRepository,
+    private val shadeRepository: ShadeRepository,
     userSetupRepository: UserSetupRepository,
     userSwitcherInteractor: UserSwitcherInteractor,
     private val baseShadeInteractor: BaseShadeInteractor,
@@ -113,13 +112,6 @@ constructor(
                 SharingStarted.Eagerly,
                 initialValue = determineShadeMode(isShadeLayoutWide.value)
             )
-
-    override val shadeAlignment: ShadeAlignment =
-        if (shadeRepository.isDualShadeAlignedToBottom) {
-            ShadeAlignment.Bottom
-        } else {
-            ShadeAlignment.Top
-        }
 
     override val isExpandToQsEnabled: Flow<Boolean> =
         combine(

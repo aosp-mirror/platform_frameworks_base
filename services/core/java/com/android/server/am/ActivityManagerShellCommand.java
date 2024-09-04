@@ -1234,8 +1234,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 if (freeze) {
                     mInternal.mOomAdjuster.mCachedAppOptimizer.forceFreezeAppAsyncLSP(proc);
                 } else {
-                    mInternal.mOomAdjuster.mCachedAppOptimizer.unfreezeAppInternalLSP(proc, 0,
-                            true);
+                    mInternal.mOomAdjuster.mCachedAppOptimizer.unfreezeAppLSP(proc, 0, true);
                 }
             }
         }

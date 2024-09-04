@@ -23,7 +23,7 @@ import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the translation of an element to another element. */
 internal class AnchoredTranslate(
@@ -35,7 +35,7 @@ internal class AnchoredTranslate(
         content: ContentKey,
         element: Element,
         stateInContent: Element.State,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
         fun throwException(content: ContentKey?): Nothing {

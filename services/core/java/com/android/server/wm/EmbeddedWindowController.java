@@ -403,7 +403,7 @@ class EmbeddedWindowController {
 
         @Override
         public void dumpProto(ProtoOutputStream proto, long fieldId,
-                              @WindowTraceLogLevel int logLevel) {
+                              @WindowTracingLogLevel int logLevel) {
             final long token = proto.start(fieldId);
 
             final long token2 = proto.start(IDENTIFIER);

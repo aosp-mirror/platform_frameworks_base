@@ -52,6 +52,7 @@ import android.view.inputmethod.InputMethodManagerGlobal;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
@@ -467,6 +468,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
                 if (mImeSourceControl == null || mImeSourceControl.getLeash() == null) {
                     if (DEBUG) Slog.d(TAG, "No leash available, not starting the animation.");
+                    return;
+                } else if (!mImeRequestedVisible && show) {
+                    // we have a control with leash, but the IME was not requested visible before,
+                    // therefore aborting the show animation.
+                    Slog.e(TAG, "IME was not requested visible, not starting the show animation.");
+                    // TODO(b/353463205) fail statsToken here
                     return;
                 }
             }

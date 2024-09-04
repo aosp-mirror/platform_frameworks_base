@@ -50,8 +50,8 @@ class TileViewModel(private val tile: QSTile, val spec: TileSpec) {
         tile.longClick(expandable)
     }
 
-    fun onSecondaryClick(expandable: Expandable?) {
-        tile.secondaryClick(expandable)
+    fun onSecondaryClick() {
+        tile.secondaryClick(null)
     }
 
     fun startListening(token: Any) = tile.setListening(token, true)

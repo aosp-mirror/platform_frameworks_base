@@ -178,7 +178,7 @@ public class CsipDeviceManager {
         }
         log("updateRelationshipOfGroupDevices: mCachedDevices list =" + mCachedDevices.toString());
 
-        // Get the preferred main device by getPreferredMainDeviceWithoutConectionState
+        // Get the preferred main device by getPreferredMainDeviceWithoutConnectionState
         List<CachedBluetoothDevice> groupDevicesList = getGroupDevicesFromAllOfDevicesList(groupId);
         CachedBluetoothDevice preferredMainDevice =
                 getPreferredMainDevice(groupId, groupDevicesList);
@@ -261,9 +261,9 @@ public class CsipDeviceManager {
         }
 
         CachedBluetoothDevice dualModeDevice = groupDevicesList.stream()
-                .filter(cachedDevice -> cachedDevice.getConnectableProfiles().stream()
+                .filter(cachedDevice -> cachedDevice.getUiAccessibleProfiles().stream()
                         .anyMatch(profile -> profile instanceof LeAudioProfile))
-                .filter(cachedDevice -> cachedDevice.getConnectableProfiles().stream()
+                .filter(cachedDevice -> cachedDevice.getUiAccessibleProfiles().stream()
                         .anyMatch(profile -> profile instanceof A2dpProfile
                                 || profile instanceof HeadsetProfile))
                 .findFirst().orElse(null);
@@ -373,6 +373,7 @@ public class CsipDeviceManager {
                 preferredMainDevice.addMemberDevice(deviceItem);
                 mCachedDevices.remove(deviceItem);
                 mBtManager.getEventManager().dispatchDeviceRemoved(deviceItem);
+                preferredMainDevice.refresh();
                 hasChanged = true;
             }
         }

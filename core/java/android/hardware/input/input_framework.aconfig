@@ -92,3 +92,17 @@ flag {
   description: "Dump keyboard shortcuts in dumpsys window"
   bug: "351963350"
 }
+
+flag {
+  name: "modifier_shortcut_manager_refactor"
+  namespace: "input"
+  description: "Refactor ModifierShortcutManager internal representation of shortcuts."
+  bug: "358603902"
+}
+
+flag {
+  name: "keyboard_repeat_keys"
+  namespace: "input"
+  description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
+  bug: "336585002"
+}

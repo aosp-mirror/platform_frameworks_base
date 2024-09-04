@@ -59,6 +59,16 @@ internal fun ConstraintSet.setAlpha(
     alpha: Float,
 ) = views.forEach { view -> this.setAlpha(view.id, alpha) }
 
+internal fun ConstraintSet.setScaleX(
+    views: Iterable<View>,
+    alpha: Float,
+) = views.forEach { view -> this.setScaleX(view.id, alpha) }
+
+internal fun ConstraintSet.setScaleY(
+    views: Iterable<View>,
+    alpha: Float,
+) = views.forEach { view -> this.setScaleY(view.id, alpha) }
+
 @SysUISingleton
 class ClockSection
 @Inject
@@ -125,6 +135,9 @@ constructor(
             setAlpha(getNonTargetClockFace(clock).views, 0F)
             if (!keyguardClockViewModel.isLargeClockVisible.value) {
                 connect(sharedR.id.bc_smartspace_view, TOP, sharedR.id.date_smartspace_view, BOTTOM)
+            } else {
+                setScaleX(getTargetClockFace(clock).views, rootViewModel.burnInModel.value.scale)
+                setScaleY(getTargetClockFace(clock).views, rootViewModel.burnInModel.value.scale)
             }
         }
     }
@@ -205,6 +218,9 @@ constructor(
             create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)
             setGuidelineBegin(R.id.small_clock_guideline_top, smallClockTopMargin)
             connect(R.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)
+
+            // Explicitly clear pivot to force recalculate pivot instead of using legacy value
+            setTransformPivot(R.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
         }
 
         constrainWeatherClockDateIconsBarrier(constraints)

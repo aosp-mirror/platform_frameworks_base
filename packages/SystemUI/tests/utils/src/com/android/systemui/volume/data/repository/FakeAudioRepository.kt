@@ -18,12 +18,16 @@ package com.android.systemui.volume.data.repository
 
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import com.android.settingslib.volume.data.model.VolumeControllerEvent
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -39,9 +43,25 @@ class FakeAudioRepository : AudioRepository {
     override val communicationDevice: StateFlow<AudioDeviceInfo?> =
         mutableCommunicationDevice.asStateFlow()
 
+    private val mutableVolumeControllerEvents = MutableSharedFlow<VolumeControllerEvent>(replay = 1)
+    override val volumeControllerEvents: Flow<VolumeControllerEvent>
+        get() = mutableVolumeControllerEvents.asSharedFlow()
+
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
     private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()
     private val deviceCategories: MutableMap<String, Int> = mutableMapOf()
+
+    private val mutableIsVolumeControllerVisible = MutableStateFlow(false)
+    val isVolumeControllerVisible: StateFlow<Boolean>
+        get() = mutableIsVolumeControllerVisible.asStateFlow()
+
+    private var mutableIsInitialized: Boolean = false
+    val isInitialized: Boolean
+        get() = mutableIsInitialized
+
+    override fun init() {
+        mutableIsInitialized = true
+    }
 
     private fun getAudioStreamModelState(
         audioStream: AudioStream
@@ -110,5 +130,17 @@ class FakeAudioRepository : AudioRepository {
 
     override suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int {
         return deviceCategories[bluetoothAddress] ?: AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN
+    }
+
+    suspend fun sendVolumeControllerEvent(event: VolumeControllerEvent) {
+        if (isInitialized) {
+            mutableVolumeControllerEvents.emit(event)
+        }
+    }
+
+    override suspend fun notifyVolumeControllerVisible(isVisible: Boolean) {
+        if (isInitialized) {
+            mutableIsVolumeControllerVisible.value = isVisible
+        }
     }
 }

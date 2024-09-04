@@ -21,6 +21,7 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
 import static com.android.server.am.ActivityManagerService.Injector;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.FrozenProcessListener;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -1033,6 +1036,53 @@ public final class CachedAppOptimizerTest {
         assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
 
         mFreezeCounter = new CountDownLatch(1);
+        mCachedAppOptimizerUnderTest.forceFreezeForTest(app, false);
+        assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testFrozenNotifier() throws Exception {
+        mUseFreezer = true;
+        mProcessDependencies.setRss(new long[] {
+                    0 /*total_rss*/,
+                    0 /*file*/,
+                    0 /*anon*/,
+                    0 /*swap*/,
+                    0 /*shmem*/
+                });
+
+        // Force the system to use the freezer
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+                CachedAppOptimizer.KEY_USE_FREEZER, "true", false);
+        mCachedAppOptimizerUnderTest.init();
+        initActivityManagerService();
+
+        assertTrue(mAms.isAppFreezerSupported());
+        assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isTrue();
+
+        int pid = 10000;
+        int uid = 2;
+        int pkgUid = 3;
+        ProcessRecord app = makeProcessRecord(pid, uid, pkgUid, "p1", "app1");
+        assertNotNull(app.mOptRecord);
+
+        FrozenProcessListener listener = new FrozenProcessListener() {
+                @Override
+                public void onProcessFrozen(int pid) {
+                    mFreezeCounter.countDown();
+                }
+                @Override
+                public void onProcessUnfrozen(int pid) {
+                    mFreezeCounter.countDown();
+                }
+            };
+        mCachedAppOptimizerUnderTest.addFrozenProcessListener(app, directExecutor(), listener);
+
+        mFreezeCounter = new CountDownLatch(2);
+        mCachedAppOptimizerUnderTest.forceFreezeForTest(app, true);
+        assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
+
+        mFreezeCounter = new CountDownLatch(2);
         mCachedAppOptimizerUnderTest.forceFreezeForTest(app, false);
         assertTrue(mFreezeCounter.await(5, TimeUnit.SECONDS));
     }

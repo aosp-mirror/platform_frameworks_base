@@ -638,17 +638,17 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * Set caller's component name for getting logo icon/description. This should only be used
          * by ConfirmDeviceCredentialActivity, see b/337082634 for more context.
          *
-         * @param componentNameForConfirmDeviceCredentialActivity set the component name for
-         *                                                        ConfirmDeviceCredentialActivity.
+         * @param realCaller set the component name of real caller for
+         *                   ConfirmDeviceCredentialActivity.
          * @return This builder.
          * @hide
          */
         @NonNull
         @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
-        public Builder setComponentNameForConfirmDeviceCredentialActivity(
-                ComponentName componentNameForConfirmDeviceCredentialActivity) {
-            mPromptInfo.setComponentNameForConfirmDeviceCredentialActivity(
-                    componentNameForConfirmDeviceCredentialActivity);
+        public Builder setRealCallerForConfirmDeviceCredentialActivity(ComponentName realCaller) {
+            mPromptInfo.setRealCallerForConfirmDeviceCredentialActivity(realCaller);
+            mPromptInfo.setClassNameIfItIsConfirmDeviceCredentialActivity(
+                    mContext.getClass().getName());
             return this;
         }
 

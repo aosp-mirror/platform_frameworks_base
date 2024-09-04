@@ -19,16 +19,6 @@ flag {
 }
 
 flag {
-    name: "do_not_skip_ime_by_target_visibility"
-    namespace: "windowing_frontend"
-    description: "Avoid window traversal missing IME"
-    bug: "339375944"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "apply_lifecycle_on_pip_change"
     namespace: "windowing_frontend"
     description: "Make pip activity lifecyle change with windowing mode"
@@ -65,10 +55,37 @@ flag {
 }
 
 flag {
+  name: "keyguard_going_away_timeout"
+  namespace: "windowing_frontend"
+  description: "Allow a maximum of 10 seconds with keyguardGoingAway=true before force-resetting"
+  bug: "343598832"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "close_to_square_config_includes_status_bar"
   namespace: "windowing_frontend"
   description: "On close to square display, when necessary, configuration includes status bar"
   bug: "291870756"
+}
+
+flag {
+  name: "reduce_keyguard_transitions"
+  namespace: "windowing_frontend"
+  description: "Avoid setting keyguard transitions ready unless there are no other changes"
+  bug: "354647472"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "transit_tracker_plumbing"
+  namespace: "windowing_frontend"
+  description: "Plumb and collect on transition tracking object instead of singleton"
+  bug: "325114242"
+  is_fixed_read_only: true
 }
 
 flag {
@@ -91,14 +108,6 @@ flag {
     namespace: "systemui"
     description: "Predictive back for system animations"
     bug: "320510464"
-}
-
-flag {
-    name: "activity_snapshot_by_default"
-    namespace: "systemui"
-    description: "Enable record activity snapshot by default"
-    bug: "259497289"
-    is_fixed_read_only: true
 }
 
 flag {
@@ -191,10 +200,28 @@ flag {
 }
 
 flag {
+  name: "system_ui_immersive_confirmation_dialog"
+  namespace: "windowing_frontend"
+  description: "Enable the implementation of the immersive confirmation dialog on system UI side by default"
+  bug: "359713629"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "ensure_wallpaper_in_transitions"
   namespace: "windowing_frontend"
   description: "Ensure that wallpaper window tokens are always present/available for collection in transitions"
   bug: "347593088"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "ensure_wallpaper_in_wear_transitions"
+  namespace: "windowing_frontend"
+  description: "Ensure that wallpaper window tokens are always present/available for collection in transitions on Wear"
+  bug: "355596979"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -214,6 +241,17 @@ flag {
   namespace: "windowing_frontend"
   description: "Create transition when visibility change from predictive back"
   bug: "347168362"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "always_capture_activity_snapshot"
+  namespace: "windowing_frontend"
+  description: "Always capture activity snapshot regardless predictive back status"
+  bug: "362183912"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX

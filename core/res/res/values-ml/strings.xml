@@ -204,7 +204,7 @@
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"സ്വകാര്യ സ്പേസ് നീക്കം ചെയ്തു"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"മാനേജ് ചെയ്യപ്പെടുന്ന ഈ ഉപകരണത്തിൽ നിങ്ങളുടെ സ്ഥാപനം സ്വകാര്യ സ്പേസുകൾ അനുവദിക്കുന്നില്ല."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനം ഈ ഉപകരണം മാനേജ് ചെയ്യുകയും നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ആപ്പുകൾക്ക് നിങ്ങളുടെ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യാനാകും"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"കൂടുതലറിയാൻ നിങ്ങളുടെ ഐടി അഡ്‌മിനെ ബന്ധപ്പെടുക"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ജിയോഫെൻസിംഗ് സേവനം"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"പാസ്‍വേഡ് ഫീൽഡുകളിൽ കയ്യെഴുത്ത് പിന്തുണയ്ക്കുന്നില്ല"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"മടങ്ങുക"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ഇൻപുട്ട് രീതി മാറുക"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ഇൻപുട്ട് രീതി പിക്കർ തുറക്കുക"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ക്രമീകരണം"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് ആപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"സാറ്റലൈറ്റിലേക്ക് സ്വയമേവ കണക്റ്റ് ചെയ്തു"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"മൊബൈലോ വൈഫൈ നെറ്റ്‌വർക്കോ ഇല്ലാതെ തന്നെ സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും നിങ്ങൾക്ക് കഴിയും"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"സാറ്റലൈറ്റ് സന്ദേശമയയ്ക്കൽ ഉപയോഗിക്കണോ?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"മൊബൈൽ അല്ലെങ്കിൽ വൈഫൈ നെറ്റ്‌വർക്ക് ഇല്ലാതെ സന്ദേശങ്ങൾ അയയ്ക്കുകയും സ്വീകരിക്കുകയും ചെയ്യുക"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"കാൽക്കുലേറ്റർ"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"മാപ്പുകൾ"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ആപ്പുകൾ"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"നിങ്ങളുടെ ഫിംഗർപ്രിന്റുകൾ ഇനി തിരിച്ചറിയാനാകില്ല. ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക."</string>
 </resources>

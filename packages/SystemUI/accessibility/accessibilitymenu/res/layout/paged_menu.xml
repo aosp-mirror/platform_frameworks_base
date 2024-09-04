@@ -6,18 +6,16 @@
     android:background="@drawable/view_background"
     >
   <LinearLayout
-      android:layout_width="@dimen/row_width"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical">
 
-    <androidx.viewpager.widget.ViewPager
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/table_margin_top"
         android:paddingBottom="@dimen/a11ymenu_layout_margin"
-        android:paddingLeft="@dimen/a11ymenu_layout_margin"
-        android:paddingRight="@dimen/a11ymenu_layout_margin"
         android:layout_gravity="center"
         android:gravity="center"
         />

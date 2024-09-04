@@ -4,3 +4,4 @@ per-file BinderTest.java = file:platform/frameworks/native:/libs/binder/OWNERS
 per-file ParcelTest.java = file:platform/frameworks/native:/libs/binder/OWNERS
 per-file SurfaceControlRegistryTests.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file VintfObjectTest.java = file:platform/system/libvintf:/OWNERS
+per-file AppOpsLoggingTest.kt,AppOpsLoggingTest.cpp,IAppOps*.aidl,AppThatUsesAppOps/* = file:/core/java/android/permission/OWNERS

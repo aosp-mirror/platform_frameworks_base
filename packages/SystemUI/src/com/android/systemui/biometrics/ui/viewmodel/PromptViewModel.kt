@@ -36,7 +36,6 @@ import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import com.android.launcher3.icons.IconProvider
-import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.Utils.isSystem
@@ -409,12 +408,7 @@ constructor(
             .distinctUntilChanged()
 
     val iconViewModel: PromptIconViewModel =
-        PromptIconViewModel(
-            this,
-            displayStateInteractor,
-            promptSelectorInteractor,
-            udfpsOverlayInteractor
-        )
+        PromptIconViewModel(this, displayStateInteractor, promptSelectorInteractor)
 
     private val _isIconViewLoaded = MutableStateFlow(false)
 
@@ -475,7 +469,7 @@ constructor(
         promptSelectorInteractor.prompt
             .map {
                 when {
-                    !(customBiometricPrompt() && constraintBp()) || it == null -> Pair(null, "")
+                    !(customBiometricPrompt()) || it == null -> Pair(null, "")
                     else -> context.getUserBadgedLogoInfo(it, iconProvider, activityTaskManager)
                 }
             }
@@ -492,7 +486,7 @@ constructor(
     /** Custom content view for the prompt. */
     val contentView: Flow<PromptContentView?> =
         promptSelectorInteractor.prompt
-            .map { if (customBiometricPrompt() && constraintBp()) it?.contentView else null }
+            .map { if (customBiometricPrompt()) it?.contentView else null }
             .distinctUntilChanged()
 
     private val originalDescription =
@@ -838,7 +832,7 @@ constructor(
         messageJob?.cancel()
         messageJob = null
 
-        if (helpMessage.isNotBlank()) {
+        if (helpMessage.isNotBlank() && needsUserConfirmation) {
             showHelp(helpMessage)
         }
     }
@@ -903,8 +897,8 @@ constructor(
     ): Boolean {
         if (
             modalities.first().hasUdfps &&
-            touchExplorationEnabled &&
-            !isAuthenticated.first().isAuthenticated
+                touchExplorationEnabled &&
+                !isAuthenticated.first().isAuthenticated
         ) {
             // TODO(b/315184924): Remove uses of UdfpsUtils
             val scaledTouch =
@@ -947,16 +941,16 @@ constructor(
     private fun vibrateOnSuccess() {
         _hapticsToPlay.value =
             HapticsToPlay(
-                HapticFeedbackConstants.CONFIRM,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+                HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                null,
             )
     }
 
     private fun vibrateOnError() {
         _hapticsToPlay.value =
             HapticsToPlay(
-                HapticFeedbackConstants.REJECT,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
+                HapticFeedbackConstants.BIOMETRIC_REJECT,
+                null,
             )
     }
 
@@ -1050,7 +1044,7 @@ private fun BiometricPromptRequest.Biometric.getApplicationInfo(
     val packageName =
         when {
             componentNameForLogo != null -> componentNameForLogo.packageName
-            // TODO(b/339532378): We should check whether |allowBackgroundAuthentication| should be
+            // TODO(b/353597496): We should check whether |allowBackgroundAuthentication| should be
             // removed.
             // This is being consistent with the check in [AuthController.showDialog()].
             allowBackgroundAuthentication || isSystem(context, opPackageName) -> opPackageName

@@ -31,6 +31,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.CpuPowerStatsLayout;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -132,14 +133,8 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mTempCpuTimeByScalingStep = new long[cpuScalingStepCount];
         int[] scalingStepToPowerBracketMap = initPowerBrackets();
 
-        mLayout = new CpuPowerStatsLayout();
-        mLayout.addDeviceSectionCpuTimeByScalingStep(cpuScalingStepCount);
-        mLayout.addDeviceSectionCpuTimeByCluster(mCpuScalingPolicies.getPolicies().length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionEnergyConsumers(mCpuEnergyConsumerIds.length);
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionCpuTimeByPowerBracket(scalingStepToPowerBracketMap);
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new CpuPowerStatsLayout(mCpuEnergyConsumerIds.length,
+                mCpuScalingPolicies.getPolicies().length, scalingStepToPowerBracketMap);
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);

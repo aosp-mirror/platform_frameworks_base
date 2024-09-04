@@ -396,6 +396,9 @@ public class InteractionJankMonitor {
         int cujType = conf.mCujType;
         if (!shouldMonitor()) {
             return false;
+        } else if (!conf.hasValidView()) {
+            Log.w(TAG, "The view has since become invalid, aborting the CUJ.");
+            return false;
         }
 
         RunningTracker tracker = putTrackerIfNoCurrent(cujType, () ->

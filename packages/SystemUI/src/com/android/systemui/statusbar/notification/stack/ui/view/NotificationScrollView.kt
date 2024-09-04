@@ -71,6 +71,9 @@ interface NotificationScrollView {
     /** Set a consumer for current gesture overscroll events */
     fun setCurrentGestureOverscrollConsumer(consumer: Consumer<Boolean>?)
 
+    /** Set a consumer for current gesture in guts events */
+    fun setCurrentGestureInGutsConsumer(consumer: Consumer<Boolean>?)
+
     /** Set a consumer for heads up height changed events */
     fun setHeadsUpHeightConsumer(consumer: Consumer<Float>?)
 
@@ -80,8 +83,23 @@ interface NotificationScrollView {
     /** sets the current expand fraction */
     fun setExpandFraction(expandFraction: Float)
 
+    /** sets the current QS expand fraction */
+    fun setQsExpandFraction(expandFraction: Float)
+
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
+
+    /** Sets whether the view is displayed in pulsing mode. */
+    fun setPulsing(pulsing: Boolean, animated: Boolean)
+
+    /** Gets the inset for HUNs when they are not visible */
+    fun getHeadsUpInset(): Int
+
+    /**
+     * Signals that any open Notification guts should be closed, as scene container is handling
+     * touch events.
+     */
+    fun closeGutsOnSceneTouch()
 
     /** Adds a listener to be notified, when the stack height might have changed. */
     fun addStackHeightChangedListener(runnable: Runnable)

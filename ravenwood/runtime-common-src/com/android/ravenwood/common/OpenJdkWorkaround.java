@@ -16,8 +16,18 @@
 package com.android.ravenwood.common;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 class OpenJdkWorkaround extends JvmWorkaround {
+
+    // @GuardedBy("sAddressMap")
+    private static final Map<Object, Long> sAddressMap = new WeakHashMap<>();
+    // @GuardedBy("sAddressMap")
+    private static long sCurrentAddress = 1;
+
     @Override
     public void setFdInt(FileDescriptor fd, int fdInt) {
         try {
@@ -42,5 +52,44 @@ class OpenJdkWorkaround extends JvmWorkaround {
             throw new RuntimeException("Failed to interact with raw FileDescriptor internals;"
                     + " perhaps JRE has changed?", e);
         }
+    }
+
+    @Override
+    public void closeFd(FileDescriptor fd) throws IOException {
+        try {
+            final Object obj = Class.forName("jdk.internal.access.SharedSecrets").getMethod(
+                    "getJavaIOFileDescriptorAccess").invoke(null);
+            Class.forName("jdk.internal.access.JavaIOFileDescriptorAccess").getMethod(
+                    "close", FileDescriptor.class).invoke(obj, fd);
+        } catch (InvocationTargetException e) {
+            SneakyThrow.sneakyThrow(e.getTargetException());
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to interact with raw FileDescriptor internals;"
+                    + " perhaps JRE has changed?", e);
+        }
+    }
+
+    @Override
+    public long addressOf(Object o) {
+        synchronized (sAddressMap) {
+            Long address = sAddressMap.get(o);
+            if (address == null) {
+                address = sCurrentAddress++;
+                sAddressMap.put(o, address);
+            }
+            return address;
+        }
+    }
+
+    @Override
+    public <T> T fromAddress(long address) {
+        synchronized (sAddressMap) {
+            for (var e : sAddressMap.entrySet()) {
+                if (e.getValue() == address) {
+                    return (T) e.getKey();
+                }
+            }
+        }
+        return null;
     }
 }

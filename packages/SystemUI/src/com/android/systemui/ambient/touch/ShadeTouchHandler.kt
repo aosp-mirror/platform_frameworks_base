@@ -61,7 +61,7 @@ constructor(
     private var touchAvailable = false
 
     init {
-        if (Flags.hubmodeFullscreenVerticalSwipe()) {
+        if (Flags.hubmodeFullscreenVerticalSwipeFix()) {
             scope.launch {
                 communalViewModel.glanceableTouchAvailable.collect {
                     onGlanceableTouchAvailable(it)
@@ -107,7 +107,8 @@ constructor(
                         capture =
                             abs(distanceY.toDouble()) > abs(distanceX.toDouble()) &&
                                 distanceY < 0 &&
-                                if (Flags.hubmodeFullscreenVerticalSwipe()) touchAvailable else true
+                                if (Flags.hubmodeFullscreenVerticalSwipeFix()) touchAvailable
+                                else true
                         if (capture == true) {
                             // Send the initial touches over, as the input listener has already
                             // processed these touches.
@@ -144,7 +145,7 @@ constructor(
 
     override fun getTouchInitiationRegion(bounds: Rect, region: Region, exclusionRect: Rect?) {
         // If fullscreen swipe, use entire space minus exclusion region
-        if (Flags.hubmodeFullscreenVerticalSwipe()) {
+        if (Flags.hubmodeFullscreenVerticalSwipeFix()) {
             region.op(bounds, Region.Op.UNION)
 
             exclusionRect?.apply { region.op(this, Region.Op.DIFFERENCE) }

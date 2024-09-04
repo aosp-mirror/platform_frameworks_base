@@ -135,6 +135,8 @@ interface NativeInputManagerService {
 
     void setTouchpadTapDraggingEnabled(boolean enabled);
 
+    void setShouldNotifyTouchpadHardwareState(boolean enabled);
+
     void setTouchpadRightClickZoneEnabled(boolean enabled);
 
     void setShowTouches(boolean enabled);
@@ -213,6 +215,9 @@ interface NativeInputManagerService {
     void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
 
     InputSensorInfo[] getSensorList(int deviceId);
+
+    @Nullable
+    TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId);
 
     boolean flushSensor(int deviceId, int sensorType);
 
@@ -395,6 +400,9 @@ interface NativeInputManagerService {
         public native void setTouchpadTapDraggingEnabled(boolean enabled);
 
         @Override
+        public native void setShouldNotifyTouchpadHardwareState(boolean enabled);
+
+        @Override
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
 
         @Override
@@ -505,6 +513,9 @@ interface NativeInputManagerService {
 
         @Override
         public native InputSensorInfo[] getSensorList(int deviceId);
+
+        @Override
+        public native TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId);
 
         @Override
         public native boolean flushSensor(int deviceId, int sensorType);

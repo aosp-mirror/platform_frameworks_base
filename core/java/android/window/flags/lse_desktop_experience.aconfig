@@ -31,6 +31,13 @@ flag {
 }
 
 flag {
+    name: "disable_non_resizable_app_snap_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Stops non-resizable app desktop windows from being snap resized"
+    bug: "325240072"
+}
+
+flag {
     name: "enable_desktop_windowing_task_limit"
     namespace: "lse_desktop_experience"
     description: "Enables a limit on the number of Tasks shown in Desktop Mode"
@@ -105,6 +112,16 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Whether to apply cascading effect for placing multiple windows when first launched"
     bug: "325240051"
+}
+
+flag {
+    name: "respect_orientation_change_for_unresizeable"
+    namespace: "lse_desktop_experience"
+    description: "Whether to resize task to respect requested orientation change of unresizeable activity"
+    bug: "353338503"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -203,4 +220,28 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables the tracking of the status for compat ui elements."
     bug: "350953004"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web_education"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app-to-web education"
+    bug: "348205896"
+}
+
+flag {
+    name: "enable_minimize_button"
+    namespace: "lse_desktop_experience"
+    description: "Adds a minimize button the the caption bar"
+    bug: "356843241"
+}
+
+flag {
+    name: "skip_compat_ui_education_in_desktop_mode"
+    namespace: "lse_desktop_experience"
+    description: "Ignore Compat UI educations when in Desktop Mode."
+    bug: "357062954"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

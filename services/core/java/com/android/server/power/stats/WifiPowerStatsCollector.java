@@ -28,6 +28,7 @@ import android.util.SparseArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.WifiPowerStatsLayout;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +50,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
                 long uptimeMs);
     }
 
-    interface WifiStatsRetriever {
+    public interface WifiStatsRetriever {
         interface Callback {
             void onWifiScanTime(int uid, long scanTimeMs, long batchScanTimeMs);
         }
@@ -58,7 +59,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         long getWifiActiveDuration();
     }
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
@@ -99,7 +100,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     private final SparseArray<WifiScanTimes> mLastScanTimes = new SparseArray<>();
     private long mLastWifiActiveDuration;
 
-    WifiPowerStatsCollector(Injector injector, Observer observer) {
+    public WifiPowerStatsCollector(Injector injector, Observer observer) {
         super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_WIFI)),
@@ -140,13 +141,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
         mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
         Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new WifiPowerStatsLayout();
-        mLayout.addDeviceWifiActivity(mPowerReportingSupported);
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addUidNetworkStats();
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new WifiPowerStatsLayout(mEnergyConsumerIds.length, mPowerReportingSupported);
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);
@@ -162,7 +157,7 @@ public class WifiPowerStatsCollector extends PowerStatsCollector {
     }
 
     @Override
-    protected PowerStats collectStats() {
+    public PowerStats collectStats() {
         if (!ensureInitialized()) {
             return null;
         }

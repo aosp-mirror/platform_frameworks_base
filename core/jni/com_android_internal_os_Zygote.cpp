@@ -19,14 +19,6 @@
 
 #include "com_android_internal_os_Zygote.h"
 
-#include <async_safe/log.h>
-
-// sys/mount.h has to come before linux/fs.h due to redefinition of MS_RDONLY, MS_BIND, etc
-#include <sys/mount.h>
-#include <linux/fs.h>
-#include <sys/types.h>
-#include <dirent.h>
-
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -41,32 +33,31 @@
 
 #include <android/fdsan.h>
 #include <arpa/inet.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
 #include <malloc.h>
 #include <mntent.h>
-#include <paths.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/auxv.h>
 #include <sys/capability.h>
-#include <sys/cdefs.h>
 #include <sys/eventfd.h>
+#include <sys/mount.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
-#include <sys/_system_properties.h>
+#include <sys/system_properties.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <async_safe/log.h>
 #include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/properties.h>

@@ -18,6 +18,11 @@ package com.android.internal.widget.remotecompose.core;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
+import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
+import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +35,9 @@ import java.util.Set;
 public class CoreDocument {
 
     ArrayList<Operation> mOperations;
+
+    RootLayoutComponent mRootLayoutComponent = null;
+
     RemoteComposeState mRemoteComposeState = new RemoteComposeState();
     TimeVariables mTimeVariables = new TimeVariables();
     // Semantic version of the document
@@ -81,7 +89,6 @@ public class CoreDocument {
     public void setHeight(int height) {
         this.mHeight = height;
         mRemoteComposeState.setWindowHeight(height);
-
     }
 
     public RemoteComposeBuffer getBuffer() {
@@ -259,8 +266,41 @@ public class CoreDocument {
         translateOutput[1] = translateY;
     }
 
+    /**
+     * Returns the list of click areas
+     * @return list of click areas in document coordinates
+     */
     public Set<ClickAreaRepresentation> getClickAreas() {
         return mClickAreas;
+    }
+
+    /**
+     * Returns the root layout component
+     * @return returns the root component if it exists, null otherwise
+     */
+    public RootLayoutComponent getRootLayoutComponent() {
+        return mRootLayoutComponent;
+    }
+
+    /**
+     * Invalidate the document for layout measures. This will trigger a layout remeasure pass.
+     */
+    public void invalidateMeasure() {
+        if (mRootLayoutComponent != null) {
+            mRootLayoutComponent.invalidateMeasure();
+        }
+    }
+
+    /**
+     * Returns the component with the given id
+     * @param id component id
+     * @return the component if it exists, null otherwise
+     */
+    public Component getComponent(int id) {
+        if (mRootLayoutComponent != null) {
+            return mRootLayoutComponent.getComponent(id);
+        }
+        return null;
     }
 
     public interface ClickCallbacks {
@@ -354,7 +394,54 @@ public class CoreDocument {
     public void initFromBuffer(RemoteComposeBuffer buffer) {
         mOperations = new ArrayList<Operation>();
         buffer.inflateFromBuffer(mOperations);
+        mOperations = inflateComponents(mOperations);
         mBuffer = buffer;
+        for (Operation op : mOperations) {
+            if (op instanceof RootLayoutComponent) {
+                mRootLayoutComponent = (RootLayoutComponent) op;
+                break;
+            }
+        }
+        if (mRootLayoutComponent != null) {
+            mRootLayoutComponent.assignIds();
+        }
+    }
+
+    /**
+     * Inflate a component tree
+     * @param operations flat list of operations
+     * @return nested list of operations / components
+     */
+    private ArrayList<Operation> inflateComponents(ArrayList<Operation> operations) {
+        Component currentComponent = null;
+        ArrayList<Component> components = new ArrayList<>();
+        ArrayList<Operation> finalOperationsList = new ArrayList<>();
+        ArrayList<Operation> ops = finalOperationsList;
+
+        for (Operation o : operations) {
+            if (o instanceof ComponentStartOperation) {
+                Component component = (Component) o;
+                component.setParent(currentComponent);
+                components.add(component);
+                currentComponent = component;
+                ops.add(currentComponent);
+                ops = currentComponent.getList();
+            } else if (o instanceof ComponentEnd) {
+                if (currentComponent instanceof LayoutComponent) {
+                    ((LayoutComponent) currentComponent).inflate();
+                }
+                components.remove(components.size() - 1);
+                if (!components.isEmpty()) {
+                    currentComponent = components.get(components.size() - 1);
+                    ops = currentComponent.getList();
+                } else {
+                    ops = finalOperationsList;
+                }
+            } else {
+                ops.add(o);
+            }
+        }
+        return ops;
     }
 
     /**
@@ -559,6 +646,18 @@ public class CoreDocument {
         context.loadFloat(RemoteContext.ID_WINDOW_WIDTH, getWidth());
         context.loadFloat(RemoteContext.ID_WINDOW_HEIGHT, getHeight());
         mRepaintNext = context.updateOps();
+        if (mRootLayoutComponent != null) {
+            if (context.mWidth != mRootLayoutComponent.getWidth()
+                    || context.mHeight != mRootLayoutComponent.getHeight()) {
+                mRootLayoutComponent.invalidateMeasure();
+            }
+            if (mRootLayoutComponent.needsMeasure()) {
+                mRootLayoutComponent.layout(context);
+            }
+            if (mRootLayoutComponent.doesNeedsRepaint()) {
+                mRepaintNext = 1;
+            }
+        }
         for (Operation op : mOperations) {
             // operations will only be executed if no theme is set (ie UNSPECIFIED)
             // or the theme is equal as the one passed in argument to paint.

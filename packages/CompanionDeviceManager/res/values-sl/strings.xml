@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"ura"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Izbira naprave, ki jo bo upravljala aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Izberite profil naprave »<xliff:g id="PROFILE_NAME">%1$s</xliff:g>« za nastavitev"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"Ta aplikacija bo lahko sinhronizirala podatke, na primer ime klicatelja, in dostopala do teh dovoljenj v napravi »<xliff:g id="DEVICE_NAME">%1$s</xliff:g>«."</string>
+    <string name="summary_watch" msgid="8134580124808507407">"Ta aplikacija bo lahko sinhronizirala podatke, na primer ime klicatelja, in dostopala do teh dovoljenj v napravi »<xliff:g id="DEVICE_TYPE">%1$s</xliff:g>«."</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Želite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; dovoliti upravljanje naprave &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"naprava"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"Ta aplikacija bo lahko dostopala do teh dovoljenj v napravi »<xliff:g id="DEVICE_NAME">%1$s</xliff:g>«."</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"Dovolite, da &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; dostopa do teh podatkov v vašem telefonu"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Ali aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; dovolite, da pretočno predvaja aplikacije telefona?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"Aplikacija %1$s bo imela dostop do vsega, kar je prikazano ali se predvaja v telefonu, vključno z zvokom, fotografijami, gesli in sporočili.&lt;br/&gt;&lt;br/&gt;Aplikacija %1$s bo lahko pretočno predvajala aplikacije, dokler ne odstranite dostopa do tega dovoljenja."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Storitve v več napravah"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v imenu naprave »<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>« zahteva dovoljenje za pretočno predvajanje aplikacij v vaših napravah."</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v imenu naprave »<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>« zahteva dovoljenje za prikaz in pretočno predvajanje aplikacij v vaših napravah."</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"Ta aplikacija bo lahko dostopala do teh dovoljenj v napravi »<xliff:g id="DEVICE_TYPE">%1$s</xliff:g>«."</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"Ali aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; dovolite, da pretočno predvaja aplikacije naprave »<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>« v napravi &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> bo imela dostop do vsega, kar je prikazano ali se predvaja v napravi »<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>«, vključno z zvokom, fotografijami, gesli in sporočili.&lt;br/&gt;&lt;br/&gt;Aplikacija <xliff:g id="APP_NAME_1">%1$s</xliff:g> bo lahko pretočno predvajala aplikacije v napravo »<xliff:g id="DEVICE_NAME">%3$s</xliff:g>«, dokler ne odstranite dostopa do tega dovoljenja."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v imenu naprave »<xliff:g id="DEVICE_NAME">%2$s</xliff:g>« zahteva dovoljenje za prikaz in pretočno predvajanje aplikacij v vaših napravah."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Dovolite, da &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; dostopa do teh podatkov v vašem telefonu"</string>
+    <string name="title_computer" msgid="4782923323932440751">"Dovolite, da &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; dostopa do teh podatkov v vaši napravi »<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>«."</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Storitve Google Play"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v imenu naprave »<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>« zahteva dovoljenje za dostop do fotografij, predstavnosti in obvestil v telefonu."</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Ali napravi &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; dovolite izvedbo tega dejanja?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Ali napravi &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; dovolite, da pretočno predvaja aplikacije in sistemske funkcije telefona?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"Naprava %1$s bo imela dostop do vsega, kar je prikazano ali se predvaja v telefonu, vključno z zvokom, fotografijami, podatki za plačilo, gesli in sporočili.&lt;br/&gt;&lt;br/&gt;Naprava %1$s bo lahko pretočno predvajala aplikacije in sistemske funkcije, dokler ne odstranite dostopa do tega dovoljenja."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v imenu naprave »<xliff:g id="DEVICE_NAME">%2$s</xliff:g>« zahteva dovoljenje za pretočno predvajanje aplikacij in drugih sistemskih funkcij v napravah v bližini."</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v imenu naprave »<xliff:g id="DEVICE_NAME">%2$s</xliff:g>« zahteva dovoljenje za dostop do fotografij, predstavnosti in obvestil v napravi »<xliff:g id="DEVICE_TYPE">%3$s</xliff:g>«."</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"Ali napravi &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; dovolite, da pretočno predvaja aplikacije in sistemske funkcije naprave »<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>« v napravi &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> bo imela dostop do vsega, kar je prikazano ali se predvaja v napravi »<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>«, vključno z zvokom, fotografijami, podatki za plačilo, gesli in sporočili.&lt;br/&gt;&lt;br/&gt;Aplikacija <xliff:g id="APP_NAME_1">%1$s</xliff:g> bo lahko pretočno predvajala aplikacije in sistemske funkcije v napravo »<xliff:g id="DEVICE_NAME">%3$s</xliff:g>«, dokler ne odstranite dostopa do tega dovoljenja."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> v imenu naprave »<xliff:g id="DEVICE_NAME">%2$s</xliff:g>« zahteva dovoljenje za pretočno predvajanje aplikacij in drugih sistemskih funkcij v vaših napravah."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"naprava"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Ta aplikacija bo lahko sinhronizirala podatke, na primer ime klicatelja, v telefonu in izbrani napravi."</string>
     <string name="consent_yes" msgid="8344487259618762872">"Dovoli"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Spreminjanje izhoda za predstavnost"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotografije in predstavnost"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Obvestila"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikacije"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Pretočno predvajanje"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"Opravljanje in upravljanje telefonskih klicev"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"Branje in zapisovanje dnevnika klicev v telefonu"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"Pošiljanje in ogled sporočil SMS"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Iskanje naprav v bližini, povezovanje z njimi in določanje njihovega relativnega položaja"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Branje vseh obvestil, vključno s podatki, kot so stiki, sporočila in fotografije"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• Branje vseh obvestil, vključno s podatki, kot so stiki, sporočila in fotografije&lt;br/&gt;• Pošiljanje obvestil&lt;br/&gt;&lt;br/&gt;Zmožnost branja in pošiljanja obvestil za to aplikacijo lahko kadar koli upravljate v meniju »Nastavitve« &gt; »Obvestila«."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Pretočno predvajanje aplikacij telefona"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Pretočno predvajanje aplikacij in drugih sistemskih funkcij iz telefona"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Dostop do seznama razpoložljivih naprav in upravljanje, katera naprava pretočno ali na daljavo predvaja zvok ali videoposnetek iz drugih aplikacij"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablični računalnik"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"televizor"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"naprava"</string>
 </resources>

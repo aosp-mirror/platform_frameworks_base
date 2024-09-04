@@ -16,7 +16,7 @@
 
 package com.android.server.inputmethod;
 
-import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -140,23 +140,26 @@ public abstract class InputMethodManagerInternal {
      * to be switched.
      */
     public boolean switchToInputMethod(@NonNull String imeId, @UserIdInt int userId) {
-        return switchToInputMethod(imeId, NOT_A_SUBTYPE_ID, userId);
+        return switchToInputMethod(imeId, NOT_A_SUBTYPE_INDEX, userId);
     }
 
     /**
      * Force switch to the enabled input method by {@code imeId} for the current user. If the input
-     * method with {@code imeId} is not enabled or not installed, do nothing. If {@code subtypeId}
-     * is also supplied (not {@link InputMethodUtils#NOT_A_SUBTYPE_ID}) and valid, also switches to
-     * it, otherwise the system decides the most sensible default subtype to use.
+     * method with {@code imeId} is not enabled or not installed, do nothing. If
+     * {@code subtypeIndex} is also supplied (not {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX}) and
+     * valid, also switches to it, otherwise the system decides the most sensible default subtype to
+     * use.
      *
-     * @param imeId the input method ID to be switched to
-     * @param subtypeId the input method subtype ID to be switched to
-     * @param userId the user ID to be queried
+     * @param imeId        the input method ID to be switched to
+     * @param subtypeIndex the subtype to be switched to, as an index in the input method's array of
+     *                     subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if the system
+     *                     should decide the most sensible subtype
+     * @param userId       the user ID to be queried
      * @return {@code true} if the current input method was successfully switched to the input
      * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
      * to be switched.
      */
-    public abstract boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+    public abstract boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
             @UserIdInt int userId);
 
     /**
@@ -236,6 +239,33 @@ public abstract class InputMethodManagerInternal {
      */
     @ImfLockFree
     public abstract void removeImeSurface(int displayId);
+
+    /**
+     * Called when a non-IME-focusable overlay window being the IME layering target (e.g. a
+     * window with {@link android.view.WindowManager.LayoutParams#FLAG_NOT_FOCUSABLE} and
+     * {@link android.view.WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM} flags)
+     * has changed its window visibility.
+     *
+     * @param hasVisibleOverlay  whether such an overlay window exists or not
+     * @param displayId          the display ID where the overlay window exists
+     */
+    public abstract void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay, int displayId);
+
+    /**
+     * Called when the visibility of IME input target window has changed.
+     *
+     * @param imeInputTarget        the window token of the IME input target window
+     * @param visibleAndNotRemoved  {@code true} when the new window is made visible by
+     *                              {@code imeInputTarget} and the IME input target window has not
+     *                              been removed. The new window is considered to be visible when
+     *                              switching to the new visible IME input target window and
+     *                              starting input, or the existing input target becomes visible.
+     *                              In contrast, {@code false} when closing the input target, or the
+     *                              existing input target becomes invisible
+     * @param displayId             the display for which to update the IME window status
+     */
+    public abstract void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+            boolean visibleAndNotRemoved, int displayId);
 
     /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
@@ -349,7 +379,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public boolean switchToInputMethod(@NonNull String imeId, int subtypeId,
+                public boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
                         @UserIdInt int userId) {
                     return false;
                 }
@@ -387,6 +417,16 @@ public abstract class InputMethodManagerInternal {
                 @ImfLockFree
                 @Override
                 public void removeImeSurface(int displayId) {
+                }
+
+                @Override
+                public void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay,
+                        int displayId) {
+                }
+
+                @Override
+                public void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+                        boolean visibleAndNotRemoved, int displayId) {
                 }
 
                 @ImfLockFree

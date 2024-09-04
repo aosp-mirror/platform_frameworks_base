@@ -91,7 +91,7 @@ public class AssistContentRequester {
             try {
                 boolean success = mActivityTaskManager.requestAssistDataForTask(
                         new AssistDataReceiver(callback, this), taskId, mPackageName,
-                        mAttributionTag);
+                        mAttributionTag, false /* fetchStructure */);
                 if (!success) {
                     callback.onAssistContentAvailable(null);
                 }

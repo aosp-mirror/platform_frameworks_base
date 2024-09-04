@@ -24,7 +24,7 @@ import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.domain.resolver.sceneFamilyResolvers
 import com.android.systemui.scene.shared.logger.sceneLogger
 
-val Kosmos.sceneInteractor by
+val Kosmos.sceneInteractor: SceneInteractor by
     Kosmos.Fixture {
         SceneInteractor(
             applicationScope = applicationCoroutineScope,

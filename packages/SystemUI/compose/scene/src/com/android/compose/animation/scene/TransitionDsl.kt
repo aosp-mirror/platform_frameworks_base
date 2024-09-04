@@ -17,13 +17,16 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
+import kotlin.math.tanh
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -45,6 +48,12 @@ interface SceneTransitionsBuilder {
      * [DefaultInterruptionHandler].
      */
     var interruptionHandler: InterruptionHandler
+
+    /**
+     * Default [ProgressConverter] used during overscroll. It lets you change a linear progress into
+     * a function of your choice. Defaults to [ProgressConverter.Default].
+     */
+    var defaultOverscrollProgressConverter: ProgressConverter
 
     /**
      * Define the default animation to be played when transitioning [to] the specified content, from
@@ -95,23 +104,23 @@ interface SceneTransitionsBuilder {
     ): TransitionSpec
 
     /**
-     * Define the animation to be played when the [scene] is overscrolled in the given
+     * Define the animation to be played when the [content] is overscrolled in the given
      * [orientation].
      *
      * The overscroll animation always starts from a progress of 0f, and reaches 1f when moving the
      * [distance] down/right, -1f when moving in the opposite direction.
      */
     fun overscroll(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
         builder: OverscrollBuilder.() -> Unit,
     ): OverscrollSpec
 
     /**
-     * Prevents overscroll the [scene] in the given [orientation], allowing ancestors to eventually
-     * consume the remaining gesture.
+     * Prevents overscroll the [content] in the given [orientation], allowing ancestors to
+     * eventually consume the remaining gesture.
      */
-    fun overscrollDisabled(scene: SceneKey, orientation: Orientation): OverscrollSpec
+    fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {
@@ -140,6 +149,7 @@ interface BaseTransitionBuilder : PropertyTransformationBuilder {
     fun fractionRange(
         start: Float? = null,
         end: Float? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 }
@@ -182,6 +192,7 @@ interface TransitionBuilder : BaseTransitionBuilder {
     fun timestampRange(
         startMillis: Int? = null,
         endMillis: Int? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 
@@ -212,7 +223,7 @@ interface OverscrollBuilder : BaseTransitionBuilder {
      * - 1, the user overscrolled by exactly the [distance].
      * - Greater than 1, the user overscrolled more than the [distance].
      */
-    var progressConverter: (Float) -> Float
+    var progressConverter: ProgressConverter?
 
     /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
     fun translate(
@@ -241,9 +252,7 @@ interface OverscrollScope : Density {
 interface ElementContentPicker {
     /**
      * Return the content in which [element] should be drawn (when using `Modifier.element(key)`) or
-     * composed (when using `MovableElement(key)`) during the given [transition]. If this element
-     * should not be drawn or composed in neither [transition.fromContent] nor
-     * [transition.toContent], return `null`.
+     * composed (when using `MovableElement(key)`) during the given [transition].
      *
      * Important: For [MovableElements][ContentScope.MovableElement], this content picker will
      * *always* be used during transitions to decide whether we should compose that element in a
@@ -253,7 +262,7 @@ interface ElementContentPicker {
      */
     fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float,
     ): ContentKey
@@ -269,7 +278,7 @@ interface ElementContentPicker {
      */
     fun pickSingleContentIn(
         contents: Set<ContentKey>,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         element: ElementKey,
     ): ContentKey {
         val fromContent = transition.fromContent
@@ -305,6 +314,11 @@ interface ElementContentPicker {
  * An element picker on which we can query the set of contents (scenes or overlays) that contain the
  * element. This is needed by [MovableElement], that needs to know at composition time on which of
  * the candidate contents an element should be composed.
+ *
+ * @see DefaultElementContentPicker(contents)
+ * @see HighestZIndexContentPicker(contents)
+ * @see LowestZIndexContentPicker(contents)
+ * @see MovableElementContentPicker
  */
 interface StaticElementContentPicker : ElementContentPicker {
     /** The exhaustive lists of contents that contain this element. */
@@ -317,7 +331,7 @@ interface StaticElementContentPicker : ElementContentPicker {
 object HighestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float
     ): ContentKey {
@@ -338,7 +352,7 @@ object HighestZIndexContentPicker : ElementContentPicker {
 
             override fun contentDuringTransition(
                 element: ElementKey,
-                transition: ContentState.Transition<*>,
+                transition: TransitionState.Transition,
                 fromContentZIndex: Float,
                 toContentZIndex: Float
             ): ContentKey {
@@ -359,7 +373,7 @@ object HighestZIndexContentPicker : ElementContentPicker {
 object LowestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float
     ): ContentKey {
@@ -380,7 +394,7 @@ object LowestZIndexContentPicker : ElementContentPicker {
 
             override fun contentDuringTransition(
                 element: ElementKey,
-                transition: ContentState.Transition<*>,
+                transition: TransitionState.Transition,
                 fromContentZIndex: Float,
                 toContentZIndex: Float
             ): ContentKey {
@@ -414,7 +428,7 @@ class MovableElementContentPicker(
 ) : StaticElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float,
     ): ContentKey {
@@ -433,6 +447,11 @@ class MovableElementContentPicker(
 
 /** The default [ElementContentPicker]. */
 val DefaultElementContentPicker = HighestZIndexContentPicker
+
+/** The [DefaultElementContentPicker] that can be used for [MovableElement]s. */
+fun DefaultElementContentPicker(contents: Set<ContentKey>): StaticElementContentPicker {
+    return HighestZIndexContentPicker(contents)
+}
 
 @TransitionDsl
 interface PropertyTransformationBuilder {
@@ -497,4 +516,36 @@ interface PropertyTransformationBuilder {
         anchorWidth: Boolean = true,
         anchorHeight: Boolean = true,
     )
+}
+
+/** This converter lets you change a linear progress into a function of your choice. */
+fun interface ProgressConverter {
+    fun convert(progress: Float): Float
+
+    companion object {
+        /** Starts linearly with some resistance and slowly approaches to 0.2f */
+        val Default = tanh(maxProgress = 0.2f, tilt = 3f)
+
+        /**
+         * The scroll stays linear, with [factor] you can control how much resistance there is.
+         *
+         * @param factor If you choose a value between 0f and 1f, the progress will grow more
+         *   slowly, like there's resistance. A value of 1f means there's no resistance.
+         */
+        fun linear(factor: Float = 1f) = ProgressConverter { it * factor }
+
+        /**
+         * This function starts linear and slowly approaches [maxProgress].
+         *
+         * See a [visual representation](https://www.desmos.com/calculator/usgvvf0z1u) of this
+         * function.
+         *
+         * @param maxProgress is the maximum progress value.
+         * @param tilt behaves similarly to the factor in the [linear] function, and allows you to
+         *   control how quickly you get to the [maxProgress].
+         */
+        fun tanh(maxProgress: Float, tilt: Float = 1f) = ProgressConverter {
+            maxProgress * tanh(x = it / (maxProgress * tilt))
+        }
+    }
 }

@@ -19,6 +19,7 @@ package com.android.systemui.qs;
 import android.database.ContentObserver;
 import android.os.Handler;
 
+import com.android.systemui.Flags;
 import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
@@ -76,10 +77,20 @@ public abstract class UserSettingObserver extends ContentObserver implements Lis
         mListening = listening;
         if (listening) {
             mObservedValue = getValueFromProvider();
-            mSettingsProxy.registerContentObserverForUserSync(
-                    mSettingsProxy.getUriFor(mSettingName), false, this, mUserId);
+            if (Flags.qsRegisterSettingObserverOnBgThread()) {
+                mSettingsProxy.registerContentObserverForUserAsync(
+                        mSettingsProxy.getUriFor(mSettingName), this, mUserId, () ->
+                                mObservedValue = getValueFromProvider());
+            } else {
+                mSettingsProxy.registerContentObserverForUserSync(
+                        mSettingsProxy.getUriFor(mSettingName), false, this, mUserId);
+            }
         } else {
-            mSettingsProxy.unregisterContentObserverSync(this);
+            if (Flags.qsRegisterSettingObserverOnBgThread()) {
+                mSettingsProxy.unregisterContentObserverAsync(this);
+            } else {
+                mSettingsProxy.unregisterContentObserverSync(this);
+            }
             mObservedValue = mDefaultValue;
         }
     }

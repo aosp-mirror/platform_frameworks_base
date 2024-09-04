@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test

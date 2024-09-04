@@ -19,6 +19,7 @@ import android.platform.test.ravenwood.RavenwoodSystemProperties;
 import android.util.Log;
 
 import com.android.internal.ravenwood.RavenwoodEnvironment;
+import com.android.ravenwood.common.JvmWorkaround;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 public class RavenwoodEnvironment_host {
@@ -35,7 +36,10 @@ public class RavenwoodEnvironment_host {
     /**
      * Called from {@link RavenwoodEnvironment#ensureRavenwoodInitialized()}.
      */
-    public static void ensureRavenwoodInitializedInternal() {
+    public static void ensureRavenwoodInitialized() {
+
+        // TODO Unify it with the initialization code in RavenwoodAwareTestRunnerHook.
+
         synchronized (sInitializeLock) {
             if (sInitialized) {
                 return;
@@ -54,5 +58,19 @@ public class RavenwoodEnvironment_host {
 
             sInitialized = true;
         }
+    }
+
+    /**
+     * Called from {@link RavenwoodEnvironment#getRavenwoodRuntimePath()}.
+     */
+    public static String getRavenwoodRuntimePath(RavenwoodEnvironment env) {
+        return RavenwoodCommonUtils.getRavenwoodRuntimePath();
+    }
+
+    /**
+     * Called from {@link RavenwoodEnvironment#fromAddress(long)}.
+     */
+    public static <T> T fromAddress(RavenwoodEnvironment env, long address) {
+        return JvmWorkaround.getInstance().fromAddress(address);
     }
 }

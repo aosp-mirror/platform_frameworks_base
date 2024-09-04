@@ -30,7 +30,6 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Flags.notificationClassification;
 
@@ -1979,8 +1978,8 @@ public class PreferencesHelper implements RankingConfig {
                         (areChannelsBypassingDnd
                                 ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND : 0),
                         policy.priorityConversationSenders),
-                fromSystemOrSystemUi ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                        : ZenModeConfig.UPDATE_ORIGIN_APP,
+                fromSystemOrSystemUi ? ZenModeConfig.ORIGIN_SYSTEM
+                        : ZenModeConfig.ORIGIN_APP,
                 callingUid);
     }
 

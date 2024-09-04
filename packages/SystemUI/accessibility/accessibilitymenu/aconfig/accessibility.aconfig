@@ -29,3 +29,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "hide_restricted_actions"
+    namespace: "accessibility"
+    description: "Hides shortcut buttons for possibly restricted actions like brightness/volume adjustment"
+    bug: "347269196"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

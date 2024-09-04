@@ -23,15 +23,20 @@ import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.util.Log
 import androidx.concurrent.futures.await
 import com.android.settingslib.notification.data.repository.ZenModeRepository
+import com.android.settingslib.notification.modes.ZenIcon
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
-import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
+import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import java.time.Duration
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /**
@@ -41,11 +46,12 @@ import kotlinx.coroutines.flow.map
 class ZenModeInteractor
 @Inject
 constructor(
+    private val context: Context,
     private val zenModeRepository: ZenModeRepository,
     private val notificationSettingsRepository: NotificationSettingsRepository,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val iconLoader: ZenIconLoader,
 ) {
-    private val iconLoader: ZenIconLoader = ZenIconLoader.getInstance()
-
     val isZenModeEnabled: Flow<Boolean> =
         zenModeRepository.globalZenMode
             .map {
@@ -74,8 +80,29 @@ constructor(
 
     val modes: Flow<List<ZenMode>> = zenModeRepository.modes
 
-    suspend fun getModeIcon(mode: ZenMode, context: Context): Icon {
-        return Icon.Loaded(mode.getIcon(context, iconLoader).await(), contentDescription = null)
+    /** Flow returning the currently active mode(s), if any. */
+    val activeModes: Flow<ActiveZenModes> =
+        modes
+            .map { modes -> buildActiveZenModes(modes) }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
+
+    suspend fun getActiveModes() = buildActiveZenModes(zenModeRepository.getModes())
+
+    private suspend fun buildActiveZenModes(modes: List<ZenMode>): ActiveZenModes {
+        val activeModesList =
+            modes.filter { mode -> mode.isActive }.sortedWith(ZenMode.PRIORITIZING_COMPARATOR)
+        val mainActiveMode =
+            activeModesList.firstOrNull()?.let { ZenModeInfo(it.name, getModeIcon(it)) }
+
+        return ActiveZenModes(activeModesList.map { m -> m.name }, mainActiveMode)
+    }
+
+    val mainActiveMode: Flow<ZenModeInfo?> =
+        activeModes.map { a -> a.mainMode }.distinctUntilChanged()
+
+    suspend fun getModeIcon(mode: ZenMode): ZenIcon {
+        return iconLoader.getIcon(context, mode).await()
     }
 
     fun activateMode(zenMode: ZenMode) {

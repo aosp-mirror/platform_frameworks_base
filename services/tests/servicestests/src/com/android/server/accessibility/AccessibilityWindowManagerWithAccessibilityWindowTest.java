@@ -1319,7 +1319,6 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
 
         final AccessibilityWindow window = Mockito.mock(AccessibilityWindow.class);
         when(window.getWindowInfo()).thenReturn(windowInfo);
-        when(window.ignoreRecentsAnimationForAccessibility()).thenReturn(false);
         when(window.isFocused()).thenAnswer(invocation -> windowInfo.focused);
         when(window.isTouchable()).thenReturn(true);
         when(window.getType()).thenReturn(windowInfo.type);

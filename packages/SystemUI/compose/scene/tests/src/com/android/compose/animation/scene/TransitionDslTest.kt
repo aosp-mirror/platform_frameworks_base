@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.spring
@@ -107,6 +108,13 @@ class TransitionDslTest {
                 fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
                 fractionRange(start = 0.2f) { fade(TestElements.Foo) }
                 fractionRange(end = 0.9f) { fade(TestElements.Foo) }
+                fractionRange(
+                    start = 0.1f,
+                    end = 0.8f,
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                ) {
+                    fade(TestElements.Foo)
+                }
             }
         }
 
@@ -118,6 +126,11 @@ class TransitionDslTest {
                 TransformationRange(start = 0.1f, end = 0.8f),
                 TransformationRange(start = 0.2f, end = TransformationRange.BoundUnspecified),
                 TransformationRange(start = TransformationRange.BoundUnspecified, end = 0.9f),
+                TransformationRange(
+                    start = 0.1f,
+                    end = 0.8f,
+                    CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                ),
             )
     }
 
@@ -130,6 +143,13 @@ class TransitionDslTest {
                 timestampRange(startMillis = 100, endMillis = 300) { fade(TestElements.Foo) }
                 timestampRange(startMillis = 200) { fade(TestElements.Foo) }
                 timestampRange(endMillis = 400) { fade(TestElements.Foo) }
+                timestampRange(
+                    startMillis = 100,
+                    endMillis = 300,
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                ) {
+                    fade(TestElements.Foo)
+                }
             }
         }
 
@@ -141,6 +161,11 @@ class TransitionDslTest {
                 TransformationRange(start = 100 / 500f, end = 300 / 500f),
                 TransformationRange(start = 200 / 500f, end = TransformationRange.BoundUnspecified),
                 TransformationRange(start = TransformationRange.BoundUnspecified, end = 400 / 500f),
+                TransformationRange(
+                    start = 100 / 500f,
+                    end = 300 / 500f,
+                    easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
+                ),
             )
     }
 
@@ -203,6 +228,47 @@ class TransitionDslTest {
             .comparingElementsUsing(TRANSFORMATION_RANGE)
             .containsExactly(
                 TransformationRange(start = 0.5f, end = 0.6f),
+            )
+    }
+
+    @Test
+    fun defaultPredictiveBack() {
+        val transitions = transitions {
+            from(
+                TestScenes.SceneA,
+                to = TestScenes.SceneB,
+                preview = { fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) } }
+            ) {
+                spec = tween(500)
+                fractionRange(start = 0.1f, end = 0.8f) { fade(TestElements.Foo) }
+                timestampRange(startMillis = 100, endMillis = 300) { fade(TestElements.Foo) }
+            }
+        }
+
+        // Verify that fetching the transitionSpec with the PredictiveBack key defaults to the above
+        // transition despite it not having the PredictiveBack key set.
+        val transitionSpec =
+            transitions.transitionSpec(
+                from = TestScenes.SceneA,
+                to = TestScenes.SceneB,
+                key = TransitionKey.PredictiveBack
+            )
+
+        val transformations = transitionSpec.transformationSpec().transformations
+
+        assertThat(transformations)
+            .comparingElementsUsing(TRANSFORMATION_RANGE)
+            .containsExactly(
+                TransformationRange(start = 0.1f, end = 0.8f),
+                TransformationRange(start = 100 / 500f, end = 300 / 500f),
+            )
+
+        val previewTransformations = transitionSpec.previewTransformationSpec()?.transformations
+
+        assertThat(previewTransformations)
+            .comparingElementsUsing(TRANSFORMATION_RANGE)
+            .containsExactly(
+                TransformationRange(start = 0.1f, end = 0.8f),
             )
     }
 

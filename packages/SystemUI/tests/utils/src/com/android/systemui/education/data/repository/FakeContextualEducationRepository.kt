@@ -17,43 +17,57 @@
 package com.android.systemui.education.data.repository
 
 import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.education.data.model.EduDeviceConnectionTime
 import com.android.systemui.education.data.model.GestureEduModel
-import java.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeContextualEducationRepository(private val clock: Clock) : ContextualEducationRepository {
+class FakeContextualEducationRepository : ContextualEducationRepository {
 
     private val userGestureMap = mutableMapOf<Int, GestureEduModel>()
-    private val _gestureEduModels = MutableStateFlow(GestureEduModel())
+    private val _gestureEduModels = MutableStateFlow(GestureEduModel(userId = 0))
     private val gestureEduModelsFlow = _gestureEduModels.asStateFlow()
+
+    private val userEduDeviceConnectionTimeMap = mutableMapOf<Int, EduDeviceConnectionTime>()
+    private val _eduDeviceConnectionTime = MutableStateFlow(EduDeviceConnectionTime())
+    private val eduDeviceConnectionTime = _eduDeviceConnectionTime.asStateFlow()
+
     private var currentUser: Int = 0
 
     override fun setUser(userId: Int) {
         if (!userGestureMap.contains(userId)) {
-            userGestureMap[userId] = GestureEduModel()
+            userGestureMap[userId] = GestureEduModel(userId = userId)
+            userEduDeviceConnectionTimeMap[userId] = EduDeviceConnectionTime()
         }
         // save data of current user to the map
         userGestureMap[currentUser] = _gestureEduModels.value
+        userEduDeviceConnectionTimeMap[currentUser] = _eduDeviceConnectionTime.value
         // switch to data of new user
         _gestureEduModels.value = userGestureMap[userId]!!
+        _eduDeviceConnectionTime.value = userEduDeviceConnectionTimeMap[userId]!!
     }
 
     override fun readGestureEduModelFlow(gestureType: GestureType): Flow<GestureEduModel> {
         return gestureEduModelsFlow
     }
 
-    override suspend fun incrementSignalCount(gestureType: GestureType) {
-        val originalModel = _gestureEduModels.value
-        _gestureEduModels.value =
-            originalModel.copy(
-                signalCount = _gestureEduModels.value.signalCount + 1,
-            )
+    override fun readEduDeviceConnectionTime(): Flow<EduDeviceConnectionTime> {
+        return eduDeviceConnectionTime
     }
 
-    override suspend fun updateShortcutTriggerTime(gestureType: GestureType) {
-        val originalModel = _gestureEduModels.value
-        _gestureEduModels.value = originalModel.copy(lastShortcutTriggeredTime = clock.instant())
+    override suspend fun updateGestureEduModel(
+        gestureType: GestureType,
+        transform: (GestureEduModel) -> GestureEduModel
+    ) {
+        val currentModel = _gestureEduModels.value
+        _gestureEduModels.value = transform(currentModel)
+    }
+
+    override suspend fun updateEduDeviceConnectionTime(
+        transform: (EduDeviceConnectionTime) -> EduDeviceConnectionTime
+    ) {
+        val currentModel = _eduDeviceConnectionTime.value
+        _eduDeviceConnectionTime.value = transform(currentModel)
     }
 }

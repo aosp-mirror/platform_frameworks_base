@@ -1211,6 +1211,8 @@ public class ServiceState implements Parcelable {
                     .append(", mIsDataRoamingFromRegistration=")
                     .append(mIsDataRoamingFromRegistration)
                     .append(", mIsIwlanPreferred=").append(mIsIwlanPreferred)
+                    .append(", mIsUsingNonTerrestrialNetwork=")
+                    .append(isUsingNonTerrestrialNetwork())
                     .append("}").toString();
         }
     }

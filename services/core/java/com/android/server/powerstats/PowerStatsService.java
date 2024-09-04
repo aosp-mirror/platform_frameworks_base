@@ -62,6 +62,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -207,19 +208,28 @@ public class PowerStatsService extends SystemService {
     private final IBinder mService = new IPowerStatsService.Stub() {
 
         @Override
-        public void getSupportedPowerMonitors(ResultReceiver resultReceiver) {
+        public void getSupportedPowerMonitors(@NonNull ResultReceiver resultReceiver) {
+            if (Flags.verifyNonNullArguments()) {
+                Objects.requireNonNull(resultReceiver);
+            }
             getHandler().post(() -> getSupportedPowerMonitorsImpl(resultReceiver));
         }
 
         @Override
-        public void getPowerMonitorReadings(int[] powerMonitorIds, ResultReceiver resultReceiver) {
+        public void getPowerMonitorReadings(@NonNull int[] powerMonitorIds,
+                @NonNull ResultReceiver resultReceiver) {
+            if (Flags.verifyNonNullArguments()) {
+                Objects.requireNonNull(powerMonitorIds);
+                Objects.requireNonNull(resultReceiver);
+            }
             int callingUid = Binder.getCallingUid();
             getHandler().post(() ->
                     getPowerMonitorReadingsImpl(powerMonitorIds, resultReceiver, callingUid));
         }
 
         @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+                @Nullable String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
             if (mPowerStatsLogger == null) {
@@ -263,6 +273,11 @@ public class PowerStatsService extends SystemService {
         }
     };
 
+    @VisibleForTesting
+    IPowerStatsService getIPowerStatsServiceForTest() {
+        return (IPowerStatsService) mService;
+    }
+
     private class DeviceConfigListener implements DeviceConfig.OnPropertiesChangedListener {
         public Executor mExecutor = new HandlerExecutor(getHandler());
 
@@ -289,10 +304,20 @@ public class PowerStatsService extends SystemService {
     @Override
     public void onStart() {
         if (getPowerStatsHal().isInitialized()) {
-            mPowerStatsInternal = new LocalService();
-            publishLocalService(PowerStatsInternal.class, mPowerStatsInternal);
+            publishLocalService(PowerStatsInternal.class, getPowerStatsInternal());
         }
         publishBinderService(Context.POWER_STATS_SERVICE, mService);
+    }
+
+    /**
+     * Returns the PowerStatsInternal associated with this service, maybe creating it if needed.
+     */
+    @VisibleForTesting
+    public PowerStatsInternal getPowerStatsInternal() {
+        if (mPowerStatsInternal == null) {
+            mPowerStatsInternal = new LocalService();
+        }
+        return mPowerStatsInternal;
     }
 
     private void onSystemServicesReady() {
@@ -441,7 +466,13 @@ public class PowerStatsService extends SystemService {
 
     private void getEnergyConsumedAsync(CompletableFuture<EnergyConsumerResult[]> future,
             int[] energyConsumerIds) {
-        EnergyConsumerResult[] results = getPowerStatsHal().getEnergyConsumed(energyConsumerIds);
+        EnergyConsumerResult[] results;
+        try {
+            results = getPowerStatsHal().getEnergyConsumed(energyConsumerIds);
+        } catch (Exception e) {
+            future.completeExceptionally(e);
+            return;
+        }
 
         // STOPSHIP(253292374): Remove once missing EnergyConsumer results issue is resolved.
         EnergyConsumer[] energyConsumers = getEnergyConsumerInfo();
@@ -508,12 +539,20 @@ public class PowerStatsService extends SystemService {
 
     private void getStateResidencyAsync(CompletableFuture<StateResidencyResult[]> future,
             int[] powerEntityIds) {
-        future.complete(getPowerStatsHal().getStateResidency(powerEntityIds));
+        try {
+            future.complete(getPowerStatsHal().getStateResidency(powerEntityIds));
+        } catch (Exception e) {
+            future.completeExceptionally(e);
+        }
     }
 
     private void readEnergyMeterAsync(CompletableFuture<EnergyMeasurement[]> future,
             int[] channelIds) {
-        future.complete(getPowerStatsHal().readEnergyMeter(channelIds));
+        try {
+            future.complete(getPowerStatsHal().readEnergyMeter(channelIds));
+        } catch (Exception e) {
+            future.completeExceptionally(e);
+        }
     }
 
     private static class PowerMonitorState {

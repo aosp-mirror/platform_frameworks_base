@@ -154,7 +154,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = communalWidgetItemEntry.widgetId,
                         providerInfo = providerInfoA,
-                        priority = communalItemRankEntry.rank,
+                        rank = communalItemRankEntry.rank,
                     )
                 )
 
@@ -190,12 +190,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
-                        priority = 2,
+                        rank = 2,
                     ),
                 )
         }
@@ -225,12 +225,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
-                        priority = 2,
+                        rank = 2,
                     ),
                 )
 
@@ -248,12 +248,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         // Verify that provider info updated
                         providerInfo = providerInfoC,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
-                        priority = 2,
+                        rank = 2,
                     ),
                 )
         }
@@ -263,7 +263,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -273,12 +273,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, mainUser, priority, kosmos.widgetConfiguratorSuccess)
+            underTest.addWidget(provider, mainUser, rank, kosmos.widgetConfiguratorSuccess)
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
-            verify(communalWidgetDao)
-                .addWidget(id, provider, priority, testUserSerialNumber(mainUser))
+            verify(communalWidgetDao).addWidget(id, provider, rank, testUserSerialNumber(mainUser))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -289,7 +288,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -299,7 +298,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, mainUser, priority, kosmos.widgetConfiguratorFail)
+            underTest.addWidget(provider, mainUser, rank, kosmos.widgetConfiguratorFail)
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
@@ -316,7 +315,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_REQUIRES_CONFIGURATION)
             whenever(
@@ -326,7 +325,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, mainUser, priority) {
+            underTest.addWidget(provider, mainUser, rank) {
                 throw IllegalStateException("some error")
             }
             runCurrent()
@@ -345,7 +344,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
-            val priority = 1
+            val rank = 1
             whenever(communalWidgetHost.getAppWidgetInfo(id))
                 .thenReturn(PROVIDER_INFO_CONFIGURATION_OPTIONAL)
             whenever(
@@ -355,12 +354,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(id)
-            underTest.addWidget(provider, mainUser, priority, kosmos.widgetConfiguratorFail)
+            underTest.addWidget(provider, mainUser, rank, kosmos.widgetConfiguratorFail)
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
-            verify(communalWidgetDao)
-                .addWidget(id, provider, priority, testUserSerialNumber(mainUser))
+            verify(communalWidgetDao).addWidget(id, provider, rank, testUserSerialNumber(mainUser))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -399,11 +397,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun reorderWidgets_queryDb() =
         testScope.runTest {
-            val widgetIdToPriorityMap = mapOf(104 to 1, 103 to 2, 101 to 3)
-            underTest.updateWidgetOrder(widgetIdToPriorityMap)
+            val widgetIdToRankMap = mapOf(104 to 1, 103 to 2, 101 to 3)
+            underTest.updateWidgetOrder(widgetIdToRankMap)
             runCurrent()
 
-            verify(communalWidgetDao).updateWidgetOrder(widgetIdToPriorityMap)
+            verify(communalWidgetDao).updateWidgetOrder(widgetIdToRankMap)
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -691,11 +689,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 2,
-                        priority = 2,
+                        rank = 2,
                         componentName = ComponentName("pk_2", "cls_2"),
                         icon = fakeIcon,
                         user = mainUser,
@@ -730,7 +728,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 .containsExactly(
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 1,
-                        priority = 1,
+                        rank = 1,
                         componentName = ComponentName("pk_1", "cls_1"),
                         icon = fakeIcon,
                         user = mainUser,
@@ -750,7 +748,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
-                        priority = 1,
+                        rank = 1,
                     ),
                 )
         }

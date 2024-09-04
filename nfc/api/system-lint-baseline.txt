@@ -9,6 +9,18 @@ BroadcastBehavior: android.nfc.NfcAdapter#ACTION_TRANSACTION_DETECTED:
     Field 'ACTION_TRANSACTION_DETECTED' is missing @BroadcastBehavior
 
 
+CallbackMethodName: android.nfc.NfcOemExtension.Callback#shouldSkipRoutingChange():
+    Callback method names must follow the on<Something> style: shouldSkipRoutingChange
+
+
+MethodNameTense: android.nfc.NfcOemExtension.Callback#onEnable():
+    Unexpected tense; probably meant `enabled`, was `onEnable`
+
+
+MissingNullability: android.nfc.cardemulation.CardEmulation#overrideRoutingTable(android.app.Activity, String, String) parameter #1:
+    Missing nullability on parameter `protocol` in method `overrideRoutingTable`
+MissingNullability: android.nfc.cardemulation.CardEmulation#overrideRoutingTable(android.app.Activity, String, String) parameter #2:
+    Missing nullability on parameter `technology` in method `overrideRoutingTable`
 MissingNullability: android.nfc.cardemulation.OffHostApduService#onBind(android.content.Intent):
     Missing nullability on method `onBind` return
 MissingNullability: android.nfc.cardemulation.OffHostApduService#onBind(android.content.Intent) parameter #0:
@@ -96,10 +108,12 @@ RequiresPermission: android.nfc.tech.TagTechnology#close():
 RequiresPermission: android.nfc.tech.TagTechnology#connect():
     Method 'connect' documentation mentions permissions without declaring @RequiresPermission
 
+
 SamShouldBeLast: android.nfc.NfcAdapter#enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle):
     SAM-compatible parameters (such as parameter 2, "callback", in android.nfc.NfcAdapter.enableReaderMode) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.nfc.NfcAdapter#ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 3, "tagRemovedListener", in android.nfc.NfcAdapter.ignore) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+
 
 SdkConstant: android.nfc.NfcAdapter#ACTION_REQUIRE_UNLOCK_FOR_NFC:
     Field 'ACTION_REQUIRE_UNLOCK_FOR_NFC' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

@@ -112,7 +112,7 @@ abstract class WindowTracing {
         saveForBugreportInternal(pw);
     }
 
-    abstract void setLogLevel(@WindowTraceLogLevel int logLevel, PrintWriter pw);
+    abstract void setLogLevel(@WindowTracingLogLevel int logLevel, PrintWriter pw);
     abstract void setLogFrequency(boolean onFrame, PrintWriter pw);
     abstract void setBufferCapacity(int capacity, PrintWriter pw);
     abstract boolean isEnabled();
@@ -158,7 +158,7 @@ abstract class WindowTracing {
      * @param where Logging point descriptor
      * @param elapsedRealtimeNanos Timestamp
      */
-    protected void dumpToProto(ProtoOutputStream os, @WindowTraceLogLevel int logLevel,
+    protected void dumpToProto(ProtoOutputStream os, @WindowTracingLogLevel int logLevel,
             String where, long elapsedRealtimeNanos) {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "traceStateLocked");
         try {

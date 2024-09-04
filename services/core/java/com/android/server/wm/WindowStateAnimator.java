@@ -67,9 +67,8 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.ProtoLog;
-import com.android.window.flags.Flags;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -413,7 +412,7 @@ class WindowStateAnimator {
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
                     mWin, new RuntimeException().fillInStackTrace());
             destroySurface(t);
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 if (mWallpaperControllerLocked.isWallpaperTarget(mWin)) {
                     mWin.requestUpdateWallpaperIfNeeded();
                 }
@@ -464,7 +463,7 @@ class WindowStateAnimator {
 
         if (!w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
-            if (!w.mIsWallpaper || !Flags.ensureWallpaperInTransitions()) {
+            if (!w.mIsWallpaper || !mService.mFlags.mEnsureWallpaperInTransitions) {
                 mWallpaperControllerLocked.hideWallpapers(w);
             }
 

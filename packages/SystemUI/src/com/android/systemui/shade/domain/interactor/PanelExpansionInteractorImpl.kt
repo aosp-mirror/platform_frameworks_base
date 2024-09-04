@@ -64,7 +64,7 @@ constructor(
                             0f
                         }
                     )
-                is ObservableTransitionState.Transition ->
+                is ObservableTransitionState.Transition.ChangeScene ->
                     when {
                         state.fromScene == Scenes.Gone ->
                             if (state.toScene.isExpandable()) {
@@ -88,6 +88,9 @@ constructor(
                             }
                         else -> flowOf(1f)
                     }
+                is ObservableTransitionState.Transition.ShowOrHideOverlay,
+                is ObservableTransitionState.Transition.ReplaceOverlay ->
+                    TODO("b/359173565: Handle overlay transitions")
             }
         }
 

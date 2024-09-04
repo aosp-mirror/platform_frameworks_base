@@ -71,6 +71,8 @@ android_ravenwood_test {
     ],
     srcs: [
         "src/com/android/server/power/stats/*.java",
+        "src/com/android/server/power/stats/format/*.java",
+        "src/com/android/server/power/stats/processor/*.java",
     ],
     java_resources: [
         "res/xml/power_profile*.xml",

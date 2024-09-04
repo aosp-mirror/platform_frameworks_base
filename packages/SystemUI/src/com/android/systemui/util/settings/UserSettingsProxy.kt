@@ -368,19 +368,19 @@ interface UserSettingsProxy : SettingsProxy {
      * @param value to associate with the name
      * @return true if the value was set, false on database errors
      */
-    fun putString(name: String, value: String, overrideableByRestore: Boolean): Boolean
+    fun putString(name: String, value: String?, overrideableByRestore: Boolean): Boolean
 
-    override fun putString(name: String, value: String): Boolean {
+    override fun putString(name: String, value: String?): Boolean {
         return putStringForUser(name, value, userId)
     }
 
     /** Similar implementation to [putString] for the specified [userHandle]. */
-    fun putStringForUser(name: String, value: String, userHandle: Int): Boolean
+    fun putStringForUser(name: String, value: String?, userHandle: Int): Boolean
 
     /** Similar implementation to [putString] for the specified [userHandle]. */
     fun putStringForUser(
         name: String,
-        value: String,
+        value: String?,
         tag: String?,
         makeDefault: Boolean,
         @UserIdInt userHandle: Int,

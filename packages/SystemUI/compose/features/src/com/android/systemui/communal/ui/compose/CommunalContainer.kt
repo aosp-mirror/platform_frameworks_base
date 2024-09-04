@@ -27,11 +27,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
@@ -47,7 +46,6 @@ import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.internal.R.attr.focusable
-import com.android.systemui.Flags.glanceableHubBackGesture
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -198,15 +196,7 @@ fun CommunalContainer(
             Box(modifier = Modifier.fillMaxSize())
         }
 
-        val userActions =
-            if (glanceableHubBackGesture()) {
-                mapOf(
-                    Swipe(SwipeDirection.End) to CommunalScenes.Blank,
-                    Back to CommunalScenes.Blank,
-                )
-            } else {
-                mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
-            }
+        val userActions = mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
 
         scene(CommunalScenes.Communal, userActions = userActions) {
             CommunalScene(
@@ -243,7 +233,7 @@ private fun SceneScope.CommunalScene(
                     if (isFocusable) {
                         Modifier.focusable()
                     } else {
-                        Modifier.semantics { contentDescription = "" }.clearAndSetSemantics {}
+                        Modifier.semantics { disabled() }.clearAndSetSemantics {}
                     }
                 )
     ) {
@@ -259,7 +249,7 @@ private fun SceneScope.CommunalScene(
                 modifier =
                     modifier.focusable(isFocusable).semantics {
                         if (!isFocusable) {
-                            contentDescription = ""
+                            disabled()
                         }
                     }
             )

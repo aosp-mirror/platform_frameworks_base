@@ -19,7 +19,6 @@ package com.android.systemui.qs.tiles.impl.modes.ui
 import android.content.res.Resources
 import android.icu.text.MessageFormat
 import android.widget.Button
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
@@ -37,18 +36,10 @@ constructor(
 ) : QSTileDataToStateMapper<ModesTileModel> {
     override fun map(config: QSTileConfig, data: ModesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes =
-                if (data.isActivated) {
-                    R.drawable.qs_dnd_icon_on
-                } else {
-                    R.drawable.qs_dnd_icon_off
-                }
-            val icon =
-                Icon.Loaded(
-                    resources.getDrawable(iconRes!!, theme),
-                    contentDescription = null,
-                )
-            this.icon = { icon }
+            if (!android.app.Flags.modesUiIcons()) {
+                iconRes = data.iconResId
+            }
+            icon = { data.icon }
             activationState =
                 if (data.isActivated) {
                     QSTileState.ActivationState.ACTIVE

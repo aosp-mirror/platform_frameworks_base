@@ -83,9 +83,8 @@ import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource.UNKNOWN
-import com.android.wm.shell.common.split.SplitScreenConstants
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.DesktopTasksController.TaskbarDesktopTaskListener
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -95,6 +94,8 @@ import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.UNKNOWN
+import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -118,19 +119,19 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isA
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
@@ -157,8 +158,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
   @Mock lateinit var transitions: Transitions
   @Mock lateinit var keyguardManager: KeyguardManager
+  @Mock lateinit var mReturnToDragStartAnimator: ReturnToDragStartAnimator
   @Mock lateinit var exitDesktopTransitionHandler: ExitDesktopTaskTransitionHandler
   @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
+  @Mock lateinit var dragAndDropTransitionHandler: DesktopModeDragAndDropTransitionHandler
   @Mock
   lateinit var toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler
   @Mock lateinit var dragToDesktopTransitionHandler: DragToDesktopTransitionHandler
@@ -173,6 +176,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock
   private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
   @Mock private lateinit var mockSurface: SurfaceControl
+  @Mock private lateinit var taskbarDesktopTaskListener: TaskbarDesktopTaskListener
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -235,6 +239,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val captor = ArgumentCaptor.forClass(RecentsTransitionStateListener::class.java)
     verify(recentsTransitionHandler).addTransitionStateListener(captor.capture())
     recentsTransitionStateListener = captor.value
+
+    controller.taskbarDesktopTaskListener = taskbarDesktopTaskListener
   }
 
   private fun createController(): DesktopTasksController {
@@ -250,8 +256,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
         dragAndDropController,
         transitions,
         keyguardManager,
+        mReturnToDragStartAnimator,
         enterDesktopTransitionHandler,
         exitDesktopTransitionHandler,
+        dragAndDropTransitionHandler,
         toggleResizeDesktopTaskTransitionHandler,
         dragToDesktopTransitionHandler,
         taskRepository,
@@ -276,6 +284,52 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun instantiate_addInitCallback() {
     verify(shellInit).addInitCallback(any(), any<DesktopTasksController>())
   }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_onlyFreeFormTaskIsRunning_returnFalse() {
+    setUpFreeformTask()
+
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isFalse()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_toggleResizeOfFreeFormTask_returnTrue() {
+    val task1 = setUpFreeformTask()
+
+    val argumentCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+    controller.toggleDesktopTaskSize(task1)
+    verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
+
+    assertThat(argumentCaptor.value).isTrue()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_fullScreenTaskIsRunning_returnTrue() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    setUpFreeformTask(bounds = stableBounds, active = true)
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isTrue()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_toggleResizeOfFullScreenTask_returnFalse() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    val task1 = setUpFreeformTask(bounds = stableBounds, active = true)
+
+    val argumentCaptor = ArgumentCaptor.forClass(Boolean::class.java)
+    controller.toggleDesktopTaskSize(task1)
+    verify(taskbarDesktopTaskListener).onTaskbarCornerRoundingUpdate(argumentCaptor.capture())
+
+    assertThat(argumentCaptor.value).isFalse()
+  }
+
+  @Test
+  fun doesAnyTaskRequireTaskbarRounding_splitScreenTaskIsRunning_returnTrue() {
+    val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+    setUpFreeformTask(bounds = Rect(stableBounds.left, stableBounds.top, 500, stableBounds.bottom))
+
+    assertThat(controller.doesAnyTaskRequireTaskbarRounding(DEFAULT_DISPLAY)).isTrue()
+  }
+
 
   @Test
   fun instantiate_cannotEnterDesktopMode_doNotAddInitCallback() {
@@ -639,6 +693,41 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun handleRequest_newFreeformTaskLaunch_cascadeApplied() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS)
+    val freeformTask = setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS, active = false)
+
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNotNull(wct, "should handle request")
+    val finalBounds = findBoundsChange(wct, freeformTask)
+    assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
+      .isEqualTo(DesktopTaskPosition.BottomRight)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun handleRequest_freeformTaskAlreadyExistsInDesktopMode_cascadeNotApplied() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS)
+    val freeformTask = setUpFreeformTask(bounds = DEFAULT_LANDSCAPE_BOUNDS)
+
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNull(wct, "should not handle request")
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
   fun addMoveToDesktopChanges_positionBottomRight() {
     setUpLandscapeDisplay()
     val stableBounds = Rect()
@@ -729,6 +818,64 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun addMoveToDesktopChanges_lastWindowSnapLeft_positionResetsToCenter() {
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    // Add freeform task with half display size snap bounds at left side.
+    setUpFreeformTask(bounds = Rect(stableBounds.left, stableBounds.top, 500, stableBounds.bottom))
+
+    val task = setUpFullscreenTask()
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    val finalBounds = findBoundsChange(wct, task)
+    assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
+      .isEqualTo(DesktopTaskPosition.Center)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun addMoveToDesktopChanges_lastWindowSnapRight_positionResetsToCenter() {
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    // Add freeform task with half display size snap bounds at right side.
+    setUpFreeformTask(bounds = Rect(
+      stableBounds.right - 500, stableBounds.top, stableBounds.right, stableBounds.bottom))
+
+    val task = setUpFullscreenTask()
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    val finalBounds = findBoundsChange(wct, task)
+    assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
+      .isEqualTo(DesktopTaskPosition.Center)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
+  fun addMoveToDesktopChanges_lastWindowMaximised_positionResetsToCenter() {
+    setUpLandscapeDisplay()
+    val stableBounds = Rect()
+    displayLayout.getStableBoundsForDesktopMode(stableBounds)
+
+    // Add maximised freeform task.
+    setUpFreeformTask(bounds = Rect(stableBounds))
+
+    val task = setUpFullscreenTask()
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    val finalBounds = findBoundsChange(wct, task)
+    assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
+      .isEqualTo(DesktopTaskPosition.Center)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_CASCADING_WINDOWS)
   fun addMoveToDesktopChanges_defaultToCenterIfFree() {
     setUpLandscapeDisplay()
     val stableBounds = Rect()
@@ -746,6 +893,75 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val finalBounds = findBoundsChange(wct, task)
     assertThat(stableBounds.getDesktopTaskPosition(finalBounds!!))
       .isEqualTo(DesktopTaskPosition.Center)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_landscapeDevice_userFullscreenOverride_defaultPortraitBounds() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask(enableUserFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_landscapeDevice_systemFullscreenOverride_defaultPortraitBounds() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask(enableSystemFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_LANDSCAPE_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_landscapeDevice_portraitResizableApp_aspectRatioOverridden() {
+    setUpLandscapeDisplay()
+    val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_PORTRAIT,
+      shouldLetterbox = true, aspectRatioOverrideApplied = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_PORTRAIT_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_portraitDevice_userFullscreenOverride_defaultPortraitBounds() {
+    setUpPortraitDisplay()
+    val task = setUpFullscreenTask(enableUserFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_portraitDevice_systemFullscreenOverride_defaultPortraitBounds() {
+    setUpPortraitDisplay()
+    val task = setUpFullscreenTask(enableSystemFullscreenOverride = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(DEFAULT_PORTRAIT_BOUNDS)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+  fun addMoveToDesktopChanges_portraitDevice_landscapeResizableApp_aspectRatioOverridden() {
+    setUpPortraitDisplay()
+    val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_LANDSCAPE,
+      deviceOrientation = ORIENTATION_PORTRAIT,
+      shouldLetterbox = true, aspectRatioOverrideApplied = true)
+    val wct = WindowContainerTransaction()
+    controller.addMoveToDesktopChanges(wct, task)
+
+    assertThat(findBoundsChange(wct, task)).isEqualTo(UNRESIZABLE_LANDSCAPE_BOUNDS)
   }
 
   @Test
@@ -1263,6 +1479,78 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun onDesktopWindowMinimize_noActiveTask_doesntUpdateTransaction() {
+    val wct = WindowContainerTransaction()
+    controller.onDesktopWindowMinimize(wct, taskId = 1)
+    // Nothing happens.
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_singleActiveTask_noWallpaperActivityToken_doesntUpdateTransaction() {
+    val task = setUpFreeformTask()
+    val wct = WindowContainerTransaction()
+    controller.onDesktopWindowMinimize(wct, taskId = task.taskId)
+    // Nothing happens.
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_singleActiveTask_hasWallpaperActivityToken_removesWallpaper() {
+    val task = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+
+    val wct = WindowContainerTransaction()
+    // The only active task is being minimized.
+    controller.onDesktopWindowMinimize(wct, taskId = task.taskId)
+    // Adds remove wallpaper operation
+    wct.assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_singleActiveTask_alreadyMinimized_doesntUpdateTransaction() {
+    val task = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+    taskRepository.minimizeTask(DEFAULT_DISPLAY, task.taskId)
+
+    val wct = WindowContainerTransaction()
+    // The only active task is already minimized.
+    controller.onDesktopWindowMinimize(wct, taskId = task.taskId)
+    // Doesn't modify transaction
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_multipleActiveTasks_doesntUpdateTransaction() {
+    val task1 = setUpFreeformTask()
+    setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+
+    val wct = WindowContainerTransaction()
+    controller.onDesktopWindowMinimize(wct, taskId = task1.taskId)
+    // Doesn't modify transaction
+    assertThat(wct.hierarchyOps).isEmpty()
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_multipleActiveTasks_minimizesTheOnlyVisibleTask_removesWallpaper() {
+    val task1 = setUpFreeformTask()
+    val task2 = setUpFreeformTask()
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+    taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
+
+    val wct = WindowContainerTransaction()
+    // task1 is the only visible task as task2 is minimized.
+    controller.onDesktopWindowMinimize(wct, taskId = task1.taskId)
+    // Adds remove wallpaper operation
+    wct.assertRemoveAt(index = 0, wallpaperToken)
+  }
+
+  @Test
   fun handleRequest_fullscreenTask_freeformVisible_returnSwitchToFreeformWCT() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
@@ -1277,8 +1565,34 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
         .isEqualTo(WINDOWING_MODE_FREEFORM)
 
-    assertThat(wct.hierarchyOps).hasSize(2)
-    wct.assertReorderAt(1, homeTask, toTop = false)
+    assertThat(wct.hierarchyOps).hasSize(1)
+  }
+
+  @Test
+  fun handleRequest_fullscreenTaskWithTaskOnHome_freeformVisible_returnSwitchToFreeformWCT() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    val homeTask = setUpHomeTask()
+    val freeformTask = setUpFreeformTask()
+    markTaskVisible(freeformTask)
+    val fullscreenTask = createFullscreenTask()
+    fullscreenTask.baseIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME)
+
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
+      .isEqualTo(WINDOWING_MODE_FREEFORM)
+
+    // There are 5 hops that are happening in this case:
+    // 1. Moving the fullscreen task to top as we add moveToDesktop() changes
+    // 2. Bringing home task to front
+    // 3. Pending intent for the wallpaper
+    // 4. Bringing the existing freeform task to top
+    // 5. Bringing the fullscreen task back at the top
+    assertThat(wct.hierarchyOps).hasSize(5)
+    wct.assertReorderAt(1, homeTask, toTop = true)
+    wct.assertReorderAt(4, fullscreenTask, toTop = true)
   }
 
   @Test
@@ -1310,6 +1624,45 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(wct!!.hierarchyOps.size).isEqualTo(2)
     wct.assertReorderAt(0, fullscreenTask, toTop = true)
     wct.assertReorderAt(1, freeformTasks[0], toTop = false)
+  }
+
+  @Test
+  fun handleRequest_fullscreenTaskWithTaskOnHome_bringsTasksOverLimit_otherTaskIsMinimized() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
+    freeformTasks.forEach { markTaskVisible(it) }
+    val fullscreenTask = createFullscreenTask()
+    fullscreenTask.baseIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME)
+
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    // Make sure we reorder the new task to top, and the back task to the bottom
+    assertThat(wct!!.hierarchyOps.size).isEqualTo(9)
+    wct.assertReorderAt(0, fullscreenTask, toTop = true)
+    wct.assertReorderAt(8, freeformTasks[0], toTop = false)
+  }
+
+  @Test
+  fun handleRequest_fullscreenTaskWithTaskOnHome_beyondLimit_existingAndNewTasksAreMinimized() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    val minimizedTask = setUpFreeformTask()
+    taskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = minimizedTask.taskId)
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
+    freeformTasks.forEach { markTaskVisible(it) }
+    val homeTask = setUpHomeTask()
+    val fullscreenTask = createFullscreenTask()
+    fullscreenTask.baseIntent.setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME)
+
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    assertThat(wct!!.hierarchyOps.size).isEqualTo(10)
+    wct.assertReorderAt(0, fullscreenTask, toTop = true)
+    // Make sure we reorder the home task to the top, desktop tasks to top of them and minimized
+    // task is under the home task.
+    wct.assertReorderAt(1, homeTask, toTop = true)
+    wct.assertReorderAt(9, freeformTasks[0], toTop = false)
   }
 
   @Test
@@ -1654,6 +2007,19 @@ class DesktopTasksControllerTest : ShellTestCase() {
     val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
 
     assertNotNull(result, "Should handle request").assertRemoveAt(0, task.token)
+  }
+
+  @Test
+  @EnableFlags(
+    Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+  )
+  fun handleRequest_backTransition_singleTaskNoToken_withWallpaper_notInDesktop_doesNotHandle() {
+    val task = setUpFreeformTask()
+    markTaskHidden(task)
+
+    val result = controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
+
+    assertNull(result, "Should not handle request")
   }
 
   @Test
@@ -2062,27 +2428,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun desktopTasksVisibilityChange_visible_setLaunchAdjacentDisabled() {
-    val task = setUpFreeformTask()
-    clearInvocations(launchAdjacentController)
-
-    markTaskVisible(task)
-    shellExecutor.flushAll()
-    verify(launchAdjacentController).launchAdjacentEnabled = false
-  }
-
-  @Test
-  fun desktopTasksVisibilityChange_invisible_setLaunchAdjacentEnabled() {
-    val task = setUpFreeformTask()
-    markTaskVisible(task)
-    clearInvocations(launchAdjacentController)
-
-    markTaskHidden(task)
-    shellExecutor.flushAll()
-    verify(launchAdjacentController).launchAdjacentEnabled = true
-  }
-
-  @Test
   fun moveFocusedTaskToDesktop_fullscreenTaskIsMovedToDesktop() {
     val task1 = setUpFullscreenTask()
     val task2 = setUpFullscreenTask()
@@ -2187,7 +2532,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_resizable_undefinedOrientation_defaultLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task = setUpFullscreenTask()
@@ -2203,7 +2548,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_resizable_landscapeOrientation_defaultLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task = setUpFullscreenTask(screenOrientation = SCREEN_ORIENTATION_LANDSCAPE)
@@ -2219,7 +2564,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_resizable_portraitOrientation_resizablePortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2236,7 +2581,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_unResizable_landscapeOrientation_defaultLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2253,7 +2598,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_landscapeDevice_unResizable_portraitOrientation_unResizablePortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2273,7 +2618,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_resizable_undefinedOrientation_defaultPortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task = setUpFullscreenTask(deviceOrientation = ORIENTATION_PORTRAIT)
@@ -2289,7 +2634,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_resizable_portraitOrientation_defaultPortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2308,7 +2653,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_resizable_landscapeOrientation_resizableLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2328,7 +2673,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_unResizable_portraitOrientation_defaultPortraitBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2348,7 +2693,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun dragToDesktop_portraitDevice_unResizable_landscapeOrientation_unResizableLandscapeBounds() {
     val spyController = spy(controller)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
         .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR)
 
     val task =
@@ -2375,10 +2720,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     controller.onDragPositioningEnd(
         task,
+        mockSurface,
         Point(100, -100), /* position */
         PointF(200f, -200f), /* inputCoordinate */
         Rect(100, -100, 500, 1000), /* currentDragBounds */
-        Rect(0, 50, 2000, 2000) /* validDragArea */)
+        Rect(0, 50, 2000, 2000), /* validDragArea */
+        Rect() /* dragStartBounds */ )
     val rectAfterEnd = Rect(100, 50, 500, 1150)
     verify(transitions)
         .startTransition(
@@ -2403,15 +2750,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     val currentDragBounds = Rect(100, 200, 500, 1000)
     whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
-    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull(), anyOrNull()))
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
       .thenReturn(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
 
     spyController.onDragPositioningEnd(
       task,
+      mockSurface,
       Point(100, 200), /* position */
       PointF(200f, 300f), /* inputCoordinate */
       currentDragBounds, /* currentDragBounds */
-      Rect(0, 50, 2000, 2000) /* validDragArea */)
+      Rect(0, 50, 2000, 2000) /* validDragArea */,
+      Rect() /* dragStartBounds */)
 
 
     verify(transitions)
@@ -2510,7 +2859,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun getSnapBounds_calculatesBoundsForResizable() {
+  fun snapToHalfScreen_getSnapBounds_calculatesBoundsForResizable() {
     val bounds = Rect(100, 100, 300, 300)
     val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
       topActivityInfo = ActivityInfo().apply {
@@ -2525,10 +2874,78 @@ class DesktopTasksControllerTest : ShellTestCase() {
       STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
     )
 
-    controller.snapToHalfScreen(task, currentDragBounds, SnapPosition.LEFT)
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT)
     // Assert bounds set to stable bounds
     val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(expectedBounds)
+  }
+
+  @Test
+  fun snapToHalfScreen_snapBoundsWhenAlreadySnapped_animatesSurfaceWithoutWCT() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    // Set up task to already be in snapped-left bounds
+    val bounds = Rect(
+      STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom
+    )
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, bounds).apply {
+      topActivityInfo = ActivityInfo().apply {
+        screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
+        configuration.windowConfiguration.appBounds = bounds
+      }
+      isResizeable = true
+    }
+
+    // Attempt to snap left again
+    val currentDragBounds = Rect(bounds).apply { offset(-100, 0) }
+    controller.snapToHalfScreen(task, mockSurface, currentDragBounds, SnapPosition.LEFT)
+
+    // Assert that task is NOT updated via WCT
+    verify(toggleResizeDesktopTaskTransitionHandler, never()).startTransition(any(), any())
+
+    // Assert that task leash is updated via Surface Animations
+    verify(mReturnToDragStartAnimator).start(
+      eq(task.taskId),
+      eq(mockSurface),
+      eq(currentDragBounds),
+      eq(bounds),
+      eq(true)
+    )
+  }
+
+  @Test
+  @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+  fun handleSnapResizingTask_nonResizable_snapsToHalfScreen() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
+      isResizeable = false
+    }
+    val preDragBounds = Rect(100, 100, 400, 500)
+    val currentDragBounds = Rect(0, 100, 300, 500)
+
+    controller.handleSnapResizingTask(
+      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds)
+    val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
+    assertThat(findBoundsChange(wct, task)).isEqualTo(
+      Rect(STABLE_BOUNDS.left, STABLE_BOUNDS.top, STABLE_BOUNDS.right / 2, STABLE_BOUNDS.bottom))
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+  fun handleSnapResizingTask_nonResizable_startsRepositionAnimation() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY, Rect(0, 0, 200, 100)).apply {
+      isResizeable = false
+    }
+    val preDragBounds = Rect(100, 100, 400, 500)
+    val currentDragBounds = Rect(0, 100, 300, 500)
+
+    controller.handleSnapResizingTask(
+      task, SnapPosition.LEFT, mockSurface, currentDragBounds, preDragBounds)
+    verify(mReturnToDragStartAnimator).start(
+      eq(task.taskId),
+      eq(mockSurface),
+      eq(currentDragBounds),
+      eq(preDragBounds),
+      eq(false)
+    )
   }
 
   @Test
@@ -2650,14 +3067,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   private fun setUpFreeformTask(
       displayId: Int = DEFAULT_DISPLAY,
-      bounds: Rect? = null
+      bounds: Rect? = null,
+      active: Boolean = true
   ): RunningTaskInfo {
     val task = createFreeformTask(displayId, bounds)
     val activityInfo = ActivityInfo()
     task.topActivityInfo = activityInfo
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
-    taskRepository.addActiveTask(displayId, task.taskId)
-    taskRepository.updateTaskVisibility(displayId, task.taskId, visible = true)
+    if (active) {
+      taskRepository.addActiveTask(displayId, task.taskId)
+      taskRepository.updateTaskVisibility(displayId, task.taskId, visible = true)
+    }
     taskRepository.addOrMoveFreeformTaskToTop(displayId, task.taskId)
     runningTasks.add(task)
     return task
@@ -2671,13 +3091,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   private fun setUpFullscreenTask(
-      displayId: Int = DEFAULT_DISPLAY,
-      isResizable: Boolean = true,
-      windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
-      deviceOrientation: Int = ORIENTATION_LANDSCAPE,
-      screenOrientation: Int = SCREEN_ORIENTATION_UNSPECIFIED,
-      shouldLetterbox: Boolean = false,
-      gravity: Int = Gravity.NO_GRAVITY
+    displayId: Int = DEFAULT_DISPLAY,
+    isResizable: Boolean = true,
+    windowingMode: Int = WINDOWING_MODE_FULLSCREEN,
+    deviceOrientation: Int = ORIENTATION_LANDSCAPE,
+    screenOrientation: Int = SCREEN_ORIENTATION_UNSPECIFIED,
+    shouldLetterbox: Boolean = false,
+    gravity: Int = Gravity.NO_GRAVITY,
+    enableUserFullscreenOverride: Boolean = false,
+    enableSystemFullscreenOverride: Boolean = false,
+    aspectRatioOverrideApplied: Boolean = false
   ): RunningTaskInfo {
     val task = createFullscreenTask(displayId)
     val activityInfo = ActivityInfo()
@@ -2688,23 +3111,24 @@ class DesktopTasksControllerTest : ShellTestCase() {
       isResizeable = isResizable
       configuration.orientation = deviceOrientation
       configuration.windowConfiguration.windowingMode = windowingMode
+      appCompatTaskInfo.isUserFullscreenOverrideEnabled = enableUserFullscreenOverride
+      appCompatTaskInfo.isSystemFullscreenOverrideEnabled = enableSystemFullscreenOverride
 
       if (shouldLetterbox) {
+        appCompatTaskInfo.setHasMinAspectRatioOverride(aspectRatioOverrideApplied)
         if (deviceOrientation == ORIENTATION_LANDSCAPE &&
             screenOrientation == SCREEN_ORIENTATION_PORTRAIT) {
           // Letterbox to portrait size
-          appCompatTaskInfo.topActivityBoundsLetterboxed = true
-          appCompatTaskInfo.topActivityLetterboxWidth = 1200
-          appCompatTaskInfo.topActivityLetterboxHeight = 1600
+          appCompatTaskInfo.setTopActivityLetterboxed(true)
+          appCompatTaskInfo.topActivityLetterboxAppWidth = 1200
+          appCompatTaskInfo.topActivityLetterboxAppHeight = 1600
         } else if (deviceOrientation == ORIENTATION_PORTRAIT &&
             screenOrientation == SCREEN_ORIENTATION_LANDSCAPE) {
           // Letterbox to landscape size
-          appCompatTaskInfo.topActivityBoundsLetterboxed = true
-          appCompatTaskInfo.topActivityLetterboxWidth = 1600
-          appCompatTaskInfo.topActivityLetterboxHeight = 1200
+          appCompatTaskInfo.setTopActivityLetterboxed(true)
+          appCompatTaskInfo.topActivityLetterboxAppWidth = 1600
+          appCompatTaskInfo.topActivityLetterboxAppHeight = 1200
         }
-      } else {
-        appCompatTaskInfo.topActivityBoundsLetterboxed = false
       }
 
       if (deviceOrientation == ORIENTATION_LANDSCAPE) {

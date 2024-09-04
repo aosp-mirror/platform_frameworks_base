@@ -25,6 +25,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
@@ -132,6 +133,7 @@ constructor(
     private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
     private val statusBarStateController: SysuiStatusBarStateController,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -150,7 +152,7 @@ constructor(
             hydrateBackStack()
             resetShadeSessions()
             handleKeyguardEnabledness()
-            notifyKeyguardDismissCallbacks()
+            notifyKeyguardDismissCancelledCallbacks()
             refreshLockscreenEnabled()
         } else {
             sceneLogger.logFrameworkEnabled(
@@ -187,7 +189,7 @@ constructor(
                             // current scene
                             when (state) {
                                 is ObservableTransitionState.Idle -> state.currentScene
-                                is ObservableTransitionState.Transition -> state.fromScene
+                                is ObservableTransitionState.Transition -> state.fromContent
                             }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
                         }
                         .distinctUntilChanged()
@@ -218,7 +220,7 @@ constructor(
                                             }
                                         }
                                         is ObservableTransitionState.Transition -> {
-                                            if (state.fromScene == Scenes.Gone) {
+                                            if (state.fromContent == Scenes.Gone) {
                                                 true to "scene transitioning away from Gone"
                                             } else {
                                                 null
@@ -228,13 +230,16 @@ constructor(
                                 },
                                 headsUpInteractor.isHeadsUpOrAnimatingAway,
                                 occlusionInteractor.invisibleDueToOcclusion,
+                                alternateBouncerInteractor.isVisible,
                             ) {
                                 visibilityForTransitionState,
                                 isHeadsUpOrAnimatingAway,
                                 invisibleDueToOcclusion,
+                                isAlternateBouncerVisible,
                                 ->
                                 when {
                                     isHeadsUpOrAnimatingAway -> true to "showing a HUN"
+                                    isAlternateBouncerVisible -> true to "showing alternate bouncer"
                                     invisibleDueToOcclusion -> false to "invisible due to occlusion"
                                     else -> visibilityForTransitionState
                                 }
@@ -346,14 +351,15 @@ constructor(
                             is ObservableTransitionState.Idle -> setOf(transitionState.currentScene)
                             is ObservableTransitionState.Transition ->
                                 setOf(
-                                    transitionState.fromScene,
-                                    transitionState.toScene,
+                                    transitionState.fromContent,
+                                    transitionState.toContent,
                                 )
                         }
                     val isOnLockscreen = renderedScenes.contains(Scenes.Lockscreen)
-                    val isOnBouncer = renderedScenes.contains(Scenes.Bouncer)
+                    val isAlternateBouncerVisible = alternateBouncerInteractor.isVisibleState()
+                    val isOnPrimaryBouncer = renderedScenes.contains(Scenes.Bouncer)
                     if (!deviceUnlockStatus.isUnlocked) {
-                        return@mapNotNull if (isOnLockscreen || isOnBouncer) {
+                        return@mapNotNull if (isOnLockscreen || isOnPrimaryBouncer) {
                             // Already on lockscreen or bouncer, no need to change scenes.
                             null
                         } else {
@@ -365,27 +371,50 @@ constructor(
                     }
 
                     if (
-                        isOnBouncer &&
+                        isOnPrimaryBouncer &&
                             deviceUnlockStatus.deviceUnlockSource == DeviceUnlockSource.TrustAgent
                     ) {
                         uiEventLogger.log(BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS)
                     }
                     when {
-                        isOnBouncer ->
-                            // When the device becomes unlocked in Bouncer, go to previous scene,
-                            // or Gone.
+                        isAlternateBouncerVisible -> {
+                            // When the device becomes unlocked when the alternate bouncer is
+                            // showing, always hide the alternate bouncer and notify dismiss
+                            // succeeded
+                            alternateBouncerInteractor.hide()
+                            dismissCallbackRegistry.notifyDismissSucceeded()
+
+                            // ... and go to Gone or stay on the current scene
+                            if (
+                                isOnLockscreen ||
+                                    !statusBarStateController.leaveOpenOnKeyguardHide()
+                            ) {
+                                Scenes.Gone to
+                                    "device was unlocked with alternate bouncer showing" +
+                                        " and shade didn't need to be left open"
+                            } else {
+                                null
+                            }
+                        }
+                        isOnPrimaryBouncer -> {
+                            // When the device becomes unlocked in primary Bouncer,
+                            // notify dismiss succeeded and
+                            // go to previous scene or Gone.
+                            dismissCallbackRegistry.notifyDismissSucceeded()
                             if (
                                 previousScene.value == Scenes.Lockscreen ||
                                     !statusBarStateController.leaveOpenOnKeyguardHide()
                             ) {
                                 Scenes.Gone to
-                                    "device was unlocked in Bouncer scene and shade" +
+                                    "device was unlocked with bouncer showing and shade" +
                                         " didn't need to be left open"
                             } else {
                                 val prevScene = previousScene.value
                                 (prevScene ?: Scenes.Gone) to
-                                    "device was unlocked in Bouncer scene, from sceneKey=$prevScene"
+                                    "device was unlocked with primary bouncer showing," +
+                                        " from sceneKey=$prevScene"
                             }
+                        }
                         isOnLockscreen ->
                             // The lockscreen should be dismissed automatically in 2 scenarios:
                             // 1. When face auth bypass is enabled and authentication happens while
@@ -432,7 +461,8 @@ constructor(
                     sceneInteractor.transitionState.value as? ObservableTransitionState.Transition
                         ?: return@collect
                 if (
-                    transition.fromScene == Scenes.Gone && transition.toScene == Scenes.Lockscreen
+                    transition.fromContent == Scenes.Gone &&
+                        transition.toContent == Scenes.Lockscreen
                 ) {
                     switchToScene(
                         targetSceneKey = Scenes.Gone,
@@ -444,10 +474,13 @@ constructor(
         applicationScope.launch {
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {
+                    alternateBouncerInteractor.hide()
+                    dismissCallbackRegistry.notifyDismissCancelled()
+
                     switchToScene(
                         targetSceneKey = Scenes.Lockscreen,
                         loggingReason = "device is starting to sleep",
-                        sceneState = keyguardTransitionInteractor.asleepKeyguardState.value,
+                        sceneState = keyguardInteractor.asleepKeyguardState.value,
                     )
                 } else {
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
@@ -662,8 +695,8 @@ constructor(
                 .filterIsInstance<ObservableTransitionState.Transition>()
                 // Only consider user-initiated (e.g. drags) that go from bouncer to lockscreen.
                 .filter { transition ->
-                    transition.fromScene == Scenes.Bouncer &&
-                        transition.toScene == Scenes.Lockscreen &&
+                    transition.fromContent == Scenes.Bouncer &&
+                        transition.toContent == Scenes.Lockscreen &&
                         transition.isInitiatedByUserInput
                 }
                 .flatMapLatest { it.progress }
@@ -747,15 +780,23 @@ constructor(
         }
     }
 
-    private fun notifyKeyguardDismissCallbacks() {
+    private fun notifyKeyguardDismissCancelledCallbacks() {
         applicationScope.launch {
-            sceneInteractor.currentScene.pairwise().collect { (from, to) ->
-                when {
-                    from != Scenes.Bouncer -> Unit
-                    to == Scenes.Gone -> dismissCallbackRegistry.notifyDismissSucceeded()
-                    else -> dismissCallbackRegistry.notifyDismissCancelled()
+            combine(
+                    deviceEntryInteractor.isUnlocked,
+                    sceneInteractor.currentScene.pairwise(),
+                ) { isUnlocked, (from, to) ->
+                    when {
+                        from != Scenes.Bouncer -> false
+                        to != Scenes.Gone && !isUnlocked -> true
+                        else -> false
+                    }
                 }
-            }
+                .collect { notifyKeyguardDismissCancelled ->
+                    if (notifyKeyguardDismissCancelled) {
+                        dismissCallbackRegistry.notifyDismissCancelled()
+                    }
+                }
         }
     }
 

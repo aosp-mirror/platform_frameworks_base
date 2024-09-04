@@ -22,6 +22,8 @@ import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -59,6 +61,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams.OccludingCaptionElement;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer;
+import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,6 +144,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     TaskDragResizer mTaskDragResizer;
     boolean mIsCaptionVisible;
 
+    private boolean mIsStatusBarVisible;
+    private boolean mIsKeyguardVisibleAndOccluded;
+
     /** The most recent set of insets applied to this window decoration. */
     private WindowDecorationInsets mWindowDecorationInsets;
     private final Binder mOwner = new Binder();
@@ -182,6 +188,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mWindowContainerTransactionSupplier = windowContainerTransactionSupplier;
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
+        final InsetsState insetsState = mDisplayController.getInsetsState(mTaskInfo.displayId);
+        mIsStatusBarVisible = insetsState != null
+                && InsetsStateKt.isVisible(insetsState, statusBars());
     }
 
     /**
@@ -232,14 +241,15 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
         rootView = null; // Clear it just in case we use it accidentally
 
-        updateCaptionVisibility(outResult.mRootView, mTaskInfo.displayId);
+        updateCaptionVisibility(outResult.mRootView);
 
         final Rect taskBounds = mTaskInfo.getConfiguration().windowConfiguration.getBounds();
         outResult.mWidth = taskBounds.width();
         outResult.mHeight = taskBounds.height();
         outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
         final Resources resources = mDecorWindowContext.getResources();
-        outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
+        outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId)
+                + params.mCaptionTopPadding;
         outResult.mCaptionWidth = params.mCaptionWidthId != Resources.ID_NULL
                 ? loadDimensionPixelSize(resources, params.mCaptionWidthId) : taskBounds.width();
         outResult.mCaptionX = (outResult.mWidth - outResult.mCaptionWidth) / 2;
@@ -281,15 +291,18 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mDecorWindowContext = mContext.createConfigurationContext(mWindowDecorConfig);
             mDecorWindowContext.setTheme(mContext.getThemeResId());
             if (params.mLayoutResId != 0) {
-                outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
-                        .inflate(params.mLayoutResId, null);
+                outResult.mRootView = inflateLayout(mDecorWindowContext, params.mLayoutResId);
             }
         }
 
         if (outResult.mRootView == null) {
-            outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
-                    .inflate(params.mLayoutResId, null);
+            outResult.mRootView = inflateLayout(mDecorWindowContext, params.mLayoutResId);
         }
+    }
+
+    @VisibleForTesting
+    T inflateLayout(Context context, int layoutResId) {
+        return (T) LayoutInflater.from(context).inflate(layoutResId, null);
     }
 
     private void updateDecorationContainerSurface(
@@ -443,9 +456,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
         mCaptionWindowManager.setConfiguration(mTaskInfo.getConfiguration());
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(outResult.mCaptionWidth, outResult.mCaptionHeight,
+                new WindowManager.LayoutParams(
+                        outResult.mCaptionWidth,
+                        outResult.mCaptionHeight,
                         TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
+                        FLAG_NOT_FOCUSABLE | FLAG_SPLIT_TOUCH,
+                        PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
         lp.inputFeatures = params.mInputFeatures;
@@ -459,6 +475,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 }
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
+            outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
             mViewHost.setView(outResult.mRootView, lp);
             Trace.endSection();
         } else {
@@ -469,6 +486,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 }
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
             }
+            outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
             mViewHost.relayout(lp);
             Trace.endSection();
         }
@@ -489,22 +507,31 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         throw new IllegalArgumentException("Unexpected alignment " + element.mAlignment);
     }
 
+    void onKeyguardStateChanged(boolean visible, boolean occluded) {
+        final boolean prevVisAndOccluded = mIsKeyguardVisibleAndOccluded;
+        mIsKeyguardVisibleAndOccluded = visible && occluded;
+        final boolean changed = prevVisAndOccluded != mIsKeyguardVisibleAndOccluded;
+        if (changed) {
+            relayout(mTaskInfo);
+        }
+    }
+
+    void onInsetsStateChanged(@NonNull InsetsState insetsState) {
+        final boolean prevStatusBarVisibility = mIsStatusBarVisible;
+        mIsStatusBarVisible = InsetsStateKt.isVisible(insetsState, statusBars());
+        final boolean changed = prevStatusBarVisibility != mIsStatusBarVisible;
+
+        if (changed) {
+            relayout(mTaskInfo);
+        }
+    }
+
     /**
      * Checks if task has entered/exited immersive mode and requires a change in caption visibility.
      */
-    private void updateCaptionVisibility(View rootView, int displayId) {
-        final InsetsState insetsState = mDisplayController.getInsetsState(displayId);
-        for (int i = 0; i < insetsState.sourceSize(); i++) {
-            final InsetsSource source = insetsState.sourceAt(i);
-            if (source.getType() != statusBars()) {
-                continue;
-            }
-
-            mIsCaptionVisible = source.isVisible();
-            setCaptionVisibility(rootView, mIsCaptionVisible);
-
-            return;
-        }
+    private void updateCaptionVisibility(View rootView) {
+        mIsCaptionVisible = mIsStatusBarVisible && !mIsKeyguardVisibleAndOccluded;
+        setCaptionVisibility(rootView, mIsCaptionVisible);
     }
 
     void setTaskDragResizer(TaskDragResizer taskDragResizer) {
@@ -635,9 +662,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setWindowCrop(windowSurfaceControl, width, height)
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(width, height, TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | FLAG_WATCH_OUTSIDE_TOUCH,
+                new WindowManager.LayoutParams(
+                        width,
+                        height,
+                        TYPE_APPLICATION,
+                        FLAG_NOT_FOCUSABLE | FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH,
                         PixelFormat.TRANSPARENT);
         lp.setTitle("Additional window of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
@@ -700,6 +729,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mShadowRadiusId;
         int mCornerRadius;
 
+        int mCaptionTopPadding;
+
         Configuration mWindowDecorConfig;
 
         boolean mApplyStartTransactionOnDraw;
@@ -715,6 +746,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
+
+            mCaptionTopPadding = 0;
 
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;

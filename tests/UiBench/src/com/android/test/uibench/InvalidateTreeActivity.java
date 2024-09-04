@@ -33,6 +33,7 @@ public class InvalidateTreeActivity extends AppCompatActivity {
     private final ArrayList<LinearLayout> mLayouts = new ArrayList<>();
 
     private int mColorToggle = 0;
+    private ObjectAnimator mAnimator;
 
     private void createQuadTree(LinearLayout parent, int remainingDepth) {
         mLayouts.add(parent);
@@ -71,9 +72,17 @@ public class InvalidateTreeActivity extends AppCompatActivity {
         createQuadTree(root, 8);
         setContentView(root);
 
-        ObjectAnimator animator = ObjectAnimator.ofInt(this, "ignoredValue", 0, 1000);
-        animator.setRepeatMode(ValueAnimator.REVERSE);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.start();
+        mAnimator = ObjectAnimator.ofInt(this, "ignoredValue", 0, 1000);
+        mAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mAnimator.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mAnimator != null) {
+            mAnimator.cancel();
+        }
     }
 }

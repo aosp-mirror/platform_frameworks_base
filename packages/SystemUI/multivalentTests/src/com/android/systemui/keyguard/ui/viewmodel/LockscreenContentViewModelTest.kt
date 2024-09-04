@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -79,6 +80,7 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
             fakeFeatureFlagsClassic.set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, true)
             shadeRepository.setShadeLayoutWide(false)
             underTest = lockscreenContentViewModel
+            underTest.activateIn(testScope)
         }
     }
 

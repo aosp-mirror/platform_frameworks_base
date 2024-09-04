@@ -20,4 +20,8 @@ import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInterac
 import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.notificationShadeWindowModel: NotificationShadeWindowModel by
-    Kosmos.Fixture { NotificationShadeWindowModel(keyguardTransitionInteractor) }
+    Kosmos.Fixture {
+        NotificationShadeWindowModel(
+            keyguardTransitionInteractor,
+        )
+    }

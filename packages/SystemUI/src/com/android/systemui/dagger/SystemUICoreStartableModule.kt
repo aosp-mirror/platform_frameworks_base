@@ -30,7 +30,7 @@ import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
-import com.android.systemui.inputdevice.oobe.KeyboardTouchpadOobeTutorialCoreStartable
+import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewConfigurator
@@ -255,13 +255,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(StylusUsiPowerStartable::class)
     abstract fun bindStylusUsiPowerStartable(sysui: StylusUsiPowerStartable): CoreStartable
-
-    @Binds
-    @IntoMap
-    @ClassKey(KeyboardTouchpadOobeTutorialCoreStartable::class)
-    abstract fun bindOobeSchedulerCoreStartable(
-        listener: KeyboardTouchpadOobeTutorialCoreStartable
-    ): CoreStartable
 
     @Binds
     @IntoMap

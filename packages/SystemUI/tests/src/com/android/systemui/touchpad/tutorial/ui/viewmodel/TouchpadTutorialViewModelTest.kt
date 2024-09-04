@@ -19,6 +19,7 @@ package com.android.systemui.touchpad.tutorial.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.model.sysUiState
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED
@@ -41,7 +42,13 @@ class TouchpadTutorialViewModelTest : SysuiTestCase() {
     private val sysUiState = kosmos.sysUiState
     private val viewModel =
         TouchpadTutorialViewModel(
-            TouchpadGesturesInteractor(sysUiState, kosmos.displayTracker, testScope.backgroundScope)
+            TouchpadGesturesInteractor(
+                sysUiState,
+                kosmos.displayTracker,
+                testScope.backgroundScope,
+                kosmos.inputDeviceTutorialLogger
+            ),
+            kosmos.inputDeviceTutorialLogger
         )
 
     @Test

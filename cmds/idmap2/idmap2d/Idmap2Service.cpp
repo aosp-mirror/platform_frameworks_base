@@ -78,6 +78,11 @@ PolicyBitmask ConvertAidlArgToPolicyBitmask(int32_t arg) {
 
 namespace android::os {
 
+template <typename T>
+const T* Idmap2Service::GetPointer(const OwningPtr<T>& ptr) {
+    return std::visit([](auto&& ptr) { return ptr.get(); }, ptr);
+}
+
 Status Idmap2Service::getIdmapPath(const std::string& overlay_path,
                                    int32_t user_id ATTRIBUTE_UNUSED, std::string* _aidl_return) {
   assert(_aidl_return);
@@ -224,7 +229,7 @@ idmap2::Result<Idmap2Service::TargetResourceContainerPtr> Idmap2Service::GetTarg
       if (is_framework ||
         (item.dev == st.st_dev && item.inode == st.st_ino && item.size == st.st_size
           && item.mtime.tv_sec == st.st_mtim.tv_sec && item.mtime.tv_nsec == st.st_mtim.tv_nsec)) {
-        return {item.apk.get()};
+        return {item.apk};
       }
       container_cache_.erase(cache_it);
     }
@@ -238,14 +243,14 @@ idmap2::Result<Idmap2Service::TargetResourceContainerPtr> Idmap2Service::GetTarg
     return {std::move(*target)};
   }
 
-  const auto res = target->get();
+  auto res = std::shared_ptr(std::move(*target));
   std::lock_guard lock(container_cache_mutex_);
   container_cache_.emplace(target_path, CachedContainer {
     .dev = dev_t(st.st_dev),
     .inode = ino_t(st.st_ino),
     .size = st.st_size,
     .mtime = st.st_mtim,
-    .apk = std::move(*target)
+    .apk = res
   });
   return {res};
 }

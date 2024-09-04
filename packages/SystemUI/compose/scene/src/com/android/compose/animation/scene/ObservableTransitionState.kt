@@ -31,9 +31,6 @@ import kotlinx.coroutines.flow.flowOf
  *    layout or Compose drawing phases.
  * 2. [ObservableTransitionState] values are backed by Kotlin [Flow]s and can be collected by
  *    non-Compose code to observe value changes.
- * 3. [ObservableTransitionState.Transition.fromScene] and
- *    [ObservableTransitionState.Transition.toScene] will never be equal, while
- *    [TransitionState.Transition.fromScene] and [TransitionState.Transition.toScene] can be equal.
  */
 sealed interface ObservableTransitionState {
     /**
@@ -43,7 +40,9 @@ sealed interface ObservableTransitionState {
     fun currentScene(): Flow<SceneKey> {
         return when (this) {
             is Idle -> flowOf(currentScene)
-            is Transition -> currentScene
+            is Transition.ChangeScene -> currentScene
+            is Transition.ShowOrHideOverlay -> flowOf(currentScene)
+            is Transition.ReplaceOverlay -> flowOf(currentScene)
         }
     }
 
@@ -51,10 +50,10 @@ sealed interface ObservableTransitionState {
     data class Idle(val currentScene: SceneKey) : ObservableTransitionState
 
     /** There is a transition animating between two scenes. */
-    class Transition(
-        val fromScene: SceneKey,
-        val toScene: SceneKey,
-        val currentScene: Flow<SceneKey>,
+    sealed class Transition(
+        val fromContent: ContentKey,
+        val toContent: ContentKey,
+        val currentOverlays: Flow<Set<OverlayKey>>,
         val progress: Flow<Float>,
 
         /**
@@ -74,25 +73,127 @@ sealed interface ObservableTransitionState {
          * the transition completes/settles.
          */
         val isUserInputOngoing: Flow<Boolean>,
+
+        /** Current progress of the preview part of the transition */
+        val previewProgress: Flow<Float>,
+
+        /** Whether the transition is currently in the preview stage or not */
+        val isInPreviewStage: Flow<Boolean>,
     ) : ObservableTransitionState {
         override fun toString(): String =
             """Transition
-                |(from=$fromScene,
-                | to=$toScene,
+                |(from=$fromContent,
+                | to=$toContent,
                 | isInitiatedByUserInput=$isInitiatedByUserInput,
                 | isUserInputOngoing=$isUserInputOngoing
                 |)"""
                 .trimMargin()
+
+        /** A transition animating between [fromScene] and [toScene]. */
+        class ChangeScene(
+            val fromScene: SceneKey,
+            val toScene: SceneKey,
+            val currentScene: Flow<SceneKey>,
+            currentOverlays: Flow<Set<OverlayKey>>,
+            progress: Flow<Float>,
+            isInitiatedByUserInput: Boolean,
+            isUserInputOngoing: Flow<Boolean>,
+            previewProgress: Flow<Float>,
+            isInPreviewStage: Flow<Boolean>,
+        ) :
+            Transition(
+                fromScene,
+                toScene,
+                currentOverlays,
+                progress,
+                isInitiatedByUserInput,
+                isUserInputOngoing,
+                previewProgress,
+                isInPreviewStage,
+            )
+
+        /** The [overlay] is either showing from [currentScene] or hiding into [currentScene]. */
+        class ShowOrHideOverlay(
+            val overlay: OverlayKey,
+            fromContent: ContentKey,
+            toContent: ContentKey,
+            val currentScene: SceneKey,
+            currentOverlays: Flow<Set<OverlayKey>>,
+            progress: Flow<Float>,
+            isInitiatedByUserInput: Boolean,
+            isUserInputOngoing: Flow<Boolean>,
+            previewProgress: Flow<Float>,
+            isInPreviewStage: Flow<Boolean>,
+        ) :
+            Transition(
+                fromContent,
+                toContent,
+                currentOverlays,
+                progress,
+                isInitiatedByUserInput,
+                isUserInputOngoing,
+                previewProgress,
+                isInPreviewStage,
+            )
+
+        /** We are transitioning from [fromOverlay] to [toOverlay]. */
+        class ReplaceOverlay(
+            val fromOverlay: OverlayKey,
+            val toOverlay: OverlayKey,
+            val currentScene: SceneKey,
+            currentOverlays: Flow<Set<OverlayKey>>,
+            progress: Flow<Float>,
+            isInitiatedByUserInput: Boolean,
+            isUserInputOngoing: Flow<Boolean>,
+            previewProgress: Flow<Float>,
+            isInPreviewStage: Flow<Boolean>,
+        ) :
+            Transition(
+                fromOverlay,
+                toOverlay,
+                currentOverlays,
+                progress,
+                isInitiatedByUserInput,
+                isUserInputOngoing,
+                previewProgress,
+                isInPreviewStage,
+            )
+
+        companion object {
+            operator fun invoke(
+                fromScene: SceneKey,
+                toScene: SceneKey,
+                currentScene: Flow<SceneKey>,
+                progress: Flow<Float>,
+                isInitiatedByUserInput: Boolean,
+                isUserInputOngoing: Flow<Boolean>,
+                previewProgress: Flow<Float> = flowOf(0f),
+                isInPreviewStage: Flow<Boolean> = flowOf(false),
+                currentOverlays: Flow<Set<OverlayKey>> = flowOf(emptySet()),
+            ): ChangeScene {
+                return ChangeScene(
+                    fromScene,
+                    toScene,
+                    currentScene,
+                    currentOverlays,
+                    progress,
+                    isInitiatedByUserInput,
+                    isUserInputOngoing,
+                    previewProgress,
+                    isInPreviewStage,
+                )
+            }
+        }
     }
 
-    fun isIdle(scene: SceneKey?): Boolean {
+    fun isIdle(scene: SceneKey? = null): Boolean {
         return this is Idle && (scene == null || this.currentScene == scene)
     }
 
-    fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean {
+    fun isTransitioning(from: ContentKey? = null, to: ContentKey? = null): Boolean {
         return this is Transition &&
-            (from == null || this.fromScene == from) &&
-            (to == null || this.toScene == to)
+            (from == null || this.fromContent == from) &&
+            (to == null || this.toContent == to)
     }
 }
 
@@ -105,14 +206,45 @@ fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTrans
     return snapshotFlow {
             when (val state = transitionState) {
                 is TransitionState.Idle -> ObservableTransitionState.Idle(state.currentScene)
-                is TransitionState.Transition -> {
-                    ObservableTransitionState.Transition(
+                is TransitionState.Transition.ChangeScene -> {
+                    ObservableTransitionState.Transition.ChangeScene(
                         fromScene = state.fromScene,
                         toScene = state.toScene,
                         currentScene = snapshotFlow { state.currentScene },
+                        currentOverlays = flowOf(state.currentOverlays),
                         progress = snapshotFlow { state.progress },
                         isInitiatedByUserInput = state.isInitiatedByUserInput,
                         isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },
+                        previewProgress = snapshotFlow { state.previewProgress },
+                        isInPreviewStage = snapshotFlow { state.isInPreviewStage },
+                    )
+                }
+                is TransitionState.Transition.ShowOrHideOverlay -> {
+                    check(state.fromOrToScene == state.currentScene)
+                    ObservableTransitionState.Transition.ShowOrHideOverlay(
+                        overlay = state.overlay,
+                        fromContent = state.fromContent,
+                        toContent = state.toContent,
+                        currentScene = state.currentScene,
+                        currentOverlays = snapshotFlow { state.currentOverlays },
+                        progress = snapshotFlow { state.progress },
+                        isInitiatedByUserInput = state.isInitiatedByUserInput,
+                        isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },
+                        previewProgress = snapshotFlow { state.previewProgress },
+                        isInPreviewStage = snapshotFlow { state.isInPreviewStage },
+                    )
+                }
+                is TransitionState.Transition.ReplaceOverlay -> {
+                    ObservableTransitionState.Transition.ReplaceOverlay(
+                        fromOverlay = state.fromOverlay,
+                        toOverlay = state.toOverlay,
+                        currentScene = state.currentScene,
+                        currentOverlays = snapshotFlow { state.currentOverlays },
+                        progress = snapshotFlow { state.progress },
+                        isInitiatedByUserInput = state.isInitiatedByUserInput,
+                        isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },
+                        previewProgress = snapshotFlow { state.previewProgress },
+                        isInPreviewStage = snapshotFlow { state.isInPreviewStage },
                     )
                 }
             }

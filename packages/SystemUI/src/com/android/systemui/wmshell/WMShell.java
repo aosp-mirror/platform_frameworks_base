@@ -34,6 +34,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -58,7 +60,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.kotlin.JavaAdapter;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -68,6 +69,7 @@ import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.recents.RecentTasks;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
@@ -378,8 +380,8 @@ public final class WMShell implements
             }
 
             @Override
-            public void setImeWindowStatus(int displayId, int vis, int backDisposition,
-                    boolean showImeSwitcher) {
+            public void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
+                    @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
                 if (displayId == mDisplayTracker.getDefaultDisplayId()
                         && (vis & InputMethodService.IME_VISIBLE) != 0) {
                     oneHanded.stopOneHanded(

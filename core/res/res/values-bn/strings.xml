@@ -203,8 +203,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ব্যক্তিগত কাজের জন্য অ্যাডমিন এই ডিভাইস ব্যবহার করার অনুমতি দেয়নি"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"প্রাইভেট স্পেস সরিয়ে দেওয়া হয়েছে"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"এই ম্যানেজ করা ডিভাইসে আপনার সংস্থা প্রাইভেট স্পেসের অনুমতি দেয় না।"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি পরিচালনা করা হচ্ছে"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি পরিচালনা করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।,"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ডিভাইসটি ম্যানেজ করা হচ্ছে"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"আপনার প্রতিষ্ঠান এই ডিভাইসটি ম্যানেজ করে এবং এটির নেটওয়ার্ক ট্রাফিকের উপরে নজর রাখতে পারে। বিশদ বিবরণের জন্য ট্যাপ করুন।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"অ্যাপগুলি আপনার লোকেশন অ্যাক্সেস করতে পারবে"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"আরও জানতে আইটি অ্যাডমিনের সাথে যোগাযোগ করুন"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"জিওফেন্সিং সার্ভিস"</string>
@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"পাসওয়ার্ডের ফিল্ডে হাতের লেখা কাজ করে না"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ফিরে যান"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ইনপুট পদ্ধতি পাল্টান"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"ইনপুট পদ্ধতির পিকার খুলুন"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"সেটিংস"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"স্টোরেজ পূর্ণ হতে চলেছে"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"কিছু কিছু সিস্টেম ক্রিয়াকলাপ কাজ নাও করতে পারে"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"সিস্টেমের জন্য যথেষ্ট স্টোরেজ নেই৷ আপনার কাছে ২৫০এমবি ফাঁকা স্থান রয়েছে কিনা সে বিষয়ে নিশ্চিত হন এবং সিস্টেম চালু করুন৷"</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"নিরাপত্তার জন্য স্ক্রিন শেয়ার করা থেকে লুকানো অ্যাপের কন্টেন্ট"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"স্যাটেলাইটের সাথে অটোমেটিক কানেক্ট করা হয়েছে"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"আপনি কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠাতে ও পেতে পারবেন"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"\'স্যাটেলাইট মেসেজিং\' ব্যবহার করবেন?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠান ও রিসিভ করুন"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"এটি কীভাবে কাজ করে"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বাকি আছে…"</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"ক্যালকুলেটর"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"ম্যাপ"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"অ্যাপ্লিকেশন"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"আপনার ফিঙ্গারপ্রিন্ট আর শনাক্ত করা যাবে না। \'ফিঙ্গারপ্রিন্ট আনলক\' ফিচার আবার সেট-আপ করুন।"</string>
 </resources>

@@ -19,9 +19,14 @@ package com.android.server.wm;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
+
+import com.android.server.wm.AppCompatConfiguration.LetterboxBackgroundType;
 
 /**
  * Robot implementation for {@link AppCompatConfiguration}.
@@ -47,6 +52,11 @@ class AppCompatConfigurationRobot {
 
     void enableCameraCompatTreatment(boolean enabled) {
         doReturn(enabled).when(mAppCompatConfiguration).isCameraCompatTreatmentEnabled();
+    }
+
+    void enableSplitScreenAspectRatioForUnresizableApps(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration)
+                .getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
     }
 
     void enableCameraCompatTreatmentAtBuildTime(boolean enabled) {
@@ -79,5 +89,61 @@ class AppCompatConfigurationRobot {
     void setFixedOrientationLetterboxAspectRatio(float aspectRatio) {
         doReturn(aspectRatio).when(mAppCompatConfiguration)
                 .getFixedOrientationLetterboxAspectRatio();
+    }
+
+    void setThinLetterboxWidthPx(int thinWidthPx) {
+        doReturn(thinWidthPx).when(mAppCompatConfiguration)
+                .getThinLetterboxWidthPx();
+    }
+
+    void setThinLetterboxHeightPx(int thinHeightPx) {
+        doReturn(thinHeightPx).when(mAppCompatConfiguration)
+                .getThinLetterboxHeightPx();
+    }
+
+    void setLetterboxActivityCornersRounded(boolean rounded) {
+        doReturn(rounded).when(mAppCompatConfiguration).isLetterboxActivityCornersRounded();
+    }
+
+    void setLetterboxEducationEnabled(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration).getIsEducationEnabled();
+    }
+
+    void setLetterboxActivityCornersRadius(int cornerRadius) {
+        doReturn(cornerRadius).when(mAppCompatConfiguration).getLetterboxActivityCornersRadius();
+    }
+
+    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
+        doReturn(backgroundType).when(mAppCompatConfiguration).getLetterboxBackgroundType();
+    }
+
+    void setLetterboxBackgroundWallpaperBlurRadiusPx(int blurRadiusPx) {
+        doReturn(blurRadiusPx).when(mAppCompatConfiguration)
+                .getLetterboxBackgroundWallpaperBlurRadiusPx();
+    }
+
+    void setLetterboxBackgroundWallpaperDarkScrimAlpha(float darkScrimAlpha) {
+        doReturn(darkScrimAlpha).when(mAppCompatConfiguration)
+                .getLetterboxBackgroundWallpaperDarkScrimAlpha();
+    }
+
+    void checkToNextLeftStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForHorizontalReachabilityToNextLeftStop(anyBoolean());
+    }
+
+    void checkToNextRightStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForHorizontalReachabilityToNextRightStop(anyBoolean());
+    }
+
+    void checkToNextBottomStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForVerticalReachabilityToNextBottomStop(anyBoolean());
+    }
+
+    void checkToNextTopStop(boolean invoked) {
+        verify(mAppCompatConfiguration, times(invoked ? 1 : 0))
+                .movePositionForVerticalReachabilityToNextTopStop(anyBoolean());
     }
 }

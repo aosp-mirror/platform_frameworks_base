@@ -26,11 +26,12 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
-import static com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -53,6 +54,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Size;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -78,10 +80,10 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
@@ -312,8 +314,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // transaction (that applies task crop) is synced with the buffer transaction (that draws
         // the View). Both will be shown on screen at the same, whereas applying them independently
         // causes flickering. See b/270202228.
-        final boolean applyTransactionOnDraw =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+        final boolean applyTransactionOnDraw = taskInfo.isFreeform();
         relayout(taskInfo, t, t, applyTransactionOnDraw, shouldSetTaskPositionAndCrop);
         if (!applyTransactionOnDraw) {
             t.apply();
@@ -324,7 +325,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         Trace.beginSection("DesktopModeWindowDecoration#relayout");
-        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+        if (taskInfo.isFreeform()) {
             // The Task is in Freeform mode -> show its header in sync since it's an integral part
             // of the window itself - a delayed header might cause bad UX.
             relayoutInSync(taskInfo, startT, finishT, applyStartTransactionOnDraw,
@@ -480,6 +481,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mGenericLink;
     }
 
+    UserHandle getUser() {
+        return mUserContext.getUser();
+    }
+
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
         if (!isDragResizable(mTaskInfo)) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
@@ -516,17 +521,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mDragResizeListener.setGeometry(
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
                         new Size(mResult.mWidth, mResult.mHeight),
-                        getResizeEdgeHandleSize(mContext, res), getFineResizeCornerSize(res),
-                        getLargeResizeCornerSize(res)), touchSlop)
+                        getResizeEdgeHandleSize(mContext, res), getResizeHandleEdgeInset(res),
+                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }
     }
 
     private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
-        final boolean isFreeform =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
-        return isFreeform && taskInfo.isResizeable;
+        return taskInfo.isFreeform() && taskInfo.isResizeable;
     }
 
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
@@ -645,6 +648,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             final RelayoutParams.OccludingCaptionElement controlsElement =
                     new RelayoutParams.OccludingCaptionElement();
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
+            if (Flags.enableMinimizeButton()) {
+                controlsElement.mWidthResId =
+                      R.dimen.desktop_mode_customizable_caption_with_minimize_button_margin_end;
+            }
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
         } else if (isAppHandle && !Flags.enableAdditionalWindowsAboveStatusBar()) {
@@ -1271,10 +1278,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return R.id.desktop_mode_caption;
     }
 
-    void setAnimatingTaskResize(boolean animatingTaskResize) {
+    void setAnimatingTaskResizeOrReposition(boolean animatingTaskResizeOrReposition) {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
         ((AppHeaderViewHolder) mWindowDecorViewHolder)
-                .setAnimatingTaskResize(animatingTaskResize);
+                .setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition);
     }
 
     /**

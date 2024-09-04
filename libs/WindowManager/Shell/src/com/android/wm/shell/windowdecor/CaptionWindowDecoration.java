@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -30,17 +31,19 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.util.Size;
 import android.view.Choreographer;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
@@ -195,7 +198,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             RelayoutParams relayoutParams,
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
-            boolean setTaskCropAndPosition) {
+            boolean setTaskCropAndPosition,
+            InsetsState displayInsetsState) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
@@ -223,6 +227,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         controlsElement.mWidthResId = R.dimen.caption_right_buttons_width;
         controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
         relayoutParams.mOccludingCaptionElements.add(controlsElement);
+        relayoutParams.mCaptionTopPadding = getTopPadding(relayoutParams,
+                taskInfo.getConfiguration().windowConfiguration.getBounds(), displayInsetsState);
     }
 
     @SuppressLint("MissingPermission")
@@ -238,7 +244,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
-                setTaskCropAndPosition);
+                setTaskCropAndPosition, mDisplayController.getInsetsState(taskInfo.displayId));
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
@@ -253,6 +259,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         if (oldRootView != mResult.mRootView) {
             setupRootView();
         }
+
+        bindData(mResult.mRootView, taskInfo);
 
         if (!isDragResizeable) {
             closeDragResizeListener();
@@ -280,7 +288,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
                 new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(mContext, res),
-                getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop);
+                getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
+                getLargeResizeCornerSize(res)), touchSlop);
     }
 
     /**
@@ -299,7 +308,27 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         maximize.setOnClickListener(mOnCaptionButtonClickListener);
     }
 
-    void setCaptionColor(int captionColor) {
+    private void bindData(View rootView, RunningTaskInfo taskInfo) {
+        // Set up the tint first so that the drawable can be stylized when loaded.
+        setupCaptionColor(taskInfo);
+
+        final boolean isFullscreen =
+                taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        rootView.findViewById(R.id.maximize_window)
+                .setBackgroundResource(isFullscreen ? R.drawable.decor_restore_button_dark
+                        : R.drawable.decor_maximize_button_dark);
+    }
+
+    private void setupCaptionColor(RunningTaskInfo taskInfo) {
+        if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
+            setCaptionColor(Color.TRANSPARENT);
+        } else {
+            final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
+            setCaptionColor(statusBarColor);
+        }
+    }
+
+    private void setCaptionColor(int captionColor) {
         if (mResult.mRootView == null) {
             return;
         }
@@ -316,20 +345,16 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
 
         final View back = caption.findViewById(R.id.back_button);
-        final VectorDrawable backBackground = (VectorDrawable) back.getBackground();
-        backBackground.setTintList(buttonTintColor);
+        back.setBackgroundTintList(buttonTintColor);
 
         final View minimize = caption.findViewById(R.id.minimize_window);
-        final VectorDrawable minimizeBackground = (VectorDrawable) minimize.getBackground();
-        minimizeBackground.setTintList(buttonTintColor);
+        minimize.setBackgroundTintList(buttonTintColor);
 
         final View maximize = caption.findViewById(R.id.maximize_window);
-        final VectorDrawable maximizeBackground = (VectorDrawable) maximize.getBackground();
-        maximizeBackground.setTintList(buttonTintColor);
+        maximize.setBackgroundTintList(buttonTintColor);
 
         final View close = caption.findViewById(R.id.close_window);
-        final VectorDrawable closeBackground = (VectorDrawable) close.getBackground();
-        closeBackground.setTintList(buttonTintColor);
+        close.setBackgroundTintList(buttonTintColor);
     }
 
     boolean isHandlingDragResize() {
@@ -342,6 +367,18 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         }
         mDragResizeListener.close();
         mDragResizeListener = null;
+    }
+
+    private static int getTopPadding(RelayoutParams params, Rect taskBounds,
+            InsetsState insetsState) {
+        if (!params.mRunningTaskInfo.isFreeform()) {
+            Insets systemDecor = insetsState.calculateInsets(taskBounds,
+                    WindowInsets.Type.systemBars() & ~WindowInsets.Type.captionBar(),
+                    false /* ignoreVisibility */);
+            return systemDecor.top;
+        } else {
+            return 0;
+        }
     }
 
     /**

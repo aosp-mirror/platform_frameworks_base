@@ -24,6 +24,7 @@ import android.telephony.satellite.stub.ISatelliteCapabilitiesConsumer;
 import android.telephony.satellite.stub.ISatelliteListener;
 import android.telephony.satellite.stub.SatelliteDatagram;
 import android.telephony.satellite.stub.SystemSelectionSpecifier;
+import android.telephony.satellite.stub.SatelliteModemEnableRequestAttributes;
 
 /**
  * {@hide}
@@ -82,12 +83,7 @@ oneway interface ISatellite {
      * is enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
      * this may also re-enable the cellular modem.
      *
-     * @param enableSatellite True to enable the satellite modem and false to disable.
-     * @param enableDemoMode True to enable demo mode and false to disable.
-     * @param isEmergency To specify the satellite is enabled for emergency session and false for
-     * non emergency session. Note: it is possible that a emergency session started get converted
-     * to a non emergency session and vice versa.
-     * @param resultCallback The callback to receive the error code result of the operation.
+     * @param enableAttributes The enable parameters that will be applied to the satellite session
      *
      * Valid result codes returned:
      *   SatelliteResult:SATELLITE_RESULT_SUCCESS
@@ -99,8 +95,8 @@ oneway interface ISatellite {
      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
      *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
      */
-    void requestSatelliteEnabled(in boolean enableSatellite, in boolean enableDemoMode,
-            in boolean isEmergency, in IIntegerConsumer resultCallback);
+    void requestSatelliteEnabled(in SatelliteModemEnableRequestAttributes enableAttributes,
+            in IIntegerConsumer resultCallback);
 
     /**
      * Request to get whether the satellite modem is enabled.
@@ -204,77 +200,6 @@ oneway interface ISatellite {
      *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
      */
     void stopSendingSatellitePointingInfo(in IIntegerConsumer resultCallback);
-
-    /**
-     * Provision the device with a satellite provider.
-     * This is needed if the provider allows dynamic registration.
-     * Once provisioned, ISatelliteListener#onSatelliteProvisionStateChanged should report true.
-     *
-     * @param token The token to be used as a unique identifier for provisioning with satellite
-     *              gateway.
-     * @param provisionData Data from the provisioning app that can be used by provisioning server
-     * @param resultCallback The callback to receive the error code result of the operation.
-     *
-     * Valid result codes returned:
-     *   SatelliteResult:SATELLITE_RESULT_SUCCESS
-     *   SatelliteResult:SATELLITE_RESULT_SERVICE_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_MODEM_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_NETWORK_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_MODEM_STATE
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_ARGUMENTS
-     *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
-     *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
-     *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
-     *   SatelliteResult:SATELLITE_RESULT_REQUEST_ABORTED
-     *   SatelliteResult:SATELLITE_RESULT_NETWORK_TIMEOUT
-     */
-    void provisionSatelliteService(in String token, in byte[] provisionData,
-            in IIntegerConsumer resultCallback);
-
-    /**
-     * Deprovision the device with the satellite provider.
-     * This is needed if the provider allows dynamic registration.
-     * Once deprovisioned, ISatelliteListener#onSatelliteProvisionStateChanged should report false.
-     *
-     * @param token The token of the device/subscription to be deprovisioned.
-     * @param resultCallback The callback to receive the error code result of the operation.
-     *
-     * Valid result codes returned:
-     *   SatelliteResult:SATELLITE_RESULT_SUCCESS
-     *   SatelliteResult:SATELLITE_RESULT_SERVICE_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_MODEM_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_NETWORK_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_MODEM_STATE
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_ARGUMENTS
-     *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
-     *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
-     *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
-     *   SatelliteResult:SATELLITE_RESULT_REQUEST_ABORTED
-     *   SatelliteResult:SATELLITE_RESULT_NETWORK_TIMEOUT
-     */
-    void deprovisionSatelliteService(in String token, in IIntegerConsumer resultCallback);
-
-    /**
-     * Request to get whether this device is provisioned with a satellite provider.
-     *
-     * @param resultCallback The callback to receive the error code result of the operation.
-     *                       This must only be sent when the result is not
-     *                       SatelliteResult#SATELLITE_RESULT_SUCCESS.
-     * @param callback If the result is SatelliteResult#SATELLITE_RESULT_SUCCESS, the callback to
-     *                 receive whether this device is provisioned with a satellite provider.
-     *
-     * Valid result codes returned:
-     *   SatelliteResult:SATELLITE_RESULT_SUCCESS
-     *   SatelliteResult:SATELLITE_RESULT_SERVICE_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_MODEM_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_MODEM_STATE
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_ARGUMENTS
-     *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
-     *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
-     *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
-     */
-    void requestIsSatelliteProvisioned(in IIntegerConsumer resultCallback,
-            in IBooleanConsumer callback);
 
     /**
      * Poll the pending datagrams to be received over satellite.

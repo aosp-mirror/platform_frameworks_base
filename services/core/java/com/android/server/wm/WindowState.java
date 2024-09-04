@@ -55,6 +55,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NOT_MAGNIFIABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
@@ -127,7 +128,6 @@ import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_STARTING_REVEAL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
@@ -580,7 +580,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * is guaranteed to be cleared.
      */
     static final int EXIT_ANIMATING_TYPES = ANIMATION_TYPE_APP_TRANSITION
-            | ANIMATION_TYPE_WINDOW_ANIMATION | ANIMATION_TYPE_RECENTS;
+            | ANIMATION_TYPE_WINDOW_ANIMATION;
 
     /** Currently running an exit animation? */
     boolean mAnimatingExit;
@@ -1704,18 +1704,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTaskFragment() : null;
     }
 
-    @Nullable Task getRootTask() {
-        final Task task = getTask();
-        if (task != null) {
-            return task.getRootTask();
-        }
-        // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
-        // associate them with some root task to enable dimming.
-        final DisplayContent dc = getDisplayContent();
-        return mAttrs.type >= FIRST_SYSTEM_WINDOW
-                && dc != null ? dc.getDefaultTaskDisplayArea().getRootHomeTask() : null;
-    }
-
     /**
      * Retrieves the visible bounds of the window.
      * @param bounds The rect which gets the bounds.
@@ -1970,13 +1958,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * it must be drawn before allDrawn can become true.
      */
     boolean isInteresting() {
-        final RecentsAnimationController recentsAnimationController =
-                mWmService.getRecentsAnimationController();
         return mActivityRecord != null
                 && (!mActivityRecord.isFreezingScreen() || !mAppFreezing)
-                && mViewVisibility == View.VISIBLE
-                && (recentsAnimationController == null
-                         || recentsAnimationController.isInterestingForAllDrawn(this));
+                && mViewVisibility == View.VISIBLE;
     }
 
     /**
@@ -2359,11 +2343,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         super.removeImmediately();
 
+        final DisplayContent dc = getDisplayContent();
         if (isImeOverlayLayeringTarget()) {
             mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(), mAttrs.type,
-                    false /* visible */, true /* removed */);
+                    false /* visible */, true /* removed */, dc.getDisplayId());
         }
-        final DisplayContent dc = getDisplayContent();
         if (isImeLayeringTarget()) {
             // Remove the attached IME screenshot surface.
             dc.removeImeSurfaceByTarget(this);
@@ -2374,7 +2358,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (dc.getImeInputTarget() == this && !inRelaunchingActivity()) {
             mWmService.dispatchImeInputTargetVisibilityChanged(mClient.asBinder(),
-                    false /* visible */, true /* removed */);
+                    false /* visible */, true /* removed */, dc.getDisplayId());
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -2384,6 +2368,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWmService.mDisplayManagerInternal.onPresentation(dc.getDisplay().getDisplayId(),
                     /*isShown=*/ false);
         }
+        // Check if window provides non decor insets before clearing its provided insets.
+        final boolean windowProvidesDisplayDecorInsets = providesDisplayDecorInsets();
 
         dc.getDisplayPolicy().removeWindowLw(this);
 
@@ -2394,6 +2380,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWmService.postWindowRemoveCleanupLocked(this);
 
         consumeInsetsChange();
+
+        // Update the orientation when removing a window affecting the display orientation.
+        // Also recompute configuration if it provides screen decor insets.
+        boolean needToSendNewConfiguration = dc.getLastOrientationSource() == this
+                && dc.updateOrientation();
+        if (windowProvidesDisplayDecorInsets) {
+            needToSendNewConfiguration |= dc.getDisplayPolicy().updateDecorInsetsInfo();
+        }
+
+        if (needToSendNewConfiguration) {
+            dc.sendNewConfiguration();
+        }
     }
 
     @Override
@@ -2446,16 +2444,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     mActivityRecord != null && mActivityRecord.isAnimating(PARENTS | TRANSITION),
                     mWmService.mDisplayFrozen, Debug.getCallers(6));
 
-            // Visibility of the removed window. Will be used later to update orientation later on.
-            boolean wasVisible = false;
-
             // First, see if we need to run an animation. If we do, we have to hold off on removing the
             // window until the animation is done. If the display is frozen, just remove immediately,
             // since the animation wouldn't be seen.
             if (mHasSurface && mToken.okToAnimate()) {
-                // If we are not currently running the exit animation, we need to see about starting one
-                wasVisible = isVisible();
-
                 // Remove immediately if there is display transition because the animation is
                 // usually unnoticeable (e.g. covered by rotation animation) and the animation
                 // bounds could be inconsistent, such as depending on when the window applies
@@ -2465,7 +2457,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         // look weird if its orientation is changed.
                         && !inRelaunchingActivity();
 
-                if (wasVisible && isDisplayed()) {
+                // If we are not currently running the exit animation,
+                // we need to see about starting one
+                if (isVisible() && isDisplayed()) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                     // Try starting an animation.
@@ -2514,21 +2508,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            // Check if window provides non decor insets before clearing its provided insets.
-            final boolean windowProvidesDisplayDecorInsets = providesDisplayDecorInsets();
-
             removeImmediately();
-            // Removing a visible window may affect the display orientation so just update it if
-            // needed. Also recompute configuration if it provides screen decor insets.
-            boolean needToSendNewConfiguration = wasVisible && displayContent.updateOrientation();
-            if (windowProvidesDisplayDecorInsets) {
-                needToSendNewConfiguration |=
-                        displayContent.getDisplayPolicy().updateDecorInsetsInfo();
-            }
-
-            if (needToSendNewConfiguration) {
-                displayContent.sendNewConfiguration();
-            }
             mWmService.updateFocusedWindowLocked(isFocused()
                             ? UPDATE_FOCUS_REMOVING_FOCUS
                             : UPDATE_FOCUS_NORMAL,
@@ -2578,10 +2558,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final Task rootTask = getRootTask();
-        if (rootTask != null && !rootTask.isFocusable()) {
-            // Ignore when the root task shouldn't receive input event.
-            // (i.e. the minimized root task in split screen mode.)
+        final Task task = getTask();
+        if (task != null && !task.isFocusable()) {
+            // The task can be set as non-focusable, e.g. swapping split-screen sides.
             return false;
         }
 
@@ -2607,7 +2586,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         // Don't allow transient-launch activities to take IME.
-        if (rootTask != null && mActivityRecord != null
+        if (task != null && mActivityRecord != null
                 && mTransitionController.isTransientLaunch(mActivityRecord)) {
             return false;
         }
@@ -2793,11 +2772,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // means we need to intercept touches outside of that window. The dim layer
                 // user associated with the window (task or root task) will give us the good
                 // bounds, as they would be used to display the dim layer.
-                final TaskFragment taskFragment = getTaskFragment();
+                final TaskFragment taskFragment = mActivityRecord.getTaskFragment();
                 if (taskFragment != null) {
                     taskFragment.getDimBounds(mTmpRect);
-                } else if (getRootTask() != null) {
-                    getRootTask().getDimBounds(mTmpRect);
                 }
             }
         }
@@ -2987,6 +2964,26 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mActivityRecord.canShowWhenLocked();
         }
         return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+    }
+
+    @Override
+    void resolveOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveOverrideConfiguration(newParentConfig);
+        if (mActivityRecord != null) {
+            // Let the activity decide whether to apply the size override.
+            return;
+        }
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        resolvedConfig.seq = newParentConfig.seq;
+        applySizeOverrideIfNeeded(
+                getDisplayContent(),
+                mSession.mProcess.mInfo,
+                newParentConfig,
+                resolvedConfig,
+                (mAttrs.privateFlags & PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE) != 0,
+                false /* hasFixedRotationTransform */,
+                false /* hasCompatDisplayInsets */,
+                null /* task */);
     }
 
     /**
@@ -3734,7 +3731,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If the activity is scheduled to relaunch, skip sending the resized to ViewRootImpl now
         // since it will be destroyed anyway. This also prevents the client from receiving
         // windowing mode change before it is destroyed.
-        if (inRelaunchingActivity()) {
+        if (inRelaunchingActivity() && mAttrs.type != TYPE_APPLICATION_STARTING) {
             return;
         }
         // If this is an activity or wallpaper and is invisible or going invisible, don't report
@@ -3922,14 +3919,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    private int getRootTaskId() {
-        final Task rootTask = getRootTask();
-        if (rootTask == null) {
-            return INVALID_TASK_ID;
-        }
-        return rootTask.mTaskId;
-    }
-
     public void registerFocusObserver(IWindowFocusObserver observer) {
         synchronized (mWmService.mGlobalLock) {
             if (mFocusCallbacks == null) {
@@ -3955,7 +3944,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Returns {@code true} if activity bounds are letterboxed or letterboxed for display cutout.
      *
      * <p>Note that letterbox UI may not be shown even when this returns {@code true}. See {@link
-     * LetterboxUiController#shouldShowLetterboxUi} for more context.
+     * AppCompatLetterboxOverrides#shouldShowLetterboxUi} for more context.
      */
     boolean areAppWindowBoundsLetterboxed() {
         return mActivityRecord != null && !isStartingWindowAssociatedToTask()
@@ -4056,16 +4045,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @CallSuper
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
+            @WindowTracingLogLevel int logLevel) {
         boolean isVisible = isVisible();
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible) {
             return;
         }
 
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(DISPLAY_ID, getDisplayId());
-        proto.write(STACK_ID, getRootTaskId());
+        int rootTaskId = INVALID_TASK_ID;
+        final Task task = getTask();
+        if (task != null) {
+            rootTaskId = task.getRootTaskId();
+        }
+        proto.write(STACK_ID, rootTaskId);
         mAttrs.dumpDebug(proto, ATTRIBUTES);
         mGivenContentInsets.dumpDebug(proto, GIVEN_CONTENT_INSETS);
         mWindowFrames.dumpDebug(proto, WINDOW_FRAMES);
@@ -4123,8 +4117,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         pw.print(prefix + "mDisplayId=" + getDisplayId());
-        if (getRootTask() != null) {
-            pw.print(" rootTaskId=" + getRootTaskId());
+        final Task task = getTask();
+        if (task != null) {
+            pw.print(" taskId=" + task.mTaskId);
         }
         pw.println(" mSession=" + mSession
                 + " mClient=" + mClient.asBinder());
@@ -4415,6 +4410,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             committed |= mChildren.get(i).commitFinishDrawing(t);
         }
+        // In case commitFinishDrawingLocked starts a window level animation, make sure the surface
+        // operation (reparent to leash) is synced with the visibility by transition.
+        if (getAnimationLeash() != null) {
+            t.merge(getSyncTransaction());
+        }
         return committed;
     }
 
@@ -4648,17 +4648,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // No need to apply to IME window if the window is not the current IME layering target.
         if (!isImeLayeringTarget()) {
             return false;
-        }
-        if (!com.android.window.flags.Flags.doNotSkipImeByTargetVisibility()) {
-            // Note that we don't process IME window if the IME input target is not on the screen.
-            // In case some unexpected IME visibility cases happen like starting the remote
-            // animation on the keyguard but seeing the IME window that originally on the app
-            // which behinds the keyguard.
-            final WindowState imeInputTarget = getImeInputTarget();
-            if (imeInputTarget != null
-                    && !(imeInputTarget.isDrawn() || imeInputTarget.isVisibleRequested())) {
-                return false;
-            }
         }
         return mDisplayContent.forAllImeWindows(callback, traverseTopToBottom);
     }
@@ -5028,7 +5017,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 new WindowAnimationSpec(anim, position, false /* canSkipFirstFrame */,
                         0 /* windowCornerRadius */),
                 mWmService.mSurfaceAnimationRunner);
-        startAnimation(getPendingTransaction(), adapter);
+        final Transaction t = mActivityRecord != null
+                ? getSyncTransaction() : getPendingTransaction();
+        startAnimation(t, adapter);
         commitPendingTransaction();
     }
 
@@ -5308,6 +5299,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyDims();
         }
         super.prepareSurfaces();
+    }
+
+    void updateSurfacePositionIfNeeded() {
+        if (mWindowFrames.mRelFrame.top == mWindowFrames.mLastRelFrame.top
+                && mWindowFrames.mRelFrame.left == mWindowFrames.mLastRelFrame.left) {
+            return;
+        }
+        updateSurfacePosition(getSyncTransaction());
     }
 
     @Override
@@ -6117,7 +6116,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void dumpProto(ProtoOutputStream proto, long fieldId,
-                          @WindowTraceLogLevel int logLevel) {
+                          @WindowTracingLogLevel int logLevel) {
         dumpDebug(proto, fieldId, logLevel);
     }
 

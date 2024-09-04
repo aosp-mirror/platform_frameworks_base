@@ -29,7 +29,7 @@ import android.os.VibrationEffect;
 import android.util.IntArray;
 import android.util.LongArray;
 
-import com.android.internal.vibrator.persistence.SerializedVibrationEffect.SerializedSegment;
+import com.android.internal.vibrator.persistence.SerializedComposedEffect.SerializedSegment;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 

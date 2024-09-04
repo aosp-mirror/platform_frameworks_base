@@ -45,6 +45,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Tests for {@link DragResizeWindowGeometry}.
  *
@@ -56,12 +59,13 @@ import org.junit.runner.RunWith;
 public class DragResizeWindowGeometryTests extends ShellTestCase {
     private static final Size TASK_SIZE = new Size(500, 1000);
     private static final int TASK_CORNER_RADIUS = 10;
-    private static final int EDGE_RESIZE_THICKNESS = 15;
+    private static final int EDGE_RESIZE_THICKNESS = 12;
+    private static final int EDGE_RESIZE_HANDLE_INSET = 4;
     private static final int FINE_CORNER_SIZE = EDGE_RESIZE_THICKNESS * 2 + 10;
     private static final int LARGE_CORNER_SIZE = FINE_CORNER_SIZE + 10;
     private static final DragResizeWindowGeometry GEOMETRY = new DragResizeWindowGeometry(
-            TASK_CORNER_RADIUS, TASK_SIZE, EDGE_RESIZE_THICKNESS, FINE_CORNER_SIZE,
-            LARGE_CORNER_SIZE);
+            TASK_CORNER_RADIUS, TASK_SIZE, EDGE_RESIZE_THICKNESS, EDGE_RESIZE_HANDLE_INSET,
+            FINE_CORNER_SIZE, LARGE_CORNER_SIZE);
     // Points in the edge resize handle. Note that coordinates start from the top left.
     private static final Point TOP_EDGE_POINT = new Point(TASK_SIZE.getWidth() / 2,
             -EDGE_RESIZE_THICKNESS / 2);
@@ -71,6 +75,16 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
             TASK_SIZE.getWidth() + EDGE_RESIZE_THICKNESS / 2, TASK_SIZE.getHeight() / 2);
     private static final Point BOTTOM_EDGE_POINT = new Point(TASK_SIZE.getWidth() / 2,
             TASK_SIZE.getHeight() + EDGE_RESIZE_THICKNESS / 2);
+    // Points in the inset of the task bounds still within the edge resize handle.
+    // Note that coordinates start from the top left.
+    private static final Point TOP_INSET_POINT = new Point(TASK_SIZE.getWidth() / 2,
+            EDGE_RESIZE_HANDLE_INSET / 2);
+    private static final Point LEFT_INSET_POINT = new Point(EDGE_RESIZE_HANDLE_INSET / 2,
+            TASK_SIZE.getHeight() / 2);
+    private static final Point RIGHT_INSET_POINT = new Point(
+            TASK_SIZE.getWidth() - EDGE_RESIZE_HANDLE_INSET / 2, TASK_SIZE.getHeight() / 2);
+    private static final Point BOTTOM_INSET_POINT = new Point(TASK_SIZE.getWidth() / 2,
+            TASK_SIZE.getHeight() - EDGE_RESIZE_HANDLE_INSET / 2);
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -85,18 +99,23 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
                 .addEqualityGroup(
                         GEOMETRY,
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS, FINE_CORNER_SIZE, LARGE_CORNER_SIZE))
+                                EDGE_RESIZE_THICKNESS, EDGE_RESIZE_HANDLE_INSET, FINE_CORNER_SIZE,
+                                LARGE_CORNER_SIZE))
                 .addEqualityGroup(
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE, LARGE_CORNER_SIZE),
+                                EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
+                                FINE_CORNER_SIZE, LARGE_CORNER_SIZE),
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE, LARGE_CORNER_SIZE))
+                                EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
+                                FINE_CORNER_SIZE, LARGE_CORNER_SIZE))
                 .addEqualityGroup(
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE,
+                                EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
+                                FINE_CORNER_SIZE,
                                 LARGE_CORNER_SIZE + 5),
                         new DragResizeWindowGeometry(TASK_CORNER_RADIUS, TASK_SIZE,
-                                EDGE_RESIZE_THICKNESS + 10, FINE_CORNER_SIZE,
+                                EDGE_RESIZE_THICKNESS + 10, EDGE_RESIZE_HANDLE_INSET,
+                                FINE_CORNER_SIZE,
                                 LARGE_CORNER_SIZE + 5))
                 .testEquals();
     }
@@ -127,7 +146,7 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
         assertThat(region.contains(point.x - EDGE_RESIZE_THICKNESS, point.y)).isTrue();
         // Vertically along the edge is not contained.
         assertThat(region.contains(point.x, point.y - EDGE_RESIZE_THICKNESS)).isFalse();
-        assertThat(region.contains(point.x, point.y + EDGE_RESIZE_THICKNESS)).isFalse();
+        assertThat(region.contains(point.x, point.y + EDGE_RESIZE_THICKNESS + 10)).isFalse();
     }
 
     private static void verifyVerticalEdge(@NonNull Region region, @NonNull Point point) {
@@ -188,18 +207,18 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
     }
 
     private void validateCtrlTypeForEdges(boolean isTouchscreen, boolean isEdgeResizePermitted) {
-        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
-                LEFT_EDGE_POINT.x, LEFT_EDGE_POINT.y)).isEqualTo(
-                        isEdgeResizePermitted ? CTRL_TYPE_LEFT : CTRL_TYPE_UNDEFINED);
-        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
-                TOP_EDGE_POINT.x, TOP_EDGE_POINT.y)).isEqualTo(
-                        isEdgeResizePermitted ? CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
-                RIGHT_EDGE_POINT.x, RIGHT_EDGE_POINT.y)).isEqualTo(
-                        isEdgeResizePermitted ? CTRL_TYPE_RIGHT : CTRL_TYPE_UNDEFINED);
-        assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
-                BOTTOM_EDGE_POINT.x, BOTTOM_EDGE_POINT.y)).isEqualTo(
-                        isEdgeResizePermitted ? CTRL_TYPE_BOTTOM : CTRL_TYPE_UNDEFINED);
+        List<Point> points = Arrays.asList(LEFT_EDGE_POINT, TOP_EDGE_POINT, RIGHT_EDGE_POINT,
+                BOTTOM_EDGE_POINT, LEFT_INSET_POINT, TOP_INSET_POINT, RIGHT_INSET_POINT,
+                BOTTOM_INSET_POINT);
+        List<Integer> expectedCtrlType = Arrays.asList(CTRL_TYPE_LEFT, CTRL_TYPE_TOP,
+                CTRL_TYPE_RIGHT, CTRL_TYPE_BOTTOM, CTRL_TYPE_LEFT, CTRL_TYPE_TOP, CTRL_TYPE_RIGHT,
+                CTRL_TYPE_BOTTOM);
+
+        for (int i = 0; i < points.size(); i++) {
+            assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+                    points.get(i).x, points.get(i).y)).isEqualTo(
+                    isEdgeResizePermitted ? expectedCtrlType.get(i) : CTRL_TYPE_UNDEFINED);
+        }
     }
 
     @Test

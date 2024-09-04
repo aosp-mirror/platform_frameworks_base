@@ -16,7 +16,6 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
-import android.content.Context;
 import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.TouchDelegate;
@@ -43,16 +42,14 @@ public class A11yMenuAdapter extends BaseAdapter {
     private final int mLargeTextSize;
 
     private final AccessibilityMenuService mService;
-    private final LayoutInflater mInflater;
     private final List<A11yMenuShortcut> mShortcutDataList;
     private final ShortcutDrawableUtils mShortcutDrawableUtils;
 
     public A11yMenuAdapter(
             AccessibilityMenuService service,
-            Context displayContext, List<A11yMenuShortcut> shortcutDataList) {
+            List<A11yMenuShortcut> shortcutDataList) {
         this.mService = service;
         this.mShortcutDataList = shortcutDataList;
-        mInflater = LayoutInflater.from(displayContext);
 
         mShortcutDrawableUtils = new ShortcutDrawableUtils(service);
 
@@ -78,7 +75,8 @@ public class A11yMenuAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.grid_item, parent, false);
+            convertView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.grid_item, parent, false);
 
             configureShortcutSize(convertView,
                     A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService));

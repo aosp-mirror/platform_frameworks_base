@@ -690,7 +690,13 @@ final class DeletePackageHelper {
     public void deletePackageVersionedInternal(VersionedPackage versionedPackage,
             final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags,
             final boolean allowSilentUninstall) {
-        final int callingUid = Binder.getCallingUid();
+        deletePackageVersionedInternal(versionedPackage, observer, userId, deleteFlags,
+                Binder.getCallingUid(), allowSilentUninstall);
+    }
+
+    public void deletePackageVersionedInternal(VersionedPackage versionedPackage,
+            final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags,
+            final int callingUid, final boolean allowSilentUninstall) {
         mPm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
         final Computer snapshot = mPm.snapshotComputer();
@@ -720,16 +726,22 @@ final class DeletePackageHelper {
         final String internalPackageName =
                 snapshot.resolveInternalPackageName(packageName, versionCode);
 
-        final int uid = Binder.getCallingUid();
         if (!isOrphaned(snapshot, internalPackageName)
                 && !allowSilentUninstall
                 && !isCallerAllowedToSilentlyUninstall(
-                        snapshot, uid, internalPackageName, userId)) {
+                        snapshot, callingUid, internalPackageName, userId)) {
             mPm.mHandler.post(() -> {
                 try {
                     final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
                     intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
-                    intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
+                    intent.putExtra(PackageInstaller.EXTRA_CALLBACK,
+                            new PackageManager.UninstallCompleteCallback(observer.asBinder()));
+                    if ((deleteFlags & PackageManager.DELETE_ARCHIVE) != 0) {
+                        // Delete flags are passed to the uninstaller activity so it can be
+                        // preserved in the follow-up uninstall operation after the user
+                        // confirmation
+                        intent.putExtra(PackageInstaller.EXTRA_DELETE_FLAGS, deleteFlags);
+                    }
                     observer.onUserActionRequired(intent);
                 } catch (RemoteException re) {
                 }
@@ -738,7 +750,7 @@ final class DeletePackageHelper {
         }
         final boolean deleteAllUsers = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0;
         final int[] users = deleteAllUsers ? mUserManagerInternal.getUserIds() : new int[]{userId};
-        if (UserHandle.getUserId(uid) != userId || (deleteAllUsers && users.length > 1)) {
+        if (UserHandle.getUserId(callingUid) != userId || (deleteAllUsers && users.length > 1)) {
             mPm.mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "deletePackage for user " + userId);

@@ -80,6 +80,7 @@ import android.widget.ImageView;
 import androidx.annotation.UiThread;
 import androidx.core.math.MathUtils;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -112,6 +113,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             MagnificationConstants.SCALE_MAX_VALUE);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
+    private static final float[] COLOR_BLACK_ARRAY = {0f, 0f, 0f};
     private final SparseArray<Float> mMagnificationSizeScaleOptions = new SparseArray<>();
 
     private final Context mContext;
@@ -125,6 +127,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final SurfaceControl.Transaction mTransaction;
 
     private final WindowManager mWm;
+    private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
     private float mScale;
     private int mSettingsButtonIndex = MagnificationSize.DEFAULT;
@@ -257,7 +260,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             SecureSettings secureSettings,
             Supplier<SurfaceControlViewHost> scvhSupplier,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
-            Supplier<IWindowSession> globalWindowSessionSupplier) {
+            Supplier<IWindowSession> globalWindowSessionSupplier,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context;
         mHandler = handler;
         mAnimationController = animationController;
@@ -279,6 +283,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         mWm = context.getSystemService(WindowManager.class);
         mWindowBounds = new Rect(mWm.getCurrentWindowMetrics().getBounds());
+        mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
 
         mResources = mContext.getResources();
         mScale = secureSettings.getFloatForUser(
@@ -509,7 +514,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mHandler.removeCallbacks(mMirrorViewRunnable);
             mMirrorView.removeOnLayoutChangeListener(mMirrorViewLayoutChangeListener);
             if (!Flags.createWindowlessWindowMagnifier()) {
-                mWm.removeView(mMirrorView);
+                mViewCaptureAwareWindowManager.removeView(mMirrorView);
             }
             mMirrorView = null;
         }
@@ -721,7 +726,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return v.onApplyWindowInsets(insets);
         });
 
-        mWm.addView(mMirrorView, params);
+        mViewCaptureAwareWindowManager.addView(mMirrorView, params);
 
         SurfaceHolder holder = mMirrorSurfaceView.getHolder();
         holder.addCallback(this);
@@ -1018,6 +1023,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMirrorSurface = mirrorDisplay(mDisplayId);
         if (!mMirrorSurface.isValid()) {
             return;
+        }
+        // Set the surface of the SurfaceView to black to avoid users seeing the contents below the
+        // magnifier when the mirrored surface has an alpha less than 1.
+        if (Flags.addBlackBackgroundForWindowMagnifier()) {
+            mTransaction.setColor(mMirrorSurfaceView.getSurfaceControl(), COLOR_BLACK_ARRAY);
         }
         mTransaction.show(mMirrorSurface)
                 .reparent(mMirrorSurface, mMirrorSurfaceView.getSurfaceControl());
