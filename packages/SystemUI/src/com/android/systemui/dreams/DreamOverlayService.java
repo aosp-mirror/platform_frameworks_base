@@ -552,7 +552,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     private void updateGestureBlockingLocked() {
-        final boolean shouldBlock = !isDreamInPreviewMode() && !mShadeExpanded && !mBouncerShowing;
+        final boolean shouldBlock = mStarted && !mShadeExpanded && !mBouncerShowing
+                && !isDreamInPreviewMode();
 
         if (shouldBlock) {
             mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,
