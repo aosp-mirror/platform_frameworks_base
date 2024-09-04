@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
@@ -52,7 +53,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class ScreenPowerStatsProcessorTest {
@@ -110,11 +110,6 @@ public class ScreenPowerStatsProcessorTest {
         }
 
         @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> VOLTAGE_MV;
-        }
-
-        @Override
         public int getDisplayCount() {
             return 2;
         }
@@ -128,6 +123,7 @@ public class ScreenPowerStatsProcessorTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(VOLTAGE_MV);
     }
 
     @Test
@@ -181,8 +177,8 @@ public class ScreenPowerStatsProcessorTest {
         if (energyConsumer) {
             when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.DISPLAY))
                     .thenReturn(new int[]{77});
-            when(mConsumedEnergyRetriever.getConsumedEnergyUws(new int[]{77}))
-                    .thenReturn(new long[]{10_000});
+            when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{77}))
+                    .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(10_000)});
         } else {
             when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.DISPLAY))
                     .thenReturn(new int[0]);
@@ -204,8 +200,8 @@ public class ScreenPowerStatsProcessorTest {
         if (energyConsumer) {
             // 400 mAh represented as microWattSeconds
             long energyUws = 400L * 3600 * VOLTAGE_MV;
-            when(mConsumedEnergyRetriever.getConsumedEnergyUws(new int[]{77}))
-                    .thenReturn(new long[]{10_000 + energyUws});
+            when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{77}))
+                    .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(10_000 + energyUws)});
         }
 
         when(mScreenUsageTimeRetriever.getScreenOnTimeMs(0))
@@ -260,6 +256,12 @@ public class ScreenPowerStatsProcessorTest {
         aggregatedStats.setState(STATE_SCREEN, SCREEN_STATE_ON, 0);
 
         return aggregatedStats;
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private void assertDevicePowerEstimate(

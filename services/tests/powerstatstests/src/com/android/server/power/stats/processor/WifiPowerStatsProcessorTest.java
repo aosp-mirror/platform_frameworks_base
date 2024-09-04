@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
 import android.net.wifi.WifiManager;
@@ -68,7 +69,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class WifiPowerStatsProcessorTest {
@@ -162,11 +162,6 @@ public class WifiPowerStatsProcessorTest {
                 @Override
                 public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
                     return mConsumedEnergyRetriever;
-                }
-
-                @Override
-                public IntSupplier getVoltageSupplier() {
-                    return () -> VOLTAGE_MV;
                 }
 
                 @Override
@@ -314,6 +309,7 @@ public class WifiPowerStatsProcessorTest {
         when(mWifiManager.isEnhancedPowerReportingSupported()).thenReturn(true);
 
         // PowerStats hardware is available
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(VOLTAGE_MV);
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.WIFI))
                 .thenReturn(new int[] {WIFI_ENERGY_CONSUMER_ID});
 
@@ -327,9 +323,9 @@ public class WifiPowerStatsProcessorTest {
         mockWifiActivityEnergyInfo(new WifiActivityEnergyInfo(0L,
                 WifiActivityEnergyInfo.STACK_STATE_INVALID, 0L, 0L, 0L, 0L));
 
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
+        when(mConsumedEnergyRetriever.getConsumedEnergy(
                 new int[]{WIFI_ENERGY_CONSUMER_ID}))
-                .thenReturn(new long[]{0});
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(0)});
 
         aggregatedStats.start(0);
 
@@ -360,8 +356,8 @@ public class WifiPowerStatsProcessorTest {
 
         // 10 mAh represented as microWattSeconds
         long energyUws = 10 * 3600 * VOLTAGE_MV;
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(
-                new int[]{WIFI_ENERGY_CONSUMER_ID})).thenReturn(new long[]{energyUws});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(new int[]{WIFI_ENERGY_CONSUMER_ID}))
+                .thenReturn(new EnergyConsumerResult[]{mockEnergyConsumer(energyUws)});
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
@@ -550,6 +546,12 @@ public class WifiPowerStatsProcessorTest {
 
     private int[] states(int... states) {
         return states;
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private void mockWifiActivityEnergyInfo(WifiActivityEnergyInfo waei) {

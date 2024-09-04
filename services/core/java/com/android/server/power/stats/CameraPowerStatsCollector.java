@@ -26,7 +26,6 @@ public class CameraPowerStatsCollector extends EnergyConsumerPowerStatsCollector
     public CameraPowerStatsCollector(Injector injector) {
         super(injector, BatteryConsumer.POWER_COMPONENT_CAMERA,
                 BatteryConsumer.powerComponentIdToString(BatteryConsumer.POWER_COMPONENT_CAMERA),
-                EnergyConsumerType.CAMERA, /* energy consumer name */ null,
-                new BinaryStatePowerStatsLayout());
+                EnergyConsumerType.CAMERA, new BinaryStatePowerStatsLayout());
     }
 }

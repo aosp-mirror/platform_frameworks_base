@@ -179,7 +179,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -2027,7 +2026,7 @@ public class BatteryStatsImpl extends BatteryStats {
         void setContext(Context context) {
             mPackageManager = context.getPackageManager();
             mConsumedEnergyRetriever = new PowerStatsCollector.ConsumedEnergyRetrieverImpl(
-                    LocalServices.getService(PowerStatsInternal.class));
+                    LocalServices.getService(PowerStatsInternal.class), () -> mBatteryVoltageMv);
             mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
             mTelephonyManager =
                     (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -2079,11 +2078,6 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
             return mConsumedEnergyRetriever;
-        }
-
-        @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> mBatteryVoltageMv;
         }
 
         @Override
