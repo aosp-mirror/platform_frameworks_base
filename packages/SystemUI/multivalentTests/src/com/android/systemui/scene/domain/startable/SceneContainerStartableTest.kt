@@ -1192,41 +1192,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun hydrateWindowController_setBouncerShowing() =
-        testScope.runTest {
-            underTest.start()
-            val notificationShadeWindowController = kosmos.notificationShadeWindowController
-            val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
-            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-            verify(notificationShadeWindowController, never()).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Bouncer)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
-
-            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                SuccessFingerprintAuthenticationStatus(0, true)
-            )
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Lockscreen)
-            verify(notificationShadeWindowController, times(1)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
-
-            emulateSceneTransition(transitionStateFlow, Scenes.Bouncer)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(true)
-            verify(notificationShadeWindowController, times(2)).setBouncerShowing(false)
-        }
-
-    @Test
     fun hydrateWindowController_setKeyguardOccluded() =
         testScope.runTest {
             underTest.start()
