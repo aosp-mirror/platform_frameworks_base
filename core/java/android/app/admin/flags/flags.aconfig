@@ -97,6 +97,62 @@ flag {
   bug: "356894721"
 }
 
+flag {
+ name: "reset_password_with_token_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for resetPasswordWithToken and setResetPasswordToken."
+ bug: "359187209"
+}
+
+flag {
+ name: "set_keyguard_disabled_features_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for setKeyguardDisabledFeatures."
+ bug: "359186276"
+}
+
+flag {
+ name: "set_application_restrictions_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for setApplicationRestrictions."
+ bug: "359188153"
+}
+
+flag {
+ name: "set_auto_time_enabled_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for setAutoTimeEnabled."
+ bug: "359188869"
+}
+
+flag {
+ name: "set_backup_service_enabled_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for setBackupServiceEnabled."
+ bug: "359188483"
+}
+
+flag {
+ name: "set_auto_time_zone_enabled_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for setAutoTimeZoneEnabled."
+ bug: "364338300"
+}
+
+flag {
+ name: "set_permission_grant_state_coexistence"
+ is_exported: true
+ namespace: "enterprise"
+ description: "Enables coexistence support for setPermissionGrantState."
+ bug: "364338410"
+}
+
 # Fully rolled out and must not be used.
 flag {
   name: "security_log_v2_enabled"
