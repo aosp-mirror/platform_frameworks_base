@@ -317,6 +317,15 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         tailPNext = &deviceFaultFeatures->pNext;
     }
 
+    if (grExtensions.hasExtension(VK_EXT_RGBA10X6_FORMATS_EXTENSION_NAME, 1)) {
+        VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* formatFeatures =
+                new VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT;
+        formatFeatures->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RGBA10X6_FORMATS_FEATURES_EXT;
+        formatFeatures->pNext = nullptr;
+        *tailPNext = formatFeatures;
+        tailPNext = &formatFeatures->pNext;
+    }
+
     // query to get the physical device features
     mGetPhysicalDeviceFeatures2(mPhysicalDevice, &features);
     // this looks like it would slow things down,
