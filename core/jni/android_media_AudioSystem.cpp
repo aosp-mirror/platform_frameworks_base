@@ -45,7 +45,6 @@
 #include <sys/system_properties.h>
 #include <utils/Log.h>
 
-#include <thread>
 #include <optional>
 #include <sstream>
 #include <memory>
@@ -3379,36 +3378,41 @@ static jboolean android_media_AudioSystem_isBluetoothVariableLatencyEnabled(JNIE
 class JavaSystemPropertyListener {
   public:
     JavaSystemPropertyListener(JNIEnv* env, jobject javaCallback, std::string sysPropName) :
-            mCallback(env->NewGlobalRef(javaCallback)),
-            mCachedProperty(android::base::CachedProperty{std::move(sysPropName)}) {
-        mListenerThread = std::thread([this]() mutable {
-            JNIEnv* threadEnv = GetOrAttachJNIEnvironment(gVm);
-            while (!mCleanupSignal.load()) {
-                using namespace std::chrono_literals;
-                // 1s timeout so this thread can read the cleanup signal to (slowly) be able to
-                // be destroyed.
-                std::string newVal = mCachedProperty.WaitForChange(1000ms) ?: "";
-                if (newVal != "" && mLastVal != newVal) {
-                    threadEnv->CallVoidMethod(mCallback, gRunnableClassInfo.run);
-                    mLastVal = std::move(newVal);
+            mCallback {javaCallback, env},
+            mSysPropName(sysPropName),
+            mCachedProperty(android::base::CachedProperty{std::move(sysPropName)}),
+            mListenerThread([this](mediautils::stop_token stok) mutable {
+                while (!stok.stop_requested()) {
+                    using namespace std::chrono_literals;
+                    // 1s timeout so this thread can eventually respond to the stop token
+                    std::string newVal = mCachedProperty.WaitForChange(1000ms) ?: "";
+                    updateValue(newVal);
                 }
-            }
-            });
-    }
+            }) {}
 
-    ~JavaSystemPropertyListener() {
-        mCleanupSignal.store(true);
-        mListenerThread.join();
-        JNIEnv* env = GetOrAttachJNIEnvironment(gVm);
-        env->DeleteGlobalRef(mCallback);
+    void triggerUpdateIfChanged() {
+        // We must check the property without using the cached property due to thread safety issues
+        std::string newVal = base::GetProperty(mSysPropName, "");
+        updateValue(newVal);
     }
 
   private:
-    jobject mCallback;
+    void updateValue(std::string newVal) {
+        if (newVal == "") return;
+        std::lock_guard l{mLock};
+        if (mLastVal == newVal) return;
+        const auto threadEnv = GetOrAttachJNIEnvironment(gVm);
+        threadEnv->CallVoidMethod(mCallback.get(), gRunnableClassInfo.run);
+        mLastVal = std::move(newVal);
+    }
+
+    // Should outlive thread object
+    const GlobalRef mCallback;
+    const std::string mSysPropName;
     android::base::CachedProperty mCachedProperty;
-    std::thread mListenerThread;
-    std::atomic<bool> mCleanupSignal{false};
     std::string mLastVal = "";
+    std::mutex mLock;
+    const mediautils::jthread mListenerThread;
 };
 
 // A logical set keyed by address
@@ -3432,8 +3436,7 @@ static void android_media_AudioSystem_triggerSystemPropertyUpdate(JNIEnv *env,  
     const auto iter = std::find_if(gSystemPropertyListeners.begin(), gSystemPropertyListeners.end(),
             [nativeHandle](const auto& x) { return reinterpret_cast<jlong>(x.get()) == nativeHandle; });
     if (iter != gSystemPropertyListeners.end()) {
-        // TODO(b/363548816) resolve performance issue
-        // (*iter)->triggerUpdateIfChanged();
+        (*iter)->triggerUpdateIfChanged();
     } else {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid handle");
     }
