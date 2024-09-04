@@ -45,6 +45,7 @@
 #include <sys/system_properties.h>
 #include <utils/Log.h>
 
+#include <thread>
 #include <optional>
 #include <sstream>
 #include <memory>
@@ -3378,46 +3379,36 @@ static jboolean android_media_AudioSystem_isBluetoothVariableLatencyEnabled(JNIE
 class JavaSystemPropertyListener {
   public:
     JavaSystemPropertyListener(JNIEnv* env, jobject javaCallback, std::string sysPropName) :
-            mCallback {javaCallback, env},
-            mPi {__system_property_find(sysPropName.c_str())},
-            mListenerThread([this](mediautils::stop_token stok) mutable {
-                static const struct timespec close_delay = { .tv_sec = 1 };
-                while (!stok.stop_requested()) {
-                    uint32_t old_serial = mSerial.load();
-                    uint32_t new_serial;
-                    if (__system_property_wait(mPi, old_serial, &new_serial, &close_delay)) {
-                        while (new_serial > old_serial) {
-                            if (mSerial.compare_exchange_weak(old_serial, new_serial)) {
-                                fireUpdate();
-                                break;
-                            }
-                        }
-                    }
+            mCallback(env->NewGlobalRef(javaCallback)),
+            mCachedProperty(android::base::CachedProperty{std::move(sysPropName)}) {
+        mListenerThread = std::thread([this]() mutable {
+            JNIEnv* threadEnv = GetOrAttachJNIEnvironment(gVm);
+            while (!mCleanupSignal.load()) {
+                using namespace std::chrono_literals;
+                // 1s timeout so this thread can read the cleanup signal to (slowly) be able to
+                // be destroyed.
+                std::string newVal = mCachedProperty.WaitForChange(1000ms) ?: "";
+                if (newVal != "" && mLastVal != newVal) {
+                    threadEnv->CallVoidMethod(mCallback, gRunnableClassInfo.run);
+                    mLastVal = std::move(newVal);
                 }
-            }) {}
-
-    void triggerUpdateIfChanged() {
-        uint32_t old_serial = mSerial.load();
-        uint32_t new_serial = __system_property_serial(mPi);
-        while (new_serial > old_serial) {
-            if (mSerial.compare_exchange_weak(old_serial, new_serial)) {
-                fireUpdate();
-                break;
             }
-        }
+            });
+    }
+
+    ~JavaSystemPropertyListener() {
+        mCleanupSignal.store(true);
+        mListenerThread.join();
+        JNIEnv* env = GetOrAttachJNIEnvironment(gVm);
+        env->DeleteGlobalRef(mCallback);
     }
 
   private:
-    void fireUpdate() {
-        const auto threadEnv = GetOrAttachJNIEnvironment(gVm);
-        threadEnv->CallVoidMethod(mCallback.get(), gRunnableClassInfo.run);
-    }
-
-    // Should outlive thread object
-    const GlobalRef mCallback;
-    const prop_info * const mPi;
-    std::atomic<uint32_t> mSerial = 0;
-    const mediautils::jthread mListenerThread;
+    jobject mCallback;
+    android::base::CachedProperty mCachedProperty;
+    std::thread mListenerThread;
+    std::atomic<bool> mCleanupSignal{false};
+    std::string mLastVal = "";
 };
 
 // A logical set keyed by address
@@ -3441,7 +3432,8 @@ static void android_media_AudioSystem_triggerSystemPropertyUpdate(JNIEnv *env,  
     const auto iter = std::find_if(gSystemPropertyListeners.begin(), gSystemPropertyListeners.end(),
             [nativeHandle](const auto& x) { return reinterpret_cast<jlong>(x.get()) == nativeHandle; });
     if (iter != gSystemPropertyListeners.end()) {
-        (*iter)->triggerUpdateIfChanged();
+        // TODO(b/363548816) resolve performance issue
+        // (*iter)->triggerUpdateIfChanged();
     } else {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid handle");
     }
