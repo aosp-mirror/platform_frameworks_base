@@ -43,6 +43,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.setTransition
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -112,6 +113,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
                     { kosmos.sceneInteractor },
                     { kosmos.sceneContainerOcclusionInteractor },
                     { kosmos.keyguardClockInteractor },
+                    { kosmos.sceneBackInteractor },
                 ) {
                 override fun createDarkAnimator(): ObjectAnimator {
                     return mockDarkAnimator
@@ -320,12 +322,23 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
 
             assertThat(deviceUnlockStatus!!.isUnlocked).isTrue()
 
-            kosmos.sceneInteractor.changeScene(toScene = Scenes.Gone, loggingReason = "reason")
+            kosmos.sceneInteractor.changeScene(
+                toScene = Scenes.Lockscreen,
+                loggingReason = "reason"
+            )
             runCurrent()
-            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             // Call start to begin hydrating based on the scene framework:
             underTest.start()
+            runCurrent()
+
+            assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
+
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Gone, loggingReason = "reason")
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
 
             kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "reason")
             runCurrent()

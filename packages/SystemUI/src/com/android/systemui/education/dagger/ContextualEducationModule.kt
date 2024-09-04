@@ -18,14 +18,15 @@ package com.android.systemui.education.dagger
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.data.repository.ContextualEducationRepository
-import com.android.systemui.education.data.repository.ContextualEducationRepositoryImpl
+import com.android.systemui.education.data.repository.UserContextualEducationRepository
 import com.android.systemui.education.domain.interactor.ContextualEducationInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractorImpl
+import com.android.systemui.education.ui.view.ContextualEduUiCoordinator
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -42,7 +43,7 @@ import kotlinx.coroutines.SupervisorJob
 interface ContextualEducationModule {
     @Binds
     fun bindContextualEducationRepository(
-        impl: ContextualEducationRepositoryImpl
+        impl: UserContextualEducationRepository
     ): ContextualEducationRepository
 
     @Qualifier annotation class EduDataStoreScope
@@ -74,7 +75,7 @@ interface ContextualEducationModule {
                 implLazy.get()
             } else {
                 // No-op implementation when the flag is disabled.
-                return NoOpContextualEducationInteractor
+                return NoOpCoreStartable
             }
         }
 
@@ -91,6 +92,8 @@ interface ContextualEducationModule {
         }
 
         @Provides
+        @IntoMap
+        @ClassKey(KeyboardTouchpadEduInteractor::class)
         fun provideKeyboardTouchpadEduInteractor(
             implLazy: Lazy<KeyboardTouchpadEduInteractor>
         ): CoreStartable {
@@ -98,22 +101,32 @@ interface ContextualEducationModule {
                 implLazy.get()
             } else {
                 // No-op implementation when the flag is disabled.
-                return NoOpKeyboardTouchpadEduInteractor
+                return NoOpCoreStartable
+            }
+        }
+
+        @Provides
+        @IntoMap
+        @ClassKey(ContextualEduUiCoordinator::class)
+        fun provideContextualEduUiCoordinator(
+            implLazy: Lazy<ContextualEduUiCoordinator>
+        ): CoreStartable {
+            return if (Flags.keyboardTouchpadContextualEducation()) {
+                implLazy.get()
+            } else {
+                // No-op implementation when the flag is disabled.
+                return NoOpCoreStartable
             }
         }
     }
+}
 
-    private object NoOpKeyboardTouchpadEduStatsInteractor : KeyboardTouchpadEduStatsInteractor {
-        override fun incrementSignalCount(gestureType: GestureType) {}
+private object NoOpKeyboardTouchpadEduStatsInteractor : KeyboardTouchpadEduStatsInteractor {
+    override fun incrementSignalCount(gestureType: GestureType) {}
 
-        override fun updateShortcutTriggerTime(gestureType: GestureType) {}
-    }
+    override fun updateShortcutTriggerTime(gestureType: GestureType) {}
+}
 
-    private object NoOpContextualEducationInteractor : CoreStartable {
-        override fun start() {}
-    }
-
-    private object NoOpKeyboardTouchpadEduInteractor : CoreStartable {
-        override fun start() {}
-    }
+private object NoOpCoreStartable : CoreStartable {
+    override fun start() {}
 }

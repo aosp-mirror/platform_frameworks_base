@@ -2629,8 +2629,13 @@ public class DeviceIdleController extends SystemService
             for (int i=0; i<allowPowerExceptIdle.size(); i++) {
                 String pkg = allowPowerExceptIdle.valueAt(i);
                 try {
+                    // On some devices (eg. HSUM), some apps may
+                    // be not be pre-installed on user 0, but may be
+                    // pre-installed on FULL users. Look for pre-installed system
+                    // apps across all users to make sure they're properly
+                    // allowlisted.
                     ApplicationInfo ai = pm.getApplicationInfo(pkg,
-                            PackageManager.MATCH_SYSTEM_ONLY);
+                            PackageManager.MATCH_ANY_USER | PackageManager.MATCH_SYSTEM_ONLY);
                     int appid = UserHandle.getAppId(ai.uid);
                     mPowerSaveWhitelistAppsExceptIdle.put(ai.packageName, appid);
                     mPowerSaveWhitelistSystemAppIdsExceptIdle.put(appid, true);
@@ -2641,8 +2646,13 @@ public class DeviceIdleController extends SystemService
             for (int i=0; i<allowPower.size(); i++) {
                 String pkg = allowPower.valueAt(i);
                 try {
+                    // On some devices (eg. HSUM), some apps may
+                    // be not be pre-installed on user 0, but may be
+                    // pre-installed on FULL users. Look for pre-installed system
+                    // apps across all users to make sure they're properly
+                    // allowlisted.
                     ApplicationInfo ai = pm.getApplicationInfo(pkg,
-                            PackageManager.MATCH_SYSTEM_ONLY);
+                            PackageManager.MATCH_ANY_USER | PackageManager.MATCH_SYSTEM_ONLY);
                     int appid = UserHandle.getAppId(ai.uid);
                     // These apps are on both the whitelist-except-idle as well
                     // as the full whitelist, so they apply in all cases.

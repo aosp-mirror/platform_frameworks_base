@@ -22,6 +22,7 @@ import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -126,13 +127,27 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        if (mCode != KEYCODE_UNKNOWN) {
+        if (isClickable()) {
             info.addAction(new AccessibilityNodeInfo.AccessibilityAction(ACTION_CLICK, null));
             if (isLongClickable()) {
                 info.addAction(
-                        new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK, null));
+                        new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK,
+                                getAccessibilityLongClickActionLabel()));
             }
         }
+    }
+
+    /**
+     * Gets the accessibility long click action label for the button, or {@code null} for no label.
+     */
+    @Nullable
+    private CharSequence getAccessibilityLongClickActionLabel() {
+        if (Flags.imeSwitcherRevamp()
+                && getId() == com.android.internal.R.id.input_method_nav_ime_switcher) {
+            return getContext().getText(
+                    com.android.internal.R.string.input_method_ime_switch_long_click_action_desc);
+        }
+        return null;
     }
 
     @Override

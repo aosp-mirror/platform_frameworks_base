@@ -25,11 +25,13 @@ import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatu
  * - startWindow: Window of time on start required before showing the first help message
  * - shownFaceMessageFrequencyBoost: Frequency boost given to messages that are currently shown to
  *   the user
+ * - threshold: minimum percentage of frames a message must appear in order to show it
  */
 class FaceHelpMessageDebouncer(
     private val window: Long = DEFAULT_WINDOW_MS,
     private val startWindow: Long = window,
     private val shownFaceMessageFrequencyBoost: Int = 4,
+    private val threshold: Float = 0f,
 ) {
     private val TAG = "FaceHelpMessageDebouncer"
     private var startTime = 0L
@@ -56,7 +58,7 @@ class FaceHelpMessageDebouncer(
         }
     }
 
-    private fun getMostFrequentHelpMessage(): HelpFaceAuthenticationStatus? {
+    private fun getMostFrequentHelpMessageSurpassingThreshold(): HelpFaceAuthenticationStatus? {
         // freqMap: msgId => frequency
         val freqMap = helpFaceAuthStatuses.groupingBy { it.msgId }.eachCount().toMutableMap()
 
@@ -83,7 +85,25 @@ class FaceHelpMessageDebouncer(
                     }
                 }
                 ?.key
-        return helpFaceAuthStatuses.findLast { it.msgId == msgIdWithHighestFrequency }
+
+        if (msgIdWithHighestFrequency == null) {
+            return null
+        }
+
+        val freq =
+            if (msgIdWithHighestFrequency == lastMessageIdShown) {
+                    freqMap[msgIdWithHighestFrequency]!! - shownFaceMessageFrequencyBoost
+                } else {
+                    freqMap[msgIdWithHighestFrequency]!!
+                }
+                .toFloat()
+
+        return if ((freq / helpFaceAuthStatuses.size.toFloat()) >= threshold) {
+            helpFaceAuthStatuses.findLast { it.msgId == msgIdWithHighestFrequency }
+        } else {
+            Log.v(TAG, "most frequent helpFaceAuthStatus didn't make the threshold: $threshold")
+            null
+        }
     }
 
     fun addMessage(helpFaceAuthStatus: HelpFaceAuthenticationStatus) {
@@ -98,14 +118,15 @@ class FaceHelpMessageDebouncer(
             return null
         }
         removeOldMessages(atTimestamp)
-        val messageToShow = getMostFrequentHelpMessage()
+        val messageToShow = getMostFrequentHelpMessageSurpassingThreshold()
         if (lastMessageIdShown != messageToShow?.msgId) {
             Log.v(
                 TAG,
                 "showMessage previousLastMessageId=$lastMessageIdShown" +
                     "\n\tmessageToShow=$messageToShow " +
                     "\n\thelpFaceAuthStatusesSize=${helpFaceAuthStatuses.size}" +
-                    "\n\thelpFaceAuthStatuses=$helpFaceAuthStatuses"
+                    "\n\thelpFaceAuthStatuses=$helpFaceAuthStatuses" +
+                    "\n\tthreshold=$threshold"
             )
             lastMessageIdShown = messageToShow?.msgId
         }

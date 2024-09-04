@@ -97,11 +97,11 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -160,24 +160,27 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         communalInteractor = spy(kosmos.communalInteractor)
 
-        underTest =
-            CommunalViewModel(
-                kosmos.testDispatcher,
-                testScope,
-                kosmos.testScope.backgroundScope,
-                context.resources,
-                kosmos.keyguardTransitionInteractor,
-                kosmos.keyguardInteractor,
-                mock<KeyguardIndicationController>(),
-                kosmos.communalSceneInteractor,
-                communalInteractor,
-                kosmos.communalSettingsInteractor,
-                kosmos.communalTutorialInteractor,
-                kosmos.shadeInteractor,
-                mediaHost,
-                logcatLogBuffer("CommunalViewModelTest"),
-                metricsLogger,
-            )
+        underTest = createViewModel()
+    }
+
+    private fun createViewModel(): CommunalViewModel {
+        return CommunalViewModel(
+            kosmos.testDispatcher,
+            testScope,
+            kosmos.testScope.backgroundScope,
+            context.resources,
+            kosmos.keyguardTransitionInteractor,
+            kosmos.keyguardInteractor,
+            mock<KeyguardIndicationController>(),
+            kosmos.communalSceneInteractor,
+            communalInteractor,
+            kosmos.communalSettingsInteractor,
+            kosmos.communalTutorialInteractor,
+            kosmos.shadeInteractor,
+            mediaHost,
+            logcatLogBuffer("CommunalViewModelTest"),
+            metricsLogger,
+        )
     }
 
     @Test
@@ -213,8 +216,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
             // Widgets available.
-            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
-            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             // Smartspace available.
             smartspaceRepository.setTimers(
@@ -303,7 +306,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
-            widgetRepository.addWidget(appWidgetId = 1, priority = 1)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 1)
             mediaRepository.mediaInactive()
             smartspaceRepository.setTimers(emptyList())
 
@@ -533,6 +536,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
+
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -641,6 +646,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -657,8 +663,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
             // Widgets available
-            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
-            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             // Then hub shows widgets and the CTA tile
             assertThat(communalContent).hasSize(3)
@@ -699,6 +705,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             keyguardRepository.setDozeTransitionModel(
                 DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
             )
+            advanceTimeBy(600L)
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDreamingWithOverlay(true)
             advanceTimeBy(60L)
@@ -712,8 +719,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
             // And widgets available
-            widgetRepository.addWidget(appWidgetId = 0, priority = 30)
-            widgetRepository.addWidget(appWidgetId = 1, priority = 20)
+            widgetRepository.addWidget(appWidgetId = 0, rank = 30)
+            widgetRepository.addWidget(appWidgetId = 1, rank = 20)
 
             // Then emits widgets and the CTA tile
             assertThat(communalContent).hasSize(3)
@@ -751,7 +758,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             // updateViewVisibility is called when the flow is collected.
             assertThat(communalContent).isNotNull()
-            verify(mediaHost).updateViewVisibility()
+            verify(mediaHost, atLeastOnce()).updateViewVisibility()
         }
 
     @Test
@@ -766,7 +773,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun onTapWidget_logEvent() {
-        underTest.onTapWidget(ComponentName("test_pkg", "test_cls"), priority = 10)
+        underTest.onTapWidget(ComponentName("test_pkg", "test_cls"), rank = 10)
         verify(metricsLogger).logTapWidget("test_pkg/test_cls", rank = 10)
     }
 
@@ -779,6 +786,21 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(touchAvailable).isFalse()
             underTest.onNestedScrolling()
             assertThat(touchAvailable).isTrue()
+        }
+
+    @Test
+    fun selectedKey_changeAffectsAllInstances() =
+        testScope.runTest {
+            val model1 = createViewModel()
+            val selectedKey1 by collectLastValue(model1.selectedKey)
+            val model2 = createViewModel()
+            val selectedKey2 by collectLastValue(model2.selectedKey)
+
+            val key = "test"
+            model1.setSelectedKey(key)
+
+            assertThat(selectedKey1).isEqualTo(key)
+            assertThat(selectedKey2).isEqualTo(key)
         }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {

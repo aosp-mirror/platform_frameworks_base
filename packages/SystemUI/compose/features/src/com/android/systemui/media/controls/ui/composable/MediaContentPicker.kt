@@ -21,13 +21,12 @@ import com.android.compose.animation.scene.ElementContentPicker
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.StaticElementContentPicker
-import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.systemui.scene.shared.model.Scenes
 
 /** [ElementContentPicker] implementation for the media carousel object. */
 object MediaContentPicker : StaticElementContentPicker {
 
-    const val SHADE_FRACTION = 0.66f
     override val contents =
         setOf(
             Scenes.Lockscreen,
@@ -39,7 +38,7 @@ object MediaContentPicker : StaticElementContentPicker {
 
     override fun contentDuringTransition(
         element: ElementKey,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         fromContentZIndex: Float,
         toContentZIndex: Float
     ): ContentKey {
@@ -65,7 +64,7 @@ object MediaContentPicker : StaticElementContentPicker {
     }
 
     /** Returns true when the media should be laid on top of the rest for the given [transition]. */
-    fun shouldElevateMedia(transition: ContentState.Transition<*>): Boolean {
+    fun shouldElevateMedia(transition: TransitionState.Transition): Boolean {
         return transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
     }
 }

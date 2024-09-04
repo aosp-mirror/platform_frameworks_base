@@ -35,6 +35,7 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_SENSOR_PRIVACY_ENABLED;
 import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
+import static com.android.server.biometrics.PreAuthInfo.MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,6 +49,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
@@ -309,10 +311,15 @@ public class Utils {
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
             case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
-                biometricManagerCode = BiometricManager.BIOMETRIC_SUCCESS;
+                biometricManagerCode = Flags.mandatoryBiometrics()
+                        ? BiometricManager.BIOMETRIC_ERROR_LOCKOUT
+                        : BiometricManager.BIOMETRIC_SUCCESS;
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+                break;
+            case BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE:
+                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
                 break;
             default:
                 Slog.e(BiometricService.TAG, "Unhandled result code: " + biometricConstantsCode);
@@ -375,6 +382,8 @@ public class Utils {
                 return BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
             case BIOMETRIC_SENSOR_PRIVACY_ENABLED:
                 return BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED;
+            case MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR:
+                return BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
             case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
             case BIOMETRIC_HARDWARE_NOT_DETECTED:
             case BIOMETRIC_NOT_ENABLED_FOR_APPS:
@@ -586,6 +595,8 @@ public class Utils {
         }
     }
 
+    // LINT.IfChange
+
     /**
      * Checks if a client package is running in the background.
      *
@@ -618,4 +629,6 @@ public class Utils {
 
         return true;
     }
+    // LINT.ThenChange(frameworks/base/packages/SystemUI/shared/biometrics/src/com/android
+    // /systemui/biometrics/Utils.kt)
 }

@@ -29,6 +29,7 @@ import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.AlertDialogWithDelegate
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertEquals
 import org.junit.After
 import org.junit.Test
@@ -117,6 +118,36 @@ class SystemCastPermissionDialogDelegateTest : SysuiTestCase() {
         assertEquals(context.getString(resIdFullScreen), secondOptionText)
     }
 
+    @Test
+    fun startButtonText_entireScreenSelected() {
+        setUpAndShowDialog()
+        onSpinnerItemSelected(ENTIRE_SCREEN)
+
+        val startButtonText = dialog.requireViewById<TextView>(android.R.id.button1).text
+
+        assertThat(startButtonText)
+            .isEqualTo(
+                context.getString(
+                    R.string.media_projection_entry_cast_permission_dialog_continue_entire_screen
+                )
+            )
+    }
+
+    @Test
+    fun startButtonText_singleAppSelected() {
+        setUpAndShowDialog()
+        onSpinnerItemSelected(SINGLE_APP)
+
+        val startButtonText = dialog.requireViewById<TextView>(android.R.id.button1).text
+
+        assertThat(startButtonText)
+            .isEqualTo(
+                context.getString(
+                    R.string.media_projection_entry_generic_permission_dialog_continue_single_app
+                )
+            )
+    }
+
     private fun setUpAndShowDialog(
         mediaProjectionConfig: MediaProjectionConfig? = null,
         overrideDisableSingleAppOption: Boolean = false,
@@ -143,5 +174,11 @@ class SystemCastPermissionDialogDelegateTest : SysuiTestCase() {
 
         delegate.onCreate(dialog, savedInstanceState = null)
         dialog.show()
+    }
+
+    private fun onSpinnerItemSelected(position: Int) {
+        val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
+        checkNotNull(spinner.onItemSelectedListener)
+            .onItemSelected(spinner, mock(), position, /* id= */ 0)
     }
 }

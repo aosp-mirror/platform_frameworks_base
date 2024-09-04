@@ -611,16 +611,6 @@ public class DisplayRotation {
             mDisplayRotationCoordinator.onDefaultDisplayRotationChanged(rotation);
         }
 
-        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
-        // case properly since the signals it receives all happen post-change. We do this earlier
-        // in the rotation flow, since DisplayContent.updateDisplayOverrideConfigurationLocked seems
-        // to happen too late.
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
-        if (recentsAnimationController != null) {
-            recentsAnimationController.cancelAnimationForDisplayChange();
-        }
-
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
                         displayId, rotation, oldRotation, lastOrientation);
@@ -1239,7 +1229,6 @@ public class DisplayRotation {
      * @param lastRotation The most recently used rotation.
      * @return The surface rotation to use.
      */
-    @VisibleForTesting
     @Surface.Rotation
     int rotationForOrientation(@ScreenOrientation int orientation,
             @Surface.Rotation int lastRotation) {

@@ -380,6 +380,8 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"顯示輕按位置的視覺回應"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"顯示按鍵操作"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"顯示實際按鍵操作的視覺回應"</string>
+    <string name="touchpad_visualizer" msgid="3707916068870825115">"顯示觸控板輸入內容"</string>
+    <string name="touchpad_visualizer_summary" msgid="4056080018119847449">"重疊式畫面正在顯示觸控板輸入的資料和已辨識的手勢"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"顯示表層更新"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"更新表層時閃動整個視窗表層"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"顯示畫面更新"</string>
@@ -493,10 +495,9 @@
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"剩餘電量時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"剩餘電量時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充滿電"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後完成充電"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充滿電"</string>
-    <!-- no translation found for power_charging_limited (4144004473976005214) -->
-    <skip />
+    <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - 為保護電池，目前暫停充電"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ 充電中"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - 在 <xliff:g id="TIME">%3$s</xliff:g>前充滿電"</string>
     <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> • 在 <xliff:g id="TIME">%2$s</xliff:g>前充滿電"</string>

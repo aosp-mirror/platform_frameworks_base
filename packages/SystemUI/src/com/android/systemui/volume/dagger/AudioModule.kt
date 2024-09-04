@@ -70,6 +70,7 @@ interface AudioModule {
                 coroutineContext,
                 coroutineScope,
                 volumeLogger,
+                com.android.systemui.Flags.useVolumeController(),
             )
 
         @Provides
@@ -79,13 +80,15 @@ interface AudioModule {
             localBluetoothManager: LocalBluetoothManager?,
             @Application coroutineScope: CoroutineScope,
             @Background coroutineContext: CoroutineContext,
+            volumeLogger: VolumeLogger
         ): AudioSharingRepository =
             if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
                 AudioSharingRepositoryImpl(
                     contentResolver,
                     localBluetoothManager,
                     coroutineScope,
-                    coroutineContext
+                    coroutineContext,
+                    volumeLogger
                 )
             } else {
                 AudioSharingRepositoryEmptyImpl()

@@ -634,7 +634,7 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         private boolean isMediaDevice(CachedBluetoothDevice device) {
-            for (LocalBluetoothProfile profile : device.getConnectableProfiles()) {
+            for (LocalBluetoothProfile profile : device.getUiAccessibleProfiles()) {
                 if (profile instanceof A2dpProfile || profile instanceof HearingAidProfile ||
                         profile instanceof LeAudioProfile) {
                     return true;

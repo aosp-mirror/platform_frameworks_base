@@ -319,7 +319,7 @@ public class AlarmManagerService extends SystemService {
      */
     int mSystemUiUid;
 
-    static boolean isTimeTickAlarm(Alarm a) {
+    private static boolean isTimeTickAlarm(Alarm a) {
         return a.uid == Process.SYSTEM_UID && TIME_TICK_TAG.equals(a.listenerTag);
     }
 
@@ -357,6 +357,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     // TODO(b/172085676): Move inside alarm store.
+    @GuardedBy("mLock")
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
             new SparseArray<>();
     private final SparseArray<AlarmManager.AlarmClockInfo> mTmpSparseAlarmClockArray =
@@ -2616,6 +2617,13 @@ public class AlarmManagerService extends SystemService {
                 mInFlightListeners.add(callback);
             }
         }
+
+        /** @see AlarmManagerInternal#getNextAlarmTriggerTimeForUser(int) */
+        @Override
+        public long getNextAlarmTriggerTimeForUser(@UserIdInt int userId) {
+            final AlarmManager.AlarmClockInfo nextAlarm = getNextAlarmClockImpl(userId);
+            return nextAlarm != null ? nextAlarm.getTriggerTime() : 0;
+        }
     }
 
     boolean hasUseExactAlarmInternal(String packageName, int uid) {
@@ -3947,6 +3955,9 @@ public class AlarmManagerService extends SystemService {
             if (!RemovedAlarm.isLoggable(reason)) {
                 continue;
             }
+            if (isTimeTickAlarm(removed)) {
+                Slog.wtf(TAG, "Removed TIME_TICK alarm");
+            }
             RingBuffer<RemovedAlarm> bufferForUid = mRemovalHistory.get(removed.uid);
             if (bufferForUid == null) {
                 bufferForUid = new RingBuffer<>(RemovedAlarm.class, REMOVAL_HISTORY_SIZE_PER_UID);
@@ -4441,6 +4452,11 @@ public class AlarmManagerService extends SystemService {
         public void run() {
             ArrayList<Alarm> triggerList = new ArrayList<Alarm>();
 
+            synchronized (mLock) {
+                mLastTimeChangeClockTime = mInjector.getCurrentTimeMillis();
+                mLastTimeChangeRealtime = mInjector.getElapsedRealtimeMillis();
+            }
+
             while (true) {
                 int result = mInjector.waitForAlarm();
                 final long nowRTC = mInjector.getCurrentTimeMillis();
@@ -4464,10 +4480,9 @@ public class AlarmManagerService extends SystemService {
                         expectedClockTime = lastTimeChangeClockTime
                                 + (nowELAPSED - mLastTimeChangeRealtime);
                     }
-                    if (lastTimeChangeClockTime == 0 || nowRTC < (expectedClockTime - 1000)
+                    if (nowRTC < (expectedClockTime - 1000)
                             || nowRTC > (expectedClockTime + 1000)) {
-                        // The change is by at least +/- 1000 ms (or this is the first change),
-                        // let's do it!
+                        // The change is by at least +/- 1000 ms, let's do it!
                         if (DEBUG_BATCH) {
                             Slog.v(TAG, "Time changed notification from kernel; rebatching");
                         }

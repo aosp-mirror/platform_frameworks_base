@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
+import androidx.benchmark.BenchmarkState;
+import androidx.benchmark.junit4.BenchmarkRule;
 
 import androidx.test.filters.LargeTest;
 
@@ -33,7 +33,7 @@ import java.nio.charset.Charset;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CharsetForNamePerfTest {
-    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
 
     public static String[] charsetNames() {
         return new String[] {
@@ -52,7 +52,7 @@ public class CharsetForNamePerfTest {
     @Test
     @Parameters(method = "charsetNames")
     public void timeCharsetForName(String charsetName) throws Exception {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final BenchmarkState state = mBenchmarkRule.getState();
         while (state.keepRunning()) {
             Charset.forName(charsetName);
         }

@@ -222,6 +222,9 @@ public final class NotificationRecord {
     private boolean mPendingLogUpdate = false;
     private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
     private boolean mSensitiveContent = false;
+    // Whether an app has attempted to cancel this notification after it has been marked as
+    // lifetime extended.
+    private boolean mCanceledAfterLifetimeExtension = false;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -535,6 +538,7 @@ public final class NotificationRecord {
                 + NotificationListenerService.Ranking.importanceToString(mProposedImportance));
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mSensitiveContent=" + mSensitiveContent);
+        pw.println(prefix + "mCanceledAfterLifetimeExtension=" + mCanceledAfterLifetimeExtension);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
@@ -1163,6 +1167,21 @@ public final class NotificationRecord {
         getSbn().setOverrideGroupKey(overrideGroupKey);
     }
 
+    /**
+     * Get the original group key that was set via {@link Notification.Builder#setGroup}
+     *
+     * This value is different than the value returned by {@link #getGroupKey()} as it does
+     * not contain any userId or package name.
+     *
+     * This value is different than the value returned
+     * by {@link StatusBarNotification#getGroup()} if the notification group
+     * was overridden: by NotificationAssistantService or by autogrouping.
+     */
+    @Nullable
+    public String getOriginalGroupKey() {
+        return getSbn().getNotification().getGroup();
+    }
+
     public NotificationChannel getChannel() {
         return mChannel;
     }
@@ -1603,6 +1622,14 @@ public final class NotificationRecord {
 
     public void setPkgAllowedAsConvo(boolean allowedAsConvo) {
         mPkgAllowedAsConvo = allowedAsConvo;
+    }
+
+    public boolean isCanceledAfterLifetimeExtension() {
+        return mCanceledAfterLifetimeExtension;
+    }
+
+    public void setCanceledAfterLifetimeExtension(boolean canceledAfterLifetimeExtension) {
+        mCanceledAfterLifetimeExtension = canceledAfterLifetimeExtension;
     }
 
     /**

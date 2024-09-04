@@ -461,6 +461,12 @@ public final class CameraExtensionCharacteristics {
         @SuppressLint("NonUserGetterCalled")
         public boolean registerClient(Context ctx, IBinder token, int extension,
                 String cameraId, Map<String, CameraMetadataNative> characteristicsMapNative) {
+            if (!SystemProperties.getBoolean("ro.camerax.extensions.enabled",
+                    /*default*/ false)) {
+                Log.v(TAG, "Disabled camera extension property!");
+                return false;
+            }
+
             boolean ret = registerClientHelper(ctx, token, extension, false /*useFallback*/);
 
             if (Flags.concertMode()) {

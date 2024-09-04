@@ -217,9 +217,27 @@ flag {
 }
 
 flag {
+    name: "check_op_validate_package"
+    namespace: "permissions"
+    description: "Validate package/uid match in checkOp similar to noteOp"
+    bug: "294609684"
+}
+
+flag {
     name: "location_bypass_privacy_dashboard_enabled"
     is_exported: true
     namespace: "permissions"
     description: "Show access entry of location bypass permission in the Privacy Dashboard"
     bug: "325536053"
+}
+
+flag {
+    name: "dont_remove_existing_uid_states"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Double check if the uid still exists before attempting to remove its appops state"
+    bug: "353474742"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

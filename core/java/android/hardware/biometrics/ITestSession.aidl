@@ -59,4 +59,8 @@ interface ITestSession {
     // HAL is disabled (e.g. to clean up after a test).
     @EnforcePermission("TEST_BIOMETRIC")
     void cleanupInternalState(int userId);
+
+    // Get the sensor id of the current test session.
+    @EnforcePermission("TEST_BIOMETRIC")
+    int getSensorId();
 }

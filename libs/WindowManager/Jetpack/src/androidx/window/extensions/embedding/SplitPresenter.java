@@ -158,6 +158,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     private final WindowLayoutComponentImpl mWindowLayoutComponent;
     private final SplitController mController;
+    @NonNull
+    private final BackupHelper mBackupHelper;
 
     SplitPresenter(@NonNull Executor executor,
             @NonNull WindowLayoutComponentImpl windowLayoutComponent,
@@ -165,7 +167,23 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         super(executor, controller);
         mWindowLayoutComponent = windowLayoutComponent;
         mController = controller;
-        registerOrganizer();
+        final Bundle outSavedState = new Bundle();
+        if (Flags.aeBackStackRestore()) {
+            outSavedState.setClassLoader(ParcelableTaskContainerData.class.getClassLoader());
+            registerOrganizer(false /* isSystemOrganizer */, outSavedState);
+        } else {
+            registerOrganizer();
+        }
+        mBackupHelper = new BackupHelper(controller, outSavedState);
+        if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
+            // TODO(b/207070762): cleanup with legacy app transition
+            // Animation will be handled by WM Shell when Shell transition is enabled.
+            overrideSplitAnimation();
+        }
+    }
+
+    void scheduleBackup() {
+        mBackupHelper.scheduleBackup();
     }
 
     /**
@@ -405,8 +423,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         // Sets the dim area when the two TaskFragments are adjacent.
         final boolean dimOnTask = !isStacked
-                && splitAttributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
-                && Flags.fullscreenDimFlag();
+                && splitAttributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK;
         setTaskFragmentDimOnTask(wct, primaryContainer.getTaskFragmentToken(), dimOnTask);
         setTaskFragmentDimOnTask(wct, secondaryContainer.getTaskFragmentToken(), dimOnTask);
 
@@ -646,7 +663,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 container);
         final boolean isFillParent = relativeBounds.isEmpty();
         final boolean dimOnTask = !isFillParent
-                && Flags.fullscreenDimFlag()
                 && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK;
         final IBinder fragmentToken = container.getTaskFragmentToken();
 

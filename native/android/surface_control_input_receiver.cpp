@@ -41,7 +41,7 @@ public:
                   const sp<IBinder>& clientToken, const sp<InputTransferToken>& inputTransferToken,
                   AInputReceiverCallbacks* callbacks)
           : mCallbacks(callbacks),
-            mInputConsumer(inputChannel, looper, *this),
+            mInputConsumer(inputChannel, looper, *this, nullptr),
             mClientToken(clientToken),
             mInputTransferToken(inputTransferToken) {}
 

@@ -78,6 +78,9 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
     private final AccessibilityManagerService mAms;
     private final Handler mHandler;
 
+    /** Thread to wait for virtual mouse creation to complete */
+    private final Thread mCreateVirtualMouseThread;
+
     VirtualDeviceManager.VirtualDevice mVirtualDevice = null;
 
     private VirtualMouse mVirtualMouse = null;
@@ -154,34 +157,47 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         mHandler = new Handler(looper, this);
         // Create the virtual mouse on a separate thread since virtual device creation
         // should happen on an auxiliary thread, and not from the handler's thread.
-        // This is because virtual device creation is a blocking operation and can cause a
-        // deadlock if it is called from the handler's thread.
-        new Thread(() -> {
+        // This is because the handler thread is the same as the main thread,
+        // and the main thread will be blocked waiting for the virtual device to be created.
+        mCreateVirtualMouseThread = new Thread(() -> {
             mVirtualMouse = createVirtualMouse(displayId);
-        }).start();
+        });
+        mCreateVirtualMouseThread.start();
+    }
 
+    /**
+     * Wait for {@code mVirtualMouse} to be created.
+     * This will ensure that {@code mVirtualMouse} is always created before
+     * trying to send mouse events.
+     **/
+    private void waitForVirtualMouseCreation() {
+        try {
+            // Block the current thread until the virtual mouse creation thread completes.
+            mCreateVirtualMouseThread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void sendVirtualMouseRelativeEvent(float x, float y) {
-        if (mVirtualMouse != null) {
-            mVirtualMouse.sendRelativeEvent(new VirtualMouseRelativeEvent.Builder()
-                    .setRelativeX(x)
-                    .setRelativeY(y)
-                    .build()
-            );
-        }
+        waitForVirtualMouseCreation();
+        mVirtualMouse.sendRelativeEvent(new VirtualMouseRelativeEvent.Builder()
+                .setRelativeX(x)
+                .setRelativeY(y)
+                .build()
+        );
     }
 
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void sendVirtualMouseButtonEvent(int buttonCode, int actionCode) {
-        if (mVirtualMouse != null) {
-            mVirtualMouse.sendButtonEvent(new VirtualMouseButtonEvent.Builder()
-                    .setAction(actionCode)
-                    .setButtonCode(buttonCode)
-                    .build()
-            );
-        }
+        waitForVirtualMouseCreation();
+        mVirtualMouse.sendButtonEvent(new VirtualMouseButtonEvent.Builder()
+                .setAction(actionCode)
+                .setButtonCode(buttonCode)
+                .build()
+        );
     }
 
     /**
@@ -205,12 +221,11 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
             case DOWN_MOVE_OR_SCROLL -> -1.0f;
             default -> 0.0f;
         };
-        if (mVirtualMouse != null) {
-            mVirtualMouse.sendScrollEvent(new VirtualMouseScrollEvent.Builder()
-                    .setYAxisMovement(y)
-                    .build()
-            );
-        }
+        waitForVirtualMouseCreation();
+        mVirtualMouse.sendScrollEvent(new VirtualMouseScrollEvent.Builder()
+                .setYAxisMovement(y)
+                .build()
+        );
         if (DEBUG) {
             Slog.d(LOG_TAG, "Performed mouse key event: " + mouseKeyEvent.name()
                     + " for scroll action with axis movement (y=" + y + ")");

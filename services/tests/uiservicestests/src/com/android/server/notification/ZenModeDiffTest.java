@@ -158,7 +158,10 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                             RuleDiff.FIELD_ZEN_DEVICE_EFFECTS,
                             RuleDiff.FIELD_LEGACY_SUPPRESSED_EFFECTS));
         }
-        if (!(Flags.modesApi() && Flags.modesUi())) {
+        if (Flags.modesApi() && Flags.modesUi()) {
+            exemptFields.add(RuleDiff.FIELD_SNOOZING); // Obsolete.
+        } else {
+            exemptFields.add(RuleDiff.FIELD_CONDITION_OVERRIDE);
             exemptFields.add(RuleDiff.FIELD_LEGACY_SUPPRESSED_EFFECTS);
         }
         return exemptFields;
@@ -339,7 +342,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         rule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         rule.modified = false;
         rule.name = "name";
-        rule.snoozing = true;
+        rule.setConditionOverride(ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE);
         rule.pkg = "a";
         if (android.app.Flags.modesApi()) {
             rule.allowManualInvocation = true;

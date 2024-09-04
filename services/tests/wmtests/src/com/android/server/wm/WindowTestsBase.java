@@ -55,6 +55,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
 import static org.junit.Assert.assertEquals;
@@ -693,6 +694,13 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    static void makeWindowVisibleAndNotDrawn(WindowState... windows) {
+        makeWindowVisible(windows);
+        for (WindowState win : windows) {
+            win.mWinAnimator.mDrawState = DRAW_PENDING;
+        }
+    }
+
     static void makeLastConfigReportedToClient(WindowState w, boolean visible) {
         w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
                 new MergedConfiguration(), new ActivityWindowInfo(), true /* useLatestConfig */,
@@ -924,7 +932,8 @@ public class WindowTestsBase extends SystemServiceTestsBase {
             mSystemServicesTestRule.addProcess("pkgName", "procName",
                     WindowManagerService.MY_PID, WindowManagerService.MY_UID);
         }
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(organizer, isSystemOrganizer);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(organizer, isSystemOrganizer,
+                new Bundle());
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
@@ -2122,7 +2131,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit);
+            mController.finishTransition(ActionChain.testFinish(mLastTransit));
         }
     }
 }

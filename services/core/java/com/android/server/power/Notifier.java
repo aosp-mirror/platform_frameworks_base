@@ -360,7 +360,13 @@ public class Notifier {
             IWakeLockCallback callback, int newFlags, String newTag, String newPackageName,
             int newOwnerUid, int newOwnerPid, WorkSource newWorkSource, String newHistoryTag,
             IWakeLockCallback newCallback) {
-
+        // Todo(b/359154665): We do this because the newWorkSource can potentially be updated
+        // before the request is processed on the notifier thread. This would generally happen is
+        // the Worksource's set method is called, which as of this comment happens only in
+        // PowerManager#setWorksource and WifiManager#WifiLock#setWorksource. Both these places
+        // need to be updated and the WorkSource#set should be deprecated to avoid falling into
+        // such traps
+        newWorkSource = (newWorkSource == null) ? null : new WorkSource(newWorkSource);
         final int monitorType = getBatteryStatsWakeLockMonitorType(flags);
         final int newMonitorType = getBatteryStatsWakeLockMonitorType(newFlags);
         if (workSource != null && newWorkSource != null
@@ -1058,9 +1064,9 @@ public class Notifier {
     private void notifyWakeLockListener(IWakeLockCallback callback, String tag, boolean isEnabled,
             int ownerUid, int ownerPid, int flags, WorkSource workSource, String packageName,
             String historyTag) {
+        long currentTime = mInjector.currentTimeMillis();
         mHandler.post(() -> {
             if (mFlags.improveWakelockLatency()) {
-                long currentTime = mInjector.currentTimeMillis();
                 if (isEnabled) {
                     notifyWakelockAcquisition(tag, ownerUid, ownerPid, flags,
                             workSource, packageName, historyTag, currentTime);

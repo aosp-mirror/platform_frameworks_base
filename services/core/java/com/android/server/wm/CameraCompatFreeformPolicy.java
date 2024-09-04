@@ -60,6 +60,11 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     @Nullable
     private Task mCameraTask;
 
+    /**
+     * Value toggled on {@link #start()} to {@code true} and on {@link #dispose()} to {@code false}.
+     */
+    private boolean mIsRunning;
+
     CameraCompatFreeformPolicy(@NonNull DisplayContent displayContent,
             @NonNull CameraStateMonitor cameraStateMonitor,
             @NonNull ActivityRefresher activityRefresher) {
@@ -71,12 +76,19 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     void start() {
         mCameraStateMonitor.addCameraStateListener(this);
         mActivityRefresher.addEvaluator(this);
+        mIsRunning = true;
     }
 
     /** Releases camera callback listener. */
     void dispose() {
         mCameraStateMonitor.removeCameraStateListener(this);
         mActivityRefresher.removeEvaluator(this);
+        mIsRunning = false;
+    }
+
+    @VisibleForTesting
+    boolean isRunning() {
+        return mIsRunning;
     }
 
     // Refreshing only when configuration changes after rotation or camera split screen aspect ratio
@@ -109,10 +121,10 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     @Override
-    public boolean onCameraOpened(@NonNull ActivityRecord cameraActivity,
+    public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
             @NonNull String cameraId) {
         if (!isTreatmentEnabledForActivity(cameraActivity)) {
-            return false;
+            return;
         }
         final int existingCameraCompatMode = cameraActivity.mAppCompatController
                 .getAppCompatCameraOverrides()
@@ -124,11 +136,9 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
             cameraActivity.mAppCompatController.getAppCompatCameraOverrides()
                     .setFreeformCameraCompatMode(newCameraCompatMode);
             forceUpdateActivityAndTask(cameraActivity);
-            return true;
         } else {
             mIsCameraCompatTreatmentPending = false;
         }
-        return false;
     }
 
     @Override

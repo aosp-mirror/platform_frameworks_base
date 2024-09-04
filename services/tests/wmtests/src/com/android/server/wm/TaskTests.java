@@ -230,8 +230,7 @@ public class TaskTests extends WindowTestsBase {
         final Task originalTask = activityMain.getTask();
         final ActivityRecord activityPip = new ActivityBuilder(mAtm).setTask(originalTask).build();
         activityPip.setState(RESUMED, "test");
-        mAtm.mRootWindowContainer.moveActivityToPinnedRootTask(activityPip,
-                null /* launchIntoPipHostActivity */, "test");
+        mAtm.mRootWindowContainer.moveActivityToPinnedRootTask(activityPip, "test");
         final Task pinnedActivityTask = activityPip.getTask();
 
         // Simulate pinnedActivityTask unintentionally added to recent during top activity resume.
@@ -635,27 +634,27 @@ public class TaskTests extends WindowTestsBase {
 
         // The button should be eligible to be displayed
         assertTrue(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
 
         // When shouldApplyUserMinAspectRatioOverride is disable the button is not enabled
         doReturn(false).when(
                 root.mAppCompatController.getAppCompatAspectRatioOverrides())
                     .shouldEnableUserAspectRatioSettings();
         assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
         doReturn(true).when(root.mAppCompatController
                 .getAppCompatAspectRatioOverrides()).shouldEnableUserAspectRatioSettings();
 
         // When in size compat mode the button is not enabled
         doReturn(true).when(root).inSizeCompatMode();
         assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
         doReturn(false).when(root).inSizeCompatMode();
 
         // When the top activity is transparent, the button is not enabled
         doReturn(false).when(root).fillsParent();
         assertFalse(task.getTaskInfo()
-                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+                .appCompatTaskInfo.eligibleForUserAspectRatioButton());
         doReturn(true).when(root).fillsParent();
     }
 
@@ -867,8 +866,8 @@ public class TaskTests extends WindowTestsBase {
         // Without limiting to be inside the parent bounds, the out screen size should keep relative
         // to the input bounds.
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
-        final ActivityRecord.CompatDisplayInsets compatInsets =
-                new ActivityRecord.CompatDisplayInsets(
+        final AppCompatDisplayInsets compatInsets =
+                new AppCompatDisplayInsets(
                         display, activity, /* letterboxedContainerBounds */ null,
                         /* useOverrideInsets */ false);
         final TaskFragment.ConfigOverrideHint overrideHint = new TaskFragment.ConfigOverrideHint();

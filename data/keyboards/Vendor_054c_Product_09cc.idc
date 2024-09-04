@@ -60,3 +60,11 @@ gestureProp.Drumroll_Suppression_Enable = 0
 # from the palm classifier to increase the usable area of the pad.
 gestureProp.Palm_Edge_Zone_Width = 0
 gestureProp.Tap_Exclusion_Border_Width = 0
+
+# Touchpad is small, scale up the pointer movements to make it more practical
+# to use.
+gestureProp.Point_X_Out_Scale = 2.5
+gestureProp.Point_Y_Out_Scale = 2.5
+
+# TODO(b/351326684): Ideally "Scroll X Out Scale" and "Scroll Y Out Scale"
+# should be adjusted as well. Currently not supported in IDC files.

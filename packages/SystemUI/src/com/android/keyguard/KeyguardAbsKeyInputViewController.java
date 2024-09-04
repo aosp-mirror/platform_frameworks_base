@@ -19,7 +19,10 @@ package com.android.keyguard;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 import static com.android.keyguard.KeyguardAbsKeyInputView.MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT;
+import static com.android.systemui.Flags.msdlFeedback;
+import static com.android.systemui.Flags.notifyPasswordTextViewUserActivityInBackground;
 
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -40,6 +43,9 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
+import com.google.android.msdl.data.model.MSDLToken;
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,11 +56,14 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     private final LatencyTracker mLatencyTracker;
     private final FalsingCollector mFalsingCollector;
     private final EmergencyButtonController mEmergencyButtonController;
+    private final UserActivityNotifier mUserActivityNotifier;
     private CountDownTimer mCountdownTimer;
     private boolean mDismissing;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected boolean mResumed;
     protected boolean mLockedOut;
+    @Nullable
+    protected MSDLPlayer mMSDLPlayer;
 
     private final KeyDownListener mKeyDownListener = (keyCode, keyEvent) -> {
         // Fingerprint sensor sends a KeyEvent.KEYCODE_UNKNOWN.
@@ -81,7 +90,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController,
-            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor) {
+            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
+            @Nullable MSDLPlayer msdlPlayer,
+            UserActivityNotifier userActivityNotifier) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
                 messageAreaControllerFactory, featureFlags, selectedUserInteractor);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -89,6 +100,8 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         mLatencyTracker = latencyTracker;
         mFalsingCollector = falsingCollector;
         mEmergencyButtonController = emergencyButtonController;
+        mMSDLPlayer = msdlPlayer;
+        mUserActivityNotifier = userActivityNotifier;
     }
 
     abstract void resetState();
@@ -178,6 +191,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     void onPasswordChecked(int userId, boolean matched, int timeoutMs, boolean isValidPassword) {
         boolean dismissKeyguard = mSelectedUserInteractor.getSelectedUserId() == userId;
         if (matched) {
+            playAuthenticationHaptics(/* unlock= */true);
             getKeyguardSecurityCallback().reportUnlockAttempt(userId, true, 0);
             if (dismissKeyguard) {
                 mDismissing = true;
@@ -185,6 +199,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                 getKeyguardSecurityCallback().dismiss(true, userId, getSecurityMode());
             }
         } else {
+            playAuthenticationHaptics(/* unlock= */false);
             mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (isValidPassword) {
                 getKeyguardSecurityCallback().reportUnlockAttempt(userId, false, timeoutMs);
@@ -199,6 +214,18 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             }
             startErrorAnimation();
         }
+    }
+
+    private void playAuthenticationHaptics(boolean unlock) {
+        if (!msdlFeedback() || mMSDLPlayer == null) return;
+
+        MSDLToken token;
+        if (unlock) {
+            token = MSDLToken.UNLOCK;
+        } else {
+            token = MSDLToken.FAILURE;
+        }
+        mMSDLPlayer.playToken(token, mAuthInteractionProperties);
     }
 
     protected void startErrorAnimation() { /* no-op */ }
@@ -280,6 +307,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         getKeyguardSecurityCallback().userActivity();
         getKeyguardSecurityCallback().onUserInput();
         mMessageAreaController.setMessage("");
+        if (notifyPasswordTextViewUserActivityInBackground()) {
+            mUserActivityNotifier.notifyUserActivity();
+        }
     }
 
     @Override

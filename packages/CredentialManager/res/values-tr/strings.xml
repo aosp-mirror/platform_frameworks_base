@@ -56,7 +56,7 @@
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> için bu şifre yöneticisi, şifrelerinizi ve geçiş anahtarlarınızı saklayarak kolayca oturum açmanıza yardımcı olur"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Varsayılan olarak ayarla"</string>
     <string name="settings" msgid="6536394145760913145">"Ayarlar"</string>
-    <string name="use_once" msgid="9027366575315399714">"Bir kez kullanın"</string>
+    <string name="use_once" msgid="9027366575315399714">"Bir kez kullan"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> şifre • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> geçiş anahtarı"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> şifre"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> geçiş anahtarı"</string>

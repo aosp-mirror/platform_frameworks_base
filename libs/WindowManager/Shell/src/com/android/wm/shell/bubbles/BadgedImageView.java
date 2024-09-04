@@ -37,7 +37,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.launcher3.icons.DotRenderer;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.shared.animation.Interpolators;
 
 import java.util.EnumSet;
 
@@ -357,7 +357,9 @@ public class BadgedImageView extends ConstraintLayout {
 
     void showBadge() {
         Bitmap appBadgeBitmap = mBubble.getAppBadge();
-        if (appBadgeBitmap == null) {
+        final boolean isAppLaunchIntent = (mBubble instanceof Bubble)
+                && ((Bubble) mBubble).isAppLaunchIntent();
+        if (appBadgeBitmap == null || isAppLaunchIntent) {
             mAppIcon.setVisibility(GONE);
             return;
         }

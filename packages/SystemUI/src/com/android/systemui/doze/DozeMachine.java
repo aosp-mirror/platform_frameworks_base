@@ -39,7 +39,6 @@ import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -232,7 +231,6 @@ public class DozeMachine {
     }
 
     void onScreenState(int state) {
-        mDozeLog.traceDisplayState(state);
         for (Part part : mParts) {
             part.onScreenState(state);
         }
@@ -516,11 +514,9 @@ public class DozeMachine {
 
         class Delegate implements Service {
             private final Service mDelegate;
-            private final Executor mBgExecutor;
 
-            public Delegate(Service delegate, Executor bgExecutor) {
+            public Delegate(Service delegate) {
                 mDelegate = delegate;
-                mBgExecutor = bgExecutor;
             }
 
             @Override
@@ -540,16 +536,12 @@ public class DozeMachine {
 
             @Override
             public void setDozeScreenBrightness(int brightness) {
-                mBgExecutor.execute(() -> {
-                    mDelegate.setDozeScreenBrightness(brightness);
-                });
+                mDelegate.setDozeScreenBrightness(brightness);
             }
 
             @Override
             public void setDozeScreenBrightnessFloat(float brightness) {
-                mBgExecutor.execute(() -> {
-                    mDelegate.setDozeScreenBrightnessFloat(brightness);
-                });
+                mDelegate.setDozeScreenBrightnessFloat(brightness);
             }
         }
     }

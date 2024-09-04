@@ -113,6 +113,7 @@ cc_library_host_static {
         "io/ZipArchive.cpp",
         "link/AutoVersioner.cpp",
         "link/FeatureFlagsFilter.cpp",
+        "link/FlagDisabledResourceRemover.cpp",
         "link/ManifestFixer.cpp",
         "link/NoDefaultResourceRemover.cpp",
         "link/PrivateAttributeMover.cpp",
@@ -189,6 +190,8 @@ cc_test_host {
         "integration-tests/CommandTests/**/*",
         "integration-tests/ConvertTest/**/*",
         "integration-tests/DumpTest/**/*",
+        ":resource-flagging-test-app-apk",
+        ":resource-flagging-test-app-r-java",
     ],
 }
 

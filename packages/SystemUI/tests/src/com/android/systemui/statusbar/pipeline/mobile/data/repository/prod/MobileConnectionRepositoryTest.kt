@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
@@ -70,6 +71,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
@@ -86,7 +88,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionMod
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest.Companion.configWithOverride
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest.Companion.createTestConfig
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.signalStrength
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.telephonyDisplayInfo
@@ -119,7 +120,6 @@ import org.mockito.kotlin.argumentCaptor
 @RunWith(AndroidJUnit4::class)
 class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
-    private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
     private val flags =
         FakeFeatureFlagsClassic().also { it.set(ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
@@ -153,8 +153,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_1_ID)
-
-        connectionsRepo = FakeMobileConnectionsRepository(mobileMappings, tableLogger)
 
         underTest =
             MobileConnectionRepositoryImpl(
@@ -807,6 +805,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
     fun networkName_usesBroadcastInfo_returnsDerived() =
         testScope.runTest {
             var latest: NetworkNameModel? = null
@@ -818,13 +817,31 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             captor.lastValue.onReceive(context, intent)
 
             // spnIntent() sets all values to true and test strings
-            assertThat(latest)
-                .isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN$SEP$DATA_SPN"))
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN"))
 
             job.cancel()
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_usesBroadcastInfo_returnsDerived_flagOff() =
+        testScope.runTest {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            val intent = spnIntent()
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            captor.lastValue.onReceive(context, intent)
+
+            // spnIntent() sets all values to true and test strings
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$DATA_SPN"))
+
+            job.cancel()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
     fun networkName_broadcastNotForThisSubId_keepsOldValue() =
         testScope.runTest {
             var latest: NetworkNameModel? = null
@@ -835,8 +852,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             verify(context).registerReceiver(captor.capture(), any())
             captor.lastValue.onReceive(context, intent)
 
-            assertThat(latest)
-                .isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN$SEP$DATA_SPN"))
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN"))
 
             // WHEN an intent with a different subId is sent
             val wrongSubIntent = spnIntent(subId = 101)
@@ -844,13 +860,38 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             captor.lastValue.onReceive(context, wrongSubIntent)
 
             // THEN the previous intent's name is still used
-            assertThat(latest)
-                .isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN$SEP$DATA_SPN"))
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN"))
 
             job.cancel()
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_broadcastNotForThisSubId_keepsOldValue_flagOff() =
+        testScope.runTest {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            val intent = spnIntent()
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            captor.lastValue.onReceive(context, intent)
+
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$DATA_SPN"))
+
+            // WHEN an intent with a different subId is sent
+            val wrongSubIntent = spnIntent(subId = 101)
+
+            captor.lastValue.onReceive(context, wrongSubIntent)
+
+            // THEN the previous intent's name is still used
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$DATA_SPN"))
+
+            job.cancel()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
     fun networkName_broadcastHasNoData_updatesToDefault() =
         testScope.runTest {
             var latest: NetworkNameModel? = null
@@ -861,8 +902,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             verify(context).registerReceiver(captor.capture(), any())
             captor.lastValue.onReceive(context, intent)
 
-            assertThat(latest)
-                .isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN$SEP$DATA_SPN"))
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN"))
 
             val intentWithoutInfo =
                 spnIntent(
@@ -878,6 +918,34 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_broadcastHasNoData_updatesToDefault_flagOff() =
+        testScope.runTest {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            val intent = spnIntent()
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            captor.lastValue.onReceive(context, intent)
+
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$DATA_SPN"))
+
+            val intentWithoutInfo =
+                spnIntent(
+                    showSpn = false,
+                    showPlmn = false,
+                )
+
+            captor.lastValue.onReceive(context, intentWithoutInfo)
+
+            assertThat(latest).isEqualTo(DEFAULT_NAME_MODEL)
+
+            job.cancel()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
     fun networkName_usingEagerStrategy_retainsNameBetweenSubscribers() =
         testScope.runTest {
             // Use the [StateFlow.value] getter so we can prove that the collection happens
@@ -893,11 +961,32 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             // The value is still there despite no active subscribers
             assertThat(underTest.networkName.value)
-                .isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN$SEP$DATA_SPN"))
+                .isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$SPN"))
         }
 
     @Test
-    fun networkName_allFieldsSet() =
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_usingEagerStrategy_retainsNameBetweenSubscribers_flagOff() =
+        testScope.runTest {
+            // Use the [StateFlow.value] getter so we can prove that the collection happens
+            // even when there is no [Job]
+
+            // Starts out default
+            assertThat(underTest.networkName.value).isEqualTo(DEFAULT_NAME_MODEL)
+
+            val intent = spnIntent()
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            captor.lastValue.onReceive(context, intent)
+
+            // The value is still there despite no active subscribers
+            assertThat(underTest.networkName.value)
+                .isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$DATA_SPN"))
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_allFieldsSet_doesNotUseDataSpn() =
         testScope.runTest {
             val latest by collectLastValue(underTest.networkName)
             val captor = argumentCaptor<BroadcastReceiver>()
@@ -908,7 +997,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                     subId = SUB_1_ID,
                     showSpn = true,
                     spn = SPN,
-                    dataSpn = null,
+                    dataSpn = DATA_SPN,
                     showPlmn = true,
                     plmn = PLMN,
                 )
@@ -917,7 +1006,49 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_allFieldsSet_flagOff() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.networkName)
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+
+            val intent =
+                spnIntent(
+                    subId = SUB_1_ID,
+                    showSpn = true,
+                    spn = SPN,
+                    dataSpn = DATA_SPN,
+                    showPlmn = true,
+                    plmn = PLMN,
+                )
+            captor.lastValue.onReceive(context, intent)
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN$SEP$DATA_SPN"))
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
     fun networkName_showPlmn_plmnNotNull_showSpn_spnNull_dataSpnNotNull() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.networkName)
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            val intent =
+                spnIntent(
+                    subId = SUB_1_ID,
+                    showSpn = true,
+                    spn = null,
+                    dataSpn = DATA_SPN,
+                    showPlmn = true,
+                    plmn = PLMN,
+                )
+            captor.lastValue.onReceive(context, intent)
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$PLMN"))
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_showPlmn_plmnNotNull_showSpn_spnNull_dataSpnNotNull_flagOff() =
         testScope.runTest {
             val latest by collectLastValue(underTest.networkName)
             val captor = argumentCaptor<BroadcastReceiver>()
@@ -955,6 +1086,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
     fun networkName_showPlmn_plmnNull_showSpn() =
         testScope.runTest {
             val latest by collectLastValue(underTest.networkName)
@@ -970,7 +1102,27 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                     plmn = null,
                 )
             captor.lastValue.onReceive(context, intent)
-            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$SPN$SEP$DATA_SPN"))
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$SPN"))
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_STATUS_BAR_SWITCH_TO_SPN_FROM_DATA_SPN)
+    fun networkName_showPlmn_plmnNull_showSpn_flagOff() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.networkName)
+            val captor = argumentCaptor<BroadcastReceiver>()
+            verify(context).registerReceiver(captor.capture(), any())
+            val intent =
+                spnIntent(
+                    subId = SUB_1_ID,
+                    showSpn = true,
+                    spn = SPN,
+                    dataSpn = DATA_SPN,
+                    showPlmn = true,
+                    plmn = null,
+                )
+            captor.lastValue.onReceive(context, intent)
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived("$DATA_SPN"))
         }
 
     @Test

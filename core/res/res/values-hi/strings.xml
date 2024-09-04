@@ -1194,6 +1194,8 @@
     <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"हैंडराइटिंग की सुविधा, पासवर्ड वाले फ़ील्ड में काम नहीं करती है"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"वापस जाएं"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"इनपुट का तरीका बदलें"</string>
+    <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"\'इनपुट का तरीका\' पिकर को खोलें"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"सेटिंग"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"मेमोरी में जगह नहीं बची है"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"हो सकता है कुछ सिस्टम फ़ंक्शन काम नहीं करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"सिस्टम के लिए ज़रूरी मेमोरी नहीं है. पक्का करें कि आपके पास 250एमबी की खाली जगह है और फिर से शुरू करें."</string>
@@ -2422,6 +2424,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"स्क्रीन शेयर करने के दौरान सुरक्षा के लिए, ऐप्लिकेशन का कॉन्टेंट छिपाया गया"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"सैटलाइट से अपने-आप कनेक्ट हो गया"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"मोबाइल या वाई-फ़ाई नेटवर्क के बिना भी मैसेज भेजे और पाए जा सकते हैं"</string>
+    <string name="satellite_notification_manual_title" msgid="1097504441849466279">"क्या आपको सैटलाइट की मदद से मैसेज भेजना है?"</string>
+    <string name="satellite_notification_manual_summary" msgid="901206289846283445">"मोबाइल या वाई-फ़ाई नेटवर्क के बिना मैसेज भेजें और पाएं"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ऐप्लिकेशन खोलें"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यह सेटिंग कैसे काम करती है"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"प्रोसेस जारी है..."</string>
@@ -2447,4 +2451,5 @@
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"कैल्कुलेटर"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"मैप"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ऐप्लिकेशन"</string>
+    <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"अब आपके फ़िंगरप्रिंट की पहचान नहीं की जा सकती. फ़िंगरप्रिंट अनलॉक की सुविधा को दोबारा सेट अप करें."</string>
 </resources>

@@ -25,6 +25,9 @@
 #include <input/Input.h>
 #include <log/log.h>
 
+#define INDENT "  "
+#define INDENT2 "    "
+
 namespace {
 // Time to spend fading out the pointer completely.
 const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
@@ -447,6 +450,24 @@ void MouseCursorController::getAdditionalMouseResources() {
 bool MouseCursorController::resourcesLoaded() {
     std::scoped_lock lock(mLock);
     return mLocked.resourcesLoaded;
+}
+
+std::string MouseCursorController::dump() const {
+    std::string dump = INDENT "MouseCursorController:\n";
+    std::scoped_lock lock(mLock);
+    dump += StringPrintf(INDENT2 "viewport: %s\n", mLocked.viewport.toString().c_str());
+    dump += StringPrintf(INDENT2 "stylusHoverMode: %s\n",
+                         mLocked.stylusHoverMode ? "true" : "false");
+    dump += StringPrintf(INDENT2 "pointerFadeDirection: %d\n", mLocked.pointerFadeDirection);
+    dump += StringPrintf(INDENT2 "updatePointerIcon: %s\n",
+                         mLocked.updatePointerIcon ? "true" : "false");
+    dump += StringPrintf(INDENT2 "resourcesLoaded: %s\n",
+                         mLocked.resourcesLoaded ? "true" : "false");
+    dump += StringPrintf(INDENT2 "requestedPointerType: %d\n", mLocked.requestedPointerType);
+    dump += StringPrintf(INDENT2 "resolvedPointerType: %d\n", mLocked.resolvedPointerType);
+    dump += StringPrintf(INDENT2 "skipScreenshot: %s\n", mLocked.skipScreenshot ? "true" : "false");
+    dump += StringPrintf(INDENT2 "animating: %s\n", mLocked.animating ? "true" : "false");
+    return dump;
 }
 
 bool MouseCursorController::doAnimations(nsecs_t timestamp) {

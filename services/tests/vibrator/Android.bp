@@ -36,6 +36,7 @@ android_test {
         "platform-test-annotations",
         "service-permission.stubs.system_server",
         "services.core",
+        "TestParameterInjector",
     ],
     jni_libs: ["libdexmakerjvmtiagent"],
     platform_apis: true,

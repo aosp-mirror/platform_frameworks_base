@@ -107,10 +107,13 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"Ekranni yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Yozib olish boshlansinmi?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Yozib olish vaqtida Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Ilovani yozib olayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Yozib olish"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ekran yozib olinsinmi?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Bitta ilovani yozib olish"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Butun ekranni yozib olish"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Butun ekranni yozib olishda ekranda koʻrsatilgan barcha axborotlar yozib olinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Ilovani yozib olishda ilova koʻrsatilgan yoki ijro etilgan barcha axborotlar yozib olinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ekranni yozib olish"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Yozib olinadigan ilovani tanlash"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio yozib olish"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Qurilmadagi audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Qurilmangizdagi musiqa, chaqiruvlar va ringtonlar kabi ovozlar"</string>
@@ -176,8 +179,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Yuborish"</string>
     <string name="cancel" msgid="1089011503403416730">"Bekor qilish"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"Ilova logotipi"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"OK"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Qayta urinish"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Tekshiruvni bekor qilish uchun bosing"</string>
@@ -307,6 +308,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ertaga ertalab yoqiladi"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Audioni ulashish"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Audio ulashuvi yoniq"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"audio ulashuv sozlamalarini kiritish"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Garnitura"</string>
@@ -378,7 +380,7 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ekran yozuvi"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Boshlash"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Toʻxtatish"</string>
-    <string name="qs_record_issue_label" msgid="8166290137285529059">"Yozib olishda xato"</string>
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Nosozlikni yozib olish"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Boshlash"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Toʻxtatish"</string>
     <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Xatoliklar hisoboti"</string>
@@ -400,7 +402,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Yangi qurilmani ulash uchun bosing"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Andoza yangilanmadi"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Andoza"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"Jonli izoh"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Jonli izoh"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Qurilma mikrofoni blokdan chiqarilsinmi?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Qurilma kamerasi blokdan chiqarilsinmi?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Qurilma kamerasi va mikrofoni blokdan chiqarilsinmi?"</string>
@@ -433,13 +435,11 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Tayyor"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Sozlamalar"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Yoniq"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Yoniq • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Yoqilmagan"</string>
-    <!-- no translation found for zen_mode_set_up (7457957033034460064) -->
-    <skip />
-    <!-- no translation found for zen_mode_no_manual_invocation (1769975741344633672) -->
-    <skip />
-    <!-- no translation found for zen_mode_active_modes (1625850411578488856) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Sozlash"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Sozlamalarda boshqarish"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Hech qanday rejim faol emas}=1{{mode} faol}other{# ta rejim faol}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq, signallar, eslatmalar, tadbirlar haqidagi bildirishnomalar va siz tanlagan abonentlardan kelgan chaqiruvlar bundan mustasno. Lekin, ijro etiladigan barcha narsalar, jumladan, musiqa, video va o‘yinlar ovozi eshitiladi."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Turli ovoz va tebranishlar endi sizni bezovta qilmaydi. Biroq, signallar bundan mustasno. Lekin, ijro etiladigan barcha narsalar, jumladan, musiqa, video va o‘yinlar ovozi eshitiladi."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Sozlash"</string>
@@ -478,8 +478,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sekin quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Ekran qulfidagi vidjetlar"</string>
-    <!-- no translation found for accessibility_announcement_communal_widget_added (6911593106099328271) -->
-    <skip />
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"Ekran qulfiga <xliff:g id="WIDGET_NAME">%1$s</xliff:g> vidjeti qoʻshildi"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Qoʻllanma bilan tanishish uchun chapga suring"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Moslash"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Yopish"</string>
@@ -531,22 +530,27 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Yozib olish yoki translatsiya boshlansinmi?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Bu funksiyani taʼminlovchi xizmat ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Butun ekran"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Bitta ilova"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Ilovada ulashish yoki yozib olish"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> orqali yozib olish yoki translatsiya boshlansinmi?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Ulashish, yozib olish va translatsiya qilish vaqtida <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Ulashish, yozib olish va translatsiya qilish vaqtida <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Boshlash"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Ilovani ulashish yoki yozib olish"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Ekraningiz <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bilan ulashilsinmi?"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Bitta ilovani namoyish qilish"</string>
+    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Butun ekranni namoyish qilish"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Butun ekranni namoyish qilayotganingizda, ekrandagi barcha narsalaringiz <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ga koʻrinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Ilovani namoyish qilayotganingizda oʻsha ilova ichida koʻrsatilayotgan yoki ijro qilinayotganlar <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ga koʻrinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Ekranni namoyish qilish"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> bu sozlamani faolsizlantirgan"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Translatsiya boshlansinmi?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Translatsiya qilayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Translatsiya qilayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Translatsiyani boshlang"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Ulashiladigan ilovani tanlash"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Ekraningiz uzatilsinmi?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Bitta ilovani uzatish"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Butun ekranni uzatish"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Butun ekran uzatilayotganda, ekrandagi hamma narsa koʻrinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Ilovani uzatayotganingizda oʻsha ilova ichida koʻrsatilayotgan yoki ijro qilinayotganlar koʻrinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Ekranni translatsiya qilish"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Translatsiya qilinadigan ilovani tanlash"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Ulashuv boshlansinmi?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Ulashish, yozib olish va translatsiya qilish vaqtida Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Ilovani ulashish, yozib olish yoki translatsiya qilayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Boshlash"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"Keyingisi"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Ilovalarni almashtirsangiz, ulashuv toʻxtatiladi"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Bu ilovani ulashish"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Ortga qaytarish"</string>
@@ -714,6 +718,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Sputnik, aloqa sifati yaxshi"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Sputnik, aloqa mavjud"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Sputnik SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ish profili"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diqqat!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner yordamida siz Android foydalanuvchi interfeysini tuzatish va o‘zingizga moslashtirishingiz mumkin. Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
@@ -1376,6 +1382,7 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Qulayliklar"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tezkor tugmalar"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Tezkor tugmalar qidiruvi"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Hech narsa topilmadi"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Yigʻish belgisi"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Yoyish belgisi"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"yoki"</string>
@@ -1383,14 +1390,18 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Asosiy ekran ishorasi"</string>
     <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Amal tugmasi"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Tayyor"</string>
-    <string name="touchpad_tutorial_gesture_done" msgid="4784438360736821255">"Barakalla!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Orqaga qaytish"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (6263750214998421587) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_finished (5353616006999726249) -->
-    <skip />
-    <string name="touchpad_back_gesture_animation_content_description" msgid="2646107450922379918">"Sensorli panelda uchta barmoq chapga va oʻngga harakatlanishi"</string>
-    <string name="touchpad_back_gesture_screen_animation_content_description" msgid="4036267494237748710">"Qurilma ekranidagi ortga qaytish ishorasi animatsiyasi"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Ortga qaytish uchun sensorli panelda uchta barmoqni chapga yoki oʻngga suring.\n\nBuning uchun Action + ESC tezkor tugmalaridan ham foydalanishingiz mumkin."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Barakalla!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Ortga qaytish ishorasi darsini tamomladingiz."</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Boshiga"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Istalgan vaqtda bosh ekranga oʻtish uchun ekranning pastidan uchta barmoq bilan tepaga suring."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Yaxshi!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Bosh ekranni ochish ishorasi darsini tamomladingiz."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Amal tugmasi"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Ilovalarga kirish uchun klaviaturadagi amal tugmasini bosing"</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Tabriklaymiz!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Amal tugmasi ishorasi darsini tamomladingiz.\n\nAmal + / bosilsa, mavjud buyruqlar koʻrsatiladi."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatura orqa yoritkichi"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Daraja: %1$d / %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Uy boshqaruvi"</string>
@@ -1400,6 +1411,8 @@
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Bosh ekranga qaytish uchun sensorli panelda uchta barmoq bilan chapga yoki oʻngga suring"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Oxirgi ilovalarni koʻrish uchun sensorli panelda uchta barmoq bilan tepaga surib, bosib turing"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Barcha ishoralarni koʻrish uchun klaviaturadagi amal tugmasini bosing"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Chiqarildi"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Koʻrish uchun qulfdan chiqaring"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Sensorli panel orqali orqaga qaytish"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Uchta barmoq bilan chapga yoki oʻngga suring. Boshqa ishoralar bilan tanishish uchun bosing."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Sensorli panel orqali bosh ekranga qaytish"</string>
@@ -1408,4 +1421,8 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Uchta barmoq bilan tepaga surib, bosib turing. Boshqa ishoralar bilan tanishish uchun bosing."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Klaviatura orqali barcha ilovalarni koʻrish"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Amal tugmasini istalganda bosing. Boshqa ishoralar bilan tanishish uchun bosing."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"Juda xira endi yorqinlik panelida joylashgan"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Endi yorqinlik darajasini ekranning yuqori qismidan yanada pasaytirish orqali ekranni yanada xiralashtirishingiz mumkin.\n\nBu qorongʻi muhitda eng yaxshi ishlaydi."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Juda xira yorligʻini olib tashlash"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Juda xira yorligʻi olib tashlandi. Yorqinlikni pasaytirish uchun oddiy yorqinlik panelidan foydalaning."</string>
 </resources>

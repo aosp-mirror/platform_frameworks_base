@@ -45,7 +45,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
-import com.android.wm.shell.common.split.SplitScreenConstants
+import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
@@ -185,7 +185,8 @@ class HandleMenu(
                     width = menuWidth,
                     height = menuHeight,
                     flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                            WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                     view = handleMenuView.rootView
                 )
             } else {

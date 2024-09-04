@@ -35,12 +35,12 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -55,8 +55,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     protected static final long MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS = 1000 * 60 * 10;
 
     private static final long MODEM_ACTIVITY_REQUEST_TIMEOUT = 20000;
-
-    private static final long ENERGY_UNSPECIFIED = -1;
 
     @VisibleForTesting
     @AccessNetworkConstants.RadioAccessNetworkType
@@ -77,14 +75,13 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
                 long elapsedRealtimeMs, long uptimeMs);
     }
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
         long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
         PackageManager getPackageManager();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
-        IntSupplier getVoltageSupplier();
         Supplier<NetworkStats> getMobileNetworkStatsSupplier();
         TelephonyManager getTelephonyManager();
         LongSupplier getCallDurationSupplier();
@@ -103,18 +100,14 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     private LongSupplier mCallDurationSupplier;
     private LongSupplier mScanDurationSupplier;
     private volatile Supplier<NetworkStats> mNetworkStatsSupplier;
-    private ConsumedEnergyRetriever mConsumedEnergyRetriever;
-    private IntSupplier mVoltageSupplier;
-    private int[] mEnergyConsumerIds = new int[0];
+    private ConsumedEnergyHelper mConsumedEnergyHelper;
     private long mLastUpdateTimestampMillis;
     private ModemActivityInfo mLastModemActivityInfo;
     private NetworkStats mLastNetworkStats;
-    private long[] mLastConsumedEnergyUws;
-    private int mLastVoltageMv;
     private long mLastCallDuration;
     private long mLastScanDuration;
 
-    MobileRadioPowerStatsCollector(Injector injector, Observer observer) {
+    public MobileRadioPowerStatsCollector(Injector injector, Observer observer) {
         super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)),
@@ -144,34 +137,22 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             return false;
         }
 
-        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
-        mVoltageSupplier = mInjector.getVoltageSupplier();
-
         mTelephonyManager = mInjector.getTelephonyManager();
         mNetworkStatsSupplier = mInjector.getMobileNetworkStatsSupplier();
         mCallDurationSupplier = mInjector.getCallDurationSupplier();
         mScanDurationSupplier = mInjector.getPhoneSignalScanDurationSupplier();
 
-        mEnergyConsumerIds = mConsumedEnergyRetriever.getEnergyConsumerIds(
+        mConsumedEnergyHelper = new ConsumedEnergyHelper(mInjector.getConsumedEnergyRetriever(),
                 EnergyConsumerType.MOBILE_RADIO);
-        mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
-        mLayout = new MobileRadioPowerStatsLayout();
-        mLayout.addDeviceMobileActivity();
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addStateStats();
-        mLayout.addUidNetworkStats();
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidSectionPowerEstimate();
+        mLayout = new MobileRadioPowerStatsLayout(mConsumedEnergyHelper.getEnergyConsumerCount());
 
         SparseArray<String> stateLabels = new SparseArray<>();
         for (int rat = 0; rat < BatteryStats.RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {
             final int freqCount = rat == BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR
                     ? ServiceState.FREQUENCY_RANGE_COUNT : 1;
             for (int freq = 0; freq < freqCount; freq++) {
-                int stateKey = makeStateKey(rat, freq);
+                int stateKey = MobileRadioPowerStatsLayout.makeStateKey(rat, freq);
                 StringBuilder sb = new StringBuilder();
                 if (rat != BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER) {
                     sb.append(BatteryStats.RADIO_ACCESS_TECHNOLOGY_NAMES[rat]);
@@ -200,7 +181,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     }
 
     @Override
-    protected PowerStats collectStats() {
+    public PowerStats collectStats() {
         if (!ensureInitialized()) {
             return null;
         }
@@ -210,9 +191,8 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
 
         ModemActivityInfo modemActivityDelta = collectModemActivityInfo();
         List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas = collectNetworkStats();
-        if (mEnergyConsumerIds.length != 0) {
-            collectEnergyConsumers();
-        }
+
+        mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
         if (mPowerStats.durationMs == 0) {
             setTimestamp(mClock.elapsedRealtime());
@@ -346,65 +326,8 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         return delta;
     }
 
-    private void collectEnergyConsumers() {
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                    + " mV) when querying energy consumers");
-            return;
-        }
-
-        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
-        mLastVoltageMv = voltageMv;
-
-        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mEnergyConsumerIds);
-        if (energyUws == null) {
-            return;
-        }
-
-        for (int i = energyUws.length - 1; i >= 0; i--) {
-            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
-            if (energyDelta < 0) {
-                // Likely, restart of powerstats HAL
-                energyDelta = 0;
-            }
-            mLayout.setConsumedEnergy(mPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
-            mLastConsumedEnergyUws[i] = energyUws[i];
-        }
-    }
-
-    static int makeStateKey(int rat, int freqRange) {
-        if (rat == BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR) {
-            return rat | (freqRange << 8);
-        } else {
-            return rat;
-        }
-    }
-
     private void setTimestamp(long timestamp) {
         mPowerStats.durationMs = Math.max(timestamp - mLastUpdateTimestampMillis, 0);
         mLastUpdateTimestampMillis = timestamp;
-    }
-
-    @BatteryStats.RadioAccessTechnology
-    static int mapRadioAccessNetworkTypeToRadioAccessTechnology(
-            @AccessNetworkConstants.RadioAccessNetworkType int networkType) {
-        switch (networkType) {
-            case AccessNetworkConstants.AccessNetworkType.NGRAN:
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_NR;
-            case AccessNetworkConstants.AccessNetworkType.EUTRAN:
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_LTE;
-            case AccessNetworkConstants.AccessNetworkType.UNKNOWN: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.GERAN: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.UTRAN: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.CDMA2000: //fallthrough
-            case AccessNetworkConstants.AccessNetworkType.IWLAN:
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER;
-            default:
-                Slog.w(TAG,
-                        "Unhandled RadioAccessNetworkType (" + networkType + "), mapping to OTHER");
-                return BatteryStats.RADIO_ACCESS_TECHNOLOGY_OTHER;
-        }
     }
 }

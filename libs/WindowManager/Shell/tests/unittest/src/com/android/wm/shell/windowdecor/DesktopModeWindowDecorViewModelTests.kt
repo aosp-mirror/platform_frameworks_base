@@ -34,9 +34,9 @@ import android.hardware.display.VirtualDisplay
 import android.hardware.input.InputManager
 import android.net.Uri
 import android.os.Handler
+import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.platform.test.flag.junit.SetFlagsRule
@@ -56,9 +56,10 @@ import android.view.Surface
 import android.view.SurfaceControl
 import android.view.SurfaceView
 import android.view.View
-import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
+import android.widget.Toast
 import android.window.WindowContainerTransaction
+import android.window.WindowContainerTransaction.HierarchyOp
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
@@ -79,21 +80,25 @@ import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource
+import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.DesktopTasksLimiter
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.splitscreen.SplitScreenController
-import com.android.wm.shell.sysui.KeyguardChangeListener
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
 import java.util.Optional
 import java.util.function.Consumer
 import java.util.function.Supplier
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -108,8 +113,9 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
@@ -118,8 +124,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
+
 
 /**
  * Tests of [DesktopModeWindowDecorViewModel]
@@ -159,8 +164,14 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockWindowManager: IWindowManager
     @Mock private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
     @Mock private lateinit var mockGenericLinksParser: AppToWebGenericLinksParser
+    @Mock private lateinit var mockUserHandle: UserHandle
+    @Mock private lateinit var mockToast: Toast
     private val bgExecutor = TestShellExecutor()
     @Mock private lateinit var mockMultiInstanceHelper: MultiInstanceHelper
+    @Mock private lateinit var mockTasksLimiter: DesktopTasksLimiter
+    @Mock private lateinit var mockFreeformTaskTransitionStarter: FreeformTaskTransitionStarter
+    @Mock private lateinit var mockActivityOrientationChangeHandler:
+            DesktopActivityOrientationChangeHandler
     private lateinit var spyContext: TestableContext
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -172,6 +183,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeOnInsetsChangedListener: DesktopModeOnInsetsChangedListener
     private lateinit var displayChangingListener: DisplayChangeController.OnDisplayChangingListener
+    private lateinit var desktopModeOnKeyguardChangedListener: DesktopModeKeyguardChangeListener
     private lateinit var desktopModeWindowDecorViewModel: DesktopModeWindowDecorViewModel
 
     @Before
@@ -181,6 +193,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 .strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus::class.java)
                 .spyStatic(DragPositioningCallbackUtility::class.java)
+                .spyStatic(Toast::class.java)
                 .startMocking()
         doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(Mockito.any()) }
 
@@ -211,12 +224,16 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 transactionFactory,
                 mockRootTaskDisplayAreaOrganizer,
                 windowDecorByTaskIdSpy,
-                mockInteractionJankMonitor
+                mockInteractionJankMonitor,
+                Optional.of(mockTasksLimiter),
+                Optional.of(mockActivityOrientationChangeHandler)
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.stableInsets()).thenReturn(STABLE_INSETS)
         whenever(mockInputMonitorFactory.create(any(), any())).thenReturn(mockInputMonitor)
+
+        doReturn(mockToast).`when` { Toast.makeText(any(), anyInt(), anyInt()) }
 
         // InputChannel cannot be mocked because it passes to InputEventReceiver.
         val inputChannels = InputChannel.openInputChannelPair(TAG)
@@ -225,17 +242,20 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         shellInit.init()
 
-        val insetListenerCaptor =
-            argumentCaptor<DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener>()
-        verify(displayInsetsController)
-            .addInsetsChangedListener(anyInt(), insetListenerCaptor.capture())
-        desktopModeOnInsetsChangedListener = insetListenerCaptor.firstValue
-
         val displayChangingListenerCaptor =
             argumentCaptor<DisplayChangeController.OnDisplayChangingListener>()
         verify(mockDisplayController)
             .addDisplayChangingController(displayChangingListenerCaptor.capture())
         displayChangingListener = displayChangingListenerCaptor.firstValue
+        val insetsChangedCaptor =
+                argumentCaptor<DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener>()
+        verify(displayInsetsController)
+            .addGlobalInsetsChangedListener(insetsChangedCaptor.capture())
+        desktopModeOnInsetsChangedListener = insetsChangedCaptor.firstValue
+        val keyguardChangedCaptor =
+            argumentCaptor<DesktopModeKeyguardChangeListener>()
+        verify(mockShellController).addKeyguardChangeListener(keyguardChangedCaptor.capture())
+        desktopModeOnKeyguardChangedListener = keyguardChangedCaptor.firstValue
     }
 
     @After
@@ -281,11 +301,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
     fun testCreateAndDisposeEventReceiver() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
-        setUpMockDecorationForTask(task)
-
-        onTaskOpening(task)
-        desktopModeWindowDecorViewModel.destroyWindowDecoration(task)
+        val decor = createOpenTaskDecoration(windowingMode = WINDOWING_MODE_FREEFORM)
+        desktopModeWindowDecorViewModel.destroyWindowDecoration(decor.mTaskInfo)
 
         verify(mockInputMonitorFactory).create(any(), any())
         verify(mockInputMonitor).dispose()
@@ -340,9 +357,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val inputManager = mock(InputManager::class.java)
         spyContext.addMockSystemService(InputManager::class.java, inputManager)
 
-        val freeformTaskTransitionStarter = mock(FreeformTaskTransitionStarter::class.java)
         desktopModeWindowDecorViewModel
-                .setFreeformTaskTransitionStarter(freeformTaskTransitionStarter)
+                .setFreeformTaskTransitionStarter(mockFreeformTaskTransitionStarter)
 
         onClickListener.onClick(view)
 
@@ -354,23 +370,62 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    fun testCaptionIsNotCreatedWhenKeyguardIsVisible() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
-        val keyguardListenerCaptor = argumentCaptor<KeyguardChangeListener>()
-        verify(mockShellController).addKeyguardChangeListener(keyguardListenerCaptor.capture())
-
-        keyguardListenerCaptor.firstValue.onKeyguardVisibilityChanged(
-                true /* visible */,
-                true /* occluded */,
-                false /* animatingDismiss */
+    fun testCloseButtonInFreeform_closeWindow() {
+        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
+                as ArgumentCaptor<View.OnClickListener>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onCaptionButtonClickListener = onClickListenerCaptor
         )
-        onTaskOpening(task)
 
-        task.setWindowingMode(WINDOWING_MODE_UNDEFINED)
-        task.setWindowingMode(ACTIVITY_TYPE_UNDEFINED)
-        onTaskChanging(task)
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.close_window)
 
-        assertFalse(windowDecorByTaskIdSpy.contains(task.taskId))
+        desktopModeWindowDecorViewModel
+            .setFreeformTaskTransitionStarter(mockFreeformTaskTransitionStarter)
+
+        onClickListenerCaptor.value.onClick(view)
+
+        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
+        verify(mockFreeformTaskTransitionStarter).startRemoveTransition(transactionCaptor.capture())
+        val wct = transactionCaptor.firstValue
+
+        assertEquals(1, wct.getHierarchyOps().size)
+        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK,
+                     wct.getHierarchyOps().get(0).getType())
+        assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_MINIMIZE_BUTTON)
+    fun testMinimizeButtonInFreefrom_minimizeWindow() {
+        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
+                as ArgumentCaptor<View.OnClickListener>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onCaptionButtonClickListener = onClickListenerCaptor
+        )
+
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.minimize_window)
+
+        desktopModeWindowDecorViewModel
+            .setFreeformTaskTransitionStarter(mockFreeformTaskTransitionStarter)
+
+        onClickListenerCaptor.value.onClick(view)
+
+        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
+        verify(mockFreeformTaskTransitionStarter)
+            .startMinimizedModeTransition(transactionCaptor.capture())
+        val wct = transactionCaptor.firstValue
+
+        verify(mockTasksLimiter).addPendingMinimizeChange(
+                anyOrNull(), eq(DEFAULT_DISPLAY), eq(decor.mTaskInfo.taskId))
+
+        assertEquals(1, wct.getHierarchyOps().size)
+        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REORDER, wct.getHierarchyOps().get(0).getType())
+        assertFalse(wct.getHierarchyOps().get(0).getToTop())
+        assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
     }
 
     @Test
@@ -418,67 +473,44 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
-    fun testRelayoutRunsWhenStatusBarsInsetsSourceVisibilityChanges() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
-        val decoration = setUpMockDecorationForTask(task)
-
-        onTaskOpening(task)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
+    fun testInsetsStateChanged_notifiesAllDecorsInDisplay() {
+        val task1 = createTask(windowingMode = WINDOWING_MODE_FREEFORM, displayId = 1)
+        val decoration1 = setUpMockDecorationForTask(task1)
+        onTaskOpening(task1)
+        val task2 = createTask(windowingMode = WINDOWING_MODE_FREEFORM, displayId = 2)
+        val decoration2 = setUpMockDecorationForTask(task2)
+        onTaskOpening(task2)
+        val task3 = createTask(windowingMode = WINDOWING_MODE_FREEFORM, displayId = 2)
+        val decoration3 = setUpMockDecorationForTask(task3)
+        onTaskOpening(task3)
 
         // Add status bar insets source
-        val insetsState = InsetsState()
-        val statusBarInsetsSourceId = 0
-        val statusBarInsetsSource = InsetsSource(statusBarInsetsSourceId, statusBars())
-        statusBarInsetsSource.isVisible = false
-        insetsState.addSource(statusBarInsetsSource)
+        val insetsState = InsetsState().apply {
+            addSource(InsetsSource(0 /* id */, statusBars()).apply {
+                isVisible = false
+            })
+        }
+        desktopModeOnInsetsChangedListener.insetsChanged(2 /* displayId */, insetsState)
 
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-
-        // Verify relayout occurs when status bar inset visibility changes
-        verify(decoration, times(1)).relayout(task)
+        verify(decoration1, never()).onInsetsStateChanged(insetsState)
+        verify(decoration2).onInsetsStateChanged(insetsState)
+        verify(decoration3).onInsetsStateChanged(insetsState)
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
-    fun testRelayoutDoesNotRunWhenNonStatusBarsInsetsSourceVisibilityChanges() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
-        val decoration = setUpMockDecorationForTask(task)
+    fun testKeyguardState_notifiesAllDecors() {
+        val decoration1 = createOpenTaskDecoration(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration2 = createOpenTaskDecoration(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration3 = createOpenTaskDecoration(windowingMode = WINDOWING_MODE_FREEFORM)
 
-        onTaskOpening(task)
+        desktopModeOnKeyguardChangedListener
+            .onKeyguardVisibilityChanged(true /* visible */, true /* occluded */,
+                false /* animatingDismiss */)
 
-        // Add navigation bar insets source
-        val insetsState = InsetsState()
-        val navigationBarInsetsSourceId = 1
-        val navigationBarInsetsSource = InsetsSource(navigationBarInsetsSourceId, navigationBars())
-        navigationBarInsetsSource.isVisible = false
-        insetsState.addSource(navigationBarInsetsSource)
-
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-
-        // Verify relayout does not occur when non-status bar inset changes visibility
-        verify(decoration, never()).relayout(task)
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_IMMERSIVE_HANDLE_HIDING)
-    fun testRelayoutDoesNotRunWhenNonStatusBarsInsetSourceVisibilityDoesNotChange() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
-        val decoration = setUpMockDecorationForTask(task)
-
-        onTaskOpening(task)
-
-        // Add status bar insets source
-        val insetsState = InsetsState()
-        val statusBarInsetsSourceId = 0
-        val statusBarInsetsSource = InsetsSource(statusBarInsetsSourceId, statusBars())
-        statusBarInsetsSource.isVisible = false
-        insetsState.addSource(statusBarInsetsSource)
-
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-        desktopModeOnInsetsChangedListener.insetsChanged(insetsState)
-
-        // Verify relayout runs only once when status bar inset visibility changes.
-        verify(decoration, times(1)).relayout(task)
+        verify(decoration1).onKeyguardStateChanged(true /* visible */, true /* occluded */)
+        verify(decoration2).onKeyguardStateChanged(true /* visible */, true /* occluded */)
+        verify(decoration3).onKeyguardStateChanged(true /* visible */, true /* occluded */)
     }
 
     @Test
@@ -568,6 +600,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDecorSnappedLeft_snapResizes() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onLeftSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -578,8 +611,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onLeftSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController)
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.LEFT)
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.LEFT)
+        )
+        assertEquals(taskSurfaceCaptor.firstValue, decor.mTaskSurface)
     }
 
     @Test
@@ -598,7 +636,49 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+    fun testOnSnapResizeLeft_nonResizable_decorSnappedLeft() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
+        val onLeftSnapClickListenerCaptor = forClass(Function0::class.java)
+                as ArgumentCaptor<Function0<Unit>>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onLeftSnapClickListenerCaptor = onLeftSnapClickListenerCaptor
+        ).also { it.mTaskInfo.isResizeable = false }
+
+        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
+        onLeftSnapClickListenerCaptor.value.invoke()
+
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.LEFT)
+        )
+        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+    fun testOnSnapResizeLeft_nonResizable_decorNotSnapped() {
+        val onLeftSnapClickListenerCaptor = forClass(Function0::class.java)
+                as ArgumentCaptor<Function0<Unit>>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onLeftSnapClickListenerCaptor = onLeftSnapClickListenerCaptor
+        ).also { it.mTaskInfo.isResizeable = false }
+
+        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
+        onLeftSnapClickListenerCaptor.value.invoke()
+
+        verify(mockDesktopTasksController, never())
+            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT))
+        verify(mockToast).show()
+    }
+
+    @Test
     fun testOnDecorSnappedRight_snapResizes() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
         val onRightSnapClickListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -609,8 +689,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
         onRightSnapClickListenerCaptor.value.invoke()
 
-        verify(mockDesktopTasksController)
-            .snapToHalfScreen(decor.mTaskInfo, currentBounds, SnapPosition.RIGHT)
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.RIGHT)
+        )
+        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
     }
 
     @Test
@@ -626,6 +711,47 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         verify(decor).closeHandleMenu()
         verify(decor).closeMaximizeMenu()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+    fun testOnSnapResizeRight_nonResizable_decorSnappedRight() {
+        val taskSurfaceCaptor = argumentCaptor<SurfaceControl>()
+        val onRightSnapClickListenerCaptor = forClass(Function0::class.java)
+                as ArgumentCaptor<Function0<Unit>>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onRightSnapClickListenerCaptor = onRightSnapClickListenerCaptor
+        ).also { it.mTaskInfo.isResizeable = false }
+
+        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
+        onRightSnapClickListenerCaptor.value.invoke()
+
+        verify(mockDesktopTasksController).snapToHalfScreen(
+            eq(decor.mTaskInfo),
+            taskSurfaceCaptor.capture(),
+            eq(currentBounds),
+            eq(SnapPosition.RIGHT)
+        )
+        assertEquals(decor.mTaskSurface, taskSurfaceCaptor.firstValue)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DISABLE_NON_RESIZABLE_APP_SNAP_RESIZING)
+    fun testOnSnapResizeRight_nonResizable_decorNotSnapped() {
+        val onRightSnapClickListenerCaptor = forClass(Function0::class.java)
+                as ArgumentCaptor<Function0<Unit>>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onRightSnapClickListenerCaptor = onRightSnapClickListenerCaptor
+        ).also { it.mTaskInfo.isResizeable = false }
+
+        val currentBounds = decor.mTaskInfo.configuration.windowConfiguration.bounds
+        onRightSnapClickListenerCaptor.value.invoke()
+
+        verify(mockDesktopTasksController, never())
+            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT))
+        verify(mockToast).show()
     }
 
     @Test
@@ -792,12 +918,12 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         openInBrowserListenerCaptor.value.accept(uri)
 
-        verify(spyContext).startActivity(argThat { intent ->
+        verify(spyContext).startActivityAsUser(argThat { intent ->
             intent.data == uri
                     && ((intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK) != 0)
                     && intent.categories.contains(Intent.CATEGORY_LAUNCHER)
                     && intent.action == Intent.ACTION_MAIN
-        })
+        }, eq(mockUserHandle))
     }
 
     @Test
@@ -931,6 +1057,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
+        taskSurface: SurfaceControl = SurfaceControl(),
         onMaxOrRestoreListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onLeftSnapClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
@@ -945,9 +1072,11 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onOpenInBrowserClickListener: ArgumentCaptor<Consumer<Uri>> =
             forClass(Consumer::class.java) as ArgumentCaptor<Consumer<Uri>>,
+        onCaptionButtonClickListener: ArgumentCaptor<View.OnClickListener> =
+            forClass(View.OnClickListener::class.java) as ArgumentCaptor<View.OnClickListener>
     ): DesktopModeWindowDecoration {
         val decor = setUpMockDecorationForTask(createTask(windowingMode = windowingMode))
-        onTaskOpening(decor.mTaskInfo)
+        onTaskOpening(decor.mTaskInfo, taskSurface)
         verify(decor).setOnMaximizeOrRestoreClickListener(onMaxOrRestoreListenerCaptor.capture())
         verify(decor).setOnLeftSnapClickListener(onLeftSnapClickListenerCaptor.capture())
         verify(decor).setOnRightSnapClickListener(onRightSnapClickListenerCaptor.capture())
@@ -955,6 +1084,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         verify(decor).setOnToFullscreenClickListener(onToFullscreenClickListenerCaptor.capture())
         verify(decor).setOnToSplitScreenClickListener(onToSplitScreenClickListenerCaptor.capture())
         verify(decor).setOpenInBrowserClickListener(onOpenInBrowserClickListener.capture())
+        verify(decor).setCaptionListeners(
+                onCaptionButtonClickListener.capture(), any(), any(), any())
         return decor
     }
 
@@ -991,6 +1122,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 .build().apply {
                     topActivityInfo = activityInfo
                     isFocused = focused
+                    isResizeable = true
                 }
     }
 
@@ -1003,6 +1135,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)
+        whenever(decoration.user).thenReturn(mockUserHandle)
         if (task.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
             whenever(mockSplitScreenController.isTaskInSplitScreen(task.taskId))
                 .thenReturn(true)

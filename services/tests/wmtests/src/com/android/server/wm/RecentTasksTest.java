@@ -1413,7 +1413,7 @@ public class RecentTasksTest extends WindowTestsBase {
                 Surface.ROTATION_0, taskSize, new Rect() /* contentInsets */,
                 new Rect() /* letterboxInsets*/, false /* isLowResolution */,
                 true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN, 0 /* mSystemUiVisibility */,
-                false /* isTranslucent */, false /* hasImeSurface */);
+                false /* isTranslucent */, false /* hasImeSurface */, 0 /* uiMode */);
     }
 
     /**
@@ -1481,9 +1481,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
         assertSecurityException(expectCallable, () -> mAtm.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, 0,
-                null));
-        assertSecurityException(expectCallable, () -> mAtm.cancelRecentsAnimation(true));
         assertSecurityException(expectCallable, () -> mAtm.stopAppSwitches());
         assertSecurityException(expectCallable, () -> mAtm.resumeAppSwitches());
     }

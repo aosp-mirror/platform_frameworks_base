@@ -72,15 +72,19 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.kosmos.Kosmos;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractor;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractorKosmosKt;
 
 import com.google.common.collect.ImmutableList;
 
@@ -158,11 +162,16 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     @Mock
     private UserTracker mUserTracker;
 
+    private final Kosmos mKosmos = SysuiTestCaseExtKt.testKosmos(this);
+
     private FeatureFlags mFlags = mock(FeatureFlags.class);
     private View mDialogLaunchView = mock(View.class);
     private MediaOutputController.Callback mCallback = mock(MediaOutputController.Callback.class);
 
     final Notification mNotification = mock(Notification.class);
+    private final VolumePanelGlobalStateInteractor mVolumePanelGlobalStateInteractor =
+            VolumePanelGlobalStateInteractorKosmosKt.getVolumePanelGlobalStateInteractor(
+                    mKosmos);
 
     private Context mSpyContext;
     private String mPackageName = null;
@@ -194,6 +203,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
                 mCachedBluetoothDeviceManager);
 
+
         mMediaOutputController =
                 new MediaOutputController(
                         mSpyContext,
@@ -210,6 +220,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(false);
@@ -304,6 +315,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
 
         mMediaOutputController.start(mCb);
@@ -346,6 +358,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
 
         mMediaOutputController.start(mCb);
@@ -602,6 +615,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
         testMediaOutputController.start(mCb);
         reset(mCb);
@@ -636,6 +650,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
         testMediaOutputController.start(mCb);
         reset(mCb);
@@ -683,6 +698,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
 
         LocalMediaManager mockLocalMediaManager = mock(LocalMediaManager.class);
@@ -710,6 +726,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
 
         LocalMediaManager mockLocalMediaManager = mock(LocalMediaManager.class);
@@ -990,6 +1007,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
@@ -1193,6 +1211,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        mVolumePanelGlobalStateInteractor,
                         mUserTracker);
 
         testMediaOutputController.setTemporaryAllowListExceptionIfNeeded(mMediaDevice2);

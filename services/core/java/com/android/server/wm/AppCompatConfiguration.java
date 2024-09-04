@@ -30,6 +30,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.utils.DimenPxIntSupplier;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.function.Function;
@@ -1380,6 +1381,26 @@ final class AppCompatConfiguration {
 
     void resetUserAppAspectRatioFullscreenEnabled() {
         setUserAppAspectRatioFullscreenOverrideEnabled(false);
+    }
+
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        // TODO(b/359438445): Add more useful information to dump().
+        pw.println(prefix + "  letterboxPositionForHorizontalReachability="
+                + letterboxHorizontalReachabilityPositionToString(
+                    getLetterboxPositionForHorizontalReachability(
+                            /* isInFullScreenBookMode */ false)));
+        pw.println(prefix + "  letterboxPositionForVerticalReachability="
+                + letterboxVerticalReachabilityPositionToString(
+                    getLetterboxPositionForVerticalReachability(
+                            /* isInFullScreenTabletopMode */ false)));
+        pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
+                + getFixedOrientationLetterboxAspectRatio());
+        pw.println(prefix + "  defaultMinAspectRatioForUnresizableApps="
+                + getDefaultMinAspectRatioForUnresizableApps());
+        pw.println(prefix + "  isSplitScreenAspectRatioForUnresizableAppsEnabled="
+                + getIsSplitScreenAspectRatioForUnresizableAppsEnabled());
+        pw.println(prefix + "  isDisplayAspectRatioEnabledForFixedOrientationLetterbox="
+                + getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox());
     }
 
     /**

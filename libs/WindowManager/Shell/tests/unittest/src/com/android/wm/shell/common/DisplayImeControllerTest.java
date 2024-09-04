@@ -43,6 +43,7 @@ import android.view.inputmethod.ImeTracker;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
@@ -119,7 +120,7 @@ public class DisplayImeControllerTest extends ShellTestCase {
     @Test
     public void reappliesVisibilityToChangedLeash() {
         verifyZeroInteractions(mT);
-        mPerDisplay.mImeShowing = true;
+        mPerDisplay.mImeShowing = false;
 
         mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
 
