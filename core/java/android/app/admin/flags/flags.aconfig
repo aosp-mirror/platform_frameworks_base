@@ -257,16 +257,6 @@ flag {
 }
 
 flag {
-    name: "headless_single_user_fixes"
-    namespace: "enterprise"
-    description: "Various fixes for headless single user mode"
-    bug: "289515470"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "backup_connected_apps_settings"
     namespace: "enterprise"
     description: "backup and restore connected work and personal apps user settings across devices"
