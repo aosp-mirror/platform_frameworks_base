@@ -52,14 +52,6 @@ flag {
 }
 
 flag {
-    name: "bugreport_mode_max_value"
-    is_exported: true
-    namespace: "telephony"
-    description: "Introduce a constant as maximum value of bugreport mode."
-    bug: "305067125"
-}
-
-flag {
     name: "adpf_prefer_power_efficiency"
     is_exported: true
     namespace: "game"
