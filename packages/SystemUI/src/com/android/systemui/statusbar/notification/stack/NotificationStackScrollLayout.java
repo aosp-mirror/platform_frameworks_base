@@ -3707,7 +3707,7 @@ public class NotificationStackScrollLayout
         if (!isScrollingEnabled()) {
             return false;
         }
-        if (isInsideQsHeader(ev) && !mIsBeingDragged) {
+        if (!isInScrollableRegion(ev) && !mIsBeingDragged) {
             return false;
         }
         mForcedScroll = null;
@@ -3875,11 +3875,26 @@ public class NotificationStackScrollLayout
         return mFlingAfterUpEvent;
     }
 
-    protected boolean isInsideQsHeader(MotionEvent ev) {
-        if (SceneContainerFlag.isEnabled()) {
-            return ev.getY() < mAmbientState.getStackTop();
+    /** Is this touch event inside the scrollable region? */
+    @VisibleForTesting
+    boolean isInScrollableRegion(MotionEvent ev) {
+        if (!SceneContainerFlag.isEnabled()) {
+            return !isInsideQsHeader(ev);
+        }
+        ShadeScrimShape shape = mScrollViewFields.getScrimClippingShape();
+        if (shape == null) {
+            return true; // When there is no scrim, consider this event scrollable.
         }
 
+        ShadeScrimBounds bounds = shape.getBounds();
+        return ev.getX() >= bounds.getLeft()
+                && ev.getX() <= bounds.getRight()
+                && ev.getY() >= bounds.getTop()
+                && ev.getY() <= bounds.getBottom();
+    }
+
+    protected boolean isInsideQsHeader(MotionEvent ev) {
+        SceneContainerFlag.assertInLegacyMode();
         if (QSComposeFragment.isEnabled()) {
             if (mQSHeaderBoundsProvider == null) {
                 return false;
