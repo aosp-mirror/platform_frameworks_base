@@ -6025,7 +6025,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.setForcedSize(displayContent.mInitialDisplayWidth,
                             displayContent.mInitialDisplayHeight,
                             displayContent.mInitialPhysicalXDpi,
-                            displayContent.mInitialPhysicalXDpi);
+                            displayContent.mInitialPhysicalYDpi);
                 }
             }
         } finally {

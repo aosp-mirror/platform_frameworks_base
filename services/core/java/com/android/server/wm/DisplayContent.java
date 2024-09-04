@@ -3215,15 +3215,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * If xPpi or yDpi is equal to {@link #INVALID_DPI}, the values are ignored.
      */
     void setForcedSize(int width, int height, float xDPI, float yDPI) {
-  	// Can't force size higher than the maximal allowed
-        if (mMaxUiWidth > 0 && width > mMaxUiWidth) {
-            final float ratio = mMaxUiWidth / (float) width;
-            height = (int) (height * ratio);
-            width = mMaxUiWidth;
-        }
-
         mIsSizeForced = mInitialDisplayWidth != width || mInitialDisplayHeight != height;
         if (mIsSizeForced) {
+            if (mMaxUiWidth > 0 && width > mMaxUiWidth) {
+                final float ratio = mMaxUiWidth / (float) width;
+                height = (int) (height * ratio);
+                width = mMaxUiWidth;
+            }
             final Point size = getValidForcedSize(width, height);
             width = size.x;
             height = size.y;
