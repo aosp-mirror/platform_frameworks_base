@@ -29,8 +29,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.table.TableLogBuffer
@@ -75,7 +73,6 @@ import kotlinx.coroutines.flow.stateIn
 class WifiRepositoryImpl
 @Inject
 constructor(
-    featureFlags: FeatureFlags,
     @Application private val scope: CoroutineScope,
     @Main private val mainExecutor: Executor,
     @Background private val bgDispatcher: CoroutineDispatcher,
@@ -89,8 +86,6 @@ constructor(
         LifecycleRegistry(this).also {
             mainExecutor.execute { it.currentState = Lifecycle.State.CREATED }
         }
-
-    private val isInstantTetherEnabled = featureFlags.isEnabled(Flags.INSTANT_TETHER)
 
     private var wifiPickerTracker: WifiPickerTracker? = null
 
@@ -273,7 +268,7 @@ constructor(
         }
 
         val hotspotDeviceType =
-            if (isInstantTetherEnabled && this is HotspotNetworkEntry) {
+            if (this is HotspotNetworkEntry) {
                 this.deviceType.toHotspotDeviceType()
             } else {
                 WifiNetworkModel.HotspotDeviceType.NONE
@@ -404,7 +399,6 @@ constructor(
     class Factory
     @Inject
     constructor(
-        private val featureFlags: FeatureFlags,
         @Application private val scope: CoroutineScope,
         @Main private val mainExecutor: Executor,
         @Background private val bgDispatcher: CoroutineDispatcher,
@@ -414,7 +408,6 @@ constructor(
     ) {
         fun create(wifiManager: WifiManager): WifiRepositoryImpl {
             return WifiRepositoryImpl(
-                featureFlags,
                 scope,
                 mainExecutor,
                 bgDispatcher,
