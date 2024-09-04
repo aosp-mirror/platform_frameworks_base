@@ -99,6 +99,12 @@ public final class DeviceConfigService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("SyncDisabledForTests: ");
+        MyShellCommand.getSyncDisabledForTests(pw, pw);
+
+        pw.print("Is mainline: ");
+        pw.println(UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService());
+
         final IContentProvider iprovider = mProvider.getIContentProvider();
         pw.println("DeviceConfig flags:");
         for (String line : MyShellCommand.listAll(iprovider)) {
@@ -230,6 +236,17 @@ public final class DeviceConfigService extends Binder {
          */
         private boolean isRoot() {
             return Binder.getCallingUid() == Process.ROOT_UID;
+        }
+
+        private static int getSyncDisabledForTests(PrintWriter pOut, PrintWriter pErr) {
+            int syncDisabledModeInt = DeviceConfig.getSyncDisabledMode();
+            String syncDisabledModeString = formatSyncDisabledMode(syncDisabledModeInt);
+            if (syncDisabledModeString == null) {
+                pErr.println("Unknown mode: " + syncDisabledModeInt);
+                return -1;
+            }
+            pOut.println(syncDisabledModeString);
+            return 0;
         }
 
       public static HashMap<String, String> getAllFlags(IContentProvider provider) {
@@ -597,14 +614,7 @@ public final class DeviceConfigService extends Binder {
                     DeviceConfig.setSyncDisabledMode(syncDisabledModeArg);
                     break;
                 case GET_SYNC_DISABLED_FOR_TESTS:
-                    int syncDisabledModeInt = DeviceConfig.getSyncDisabledMode();
-                    String syncDisabledModeString = formatSyncDisabledMode(syncDisabledModeInt);
-                    if (syncDisabledModeString == null) {
-                        perr.println("Unknown mode: " + syncDisabledModeInt);
-                        return -1;
-                    }
-                    pout.println(syncDisabledModeString);
-                    break;
+                    return getSyncDisabledForTests(pout, perr);
                 default:
                     perr.println("Unspecified command");
                     return -1;
