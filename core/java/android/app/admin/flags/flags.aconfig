@@ -107,16 +107,6 @@ flag {
 }
 
 flag {
-  name: "hsum_unlock_notification_fix"
-  namespace: "enterprise"
-  description: "Using the right userId when starting the work profile unlock flow "
-  bug: "327350831"
-  metadata {
-      purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "allow_querying_profile_type"
     is_exported: true
     namespace: "enterprise"
