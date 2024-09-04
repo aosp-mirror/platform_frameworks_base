@@ -1526,7 +1526,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
         int res = mPolicy.checkAddPermission(attrs.type, isRoundedCornerOverlay, attrs.packageName,
-                appOp);
+                appOp, displayId);
         if (res != ADD_OKAY) {
             return res;
         }
@@ -10120,6 +10120,23 @@ public class WindowManagerService extends IWindowManager.Stub
                     },
                     true /* traverseTopToBottom */);
             return List.copyOf(notifiedApps);
+        }
+    }
+
+    /**
+     * Returns whether the given UID is the owner of a virtual device, which the given display
+     * belongs to.
+     */
+    @Override
+    public boolean isCallerVirtualDeviceOwner(int displayId, int callingUid) {
+        if (!android.companion.virtualdevice.flags.Flags.statusBarAndInsets()) {
+            return false;
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mAtmService.mTaskSupervisor.isDeviceOwnerUid(displayId, callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
