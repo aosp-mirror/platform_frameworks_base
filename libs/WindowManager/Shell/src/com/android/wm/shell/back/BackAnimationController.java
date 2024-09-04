@@ -1180,16 +1180,18 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         private void applyFinishOpenTransition() {
-            if (mFinishOpenTransaction != null) {
-                mFinishOpenTransaction.apply();
-                mFinishOpenTransaction = null;
-            }
-            if (mFinishOpenTransitionCallback != null) {
-                mFinishOpenTransitionCallback.onTransitionFinished(null);
-                mFinishOpenTransitionCallback = null;
-            }
             mOpenTransitionInfo = null;
             mPrepareOpenTransition = null;
+            if (mFinishOpenTransaction != null) {
+                final SurfaceControl.Transaction t = mFinishOpenTransaction;
+                mFinishOpenTransaction = null;
+                t.apply();
+            }
+            if (mFinishOpenTransitionCallback != null) {
+                final Transitions.TransitionFinishCallback callback = mFinishOpenTransitionCallback;
+                mFinishOpenTransitionCallback = null;
+                callback.onTransitionFinished(null);
+            }
         }
 
         private void applyAndFinish(@NonNull SurfaceControl.Transaction st,
@@ -1334,6 +1336,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     tmpSize = init.getChanges().size();
                     for (int i = 0; i < tmpSize; ++i) {
                         final TransitionInfo.Change change = init.getChanges().get(i);
+                        if (change.hasFlags(FLAG_IS_WALLPAPER)) {
+                            continue;
+                        }
                         if (moveToTop) {
                             if (isSameChangeTarget(openComponent, openTaskId, openToken, change)) {
                                 change.setFlags(change.getFlags() | FLAG_MOVED_TO_TOP);
