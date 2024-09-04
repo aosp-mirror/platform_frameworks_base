@@ -729,7 +729,7 @@ public class HearingAidDeviceManagerTest {
 
     @Test
     public void onActiveDeviceChanged_connected_callSetStrategies() {
-        when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
+        when(mHelper.getMatchedHearingDeviceAttributesForOutput(mCachedDevice1)).thenReturn(
                 mHearingDeviceAttribute);
         when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
         doReturn(true).when(mHelper).setPreferredDeviceRoutingStrategies(anyList(),
@@ -743,7 +743,7 @@ public class HearingAidDeviceManagerTest {
 
     @Test
     public void onActiveDeviceChanged_disconnected_callSetStrategiesWithAutoValue() {
-        when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
+        when(mHelper.getMatchedHearingDeviceAttributesForOutput(mCachedDevice1)).thenReturn(
                 mHearingDeviceAttribute);
         when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(false);
         doReturn(true).when(mHelper).setPreferredDeviceRoutingStrategies(anyList(), any(),
