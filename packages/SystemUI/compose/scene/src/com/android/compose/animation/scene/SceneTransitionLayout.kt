@@ -550,6 +550,22 @@ sealed class UserActionResult(
              */
             requiresFullDistanceSwipe: Boolean = false,
         ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
+
+        /** A [UserActionResult] that shows [toOverlay]. */
+        operator fun invoke(
+            /** The overlay we should be transitioning to during the [UserAction]. */
+            toOverlay: OverlayKey,
+
+            /** The key of the transition that should be used. */
+            transitionKey: TransitionKey? = null,
+
+            /**
+             * If `true`, the swipe will be committed if only if the user swiped at least the swipe
+             * distance, i.e. the transition progress was already equal to or bigger than 100% when
+             * the user released their finger.
+             */
+            requiresFullDistanceSwipe: Boolean = false,
+        ): UserActionResult = ShowOverlay(toOverlay, transitionKey, requiresFullDistanceSwipe)
     }
 }
 
