@@ -183,16 +183,6 @@ flag {
 }
 
 flag {
-  name: "copy_account_with_retry_enabled"
-  namespace: "enterprise"
-  description: "Retry copy and remove account from personal to work profile in case of failure"
-  bug: "329424312"
-  metadata {
-      purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "disallow_user_control_stopped_state_fix"
   namespace: "enterprise"
   description: "Ensure DPM.setUserControlDisabledPackages() clears FLAG_STOPPED for the app"

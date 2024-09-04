@@ -21893,18 +21893,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if (Flags.copyAccountWithRetryEnabled()) {
-            boolean copySucceeded = false;
-            int retryAttemptsLeft = RETRY_COPY_ACCOUNT_ATTEMPTS;
-            while (!copySucceeded && (retryAttemptsLeft > 0)) {
-                Slogf.i(LOG_TAG, "Copying account. Attempts left : " + retryAttemptsLeft);
-                copySucceeded =
-                        copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
-                retryAttemptsLeft--;
-            }
-        } else {
-            copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
+        boolean copySucceeded = false;
+        int retryAttemptsLeft = RETRY_COPY_ACCOUNT_ATTEMPTS;
+        while (!copySucceeded && (retryAttemptsLeft > 0)) {
+            Slogf.i(LOG_TAG, "Copying account. Attempts left : " + retryAttemptsLeft);
+            copySucceeded =
+                    copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
+            retryAttemptsLeft--;
         }
+
         if (!keepAccountMigrated) {
             removeAccount(accountToMigrate, sourceUserId);
         }
