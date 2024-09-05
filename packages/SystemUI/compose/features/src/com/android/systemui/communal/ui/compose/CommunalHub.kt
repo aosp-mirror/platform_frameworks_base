@@ -137,6 +137,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -241,10 +242,15 @@ fun CommunalHub(
         }
     }
 
+    val paneTitle = stringResource(R.string.accessibility_content_description_for_communal_hub)
+
     Box(
         modifier =
             modifier
-                .semantics { testTagsAsResourceId = true }
+                .semantics {
+                    testTagsAsResourceId = true
+                    this.paneTitle = paneTitle
+                }
                 .testTag(COMMUNAL_HUB_TEST_TAG)
                 .fillMaxSize()
                 // Observe taps for selecting items
