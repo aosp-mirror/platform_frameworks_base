@@ -1149,7 +1149,7 @@ public class ClipData implements Parcelable {
         for (int i = 0; i < size; i++) {
             final Item item = mItems.get(i);
             if (item.mIntent != null) {
-                item.mIntent.prepareToLeaveProcess(leavingPackage);
+                item.mIntent.prepareToLeaveProcess(leavingPackage, false);
             }
             if (item.mUri != null && leavingPackage) {
                 if (StrictMode.vmFileUriExposureEnabled()) {

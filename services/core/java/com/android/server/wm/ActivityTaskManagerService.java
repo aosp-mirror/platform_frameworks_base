@@ -1228,6 +1228,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             String callingFeatureId, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, ProfilerInfo profilerInfo,
             Bundle bOptions) {
+        mAmInternal.addCreatorToken(intent);
         return startActivityAsUser(caller, callingPackage, callingFeatureId, intent, resolvedType,
                 resultTo, resultWho, requestCode, startFlags, profilerInfo, bOptions,
                 UserHandle.getCallingUserId());
@@ -1240,6 +1241,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         assertPackageMatchesCallingUid(callingPackage);
         final String reason = "startActivities";
         enforceNotIsolatedCaller(reason);
+        if (intents != null) {
+            for (Intent intent : intents) {
+                mAmInternal.addCreatorToken(intent);
+            }
+        }
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
         // TODO: Switch to user app stacks here.
         return getActivityStartController().startActivities(caller, -1, 0, -1, callingPackage,
@@ -1269,6 +1275,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @Nullable String callingFeatureId, Intent intent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
+        mAmInternal.addCreatorToken(intent);
         final SafeActivityOptions opts = SafeActivityOptions.fromBundle(bOptions);
 
         assertPackageMatchesCallingUid(callingPackage);
@@ -1323,6 +1330,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             // Remove existing mismatch flag so it can be properly updated later
             fillInIntent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+            mAmInternal.addCreatorToken(fillInIntent);
         }
 
         if (!(target instanceof PendingIntentRecord)) {
@@ -1352,6 +1360,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
+
+        mAmInternal.addCreatorToken(intent);
+
         SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
 
         synchronized (mGlobalLock) {
