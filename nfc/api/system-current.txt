@@ -97,6 +97,7 @@ package android.nfc.cardemulation {
   public final class CardEmulation {
     method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static android.content.ComponentName getPreferredPaymentService(@NonNull android.content.Context);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
+    method @FlaggedApi("android.nfc.enable_card_emulation_euicc") public boolean isEuiccSupported();
     method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void overrideRoutingTable(@NonNull android.app.Activity, int, int);
     method @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public void recoverRoutingTable(@NonNull android.app.Activity);
   }
