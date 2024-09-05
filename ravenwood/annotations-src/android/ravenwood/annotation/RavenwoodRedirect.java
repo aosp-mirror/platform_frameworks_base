@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hosttest.annotation;
+package android.ravenwood.annotation;
 
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.METHOD;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,11 +25,11 @@ import java.lang.annotation.Target;
  * THIS ANNOTATION IS EXPERIMENTAL. REACH OUT TO g/ravenwood BEFORE USING IT, OR YOU HAVE ANY
  * QUESTIONS ABOUT IT.
  *
- * If a class has this annotation, all its native methods will be delegated to another class.
- * (See {@link android.os.Parcel} as an example.)
+ * TODO: Javadoc
+ *
+ * @hide
  */
-@Target({TYPE})
+@Target({METHOD})
 @Retention(RetentionPolicy.CLASS)
-public @interface HostSideTestNativeSubstitutionClass {
-    String value();
+public @interface RavenwoodRedirect {
 }

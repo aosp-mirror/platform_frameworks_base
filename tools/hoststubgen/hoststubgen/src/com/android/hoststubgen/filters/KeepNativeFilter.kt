@@ -18,7 +18,12 @@ package com.android.hoststubgen.filters
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.isNative
 
-class NativeFilter(
+/**
+ *  For native methods that weren't handled by outer filters, we keep it so that
+ *  native method registration will not crash at runtime. Ideally we shouldn't need
+ *  this, but in practice unsupported native method registrations do occur.
+ */
+class KeepNativeFilter(
     private val classes: ClassNodes,
     fallback: OutputFilter
 ) : DelegatingFilter(fallback) {
@@ -28,8 +33,6 @@ class NativeFilter(
         descriptor: String,
     ): FilterPolicyWithReason {
         return classes.findMethod(className, methodName, descriptor)?.let { mn ->
-            // For native methods that weren't handled by outer filters,
-            // we keep it so that native method registration will not crash.
             if (mn.isNative()) {
                 FilterPolicy.Keep.withReason("native-preserve")
             } else {
