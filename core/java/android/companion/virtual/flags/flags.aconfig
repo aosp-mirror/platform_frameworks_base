@@ -111,3 +111,10 @@ flag {
     description: "Device awareness in power and display APIs"
     bug: "285020111"
 }
+
+flag {
+  name: "status_bar_and_insets"
+  namespace: "virtual_devices"
+  description: "Allow for status bar and insets on virtual devices"
+  bug: "350007866"
+}

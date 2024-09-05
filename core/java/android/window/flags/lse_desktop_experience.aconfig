@@ -245,3 +245,10 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_desktop_windowing_persistence"
+    namespace: "lse_desktop_experience"
+    description: "Persists the desktop windowing session across reboots."
+    bug: "350456942"
+}

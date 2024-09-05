@@ -19,7 +19,10 @@ package com.android.server.power.stats;
 import android.os.BatteryUsageStats;
 import android.util.IndentingPrintWriter;
 
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
@@ -38,12 +41,25 @@ class BatteryUsageStatsSection extends PowerStatsSpan.Section {
     }
 
     @Override
-    void write(TypedXmlSerializer serializer) throws IOException {
+    public void write(TypedXmlSerializer serializer) throws IOException {
         mBatteryUsageStats.writeXml(serializer);
     }
 
     @Override
     public void dump(IndentingPrintWriter ipw) {
         mBatteryUsageStats.dump(ipw, "");
+    }
+
+    static class Reader implements PowerStatsSpan.SectionReader {
+        @Override
+        public String getType() {
+            return TYPE;
+        }
+
+        @Override
+        public PowerStatsSpan.Section read(String sectionType, TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            return new BatteryUsageStatsSection(BatteryUsageStats.createFromXml(parser));
+        }
     }
 }

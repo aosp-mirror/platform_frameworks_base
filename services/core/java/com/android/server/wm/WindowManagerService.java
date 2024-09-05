@@ -288,7 +288,6 @@ import android.view.ScrollCaptureResponse;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.view.View.FocusDirection;
 import android.view.ViewDebug;
@@ -386,7 +385,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /** {@hide} */
@@ -1111,7 +1109,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
             new WindowManagerThreadPriorityBooster();
 
-    Function<SurfaceSession, SurfaceControl.Builder> mSurfaceControlFactory;
+    Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
     Supplier<SurfaceControl.Transaction> mTransactionFactory;
 
     private final SurfaceControl.Transaction mTransaction;
@@ -1202,7 +1200,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
             DisplayWindowSettingsProvider displayWindowSettingsProvider,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory) {
+            Supplier<SurfaceControl.Builder> surfaceControlFactory) {
         final WindowManagerService[] wms = new WindowManagerService[1];
         DisplayThread.getHandler().runWithScissors(() ->
                 wms[0] = new WindowManagerService(context, im, showBootMsgs, policy, atm,
@@ -1231,7 +1229,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
             DisplayWindowSettingsProvider displayWindowSettingsProvider,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory) {
+            Supplier<SurfaceControl.Builder> surfaceControlFactory) {
         installLock(this, INDEX_WINDOW);
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
@@ -1526,7 +1524,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
         int res = mPolicy.checkAddPermission(attrs.type, isRoundedCornerOverlay, attrs.packageName,
-                appOp);
+                appOp, displayId);
         if (res != ADD_OKAY) {
             return res;
         }
@@ -8521,7 +8519,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return null;
                 }
                 // TODO(b/210039666): Use a method like add/removeDisplayOverlay if available.
-                return makeSurfaceBuilder(dc.getSession())
+                return makeSurfaceBuilder()
                         .setContainerLayer()
                         .setName("IME Handwriting Surface")
                         .setCallsite("getHandwritingSurfaceForDisplay")
@@ -8829,8 +8827,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    SurfaceControl.Builder makeSurfaceBuilder(SurfaceSession s) {
-        return mSurfaceControlFactory.apply(s);
+    SurfaceControl.Builder makeSurfaceBuilder() {
+        return mSurfaceControlFactory.get();
     }
 
     /**
@@ -10120,6 +10118,23 @@ public class WindowManagerService extends IWindowManager.Stub
                     },
                     true /* traverseTopToBottom */);
             return List.copyOf(notifiedApps);
+        }
+    }
+
+    /**
+     * Returns whether the given UID is the owner of a virtual device, which the given display
+     * belongs to.
+     */
+    @Override
+    public boolean isCallerVirtualDeviceOwner(int displayId, int callingUid) {
+        if (!android.companion.virtualdevice.flags.Flags.statusBarAndInsets()) {
+            return false;
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mAtmService.mTaskSupervisor.isDeviceOwnerUid(displayId, callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 

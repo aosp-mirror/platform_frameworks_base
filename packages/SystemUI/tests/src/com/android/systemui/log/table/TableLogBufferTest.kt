@@ -23,22 +23,18 @@ import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
 import com.android.systemui.log.table.TableChange.Companion.MAX_STRING_LENGTH
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class TableLogBufferTest : SysuiTestCase() {
@@ -48,9 +44,6 @@ class TableLogBufferTest : SysuiTestCase() {
     private lateinit var outputWriter: StringWriter
     private lateinit var logcatEchoTracker: LogcatEchoTracker
     private lateinit var localLogcat: FakeLogProxy
-
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setup() {
@@ -65,8 +58,6 @@ class TableLogBufferTest : SysuiTestCase() {
                 NAME,
                 systemClock,
                 logcatEchoTracker,
-                testDispatcher,
-                testScope.backgroundScope,
                 localLogcat = localLogcat,
             )
     }
@@ -78,8 +69,6 @@ class TableLogBufferTest : SysuiTestCase() {
             "name",
             systemClock,
             logcatEchoTracker,
-            testDispatcher,
-            testScope.backgroundScope,
             localLogcat = localLogcat,
         )
     }

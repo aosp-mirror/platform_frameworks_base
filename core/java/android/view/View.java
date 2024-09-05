@@ -27377,6 +27377,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Modifiers the input matrix such that it maps root view's coordinates to view-local
+     * coordinates.
+     *
+     * @param matrix input matrix to modify
+     * @hide
+     */
+    public void transformMatrixRootToLocal(@NonNull Matrix matrix) {
+        final ViewParent parent = mParent;
+        if (parent instanceof final View vp) {
+            vp.transformMatrixRootToLocal(matrix);
+            matrix.postTranslate(vp.mScrollX, vp.mScrollY);
+        }
+        // This method is different from transformMatrixToLocal that it doesn't perform any
+        // transformation for ViewRootImpl
+
+        matrix.postTranslate(-mLeft, -mTop);
+
+        if (!hasIdentityMatrix()) {
+            matrix.postConcat(getInverseMatrix());
+        }
+    }
+
+    /**
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", indexMapping = {

@@ -36,7 +36,7 @@ public class RavenwoodEnvironment_host {
     /**
      * Called from {@link RavenwoodEnvironment#ensureRavenwoodInitialized()}.
      */
-    public static void ensureRavenwoodInitialized() {
+    public static void nativeEnsureRavenwoodInitialized() {
 
         // TODO Unify it with the initialization code in RavenwoodAwareTestRunnerHook.
 
@@ -63,14 +63,14 @@ public class RavenwoodEnvironment_host {
     /**
      * Called from {@link RavenwoodEnvironment#getRavenwoodRuntimePath()}.
      */
-    public static String getRavenwoodRuntimePath(RavenwoodEnvironment env) {
+    public static String nativeGetRavenwoodRuntimePath(RavenwoodEnvironment env) {
         return RavenwoodCommonUtils.getRavenwoodRuntimePath();
     }
 
     /**
      * Called from {@link RavenwoodEnvironment#fromAddress(long)}.
      */
-    public static <T> T fromAddress(RavenwoodEnvironment env, long address) {
+    public static <T> T nativeFromAddress(RavenwoodEnvironment env, long address) {
         return JvmWorkaround.getInstance().fromAddress(address);
     }
 }

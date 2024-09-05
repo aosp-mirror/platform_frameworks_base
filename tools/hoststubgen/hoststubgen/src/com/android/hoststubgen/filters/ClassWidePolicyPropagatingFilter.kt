@@ -16,6 +16,7 @@
 package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.isNative
 
 /**
  * This is used as the second last fallback filter. This filter propagates the class-wide policy
@@ -52,7 +53,7 @@ class ClassWidePolicyPropagatingFilter(
 
     private fun getClassWidePolicy(className: String, resolve: Boolean): FilterPolicyWithReason? {
         outermostFilter.getPolicyForClass(className).let { policy ->
-            if (policy.policy.isClassWidePolicy) {
+            if (policy.policy == FilterPolicy.KeepClass) {
                 val p = if (resolve) {
                     policy.policy.resolveClassWidePolicy()
                 } else {
@@ -87,7 +88,16 @@ class ClassWidePolicyPropagatingFilter(
         methodName: String,
         descriptor: String
     ): FilterPolicyWithReason {
-        return getClassWidePolicy(className, resolve = true)
-                ?: super.getPolicyForMethod(className, methodName, descriptor)
+        return outermostFilter.getNativeSubstitutionClass(className)?.let {
+            // First check native substitution
+            classes.findMethod(className, methodName, descriptor)?.let { mn ->
+                if (mn.isNative()) {
+                    FilterPolicy.NativeSubstitute.withReason("class-wide in $className")
+                } else {
+                    null
+                }
+            }
+        } ?: getClassWidePolicy(className, resolve = true)
+        ?: super.getPolicyForMethod(className, methodName, descriptor)
     }
 }

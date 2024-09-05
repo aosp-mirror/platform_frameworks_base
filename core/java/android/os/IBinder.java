@@ -376,4 +376,53 @@ public interface IBinder {
      * return value instead.
      */
     public boolean unlinkToDeath(@NonNull DeathRecipient recipient, int flags);
+
+    /** @hide */
+    interface IFrozenStateChangeCallback {
+        enum State {FROZEN, UNFROZEN};
+
+        /**
+         * Interface for receiving a callback when the process hosting an IBinder
+         * has changed its frozen state.
+         * @param who The IBinder whose hosting process has changed state.
+         * @param state The latest state.
+         */
+        void onFrozenStateChanged(@NonNull IBinder who, State state);
+    }
+
+    /**
+     * {@link addFrozenStateChangeCallback} provides a callback mechanism to notify about process
+     * frozen/unfrozen events. Upon registration and any subsequent state changes, the callback is
+     * invoked with the latest process frozen state.
+     *
+     * <p>If the listener process (the one using this API) is itself frozen, state change events
+     * might be combined into a single one with the latest frozen state. This single event would
+     * then be delivered when the listener process becomes unfrozen. Similarly, if an event happens
+     * before the previous event is consumed, they might be combined. This means the callback might
+     * not be called for every single state change, so don't rely on this API to count how many
+     * times the state has changed.</p>
+     *
+     * <p>The callback is automatically removed when all references to the binder proxy are
+     * dropped.</p>
+     *
+     * <p>You will only receive state change notifications for remote binders, as local binders by
+     * definition can't be frozen without you being frozen too.</p>
+     *
+     * <p>@throws {@link UnsupportedOperationException} if the kernel binder driver does not support
+     * this feature.
+     * @hide
+     */
+    default void addFrozenStateChangeCallback(@NonNull IFrozenStateChangeCallback callback)
+            throws RemoteException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Unregister a {@link IFrozenStateChangeCallback}. The callback will no longer be invoked when
+     * the hosting process changes its frozen state.
+     * @hide
+     */
+    default boolean removeFrozenStateChangeCallback(@NonNull IFrozenStateChangeCallback callback) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -16,12 +16,8 @@
 package com.android.hoststubgen.hosthelper;
 
 import java.io.PrintStream;
-import java.lang.StackWalker.Option;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-
-import javax.annotation.concurrent.GuardedBy;
 
 /**
  * Utilities used in the host side test environment.
@@ -99,68 +95,6 @@ public class HostTestUtils {
         }
         logPrintStream.println("# method called: " + methodClass.getCanonicalName() + "."
                 + methodName + methodDescriptor);
-    }
-
-    private static final StackWalker sStackWalker =
-            StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
-
-    /**
-     * Return a {@link StackWalker} that supports {@link StackWalker#getCallerClass()}.
-     */
-    public static StackWalker getStackWalker() {
-        return sStackWalker;
-    }
-
-    /**
-     * Cache used by {@link #isClassAllowedToCallNonStubMethods}.
-     */
-    @GuardedBy("sAllowedClasses")
-    private static final HashMap<Class, Boolean> sAllowedClasses = new HashMap();
-
-    /**
-     * Return true if a given class is allowed to access non-stub methods -- that is, if the class
-     * is in the hoststubgen generated JARs. (not in the test jar.)
-     */
-    private static boolean isClassAllowedToCallNonStubMethods(Class<?> clazz) {
-        synchronized (sAllowedClasses) {
-            var cached = sAllowedClasses.get(clazz);
-            if (cached != null) {
-                return cached;
-            }
-        }
-        // All processed classes have this annotation.
-        var allowed = clazz.getAnnotation(HostStubGenKeptInImpl.class) != null;
-
-        // Java classes should be able to access any methods. (via callbacks, etc.)
-        if (!allowed) {
-            if (clazz.getPackageName().startsWith("java.")
-                    || clazz.getPackageName().startsWith("javax.")) {
-                allowed = true;
-            }
-        }
-        synchronized (sAllowedClasses) {
-            sAllowedClasses.put(clazz, allowed);
-        }
-        return allowed;
-    }
-
-    /**
-     * Called when non-stub methods are called. We do a host-unsupported method direct call check
-     * in here.
-     */
-    public static void onNonStubMethodCalled(
-            String methodClass,
-            String methodName,
-            String methodDescriptor,
-            Class<?> callerClass) {
-        if (SKIP_NON_STUB_METHOD_CHECK) {
-            return;
-        }
-        if (isClassAllowedToCallNonStubMethods(callerClass)) {
-            return; // Generated class is allowed to call framework class.
-        }
-        logPrintStream.println("! " + methodClass + "." + methodName + methodDescriptor
-                + " called by " + callerClass.getCanonicalName());
     }
 
     /**

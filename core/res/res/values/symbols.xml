@@ -5490,8 +5490,11 @@
   <java-symbol type="bool" name="config_tvExternalInputLoggingDisplayNameFilterEnabled" />
   <java-symbol type="array" name="config_tvExternalInputLoggingDeviceOnScreenDisplayNames" />
   <java-symbol type="array" name="config_tvExternalInputLoggingDeviceBrandNames" />
+
+  <!-- Scroll Feedback Configs -->
   <java-symbol type="bool" name="config_viewRotaryEncoderHapticScrollFedbackEnabled" />
   <java-symbol type="bool" name="config_viewBasedRotaryEncoderHapticsEnabled" />
+  <java-symbol type="bool" name="config_viewTouchScreenHapticScrollFeedbackEnabled" />
 
   <java-symbol type="bool" name="config_quickSettingsShowMediaPlayer" />
 

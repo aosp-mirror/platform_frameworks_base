@@ -33,16 +33,16 @@ import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 
-val Kosmos.bouncerSceneActionsViewModel by Fixture {
-    BouncerSceneActionsViewModel(
+val Kosmos.bouncerUserActionsViewModel by Fixture {
+    BouncerUserActionsViewModel(
         bouncerInteractor = bouncerInteractor,
     )
 }
 
-val Kosmos.bouncerSceneActionsViewModelFactory by Fixture {
-    object : BouncerSceneActionsViewModel.Factory {
-        override fun create(): BouncerSceneActionsViewModel {
-            return bouncerSceneActionsViewModel
+val Kosmos.bouncerUserActionsViewModelFactory by Fixture {
+    object : BouncerUserActionsViewModel.Factory {
+        override fun create(): BouncerUserActionsViewModel {
+            return bouncerUserActionsViewModel
         }
     }
 }

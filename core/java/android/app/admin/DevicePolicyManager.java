@@ -10476,10 +10476,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("setApplicationRestrictions");
-        }
-
         if (mService != null) {
             try {
                 mService.setApplicationRestrictions(admin, mContext.getPackageName(), packageName,
@@ -11884,9 +11880,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
             @Nullable ComponentName admin, String packageName) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("getApplicationRestrictions");
-        }
 
         if (mService != null) {
             try {
@@ -14231,21 +14224,11 @@ public class DevicePolicyManager {
      */
     public @NonNull DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
         throwIfParentInstance("getParentProfileInstance");
-        try {
-            if (Flags.dmrhSetAppRestrictions()) {
-                UserManager um = mContext.getSystemService(UserManager.class);
-                if (!um.isManagedProfile()) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            } else {
-                if (!mService.isManagedProfile(admin)) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            }
-            return new DevicePolicyManager(mContext, mService, true);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        UserManager um = mContext.getSystemService(UserManager.class);
+        if (!um.isManagedProfile()) {
+            throw new SecurityException("The current user does not have a parent profile.");
         }
+        return new DevicePolicyManager(mContext, mService, true);
     }
 
     /**

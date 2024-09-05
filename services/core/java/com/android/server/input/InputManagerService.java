@@ -597,9 +597,6 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
-        if (mTouchpadDebugViewController != null) {
-            mTouchpadDebugViewController.systemRunning();
-        }
     }
 
     private void reloadDeviceAliases() {
@@ -3337,6 +3334,13 @@ public class InputManagerService extends IInputManager.Stub
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);
             }
+        }
+    }
+
+    void updateTouchpadVisualizerEnabled(boolean enabled) {
+        mNative.setShouldNotifyTouchpadHardwareState(enabled);
+        if (mTouchpadDebugViewController != null) {
+            mTouchpadDebugViewController.updateTouchpadVisualizerEnabled(enabled);
         }
     }
 

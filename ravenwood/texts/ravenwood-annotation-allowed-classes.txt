@@ -9,17 +9,13 @@ com.android.internal.logging.testing.FakeMetricsLogger
 com.android.internal.logging.testing.UiEventLoggerFake
 com.android.internal.os.AndroidPrintStream
 com.android.internal.os.BatteryStatsHistory
-com.android.internal.os.BatteryStatsHistory$TraceDelegate
-com.android.internal.os.BatteryStatsHistory$VarintParceler
 com.android.internal.os.BatteryStatsHistoryIterator
 com.android.internal.os.Clock
 com.android.internal.os.LongArrayMultiStateCounter
-com.android.internal.os.LongArrayMultiStateCounter$LongArrayContainer
 com.android.internal.os.LongMultiStateCounter
 com.android.internal.os.MonotonicClock
 com.android.internal.os.PowerProfile
 com.android.internal.os.PowerStats
-com.android.internal.os.PowerStats$Descriptor
 com.android.internal.os.RuntimeInit
 com.android.internal.power.EnergyConsumerStats
 com.android.internal.power.ModemPowerProfile
@@ -123,15 +119,9 @@ android.os.BadTypeParcelableException
 android.os.BaseBundle
 android.os.BatteryConsumer
 android.os.BatteryStats
-android.os.BatteryStats$HistoryItem
-android.os.BatteryStats$HistoryStepDetails
-android.os.BatteryStats$HistoryTag
-android.os.BatteryStats$LongCounter
-android.os.BatteryStats$ProcessStateChange
 android.os.BatteryUsageStats
 android.os.BatteryUsageStatsQuery
 android.os.Binder
-android.os.Binder$IdentitySupplier
 android.os.BluetoothBatteryStats
 android.os.Broadcaster
 android.os.Build
@@ -142,7 +132,6 @@ android.os.ConditionVariable
 android.os.DeadObjectException
 android.os.DeadSystemException
 android.os.FileUtils
-android.os.FileUtils$MemoryPipe
 android.os.Handler
 android.os.HandlerExecutor
 android.os.HandlerThread
@@ -154,8 +143,6 @@ android.os.MessageQueue
 android.os.PackageTagsList
 android.os.Parcel
 android.os.ParcelFileDescriptor
-android.os.ParcelFileDescriptor$AutoCloseInputStream
-android.os.ParcelFileDescriptor$AutoCloseOutputStream
 android.os.ParcelFormatException
 android.os.ParcelUuid
 android.os.Parcelable
@@ -169,7 +156,6 @@ android.os.RemoteCallbackList
 android.os.RemoteException
 android.os.ResultReceiver
 android.os.ServiceManager
-android.os.ServiceManager$ServiceNotFoundException
 android.os.ServiceSpecificException
 android.os.StrictMode
 android.os.SystemClock
@@ -180,18 +166,14 @@ android.os.TimestampedValue
 android.os.Trace
 android.os.TransactionTooLargeException
 android.os.UserBatteryConsumer
-android.os.UserBatteryConsumer$Builder
 android.os.UidBatteryConsumer
-android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
 android.os.UserManager
 android.os.VibrationAttributes
-android.os.VibrationAttributes$Builder
 android.os.WakeLockStats
 android.os.WorkSource
 
 android.content.ClipData
-android.content.ClipData$Item
 android.content.ClipDescription
 android.content.ClipboardManager
 android.content.ComponentName
@@ -208,11 +190,7 @@ android.content.pm.ApplicationInfo
 android.content.pm.ComponentInfo
 android.content.pm.PackageInfo
 android.content.pm.PackageItemInfo
-android.content.pm.PackageManager$Flags
-android.content.pm.PackageManager$PackageInfoFlags
-android.content.pm.PackageManager$ApplicationInfoFlags
-android.content.pm.PackageManager$ComponentInfoFlags
-android.content.pm.PackageManager$ResolveInfoFlags
+android.content.pm.PackageManager
 android.content.pm.PathPermission
 android.content.pm.ProviderInfo
 android.content.pm.ResolveInfo
@@ -223,7 +201,6 @@ android.content.pm.UserInfo
 android.content.res.ApkAssets
 android.content.res.AssetFileDescriptor
 android.content.res.AssetManager
-android.content.res.AssetManager$Builder
 android.content.res.ColorStateList
 android.content.res.ConfigurationBoundResourceCache
 android.content.res.Configuration
@@ -237,7 +214,6 @@ android.content.res.FontScaleConverter
 android.content.res.FontScaleConverterImpl
 android.content.res.FontScaleConverterFactory
 android.content.res.Resources
-android.content.res.Resources$Theme
 android.content.res.ResourceId
 android.content.res.ResourcesImpl
 android.content.res.ResourcesKey
@@ -260,7 +236,6 @@ android.database.CursorWrapper
 android.database.DataSetObservable
 android.database.DataSetObserver
 android.database.MatrixCursor
-android.database.MatrixCursor$RowBuilder
 android.database.MergeCursor
 android.database.Observable
 android.database.SQLException
@@ -268,7 +243,6 @@ android.database.sqlite.SQLiteClosable
 android.database.sqlite.SQLiteException
 
 android.text.TextUtils
-android.text.TextUtils$SimpleStringSplitter
 
 android.accounts.Account
 
@@ -298,14 +272,11 @@ android.app.ComponentOptions
 android.app.Instrumentation
 android.app.LocaleConfig
 android.app.ResourcesManager
-android.app.ResourcesManager$UpdateHandler
 android.app.WindowConfiguration
 
 android.metrics.LogMaker
 
 android.view.Display
-android.view.Display$HdrCapabilities
-android.view.Display$Mode
 android.view.DisplayAdjustments
 android.view.DisplayInfo
 android.view.inputmethod.InputBinding

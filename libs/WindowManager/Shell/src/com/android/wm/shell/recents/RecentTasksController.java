@@ -21,9 +21,12 @@ import static android.content.pm.PackageManager.FEATURE_PC;
 
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -158,6 +161,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         return new IRecentTasksImpl(this);
     }
 
+    @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     private void onInit() {
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_RECENT_TASKS,
                 this::createExternalInterface, this);
@@ -168,6 +172,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
             mTaskStackTransitionObserver.addTaskStackTransitionObserverListener(this,
                     mMainExecutor);
         }
+        mContext.getSystemService(KeyguardManager.class).addKeyguardLockedStateListener(
+                mMainExecutor, isKeyguardLocked -> notifyRecentTasksChanged());
     }
 
     void setTransitionHandler(RecentsTransitionHandler handler) {

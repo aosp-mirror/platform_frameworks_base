@@ -136,6 +136,7 @@ class TaskContainer {
         mInfo = new TaskFragmentParentInfo(
                 taskProperties.getConfiguration(),
                 taskProperties.getDisplayId(),
+                taskId,
                 // Note that it is always called when there's a new Activity is started, which
                 // implies the host task is visible and has an activity in the task.
                 true /* visible */,
@@ -194,7 +195,8 @@ class TaskContainer {
 
     void setInvisible() {
         mInfo = new TaskFragmentParentInfo(mInfo.getConfiguration(), mInfo.getDisplayId(),
-                false /* visible */, mInfo.hasDirectActivity(), mInfo.getDecorSurface());
+                mInfo.getTaskId(), false /* visible */, mInfo.hasDirectActivity(),
+                mInfo.getDecorSurface());
     }
 
     boolean hasDirectActivity() {
