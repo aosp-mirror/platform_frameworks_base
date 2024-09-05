@@ -33,16 +33,19 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteract
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModelModule.Companion.LOCKSCREEN_INSTANCE
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import dagger.Lazy
 import javax.inject.Inject
+import javax.inject.Named
 
 class DefaultShortcutsSection
 @Inject
 constructor(
     @Main private val resources: Resources,
+    @Named(LOCKSCREEN_INSTANCE)
     private val keyguardQuickAffordancesCombinedViewModel:
         KeyguardQuickAffordancesCombinedViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
@@ -76,6 +79,7 @@ constructor(
 
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
+            leftShortcutHandle?.destroy()
             leftShortcutHandle =
                 keyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.start_button),
@@ -84,6 +88,7 @@ constructor(
                 ) {
                     indicationController.showTransientIndication(it)
                 }
+            rightShortcutHandle?.destroy()
             rightShortcutHandle =
                 keyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.end_button),
