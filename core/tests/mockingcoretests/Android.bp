@@ -62,3 +62,13 @@ android_test {
 
     certificate: "platform",
 }
+
+test_module_config {
+    name: "FrameworksMockingCoreTests_os_bundlerecyclingtest",
+    base: "FrameworksMockingCoreTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["android.os.BundleRecyclingTest"],
+}
