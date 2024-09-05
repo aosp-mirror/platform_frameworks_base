@@ -1659,11 +1659,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (!hasUseBoundForWidthValue) {
-            if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
-                mUseBoundsForWidth = Flags.useBoundsForWidth();
-            } else {
-                mUseBoundsForWidth = false;
-            }
+            mUseBoundsForWidth = CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH);
         }
 
         // TODO(b/179693024): Use a ChangeId instead.
