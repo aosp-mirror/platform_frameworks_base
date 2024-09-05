@@ -74,21 +74,16 @@ class HostStubGenOptions(
         /** Input jar file*/
         var inJar: SetOnce<String> = SetOnce(""),
 
-        /** Output stub jar file */
-        var outStubJar: SetOnce<String?> = SetOnce(null),
-
-        /** Output implementation jar file */
-        var outImplJar: SetOnce<String?> = SetOnce(null),
+        /** Output jar file */
+        var outJar: SetOnce<String?> = SetOnce(null),
 
         var inputJarDumpFile: SetOnce<String?> = SetOnce(null),
 
         var inputJarAsKeepAllFile: SetOnce<String?> = SetOnce(null),
 
-        var stubAnnotations: MutableSet<String> = mutableSetOf(),
         var keepAnnotations: MutableSet<String> = mutableSetOf(),
         var throwAnnotations: MutableSet<String> = mutableSetOf(),
         var removeAnnotations: MutableSet<String> = mutableSetOf(),
-        var stubClassAnnotations: MutableSet<String> = mutableSetOf(),
         var keepClassAnnotations: MutableSet<String> = mutableSetOf(),
 
         var substituteAnnotations: MutableSet<String> = mutableSetOf(),
@@ -103,8 +98,6 @@ class HostStubGenOptions(
         var defaultClassLoadHook: SetOnce<String?> = SetOnce(null),
         var defaultMethodCallHook: SetOnce<String?> = SetOnce(null),
 
-        var intersectStubJars: MutableSet<String> = mutableSetOf(),
-
         var policyOverrideFile: SetOnce<String?> = SetOnce(null),
 
         var defaultPolicy: SetOnce<FilterPolicy> = SetOnce(FilterPolicy.Remove),
@@ -114,8 +107,6 @@ class HostStubGenOptions(
         var enableClassChecker: SetOnce<Boolean> = SetOnce(false),
         var enablePreTrace: SetOnce<Boolean> = SetOnce(false),
         var enablePostTrace: SetOnce<Boolean> = SetOnce(false),
-
-        var enableNonStubMethodCallDetection: SetOnce<Boolean> = SetOnce(false),
 
         var statsFile: SetOnce<String?> = SetOnce(null),
 
@@ -150,10 +141,7 @@ class HostStubGenOptions(
             }
 
             while (true) {
-                val arg = ai.nextArgOptional()
-                if (arg == null) {
-                    break
-                }
+                val arg = ai.nextArgOptional() ?: break
 
                 // Define some shorthands...
                 fun nextArg(): String = ai.nextArgRequired(arg)
@@ -169,8 +157,9 @@ class HostStubGenOptions(
                         "-h", "--help" -> TODO("Help is not implemented yet")
 
                         "--in-jar" -> ret.inJar.set(nextArg()).ensureFileExists()
-                        "--out-stub-jar" -> ret.outStubJar.set(nextArg())
-                        "--out-impl-jar" -> ret.outImplJar.set(nextArg())
+                        // We support both arguments because some AOSP dependencies
+                        // still use the old argument
+                        "--out-jar", "--out-impl-jar" -> ret.outJar.set(nextArg())
 
                         "--policy-override-file" ->
                             ret.policyOverrideFile.set(nextArg())!!.ensureFileExists()
@@ -181,16 +170,9 @@ class HostStubGenOptions(
                         "--default-remove" -> ret.defaultPolicy.set(FilterPolicy.Remove)
                         "--default-throw" -> ret.defaultPolicy.set(FilterPolicy.Throw)
                         "--default-keep" -> ret.defaultPolicy.set(FilterPolicy.Keep)
-                        "--default-stub" -> ret.defaultPolicy.set(FilterPolicy.Stub)
-
-                        "--stub-annotation" ->
-                            ret.stubAnnotations.addUniqueAnnotationArg()
 
                         "--keep-annotation" ->
                             ret.keepAnnotations.addUniqueAnnotationArg()
-
-                        "--stub-class-annotation" ->
-                            ret.stubClassAnnotations.addUniqueAnnotationArg()
 
                         "--keep-class-annotation" ->
                             ret.keepClassAnnotations.addUniqueAnnotationArg()
@@ -225,9 +207,6 @@ class HostStubGenOptions(
                         "--default-method-call-hook" ->
                             ret.defaultMethodCallHook.set(nextArg())
 
-                        "--intersect-stub-jar" ->
-                            ret.intersectStubJars += nextArg().ensureFileExists()
-
                         "--gen-keep-all-file" ->
                             ret.inputJarAsKeepAllFile.set(nextArg())
 
@@ -240,12 +219,6 @@ class HostStubGenOptions(
 
                         "--enable-post-trace" -> ret.enablePostTrace.set(true)
                         "--no-post-trace" -> ret.enablePostTrace.set(false)
-
-                        "--enable-non-stub-method-check" ->
-                            ret.enableNonStubMethodCallDetection.set(true)
-
-                        "--no-non-stub-method-check" ->
-                            ret.enableNonStubMethodCallDetection.set(false)
 
                         "--gen-input-dump-file" -> ret.inputJarDumpFile.set(nextArg())
 
@@ -273,9 +246,8 @@ class HostStubGenOptions(
             if (!ret.inJar.isSet) {
                 throw ArgumentsException("Required option missing: --in-jar")
             }
-            if (!ret.outStubJar.isSet && !ret.outImplJar.isSet) {
-                log.w("Neither --out-stub-jar nor --out-impl-jar is set." +
-                        " $executableName will not generate jar files.")
+            if (!ret.outJar.isSet) {
+                log.w("--out-jar is not set. $executableName will not generate jar files.")
             }
             if (ret.numShards.isSet != ret.shard.isSet) {
                 throw ArgumentsException("--num-shards and --shard-index must be used together")
@@ -287,11 +259,6 @@ class HostStubGenOptions(
                 }
             }
 
-            if (ret.enableNonStubMethodCallDetection.get) {
-                log.w("--enable-non-stub-method-check is not fully implemented yet." +
-                    " See the todo in doesMethodNeedNonStubCallCheck().")
-            }
-
             return ret
         }
     }
@@ -300,32 +267,27 @@ class HostStubGenOptions(
         return """
             HostStubGenOptions{
               inJar='$inJar',
-              outStubJar='$outStubJar',
-              outImplJar='$outImplJar',
+              outJar='$outJar',
               inputJarDumpFile=$inputJarDumpFile,
               inputJarAsKeepAllFile=$inputJarAsKeepAllFile,
-              stubAnnotations=$stubAnnotations,
               keepAnnotations=$keepAnnotations,
               throwAnnotations=$throwAnnotations,
               removeAnnotations=$removeAnnotations,
-              stubClassAnnotations=$stubClassAnnotations,
               keepClassAnnotations=$keepClassAnnotations,
               substituteAnnotations=$substituteAnnotations,
               nativeSubstituteAnnotations=$nativeSubstituteAnnotations,
               classLoadHookAnnotations=$classLoadHookAnnotations,
               keepStaticInitializerAnnotations=$keepStaticInitializerAnnotations,
               packageRedirects=$packageRedirects,
-              $annotationAllowedClassesFile=$annotationAllowedClassesFile,
+              annotationAllowedClassesFile=$annotationAllowedClassesFile,
               defaultClassLoadHook=$defaultClassLoadHook,
               defaultMethodCallHook=$defaultMethodCallHook,
-              intersectStubJars=$intersectStubJars,
               policyOverrideFile=$policyOverrideFile,
               defaultPolicy=$defaultPolicy,
               cleanUpOnError=$cleanUpOnError,
               enableClassChecker=$enableClassChecker,
               enablePreTrace=$enablePreTrace,
               enablePostTrace=$enablePostTrace,
-              enableNonStubMethodCallDetection=$enableNonStubMethodCallDetection,
               statsFile=$statsFile,
               apiListFile=$apiListFile,
               numShards=$numShards,

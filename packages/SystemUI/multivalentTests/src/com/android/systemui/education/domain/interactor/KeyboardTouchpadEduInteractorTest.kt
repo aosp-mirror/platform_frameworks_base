@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.education.data.model.GestureEduModel
@@ -220,17 +221,19 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
             verify(kosmos.mockEduInputManager)
                 .registerKeyGestureEventListener(any(), listenerCaptor.capture())
 
-            val backGestureEvent =
+            val allAppsKeyGestureEvent =
                 KeyGestureEvent(
                     /* deviceId= */ 1,
-                    intArrayOf(KeyEvent.KEYCODE_ESCAPE),
+                    IntArray(0),
                     KeyEvent.META_META_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_BACK
+                    KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
                 )
-            listenerCaptor.value.onKeyGestureEvent(backGestureEvent)
+            listenerCaptor.value.onKeyGestureEvent(allAppsKeyGestureEvent)
 
             val model by
-                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
+                collectLastValue(
+                    kosmos.contextualEducationRepository.readGestureEduModelFlow(ALL_APPS)
+                )
             assertThat(model?.lastShortcutTriggeredTime).isEqualTo(eduClock.instant())
         }
 

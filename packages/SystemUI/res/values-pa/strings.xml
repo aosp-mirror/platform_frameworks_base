@@ -110,7 +110,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ਕੀ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨਾ ਹੈ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ਇੱਕ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰੋ"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ਜਦੋਂ ਤੁਸੀਂ ਆਪਣੀ ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹਰ ਚੀਜ਼ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ਜਦੋਂ ਤੁਸੀਂ ਆਪਣੀ ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹਰ ਚੀਜ਼ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਨਾਲ ਹੀ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਉਸ ਐਪ ਵਿੱਚ ਦਿਖਾਈ ਜਾਂ ਚਲਾਈ ਜਾ ਰਹੀ ਹਰ ਚੀਜ਼ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ਰਿਕਾਰਡ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ਬਲੂਟੁੱਥ ਵਰਤੋ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ਕਨੈਕਟ ਹੈ"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ਆਡੀਓ ਸਾਂਝਾਕਰਨ"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ਸੈਟੇਲਾਈਟ, ਕਨੈਕਸ਼ਨ ਵਧੀਆ ਹੈ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ਸੈਟੇਲਾਈਟ, ਕਨੈਕਸ਼ਨ ਉਪਲਬਧ ਹੈ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ਸੈਟੇਲਾਈਟ SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"ਐਮਰਜੈਂਸੀ ਕਾਲਾਂ ਜਾਂ ਸਹਾਇਤਾ"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ਕੁਝ ਵਾਸਤੇ ਤਾਂ ਮਜ਼ੇਦਾਰ ਹੈ ਲੇਕਿਨ ਸਾਰਿਆਂ ਵਾਸਤੇ ਨਹੀਂ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ਸਿਸਟਮ UI ਟਿਊਨਰ ਤੁਹਾਨੂੰ Android ਵਰਤੋਂਕਾਰ ਇੰਟਰਫ਼ੇਸ ਤਬਦੀਲ ਕਰਨ ਅਤੇ ਵਿਉਂਤਬੱਧ ਕਰਨ ਲਈ ਵਾਧੂ ਤਰੀਕੇ ਦਿੰਦਾ ਹੈ। ਇਹ ਪ੍ਰਯੋਗਾਤਮਿਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਭਵਿੱਖ ਦੀ ਰੀਲੀਜ਼ ਵਿੱਚ ਬਦਲ ਸਕਦੀਆਂ ਹਨ, ਟੁੱਟ ਸਕਦੀਆਂ ਹਨ, ਜਾਂ ਅਲੋਪ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਸਾਵਧਾਨੀ ਨਾਲ ਅੱਗੇ ਵੱਧੋ।"</string>

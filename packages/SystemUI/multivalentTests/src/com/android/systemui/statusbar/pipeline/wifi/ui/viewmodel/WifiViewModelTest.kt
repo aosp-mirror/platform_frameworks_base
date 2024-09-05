@@ -25,14 +25,14 @@ import com.android.systemui.Flags.FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiIcons
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -58,10 +59,11 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class WifiViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     private lateinit var underTest: WifiViewModel
 
-    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "WifiViewModelTest")
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
@@ -86,7 +88,7 @@ class WifiViewModelTest : SysuiTestCase() {
                 AirplaneModeInteractor(
                     airplaneModeRepository,
                     connectivityRepository,
-                    FakeMobileConnectionsRepository(),
+                    kosmos.fakeMobileConnectionsRepository,
                 ),
                 tableLogBuffer,
                 testScope.backgroundScope,

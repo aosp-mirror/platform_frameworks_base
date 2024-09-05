@@ -16,20 +16,20 @@
 package com.android.hoststubgen.test.tinyframework;
 
 import android.hosttest.annotation.HostSideTestClassLoadHook;
+import android.hosttest.annotation.HostSideTestKeep;
 import android.hosttest.annotation.HostSideTestStaticInitializerKeep;
-import android.hosttest.annotation.HostSideTestStub;
 
 @HostSideTestClassLoadHook(
         "com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded")
-@HostSideTestStub
+@HostSideTestKeep
 @HostSideTestStaticInitializerKeep
 public class TinyFrameworkClassWithInitializerStub {
     static {
         sInitialized = true;
     }
 
-    @HostSideTestStub
+    @HostSideTestKeep
     public static boolean sInitialized;
-    @HostSideTestStub
+    @HostSideTestKeep
     public static Object sObject = new Object();
 }

@@ -37,6 +37,7 @@ import android.tracing.perfetto.StopCallbackArguments;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.WireTypeMismatchException;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.LogLevel;
 
 import java.io.IOException;
@@ -48,6 +49,7 @@ import java.util.Set;
 public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.TlsState,
         ProtoLogDataSource.IncrementalState> {
+    private static final String DATASOURCE_NAME = "android.protolog";
 
     private final Instance.TracingInstanceStartCallback mOnStart;
     private final Runnable mOnFlush;
@@ -55,7 +57,13 @@ public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
 
     public ProtoLogDataSource(Instance.TracingInstanceStartCallback onStart, Runnable onFlush,
             Instance.TracingInstanceStopCallback onStop) {
-        super("android.protolog");
+        this(onStart, onFlush, onStop, DATASOURCE_NAME);
+    }
+
+    @VisibleForTesting
+    public ProtoLogDataSource(Instance.TracingInstanceStartCallback onStart, Runnable onFlush,
+            Instance.TracingInstanceStopCallback onStop, String dataSourceName) {
+        super(dataSourceName);
         this.mOnStart = onStart;
         this.mOnFlush = onFlush;
         this.mOnStop = onStop;

@@ -300,6 +300,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth gebruiken"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Verbonden"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audio delen"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing_or_switch_active (3227408556754456024) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Opgeslagen"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"loskoppelen"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activeren"</string>
@@ -629,7 +631,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Instellingen"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Live ondertiteling"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume verlaagd naar een veiliger niveau"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Het hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Het koptelefoonvolume is langer dan de aanbevolen tijd hoog geweest"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Het hoofdtelefoonvolume overschrijdt de veiligheidslimiet voor deze week"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Blijven luisteren"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Volume omlaag"</string>
@@ -718,8 +720,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelliet, goede verbinding"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelliet, verbinding beschikbaar"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via satelliet"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (828510231597991206) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Noodoproepen of SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Werkprofiel"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Leuk voor sommige gebruikers, maar niet voor iedereen"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Met Systeem-UI-tuner beschikt u over extra manieren om de Android-gebruikersinterface aan te passen. Deze experimentele functies kunnen veranderen, vastlopen of verdwijnen in toekomstige releases. Ga voorzichtig verder."</string>

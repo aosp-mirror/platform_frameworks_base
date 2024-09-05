@@ -90,7 +90,6 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ApplicationExitInfo;
-import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.content.ComponentName;
 import android.content.Context;
@@ -164,6 +163,10 @@ public class MockingOomAdjusterTests {
 
     private static int sFirstCachedAdj = ProcessList.CACHED_APP_MIN_ADJ
             + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
+    private static int sFirstUiCachedAdj = ProcessList.CACHED_APP_MIN_ADJ + 10;
+    private static int sFirstNonUiCachedAdj = ProcessList.CACHED_APP_MIN_ADJ + 20;
+    private static int sUiTierSize = 5;
+
     private Context mContext;
     private PackageManagerInternal mPackageManagerInternal;
     private ActivityManagerService mService;
@@ -232,9 +235,6 @@ public class MockingOomAdjusterTests {
                         mInjector);
         mService.mOomAdjuster.mAdjSeq = 10000;
         mService.mWakefulness = new AtomicInteger(PowerManagerInternal.WAKEFULNESS_AWAKE);
-        if (mService.mConstants.USE_TIERED_CACHED_ADJ) {
-            sFirstCachedAdj = ProcessList.CACHED_APP_MIN_ADJ + 10;
-        }
         mSetFlagsRule.enableFlags(Flags.FLAG_NEW_FGS_RESTRICTION_LOGIC);
     }
 
@@ -473,7 +473,8 @@ public class MockingOomAdjusterTests {
         mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
 
-        final int expectedAdj = sFirstCachedAdj;
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstUiCachedAdj : sFirstCachedAdj;
         assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj,
                 SCHED_GROUP_BACKGROUND);
     }
@@ -701,7 +702,9 @@ public class MockingOomAdjusterTests {
             mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
             mService.mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
 
-            assertEquals(sFirstCachedAdj, app.mState.getSetAdj());
+            final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                    ? sFirstUiCachedAdj : sFirstCachedAdj;
+            assertEquals(expectedAdj, app.mState.getSetAdj());
             // Follow up should not have been called again.
             verify(mService.mHandler).sendEmptyMessageAtTime(eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG),
                     followUpTimeCaptor.capture());
@@ -836,7 +839,9 @@ public class MockingOomAdjusterTests {
         mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
         mService.mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
 
-        assertProcStates(app, PROCESS_STATE_LAST_ACTIVITY, CACHED_APP_MIN_ADJ,
+        int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstUiCachedAdj : CACHED_APP_MIN_ADJ;
+        assertProcStates(app, PROCESS_STATE_LAST_ACTIVITY, expectedAdj,
                 SCHED_GROUP_BACKGROUND, "previous-expired");
         // Follow up should not have been called again.
         verify(mService.mHandler).sendEmptyMessageAtTime(eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG),
@@ -877,9 +882,15 @@ public class MockingOomAdjusterTests {
 
         for (int i = 0; i < numberOfApps; i++) {
             final int mruIndex = numberOfApps - i - 1;
-            int expectedAdj = CACHED_APP_MIN_ADJ + (mruIndex * 2 * CACHED_APP_IMPORTANCE_LEVELS);
-            if (expectedAdj > CACHED_APP_MAX_ADJ) {
-                expectedAdj = CACHED_APP_MAX_ADJ;
+            int expectedAdj;
+            if (mService.mConstants.USE_TIERED_CACHED_ADJ) {
+                expectedAdj = (i < numberOfApps - sUiTierSize)
+                        ? sFirstNonUiCachedAdj : sFirstUiCachedAdj + mruIndex;
+            } else {
+                expectedAdj = CACHED_APP_MIN_ADJ + (mruIndex * 2 * CACHED_APP_IMPORTANCE_LEVELS);
+                if (expectedAdj > CACHED_APP_MAX_ADJ) {
+                    expectedAdj = CACHED_APP_MAX_ADJ;
+                }
             }
             assertProcStates(apps[i], PROCESS_STATE_LAST_ACTIVITY, expectedAdj,
                     SCHED_GROUP_BACKGROUND, "previous-expired");
@@ -1003,7 +1014,9 @@ public class MockingOomAdjusterTests {
         updateOomAdj(client, app);
         doReturn(null).when(mService).getTopApp();
 
-        assertProcStates(app, PROCESS_STATE_SERVICE, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app, PROCESS_STATE_SERVICE, expectedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1053,7 +1066,9 @@ public class MockingOomAdjusterTests {
         mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstNonUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1469,7 +1484,9 @@ public class MockingOomAdjusterTests {
         bindProvider(app, app, null, null, false);
         updateOomAdj(app);
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstNonUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1484,7 +1501,9 @@ public class MockingOomAdjusterTests {
         mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app, client);
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstNonUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1592,7 +1611,9 @@ public class MockingOomAdjusterTests {
         mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
         mService.mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND,
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstNonUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj, SCHED_GROUP_BACKGROUND,
                 "cch-empty");
         // Follow up should not have been called again.
         verify(mService.mHandler).sendEmptyMessageAtTime(eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG),
@@ -2623,12 +2644,11 @@ public class MockingOomAdjusterTests {
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
         final int userOwner = 0;
         final int userOther = 1;
-        final int cachedAdj1 = mService.mConstants.USE_TIERED_CACHED_ADJ
-                ? CACHED_APP_MIN_ADJ + 10
-                : CACHED_APP_MIN_ADJ + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
-        final int cachedAdj2 = mService.mConstants.USE_TIERED_CACHED_ADJ
-                ? CACHED_APP_MIN_ADJ + 10
-                : cachedAdj1 + ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2;
+
+        // cachedAdj1 and cachedAdj2 will be read if USE_TIERED_CACHED_ADJ is disabled. Otherwise,
+        // sFirstUiCachedAdj and sFirstNonUiCachedAdj are used instead.
+        final int cachedAdj1 = CACHED_APP_MIN_ADJ + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
+        final int cachedAdj2 = cachedAdj1 + ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2;
         doReturn(userOwner).when(mService.mUserController).getCurrentUserId();
 
         final ArrayList<ProcessRecord> lru = mService.mProcessList.getLruProcessesLOSP();
@@ -2669,8 +2689,12 @@ public class MockingOomAdjusterTests {
         mService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj();
 
-        assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-ui-services");
-        assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj2, "cch-started-services");
+        assertProcStates(app, true, PROCESS_STATE_SERVICE,
+                mService.mConstants.USE_TIERED_CACHED_ADJ ? sFirstUiCachedAdj : cachedAdj1,
+                "cch-started-ui-services");
+        assertProcStates(app2, true, PROCESS_STATE_SERVICE,
+                mService.mConstants.USE_TIERED_CACHED_ADJ ? sFirstNonUiCachedAdj : cachedAdj2,
+                "cch-started-services");
 
         app.mState.setSetProcState(PROCESS_STATE_NONEXISTENT);
         app.mState.setAdjType(null);
@@ -2686,7 +2710,10 @@ public class MockingOomAdjusterTests {
         s.lastActivity = now - mService.mConstants.MAX_SERVICE_INACTIVITY - 1;
         updateOomAdj();
 
-        assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+        // hasShownUi was set to false for 'app', so 920 is expected for USE_TIERED_CACHED_ADJ.
+        assertProcStates(app, true, PROCESS_STATE_SERVICE,
+                mService.mConstants.USE_TIERED_CACHED_ADJ ? sFirstNonUiCachedAdj : cachedAdj1,
+                "cch-started-services");
 
         app.mServices.stopService(s);
         app.mState.setSetProcState(PROCESS_STATE_NONEXISTENT);
@@ -2705,7 +2732,9 @@ public class MockingOomAdjusterTests {
         updateOomAdj();
 
         assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
-        assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+        assertProcStates(app2, true, PROCESS_STATE_SERVICE,
+                mService.mConstants.USE_TIERED_CACHED_ADJ ? sFirstNonUiCachedAdj : cachedAdj1,
+                "cch-started-services");
 
         app.mState.setSetProcState(PROCESS_STATE_NONEXISTENT);
         app.mState.setAdjType(null);
@@ -2715,13 +2744,17 @@ public class MockingOomAdjusterTests {
         updateOomAdj();
 
         assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
-        assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+        assertProcStates(app2, true, PROCESS_STATE_SERVICE,
+                mService.mConstants.USE_TIERED_CACHED_ADJ ? sFirstNonUiCachedAdj : cachedAdj1,
+                "cch-started-services");
 
         doReturn(userOther).when(mService.mUserController).getCurrentUserId();
         mService.mOomAdjuster.handleUserSwitchedLocked();
 
         updateOomAdj();
-        assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
+        assertProcStates(app, true, PROCESS_STATE_SERVICE,
+                mService.mConstants.USE_TIERED_CACHED_ADJ ? sFirstNonUiCachedAdj : cachedAdj1,
+                "cch-started-services");
         assertProcStates(app2, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
     }
 
@@ -2998,7 +3031,9 @@ public class MockingOomAdjusterTests {
         mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
         mService.mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
 
-        assertProcStates(app, PROCESS_STATE_SERVICE, sFirstCachedAdj, SCHED_GROUP_BACKGROUND,
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstNonUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app, PROCESS_STATE_SERVICE, expectedAdj, SCHED_GROUP_BACKGROUND,
                 "cch-started-services");
         // Follow up should not have been called again.
         verify(mService.mHandler).sendEmptyMessageAtTime(eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG),
@@ -3031,14 +3066,16 @@ public class MockingOomAdjusterTests {
         mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
         mService.mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
 
-        assertProcStates(app1, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND,
+        final int expectedAdj = mService.mConstants.USE_TIERED_CACHED_ADJ
+                ? sFirstNonUiCachedAdj : sFirstCachedAdj;
+        assertProcStates(app1, PROCESS_STATE_CACHED_EMPTY, expectedAdj, SCHED_GROUP_BACKGROUND,
                 "cch-empty");
 
         verify(mService.mHandler, atLeastOnce()).sendEmptyMessageAtTime(
                 eq(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG), followUpTimeCaptor.capture());
         mInjector.jumpUptimeAheadTo(followUpTimeCaptor.getValue());
         mService.mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
-        assertProcStates(app2, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND,
+        assertProcStates(app2, PROCESS_STATE_CACHED_EMPTY, expectedAdj, SCHED_GROUP_BACKGROUND,
                 "cch-empty");
     }
 

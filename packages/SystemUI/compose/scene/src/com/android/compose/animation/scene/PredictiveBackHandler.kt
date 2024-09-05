@@ -18,18 +18,17 @@ package com.android.compose.animation.scene
 
 import androidx.activity.BackEventCompat
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import com.android.compose.animation.scene.UserActionResult.ChangeScene
 import com.android.compose.animation.scene.UserActionResult.HideOverlay
 import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay
-import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.coroutineScope
+import com.android.compose.animation.scene.transition.animateProgress
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun PredictiveBackHandler(
@@ -38,10 +37,10 @@ internal fun PredictiveBackHandler(
 ) {
     PredictiveBackHandler(
         enabled = result != null,
-    ) { progress: Flow<BackEventCompat> ->
+    ) { events: Flow<BackEventCompat> ->
         if (result == null) {
             // Note: We have to collect progress otherwise PredictiveBackHandler will throw.
-            progress.first()
+            events.first()
             return@PredictiveBackHandler
         }
 
@@ -60,48 +59,20 @@ internal fun PredictiveBackHandler(
                 distance = 1f,
             )
 
-        animate(layoutImpl, animation, progress)
-    }
-}
+        animateProgress(
+            state = layoutImpl.state,
+            animation = animation,
+            progress = events.map { it.progress },
 
-private suspend fun <T : ContentKey> animate(
-    layoutImpl: SceneTransitionLayoutImpl,
-    animation: SwipeAnimation<T>,
-    progress: Flow<BackEventCompat>,
-) {
-    fun animateOffset(targetContent: T, spec: AnimationSpec<Float>? = null) {
-        if (
-            layoutImpl.state.transitionState != animation.contentTransition ||
-                animation.isAnimatingOffset()
-        ) {
-            return
-        }
+            // Use the transformationSpec.progressSpec. We will lazily access it later once the
+            // transition has been started, because at this point the transformation spec of the
+            // transition is not computed yet.
+            commitSpec = null,
 
-        animation.animateOffset(
-            initialVelocity = 0f,
-            targetContent = targetContent,
-            spec = spec,
+            // The predictive back APIs will automatically animate the progress for us in this case
+            // so there is no need to animate it.
+            cancelSpec = snap(),
         )
-    }
-
-    coroutineScope {
-        launch {
-            try {
-                progress.collect { backEvent -> animation.dragOffset = backEvent.progress }
-
-                // Back gesture successful.
-                animateOffset(
-                    animation.toContent,
-                    animation.contentTransition.transformationSpec.progressSpec,
-                )
-            } catch (e: CancellationException) {
-                // Back gesture cancelled.
-                animateOffset(animation.fromContent)
-            }
-        }
-
-        // Start the transition.
-        layoutImpl.state.startTransition(animation.contentTransition)
     }
 }
 

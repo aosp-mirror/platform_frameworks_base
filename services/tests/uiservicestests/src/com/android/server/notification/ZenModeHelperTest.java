@@ -18,6 +18,8 @@ package com.android.server.notification;
 
 import static android.app.AutomaticZenRule.TYPE_BEDTIME;
 import static android.app.AutomaticZenRule.TYPE_IMMERSIVE;
+import static android.app.AutomaticZenRule.TYPE_SCHEDULE_CALENDAR;
+import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.Flags.FLAG_MODES_API;
 import static android.app.Flags.FLAG_MODES_UI;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
@@ -6873,6 +6875,52 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private ZenRule getZenRule(String ruleId) {
         return checkNotNull(mZenModeHelper.mConfig.automaticRules.get(ruleId),
                 "Didn't find rule with id %s", ruleId);
+    }
+
+    @Test
+    @DisableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void testDefaultConfig_preModesApi_rulesAreBare() {
+        // Create a new user, which should get a copy of the default policy.
+        mZenModeHelper.onUserSwitched(101);
+
+        ZenRule eventsRule = mZenModeHelper.mConfig.automaticRules.get(
+                ZenModeConfig.EVENTS_DEFAULT_RULE_ID);
+
+        assertThat(eventsRule).isNotNull();
+        assertThat(eventsRule.zenPolicy).isNull();
+        assertThat(eventsRule.type).isEqualTo(TYPE_UNKNOWN);
+        assertThat(eventsRule.triggerDescription).isNull();
+    }
+
+    @Test
+    @EnableFlags(FLAG_MODES_API)
+    @DisableFlags(FLAG_MODES_UI)
+    public void testDefaultConfig_modesApi_rulesHaveFullPolicy() {
+        // Create a new user, which should get a copy of the default policy.
+        mZenModeHelper.onUserSwitched(201);
+
+        ZenRule eventsRule = mZenModeHelper.mConfig.automaticRules.get(
+                ZenModeConfig.EVENTS_DEFAULT_RULE_ID);
+
+        assertThat(eventsRule).isNotNull();
+        assertThat(eventsRule.zenPolicy).isEqualTo(mZenModeHelper.getDefaultZenPolicy());
+        assertThat(eventsRule.type).isEqualTo(TYPE_UNKNOWN);
+        assertThat(eventsRule.triggerDescription).isNull();
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void testDefaultConfig_modesUi_rulesHaveFullPolicy() {
+        // Create a new user, which should get a copy of the default policy.
+        mZenModeHelper.onUserSwitched(301);
+
+        ZenRule eventsRule = mZenModeHelper.mConfig.automaticRules.get(
+                ZenModeConfig.EVENTS_DEFAULT_RULE_ID);
+
+        assertThat(eventsRule).isNotNull();
+        assertThat(eventsRule.zenPolicy).isEqualTo(mZenModeHelper.getDefaultZenPolicy());
+        assertThat(eventsRule.type).isEqualTo(TYPE_SCHEDULE_CALENDAR);
+        assertThat(eventsRule.triggerDescription).isNotEmpty();
     }
 
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,

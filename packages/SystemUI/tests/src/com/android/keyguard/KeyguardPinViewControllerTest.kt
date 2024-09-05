@@ -103,6 +103,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Mock lateinit var deleteButton: NumPadButton
     @Mock lateinit var enterButton: View
     @Mock lateinit var uiEventLogger: UiEventLogger
+    @Mock lateinit var mUserActivityNotifier: UserActivityNotifier
 
     @Captor lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
 
@@ -151,6 +152,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
             uiEventLogger,
             keyguardKeyboardInteractor,
             null,
+            mUserActivityNotifier
         )
     }
 

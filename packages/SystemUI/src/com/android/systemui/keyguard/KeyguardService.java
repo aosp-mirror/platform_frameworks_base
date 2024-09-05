@@ -76,6 +76,7 @@ import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
@@ -122,6 +123,7 @@ public class KeyguardService extends Service {
     private final PowerInteractor mPowerInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
+    private final Lazy<DeviceEntryInteractor> mDeviceEntryInteractorLazy;
     private final Executor mMainExecutor;
     private final Lazy<KeyguardStateCallbackStartable> mKeyguardStateCallbackStartableLazy;
 
@@ -347,7 +349,8 @@ public class KeyguardService extends Service {
             KeyguardEnabledInteractor keyguardEnabledInteractor,
             Lazy<KeyguardStateCallbackStartable> keyguardStateCallbackStartableLazy,
             KeyguardWakeDirectlyToGoneInteractor keyguardWakeDirectlyToGoneInteractor,
-            KeyguardDismissInteractor keyguardDismissInteractor) {
+            KeyguardDismissInteractor keyguardDismissInteractor,
+            Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -360,6 +363,7 @@ public class KeyguardService extends Service {
         mSceneInteractorLazy = sceneInteractorLazy;
         mMainExecutor = mainExecutor;
         mKeyguardStateCallbackStartableLazy = keyguardStateCallbackStartableLazy;
+        mDeviceEntryInteractorLazy = deviceEntryInteractorLazy;
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             WindowManagerLockscreenVisibilityViewBinder.bind(
@@ -484,7 +488,9 @@ public class KeyguardService extends Service {
         public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
             trace("dismiss message=" + message);
             checkPermission();
-            if (KeyguardWmStateRefactor.isEnabled()) {
+            if (SceneContainerFlag.isEnabled()) {
+                mDeviceEntryInteractorLazy.get().attemptDeviceEntry(callback);
+            } else if (KeyguardWmStateRefactor.isEnabled()) {
                 mKeyguardDismissInteractor.dismissKeyguardWithCallback(callback);
             } else {
                 mKeyguardViewMediator.dismiss(callback, message);

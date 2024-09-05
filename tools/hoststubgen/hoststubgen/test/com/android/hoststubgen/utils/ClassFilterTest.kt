@@ -72,6 +72,18 @@ class ClassFilterTest {
     }
 
     @Test
+    fun testNestedClass() {
+        val f = ClassFilter.buildFromString("a.b.c\nm.n.o\$p\n", false, "X")
+        assertThat(f.matches("a/b/c")).isEqualTo(true)
+        assertThat(f.matches("a/b/c\$d")).isEqualTo(true)
+        assertThat(f.matches("a/b/c\$d\$e")).isEqualTo(true)
+        assertThat(f.matches("m/n/o")).isEqualTo(false)
+        assertThat(f.matches("m/n/o\$p")).isEqualTo(true)
+        assertThat(f.matches("m/n/o\$p\$r")).isEqualTo(true)
+        assertThat(f.matches("m/n/o\$p\$r\$")).isEqualTo(true)
+    }
+
+    @Test
     fun testBadFilter1() {
         try {
             ClassFilter.buildFromString("""

@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.platform.test.annotations.EnableFlags
 import android.telephony.CellSignalStrength
-import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -27,12 +26,12 @@ import com.android.settingslib.mobile.MobileIconCarrierIdOverridesImpl
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.CarrierMergedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
-import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FIVE_G_OVERRIDE
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
@@ -40,12 +39,12 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -61,20 +60,17 @@ import org.mockito.ArgumentMatchers.anyString
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MobileIconInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var underTest: MobileIconInteractor
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy, mock())
 
-    private val subscriptionModel =
-        MutableStateFlow(
-            SubscriptionModel(
-                subscriptionId = SUB_1_ID,
-                carrierName = DEFAULT_NAME,
-                profileClass = PROFILE_CLASS_UNSET,
-            )
+    private val connectionRepository =
+        FakeMobileConnectionRepository(
+            SUB_1_ID,
+            logcatTableLogBuffer(kosmos, "MobileIconInteractorTest"),
         )
-
-    private val connectionRepository = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)

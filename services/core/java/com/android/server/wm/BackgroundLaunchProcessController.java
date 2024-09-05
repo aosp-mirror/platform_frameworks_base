@@ -98,42 +98,63 @@ class BackgroundLaunchProcessController {
         mBackgroundActivityStartCallback = callback;
     }
 
+    record BalCheckConfiguration(
+            boolean isCheckingForFgsStart,
+            boolean checkVisibility,
+            boolean checkOtherExemptions,
+            long gracePeriod
+    ) {
+    }
+
+    /**
+     * Check configuration for foreground service starts.
+     *
+     * The check executes all parts of the BAL checks and uses the same grace period,
+     * so FGS is allowed whenever BAL is allowed.
+     */
+    static final BalCheckConfiguration CHECK_FOR_FGS_START = new BalCheckConfiguration(
+            /* isCheckingForFgsStarts */ true,
+            /* checkVisibility */ true,
+            /* checkOtherExemptions */ true,
+            ACTIVITY_BG_START_GRACE_PERIOD_MS);
+
     BalVerdict areBackgroundActivityStartsAllowed(
             int pid, int uid, String packageName,
-            int appSwitchState, boolean isCheckingForFgsStart,
+            int appSwitchState, BalCheckConfiguration checkConfiguration,
             boolean hasActivityInVisibleTask, boolean hasBackgroundActivityStartPrivileges,
             long lastStopAppSwitchesTime, long lastActivityLaunchTime,
             long lastActivityFinishTime) {
         // Allow if the proc is instrumenting with background activity starts privs.
-        if (hasBackgroundActivityStartPrivileges) {
+        if (checkConfiguration.checkOtherExemptions && hasBackgroundActivityStartPrivileges) {
             return new BalVerdict(BAL_ALLOW_PERMISSION, /*background*/ true,
                     "process instrumenting with background activity starts privileges");
         }
         // Allow if the flag was explicitly set.
-        if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
+        if (checkConfiguration.checkOtherExemptions && isBackgroundStartAllowedByToken(uid,
+                packageName, checkConfiguration.isCheckingForFgsStart)) {
             return new BalVerdict(balImprovedMetrics() ? BAL_ALLOW_TOKEN : BAL_ALLOW_PERMISSION,
                     /*background*/ true, "process allowed by token");
         }
         // Allow if the caller is bound by a UID that's currently foreground.
         // But still respect the appSwitchState.
-        boolean allowBoundByForegroundUid =
+        if (checkConfiguration.checkVisibility && (
                 Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid()
-                ? appSwitchState != APP_SWITCH_DISALLOW && isBoundByForegroundUid()
-                : isBoundByForegroundUid();
-        if (allowBoundByForegroundUid) {
+                        ? appSwitchState != APP_SWITCH_DISALLOW && isBoundByForegroundUid()
+                        : isBoundByForegroundUid())) {
             return new BalVerdict(balImprovedMetrics() ? BAL_ALLOW_BOUND_BY_FOREGROUND
                     : BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false,
                     "process bound by foreground uid");
         }
         // Allow if the caller has an activity in any foreground task.
-        if (hasActivityInVisibleTask && appSwitchState != APP_SWITCH_DISALLOW) {
+        if (checkConfiguration.checkVisibility && hasActivityInVisibleTask
+                && appSwitchState != APP_SWITCH_DISALLOW) {
             return new BalVerdict(BAL_ALLOW_FOREGROUND, /*background*/ false,
                     "process has activity in foreground task");
         }
 
         // If app switching is not allowed, we ignore all the start activity grace period
         // exception so apps cannot start itself in onPause() after pressing home button.
-        if (appSwitchState == APP_SWITCH_ALLOW) {
+        if (checkConfiguration.checkOtherExemptions && appSwitchState == APP_SWITCH_ALLOW) {
             // Allow if any activity in the caller has either started or finished very recently, and
             // it must be started or finished after last stop app switches time.
             if (lastActivityLaunchTime > lastStopAppSwitchesTime
@@ -141,9 +162,9 @@ class BackgroundLaunchProcessController {
                 final long now = SystemClock.uptimeMillis();
                 long timeSinceLastStartOrFinish = now - Math.max(lastActivityLaunchTime,
                         lastActivityFinishTime);
-                if (timeSinceLastStartOrFinish < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
+                if (timeSinceLastStartOrFinish < checkConfiguration.gracePeriod) {
                     return new BalVerdict(BAL_ALLOW_GRACE_PERIOD, /*background*/ true,
-                            "within " + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period ("
+                            "within " + checkConfiguration.gracePeriod + "ms grace period ("
                                     + timeSinceLastStartOrFinish + "ms)");
                 }
             }

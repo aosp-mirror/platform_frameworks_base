@@ -54,10 +54,8 @@ import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
@@ -10478,10 +10476,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("setApplicationRestrictions");
-        }
-
         if (mService != null) {
             try {
                 mService.setApplicationRestrictions(admin, mContext.getPackageName(), packageName,
@@ -11886,9 +11880,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
             @Nullable ComponentName admin, String packageName) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("getApplicationRestrictions");
-        }
 
         if (mService != null) {
             try {
@@ -14233,21 +14224,11 @@ public class DevicePolicyManager {
      */
     public @NonNull DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
         throwIfParentInstance("getParentProfileInstance");
-        try {
-            if (Flags.dmrhSetAppRestrictions()) {
-                UserManager um = mContext.getSystemService(UserManager.class);
-                if (!um.isManagedProfile()) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            } else {
-                if (!mService.isManagedProfile(admin)) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            }
-            return new DevicePolicyManager(mContext, mService, true);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        UserManager um = mContext.getSystemService(UserManager.class);
+        if (!um.isManagedProfile()) {
+            throw new SecurityException("The current user does not have a parent profile.");
         }
+        return new DevicePolicyManager(mContext, mService, true);
     }
 
     /**
@@ -17809,7 +17790,6 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
     public void forceSetMaxPolicyStorageLimit(int storageLimit) {
         if (mService != null) {
             try {
@@ -17827,7 +17807,6 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
     public int getPolicySizeForAdmin(@NonNull EnforcingAdmin admin) {
         if (mService != null) {
             try {
@@ -17846,13 +17825,9 @@ public class DevicePolicyManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED)
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     @DeviceAdminInfo.HeadlessDeviceOwnerMode
     public int getHeadlessDeviceOwnerMode() {
-        if (!Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
-            return HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
-        }
         if (mService != null) {
             try {
                 return mService.getHeadlessDeviceOwnerMode(mContext.getPackageName());

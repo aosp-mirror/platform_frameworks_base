@@ -6,10 +6,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
-import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Overlay
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer

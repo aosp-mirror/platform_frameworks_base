@@ -257,6 +257,36 @@ class ZenModeInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun getActiveModes_computesMainActiveMode() = runTest {
+        zenModeRepository.addMode(id = "Bedtime", type = AutomaticZenRule.TYPE_BEDTIME)
+        zenModeRepository.addMode(id = "Other", type = AutomaticZenRule.TYPE_OTHER)
+
+        var activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).hasSize(0)
+        assertThat(activeModes.mainMode).isNull()
+
+        zenModeRepository.activateMode("Other")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Other")
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Other")
+
+        zenModeRepository.activateMode("Bedtime")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Bedtime", "Mode Other").inOrder()
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Bedtime")
+
+        zenModeRepository.deactivateMode("Other")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Bedtime")
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Bedtime")
+
+        zenModeRepository.deactivateMode("Bedtime")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).hasSize(0)
+        assertThat(activeModes.mainMode).isNull()
+    }
+
+    @Test
     fun mainActiveMode_flows() =
         testScope.runTest {
             val mainActiveMode by collectLastValue(underTest.mainActiveMode)

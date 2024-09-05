@@ -32,6 +32,7 @@ import android.widget.ImageButton
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.shared.animation.Interpolators
+import com.android.wm.shell.windowdecor.WindowManagerWrapper
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 
 /**
@@ -41,14 +42,14 @@ import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystem
 internal class AppHandleViewHolder(
     rootView: View,
     onCaptionTouchListener: View.OnTouchListener,
-    onCaptionButtonClickListener: OnClickListener
+    onCaptionButtonClickListener: OnClickListener,
+    private val windowManagerWrapper: WindowManagerWrapper
 ) : WindowDecorationViewHolder(rootView) {
 
     companion object {
         private const val CAPTION_HANDLE_ANIMATION_DURATION: Long = 100
     }
     private lateinit var taskInfo: RunningTaskInfo
-    private val windowManager = context.getSystemService(WindowManager::class.java)
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
     private val captionHandle: ImageButton = rootView.requireViewById(R.id.caption_handle)
     private val inputManager = context.getSystemService(InputManager::class.java)
@@ -96,11 +97,12 @@ internal class AppHandleViewHolder(
                                           handleWidth: Int,
                                           handleHeight: Int) {
         if (!Flags.enableAdditionalWindowsAboveStatusBar()) return
-        statusBarInputLayer = AdditionalSystemViewContainer(context, taskInfo.taskId,
-            handlePosition.x, handlePosition.y, handleWidth, handleHeight,
+        statusBarInputLayer = AdditionalSystemViewContainer(context, windowManagerWrapper,
+            taskInfo.taskId, handlePosition.x, handlePosition.y, handleWidth, handleHeight,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        val view = statusBarInputLayer?.view
-        val lp = view?.layoutParams as WindowManager.LayoutParams
+        val view = statusBarInputLayer?.view ?: error("Unable to find statusBarInputLayer View")
+        val lp = statusBarInputLayer?.lp ?: error("Unable to find statusBarInputLayer" +
+                "LayoutParams")
         lp.title = "Handle Input Layer of task " + taskInfo.taskId
         lp.setTrustedOverlay()
         // Make this window a spy window to enable it to pilfer pointers from the system-wide
@@ -120,7 +122,7 @@ internal class AppHandleViewHolder(
             captionHandle.dispatchTouchEvent(event)
             true
         }
-        windowManager.updateViewLayout(view, lp)
+        windowManagerWrapper.updateViewLayout(view, lp)
     }
 
     private fun updateStatusBarInputLayer(globalPosition: Point) {

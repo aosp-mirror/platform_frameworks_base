@@ -63,6 +63,7 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
+    @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
 
     @Before
     fun setup() {
@@ -98,6 +99,7 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 keyguardKeyboardInteractor,
                 null,
+                mUserActivityNotifier
             )
         underTest.init()
     }

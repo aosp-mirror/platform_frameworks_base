@@ -1255,6 +1255,20 @@ public final class VirtualDeviceManager {
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         default void onActivityLaunchBlocked(int displayId, @NonNull ComponentName componentName,
                 @NonNull UserHandle user, @Nullable IntentSender intentSender) {}
+
+        /**
+         * Called when a window with a secure surface is shown on the device.
+         *
+         * @param displayId The display ID on which the window was shown.
+         * @param componentName The component name of the activity that showed the window.
+         * @param user The user associated with the activity.
+         *
+         * @see Display#FLAG_SECURE
+         * @see WindowManager.LayoutParams#FLAG_SECURE
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        default void onSecureWindowShown(int displayId, @NonNull ComponentName componentName,
+                @NonNull UserHandle user) {}
     }
 
     /**
